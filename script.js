@@ -55,7 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Load Google GenAI SDK dynamically
         import("https://esm.run/@google/generative-ai").then(async (module) => {
             const { GoogleGenerativeAI } = module;
-            const API_KEY = "***REMOVED***"; // ⚠️ Exposed for demo purposes
+            // ⚠️ SECURITY: API Key must not be hardcoded in production.
+            // For this demo, we will prompt or use a secure proxy.
+            const API_KEY = ""; // REMOVED FOR SAFETY
             const genAI = new GoogleGenerativeAI(API_KEY);
             const model = genAI.getGenerativeModel({
                 model: "gemini-2.5-pro",
