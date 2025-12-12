@@ -309,9 +309,9 @@ CRITÈRES STATUS :
                 }, 1500);
 
             } catch (err) {
-                console.error(err);
+                console.error("AYO Analysis Error:", err);
                 ayoTyping.style.display = 'none';
-                addBotMessage("Une erreur est survenue pendant l'analyse. Veuillez vérifier votre URL ou réessayer plus tard.");
+                addBotMessage(`Une erreur est survenue pendant l'analyse.<br><small>Détail technique : ${err.message}</small>`);
             }
         });
     }
