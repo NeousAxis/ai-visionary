@@ -25,28 +25,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Inject API Secret
+        env:
+          THE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          # Tentative de récupération de la clé (GEMINI ou GOOGLE)
-          KEY="${{ secrets.GEMINI_API_KEY }}"
-          if [ -z "$KEY" ]; then
-            KEY="${{ secrets.GOOGLE_API_KEY }}"
-          fi
-          
-          # Vérification finale
-          if [ -z "$KEY" ]; then
-            echo "::error::❌ AUCUNE CLÉ API TROUVÉE ! Vérifiez les Secrets GitHub (GEMINI_API_KEY ou GOOGLE_API_KEY)."
+          # 1. Vérification que la clé existe dans l'environnement du Runner
+          if [ -z "$THE_API_KEY" ]; then
+            echo "::error::❌ CRITIQUE : Le secret 'GEMINI_API_KEY' n'a pas été trouvé ou est vide."
             exit 1
           fi
 
-          # Injection
-          sed -i "s|SECRET_API_KEY_PLACEHOLDER|$KEY|g" script.js
+          # 2. Injection sécurisée (sed)
+          sed -i "s|SECRET_API_KEY_PLACEHOLDER|$THE_API_KEY|g" script.js
           
-          # Vérification succès sed
+          # 3. Vérification post-injection
           if grep -q "SECRET_API_KEY_PLACEHOLDER" script.js; then
-            echo "::error::❌ Le remplacement a échoué techniquement."
+            echo "::error::❌ ÉCHEC : Le placeholder est toujours présent dans script.js après 'sed'."
             exit 1
           fi
-          echo "✅ Clé injectée avec succès."
+          
+          echo "✅ SUCCÈS : Clé API injectée."
         shell: bash
 
       - name: Setup Pages
