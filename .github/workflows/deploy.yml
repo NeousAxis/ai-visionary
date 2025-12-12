@@ -16,13 +16,24 @@ concurrency:
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug Secret Availability (Safe)
+        env:
+          THE_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$THE_KEY" ]; then
+            echo "::warning::⚠️ Le secret GEMINI_API_KEY semble VIDE ou INACCESSIBLE."
+            echo "SECRET_LENGTH=0" >> $GITHUB_ENV
+          else
+            echo "✅ Le secret GEMINI_API_KEY a été trouvé."
+            echo "Longueur du secret: ${#THE_KEY} caractères"
+            echo "SECRET_LENGTH=${#THE_KEY}" >> $GITHUB_ENV
+          fi
+        shell: bash
 
       - name: Inject API Secret
         env:
