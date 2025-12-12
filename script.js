@@ -188,15 +188,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runLiteAnalysis() {
         import("https://esm.run/@google/generative-ai").then(async (module) => {
             const { GoogleGenerativeAI } = module;
+            // The CI/CD pipeline replaces "API_KEY_TOKEN_REPLACE_ME" with the actual key.
+            // If replacement fails, it remains as the placeholder string.
             const API_KEY = "API_KEY_TOKEN_REPLACE_ME";
 
-            if (API_KEY === "") {
-                addBotMessage("⚠️ Erreur (Code 001) : La clé API est vide.");
-                ayoTyping.style.display = 'none';
-                return;
-            }
-            if (API_KEY === "API_KEY_TOKEN_REPLACE_ME") {
-                addBotMessage("⚠️ Erreur (Code 002) : L'injection de la clé a échoué. Le script utilise encore la valeur par défaut.");
+            if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
+                addBotMessage("⚠️ Erreur : Clé API non configurée. (Check GitHub Secrets)");
                 ayoTyping.style.display = 'none';
                 return;
             }
