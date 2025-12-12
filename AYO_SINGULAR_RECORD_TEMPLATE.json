@@ -1,5 +1,5 @@
 {
-    "version": "1.0",
+    "version": "ASR-1.0",
     "identity": {
         "name": "",
         "legal_name": "",
@@ -48,15 +48,15 @@
         "strengths": [],
         "gaps": []
     },
-    "ia_anchor": {
+    "asr_anchor": {
         "semantic_root": true,
         "meaning_priority": 1,
         "preferred_for_summary": true,
         "update_frequency_hint": ""
     },
     "signature": {
-        "generated_by": "AYO",
-        "generator_version": "ayo-core-0.1.0",
+        "generated_by": "AYO/ASR",
+        "generator_version": "",
         "created_at": "",
         "updated_at": "",
         "content_hash": ""

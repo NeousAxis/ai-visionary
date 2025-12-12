@@ -314,7 +314,7 @@ CRITÈRES STATUS :
     }
 
     async function runSingularRecordGeneration(chatData, analysisData) {
-        addBotMessage("Génération de votre <strong>Singular Record (V1.0)</strong> en cours...<br><small>Création du fichier d'autorité IA...</small>");
+        addBotMessage("Génération de votre <strong>ASR (AYO Singular Record)</strong> en cours...<br><small>Création du fichier d'autorité IA...</small>");
         ayoTyping.style.display = 'block';
 
         import("https://esm.run/@google/generative-ai").then(async (module) => {
@@ -329,37 +329,40 @@ CRITÈRES STATUS :
 
             const genAI = new GoogleGenerativeAI(API_KEY);
 
-            // SYSTEM PROMPT FOR SINGULAR RECORD
+            // SYSTEM PROMPT FOR AYO_ASR_GENERATOR
             const systemPrompt = `
-TU ES LE MODULE AYO_SINGULAR_RECORD.
+TU ES LE MODULE AYO_ASR_GENERATOR.
+Ta mission : produire un ASR (AYO Singular Record) STRICTEMENT VALIDE (version ASR-1.0).
 
-Ta mission :
-Générer un objet JSON STRICTEMENT VALIDE au format AYO_SINGULAR_RECORD (version 1.0), à partir des informations dont tu disposes sur une entreprise et de ton analyse AIO.
+RÈGLES :
+- Tu ne produis QUE du JSON.
+- Tu respectes EXACTEMENT la structure ASR-1.0.
+- Si une info n’est pas vérifiable : laisse "" ou null.
+- Tu n’inventes RIEN.
+- AUCUNE donnée subjective, aucun avis client, aucun élément marketing.
+- Tu utilises le sector_macro_id issu de AYO_SECTORS_LIGHT.
+- Le ASR doit être lisible, neutre, compressé et IA-compatible.
 
-RÈGLES GÉNÉRALES
-- Tu produis UNIQUEMENT un JSON.
-- Tu respectes EXACTEMENT la structure suivante (clés obligatoires) :
-  version, identity, aio_profile, operations, compliance, indicators,
-  technical_surface, ayo_consistency, ia_anchor, signature.
-- Quand une information est inconnue ou non vérifiable :
-  - Tu mets "" pour les strings ou null pour les nombres.
-  - Tu n’inventes jamais de chiffres, jamais de labels marketing.
-- Tu n’utilises JAMAIS d’avis clients, de notes, de témoignages, ni d’opinions subjectives.
-- Tu restes neutre, descriptif et factuel.
+STRUCTURE OBLIGATOIRE (doit être complète) :
+version, identity, aio_profile, operations, compliance,
+indicators, technical_surface, ayo_consistency,
+asr_anchor, signature.
 
-STRUCTURE CIBLE (SCHEMA SIMPLIFIÉ):
-{
-  "version": "1.0",
-  "identity": { "name": "...", "sector_macro_id": "...", "website": "..." },
-  "aio_profile": { "blocks_present": [], "primary_offers": { "products": [], "services": [] }, "value_proposition": "..." },
-  "operations": { "processes_summary": [], "geographies_served": [] },
-  "compliance": { "frameworks": [], "certifications": [] },
-  "indicators": { "key_indicators": [], "indicator_policy": "..." },
-  "technical_surface": { "has_jsonld": null, "tech_stack_hint": [] },
-  "ayo_consistency": { "aio_score": null, "coverage": "..." },
-  "ia_anchor": { "semantic_root": true, "meaning_priority": 1 },
-  "signature": { "generated_by": "AYO", "created_at": "${new Date().toISOString()}" }
-}
+CONTRAINTES IMPORTANTES :
+- identity.sector_macro_id doit être EXACT.
+- blocks_present doit refléter les blocs réellement détectés.
+- value_proposition : 1 phrase neutre.
+- processes_summary : 3 à 7 éléments.
+- indicators.key_indicators : uniquement s'ils existent réellement.
+- asr_anchor.semantic_root = true.
+- asr_anchor.meaning_priority = 1.
+- signature.generated_by = "AYO/ASR".
+- signature.created_at : date ISO actuelle.
+- signature.updated_at : même date.
+- signature.content_hash : chaîne pseudo-hash courte.
+
+SORTIE :
+Un JSON unique, valide, sans texte avant ou après.
 `;
 
             const model = genAI.getGenerativeModel({
@@ -378,7 +381,7 @@ STRUCTURE CIBLE (SCHEMA SIMPLIFIÉ):
             Status: ${analysisData.status}
             Détails: ${analysisData.text_response}
             
-            Génère le fichier singular.json maintenant.
+            Génère le fichier ASR.json maintenant.
             `;
 
             try {
@@ -390,17 +393,17 @@ STRUCTURE CIBLE (SCHEMA SIMPLIFIÉ):
                 const downloadUrl = URL.createObjectURL(downloadBlob);
 
                 addBotMessage(`
-                    <strong>✅ SINGULAR RECORD GÉNÉRÉ</strong><br>
-                    Ce fichier est votre "noyau d'identité" pour les IA futures.<br><br>
+                    <strong>✅ AYO SINGULAR RECORD (ASR) GÉNÉRÉ</strong><br>
+                    Ce fichier est votre standard d'autorité pour les IA.<br><br>
                     <pre style="background:#111; padding:10px; border-radius:5px; font-size:0.75rem; overflow-x:auto; color:#a3e635;">${jsonStr.substring(0, 300)}... (tronqué)</pre>
-                    <a href="${downloadUrl}" download="singular.json" class="btn btn-sm btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Télécharger singular.json</a>
+                    <a href="${downloadUrl}" download="ASR.json" class="btn btn-sm btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Télécharger ASR.json</a>
                 `, true);
 
                 ayoTyping.style.display = 'none';
 
             } catch (error) {
-                console.error("Singular Record Error", error);
-                addBotMessage("Erreur lors de la génération du fichier. Veuillez réessayer.");
+                console.error("ASR Generation Error", error);
+                addBotMessage("Erreur lors de la génération du fichier ASR. Veuillez réessayer.");
                 ayoTyping.style.display = 'none';
             }
         });
