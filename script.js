@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const API_KEY = "API_KEY_TOKEN_REPLACE_ME";
 
             if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
-                addBotMessage("⚠️ Erreur : Clé API non configurée. (Check GitHub Secrets)");
+                addBotMessage("⚠️ Erreur : Clé API non configurée. (Check Deployment Settings / Vercel Env Vars)");
                 ayoTyping.style.display = 'none';
                 return;
             }
