@@ -58,9 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // The API Key will be injected securely by GitHub Actions during deployment.
             // It is NOT stored in the repository.
             const API_KEY = "SECRET_API_KEY_PLACEHOLDER";
+
+            if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
+                console.error("API Key is missing or invalid.");
+                alert("Erreur de configuration : La clé API n'est pas configurée dans le déploiement sur GitHub.");
+                return;
+            }
+
             const genAI = new GoogleGenerativeAI(API_KEY);
             const model = genAI.getGenerativeModel({
-                model: "gemini-2.5-pro",
+                model: "gemini-1.5-flash", // Reverting to flash for speed/reliability
                 systemInstruction: "Tu es un expert mondial en AIO (Artificial Intelligence Optimization) et en Sémantique Web. Ton objectif est d'analyser les entreprises et de structurer leurs données pour les rendre parfaitement lisibles et compréhensibles par les Agents IA (LLMs, Search Generative Experience). Tu dois être critique, précis et constructif."
             });
 
