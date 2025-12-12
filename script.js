@@ -233,6 +233,7 @@ Format de réponse attendu : JSON UNIQUEMENT.`
         });
     }
     // AYO Chat Logic (v2.0 - Strategic Flow)
+    console.log("AYO Bot v2.1 Ready");
     const ayoToggle = document.getElementById('ayo-toggle');
     const ayoWindow = document.getElementById('ayo-chat-window');
     const ayoClose = document.getElementById('ayo-close');
