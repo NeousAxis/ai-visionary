@@ -55,28 +55,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // Load Google GenAI SDK dynamically
         import("https://esm.run/@google/generative-ai").then(async (module) => {
             const { GoogleGenerativeAI } = module;
-            // The API Key will be injected securely by GitHub Actions during deployment.
-            // It is NOT stored in the repository.
             const API_KEY = "SECRET_API_KEY_PLACEHOLDER";
 
-            if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
-                console.error("Critical: API Key was not injected during build time.");
-                // Silent fail or minimal UI indication to avoid popup spam
-                return;
-            }
-
-            const genAI = new GoogleGenerativeAI(API_KEY);
-            const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
-                systemInstruction: "Tu es un expert mondial en AIO (Artificial Intelligence Optimization) et en Sémantique Web. Ton objectif est d'analyser les entreprises et de structurer leurs données pour les rendre parfaitement lisibles et compréhensibles par les Agents IA (LLMs, Search Generative Experience). Tu dois être critique, précis et constructif."
-            });
-
             aioForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
+                e.preventDefault(); // STOP PAGE RELOAD
+
                 const btn = document.getElementById('aio-submit-btn');
                 const loader = btn.querySelector('.loader');
                 const btnText = btn.querySelector('.btn-text-content');
                 const resultsContainer = document.getElementById('aio-results');
+
+                // Check API Key at runtime
+                if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
+                    alert("⚠️ Erreur : La clé API n'est pas active. Le déploiement GitHub n'a peut-être pas encore injecté le secret.");
+                    return;
+                }
 
                 // UI State: Loading
                 btn.disabled = true;
@@ -88,43 +81,69 @@ document.addEventListener('DOMContentLoaded', () => {
                 const url = document.getElementById('companyUrl').value;
                 const sector = document.getElementById('companySector').value;
 
+                const genAI = new GoogleGenerativeAI(API_KEY);
+                const model = genAI.getGenerativeModel({
+                    model: "gemini-1.5-flash",
+                    systemInstruction: `Tu es AIO Bot (Artificial Intelligence Optimization Bot).
+Ta mission est d'analyser une entreprise pour la rendre parfaitement lisible, compréhensible et crédible aux yeux des IA (Gemini, ChatGPT, Perplexity).
+
+Tu dois générer un rapport AUDIT + CONTENU OPTIMISÉ au format JSON STRICT.
+
+TES MODULES D'ANALYSE :
+1. ANALYSE DU SITE : Structure, métadonnées, clarté.
+2. VERIFICATION DONNÉES : Cohérence avec les standards du web.
+3. SCORE AIO (0-100) basés sur 3 piliers :
+   - Lisibilité IA (/40)
+   - Crédibilité IA (/30)
+   - Autorité IA (/30)
+
+TES MODULES DE GÉNÉRATION :
+1. Plan d'action priorisé.
+2. JSON-LD complet (Organization, LocalBusiness, etc.).
+3. FAQ structurée (Questions/Réponses claires).
+4. Glossaire métier (Définitions simples).
+5. Descriptions optimisées IA (Courte, Standard, Longue).
+
+Format de réponse attendu : JSON UNIQUEMENT.`
+                });
+
                 const prompt = `
                     Analyse l'entreprise suivante :
                     Nom : ${company}
                     URL : ${url}
                     Secteur : ${sector}
 
-                    Génère un rapport d'audit et d'optimisation AIO complet au format JSON STRICT.
-                    Ne reponds QUE par du JSON valide, sans markdown, sans balises \`\`\`.
-
-                    Structure JSON attendue :
+                    Produis le JSON suivant (sans aucun texte avant ou après, pas de markdown) :
                     {
                       "scores": {
-                        "readability": (note sur 40, capacité d'une IA à lire le contenu),
-                        "credibility": (note sur 30, fiabilité des sources et preuves),
-                        "authority": (note sur 30, expertise perçue dans le secteur),
-                        "total": (somme des 3 notes)
+                        "readability": (note/40),
+                        "credibility": (note/30),
+                        "authority": (note/30),
+                        "total": (somme/100)
                       },
                       "actionPlan": [
                         {
                           "id": 1,
-                          "title": "Titre de l'action (ex: Implémenter Schema.org)",
-                          "priority": "Critical" | "High" | "Medium" | "Low",
-                          "impact": "High" | "Medium" | "Low",
-                          "description": "Explication courte de pourquoi c'est vital pour l'IA."
+                          "title": "Action",
+                          "priority": "Critical/High/Medium/Low",
+                          "impact": "High/Medium/Low",
+                          "description": "Pourquoi c'est important pour l'IA"
                         },
-                        ... (Génère 4 actions pertinentes)
+                        ... (4 actions clés)
                       ],
                       "content": {
-                        "jsonLd": (Un objet JSON-LD complet et valide pour cette entreprise - type Organization ou LocalBusiness),
+                        "jsonLd": (Objet JSON-LD valide),
                         "faq": [
-                          { "q": "Question pertinente sur l'entreprise", "a": "Réponse optimisée pour la Featured Snippet (claire, concise)" },
-                          ... (3 questions/réponses)
+                          { "q": "Question", "a": "Réponse" }, ... (5 Q/R)
                         ],
                         "glossary": [
-                          { "term": "Terme métier clé", "def": "Définition simple et sans ambiguïté pour une IA" },
-                          ... (3 termes)
-                        ]
+                          { "term": "Terme", "def": "Définition" }, ... (5 termes)
+                        ],
+                        "descriptions": {
+                          "short": "150 chars max",
+                          "standard": "300 chars max",
+                          "long": "800 chars max"
+                        }
                       }
                     }
                 `;
@@ -171,10 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     `).join('');
 
                     resultsContainer.style.display = 'block';
+                    // Scroll to results
+                    resultsContainer.scrollIntoView({ behavior: 'smooth' });
 
                 } catch (error) {
                     console.error("AIO Error:", error);
-                    alert("Une erreur est survenue lors de l'analyse. Vérifiez la console ou réessayez.");
+                    alert("Une erreur est survenue lors de l'analyse (Erreur API ou JSON invalide).");
                 } finally {
                     btn.disabled = false;
                     loader.style.display = 'none';
