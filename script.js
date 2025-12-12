@@ -241,14 +241,11 @@ Format de réponse attendu : JSON UNIQUEMENT.`
     const ayoInput = document.getElementById('ayo-input');
     const ayoTyping = document.getElementById('ayo-typing');
 
-    let chatState = 0; // 0: Start, 1: Name, 2: URL, 3: Sector, 4: Analyzing
-    let chatData = { name: '', url: '', sector: '' };
-
     if (ayoToggle) {
         ayoToggle.addEventListener('click', () => {
             ayoWindow.classList.toggle('open');
             if (ayoWindow.classList.contains('open') && ayoMessages.children.length === 0) {
-                addBotMessage("Bonjour ! Je suis AYO, votre assistant d'optimisation IA. Voulez-vous scanner votre entreprise ? (Oui/Non)");
+                addBotMessage("Bonjour ! Je suis l'assistant AYO. Je peux répondre à vos questions sur l'optimisation IA ou le moteur AYA. Pour tester votre site, utilisez le formulaire sur la page !");
             }
         });
 
@@ -263,7 +260,41 @@ Format de réponse attendu : JSON UNIQUEMENT.`
 
             addUserMessage(userText);
             ayoInput.value = '';
-            processChatStep(userText);
+
+            // Conversation Logic
+            ayoTyping.style.display = 'block';
+
+            import("https://esm.run/@google/generative-ai").then(async (module) => {
+                const { GoogleGenerativeAI } = module;
+                const API_KEY = "SECRET_API_KEY_PLACEHOLDER";
+
+                if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
+                    ayoTyping.style.display = 'none';
+                    addBotMessage("⚠️ Erreur de configuration API.");
+                    return;
+                }
+
+                const genAI = new GoogleGenerativeAI(API_KEY);
+                const model = genAI.getGenerativeModel({
+                    model: "gemini-1.5-flash",
+                    systemInstruction: `Tu es AYO, l'assistant virtuel du site AI VISIONARY.
+Ton rôle est d'expliquer pédagogiquement ce qu'est l'AIO (Artificial Intelligence Optimization) et le moteur de recherche AYA.
+NE DEMANDE PAS d'URL ou de nom d'entreprise pour analyse.
+Si l'utilisateur veut un audit ou une analyse, dis-lui gentiment d'utiliser le grand formulaire "Testez AYO maintenant" situé au centre de la page.
+Sois concis, professionnel et serviable.`
+                });
+
+                try {
+                    const result = await model.generateContent(userText);
+                    const response = result.response.text();
+                    ayoTyping.style.display = 'none';
+                    addBotMessage(response);
+                } catch (err) {
+                    console.error(err);
+                    ayoTyping.style.display = 'none';
+                    addBotMessage("Désolé, je ne peux pas répondre pour le moment.");
+                }
+            });
         });
     }
 
@@ -282,68 +313,4 @@ Format de réponse attendu : JSON UNIQUEMENT.`
         ayoMessages.appendChild(msg);
         ayoMessages.scrollTop = ayoMessages.scrollHeight;
     }
-
-    async function processChatStep(input) {
-        ayoTyping.style.display = 'block';
-
-        // Fake latency for natural feel
-        await new Promise(r => setTimeout(r, 600));
-
-        if (chatState === 0) {
-            if (input.toLowerCase().includes('oui') || input.toLowerCase().includes('ok') || input.toLowerCase().includes('yes')) {
-                addBotMessage("Parfait ! Quel est le nom de votre entreprise ?");
-                chatState = 1;
-            } else {
-                addBotMessage("D'accord. N'hésitez pas à me solliciter si besoin !");
-            }
-        } else if (chatState === 1) {
-            chatData.name = input;
-            addBotMessage(`Merci. Quelle est l'adresse de votre site web (URL) ?`);
-            chatState = 2;
-        } else if (chatState === 2) {
-            chatData.url = input;
-            addBotMessage("Noté. Et quel est votre secteur d'activité ?");
-            chatState = 3;
-        } else if (chatState === 3) {
-            chatData.sector = input;
-            addBotMessage("C'est parti ! Je lance l'analyse AYO. Cela peut prendre quelques secondes...");
-            chatState = 4;
-            await runAyoAnalysisInChat();
-        }
-
-        ayoTyping.style.display = 'none';
-        ayoMessages.scrollTop = ayoMessages.scrollHeight;
-    }
-
-    async function runAyoAnalysisInChat() {
-        import("https://esm.run/@google/generative-ai").then(async (module) => {
-            const { GoogleGenerativeAI } = module;
-            const API_KEY = "SECRET_API_KEY_PLACEHOLDER";
-
-            if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
-                addBotMessage("⚠️ Erreur : Clé API non configurée.");
-                return;
-            }
-
-            const genAI = new GoogleGenerativeAI(API_KEY);
-            const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
-                systemInstruction: "Tu es AYO Bot. Analyse l'entreprise fournie et donne un score AIO sur 100 et 3 conseils clés. Sois bref (max 500 caractères)." // Version courte pour le chat
-            });
-
-            const prompt = `Entreprise: ${chatData.name}, URL: ${chatData.url}, Secteur: ${chatData.sector}. Donne un résumé du score AIO.`;
-
-            try {
-                const result = await model.generateContent(prompt);
-                const response = result.response.text();
-                addBotMessage(response);
-                addBotMessage("💡 Pour voir le rapport détaillé (JSON-LD, FAQ, Audit complet), utilisez le formulaire complet sur la page.");
-            } catch (err) {
-                addBotMessage("Oups, une erreur est survenue pendant l'analyse.");
-                console.error(err);
-            }
-            chatState = 0; // Reset
-        });
-    }
-
 });
