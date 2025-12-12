@@ -32,7 +32,15 @@
         "risk_domains": []
     },
     "indicators": {
-        "key_indicators": [],
+        "key_indicators": [
+            {
+                "name": "",
+                "value": null,
+                "unit": "",
+                "scope": "",
+                "source": ""
+            }
+        ],
         "indicator_policy": ""
     },
     "technical_surface": {
