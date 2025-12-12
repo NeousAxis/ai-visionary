@@ -457,4 +457,3 @@ SORTIE attendue : JSON STRICT.
         ]);
     }
 });
-```
