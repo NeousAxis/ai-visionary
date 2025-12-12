@@ -26,7 +26,13 @@ jobs:
 
       - name: Inject API Secret
         run: |
-          sed -i 's/SECRET_API_KEY_PLACEHOLDER/${{ secrets.GEMINI_API_KEY }}/g' script.js
+          sed -i 's|SECRET_API_KEY_PLACEHOLDER|${{ secrets.GEMINI_API_KEY }}|g' script.js
+          if grep -q "SECRET_API_KEY_PLACEHOLDER" script.js; then
+            echo "Replacement failed!"
+            exit 1
+          else
+            echo "Secret injected successfully."
+          fi
         shell: bash
 
       - name: Setup Pages
