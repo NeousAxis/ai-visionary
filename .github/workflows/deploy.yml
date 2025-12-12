@@ -46,10 +46,10 @@ jobs:
           fi
 
           # 2. Injection sécurisée (sed)
-          sed -i "s|SECRET_API_KEY_PLACEHOLDER|$THE_API_KEY|g" script.js
+          sed -i "s|API_KEY_TOKEN_REPLACE_ME|$THE_API_KEY|g" script.js
           
           # 3. Vérification post-injection
-          if grep -q "SECRET_API_KEY_PLACEHOLDER" script.js; then
+          if grep -q "API_KEY_TOKEN_REPLACE_ME" script.js; then
             echo "::error::❌ ÉCHEC : Le placeholder est toujours présent dans script.js après 'sed'."
             exit 1
           fi
