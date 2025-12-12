@@ -912,4 +912,44 @@ pre {
         bottom: 80px;
         right: 0;
     }
+}/* New styles for Readable List in Demo Section */
+.demo-card .subtitle {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+    margin-top: -5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.readable-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.readable-list li {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.readable-list li strong {
+    color: var(--text-main);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+.readable-list li:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
