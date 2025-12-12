@@ -26,13 +26,27 @@ jobs:
 
       - name: Inject API Secret
         run: |
-          sed -i 's|SECRET_API_KEY_PLACEHOLDER|${{ secrets.GEMINI_API_KEY }}|g' script.js
-          if grep -q "SECRET_API_KEY_PLACEHOLDER" script.js; then
-            echo "Replacement failed!"
-            exit 1
-          else
-            echo "Secret injected successfully."
+          # Tentative de récupération de la clé (GEMINI ou GOOGLE)
+          KEY="${{ secrets.GEMINI_API_KEY }}"
+          if [ -z "$KEY" ]; then
+            KEY="${{ secrets.GOOGLE_API_KEY }}"
           fi
+          
+          # Vérification finale
+          if [ -z "$KEY" ]; then
+            echo "::error::❌ AUCUNE CLÉ API TROUVÉE ! Vérifiez les Secrets GitHub (GEMINI_API_KEY ou GOOGLE_API_KEY)."
+            exit 1
+          fi
+
+          # Injection
+          sed -i "s|SECRET_API_KEY_PLACEHOLDER|$KEY|g" script.js
+          
+          # Vérification succès sed
+          if grep -q "SECRET_API_KEY_PLACEHOLDER" script.js; then
+            echo "::error::❌ Le remplacement a échoué techniquement."
+            exit 1
+          fi
+          echo "✅ Clé injectée avec succès."
         shell: bash
 
       - name: Setup Pages

@@ -190,8 +190,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const { GoogleGenerativeAI } = module;
             const API_KEY = "SECRET_API_KEY_PLACEHOLDER";
 
-            if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
-                addBotMessage("⚠️ Erreur : Clé API manquante ou invalide.");
+            if (API_KEY === "") {
+                addBotMessage("⚠️ Erreur (Code 001) : La clé API est vide. Vérifiez vos 'Secrets' GitHub (GEMINI_API_KEY).");
+                ayoTyping.style.display = 'none';
+                return;
+            }
+            if (API_KEY === "SECRET_API_KEY_PLACEHOLDER") {
+                addBotMessage("⚠️ Erreur (Code 002) : L'injection de la clé a échoué. Le script utilise encore la valeur par défaut.");
                 ayoTyping.style.display = 'none';
                 return;
             }
