@@ -49,33 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // AYO Central Trigger Logic
-    const centralAyoBtn = document.getElementById('open-ayo-chat-central');
-    if (centralAyoBtn) {
-        centralAyoBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const ayoWindow = document.getElementById('ayo-chat-window');
-            const ayoMessages = document.getElementById('ayo-messages');
-            if (ayoWindow) {
-                ayoWindow.classList.add('open');
-                if (ayoMessages && ayoMessages.children.length === 0) {
-                    // Trigger initial message if empty
-                    // Note: We need to access the addBotMessage function which is scoped below.
-                    // IMPORTANT: To fix scoping, we should move the chat logic UP or expose the function.
-                    // EASIER FIX: Just trigger a click on the toggle button which already handles this!
-                    const toggleBtn = document.getElementById('ayo-toggle');
-                    if (toggleBtn) toggleBtn.click();
-                    else ayoWindow.classList.add('open'); // Fallback
-                } else {
-                    // If already open or has messages, just ensure it's open
-                    const toggleBtn = document.getElementById('ayo-toggle');
-                    // If window is closed, click toggle to open and trigger logic
-                    if (!ayoWindow.classList.contains('open') && toggleBtn) toggleBtn.click();
-                    else ayoWindow.classList.add('open');
-                }
-            }
-        });
-    }
+
     // AYO Chat Logic (v2.0 - Strategic Flow)
     console.log("AYO Bot v2.1 Ready");
     const ayoToggle = document.getElementById('ayo-toggle');
@@ -109,6 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
         ayoClose.addEventListener('click', () => {
             ayoWindow.classList.remove('open');
         });
+
+        // Central Trigger Logic (Placed here to access 'ayoWindow' and 'addBotMessage')
+        const centralBtn = document.getElementById('open-ayo-chat-central');
+        if (centralBtn) {
+            centralBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                ayoWindow.classList.add('open');
+                if (ayoMessages.children.length === 0) {
+                    addBotMessage("Bonjour ! Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Prêt ? (Oui/Non)");
+                }
+            });
+        }
 
         ayoFormChat.addEventListener('submit', async (e) => {
             e.preventDefault();
