@@ -289,29 +289,119 @@ CRITÈRES STATUS :
 
                 // BRANCHING LOGIC
                 setTimeout(() => {
+                    const buttons = [];
+
                     if (data.status === 'READY') {
-                        addBotButtons([
-                            { text: "🚀 S’installer dans AYA maintenant (Gratuit)", action: () => activateAyaProfile() },
-                            { text: "🔍 Voir le détail (Audit Complet AYO)", action: () => showPricingOptions() }
-                        ]);
-
+                        buttons.push({ text: "🚀 S’installer dans AYA maintenant (Gratuit)", action: () => activateAyaProfile() });
+                        buttons.push({ text: "🧬 Générer mon SINGULAR RECORD (Demo)", action: () => runSingularRecordGeneration(chatData, data) });
                     } else if (data.status === 'POTENTIAL') {
-                        addBotButtons([
-                            { text: "✨ Créer mon Profil AYA (Gratuit - liste d'attente)", action: () => activateAyaProfile(true) },
-                            { text: "🛠️ Obtenir l'analyse complète AYO (Payant)", action: () => showPricingOptions() }
-                        ]);
-
+                        buttons.push({ text: "✨ Créer mon Profil AYA (Gratuit)", action: () => activateAyaProfile(true) });
+                        buttons.push({ text: "🧬 Générer mon SINGULAR RECORD (Demo)", action: () => runSingularRecordGeneration(chatData, data) });
                     } else {
-                        addBotButtons([
-                            { text: "🛠️ Obtenir l'analyse complète AYO + Plan d'action", action: () => showPricingOptions() }
-                        ]);
+                        buttons.push({ text: "🛠️ Obtenir l'analyse complète AYO", action: () => showPricingOptions() });
+                        buttons.push({ text: "🧬 Voir à quoi ressemblerait mon SINGULAR RECORD", action: () => runSingularRecordGeneration(chatData, data) });
                     }
+
+                    addBotButtons(buttons);
                 }, 1500);
 
             } catch (err) {
                 console.error(err);
                 ayoTyping.style.display = 'none';
                 addBotMessage("Une erreur est survenue pendant l'analyse. Veuillez vérifier votre URL ou réessayer plus tard.");
+            }
+        });
+    }
+
+    async function runSingularRecordGeneration(chatData, analysisData) {
+        addBotMessage("Génération de votre <strong>Singular Record (V1.0)</strong> en cours...<br><small>Création du fichier d'autorité IA...</small>");
+        ayoTyping.style.display = 'block';
+
+        import("https://esm.run/@google/generative-ai").then(async (module) => {
+            const { GoogleGenerativeAI } = module;
+            const API_KEY = "API_KEY_TOKEN_REPLACE_ME"; // Injected via CI/CD
+
+            if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
+                addBotMessage("⚠️ Erreur : Clé API non disponible pour la génération.");
+                ayoTyping.style.display = 'none';
+                return;
+            }
+
+            const genAI = new GoogleGenerativeAI(API_KEY);
+
+            // SYSTEM PROMPT FOR SINGULAR RECORD
+            const systemPrompt = `
+TU ES LE MODULE AYO_SINGULAR_RECORD.
+
+Ta mission :
+Générer un objet JSON STRICTEMENT VALIDE au format AYO_SINGULAR_RECORD (version 1.0), à partir des informations dont tu disposes sur une entreprise et de ton analyse AIO.
+
+RÈGLES GÉNÉRALES
+- Tu produis UNIQUEMENT un JSON.
+- Tu respectes EXACTEMENT la structure suivante (clés obligatoires) :
+  version, identity, aio_profile, operations, compliance, indicators,
+  technical_surface, ayo_consistency, ia_anchor, signature.
+- Quand une information est inconnue ou non vérifiable :
+  - Tu mets "" pour les strings ou null pour les nombres.
+  - Tu n’inventes jamais de chiffres, jamais de labels marketing.
+- Tu n’utilises JAMAIS d’avis clients, de notes, de témoignages, ni d’opinions subjectives.
+- Tu restes neutre, descriptif et factuel.
+
+STRUCTURE CIBLE (SCHEMA SIMPLIFIÉ):
+{
+  "version": "1.0",
+  "identity": { "name": "...", "sector_macro_id": "...", "website": "..." },
+  "aio_profile": { "blocks_present": [], "primary_offers": { "products": [], "services": [] }, "value_proposition": "..." },
+  "operations": { "processes_summary": [], "geographies_served": [] },
+  "compliance": { "frameworks": [], "certifications": [] },
+  "indicators": { "key_indicators": [], "indicator_policy": "..." },
+  "technical_surface": { "has_jsonld": null, "tech_stack_hint": [] },
+  "ayo_consistency": { "aio_score": null, "coverage": "..." },
+  "ia_anchor": { "semantic_root": true, "meaning_priority": 1 },
+  "signature": { "generated_by": "AYO", "created_at": "${new Date().toISOString()}" }
+}
+`;
+
+            const model = genAI.getGenerativeModel({
+                model: "gemini-1.5-flash",
+                systemInstruction: systemPrompt
+            });
+
+            const userPrompt = `
+            Données de base:
+            Nom: ${chatData.name}
+            Secteur: ${chatData.sector}
+            URL: ${chatData.url}
+            
+            Analyse précédente (Lite):
+            Score: ${analysisData.score_lite}
+            Status: ${analysisData.status}
+            Détails: ${analysisData.text_response}
+            
+            Génère le fichier singular.json maintenant.
+            `;
+
+            try {
+                const result = await model.generateContent(userPrompt);
+                let jsonStr = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+
+                // Display as code block
+                const downloadBlob = new Blob([jsonStr], { type: 'application/json' });
+                const downloadUrl = URL.createObjectURL(downloadBlob);
+
+                addBotMessage(`
+                    <strong>✅ SINGULAR RECORD GÉNÉRÉ</strong><br>
+                    Ce fichier est votre "noyau d'identité" pour les IA futures.<br><br>
+                    <pre style="background:#111; padding:10px; border-radius:5px; font-size:0.75rem; overflow-x:auto; color:#a3e635;">${jsonStr.substring(0, 300)}... (tronqué)</pre>
+                    <a href="${downloadUrl}" download="singular.json" class="btn btn-sm btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Télécharger singular.json</a>
+                `, true);
+
+                ayoTyping.style.display = 'none';
+
+            } catch (error) {
+                console.error("Singular Record Error", error);
+                addBotMessage("Erreur lors de la génération du fichier. Veuillez réessayer.");
+                ayoTyping.style.display = 'none';
             }
         });
     }
