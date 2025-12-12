@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const genAI = new GoogleGenerativeAI(API_KEY);
                 const model = genAI.getGenerativeModel({
                     model: "gemini-1.5-flash",
-                    systemInstruction: `Tu es AIO Bot (Artificial Intelligence Optimization Bot).
+                    systemInstruction: `Tu es AYO Bot (Artificial Intelligence Optimization Bot).
 Ta mission est d'analyser une entreprise pour la rendre parfaitement lisible, compréhensible et crédible aux yeux des IA (Gemini, ChatGPT, Perplexity).
 
 Tu dois générer un rapport AUDIT + CONTENU OPTIMISÉ au format JSON STRICT.
