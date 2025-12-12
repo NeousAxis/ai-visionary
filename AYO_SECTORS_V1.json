@@ -1,0 +1,408 @@
+{
+    "version": "1.0",
+    "description": "Macro-secteurs AYO pour l'analyse de lisibilité AIO dans une économie moderne.",
+    "universal_blocks": [
+        "identite",
+        "offre",
+        "processus_methodes",
+        "engagements_conformite",
+        "indicateurs",
+        "contenus_pedagogiques",
+        "structure_technique"
+    ],
+    "macro_sectors": [
+        {
+            "id": "commerce_local_proximite",
+            "label": "Commerce local & proximité",
+            "description": "Entreprises qui vendent des produits ou services physiques à une clientèle locale.",
+            "typical_examples": [
+                "boulangerie",
+                "café",
+                "fleuriste",
+                "épicerie",
+                "barbier",
+                "salon de coiffure"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "processus_methodes",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "jours_ouverture",
+                "horaires",
+                "nombre_fournisseurs_locaux",
+                "pourcentage_produits_locaux_ou_bio"
+            ],
+            "jsonld_recommended": [
+                "LocalBusiness",
+                "Store",
+                "Product"
+            ],
+            "strictness_default": "medium",
+            "notes": "Met l’accent sur la lisibilité de l’offre, les tarifs, la localisation, les horaires et une transparence minimale sur les produits (ingrédients/matériaux si pertinent)."
+        },
+        {
+            "id": "restauration_hebergement",
+            "label": "Restauration & Hébergement",
+            "description": "Restaurants, bars, hôtels, chambres d’hôtes et structures d’accueil.",
+            "typical_examples": [
+                "restaurant",
+                "fast-food",
+                "hôtel",
+                "guesthouse",
+                "chambres d’hôtes"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "processus_methodes",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "capacite_couvert",
+                "nombre_chambres",
+                "plages_horaires_service",
+                "options_regimes_specifiques"
+            ],
+            "jsonld_recommended": [
+                "LocalBusiness",
+                "Restaurant",
+                "LodgingBusiness",
+                "Product",
+                "Menu"
+            ],
+            "strictness_default": "medium",
+            "notes": "Insister sur la clarté de la carte/menus, les prix, les horaires, la localisation et les informations alimentaires essentielles."
+        },
+        {
+            "id": "services_experts_individuels",
+            "label": "Services experts individuels",
+            "description": "Professionnels indépendants vendant une expertise immatérielle.",
+            "typical_examples": [
+                "consultant",
+                "consultant_RSE",
+                "coach",
+                "therapeute",
+                "avocat",
+                "architecte"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "annees_experience",
+                "types_clients",
+                "formats_accompagnement",
+                "duree_typique_des_missions"
+            ],
+            "jsonld_recommended": [
+                "ProfessionalService",
+                "Organization",
+                "Person",
+                "Service"
+            ],
+            "strictness_default": "medium",
+            "notes": "Met l’accent sur la description claire des services, des approches, des livrables et du cadre légal/éthique éventuel. Pas de dépendance aux avis clients."
+        },
+        {
+            "id": "services_organises_cabinets_agences",
+            "label": "Services organisés (agences, cabinets, bureaux d’études)",
+            "description": "Structures organisées proposant des services professionnels avec équipes ou pôles.",
+            "typical_examples": [
+                "cabinet_de_conseil",
+                "agence_digitale",
+                "bureau_d_etudes",
+                "cabinet_comptable"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "nombre_collaborateurs",
+                "nombre_projets_par_an",
+                "secteurs_servis"
+            ],
+            "jsonld_recommended": [
+                "Organization",
+                "ProfessionalService",
+                "Service"
+            ],
+            "strictness_default": "high",
+            "notes": "Attentes plus élevées sur la structuration de l’offre, les méthodes, les secteurs servis et les indicateurs d’activité."
+        },
+        {
+            "id": "industrie_production",
+            "label": "Industrie & production",
+            "description": "Entreprises qui conçoivent ou fabriquent des biens physiques à échelle industrielle.",
+            "typical_examples": [
+                "usine_metal",
+                "agroalimentaire",
+                "textile",
+                "electronique",
+                "fabrication_materiaux"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "volume_production",
+                "consommation_energie",
+                "emissions_CO2",
+                "taux_recyclage_matiere",
+                "incidents_securite"
+            ],
+            "jsonld_recommended": [
+                "Organization",
+                "Product",
+                "TechArticle"
+            ],
+            "strictness_default": "high",
+            "notes": "Forte exigence sur les specs techniques, la conformité, les indicateurs de production et potentiellement RSE."
+        },
+        {
+            "id": "construction_immobilier",
+            "label": "Construction & immobilier",
+            "description": "Acteurs de la construction, rénovation, promotion, gestion immobilière.",
+            "typical_examples": [
+                "entreprise_construction",
+                "promoteur_immobilier",
+                "regie",
+                "artisan_batiment"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "types_chantiers",
+                "zones_intervention",
+                "normes_energetiques_visees"
+            ],
+            "jsonld_recommended": [
+                "Organization",
+                "LocalBusiness",
+                "Product",
+                "Service"
+            ],
+            "strictness_default": "medium",
+            "notes": "Clarté des types de projets, des zones, du respect des normes et de la conformité légale."
+        },
+        {
+            "id": "saas_technologie_numerique",
+            "label": "SaaS, plateformes & technologie numérique",
+            "description": "Outils logiciels, plateformes en ligne, applications, API.",
+            "typical_examples": [
+                "saas_B2B",
+                "application_web",
+                "plateforme_SaaS",
+                "API_commerciale"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "engagements_conformite",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "uptime",
+                "nombre_utilisateurs",
+                "frequence_mises_a_jour",
+                "plans_tarifaires"
+            ],
+            "jsonld_recommended": [
+                "SoftwareApplication",
+                "Organization",
+                "WebApplication",
+                "APIReference"
+            ],
+            "strictness_default": "high",
+            "notes": "Insister sur les fonctionnalités, les plans tarifaires, la documentation, l’API éventuelle et la clarté de l’onboarding."
+        },
+        {
+            "id": "education_formation",
+            "label": "Éducation & formation",
+            "description": "Acteurs qui conçoivent et délivrent de la formation ou des programmes éducatifs.",
+            "typical_examples": [
+                "centre_de_formation",
+                "ecole",
+                "organisme_certifie",
+                "academie_en_ligne"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "nombre_apprenants",
+                "types_certifications",
+                "modalites_pedagogiques"
+            ],
+            "jsonld_recommended": [
+                "EducationalOrganization",
+                "Course",
+                "Event"
+            ],
+            "strictness_default": "medium",
+            "notes": "Lisibilité des programmes, des formats, des prérequis et des certifications associées."
+        },
+        {
+            "id": "sante_soin_bien_etre",
+            "label": "Santé, soin & bien-être",
+            "description": "Acteurs de la santé, du soin, du bien-être et de l’accompagnement corporel/psychique.",
+            "typical_examples": [
+                "cabinet_medical",
+                "clinique",
+                "therapeute",
+                "praticien_bien_etre",
+                "centre_de_soins"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "types_actes",
+                "discipline",
+                "cadre_legal_ou_deontologique"
+            ],
+            "jsonld_recommended": [
+                "MedicalOrganization",
+                "LocalBusiness",
+                "ProfessionalService"
+            ],
+            "strictness_default": "high",
+            "notes": "Sensitivity élevée : insister sur le cadre légal, la déontologie, la clarté de l’offre. Jamais d’allégations médicales non prouvables."
+        },
+        {
+            "id": "associations_ong_fondations",
+            "label": "Associations, ONG & fondations",
+            "description": "Structures à but non lucratif, d’intérêt général ou philanthropique.",
+            "typical_examples": [
+                "association",
+                "ONG",
+                "fondation",
+                "collectif"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "processus_methodes",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "domaines_action",
+                "types_beneficiaires",
+                "indicateurs_impact",
+                "sources_financement"
+            ],
+            "jsonld_recommended": [
+                "NGO",
+                "Organization",
+                "LocalBusiness"
+            ],
+            "strictness_default": "medium",
+            "notes": "Met l’accent sur la mission, les actions, les bénéficiaires, l’impact et les sources de financement."
+        },
+        {
+            "id": "secteur_public_collectivites",
+            "label": "Secteur public & collectivités",
+            "description": "Collectivités, administrations, services publics.",
+            "typical_examples": [
+                "mairie",
+                "administration",
+                "service_public",
+                "collectivite_territoriale"
+            ],
+            "mandatory_blocks": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "structure_technique"
+            ],
+            "optional_blocks": [
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicator_examples": [
+                "types_services",
+                "population_couverte",
+                "canaux_contact"
+            ],
+            "jsonld_recommended": [
+                "GovernmentOrganization",
+                "CivicStructure",
+                "Organization"
+            ],
+            "strictness_default": "medium",
+            "notes": "Met l’accent sur la lisibilité des services proposés, des démarches, des publics concernés et des canaux de contact."
+        }
+    ]
+}

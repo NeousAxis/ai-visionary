@@ -191,32 +191,81 @@ document.addEventListener('DOMContentLoaded', () => {
             const API_KEY = "SECRET_API_KEY_PLACEHOLDER";
 
             if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
-                addBotMessage("⚠️ Erreur API Key.");
+                addBotMessage("⚠️ Erreur : Clé API manquante ou invalide.");
                 ayoTyping.style.display = 'none';
                 return;
             }
 
-            const genAI = new GoogleGenerativeAI(API_KEY);
-            const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
-                systemInstruction: `Tu es AYO. Tu réalises un pré-diagnostic pour une entreprise.
-OBJECTIF : Déterminer si l'entreprise est "AYA-READY" (éligible au moteur de recherche) ou si elle a besoin d'optimisation.
-CRITÈRES :
-- AYA-READY (Score > 65) : Données structurées probables, secteur clair.
-- AYA-POTENTIAL (Score 40-65) : Contenu intéressant mais mal structuré.
-- NON (Score < 40) : Peu de contenu.
-
-SORTIE attendue : JSON STRICT.
-{
-  "score_lite": (0-100),
-  "status": "READY" | "POTENTIAL" | "NOT_READY",
-  "reason": "Une phrase courte expliquant pourquoi."
-}`
-            });
-
-            const prompt = `Entreprise: ${chatData.name}, URL: ${chatData.url}, Secteur: ${chatData.sector}. Analyse Lite.`;
-
             try {
+                // Fetch the AYO Sectors definition
+                const response = await fetch('AYO_SECTORS_V1.json');
+                if (!response.ok) throw new Error("Impossible de charger les secteurs AYO.");
+                const ayoSectors = await response.json();
+
+                const genAI = new GoogleGenerativeAI(API_KEY);
+
+                // NEW NUCLEUS PROMPT (User Provided)
+                const systemPrompt = `
+TU ES AYO, moteur d’analyse de “Lisibilité AIO”.
+
+Ta mission est d’analyser n’importe quelle entreprise selon :
+1) une STRUCTURE UNIVERSELLE,
+2) un MACRO-SECTEUR issu du JSON AYO_SECTORS ci-dessous,
+3) des RÈGLES D’INTERDICTION strictes.
+
+[REFERENCE DATA: AYO_SECTORS_V1.json]
+${JSON.stringify(ayoSectors)}
+[END REFERENCE DATA]
+
+────────────────────────
+RÈGLES D'ANALYSE
+────────────────────────
+- Ne JAMAIS utiliser d’avis clients, notes ou témoignages.
+- N’utiliser que des données objectives, vérifiables et déclaratives.
+
+────────────────────────
+STRUCTURE UNIVERSELLE (7 BLOCS)
+────────────────────────
+1. IDENTITÉ
+2. OFFRE
+3. PROCESSUS / MÉTHODES
+4. ENGAGEMENTS / CONFORMITÉ
+5. INDICATEURS
+6. CONTENUS PÉDAGOGIQUES
+7. STRUCTURE TECHNIQUE
+
+────────────────────────
+RÈGLE 5 — PREMIÈRE PARTIE GRATUITE (LITE)
+────────────────────────
+Ceci est une analyse préliminaire. Tu dois fournir :
+1. Une brève analyse du Bloc IDENTITÉ.
+2. Un MINI AUDIT AIO (Forces principales / Faiblesses critiques).
+3. Une phrase de conclusion du type : « Vos données [sont/ne sont pas] suffisamment structurées... ».
+
+────────────────────────
+FORMAT DE SORTIE (JSON STRICT)
+────────────────────────
+Pour cette interaction, tu dois répondre UNIQUEMENT en JSON compatible avec l'interface :
+{
+  "text_response": "Le texte complet de ta réponse pour l'utilisateur (format HTML autorisé : <b>, <br>)",
+  "score_lite": (note 0-100),
+  "status": "READY" | "POTENTIAL" | "NOT_READY",
+  "reason": "Phrase très courte pour le debug interne (pourquoi ce status)"
+}
+
+CRITÈRES STATUS :
+- "READY" (Score > 65) : Données structurées, JSON-LD probable, secteur clair.
+- "POTENTIAL" (Score 40-65) : Contenu intéressant mais mal structuré.
+- "NOT_READY" (Score < 40) : Trop peu de contenu lisible.
+`;
+
+                const model = genAI.getGenerativeModel({
+                    model: "gemini-1.5-flash",
+                    systemInstruction: systemPrompt
+                });
+
+                const prompt = `Entreprise: ${chatData.name}, URL: ${chatData.url}, Secteur déclaré: ${chatData.sector}. Fais l'analyse Lite.`;
+
                 const result = await model.generateContent(prompt);
                 const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
                 const data = JSON.parse(responseText);
@@ -227,35 +276,40 @@ SORTIE attendue : JSON STRICT.
                 ayoTyping.style.display = 'none';
 
                 // RESULT DISPLAY
-                addBotMessage(`📊 <strong>Diagnostic Terminé</strong><br>Score AIO-Lite : ${data.score_lite}/100<br>Status : ${data.status}<br><small>${data.reason}</small>`, true);
+                // Use the sophisticated text response from the AI
+                addBotMessage(data.text_response, true);
+
+                // Show Score Badge slightly after
+                setTimeout(() => {
+                    addBotMessage(`📊 <strong>Score AIO-Lite : ${data.score_lite}/100</strong>`, true);
+                }, 800);
+
 
                 // BRANCHING LOGIC
-                if (data.status === 'READY') {
-                    addBotMessage("🎉 Excellente nouvelle ! Votre entreprise est <strong>AYA-Ready</strong>. Elle possède assez de données pour être indexée.");
+                setTimeout(() => {
+                    if (data.status === 'READY') {
+                        addBotButtons([
+                            { text: "🚀 S’installer dans AYA maintenant (Gratuit)", action: () => activateAyaProfile() },
+                            { text: "🔍 Voir le détail (Audit Complet AYO)", action: () => showPricingOptions() }
+                        ]);
 
-                    addBotButtons([
-                        { text: "🚀 S’installer dans AYA maintenant (Gratuit)", action: () => activateAyaProfile() },
-                        { text: "🔍 Voir le détail (Audit Complet AYO)", action: () => showPricingOptions() }
-                    ]);
+                    } else if (data.status === 'POTENTIAL') {
+                        addBotButtons([
+                            { text: "✨ Créer mon Profil AYA (Gratuit - liste d'attente)", action: () => activateAyaProfile(true) },
+                            { text: "🛠️ Obtenir l'analyse complète AYO (Payant)", action: () => showPricingOptions() }
+                        ]);
 
-                } else if (data.status === 'POTENTIAL') {
-                    addBotMessage("Vous êtes <strong>AYA-Potential</strong>. Vos données sont intéressantes, mais manquent de structure pour une indexation parfaite.");
-
-                    addBotButtons([
-                        { text: "✨ Créer mon Profil AYA (Gratuit - liste d'attente)", action: () => activateAyaProfile(true) },
-                        { text: "🛠️ Obtenir l'analyse complète AYO (Payant)", action: () => showPricingOptions() }
-                    ]);
-
-                } else {
-                    addBotMessage("Votre visibilité IA est faible. Une restructuration est nécessaire pour apparaître dans les moteurs modernes.");
-                    addBotButtons([
-                        { text: "🛠️ Obtenir l'analyse complète AYO + Plan d'action", action: () => showPricingOptions() }
-                    ]);
-                }
+                    } else {
+                        addBotButtons([
+                            { text: "🛠️ Obtenir l'analyse complète AYO + Plan d'action", action: () => showPricingOptions() }
+                        ]);
+                    }
+                }, 1500);
 
             } catch (err) {
                 console.error(err);
-                addBotMessage("Erreur d'analyse. Réessayez.");
+                ayoTyping.style.display = 'none';
+                addBotMessage("Une erreur est survenue pendant l'analyse. Veuillez vérifier votre URL ou réessayer plus tard.");
             }
         });
     }
