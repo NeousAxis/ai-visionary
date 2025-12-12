@@ -292,14 +292,17 @@ CRITÈRES STATUS :
                     const buttons = [];
 
                     if (data.status === 'READY') {
-                        buttons.push({ text: "🚀 S’installer dans AYA maintenant (Gratuit)", action: () => activateAyaProfile() });
-                        buttons.push({ text: "🧬 Générer mon SINGULAR RECORD (Demo)", action: () => runSingularRecordGeneration(chatData, data) });
+                        buttons.push({
+                            text: "🚀 S’installer dans AYA maintenant (Gratuit)",
+                            action: () => activateAyaProfile(false, data)
+                        });
                     } else if (data.status === 'POTENTIAL') {
-                        buttons.push({ text: "✨ Créer mon Profil AYA (Gratuit)", action: () => activateAyaProfile(true) });
-                        buttons.push({ text: "🧬 Générer mon SINGULAR RECORD (Demo)", action: () => runSingularRecordGeneration(chatData, data) });
+                        buttons.push({
+                            text: "✨ Créer mon Profil AYA (Gratuit - liste d'attente)",
+                            action: () => activateAyaProfile(true, data)
+                        });
                     } else {
                         buttons.push({ text: "🛠️ Obtenir l'analyse complète AYO", action: () => showPricingOptions() });
-                        buttons.push({ text: "🧬 Voir à quoi ressemblerait mon SINGULAR RECORD", action: () => runSingularRecordGeneration(chatData, data) });
                     }
 
                     addBotButtons(buttons);
@@ -313,16 +316,16 @@ CRITÈRES STATUS :
         });
     }
 
-    async function runSingularRecordGeneration(chatData, analysisData) {
-        addBotMessage("Génération de votre <strong>ASR (AYO Singular Record)</strong> en cours...<br><small>Création du fichier d'autorité IA...</small>");
+    // FUNCTION TO TRIGGER ASR GENERATION (Internal Use)
+    async function generateASR(chatData, analysisData) {
         ayoTyping.style.display = 'block';
 
         import("https://esm.run/@google/generative-ai").then(async (module) => {
             const { GoogleGenerativeAI } = module;
-            const API_KEY = "API_KEY_TOKEN_REPLACE_ME"; // Injected via CI/CD
+            const API_KEY = "API_KEY_TOKEN_REPLACE_ME";
 
             if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
-                addBotMessage("⚠️ Erreur : Clé API non disponible pour la génération.");
+                addBotMessage("⚠️ Erreur : Clé API non disponible pour la génération ASR.");
                 ayoTyping.style.display = 'none';
                 return;
             }
@@ -393,30 +396,38 @@ Un JSON unique, valide, sans texte avant ou après.
                 const downloadUrl = URL.createObjectURL(downloadBlob);
 
                 addBotMessage(`
-                    <strong>✅ AYO SINGULAR RECORD (ASR) GÉNÉRÉ</strong><br>
-                    Ce fichier est votre standard d'autorité pour les IA.<br><br>
+                    <strong>✅ ASR GÉNÉRÉ & INTÉGRÉ</strong><br>
+                    Pour finaliser votre installation dans l'index AYA, voici votre fichier d'autorité.<br>
+                    1. Téléchargez le fichier ASR.json<br>
+                    2. Placez-le à la racine de votre site (ou dossier /.ayo/)<br><br>
                     <pre style="background:#111; padding:10px; border-radius:5px; font-size:0.75rem; overflow-x:auto; color:#a3e635;">${jsonStr.substring(0, 300)}... (tronqué)</pre>
                     <a href="${downloadUrl}" download="ASR.json" class="btn btn-sm btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Télécharger ASR.json</a>
                 `, true);
 
+                // createConfetti(); // Assuming this function exists elsewhere or is to be added
                 ayoTyping.style.display = 'none';
 
             } catch (error) {
                 console.error("ASR Generation Error", error);
-                addBotMessage("Erreur lors de la génération du fichier ASR. Veuillez réessayer.");
+                addBotMessage("Erreur lors de la génération du fichier ASR.");
                 ayoTyping.style.display = 'none';
             }
         });
     }
 
-    function activateAyaProfile(isPotential = false) {
-        addBotMessage("✅ <strong>Profil activé !</strong>", true);
+    function activateAyaProfile(isPotential = false, analysisData = null) {
+        addBotMessage("✅ <strong>Profil activé !</strong> Initialisation du protocole AYO...", true);
+
         if (isPotential) {
-            addBotMessage("Votre entreprise a été ajoutée en file d'attente. Les IA pourront commencer à la repérer.");
+            addBotMessage("Vous êtes sur liste d'attente. Nous générons votre fichier ASR préliminaire pour préparer votre structure.");
         } else {
-            addBotMessage("Votre profil AYA est désormais actif. Vous apparaitrez dans les recherches AIO compatibles.");
+            addBotMessage("Votre entreprise est éligible. Génération immédiate de votre ASR (AYO Singular Record)...");
         }
-        // UPSELL SOFT
+
+        // Trigger Automatic ASR Generation
+        if (analysisData) {
+            generateASR(chatData, analysisData);
+        }
         setTimeout(() => {
             addBotMessage("Pour garantir une indexation parfaite et obtenir votre ZIP de données, l'audit complet AYO reste disponible.");
             addBotButtons([
