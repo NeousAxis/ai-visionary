@@ -16,45 +16,19 @@ concurrency:
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Debug Secret Availability (Safe)
-        env:
-          THE_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          if [ -z "$THE_KEY" ]; then
-            echo "::warning::⚠️ Le secret GEMINI_API_KEY semble VIDE ou INACCESSIBLE."
-            echo "SECRET_LENGTH=0" >> $GITHUB_ENV
-          else
-            echo "✅ Le secret GEMINI_API_KEY a été trouvé."
-            echo "Longueur du secret: ${#THE_KEY} caractères"
-            echo "SECRET_LENGTH=${#THE_KEY}" >> $GITHUB_ENV
-          fi
-        shell: bash
-
       - name: Inject API Secret
-        env:
-          THE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          # 1. Vérification que la clé existe dans l'environnement du Runner
-          if [ -z "$THE_API_KEY" ]; then
-            echo "::error::❌ CRITIQUE : Le secret 'GEMINI_API_KEY' n'a pas été trouvé ou est vide."
-            exit 1
-          fi
-
-          # 2. Injection sécurisée (sed)
-          sed -i "s|API_KEY_TOKEN_REPLACE_ME|$THE_API_KEY|g" script.js
-          
-          # 3. Vérification post-injection
-          if grep -q "API_KEY_TOKEN_REPLACE_ME" script.js; then
-            echo "::error::❌ ÉCHEC : Le placeholder est toujours présent dans script.js après 'sed'."
-            exit 1
-          fi
-          
-          echo "✅ SUCCÈS : Clé API injectée."
+          # Méthode "Bourrin" mais fiable : injection directe sans mapping complexe
+          # On utilise sed avec un séparateur pipe | pour éviter les conflits de caractères
+          sed -i "s|API_KEY_TOKEN_REPLACE_ME|${{ secrets.GEMINI_API_KEY }}|g" script.js
         shell: bash
 
       - name: Setup Pages
