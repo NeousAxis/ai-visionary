@@ -232,4 +232,118 @@ Format de réponse attendu : JSON UNIQUEMENT.`
             console.error("Failed to load Google GenAI SDK", err);
         });
     }
+    // AYO Chat Logic
+    const ayoToggle = document.getElementById('ayo-toggle');
+    const ayoWindow = document.getElementById('ayo-chat-window');
+    const ayoClose = document.getElementById('ayo-close');
+    const ayoMessages = document.getElementById('ayo-messages');
+    const ayoFormChat = document.getElementById('ayo-chat-form');
+    const ayoInput = document.getElementById('ayo-input');
+    const ayoTyping = document.getElementById('ayo-typing');
+
+    let chatState = 0; // 0: Start, 1: Name, 2: URL, 3: Sector, 4: Analyzing
+    let chatData = { name: '', url: '', sector: '' };
+
+    if (ayoToggle) {
+        ayoToggle.addEventListener('click', () => {
+            ayoWindow.classList.toggle('open');
+            if (ayoWindow.classList.contains('open') && ayoMessages.children.length === 0) {
+                addBotMessage("Bonjour ! Je suis AYO, votre assistant d'optimisation IA. Voulez-vous scanner votre entreprise ? (Oui/Non)");
+            }
+        });
+
+        ayoClose.addEventListener('click', () => {
+            ayoWindow.classList.remove('open');
+        });
+
+        ayoFormChat.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userText = ayoInput.value.trim();
+            if (!userText) return;
+
+            addUserMessage(userText);
+            ayoInput.value = '';
+            processChatStep(userText);
+        });
+    }
+
+    function addUserMessage(text) {
+        const msg = document.createElement('div');
+        msg.className = 'message user';
+        msg.textContent = text;
+        ayoMessages.appendChild(msg);
+        ayoMessages.scrollTop = ayoMessages.scrollHeight;
+    }
+
+    function addBotMessage(text) {
+        const msg = document.createElement('div');
+        msg.className = 'message bot';
+        msg.textContent = text;
+        ayoMessages.appendChild(msg);
+        ayoMessages.scrollTop = ayoMessages.scrollHeight;
+    }
+
+    async function processChatStep(input) {
+        ayoTyping.style.display = 'block';
+
+        // Fake latency for natural feel
+        await new Promise(r => setTimeout(r, 600));
+
+        if (chatState === 0) {
+            if (input.toLowerCase().includes('oui') || input.toLowerCase().includes('ok') || input.toLowerCase().includes('yes')) {
+                addBotMessage("Parfait ! Quel est le nom de votre entreprise ?");
+                chatState = 1;
+            } else {
+                addBotMessage("D'accord. N'hésitez pas à me solliciter si besoin !");
+            }
+        } else if (chatState === 1) {
+            chatData.name = input;
+            addBotMessage(`Merci. Quelle est l'adresse de votre site web (URL) ?`);
+            chatState = 2;
+        } else if (chatState === 2) {
+            chatData.url = input;
+            addBotMessage("Noté. Et quel est votre secteur d'activité ?");
+            chatState = 3;
+        } else if (chatState === 3) {
+            chatData.sector = input;
+            addBotMessage("C'est parti ! Je lance l'analyse AYO. Cela peut prendre quelques secondes...");
+            chatState = 4;
+            await runAyoAnalysisInChat();
+        }
+
+        ayoTyping.style.display = 'none';
+        ayoMessages.scrollTop = ayoMessages.scrollHeight;
+    }
+
+    async function runAyoAnalysisInChat() {
+        import("https://esm.run/@google/generative-ai").then(async (module) => {
+            const { GoogleGenerativeAI } = module;
+            const API_KEY = "SECRET_API_KEY_PLACEHOLDER";
+
+            if (API_KEY === "SECRET_API_KEY_PLACEHOLDER" || API_KEY === "") {
+                addBotMessage("⚠️ Erreur : Clé API non configurée.");
+                return;
+            }
+
+            const genAI = new GoogleGenerativeAI(API_KEY);
+            const model = genAI.getGenerativeModel({
+                model: "gemini-1.5-flash",
+                systemInstruction: "Tu es AYO Bot. Analyse l'entreprise fournie et donne un score AIO sur 100 et 3 conseils clés. Sois bref (max 500 caractères)." // Version courte pour le chat
+            });
+
+            const prompt = `Entreprise: ${chatData.name}, URL: ${chatData.url}, Secteur: ${chatData.sector}. Donne un résumé du score AIO.`;
+
+            try {
+                const result = await model.generateContent(prompt);
+                const response = result.response.text();
+                addBotMessage(response);
+                addBotMessage("💡 Pour voir le rapport détaillé (JSON-LD, FAQ, Audit complet), utilisez le formulaire complet sur la page.");
+            } catch (err) {
+                addBotMessage("Oups, une erreur est survenue pendant l'analyse.");
+                console.error(err);
+            }
+            chatState = 0; // Reset
+        });
+    }
+
 });

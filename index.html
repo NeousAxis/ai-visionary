@@ -318,6 +318,30 @@
         </div>
     </footer>
 
+    <!-- AYO Chat Widget -->
+    <div id="ayo-widget" class="ayo-widget">
+        <div class="ayo-chat-window" id="ayo-chat-window">
+            <div class="ayo-header">
+                <h4><span class="status-dot"></span> AYO Bot</h4>
+                <button id="ayo-close" style="background:none;border:none;color:white;cursor:pointer;">✕</button>
+            </div>
+            <div class="ayo-messages" id="ayo-messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="typing-indicator" id="ayo-typing">AYO écrit...</div>
+            <form class="ayo-input-area" id="ayo-chat-form">
+                <input type="text" id="ayo-input" placeholder="Écrivez ici..." autocomplete="off">
+                <button type="submit">➤</button>
+            </form>
+        </div>
+        <button id="ayo-toggle" class="ayo-toggle">
+            <!-- Icon Chat -->
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+            </svg>
+        </button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 
