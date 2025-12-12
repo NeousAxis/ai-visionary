@@ -16,16 +16,19 @@ concurrency:
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Inject API Secret
+        env:
+          MY_SECRET_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          # Méthode "Bourrin" mais fiable : injection directe sans mapping complexe
-          # On utilise sed avec un séparateur pipe | pour éviter les conflits de caractères
-          sed -i "s|API_KEY_TOKEN_REPLACE_ME|${{ secrets.GEMINI_API_KEY }}|g" script.js
+          sed -i "s|API_KEY_TOKEN_REPLACE_ME|$MY_SECRET_KEY|g" script.js
         shell: bash
 
       - name: Setup Pages
