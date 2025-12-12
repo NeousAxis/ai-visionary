@@ -262,7 +262,7 @@ CRITÈRES STATUS :
 `;
 
                 const model = genAI.getGenerativeModel({
-                    model: "gemini-1.5-flash",
+                    model: "gemini-1.5-pro",
                     systemInstruction: systemPrompt
                 });
 
@@ -311,7 +311,7 @@ CRITÈRES STATUS :
             } catch (err) {
                 console.error("AYO Analysis Error:", err);
                 ayoTyping.style.display = 'none';
-                addBotMessage(`Une erreur est survenue pendant l'analyse.<br><small>Détail technique : ${err.message}</small>`);
+                addBotMessage(`Une erreur est survenue pendant l'analyse.<br><small style="display:block; word-break:break-word; margin-top:5px;">Détail technique : ${err.message}</small>`);
             }
         });
     }
@@ -369,7 +369,7 @@ Un JSON unique, valide, sans texte avant ou après.
 `;
 
             const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
+                model: "gemini-1.5-pro",
                 systemInstruction: systemPrompt
             });
 
