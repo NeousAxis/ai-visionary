@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  reactCompiler: true,
+  reactCompiler: false,
 };
 
 export default nextConfig;

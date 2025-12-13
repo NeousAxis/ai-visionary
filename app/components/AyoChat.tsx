@@ -4,7 +4,8 @@ import { useChat } from '@ai-sdk/react';
 import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
-    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat();
+    // Cast to any to avoid temporary type mismatches with the latest SDK
+    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat() as any;
     const [isOpen, setIsOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -14,12 +15,16 @@ export default function AyoChat() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+    // Secure submit handler to prevent page reload
+    const onFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        handleSubmit(e);
+    };
+
     // Initial greeting
     const [hasGreeted, setHasGreeted] = useState(false);
     useEffect(() => {
         if (isOpen && !hasGreeted && messages.length === 0) {
-            // We can simulate an initial message or just wait for user
-            // Ideally we start empty or with a static bubble
             setHasGreeted(true);
         }
     }, [isOpen, hasGreeted, messages.length]);
@@ -54,7 +59,7 @@ export default function AyoChat() {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <form className="ayo-input-area" onSubmit={handleSubmit}>
+                    <form className="ayo-input-area" onSubmit={onFormSubmit}>
                         <input
                             className="ayo-input"
                             value={input}
