@@ -1,13 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const apiKey = process.env.GEMINI_KEY_API;
+const apiKey = process.env.OPENAI_KEY_API;
 const targetFile = path.join(__dirname, 'ayo-settings.js');
 
-console.log('Starting Build (Direct Generation Strategy)...');
+console.log('Starting Build (Direct Generation Strategy) - OPENAI MODE...');
 
 if (!apiKey || apiKey.includes('KEY_HOLDER_XYZ')) {
-    console.error('ERROR: GEMINI_KEY_API is missing or Invalid.');
+    console.error('ERROR: OPENAI_KEY_API is missing or Invalid.');
     process.exit(1);
 }
 

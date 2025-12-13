@@ -200,30 +200,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function runLiteAnalysis() {
-        import("https://esm.run/@google/generative-ai").then(async (module) => {
-            const { GoogleGenerativeAI } = module;
-            // NEW STRATEGY: Read from global AYO_SETTINGS injected by separate file
-            const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV; // Fallback just in case
-            const API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "API_KEY_NOT_FOUND_IN_SETTINGS";
+        // NEW STRATEGY: Read from global AYO_SETTINGS injected by separate file
+        const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
+        const API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "API_KEY_NOT_FOUND_IN_SETTINGS";
 
-            if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("KEY_HOLDER_XYZ")) {
-                const debugKey = API_KEY ? (API_KEY.substring(0, 4) + "...") : "NULL/EMPTY";
-                const status = API_KEY === "KEY_HOLDER_XYZ" ? "NON REMPLACÉE (Placeholder intact)" : "REMPLACÉE";
-                addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${status}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez AYO_SETTINGS)`, true);
-                ayoTyping.style.display = 'none';
-                return;
-            }
+        if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("KEY_HOLDER_XYZ")) {
+            const debugKey = API_KEY ? (API_KEY.substring(0, 4) + "...") : "NULL/EMPTY";
+            const status = API_KEY === "KEY_HOLDER_XYZ" ? "NON REMPLACÉE (Placeholder intact)" : "REMPLACÉE";
+            addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${status}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez AYO_SETTINGS)`, true);
+            ayoTyping.style.display = 'none';
+            return;
+        }
 
-            try {
-                // Fetch the AYO Sectors definition
-                const response = await fetch('AYO_SECTORS_V1.json');
-                if (!response.ok) throw new Error("Impossible de charger les secteurs AYO.");
-                const ayoSectors = await response.json();
+        try {
+            // Fetch the AYO Sectors definition
+            const response = await fetch('AYO_SECTORS_V1.json');
+            if (!response.ok) throw new Error("Impossible de charger les secteurs AYO.");
+            const ayoSectors = await response.json();
 
-                const genAI = new GoogleGenerativeAI(API_KEY);
-
-                // NEW NUCLEUS PROMPT (User Provided)
-                const systemPrompt = `
+            // OPENAI IMPLEMENTATION
+            const systemPrompt = `
 TU ES AYO, moteur d’analyse de “Lisibilité AIO”.
 
 Ta mission est d’analyser n’importe quelle entreprise selon :
@@ -277,86 +273,99 @@ CRITÈRES STATUS :
 - "NOT_READY" (Score < 40) : Trop peu de contenu lisible.
 `;
 
-                const model = genAI.getGenerativeModel({
-                    model: "gemini-1.5-pro",
-                    systemInstruction: systemPrompt
-                });
+            const userPrompt = `Entreprise: ${chatData.name}, URL: ${chatData.url}, Secteur déclaré: ${chatData.sector}. Fais l'analyse Lite.`;
 
-                const prompt = `Entreprise: ${chatData.name}, URL: ${chatData.url}, Secteur déclaré: ${chatData.sector}. Fais l'analyse Lite.`;
+            const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini", // Cost efficient and fast
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt }
+                    ],
+                    temperature: 0.7,
+                    response_format: { type: "json_object" }
+                })
+            });
 
-                const result = await model.generateContent(prompt);
-                const responseText = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-                const data = JSON.parse(responseText);
-
-                chatData.score = data.score_lite;
-                chatData.eligibility = data.status;
-
-                ayoTyping.style.display = 'none';
-
-                // RESULT DISPLAY
-                // Use the sophisticated text response from the AI
-                addBotMessage(data.text_response, true);
-
-                // Show Score Badge slightly after
-                setTimeout(() => {
-                    addBotMessage(`📊 <strong>Score AIO-Lite : ${data.score_lite}/100</strong>`, true);
-                }, 800);
-
-
-                // BRANCHING LOGIC
-                setTimeout(() => {
-                    const buttons = [];
-
-                    if (data.status === 'READY') {
-                        buttons.push({
-                            text: "🚀 S’installer dans AYA maintenant (Gratuit)",
-                            action: () => activateAyaProfile(false, data)
-                        });
-                    } else if (data.status === 'POTENTIAL') {
-                        buttons.push({
-                            text: "✨ Créer mon Profil AYA (Gratuit - liste d'attente)",
-                            action: () => activateAyaProfile(true, data)
-                        });
-                    } else {
-                        buttons.push({ text: "🛠️ Obtenir l'analyse complète AYO", action: () => showPricingOptions() });
-                    }
-
-                    addBotButtons(buttons);
-                }, 1500);
-
-            } catch (err) {
-                console.error("AYO Analysis Error:", err);
-                ayoTyping.style.display = 'none';
-
-                if (err.message.includes('400') && err.message.includes('API key')) {
-                    const keyLen = API_KEY ? API_KEY.length : 0;
-                    const keyStart = API_KEY ? API_KEY.substring(0, 4) : "NULL";
-                    addBotMessage(`⚠️ <strong>Accès refusé par Google</strong>.<br>La clé API est bien configurée mais rejetée.<br><strong>Diagnostic Clé :</strong><br>- Longueur reçue : ${keyLen} (Doit être ~39)<br>- Début : ${keyStart}...<br><br>Si Longueur = 14, c'est que l'injection a échoué (Placeholder).<br>Si Longueur = 39, la clé est révoquée/incorrecte sur Google AI Studio.`, true);
-                } else {
-                    addBotMessage(`Une erreur inattendue est survenue.<br><small>${err.message}</small>`, true);
-                }
+            if (!aiResponse.ok) {
+                const errorData = await aiResponse.json();
+                console.error("OpenAI Error Details:", errorData);
+                throw new Error(`OpenAI API Error: ${errorData.error?.message || aiResponse.statusText}`);
             }
-        });
+
+            const resultData = await aiResponse.json();
+            const responseText = resultData.choices[0].message.content;
+            const data = JSON.parse(responseText);
+
+            chatData.score = data.score_lite;
+            chatData.eligibility = data.status;
+
+            ayoTyping.style.display = 'none';
+
+            // RESULT DISPLAY
+            addBotMessage(data.text_response, true);
+
+            // Show Score Badge slightly after
+            setTimeout(() => {
+                addBotMessage(`📊 <strong>Score AIO-Lite : ${data.score_lite}/100</strong>`, true);
+            }, 800);
+
+
+            // BRANCHING LOGIC
+            setTimeout(() => {
+                const buttons = [];
+
+                if (data.status === 'READY') {
+                    buttons.push({
+                        text: "🚀 S’installer dans AYA maintenant (Gratuit)",
+                        action: () => activateAyaProfile(false, data)
+                    });
+                } else if (data.status === 'POTENTIAL') {
+                    buttons.push({
+                        text: "✨ Créer mon Profil AYA (Gratuit - liste d'attente)",
+                        action: () => activateAyaProfile(true, data)
+                    });
+                } else {
+                    buttons.push({ text: "🛠️ Obtenir l'analyse complète AYO", action: () => showPricingOptions() });
+                }
+
+                addBotButtons(buttons);
+            }, 1500);
+
+        } catch (err) {
+            console.error("AYO Analysis Error:", err);
+            ayoTyping.style.display = 'none';
+
+            if (err.message.includes('API key') || err.message.includes('401')) {
+                const keyLen = API_KEY ? API_KEY.length : 0;
+                const keyStart = API_KEY ? API_KEY.substring(0, 4) : "NULL";
+                addBotMessage(`⚠️ <strong>Accès refusé par OpenAI</strong>.<br>La clé API est bien configurée mais rejetée.<br><strong>Diagnostic Clé :</strong><br>- Longueur reçue : ${keyLen} (Doit être ~51)<br>- Début : ${keyStart}...<br><br>Si API OpenAI, doit commencer par sk-.`, true);
+            } else {
+                addBotMessage(`Une erreur inattendue est survenue.<br><small>${err.message}</small>`, true);
+            }
+        }
     }
 
     // FUNCTION TO TRIGGER ASR GENERATION (Internal Use)
     async function generateASR(chatData, analysisData) {
         ayoTyping.style.display = 'block';
 
-        import("https://esm.run/@google/generative-ai").then(async (module) => {
-            const { GoogleGenerativeAI } = module;
-            const API_KEY = "API_KEY_TOKEN_REPLACE_ME";
+        // Reuse the same key logic
+        const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
+        const API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "";
 
-            if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
-                addBotMessage("⚠️ Erreur : Clé API non disponible pour la génération ASR.");
-                ayoTyping.style.display = 'none';
-                return;
-            }
+        if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("KEY_HOLDER_XYZ")) {
+            addBotMessage("⚠️ Erreur : Clé API non disponible pour la génération ASR.");
+            ayoTyping.style.display = 'none';
+            return;
+        }
 
-            const genAI = new GoogleGenerativeAI(API_KEY);
-
-            // SYSTEM PROMPT FOR AYO_ASR_GENERATOR
-            const systemPrompt = `
+        const systemPrompt = `
 TU ES LE MODULE AYO_ASR_GENERATOR.
 Ta mission : produire un ASR (AYO Singular Record) STRICTEMENT VALIDE (version ASR-1.0).
 
@@ -391,51 +400,66 @@ SORTIE :
 Un JSON unique, valide, sans texte avant ou après.
 `;
 
-            const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-pro",
-                systemInstruction: systemPrompt
+        const userPrompt = `
+        Données de base:
+        Nom: ${chatData.name}
+        Secteur: ${chatData.sector}
+        URL: ${chatData.url}
+        
+        Analyse précédente (Lite):
+        Score: ${analysisData.score_lite}
+        Status: ${analysisData.status}
+        Détails: ${analysisData.text_response}
+        
+        Génère le fichier ASR.json maintenant.
+        `;
+
+        try {
+            const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt }
+                    ],
+                    temperature: 0.2,
+                    response_format: { type: "json_object" }
+                })
             });
 
-            const userPrompt = `
-            Données de base:
-            Nom: ${chatData.name}
-            Secteur: ${chatData.sector}
-            URL: ${chatData.url}
-            
-            Analyse précédente (Lite):
-            Score: ${analysisData.score_lite}
-            Status: ${analysisData.status}
-            Détails: ${analysisData.text_response}
-            
-            Génère le fichier ASR.json maintenant.
-            `;
-
-            try {
-                const result = await model.generateContent(userPrompt);
-                let jsonStr = result.response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-
-                // Display as code block
-                const downloadBlob = new Blob([jsonStr], { type: 'application/json' });
-                const downloadUrl = URL.createObjectURL(downloadBlob);
-
-                addBotMessage(`
-                    <strong>✅ ASR GÉNÉRÉ & INTÉGRÉ</strong><br>
-                    Pour finaliser votre installation dans l'index AYA, voici votre fichier d'autorité.<br>
-                    1. Téléchargez le fichier ASR.json<br>
-                    2. Placez-le à la racine de votre site (ou dossier /.ayo/)<br><br>
-                    <pre style="background:#111; padding:10px; border-radius:5px; font-size:0.75rem; overflow-x:auto; color:#a3e635;">${jsonStr.substring(0, 300)}... (tronqué)</pre>
-                    <a href="${downloadUrl}" download="ASR.json" class="btn btn-sm btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Télécharger ASR.json</a>
-                `, true);
-
-                // createConfetti(); // Assuming this function exists elsewhere or is to be added
-                ayoTyping.style.display = 'none';
-
-            } catch (error) {
-                console.error("ASR Generation Error", error);
-                addBotMessage("Erreur lors de la génération du fichier ASR.");
-                ayoTyping.style.display = 'none';
+            if (!aiResponse.ok) {
+                const errorData = await aiResponse.json();
+                throw new Error(`OpenAI API Error: ${errorData.error?.message || aiResponse.statusText}`);
             }
-        });
+
+            const resultData = await aiResponse.json();
+            const jsonStr = resultData.choices[0].message.content;
+
+            // Display as code block
+            const downloadBlob = new Blob([jsonStr], { type: 'application/json' });
+            const downloadUrl = URL.createObjectURL(downloadBlob);
+
+            addBotMessage(`
+                <strong>✅ ASR GÉNÉRÉ & INTÉGRÉ</strong><br>
+                Pour finaliser votre installation dans l'index AYA, voici votre fichier d'autorité.<br>
+                1. Téléchargez le fichier ASR.json<br>
+                2. Placez-le à la racine de votre site (ou dossier /.ayo/)<br><br>
+                <pre style="background:#111; padding:10px; border-radius:5px; font-size:0.75rem; overflow-x:auto; color:#a3e635;">${jsonStr.substring(0, 300)}... (tronqué)</pre>
+                <a href="${downloadUrl}" download="ASR.json" class="btn btn-sm btn-primary" style="margin-top:10px; display:inline-block; text-decoration:none;">📥 Télécharger ASR.json</a>
+            `, true);
+
+            ayoTyping.style.display = 'none';
+
+        } catch (error) {
+            console.error("ASR Generation Error", error);
+            addBotMessage("Erreur lors de la génération du fichier ASR.");
+            ayoTyping.style.display = 'none';
+        }
     }
 
     function activateAyaProfile(isPotential = false, analysisData = null) {
