@@ -6,6 +6,9 @@ const targetFile = path.join(__dirname, 'ayo-settings.js');
 
 console.log('Starting Build (Direct Generation Strategy) - OPENAI MODE...');
 
+console.log(`DEBUG: API KEY ENV VALUE: '${apiKey}'`);
+console.log(`DEBUG: API KEY LENGTH: ${apiKey ? apiKey.length : 0}`);
+
 if (!apiKey || apiKey.includes('KEY_HOLDER_XYZ')) {
     console.error('ERROR: OPENAI_KEY_API is missing or Invalid.');
     process.exit(1);
