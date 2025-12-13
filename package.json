@@ -3,5 +3,8 @@
     "version": "1.0.1",
     "scripts": {
         "build": "echo 'Build Skipped - Using Serverless'"
+    },
+    "devDependencies": {
+        "@vercel/node": "^5.5.15"
     }
 }
