@@ -15,21 +15,36 @@ if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
 }
 
-// Files to copy
-const filesToCopy = [
-    'index.html',
-    'style.css',
-    'ayo-core.js',
-    'ayo-settings.js',
-    'AYO_SECTORS_V1.json',
-    'AYO_SINGULAR_RECORD_TEMPLATE.json'
-];
+// Helper to Copy Recursive
+function copyRecursiveSync(src, dest) {
+    const exists = fs.existsSync(src);
+    const stats = exists && fs.statSync(src);
+    const isDirectory = exists && stats.isDirectory();
 
-filesToCopy.forEach(file => {
-    const srcPath = path.join(__dirname, file);
-    const destPath = path.join(distDir, file);
-    if (fs.existsSync(srcPath)) {
-        fs.copyFileSync(srcPath, destPath);
+    if (isDirectory) {
+        if (!fs.existsSync(dest)) {
+            fs.mkdirSync(dest);
+        }
+        fs.readdirSync(src).forEach(childItemName => {
+            copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+        });
+    } else {
+        fs.copyFileSync(src, dest);
+    }
+}
+
+// Read Root Directory
+const rootDir = __dirname;
+const items = fs.readdirSync(rootDir);
+
+// Ignore List
+const ignoreList = ['.git', '.github', 'node_modules', 'dist', 'api', '.env', '.gitignore', 'package.json', 'package-lock.json', 'vercel.json', 'build.js', 'inject-key.js'];
+
+items.forEach(item => {
+    if (!ignoreList.includes(item)) {
+        const src = path.join(rootDir, item);
+        const dest = path.join(distDir, item);
+        copyRecursiveSync(src, dest);
     }
 });
 
