@@ -30,7 +30,7 @@ export default function AyoChat() {
             <div id="ayo-widget" className={`ayo-widget ${isOpen ? 'open' : ''}`}>
 
                 {/* Chat Window */}
-                <div className="ayo-chat-window" style={{ display: isOpen ? 'flex' : 'none' }}>
+                <div className={`ayo-chat-window ${isOpen ? 'open' : ''}`}>
                     <div className="ayo-header">
                         <h4><span className="status-dot"></span> AYO Bot</h4>
                         <button onClick={toggleChat} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>✕</button>
@@ -49,7 +49,7 @@ export default function AyoChat() {
                         ))}
 
                         {isLoading && (
-                            <div className="typing-indicator" style={{ display: 'block' }}>AYO réflchit...</div>
+                            <div className="typing-indicator" style={{ display: 'block' }}>AYO réfléchit...</div>
                         )}
                         <div ref={messagesEndRef} />
                     </div>
