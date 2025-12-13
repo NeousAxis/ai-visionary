@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ayoWindow.classList.toggle('open');
             // If opening for the first time
             if (ayoWindow.classList.contains('open') && ayoMessages.children.length === 0) {
-                addBotMessage("Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Comment se nomme votre entreprise/organisation ?");
+                addBotMessage("Bonjour, Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Comment se nomme votre entreprise/organisation ?");
                 chatState = 1;
             }
         });
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 ayoWindow.classList.add('open');
                 if (ayoMessages.children.length === 0) {
-                    addBotMessage("Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Comment se nomme votre entreprise/organisation ?");
+                    addBotMessage("Bonjour, je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Comment se nomme votre entreprise/organisation ?");
                     chatState = 1;
                 }
             });
