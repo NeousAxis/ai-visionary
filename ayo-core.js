@@ -187,13 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runLiteAnalysis() {
         import("https://esm.run/@google/generative-ai").then(async (module) => {
             const { GoogleGenerativeAI } = module;
-            // NEW STRATEGY: Read from global AYO_ENV injected by separate file
-            const API_KEY = window.AYO_ENV && window.AYO_ENV.apiKey ? window.AYO_ENV.apiKey : "API_KEY_NOT_FOUND_IN_ENV";
+            // NEW STRATEGY: Read from global AYO_SETTINGS injected by separate file
+            const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV; // Fallback just in case
+            const API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "API_KEY_NOT_FOUND_IN_SETTINGS";
 
             if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("KEY_HOLDER_XYZ")) {
                 const debugKey = API_KEY ? (API_KEY.substring(0, 4) + "...") : "NULL/EMPTY";
-                const status = API_KEY === "KEY_HOLDER_XYZ" ? "NON REMPLACÉE (Placeholder intact)" : "REMPLACÉE (Valeur incorrecte?)";
-                addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${status}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez Vercel)`);
+                const status = API_KEY === "KEY_HOLDER_XYZ" ? "NON REMPLACÉE (Placeholder intact)" : "REMPLACÉE";
+                addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${status}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez AYO_SETTINGS)`, true);
                 ayoTyping.style.display = 'none';
                 return;
             }

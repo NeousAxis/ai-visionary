@@ -1,3 +1,3 @@
-window.AYO_ENV = {
+window.AYO_SETTINGS = {
     apiKey: "KEY_HOLDER_XYZ"
 };
