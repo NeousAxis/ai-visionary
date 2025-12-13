@@ -192,7 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const API_KEY = "API_KEY_TOKEN_REPLACE_ME";
 
             if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
-                addBotMessage("⚠️ Erreur : Clé API non configurée. (Vérifiez la variable Vercel : GEMINI_KEY_API)");
+                const debugKey = API_KEY ? (API_KEY.substring(0, 3) + "...") : "NULL/EMPTY";
+                addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${API_KEY.includes("REPLACE_ME") ? "NON REMPLACÉE" : "REMPLACÉE"}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez Vercel Logs & Vars)`);
                 ayoTyping.style.display = 'none';
                 return;
             }

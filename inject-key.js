@@ -5,6 +5,7 @@ const targetFile = path.join(__dirname, 'ayo-core.js');
 const apiKey = process.env.GEMINI_KEY_API;
 
 console.log('Starting build-time API key injection...');
+if (apiKey) console.log(`Build env var found. Length: ${apiKey.length}`);
 
 if (!apiKey) {
     console.error('ERROR: GEMINI_KEY_API environment variable is NOT set. Build failed.');
