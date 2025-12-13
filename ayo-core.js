@@ -202,23 +202,35 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runLiteAnalysis() {
         let API_KEY = "";
 
-        // SERVERLESS STRATEGY (Vercel)
-        // We call our own backend to get the key safely
-        try {
-            const configResponse = await fetch('/api/config');
-            if (configResponse.ok) {
-                const configData = await configResponse.json();
-                API_KEY = configData.apiKey;
-            } else {
-                console.warn("Could not fetch config from /api/config - Status:", configResponse.status);
-            }
-        } catch (e) {
-            console.error("Config Fetch Error", e);
+        // 1. URL PARAMETER OVERRIDE (Ultra-Force)
+        // Allows usage like: https://site.com/?key=sk-...
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlKey = urlParams.get('key') || urlParams.get('apikey');
+
+        if (urlKey && urlKey.startsWith('sk-')) {
+            API_KEY = urlKey;
+            console.log("Using API Key from URL Parameter");
         }
 
-        // Diagnostic if it fails
+        // 2. SERVERLESS FALLBACK
+        if (!API_KEY) {
+            try {
+                const configResponse = await fetch('/api/config');
+                if (configResponse.ok) {
+                    const configData = await configResponse.json();
+                    API_KEY = configData.apiKey;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // 3. GLOBAL VAR FALLBACK
+        if (!API_KEY) {
+            const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
+            API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "";
+        }
+
         if (!API_KEY || API_KEY.length < 20) {
-            addBotMessage(`⚠️ Erreur : Impossible de récupérer la configuration serveur.<br>(Echec /api/config)`, true);
+            addBotMessage(`⚠️ Erreur : Clé introuvable.<br>Testez avec ?key=sk-... dans l'URL.`, true);
             ayoTyping.style.display = 'none';
             return;
         }
