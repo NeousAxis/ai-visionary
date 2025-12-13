@@ -44,7 +44,10 @@ export default function AyoChat() {
                     <div className="ayo-messages">
                         {/* Intro Message */}
                         <div className="message bot-message">
-                            👋 Bonjour ! Je suis AYO. Je peux analyser votre entreprise pour voir si elle est visible par les IA (ChatGPT, Gemini, etc.). Tapez "Analyse" ou posez-moi une question.
+                            👋 Bonjour, ici AYO. Initialisation du protocole AIO.<br /><br />
+                            Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
+                            Pour cela, répondez à ces 3 questions.<br /><br />
+                            <strong>1. Quelle est l'adresse (URL) de votre site web ?</strong>
                         </div>
 
                         {messages.map((m: any) => (
