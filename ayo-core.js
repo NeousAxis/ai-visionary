@@ -202,35 +202,47 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runLiteAnalysis() {
         let API_KEY = "";
 
-        // 1. URL PARAMETER OVERRIDE (Ultra-Force)
-        // Allows usage like: https://site.com/?key=sk-...
+        // 1. URL PARAMETER (Priority 1 + Auto-Save)
         const urlParams = new URLSearchParams(window.location.search);
         const urlKey = urlParams.get('key') || urlParams.get('apikey');
 
         if (urlKey && urlKey.startsWith('sk-')) {
             API_KEY = urlKey;
-            console.log("Using API Key from URL Parameter");
+            // SAVE TO LOCAL STORAGE FOR NEXT TIME
+            localStorage.setItem("AYO_OPENAI_KEY", API_KEY);
+            console.log("API Key loaded from URL and saved to LocalStorage.");
+            // Optional: Clean URL
+            // window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+            // 2. LOCAL STORAGE (Priority 2)
+            const storedKey = localStorage.getItem("AYO_OPENAI_KEY");
+            if (storedKey && storedKey.startsWith('sk-')) {
+                API_KEY = storedKey;
+                console.log("API Key loaded from LocalStorage.");
+            }
         }
 
-        // 2. SERVERLESS FALLBACK
+        // 3. SERVERLESS FALLBACK (Priority 3 - If no local key)
         if (!API_KEY) {
             try {
                 const configResponse = await fetch('/api/config');
                 if (configResponse.ok) {
                     const configData = await configResponse.json();
-                    API_KEY = configData.apiKey;
+                    if (configData.apiKey && configData.apiKey.startsWith('sk-')) {
+                        API_KEY = configData.apiKey;
+                    }
                 }
             } catch (e) { console.error(e); }
         }
 
-        // 3. GLOBAL VAR FALLBACK
+        // 4. GLOBAL VAR FALLBACK (Priority 4)
         if (!API_KEY) {
             const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
             API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "";
         }
 
         if (!API_KEY || API_KEY.length < 20) {
-            addBotMessage(`⚠️ Erreur : Clé introuvable.<br>Testez avec ?key=sk-... dans l'URL.`, true);
+            addBotMessage(`⚠️ Erreur : Clé introuvable.<br>Pour initialiser, utilisez une fois :<br><code>/?key=sk-...</code>`, true);
             ayoTyping.style.display = 'none';
             return;
         }
