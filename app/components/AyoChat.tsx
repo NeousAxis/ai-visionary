@@ -1,6 +1,5 @@
 'use client';
 
-import { Message } from 'ai';
 import { useChat } from 'ai/react';
 import { useState, useEffect, useRef } from 'react';
 
@@ -43,7 +42,7 @@ export default function AyoChat() {
                             👋 Bonjour ! Je suis AYO. Je peux analyser votre entreprise pour voir si elle est visible par les IA (ChatGPT, Gemini, etc.). Tapez "Analyse" ou posez-moi une question.
                         </div>
 
-                        {messages.map((m: Message) => (
+                        {messages.map((m: any) => (
                             <div key={m.id} className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}>
                                 {m.content}
                             </div>
