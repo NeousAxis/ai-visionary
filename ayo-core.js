@@ -200,14 +200,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function runLiteAnalysis() {
-        // NEW STRATEGY: Read from global AYO_SETTINGS injected by separate file
-        const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
-        const API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "API_KEY_NOT_FOUND_IN_SETTINGS";
+        let API_KEY = "";
 
-        if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("KEY_HOLDER_XYZ")) {
+        // NEW STRATEGY: Fetch from Serverless Function (Vercel)
+        try {
+            const configResponse = await fetch('/api/config');
+            if (configResponse.ok) {
+                const configData = await configResponse.json();
+                API_KEY = configData.apiKey;
+            } else {
+                console.warn("Could not fetch config from /api/config");
+            }
+        } catch (e) {
+            console.error("Config Fetch Error", e);
+        }
+
+        // Fallback for local dev or if API fails
+        if (!API_KEY) {
+            const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
+            API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "";
+        }
+
+        if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("PLACEHOLDER")) {
             const debugKey = API_KEY ? (API_KEY.substring(0, 4) + "...") : "NULL/EMPTY";
-            const status = API_KEY === "KEY_HOLDER_XYZ" ? "NON REMPLACÉE (Placeholder intact)" : "REMPLACÉE";
-            addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${status}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez AYO_SETTINGS)`, true);
+            addBotMessage(`⚠️ Erreur : Clé API non reçue.<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Le serverless api/config a échoué)`, true);
             ayoTyping.style.display = 'none';
             return;
         }
