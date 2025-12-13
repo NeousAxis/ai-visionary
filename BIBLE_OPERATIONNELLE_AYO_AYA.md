@@ -1707,3 +1707,279 @@ indifférente aux pressions
 
 Sinon tu recrées un pouvoir éditorial.
 
+-- -- -- -- -- -- 
+
+XVII. SCHEDULER DE DESTRUCTION
+
+1) Règles exactes
+États autorisés
+
+ACTIVE | UNREACHABLE | INACTIVE | CLOSED
+
+TTL (durée avant destruction)
+
+ACTIVE → pas de destruction programmée
+
+UNREACHABLE → 90 jours (puis bascule INACTIVE si toujours unreachable)
+
+INACTIVE → 180 jours → destruction
+
+CLOSED → 30 jours → destruction
+
+Exception : ASR_PUBLISHED + CLOSED → 365 jours → destruction
+
+Définition de “vérification”
+
+À chaque run du bot AYA :
+
+si site répond HTTP 200/3xx et contenu cohérent → last_verified = now, state = ACTIVE
+
+si timeout/DNS/5xx répétés → state = UNREACHABLE (et on incrémente un compteur)
+
+si site répond mais contenu “mort” (placeholder, domaine à vendre, erreur persistante, ou absence de tout contenu pertinent) → state = INACTIVE
+
+si mention explicite de fermeture (ou page “closed”, “cessation”, “liquidation”) → state = CLOSED
+
+Anti-erreur (très important)
+
+Avant destruction, il faut 2 conditions :
+
+now >= destruction_date
+
+state n’a pas changé depuis la planification (sinon on recalcule)
+
+=> évite de supprimer une entreprise revenue en ligne.
+
+2) Modèle de données minimal
+
+Table aya_entities (minimum vital) :
+
+id (uuid)
+
+canonical_domain (text, unique)
+
+state (text)
+
+last_verified_at (timestamptz)
+
+asr_status (text: ASR_PUBLISHED | ASR_DERIVED | NONE)
+
+destruction_date (timestamptz, nullable)
+
+destruction_reason (text, nullable)
+
+status_version (int) — incrémenté à chaque changement d’état (anti-race condition)
+
+Table aya_entity_payloads (tout ce qui coûte) :
+
+entity_id (fk)
+
+asr_json (jsonb, nullable)
+
+jsonld (jsonb, nullable)
+
+evidence (jsonb, nullable)
+
+vector_refs (jsonb, nullable)
+
+3) Scheduler: logique exacte
+A) Recalcul de destruction_date (à chaque changement d’état)
+
+Quand state change, on fixe :
+
+si ACTIVE → destruction_date = null
+
+si UNREACHABLE → destruction_date = now + 90j
+
+si INACTIVE → destruction_date = now + 180j
+
+si CLOSED :
+
+si asr_status == ASR_PUBLISHED → destruction_date = now + 365j
+
+sinon → destruction_date = now + 30j
+
+B) Job quotidien de destruction (idempotent)
+
+Chaque jour :
+
+sélectionner les entités state != ACTIVE et destruction_date <= now
+
+pour chaque entité :
+
+vérifier que status_version n’a pas changé depuis planification (ou re-check state et recalcul)
+
+supprimer payloads + index vecteur + références
+
+supprimer l’entité
+
+écrire une ligne d’audit minimale non-identifiante (optionnel)
+
+4) Pseudo-code (copier/coller) — Node.js (simple)
+computeDestructionDate()
+function computeDestructionDate({ state, asr_status }, now = new Date()) {
+  const day = 24 * 60 * 60 * 1000;
+
+  if (state === "ACTIVE") return null;
+
+  if (state === "UNREACHABLE") return new Date(now.getTime() + 90 * day);
+
+  if (state === "INACTIVE") return new Date(now.getTime() + 180 * day);
+
+  if (state === "CLOSED") {
+    const days = (asr_status === "ASR_PUBLISHED") ? 365 : 30;
+    return new Date(now.getTime() + days * day);
+  }
+
+  // sécurité
+  return new Date(now.getTime() + 30 * day);
+}
+
+Job quotidien destroyExpiredEntities()
+/**
+ * Détruit définitivement les entités expirées.
+ * Hypothèse: tu as une API DB (Supabase, Postgres client, etc.)
+ */
+async function destroyExpiredEntities(db, vectorStore, now = new Date()) {
+  // 1) sélectionner les entités candidates
+  const expired = await db.query(`
+    SELECT id, canonical_domain, state, asr_status, destruction_date, status_version
+    FROM aya_entities
+    WHERE destruction_date IS NOT NULL
+      AND destruction_date <= $1
+      AND state <> 'ACTIVE'
+    LIMIT 500
+  `, [now.toISOString()]);
+
+  for (const e of expired.rows) {
+    // 2) re-check anti-erreur: si l'état a changé, on skip
+    const current = await db.query(`
+      SELECT state, asr_status, destruction_date, status_version
+      FROM aya_entities
+      WHERE id = $1
+    `, [e.id]);
+
+    if (current.rowCount === 0) continue;
+
+    const c = current.rows[0];
+
+    // si version a changé: quelqu’un (ou un autre job) a modifié l’état
+    if (c.status_version !== e.status_version) continue;
+
+    // si entre-temps l’entité est redevenue ACTIVE (ex: site revenu)
+    if (c.state === "ACTIVE") {
+      await db.query(`
+        UPDATE aya_entities
+        SET destruction_date = NULL, destruction_reason = NULL
+        WHERE id = $1
+      `, [e.id]);
+      continue;
+    }
+
+    // 3) détruire payloads coûteux
+    const payload = await db.query(`
+      SELECT vector_refs
+      FROM aya_entity_payloads
+      WHERE entity_id = $1
+    `, [e.id]);
+
+    // 4) supprimer index vectoriel si existant
+    if (payload.rowCount > 0 && payload.rows[0].vector_refs) {
+      try {
+        await vectorStore.deleteByRefs(payload.rows[0].vector_refs);
+      } catch (_) {
+        // option: log interne, mais ne bloque pas la destruction DB
+      }
+    }
+
+    await db.query(`DELETE FROM aya_entity_payloads WHERE entity_id = $1`, [e.id]);
+
+    // 5) supprimer l’entité elle-même
+    await db.query(`DELETE FROM aya_entities WHERE id = $1`, [e.id]);
+
+    // 6) optionnel: audit non-identifiant (agrégé)
+    // await db.query(`INSERT INTO aya_purge_stats(day, purged_count) VALUES (CURRENT_DATE, 1)
+    //                 ON CONFLICT (day) DO UPDATE SET purged_count = aya_purge_stats.purged_count + 1`);
+  }
+}
+
+5) SQL minimal (Postgres/Supabase)
+Table entities
+create table if not exists aya_entities (
+  id uuid primary key default gen_random_uuid(),
+  canonical_domain text unique not null,
+  state text not null check (state in ('ACTIVE','UNREACHABLE','INACTIVE','CLOSED')),
+  asr_status text not null default 'NONE' check (asr_status in ('ASR_PUBLISHED','ASR_DERIVED','NONE')),
+  last_verified_at timestamptz,
+  destruction_date timestamptz,
+  destruction_reason text,
+  status_version int not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+Table payloads (tout ce qui coûte)
+create table if not exists aya_entity_payloads (
+  entity_id uuid primary key references aya_entities(id) on delete cascade,
+  asr_json jsonb,
+  jsonld jsonb,
+  evidence jsonb,
+  vector_refs jsonb,
+  updated_at timestamptz not null default now()
+);
+
+Trigger: incrémenter status_version et recalculer destruction_date
+
+(si tu veux le rendre impossible à oublier côté code)
+
+create or replace function aya_set_destruction_date()
+returns trigger as $$
+declare
+  ttl_days int;
+begin
+  -- incrémente la version à chaque modif d'état
+  if (new.state is distinct from old.state) then
+    new.status_version := old.status_version + 1;
+  end if;
+
+  -- calcule destruction_date en fonction de l'état
+  if new.state = 'ACTIVE' then
+    new.destruction_date := null;
+    new.destruction_reason := null;
+
+  elsif new.state = 'UNREACHABLE' then
+    new.destruction_date := now() + interval '90 days';
+    new.destruction_reason := 'ttl_unreachable_90d';
+
+  elsif new.state = 'INACTIVE' then
+    new.destruction_date := now() + interval '180 days';
+    new.destruction_reason := 'ttl_inactive_180d';
+
+  elsif new.state = 'CLOSED' then
+    if new.asr_status = 'ASR_PUBLISHED' then
+      new.destruction_date := now() + interval '365 days';
+      new.destruction_reason := 'ttl_closed_asr_published_365d';
+    else
+      new.destruction_date := now() + interval '30 days';
+      new.destruction_reason := 'ttl_closed_30d';
+    end if;
+  end if;
+
+  new.updated_at := now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_aya_set_destruction_date on aya_entities;
+
+create trigger trg_aya_set_destruction_date
+before update of state, asr_status on aya_entities
+for each row
+execute procedure aya_set_destruction_date();
+
+6) Fréquence du scheduler
+
+1x/jour suffit (la destruction n’a pas besoin d’être temps réel).
+
+Le job doit être idempotent (ce code l’est).
+
+
