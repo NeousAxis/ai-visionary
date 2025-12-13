@@ -24,11 +24,12 @@ try {
         console.warn('WARNING: Placeholder KEY_HOLDER_XYZ not found in template.');
     }
 
-    // Replace
-    const newContent = content.replace(/"KEY_HOLDER_XYZ"/g, `"${apiKey.trim()}"`);
+    // We clean the key aggressively (trim + remove potential surrounding quotes copied by mistake)
+    const cleanKey = apiKey.trim().replace(/^["']|["']$/g, '');
+    const newContent = content.replace(/"KEY_HOLDER_XYZ"/g, `"${cleanKey}"`);
 
     fs.writeFileSync(targetFile, newContent, 'utf8');
-    console.log(`SUCCESS: Generated ayo-env.js from template. Key length: ${apiKey.trim().length}`);
+    console.log(`SUCCESS: Generated ayo-env.js. Key cleaned and injected.`);
 
 } catch (err) {
     console.error('Error injecting key:', err);
