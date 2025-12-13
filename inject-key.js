@@ -44,7 +44,8 @@ fs.readdirSync(__dirname).forEach(item => {
 const targetFile = path.join(distDir, 'ayo-env.js');
 try {
     let content = fs.readFileSync(targetFile, 'utf8');
-    const newContent = content.replace(/API_KEY_TOKEN_REPLACE_ME/g, apiKey);
+    // Replace the literal string "GEMINI_KEY_API" with the actual value of the env var
+    const newContent = content.replace(/GEMINI_KEY_API/g, apiKey);
     fs.writeFileSync(targetFile, newContent, 'utf8');
     console.log(`SUCCESS: API Key injected into dist/ayo-env.js (Length: ${apiKey.length})`);
 } catch (err) {
