@@ -28,7 +28,7 @@ jobs:
         env:
           MY_SECRET_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          sed -i "s|API_KEY_TOKEN_REPLACE_ME|$MY_SECRET_KEY|g" script.js
+          sed -i "s|API_KEY_TOKEN_REPLACE_ME|$MY_SECRET_KEY|g" ayo-core.js
         shell: bash
 
       - name: Setup Pages
