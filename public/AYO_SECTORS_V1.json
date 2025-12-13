@@ -1,0 +1,499 @@
+{
+    "version": "2.0-light",
+    "universal_blocks": [
+        "identite",
+        "offre",
+        "processus_methodes",
+        "engagements_conformite",
+        "indicateurs",
+        "contenus_pedagogiques",
+        "structure_technique"
+    ],
+    "macro_sectors": [
+        {
+            "id": "commerce_local_proximite",
+            "mandatory": [
+                "identite",
+                "offre",
+                "structure_technique"
+            ],
+            "optional": [
+                "engagements_conformite",
+                "processus_methodes",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "jours_ouverture",
+                "horaires",
+                "produits_locaux"
+            ],
+            "jsonld": [
+                "LocalBusiness",
+                "Store",
+                "Product"
+            ]
+        },
+        {
+            "id": "restauration_hebergement",
+            "mandatory": [
+                "identite",
+                "offre",
+                "structure_technique"
+            ],
+            "optional": [
+                "engagements_conformite",
+                "processus_methodes",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "capacite",
+                "horaires_service",
+                "menus"
+            ],
+            "jsonld": [
+                "Restaurant",
+                "LodgingBusiness",
+                "Menu",
+                "Product"
+            ]
+        },
+        {
+            "id": "services_experts_individuels",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "structure_technique"
+            ],
+            "optional": [
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "annees_experience",
+                "types_clients"
+            ],
+            "jsonld": [
+                "ProfessionalService",
+                "Organization",
+                "Service"
+            ]
+        },
+        {
+            "id": "services_organises_cabinets_agences",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "nombre_collaborateurs",
+                "projets_annuels"
+            ],
+            "jsonld": [
+                "Organization",
+                "ProfessionalService",
+                "Service"
+            ]
+        },
+        {
+            "id": "industrie_production",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "volume_production",
+                "energie",
+                "CO2"
+            ],
+            "jsonld": [
+                "Product",
+                "Organization",
+                "TechArticle"
+            ]
+        },
+        {
+            "id": "construction_immobilier",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "types_chantiers",
+                "zones_intervention"
+            ],
+            "jsonld": [
+                "Organization",
+                "LocalBusiness",
+                "Service"
+            ]
+        },
+        {
+            "id": "saas_technologie_numerique",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "engagements_conformite",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "uptime",
+                "utilisateurs",
+                "mises_a_jour"
+            ],
+            "jsonld": [
+                "SoftwareApplication",
+                "WebApplication",
+                "APIReference",
+                "Organization"
+            ]
+        },
+        {
+            "id": "education_formation",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "apprenants",
+                "certifications"
+            ],
+            "jsonld": [
+                "EducationalOrganization",
+                "Course",
+                "Event"
+            ]
+        },
+        {
+            "id": "sante_soin_bien_etre",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "structure_technique"
+            ],
+            "optional": [
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "types_actes",
+                "discipline"
+            ],
+            "jsonld": [
+                "MedicalOrganization",
+                "LocalBusiness",
+                "ProfessionalService"
+            ]
+        },
+        {
+            "id": "associations_ong_fondations",
+            "mandatory": [
+                "identite",
+                "offre",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "processus_methodes",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "domaines_action",
+                "beneficiaires",
+                "impact"
+            ],
+            "jsonld": [
+                "NGO",
+                "Organization"
+            ]
+        },
+        {
+            "id": "secteur_public_collectivites",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "structure_technique"
+            ],
+            "optional": [
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "types_services",
+                "population_couverte"
+            ],
+            "jsonld": [
+                "GovernmentOrganization",
+                "Organization"
+            ]
+        },
+        {
+            "id": "agriculture_agro_vivant",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "types_cultures",
+                "labels_bio",
+                "pratiques"
+            ],
+            "jsonld": [
+                "Product",
+                "Organization"
+            ]
+        },
+        {
+            "id": "energie_utilities",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "mix_energetique",
+                "zone_couverte"
+            ],
+            "jsonld": [
+                "Organization",
+                "LocalBusiness"
+            ]
+        },
+        {
+            "id": "transport_logistique",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "engagements_conformite",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "zones_couvertes",
+                "delais"
+            ],
+            "jsonld": [
+                "Organization",
+                "Service"
+            ]
+        },
+        {
+            "id": "ecommerce_retail_digital",
+            "mandatory": [
+                "identite",
+                "offre",
+                "structure_technique"
+            ],
+            "optional": [
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "livraison",
+                "retours"
+            ],
+            "jsonld": [
+                "Product",
+                "Offer",
+                "Organization"
+            ]
+        },
+        {
+            "id": "culture_arts_medias",
+            "mandatory": [
+                "identite",
+                "offre",
+                "structure_technique"
+            ],
+            "optional": [
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "types_oeuvres",
+                "formats_diffusion"
+            ],
+            "jsonld": [
+                "CreativeWork",
+                "Event",
+                "Organization"
+            ]
+        },
+        {
+            "id": "sports_loisirs_experiences",
+            "mandatory": [
+                "identite",
+                "offre",
+                "structure_technique"
+            ],
+            "optional": [
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "capacite",
+                "horaires",
+                "activites"
+            ],
+            "jsonld": [
+                "SportsActivityLocation",
+                "Event",
+                "Organization"
+            ]
+        },
+        {
+            "id": "finance_assurance",
+            "mandatory": [
+                "identite",
+                "offre",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "processus_methodes",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "produits_financiers",
+                "politique_risque"
+            ],
+            "jsonld": [
+                "FinancialService",
+                "Organization"
+            ]
+        },
+        {
+            "id": "immobilier_investissement",
+            "mandatory": [
+                "identite",
+                "offre",
+                "engagements_conformite",
+                "indicateurs",
+                "structure_technique"
+            ],
+            "optional": [
+                "processus_methodes",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "types_actifs",
+                "zones"
+            ],
+            "jsonld": [
+                "RealEstateAgent",
+                "Organization"
+            ]
+        },
+        {
+            "id": "recherche_innovation",
+            "mandatory": [
+                "identite",
+                "offre",
+                "processus_methodes",
+                "structure_technique"
+            ],
+            "optional": [
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "domaines_recherche",
+                "publications"
+            ],
+            "jsonld": [
+                "ResearchProject",
+                "Organization"
+            ]
+        },
+        {
+            "id": "institutions_culturelles_publiques",
+            "mandatory": [
+                "identite",
+                "offre",
+                "structure_technique"
+            ],
+            "optional": [
+                "processus_methodes",
+                "engagements_conformite",
+                "indicateurs",
+                "contenus_pedagogiques"
+            ],
+            "indicators": [
+                "programmation",
+                "publics"
+            ],
+            "jsonld": [
+                "Museum",
+                "Library",
+                "Event",
+                "Organization"
+            ]
+        }
+    ]
+}
