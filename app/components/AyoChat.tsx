@@ -8,6 +8,7 @@ export default function AyoChat() {
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat() as any;
     const [isOpen, setIsOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const submitButtonRef = useRef<HTMLButtonElement>(null);
 
     const toggleChat = () => setIsOpen(!isOpen);
 
@@ -68,14 +69,14 @@ export default function AyoChat() {
                             value={input}
                             onChange={handleInputChange}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
+                                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
                                     e.preventDefault();
-                                    handleSubmit(e as any);
+                                    submitButtonRef.current?.click();
                                 }
                             }}
                             placeholder="Écrivez ici..."
                         />
-                        <button type="submit">➤</button>
+                        <button ref={submitButtonRef} type="submit">➤</button>
                     </form>
                 </div>
 
