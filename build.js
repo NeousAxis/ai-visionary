@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const apiKey = process.env.OPENAI_KEY_API;
+const apiKey = process.env.OPENAI_KEY_API || process.env.OPENAI_API_KEY;
 
 console.log('Starting Build (Distribution Strategy)...');
 
