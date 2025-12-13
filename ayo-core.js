@@ -200,30 +200,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function runLiteAnalysis() {
-        let API_KEY = "";
-
-        // NEW STRATEGY: Fetch from Serverless Function (Vercel)
-        try {
-            const configResponse = await fetch('/api/config');
-            if (configResponse.ok) {
-                const configData = await configResponse.json();
-                API_KEY = configData.apiKey;
-            } else {
-                console.warn("Could not fetch config from /api/config");
-            }
-        } catch (e) {
-            console.error("Config Fetch Error", e);
-        }
-
-        // Fallback for local dev or if API fails
-        if (!API_KEY) {
-            const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
-            API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "";
-        }
+        // STRATEGY: Read from global AYO_SETTINGS injected by Build (sed)
+        const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
+        const API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "";
 
         if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("PLACEHOLDER")) {
             const debugKey = API_KEY ? (API_KEY.substring(0, 4) + "...") : "NULL/EMPTY";
-            addBotMessage(`⚠️ Erreur : Clé API non reçue.<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Le serverless api/config a échoué)`, true);
+            addBotMessage(`⚠️ Erreur : Clé API invalide/non injectée.<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Le build sed a échoué)`, true);
             ayoTyping.style.display = 'none';
             return;
         }
