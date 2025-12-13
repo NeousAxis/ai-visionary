@@ -1,3 +1,3 @@
 window.AYO_ENV = {
-    apiKey: "GEMINI_KEY_API"
+    apiKey: "KEY_HOLDER_XYZ"
 };

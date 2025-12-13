@@ -190,9 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // NEW STRATEGY: Read from global AYO_ENV injected by separate file
             const API_KEY = window.AYO_ENV && window.AYO_ENV.apiKey ? window.AYO_ENV.apiKey : "API_KEY_NOT_FOUND_IN_ENV";
 
-            if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
-                const debugKey = API_KEY ? (API_KEY.substring(0, 3) + "...") : "NULL/EMPTY";
-                addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${API_KEY.includes("REPLACE_ME") ? "NON REMPLACÉE" : "REMPLACÉE"}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez Vercel Logs & Vars)`);
+            if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("KEY_HOLDER_XYZ")) {
+                const debugKey = API_KEY ? (API_KEY.substring(0, 4) + "...") : "NULL/EMPTY";
+                const status = API_KEY === "KEY_HOLDER_XYZ" ? "NON REMPLACÉE (Placeholder intact)" : "REMPLACÉE (Valeur incorrecte?)";
+                addBotMessage(`⚠️ Erreur : Clé API invalide.<br>Status: ${status}<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Vérifiez Vercel)`);
                 ayoTyping.style.display = 'none';
                 return;
             }

@@ -6,6 +6,9 @@ const distDir = path.join(__dirname, 'dist');
 
 console.log('Starting Build Process...');
 
+const keyPreview = apiKey ? apiKey.substring(0, 4) + '...' : 'UNDEFINED';
+console.log(`DEBUG: Env Var 'GEMINI_KEY_API' found. Length: ${apiKey ? apiKey.length : 0}. Preview: ${keyPreview}`);
+
 if (!apiKey) {
     console.error('ERROR: GEMINI_KEY_API environment variable is NOT set. Build failed.');
     process.exit(1);
@@ -44,10 +47,10 @@ fs.readdirSync(__dirname).forEach(item => {
 const targetFile = path.join(distDir, 'ayo-env.js');
 try {
     let content = fs.readFileSync(targetFile, 'utf8');
-    // Replace the literal string "GEMINI_KEY_API" with the actual value of the env var
-    const newContent = content.replace(/GEMINI_KEY_API/g, apiKey);
+    // We look for the unique token
+    const newContent = content.replace(/"KEY_HOLDER_XYZ"/g, `"${apiKey}"`);
     fs.writeFileSync(targetFile, newContent, 'utf8');
-    console.log(`SUCCESS: API Key injected into dist/ayo-env.js (Length: ${apiKey.length})`);
+    console.log(`SUCCESS: Injected key into dist/ayo-env.js (Token KEY_HOLDER_XYZ replaced)`);
 } catch (err) {
     console.error('Error injecting key:', err);
     process.exit(1);
