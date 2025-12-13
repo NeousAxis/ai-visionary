@@ -25,22 +25,22 @@ const content = `window.AYO_SETTINGS = {
 `;
 
 try {
-    // 1. Write ayo-settings.js
-    fs.writeFileSync(targetFile, content, 'utf8');
-    console.log('SUCCESS: Generated ayo-settings.js from scratch.');
-
-    // 2. Update index.html with cache-buster
     const indexFile = path.join(__dirname, 'index.html');
     if (fs.existsSync(indexFile)) {
         let indexContent = fs.readFileSync(indexFile, 'utf8');
         const timestamp = new Date().getTime();
 
+        // 1. INJECT API KEY INLINE (Replaces the placeholder script content)
+        // We look for: window.AYO_SETTINGS = { apiKey: "PLACEHOLDER_INLINE" };
+        const keyInjection = `window.AYO_SETTINGS = { apiKey: "${cleanKey}" };`;
+        indexContent = indexContent.replace(/window\.AYO_SETTINGS\s*=\s*{\s*apiKey:\s*"PLACEHOLDER_INLINE"\s*};/, keyInjection);
+
+        // 2. Cache Buster
         // Regex to match v=TIMESTAMP_NOW -OR- v=1234567890 (previous builds)
-        // We use a broader regex: v=[a-zA-Z0-9_]+
         indexContent = indexContent.replace(/v=[a-zA-Z0-9_]+/g, `v=${timestamp}`);
 
         fs.writeFileSync(indexFile, indexContent, 'utf8');
-        console.log(`SUCCESS: Updated index.html with timestamp ${timestamp}`);
+        console.log(`SUCCESS: Injected API Key INLINE and updated timestamp ${timestamp}`);
     } else {
         console.error("ERROR: index.html not found!");
         process.exit(1);
