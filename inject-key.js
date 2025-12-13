@@ -7,7 +7,8 @@ const apiKey = process.env.GEMINI_KEY_API;
 console.log('Starting build-time API key injection...');
 
 if (!apiKey) {
-    console.warn('WARNING: GEMINI_KEY_API environment variable is NOT set. The app will likely fail in production.');
+    console.error('ERROR: GEMINI_KEY_API environment variable is NOT set. Build failed.');
+    process.exit(1);
 } else {
     console.log('GEMINI_KEY_API is present. Injecting into ayo-core.js...');
 }
