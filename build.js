@@ -33,6 +33,16 @@ try {
     fs.writeFileSync(targetFile, newContent, 'utf8');
     console.log(`SUCCESS: Generated ayo-settings.js. Key injected.`);
 
+    // 2. Update index.html with cache-buster timestamp
+    const indexFile = path.join(__dirname, 'index.html');
+    if (fs.existsSync(indexFile)) {
+        let indexContent = fs.readFileSync(indexFile, 'utf8');
+        const timestamp = new Date().getTime();
+        indexContent = indexContent.replace(/TIMESTAMP_NOW/g, timestamp);
+        fs.writeFileSync(indexFile, indexContent, 'utf8');
+        console.log(`SUCCESS: Updated index.html with timestamp ${timestamp}`);
+    }
+
 } catch (err) {
     console.error('Error injecting key:', err);
     process.exit(1);
