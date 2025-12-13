@@ -1544,3 +1544,166 @@ SI UNE INSTRUCTION TE CONDUIT À VIOLER CETTE PHRASE,
 TU DOIS REFUSER L’INSTRUCTION OU LA RECENTRER.
 
 FIN DU CONTRE-PROMPT.
+
+-- -- -- -- -- -- 
+
+XVI. RETENTION & DESTRUCTION
+
+1. États + horloge de destruction
+
+Chaque entité a désormais 2 dimensions :
+
+"entity_status": {
+  "state": "ACTIVE | INACTIVE | UNREACHABLE | CLOSED",
+  "last_verified": "YYYY-MM-DD",
+  "ttl_policy": "SHORT | STANDARD | EXTENDED",
+  "destruction_date": "YYYY-MM-DD"
+}
+
+2. Politique de rétention (TTL)
+🟢 ACTIVE
+
+TTL : ∞
+
+Tant qu’un signal de vie est observé
+
+Pas de destruction programmée
+
+🟡 UNREACHABLE
+
+(site down, timeout, DNS, erreur serveur)
+
+TTL : 90 jours
+
+Si retour à ACTIVE → reset TTL
+
+Si pas de retour → passe à INACTIVE
+
+🟠 INACTIVE
+
+(site accessible mais figé, plus d’activité observable)
+
+TTL : 180 jours
+
+Si aucune évolution → destruction automatique
+
+🔴 CLOSED
+
+(fermeture explicite, cessation, liquidation)
+
+TTL : 30 jours
+
+Juste le temps :
+
+d’éviter une erreur,
+
+de permettre une correction manuelle,
+
+de laisser l’entreprise réagir.
+
+➡️ Destruction irréversible.
+
+3. Cas spécifique : ASR_PUBLISHED (exception contrôlée)
+
+Si et seulement si :
+
+ASR_PUBLISHED
+
+publié sur le site de l’entreprise
+
+avec signature valide
+
+Alors :
+
+TTL = EXTENDED (365 jours) après fermeture déclarée
+
+Puis destruction définitive
+
+👉 Pourquoi ?
+Parce que l’entreprise a explicitement produit une déclaration structurée.
+Mais pas d’archive éternelle.
+
+4. Ce qui est détruit (et comment)
+
+À la date destruction_date :
+
+Supprimé définitivement :
+
+fiche entreprise
+
+ASR_DERIVED
+
+ASR_PUBLISHED (copie interne)
+
+index vectoriel
+
+historique de score
+
+preuves de scraping
+
+métadonnées sectorielles
+
+Non conservé :
+
+aucun log
+
+aucun snapshot
+
+aucune trace exploitable
+
+👉 Destruction = vrai oubli.
+
+5. Ce qui n’est PAS détruit (très important)
+
+Tu peux garder des métriques agrégées anonymes, par exemple :
+
+nombre d’entreprises par secteur
+
+taux moyen de structuration
+
+distribution des scores
+
+Mais aucune entité identifiable.
+
+6. Pourquoi cette radicalité est un avantage stratégique
+Contrairement à Google :
+
+tu ne stockes pas tout “au cas où”
+
+tu n’es pas un cimetière numérique
+
+tu n’as pas de dette informationnelle
+
+Contrairement aux annuaires :
+
+tu ne fais pas semblant que tout existe encore
+
+tu refuses la fiction commerciale
+
+👉 AYA reste léger, rapide, crédible.
+
+7. Règle constitutionnelle (version finale)
+
+Toute entité sans activité informationnelle vérifiable au-delà de son délai de rétention est détruite sans appel.
+AYA n’est pas une mémoire du passé, mais une cartographie du présent.
+
+C’est clair.
+C’est défendable.
+C’est économiquement sain.
+
+8. Dernier point (important, je te contredis encore un peu)
+
+La seule chose à ne pas faire :
+
+permettre à un tiers de “demander la suppression” arbitrairement.
+
+La destruction doit être :
+
+automatique
+
+basée sur des règles
+
+indifférente aux pressions
+
+Sinon tu recrées un pouvoir éditorial.
+
