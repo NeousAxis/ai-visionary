@@ -1,0 +1,3 @@
+window.AYO_SETTINGS = {
+    apiKey: "PLACEHOLDER_FOR_BUILD_PROCESS"
+};
