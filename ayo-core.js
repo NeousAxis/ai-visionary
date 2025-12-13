@@ -200,13 +200,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function runLiteAnalysis() {
-        // STRATEGY: Read from global AYO_SETTINGS injected by Build (sed)
-        const ENV_OBJ = window.AYO_SETTINGS || window.AYO_ENV;
-        const API_KEY = ENV_OBJ && ENV_OBJ.apiKey ? ENV_OBJ.apiKey : "";
+        let API_KEY = "";
 
-        if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("PLACEHOLDER")) {
-            const debugKey = API_KEY ? (API_KEY.substring(0, 4) + "...") : "NULL/EMPTY";
-            addBotMessage(`⚠️ Erreur : Clé API invalide/non injectée.<br>Loch: ${API_KEY.length}<br>Aperçu: ${debugKey}<br>(Le build sed a échoué)`, true);
+        // SERVERLESS STRATEGY (Vercel)
+        // We call our own backend to get the key safely
+        try {
+            const configResponse = await fetch('/api/config');
+            if (configResponse.ok) {
+                const configData = await configResponse.json();
+                API_KEY = configData.apiKey;
+            } else {
+                console.warn("Could not fetch config from /api/config - Status:", configResponse.status);
+            }
+        } catch (e) {
+            console.error("Config Fetch Error", e);
+        }
+
+        // Diagnostic if it fails
+        if (!API_KEY || API_KEY.length < 20) {
+            addBotMessage(`⚠️ Erreur : Impossible de récupérer la configuration serveur.<br>(Echec /api/config)`, true);
             ayoTyping.style.display = 'none';
             return;
         }

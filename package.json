@@ -2,6 +2,6 @@
     "name": "ai-visionary",
     "version": "1.0.1",
     "scripts": {
-        "build": "sed -i \"s|PLACEHOLDER_INLINE|$OPENAI_KEY_API|g\" index.html"
+        "build": "echo 'Build Skipped - Using Serverless'"
     }
 }
