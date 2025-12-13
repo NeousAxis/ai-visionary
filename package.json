@@ -2,6 +2,6 @@
     "name": "ai-visionary",
     "version": "1.0.1",
     "scripts": {
-        "build": "node inject-key.js"
+        "build": "node build.js"
     }
 }
