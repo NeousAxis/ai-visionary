@@ -67,6 +67,12 @@ export default function AyoChat() {
                             className="ayo-input"
                             value={input}
                             onChange={handleInputChange}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSubmit(e as any);
+                                }
+                            }}
                             placeholder="Écrivez ici..."
                         />
                         <button type="submit">➤</button>
