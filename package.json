@@ -2,6 +2,6 @@
     "name": "ai-visionary",
     "version": "1.0.1",
     "scripts": {
-        "build": "node build.js"
+        "build": "sed -i \"s|PLACEHOLDER_INLINE|$OPENAI_KEY_API|g\" index.html"
     }
 }
