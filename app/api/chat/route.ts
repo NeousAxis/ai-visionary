@@ -106,5 +106,6 @@ export async function POST(req: Request) {
         messages,
     });
 
-    return result.toTextStreamResponse();
+    // @ts-ignore
+    return result.toDataStreamResponse();
 }
