@@ -187,9 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function runLiteAnalysis() {
         import("https://esm.run/@google/generative-ai").then(async (module) => {
             const { GoogleGenerativeAI } = module;
-            // The CI/CD pipeline replaces "API_KEY_TOKEN_REPLACE_ME" with the actual key.
-            // If replacement fails, it remains as the placeholder string.
-            const API_KEY = "API_KEY_TOKEN_REPLACE_ME";
+            // NEW STRATEGY: Read from global AYO_ENV injected by separate file
+            const API_KEY = window.AYO_ENV && window.AYO_ENV.apiKey ? window.AYO_ENV.apiKey : "API_KEY_NOT_FOUND_IN_ENV";
 
             if (!API_KEY || API_KEY.length < 20 || API_KEY.includes("REPLACE_ME")) {
                 const debugKey = API_KEY ? (API_KEY.substring(0, 3) + "...") : "NULL/EMPTY";

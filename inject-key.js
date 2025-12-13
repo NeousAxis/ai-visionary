@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const targetFile = path.join(__dirname, 'ayo-core.js');
+const targetFile = path.join(__dirname, 'ayo-env.js');
 const apiKey = process.env.GEMINI_KEY_API;
 
 console.log('Starting build-time API key injection...');
@@ -19,7 +19,7 @@ try {
 
     // Check if placeholder exists
     if (!content.includes('API_KEY_TOKEN_REPLACE_ME')) {
-        console.warn('WARNING: Placeholder "API_KEY_TOKEN_REPLACE_ME" not found in ayo-core.js. Is it already replaced?');
+        console.warn('WARNING: Placeholder "API_KEY_TOKEN_REPLACE_ME" not found in ayo-env.js. Is it already replaced?');
     }
 
     // Replace
@@ -27,7 +27,7 @@ try {
     const newContent = content.replace(/API_KEY_TOKEN_REPLACE_ME/g, apiKey || 'API_KEY_MISSING_IN_BUILD');
 
     fs.writeFileSync(targetFile, newContent, 'utf8');
-    console.log('Successfully injected API key into ayo-core.js');
+    console.log('Successfully injected API key into ayo-env.js');
 
 } catch (err) {
     console.error('Error during API key injection:', err);
