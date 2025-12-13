@@ -105,6 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const userText = ayoInput.value.trim();
             if (!userText) return;
 
+            if (userText.toLowerCase() === 'test' || userText.toLowerCase() === 'demo') {
+                addUserMessage(userText);
+                ayoInput.value = '';
+                chatData = {
+                    name: "Boulangerie Test",
+                    url: "https://boulangerietest.com",
+                    sector: "Alimentation"
+                };
+                addBotMessage("🕵️ <strong>Mode Test Activé</strong>. Données simulées : Boulangerie Test / Alimentation.");
+                addBotMessage("Je lance le diagnostic gratuit...");
+                chatState = 4;
+                await runLiteAnalysis();
+                return;
+            }
+
             addUserMessage(userText);
             ayoInput.value = '';
             processChatStep(userText);
