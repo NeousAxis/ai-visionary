@@ -44,7 +44,7 @@ export default function AyoChat() {
                     <div className="ayo-messages">
                         {/* Intro Message */}
                         <div className="message bot-message">
-                            👋 Bonjour, ici AYO. Initialisation du protocole AIO.<br /><br />
+                            👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.<br /><br />
                             Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
                             Pour cela, répondez à ces 3 questions.<br /><br />
                             <strong>1. Quel est le NOM de votre entreprise ?</strong>
