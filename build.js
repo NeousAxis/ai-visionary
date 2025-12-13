@@ -30,10 +30,15 @@ try {
         let indexContent = fs.readFileSync(indexFile, 'utf8');
         const timestamp = new Date().getTime();
 
-        // 1. INJECT API KEY INLINE (Replaces the placeholder script content)
-        // We look for: window.AYO_SETTINGS = { apiKey: "PLACEHOLDER_INLINE" };
-        const keyInjection = `window.AYO_SETTINGS = { apiKey: "${cleanKey}" };`;
-        indexContent = indexContent.replace(/window\.AYO_SETTINGS\s*=\s*{\s*apiKey:\s*"PLACEHOLDER_INLINE"\s*};/, keyInjection);
+        // 1. INJECT API KEY INLINE (Simple String Replace)
+        // We just replace the value string directly.
+        if (indexContent.includes('PLACEHOLDER_INLINE')) {
+            indexContent = indexContent.replace('PLACEHOLDER_INLINE', cleanKey);
+            console.log('SUCCESS: Replaced PLACEHOLDER_INLINE with API Key.');
+        } else {
+            console.error('ERROR: PLACEHOLDER_INLINE not found in index.html!');
+            // We do NOT exit here to allow debugging, but it's critical.
+        }
 
         // 2. Cache Buster
         // Regex to match v=TIMESTAMP_NOW -OR- v=1234567890 (previous builds)
