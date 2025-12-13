@@ -60,8 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const ayoInput = document.getElementById('ayo-input');
     const ayoTyping = document.getElementById('ayo-typing');
 
-    // States: 0:Welcome, 1:Name, 2:URL, 3:Sector, 4:LiteAnalysis, 5:ResultsChoice, 6:Pricing
-    let chatState = 0;
+    // States: 1:Name, 2:URL, 3:Sector, 4:LiteAnalysis, 5:ResultsChoice, 6:Pricing
+    // State 0 is now skipped/merged into initial load
+    let chatState = 1;
     let chatData = { name: '', url: '', sector: '', score: 0, eligibility: '' }; // eligibility: 'READY', 'POTENTIAL', 'NOT_READY'
 
     // Pricing Links (Placeholders)
@@ -75,8 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ayoToggle) {
         ayoToggle.addEventListener('click', () => {
             ayoWindow.classList.toggle('open');
+            // If opening for the first time
             if (ayoWindow.classList.contains('open') && ayoMessages.children.length === 0) {
-                addBotMessage("Bonjour ! Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Prêt ? (Oui/Non)");
+                addBotMessage("Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Comment se nomme votre entreprise/organisation ?");
+                chatState = 1;
             }
         });
 
@@ -91,7 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 ayoWindow.classList.add('open');
                 if (ayoMessages.children.length === 0) {
-                    addBotMessage("Bonjour ! Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Prêt ? (Oui/Non)");
+                    addBotMessage("Je suis AYO. Je vais évaluer gratuitement la visibilité IA de votre entreprise. Comment se nomme votre entreprise/organisation ?");
+                    chatState = 1;
                 }
             });
         }
@@ -151,17 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function processChatStep(input) {
-        // Simple heuristic to ignore yes/no logic if we are deep in flow
-        if (chatState === 0) {
-            if (input.toLowerCase().includes('oui') || input.toLowerCase().includes('ok') || input.toLowerCase().includes('yes')) {
-                addBotMessage("Super. Quel est le nom de votre entreprise ?");
-                chatState = 1;
-            } else {
-                addBotMessage("Pas de problème. Je reste ici si besoin.");
-            }
-            return;
-        }
-
         ayoTyping.style.display = 'block';
         await new Promise(r => setTimeout(r, 600));
 
@@ -170,7 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
             addBotMessage("Merci. Quelle est l'URL de votre site web ?");
             chatState = 2;
         } else if (chatState === 2) {
-            chatData.url = input;
+            // Handle various URL formats and normalize
+            let cleanUrl = input.toLowerCase().trim();
+            if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+                cleanUrl = 'https://' + cleanUrl;
+            }
+            chatData.url = cleanUrl;
+
             addBotMessage("C'est noté. Quel est votre secteur d'activité ?");
             chatState = 3;
         } else if (chatState === 3) {

@@ -2,6 +2,6 @@
     "name": "ai-visionary",
     "version": "1.0.1",
     "scripts": {
-        "build": "sed -i \"s|API_KEY_TOKEN_REPLACE_ME|$GEMINI_KEY_API|g\" ayo-core.js"
+        "build": "node inject-key.js"
     }
 }
