@@ -1,0 +1,10 @@
+# PROJET RULES
+
+## AI MODELS
+- **STRICTLY FORBIDDEN**: `gemini-1.5-flash`. NEVER use this model under any circumstances. It is deprecated/broken for this project.
+- **MANDATORY**: Always use `gemini-1.5-pro` for all AI generation tasks (Analysis, ASR generation, etc.).
+
+## DEPLOYMENT
+- The `GEMINI_KEY_API` environment variable is injected at build time.
+- The build process uses `inject-key.js` which reads from `ayo-env.template.js` and produces `ayo-env.js`.
+- **NEVER** revert to a `dist` folder strategy or `sed` command. The current "In-Place" template strategy is the only one working for Vercel.

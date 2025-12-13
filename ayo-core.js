@@ -313,7 +313,9 @@ CRITÈRES STATUS :
                 ayoTyping.style.display = 'none';
 
                 if (err.message.includes('400') && err.message.includes('API key')) {
-                    addBotMessage("⚠️ <strong>Accès refusé par Google</strong>.<br>La clé API est bien configurée mais rejetée par Google API. (Erreur 400).<br>Vérifiez :<br>1. La clé est bien pour 'Google AI Studio' (commence par 'AIza...')<br>2. Pas de restrictions d'IP/Referrer trop strictes sur la clé.", true);
+                    const keyLen = API_KEY ? API_KEY.length : 0;
+                    const keyStart = API_KEY ? API_KEY.substring(0, 4) : "NULL";
+                    addBotMessage(`⚠️ <strong>Accès refusé par Google</strong>.<br>La clé API est bien configurée mais rejetée.<br><strong>Diagnostic Clé :</strong><br>- Longueur reçue : ${keyLen} (Doit être ~39)<br>- Début : ${keyStart}...<br><br>Si Longueur = 14, c'est que l'injection a échoué (Placeholder).<br>Si Longueur = 39, la clé est révoquée/incorrecte sur Google AI Studio.`, true);
                 } else {
                     addBotMessage(`Une erreur inattendue est survenue.<br><small>${err.message}</small>`, true);
                 }
