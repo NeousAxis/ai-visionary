@@ -47,7 +47,7 @@ export default function AyoChat() {
                             👋 Bonjour, ici AYO. Initialisation du protocole AIO.<br /><br />
                             Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
                             Pour cela, répondez à ces 3 questions.<br /><br />
-                            <strong>1. Quelle est l'adresse (URL) de votre site web ?</strong>
+                            <strong>1. Quel est le NOM de votre entreprise ?</strong>
                         </div>
 
                         {messages.map((m: any) => (
