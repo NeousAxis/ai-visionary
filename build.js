@@ -10,9 +10,9 @@ if (!apiKey) {
     process.exit(1);
 }
 
-const distDir = path.join(__dirname, 'dist');
-if (!fs.existsSync(distDir)) {
-    fs.mkdirSync(distDir);
+const publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(publicDir)) {
+    fs.mkdirSync(publicDir);
 }
 
 // Helper to Copy Recursive
@@ -33,32 +33,37 @@ function copyRecursiveSync(src, dest) {
     }
 }
 
-// Read Root Directory
-const rootDir = __dirname;
-const items = fs.readdirSync(rootDir);
+const filesToCopy = [
+    'index.html',
+    'style.css',
+    'ayo-core.js',
+    'ayo-settings.js',
+    'AYO_SECTORS_V1.json',
+    'AYO_SINGULAR_RECORD_TEMPLATE.json'
+];
 
-// Ignore List
-const ignoreList = ['.git', '.github', 'node_modules', 'dist', 'api', '.env', '.gitignore', 'package.json', 'package-lock.json', 'vercel.json', 'build.js', 'inject-key.js'];
-
-items.forEach(item => {
-    if (!ignoreList.includes(item)) {
-        const src = path.join(rootDir, item);
-        const dest = path.join(distDir, item);
-        copyRecursiveSync(src, dest);
+filesToCopy.forEach(file => {
+    const srcPath = path.join(__dirname, file);
+    const destPath = path.join(publicDir, file);
+    if (fs.existsSync(srcPath)) {
+        fs.copyFileSync(srcPath, destPath);
     }
 });
 
-// INJECT KEY INTO dist/index.html
-const indexDist = path.join(distDir, 'index.html');
-let content = fs.readFileSync(indexDist, 'utf8');
+// INJECT KEY INTO public/index.html
+const indexPublic = path.join(publicDir, 'index.html');
+let content = fs.readFileSync(indexPublic, 'utf8');
 
 // Replace Placeholder
 if (content.includes('PLACEHOLDER_INLINE')) {
     content = content.replace('PLACEHOLDER_INLINE', apiKey);
-    console.log('SUCCESS: Injected API Key into dist/index.html');
+    console.log('SUCCESS: Injected API Key into public/index.html');
+
+    // DEBUG: Print proof
+    console.log('DEBUG CHECK: File Content Start ->', content.substring(300, 500));
 } else {
     console.error('WARNING: Placeholder not found in index.html');
 }
 
-fs.writeFileSync(indexDist, content, 'utf8');
-console.log('Build Complete: Output in dist/');
+fs.writeFileSync(indexPublic, content, 'utf8');
+console.log('Build Complete: Output in public/');
