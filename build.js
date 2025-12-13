@@ -27,7 +27,8 @@ try {
 
     // We clean the key aggressively (trim + remove potential surrounding quotes copied by mistake)
     const cleanKey = apiKey.trim().replace(/^["']|["']$/g, '');
-    const newContent = content.replace(/"KEY_HOLDER_XYZ"/g, `"${cleanKey}"`);
+    // Regex to match "KEY_HOLDER_XYZ" or 'KEY_HOLDER_XYZ'
+    const newContent = content.replace(/["']KEY_HOLDER_XYZ["']/g, `"${cleanKey}"`);
 
     // Write directly to ayo-settings.js (overwriting the dummy file we committed)
     fs.writeFileSync(targetFile, newContent, 'utf8');
