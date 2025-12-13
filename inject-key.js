@@ -25,10 +25,10 @@ try {
     }
 
     // Replace
-    const newContent = content.replace(/"KEY_HOLDER_XYZ"/g, `"${apiKey}"`);
+    const newContent = content.replace(/"KEY_HOLDER_XYZ"/g, `"${apiKey.trim()}"`);
 
     fs.writeFileSync(targetFile, newContent, 'utf8');
-    console.log(`SUCCESS: Generated ayo-env.js from template. Key length: ${apiKey.length}`);
+    console.log(`SUCCESS: Generated ayo-env.js from template. Key length: ${apiKey.trim().length}`);
 
 } catch (err) {
     console.error('Error injecting key:', err);

@@ -311,7 +311,12 @@ CRITÈRES STATUS :
             } catch (err) {
                 console.error("AYO Analysis Error:", err);
                 ayoTyping.style.display = 'none';
-                addBotMessage(`Une erreur est survenue pendant l'analyse.<br><small style="display:block; word-break:break-word; margin-top:5px;">Détail technique : ${err.message}</small>`);
+
+                if (err.message.includes('400') && err.message.includes('API key')) {
+                    addBotMessage("⚠️ <strong>Accès refusé par Google</strong>.<br>La clé API est bien configurée mais rejetée par Google API. (Erreur 400).<br>Vérifiez :<br>1. La clé est bien pour 'Google AI Studio' (commence par 'AIza...')<br>2. Pas de restrictions d'IP/Referrer trop strictes sur la clé.", true);
+                } else {
+                    addBotMessage(`Une erreur inattendue est survenue.<br><small>${err.message}</small>`, true);
+                }
             }
         });
     }

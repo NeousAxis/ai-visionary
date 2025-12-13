@@ -751,7 +751,9 @@ pre {
         width: 100%;
         text-align: center;
     }
-}/* AYO Chat Widget */
+}
+
+/* AYO Chat Widget */
 .ayo-widget {
     position: fixed;
     bottom: 20px;
@@ -851,6 +853,7 @@ pre {
     font-size: 0.9rem;
     line-height: 1.4;
     animation: fadeIn 0.3s ease;
+    word-break: break-word;
 }
 
 .message.bot {
@@ -912,7 +915,9 @@ pre {
         bottom: 80px;
         right: 0;
     }
-}/* New styles for Readable List in Demo Section */
+}
+
+/* New styles for Readable List in Demo Section */
 .demo-card .subtitle {
     font-size: 0.9rem;
     color: var(--primary-color);
