@@ -21,6 +21,7 @@ export default function AyoChat() {
         handleSubmit(e);
     };
 
+
     // Initial greeting
     const [hasGreeted, setHasGreeted] = useState(false);
     useEffect(() => {
@@ -62,7 +63,7 @@ export default function AyoChat() {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <form className="ayo-input-area" onSubmit={handleSubmit}>
+                    <form className="ayo-input-area" onSubmit={onFormSubmit}>
                         <input
                             className="ayo-input"
                             value={input}
