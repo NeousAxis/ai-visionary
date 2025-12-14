@@ -79,24 +79,8 @@ export default function AyoChat() {
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
-                // Note: The Vercel AI SDK stream format might include protocol headers (0:"text").
-                // For simplicity in this fallback, we accumulate text, but cleaning might be needed properly if using Data Stream Protocol.
-                // However, raw streamText response often is just text if not using data stream mode purely.
-                // Let's assume standard text stream for now or clean basic artifacts.
-
-                // Simple cleaning of Vercel Data Stream Protocol specific prefixes if they appear coarsely
-                // Usually it sends lines like: 0:"The"\n0:" weather"
-                // We'll simplisticly append for now, but really we should parse.
-                // Let's try raw read first. If it looks like garbage, we know why.
-                // Actually, let's just append pure text, assuming the server sends text. 
-                // BUT wait, route.ts uses `result.toDataStreamResponse()`. This DOES use the protocol.
-                // Parsing that manually is annoying.
-
-                // ALTERNATIVE: Use the text directly if it is clean, or use a regex to strip protocol.
-                // Protocol: 0:"content"
-                const cleanChunk = chunk.replace(/0:"/g, '').replace(/"\n/g, '').replace(/^"/, '').replace(/"$/, '');
-
-                botMessageContent += cleanChunk;
+                // With toTextStreamResponse(), we get raw text. No regex needed.
+                botMessageContent += chunk;
 
                 setMessages(prev => prev.map(m =>
                     m.id === botMessageId ? { ...m, content: botMessageContent } : m
@@ -137,8 +121,8 @@ export default function AyoChat() {
                             key={m.id}
                             className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
                         >
-                            {/* Heuristic to display content cleanly even if raw protocol leaks slightly */}
-                            {m.content.replace(/^0:"/, '').replace(/"$/, '')}
+                            {/* Simple text rendering */}
+                            {m.content}
                         </div>
                     ))}
 

@@ -139,8 +139,11 @@ export async function POST(req: Request) {
             messages,
         });
 
-        // @ts-ignore
-        return result.toDataStreamResponse();
+        // Debug: Log what we got back
+        console.log("Stream Result Keys:", Object.keys(result));
+
+        // Switch to simpler Text Stream Response to avoid protocol issues
+        return result.toTextStreamResponse();
 
     } catch (error: any) {
         console.error("Detailed API Error:", error);
