@@ -4,8 +4,14 @@ import { useChat } from '@ai-sdk/react';
 import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
-    // Cast to any to avoid temporary type mismatches with the latest SDK
-    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat() as any;
+    // Advanced: manual control to ensure reliability
+    const { messages, input, setInput, append, isLoading, error } = useChat({
+        api: '/api/chat',
+        onError: (err) => {
+            console.error("AYO Chat Error:", err);
+        }
+    }) as any;
+
     const [isOpen, setIsOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -15,10 +21,30 @@ export default function AyoChat() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Secure submit handler to prevent page reload
-    const onFormSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        handleSubmit(e);
+    // MANUAL SEND FUNCTION - Bypasses form event quirks
+    const handleSend = async () => {
+        if (!input || !input.trim()) return;
+        if (isLoading) return;
+
+        const currentInput = input;
+        setInput(''); // Clear immediately for UX
+
+        try {
+            await append({
+                role: 'user',
+                content: currentInput
+            });
+        } catch (e) {
+            console.error("Failed to send:", e);
+            setInput(currentInput); // Restore on error
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSend();
+        }
     };
 
 
@@ -63,28 +89,23 @@ export default function AyoChat() {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <form className="ayo-input-area" onSubmit={onFormSubmit}>
+                    <div className="ayo-input-area">
                         <input
                             className="ayo-input"
                             value={input}
-                            onChange={handleInputChange}
-                            placeholder="Écrivez ici..."
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder={isLoading ? "Veuillez patienter..." : "Écrivez ici..."}
                             autoFocus
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    // Trigger the submit button click for consistency
-                                    const form = e.currentTarget.form;
-                                    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-                                    submitBtn?.click();
-                                }
-                            }}
+                            onKeyDown={handleKeyDown}
+                            disabled={isLoading}
                         />
-                        <button type="submit">➤</button>
-                    </form>
+                        <button onClick={handleSend} disabled={isLoading} style={{ opacity: isLoading ? 0.5 : 1 }}>
+                            {isLoading ? '...' : '➤'}
+                        </button>
+                    </div>
                     {error && (
                         <div style={{ color: '#ef4444', padding: '10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.5)', marginTop: '5px', borderRadius: '4px' }}>
-                            ⚠️ Une erreur est survenue. Vérifiez la clé API ou la connexion.
+                            ⚠️ Erreur: {error.message || "Problème de connexion"}
                         </div>
                     )}
                 </div>
