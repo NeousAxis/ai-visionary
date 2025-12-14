@@ -70,6 +70,12 @@ export default function AyoChat() {
                             onChange={handleInputChange}
                             placeholder="Écrivez ici..."
                             autoFocus
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSubmit(e);
+                                }
+                            }}
                         />
                         <button type="submit">➤</button>
                     </form>
