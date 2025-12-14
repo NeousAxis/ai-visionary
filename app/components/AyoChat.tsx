@@ -53,7 +53,14 @@ export default function AyoChat() {
             });
 
             if (!response.ok) {
-                throw new Error(`Erreur API: ${response.status}`);
+                let errorDetails = `Erreur ${response.status}`;
+                try {
+                    const errorJson = await response.json();
+                    if (errorJson.error) errorDetails = errorJson.error;
+                } catch (e) {
+                    // Ignore parsing error, stick to status code
+                }
+                throw new Error(errorDetails);
             }
 
             if (!response.body) throw new Error("Pas de réponse du serveur");

@@ -92,14 +92,32 @@ ${contextSectors}
 `;
 
 export async function POST(req: Request) {
-    const { messages } = await req.json();
+    try {
+        const { messages } = await req.json();
 
-    const result = await streamText({
-        model: openai('gpt-4o-mini'),
-        system: SYSTEM_PROMPT,
-        messages,
-    });
+        // 1. Debug: Check for API Key
+        if (!process.env.OPENAI_API_KEY) {
+            console.error("CRITICAL: OPENAI_API_KEY is missing in environment variables.");
+            return new Response(JSON.stringify({ error: "Configuration Error: Missing OPENAI_API_KEY on server." }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
 
-    // @ts-ignore
-    return result.toDataStreamResponse();
+        const result = await streamText({
+            model: openai('gpt-4o-mini'),
+            system: SYSTEM_PROMPT,
+            messages,
+        });
+
+        // @ts-ignore
+        return result.toDataStreamResponse();
+
+    } catch (error: any) {
+        console.error("Detailed API Error:", error);
+        return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 }
