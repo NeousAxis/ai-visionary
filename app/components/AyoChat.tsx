@@ -4,119 +4,148 @@ import { useChat } from '@ai-sdk/react';
 import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
-    // Advanced: manual control to ensure reliability
-    const { messages, input, setInput, append, isLoading, error } = useChat({
-        api: '/api/chat',
-        onError: (err) => {
-            console.error("AYO Chat Error:", err);
-        }
-    }) as any;
+    // Standard Vercel AI SDK implementation
+    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat();
 
+    // UI State
     const [isOpen, setIsOpen] = useState(false);
+    const [hasGreeted, setHasGreeted] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const toggleChat = () => setIsOpen(!isOpen);
+    // Auto-scroll to bottom of chat
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+        scrollToBottom();
+    }, [messages, isLoading]);
 
-    // MANUAL SEND FUNCTION - Bypasses form event quirks
-    const handleSend = async () => {
-        if (!input || !input.trim()) return;
-        if (isLoading) return;
-
-        const currentInput = input;
-        setInput(''); // Clear immediately for UX
-
-        try {
-            await append({
-                role: 'user',
-                content: currentInput
-            });
-        } catch (e) {
-            console.error("Failed to send:", e);
-            setInput(currentInput); // Restore on error
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSend();
-        }
-    };
-
-
-    // Initial greeting
-    const [hasGreeted, setHasGreeted] = useState(false);
+    // Initial greeting logic
     useEffect(() => {
         if (isOpen && !hasGreeted && messages.length === 0) {
             setHasGreeted(true);
         }
     }, [isOpen, hasGreeted, messages.length]);
 
-
     return (
-        <>
-            <div id="ayo-widget" className={`ayo-widget ${isOpen ? 'open' : ''}`}>
+        <div id="ayo-widget" className={`ayo-widget ${isOpen ? 'open' : ''}`}>
 
-                {/* Chat Window */}
+            {/* Main Chat Interface */}
+            {isOpen && (
                 <div className={`ayo-chat-window ${isOpen ? 'open' : ''}`}>
+
+                    {/* Header */}
                     <div className="ayo-header">
                         <h4><span className="status-dot"></span> AYO Bot</h4>
-                        <button onClick={toggleChat} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>✕</button>
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            className="close-btn"
+                            style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2rem' }}
+                        >
+                            ✕
+                        </button>
                     </div>
 
+                    {/* Messages Area */}
                     <div className="ayo-messages">
-                        {/* Intro Message */}
-                        <div className="message bot-message">
+                        {/* Static Welcome Message */}
+                        <div className="message bot-message" style={{ background: 'rgba(255, 255, 255, 0.1)', alignSelf: 'flex-start', borderBottomLeftRadius: '2px' }}>
                             👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.<br /><br />
                             Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
                             Pour cela, répondez à ces 3 questions.<br /><br />
                             <strong>1. Quel est le NOM de votre entreprise ?</strong>
                         </div>
 
-                        {messages.map((m: any) => (
-                            <div key={m.id} className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}>
-                                {m.content}
+                        {/* Dynamic Messages */}
+                        {messages.map((m) => (
+                            <div
+                                key={m.id}
+                                className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
+                                style={m.role === 'user' ?
+                                    { background: 'var(--primary-color)', color: 'white', alignSelf: 'flex-end', borderBottomRightRadius: '2px' } :
+                                    { background: 'rgba(255, 255, 255, 0.1)', alignSelf: 'flex-start', borderBottomLeftRadius: '2px' }
+                                }
+                            >
+                                <span dangerouslySetInnerHTML={{ __html: m.content.replace(/\n/g, '<br/>') }} />
                             </div>
                         ))}
 
+                        {/* Loading Indicator */}
                         {isLoading && (
-                            <div className="typing-indicator" style={{ display: 'block' }}>AYO réfléchit...</div>
+                            <div className="typing-indicator" style={{ display: 'block', padding: '10px', fontSize: '0.8rem', color: '#a1a1aa' }}>
+                                AYO réfléchit...
+                            </div>
                         )}
+
+                        {/* Error Display */}
+                        {error && (
+                            <div className="error-message" style={{ color: '#ef4444', padding: '10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', margin: '5px 0' }}>
+                                ⚠️ Erreur: Impossible de joindre AYO. (Vérifiez la clé API)
+                            </div>
+                        )}
+
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <div className="ayo-input-area">
+                    {/* Input Area - Standard Form */}
+                    <form className="ayo-input-area" onSubmit={handleSubmit} style={{ padding: '15px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '10px' }}>
                         <input
                             className="ayo-input"
                             value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder={isLoading ? "Veuillez patienter..." : "Écrivez ici..."}
-                            autoFocus
-                            onKeyDown={handleKeyDown}
+                            onChange={handleInputChange}
+                            placeholder="Écrivez ici..."
                             disabled={isLoading}
+                            autoFocus
+                            style={{ flex: 1, padding: '10px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white' }}
                         />
-                        <button onClick={handleSend} disabled={isLoading} style={{ opacity: isLoading ? 0.5 : 1 }}>
-                            {isLoading ? '...' : '➤'}
+                        <button
+                            type="submit"
+                            disabled={isLoading || !input.trim()}
+                            style={{
+                                background: 'var(--primary-color)',
+                                border: 'none',
+                                width: '35px',
+                                height: '35px',
+                                borderRadius: '50%',
+                                color: 'white',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                opacity: (isLoading || !input.trim()) ? 0.5 : 1
+                            }}
+                        >
+                            ➤
                         </button>
-                    </div>
-                    {error && (
-                        <div style={{ color: '#ef4444', padding: '10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.5)', marginTop: '5px', borderRadius: '4px' }}>
-                            ⚠️ Erreur: {error.message || "Problème de connexion"}
-                        </div>
-                    )}
+                    </form>
                 </div>
+            )}
 
-                {/* Toggle Button */}
-                <button id="ayo-toggle" className="ayo-toggle" onClick={toggleChat} style={{ display: isOpen ? 'none' : 'flex' }}>
+            {/* Toggle Trigger Button */}
+            {!isOpen && (
+                <button
+                    id="ayo-toggle"
+                    className="ayo-toggle"
+                    onClick={() => setIsOpen(true)}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        background: 'var(--primary-color)',
+                        border: 'none',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(139, 92, 246, 0.4)'
+                    }}
+                >
                     <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
                         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
                     </svg>
                 </button>
-            </div>
-        </>
+            )}
+        </div>
     );
 }
