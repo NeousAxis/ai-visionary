@@ -937,6 +937,9 @@ pre {
     justify-content: center;
     cursor: pointer;
     color: white;
+    pointer-events: auto;
+    z-index: 10000;
+    position: relative;
 }
 
 @media (max-width: 480px) {

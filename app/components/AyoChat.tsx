@@ -113,6 +113,7 @@ export default function AyoChat() {
                         autoFocus
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
+                                console.log('[AYO Debug] Enter Key Pressed');
                                 e.preventDefault();
                                 handleSend();
                             }
