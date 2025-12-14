@@ -111,24 +111,20 @@ export async function POST(req: Request) {
         if (process.env.OPENAI_API_KEY) {
             console.log("Using Provider: OpenAI");
             modelToUse = openai('gpt-4o-mini');
-        }
-        // Fallback to Google Gemini
-        else {
-            const googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+        } else {
+            let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
             if (googleKey) {
-                console.log("Using Provider: Google Gemini (Explicit Key)");
-                // Create a custom instance with the explicit key
-                const google = createGoogleGenerativeAI({
-                    apiKey: googleKey
-                });
+                // Sanitize key (remove spaces)
+                googleKey = googleKey.trim();
+
+                // Debug Log (Masked)
+                console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}... (Length: ${googleKey.length})`);
+
+                const google = createGoogleGenerativeAI({ apiKey: googleKey });
                 modelToUse = google('models/gemini-1.5-flash');
             } else {
-                console.error("CRITICAL: No API Key found.");
-                return new Response(JSON.stringify({ error: "Configuration Error: No valid API Key (OpenAI or Gemini)." }), {
-                    status: 500,
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                throw new Error("No API Key found");
             }
         }
 
