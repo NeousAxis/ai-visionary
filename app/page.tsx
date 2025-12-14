@@ -1,4 +1,4 @@
-import AyoChat from './components/AyoChat';
+
 
 export default function Home() {
   return (
@@ -264,9 +264,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* THE CHATBOT WIDGET */}
-      <AyoChat />
 
     </main>
   );
