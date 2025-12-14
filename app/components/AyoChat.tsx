@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
     // Standard Vercel AI SDK implementation
-    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat();
+    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat() as any;
 
     // UI State
     const [isOpen, setIsOpen] = useState(false);
