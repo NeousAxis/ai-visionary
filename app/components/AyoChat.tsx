@@ -73,7 +73,7 @@ export default function AyoChat() {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     e.preventDefault();
-                                    handleSubmit(e);
+                                    e.currentTarget.form?.requestSubmit();
                                 }
                             }}
                         />
