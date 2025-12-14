@@ -122,8 +122,8 @@ export async function POST(req: Request) {
                 console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}... (Length: ${googleKey.length})`);
 
                 const google = createGoogleGenerativeAI({ apiKey: googleKey });
-                // Trying the specific versioned name often required in v1beta
-                modelToUse = google('models/gemini-1.5-pro-latest');
+                // Trying without 'models/' prefix which can sometimes cause issues
+                modelToUse = google('gemini-1.5-flash');
             } else {
                 throw new Error("No API Key found");
             }
