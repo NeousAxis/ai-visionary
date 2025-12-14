@@ -58,7 +58,7 @@ export default function AyoChat() {
                         </div>
 
                         {/* Dynamic Messages */}
-                        {messages.map((m) => (
+                        {Array.isArray(messages) && messages.map((m: any) => (
                             <div
                                 key={m.id}
                                 className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
@@ -67,7 +67,7 @@ export default function AyoChat() {
                                     { background: 'rgba(255, 255, 255, 0.1)', alignSelf: 'flex-start', borderBottomLeftRadius: '2px' }
                                 }
                             >
-                                <span dangerouslySetInnerHTML={{ __html: m.content.replace(/\n/g, '<br/>') }} />
+                                {m.content}
                             </div>
                         ))}
 
@@ -92,7 +92,7 @@ export default function AyoChat() {
                     <form className="ayo-input-area" onSubmit={handleSubmit} style={{ padding: '15px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '10px' }}>
                         <input
                             className="ayo-input"
-                            value={input}
+                            value={input || ''}
                             onChange={handleInputChange}
                             placeholder="Écrivez ici..."
                             disabled={isLoading}
