@@ -5,12 +5,14 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
     // 1. Standard Vercel AI SDK hook
-    const { messages, append, isLoading, error } = useChat();
+    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+        api: '/api/chat',
+        onError: (err) => console.error("Chat Error:", err)
+    });
 
     // 2. UI State
     const [isOpen, setIsOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
-    const [localInput, setLocalInput] = useState(''); // Local state for input buffer
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // 3. Helper to scroll to bottom
@@ -29,23 +31,7 @@ export default function AyoChat() {
         }
     }, [isOpen, hasGreeted, messages.length]);
 
-    // 5. Secure Send Handler
-    const handleSend = async () => {
-        if (!localInput.trim() || isLoading) return;
-
-        const messageToSend = localInput;
-        setLocalInput(''); // Clear immediately for UX
-
-        try {
-            await append({
-                role: 'user',
-                content: messageToSend
-            });
-        } catch (err) {
-            console.error("Failed to send message:", err);
-            setLocalInput(messageToSend); // Restore if failed
-        }
-    };
+    // 5. Secure Send Handler (Removed, using handleSubmit from useChat)
 
     return (
         <div id="ayo-widget" className={`ayo-widget ${isOpen ? 'open' : ''}`}>
@@ -103,29 +89,19 @@ export default function AyoChat() {
                 </div>
 
                 {/* Input Area */}
-                <div className="ayo-input-area" style={{ display: 'flex', gap: '10px' }}>
+                <form className="ayo-input-area" onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px' }}>
                     <input
                         className="ayo-input"
-                        value={localInput}
-                        onChange={(e) => setLocalInput(e.target.value)}
+                        value={input}
+                        onChange={handleInputChange}
                         placeholder="Écrivez ici..."
                         disabled={isLoading}
                         autoFocus
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                console.log('[AYO Debug] Enter Key Pressed');
-                                e.preventDefault();
-                                handleSend();
-                            }
-                        }}
                     />
-                    <button
-                        onClick={handleSend}
-                        disabled={isLoading || !localInput.trim()}
-                    >
+                    <button type="submit" disabled={isLoading || !input?.trim()}>
                         ➤
                     </button>
-                </div>
+                </form>
             </div>
 
             {/* Toggle Button (Floating Action Button) */}
