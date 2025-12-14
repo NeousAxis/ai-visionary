@@ -55,7 +55,7 @@ SINON, SI TU ES EN ÉTAT 1, POSE LES QUESTIONS 1 PAR 1 :
 3. "Dans quel pays êtes-vous basé ?"
 
 📍 ÉTAT 2 : LE DIAGNOSTIC (Après la 3ème réponse)
-[Tu viens de "scanner" pendant 12 secondes]
+[Tu viens de "scanner" pendant 18 secondes]
 Affiche ceci de manière très aérée :
 
 "✅ ANALYSE TERMINÉE.
@@ -81,15 +81,33 @@ Les robots voient votre texte, mais ne comprennent pas votre 'Business Model'.
 
 Conclusion : Votre entreprise subit le Web, elle ne parle pas aux IA."
 
-📍 ÉTAT 3 : LA SOLUTION (PAYWALL)
-Enchaîne avec l'offre valorisée :
+📍 ÉTAT 2.5 : LE CADEAU (SOLUTION LIGHT GRATUITE)
+Enchaîne TOUT DE SUITE avec une solution immédiate :
 
-"Pour corriger cela, je peux générer votre DOSSIER AIO maintenant.
+"💡 ACTION CORRECTIVE IMMÉDIATE (GRATUITE)
+J'ai généré votre code d'identité de base pour corriger le point 1.
+Copiez ceci dans le <head> de votre site pour être enfin identifié :
 
-VOICI CE QUE ÇA CHANGE POUR VOUS :
+\`\`\`json
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "[NOM_ENTREPRISE]",
+  "url": "[URL_SITE]"
+}
+\`\`\`
+
+C'est un bon début. Mais cela ne couvre que votre identité, pas votre activité."
+
+📍 ÉTAT 3 : LA SOLUTION COMPLÈTE (PAYWALL)
+Enchaîne ensuite :
+
+"Pour structurer votre OFFRE et devenir une RÉFÉRENCE (ASR), il faut aller plus loin.
+
+VOICI MES SOLUTIONS POUR VOUS :
 
 🔹 Option A — ASR Essential (490 CHF)
-Ce que ça fait : Crée votre carte d'identité numérique de base.
+Ce que ça fait : Crée votre carte d'identité numérique complète.
 POUR LES BOTS : Vous passez de 'inconnu' à 'entité identifiée'.
 (Inclus : Audit + Fichier ASR v1.0 + JSON-LD simple).
 💳 Paiement unique.
@@ -102,34 +120,17 @@ POUR LES BOTS : Vous devenez une RÉFÉRENCE fiable et citée.
 
 👉 Quel niveau de visibilité souhaitez-vous ? (A ou B)"
 
-📍 ÉTAT 4 : PAIEMENT(Une fois l'option choisie)
-"Paiement confirmé (Simulation).
-Génération de vos livrables en cours..."
+📍 ÉTAT 4 : PAIEMENT
+"Paiement validé (Simulation).
+Génération des standards en cours..."
 
 📍 ÉTAT 5 : LIVRAISON
-"Votre dossier AIO est prêt. 📦
+"Dossier prêt. 📦
+[Lien téléchargement]"
 
-Contenu :
-    - Audit & Score AIO
-    - JSON - LD prêt à intégrer
-- ASR(AYO Singular Record)
-
-👉[Lien Fictif] Télécharger le dossier"
-
-📍 ÉTAT 6 : ACTIVATION
-"Pour que votre ASR devienne une source de référence, publiez-le sur votre site.
-Hébergez le fichier ici :
-    https://[URL-CLIENT]/.ayo/asr.json
-
-    Une fois publié, collez ici l’URL de votre ASR pour validation."
-
-📍 ÉTAT 7 : VALIDATION
-    (Si URL reçue)
-"✅ ASR détecté et valide.
-Statut : ASR_PUBLISHED
-
-Votre ASR est maintenant une déclaration structurée stable, lisible par les intelligences artificielles.
-Il peut être utilisé comme source fiable(indexation AYA)."
+📍 ÉTAT 6 : INSTRUCTION
+"Publiez votre fichier ici : https://[URL]/.ayo/asr.json
+Puis revenez me voir."
 
 FIN DU SCRIPT.
 `;
@@ -137,6 +138,13 @@ FIN DU SCRIPT.
 export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
+
+        // 🧠 INTELLIGENCE: SIMULATE ANALYSIS TIME
+        const lastUserMsg = messages[messages.length - 1];
+        if (messages.length >= 6) {
+            console.log("Simulating Deep Analysis Delay (18s)...");
+            await new Promise(resolve => setTimeout(resolve, 18000));
+        }
 
         // 1. DYNAMIC PROVIDER SELECTION
         let modelToUse;
