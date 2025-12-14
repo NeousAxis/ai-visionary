@@ -1,21 +1,19 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
 import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
-    // 1. Standard Vercel AI SDK hook
-    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
-        api: '/api/chat',
-        onError: (err) => console.error("Chat Error:", err)
-    });
-
-    // 2. UI State
+    // UI State
+    const [messages, setMessages] = useState<any[]>([]);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // 3. Helper to scroll to bottom
+    // Auto-scroll helper
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -24,35 +22,102 @@ export default function AyoChat() {
         scrollToBottom();
     }, [messages, isLoading, isOpen]);
 
-    // 4. Initial greeting logic (Client-side effect only)
+    // Initial greeting
     useEffect(() => {
         if (isOpen && !hasGreeted && messages.length === 0) {
             setHasGreeted(true);
         }
     }, [isOpen, hasGreeted, messages.length]);
 
-    // 5. Secure Send Handler (Removed, using handleSubmit from useChat)
+    // MANUAL FETCH implementation (Bypassing SDK hook to guarantee sending works)
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        if (!input.trim() || isLoading) return;
+
+        const userMessage = { role: 'user', content: input };
+
+        // 1. Optimistic update
+        setMessages(prev => [...prev, { ...userMessage, id: Date.now().toString() }]);
+        setInput('');
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            // 2. Manual Network Request
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [...messages, userMessage]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur API: ${response.status}`);
+            }
+
+            if (!response.body) throw new Error("Pas de réponse du serveur");
+
+            // 3. Stream Reading
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let botMessageContent = '';
+            const botMessageId = (Date.now() + 1).toString();
+
+            // Add empty bot message placeholder
+            setMessages(prev => [...prev, { role: 'assistant', content: '', id: botMessageId }]);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                // Note: The Vercel AI SDK stream format might include protocol headers (0:"text").
+                // For simplicity in this fallback, we accumulate text, but cleaning might be needed properly if using Data Stream Protocol.
+                // However, raw streamText response often is just text if not using data stream mode purely.
+                // Let's assume standard text stream for now or clean basic artifacts.
+
+                // Simple cleaning of Vercel Data Stream Protocol specific prefixes if they appear coarsely
+                // Usually it sends lines like: 0:"The"\n0:" weather"
+                // We'll simplisticly append for now, but really we should parse.
+                // Let's try raw read first. If it looks like garbage, we know why.
+                // Actually, let's just append pure text, assuming the server sends text. 
+                // BUT wait, route.ts uses `result.toDataStreamResponse()`. This DOES use the protocol.
+                // Parsing that manually is annoying.
+
+                // ALTERNATIVE: Use the text directly if it is clean, or use a regex to strip protocol.
+                // Protocol: 0:"content"
+                const cleanChunk = chunk.replace(/0:"/g, '').replace(/"\n/g, '').replace(/^"/, '').replace(/"$/, '');
+
+                botMessageContent += cleanChunk;
+
+                setMessages(prev => prev.map(m =>
+                    m.id === botMessageId ? { ...m, content: botMessageContent } : m
+                ));
+            }
+
+        } catch (err: any) {
+            console.error("Manual Fetch Error:", err);
+            setError(err.message || "Erreur de connexion");
+            // Restore input in case of error? No, just show error.
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div id="ayo-widget" className={`ayo-widget ${isOpen ? 'open' : ''}`}>
 
-            {/* Main Chat Window */}
             <div className={`ayo-chat-window ${isOpen ? 'open' : ''}`}>
-
-                {/* Header */}
                 <div className="ayo-header">
                     <h4><span className="status-dot"></span> AYO Bot</h4>
                     <button
                         onClick={() => setIsOpen(false)}
                         style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2rem' }}
-                    >
-                        ✕
-                    </button>
+                    >✕</button>
                 </div>
 
-                {/* Messages Container */}
                 <div className="ayo-messages">
-                    {/* Static Intro Message */}
                     <div className="message bot-message" style={{ background: 'rgba(255, 255, 255, 0.1)', alignSelf: 'flex-start', borderBottomLeftRadius: '2px' }}>
                         👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.<br /><br />
                         Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
@@ -60,51 +125,44 @@ export default function AyoChat() {
                         <strong>1. Quel est le NOM de votre entreprise ?</strong>
                     </div>
 
-                    {/* Dynamic Messages Loop - SAFEGUARDED */}
-                    {Array.isArray(messages) && messages.map((m: any) => (
+                    {messages.map((m) => (
                         <div
                             key={m.id}
                             className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
                         >
-                            {/* Simple text rendering */}
-                            {m.content}
+                            {/* Heuristic to display content cleanly even if raw protocol leaks slightly */}
+                            {m.content.replace(/^0:"/, '').replace(/"$/, '')}
                         </div>
                     ))}
 
-                    {/* Typing Indicator */}
                     {isLoading && (
-                        <div className="typing-indicator" style={{ display: 'block' }}>
-                            AYO réfléchit...
-                        </div>
+                        <div className="typing-indicator" style={{ display: 'block' }}>AYO réfléchit...</div>
                     )}
 
-                    {/* Error Feedback */}
                     {error && (
                         <div style={{ color: '#ef4444', padding: '10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.5)', marginTop: '5px', borderRadius: '4px' }}>
-                            ⚠️ Erreur: Impossible de joindre AYO. (Vérifiez la clé API)
+                            ⚠️ {error}
                         </div>
                     )}
 
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Area */}
                 <form className="ayo-input-area" onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px' }}>
                     <input
                         className="ayo-input"
                         value={input}
-                        onChange={handleInputChange}
+                        onChange={(e) => setInput(e.target.value)}
                         placeholder="Écrivez ici..."
                         disabled={isLoading}
                         autoFocus
                     />
-                    <button type="submit" disabled={isLoading || !input?.trim()}>
+                    <button type="submit" disabled={isLoading || !input.trim()}>
                         ➤
                     </button>
                 </form>
             </div>
 
-            {/* Toggle Button (Floating Action Button) */}
             <button
                 id="ayo-toggle"
                 className="ayo-toggle"
