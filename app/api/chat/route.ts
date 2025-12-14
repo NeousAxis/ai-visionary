@@ -1,4 +1,5 @@
 import { openai } from '@ai-sdk/openai';
+import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import fs from 'fs';
 import path from 'path';
@@ -95,17 +96,45 @@ export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
 
-        // 1. Debug: Check for API Key
-        if (!process.env.OPENAI_API_KEY) {
-            console.error("CRITICAL: OPENAI_API_KEY is missing in environment variables.");
-            return new Response(JSON.stringify({ error: "Configuration Error: Missing OPENAI_API_KEY on server." }), {
+        // 1. DYNAMIC PROVIDER SELECTION
+        let modelToUse;
+
+        // Priority to OpenAI if key exists
+        if (process.env.OPENAI_API_KEY) {
+            console.log("Using Provider: OpenAI");
+            modelToUse = openai('gpt-4o-mini');
+        }
+        // Fallback to Google Gemini if key exists
+        else if (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+            console.log("Using Provider: Google Gemini");
+            // Map GEMINI_API_KEY to the SDK's expected GOOGLE_GENERATIVE_AI_API_KEY if needed manually,
+            // but usually the SDK reads GOOGLE_GENERATIVE_AI_API_KEY.
+            // If the user set GEMINI_API_KEY, we pass it explicitly via headers or process env override?
+            // Safer to use the 'apiKey' option in the provider if possible, but the Vercel helper is clean.
+            // We will trust the environment or explicitly check.
+
+            // Note: The Vercel Google provider looks for GOOGLE_GENERATIVE_AI_API_KEY by default.
+            // If the user named it GEMINI_API_KEY, we might need to manually pass it.
+            const googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
+            // Re-instantiate google provider with explicit key if needed
+            // Actually simplest is just to set the env var runtime if missing
+            if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY && process.env.GEMINI_API_KEY) {
+                process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.GEMINI_API_KEY;
+            }
+
+            modelToUse = google('models/gemini-1.5-flash');
+        }
+        else {
+            console.error("CRITICAL: No API Key found (OPENAI_API_KEY or GEMINI_API_KEY).");
+            return new Response(JSON.stringify({ error: "Configuration Error: Missing API KEY (OpenAI or Gemini) on server." }), {
                 status: 500,
                 headers: { 'Content-Type': 'application/json' }
             });
         }
 
         const result = await streamText({
-            model: openai('gpt-4o-mini'),
+            model: modelToUse,
             system: SYSTEM_PROMPT,
             messages,
         });
