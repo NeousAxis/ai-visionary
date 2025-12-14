@@ -79,7 +79,7 @@ Enchaîne TOUT DE SUITE :
 
 "💡 ACTION CORRECTIVE IMMÉDIATE (GRATUITE)
 Je peux corriger votre Bloc Identité dès maintenant.
-Je vais générer votre fichier ASR 'Light' et un guide d'installation ultra-simple (pour débutants).
+Je vais générer votre fichier ASR 'Light' et un Guide d'installation facile.
 
 👉 Entrez votre email pour recevoir ce kit de réparation :"
 
