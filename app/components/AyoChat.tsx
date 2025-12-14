@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
     // Cast to any to avoid temporary type mismatches with the latest SDK
-    const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat() as any;
+    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat() as any;
     const [isOpen, setIsOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -73,12 +73,20 @@ export default function AyoChat() {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     e.preventDefault();
-                                    e.currentTarget.form?.requestSubmit();
+                                    // Trigger the submit button click for consistency
+                                    const form = e.currentTarget.form;
+                                    const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+                                    submitBtn?.click();
                                 }
                             }}
                         />
                         <button type="submit">➤</button>
                     </form>
+                    {error && (
+                        <div style={{ color: '#ef4444', padding: '10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.5)', marginTop: '5px', borderRadius: '4px' }}>
+                            ⚠️ Une erreur est survenue. Vérifiez la clé API ou la connexion.
+                        </div>
+                    )}
                 </div>
 
                 {/* Toggle Button */}
