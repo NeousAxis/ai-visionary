@@ -921,6 +921,8 @@ pre {
     padding: 10px 15px;
     color: white;
     outline: none;
+    pointer-events: auto;
+    z-index: 10000;
 }
 
 .ayo-input-area button {
