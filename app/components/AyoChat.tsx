@@ -5,12 +5,12 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function AyoChat() {
     // 1. Standard Vercel AI SDK hook
-    // Cast to 'any' to avoid temporary type mismatches that caused build errors previously
-    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat() as any;
+    const { messages, append, isLoading, error } = useChat() as any;
 
     // 2. UI State
     const [isOpen, setIsOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
+    const [localInput, setLocalInput] = useState(''); // Local state for input buffer
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // 3. Helper to scroll to bottom
@@ -29,10 +29,22 @@ export default function AyoChat() {
         }
     }, [isOpen, hasGreeted, messages.length]);
 
-    // 5. Secure Form Submit Handler
-    const onFormSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        handleSubmit(e);
+    // 5. Secure Send Handler
+    const handleSend = async () => {
+        if (!localInput.trim() || isLoading) return;
+
+        const messageToSend = localInput;
+        setLocalInput(''); // Clear immediately for UX
+
+        try {
+            await append({
+                role: 'user',
+                content: messageToSend
+            });
+        } catch (err) {
+            console.error("Failed to send message:", err);
+            setLocalInput(messageToSend); // Restore if failed
+        }
     };
 
     return (
@@ -68,7 +80,7 @@ export default function AyoChat() {
                             key={m.id}
                             className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
                         >
-                            {/* Simple text rendering first to prevent hydration crashes */}
+                            {/* Simple text rendering */}
                             {m.content}
                         </div>
                     ))}
@@ -91,29 +103,28 @@ export default function AyoChat() {
                 </div>
 
                 {/* Input Area */}
-                <form className="ayo-input-area" onSubmit={onFormSubmit}>
+                <div className="ayo-input-area" style={{ display: 'flex', gap: '10px' }}>
                     <input
                         className="ayo-input"
-                        value={input || ''}
-                        onChange={handleInputChange}
+                        value={localInput}
+                        onChange={(e) => setLocalInput(e.target.value)}
                         placeholder="Écrivez ici..."
                         disabled={isLoading}
                         autoFocus
                         onKeyDown={(e) => {
-                            // Explicit Enter key support
                             if (e.key === 'Enter') {
                                 e.preventDefault();
-                                // Trigger the submit button click for maximum compatibility
-                                const form = e.currentTarget.form;
-                                const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-                                submitBtn?.click();
+                                handleSend();
                             }
                         }}
                     />
-                    <button type="submit" disabled={isLoading || !input?.trim()}>
+                    <button
+                        onClick={handleSend}
+                        disabled={isLoading || !localInput.trim()}
+                    >
                         ➤
                     </button>
-                </form>
+                </div>
             </div>
 
             {/* Toggle Button (Floating Action Button) */}

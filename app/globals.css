@@ -923,6 +923,7 @@ pre {
     outline: none;
     pointer-events: auto;
     z-index: 10000;
+    position: relative;
 }
 
 .ayo-input-area button {
