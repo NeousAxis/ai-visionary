@@ -1,6 +1,6 @@
 import { openai } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { generateText } from 'ai';
 import fs from 'fs';
 import path from 'path';
 
@@ -132,17 +132,20 @@ export async function POST(req: Request) {
             }
         }
 
-        const result = await streamText({
+        // DEBUG MODE: NO STREAMING
+        console.log("Generating text (no stream)...");
+        const result = await generateText({
             model: modelToUse,
             system: SYSTEM_PROMPT,
             messages,
         });
 
-        // Debug output
-        console.log("Stream generated successfully.");
+        console.log("Generation success:", result.text.substring(0, 50) + "...");
 
-        // Return simpler Text Stream
-        return result.toTextStreamResponse();
+        return new Response(JSON.stringify({ text: result.text }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
 
     } catch (error: any) {
         console.error("Detailed API Error:", error);

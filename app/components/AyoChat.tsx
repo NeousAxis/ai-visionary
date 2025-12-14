@@ -63,34 +63,17 @@ export default function AyoChat() {
                 throw new Error(errorDetails);
             }
 
-            if (!response.body) throw new Error("Pas de réponse du serveur");
+            // 3. READ JSON RESPONSE (Standard fetch, no stream)
+            const data = await response.json();
 
-            // 3. Stream Reading
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let botMessageContent = '';
+            if (!data.text) throw new Error("Réponse vide de l'IA");
+
             const botMessageId = (Date.now() + 1).toString();
-
-            // Add empty bot message placeholder
-            setMessages(prev => [...prev, { role: 'assistant', content: '', id: botMessageId }]);
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                // With toTextStreamResponse(), we get raw text. No regex needed.
-                botMessageContent += chunk;
-
-                setMessages(prev => prev.map(m =>
-                    m.id === botMessageId ? { ...m, content: botMessageContent } : m
-                ));
-            }
+            setMessages(prev => [...prev, { role: 'assistant', content: data.text, id: botMessageId }]);
 
         } catch (err: any) {
             console.error("Manual Fetch Error:", err);
             setError(err.message || "Erreur de connexion");
-            // Restore input in case of error? No, just show error.
         } finally {
             setIsLoading(false);
         }
