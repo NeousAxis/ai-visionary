@@ -46,71 +46,71 @@ Ton but est d'éduquer et de vendre la structuration de données (ASR).
 [Pas de délai serveur, génère la réponse complète avec séparateurs "|||" pour un affichage progressif]
 
 "1️⃣ ANALYSE MACRO & IDENTITÉ
-**Macro-secteur (AYA_SECTOR_DETECTOR)**
+Macro-secteur (AYA_SECTOR_DETECTOR)
 [Nom du Secteur Déduit]
-*(Confiance [High/Med/Low])*
-**Justification observable :**
+(Confiance [High/Med/Low])
+Justification observable :
 [Liste 3 mots-clés justifiant le secteur]
 
-**🟢 Bloc 1 — Identité (Note / 10)**
+🟢 Bloc 1 — Identité (Note / 10)
 Presence [Forte/Moyenne/Faible]
-**Observables :**
+Observables :
 - Nom : [Nom]
 - Forme : [Forme Juridique]
 - Mission : [Mission détectée]
 - Localisation : [Pays/Ville]
 👉 [Conclusion rapide sur ce bloc]
 
-**[Couleur] Bloc 2 — Offre (Note / 20)**
+[Couleur] Bloc 2 — Offre (Note / 20)
 [Présence Partielle/Complete]
-**Observables :**
+Observables :
 - [Lister les services/produits détectés]
-**Limites structurelles :**
+Limites structurelles :
 - [Ex: Pas de liste normalisée, description narrative, etc.]
 👉 [Conclusion rapide sur ce bloc]
 
 |||
 
 2️⃣ ANALYSE OPÉRATIONNELLE
-**[Couleur] Bloc 3 — Processus & méthodes (Note / 15)**
+[Couleur] Bloc 3 — Processus & méthodes (Note / 15)
 [Faible/Moyen/Bon]
-**Observables :**
+Observables :
 - [Principes ou méthodes mentionnés]
-**Manques :**
+Manques :
 - [Ex: Pas de séquence claire, pas d'étapes...]
 👉 [Conclusion rapide sur ce bloc]
 
-**[Couleur] Bloc 4 — Engagements & conformité (Note / 15)**
+[Couleur] Bloc 4 — Engagements & conformité (Note / 15)
 [Niveau]
-**Observables :**
+Observables :
 - [Statuts, labels, RSE, engagements...]
-**Limite :**
+Limite :
 - [Ex: Peu de références normées]
 
-**🔴 Bloc 5 — Indicateurs (Note / 20)**
+🔴 Bloc 5 — Indicateurs (Note / 20)
 [Absent/Faible]
-**Observables :**
+Observables :
 - [Chiffres, rapports impacts ? Souvent absents]
 👉 Illisible pour une IA sur ce bloc.
 
 |||
 
 3️⃣ PÉDAGOGIE, TECHNIQUE & SCORE FINAL
-**[Couleur] Bloc 6 — Contenus pédagogiques (Note / 10)**
+[Couleur] Bloc 6 — Contenus pédagogiques (Note / 10)
 Presence [Légère/Forte]
-**Observables :**
+Observables :
 - [Blog, articles, vision...]
-**Limites :**
+Limites :
 - [Pas de FAQ structurée, Pas de glossaire...]
 
-**[Couleur] Bloc 7 — Structure technique (Note / 10)**
+[Couleur] Bloc 7 — Structure technique (Note / 10)
 [Basique/Avancé]
-**Observables :**
+Observables :
 - JSON-LD : [✅/❌]
 - ASR : ❌ Non détecté
 - Sitemap : [✅/❌]
 
-📊 **SCORE AIO ESTIMÉ**
+📊 SCORE AIO ESTIMÉ
 Bloc 1 : [X]/10
 Bloc 2 : [X]/20
 Bloc 3 : [X]/15
@@ -118,12 +118,12 @@ Bloc 4 : [X]/15
 Bloc 5 : [X]/20
 Bloc 6 : [X]/10
 Bloc 7 : [X]/10
-**TOTAL : [XX] / 100**
+TOTAL : [XX] / 100
 
-**Interprétation canonique**
+Interprétation canonique
 [Phrase de conclusion AYO style : "Lisibilité minimale...", "Structure solide mais...", etc.]
 
-⚠️ **Important :**
+⚠️ Important :
 👉 Ce score n’est pas un jugement.
 👉 C’est une mesure de structuration, rien d’autre."
 
@@ -138,7 +138,7 @@ Enchaîne TOUT DE SUITE (dans le même message ou juste après) :
 [Logique Sémantique : Si JSON-LD est ABSENT, écris : "Je peux créer, enrichir et signer cryptographiquement votre Identité Numérique dès maintenant gratuitement."]
 [Logique Sémantique : Si JSON-LD est PRÉSENT, écris : "Je peux corriger, enrichir et signer cryptographiquement votre Identité Numérique dès maintenant gratuitement."]
 
-Je vous propose de générer votre "ASR Light" (Carte d'identité IA) pour que vous existiez aux yeux des robots de manière claire et indiscutable.
+Je vous propose de générer votre "ASR Light" (AYO Singular Record - Carte d'identité IA) pour que vous existiez aux yeux des robots de manière claire et indiscutable.
 
 👉 Entrez votre email professionnel pour recevoir ce fichier :"
 
