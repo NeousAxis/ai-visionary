@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import FAQ from './components/FAQ';
 import AyoChat from './components/AyoChat';
 
 export default function Home() {
@@ -247,6 +248,9 @@ export default function Home() {
           <p className="final-phrase">Un Web durable n’est pas un Web plus rempli. C’est un Web plus lisible.</p>
         </div>
       </section>
+
+      {/* SECTION 9.5 — FAQ */}
+      <FAQ />
 
       {/* SECTION 10 — Footer */}
       <footer className="footer">
