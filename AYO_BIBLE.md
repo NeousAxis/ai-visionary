@@ -1065,6 +1065,37 @@ XVIII. SPECIFICATIONS CANONIQUES ASR (SCEAU, CONFORMITÉ, ÉMISSION)
 - Pipeline runtime milliseconde, sans exposition de clé privée, 100% déterministe.
 - Règle fondatrice : Si EMIT échoue, l'ASR n'existe pas.
 
+-- -- -- -- -- -- 
+
+XIX. EXEMPLE DE RÉFÉRENCE & RÈGLE ASR_PUBLISHED
+
+1. CAS RÉEL : ASSOCIATION ECLORE
+Analyse selon la Constitution AYO :
+- Secteur : Services experts / organisations d’intérêt public
+- Score Identité : 10/10 (Nom, mission, localisation clairs)
+- Score Offre : 18/20 (Services décrits, manque typologie formelle)
+- Score Technique : 7/10 (ASR publié, pas de JSON-LD)
+- Indicateurs : 0/20 (Absence honnête et assumée)
+
+2. RÈGLE CANONIQUE ASR_PUBLISHED
+Si une entité publie un ASR (ASR_PUBLISHED) :
+1. C'est la vérité canonique.
+2. ASR_DERIVED est **strictement INTERDIT**.
+3. AYO ne génère jamais de version dérivée (concurrente) si une version publiée existe.
+
+3. EXEMPLE ASR SCELLÉ (Structure Validée)
+{
+  "asr_id": "AYO-ASR-ECLORE-001",
+  "identite": { ... },
+  "offre": { ... },
+  "asr_seal": {
+    "issuer": "AYO",
+    "signature": "..."
+  }
+}
+👉 Aucune hallucination, respect total de la déclaration de l'entité.
+
+
 👉 Clamp final entre 0 et 100.
 
 8. EXEMPLES CONCRETS
