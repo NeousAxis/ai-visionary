@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import AyoChat from './components/AyoChat';
 
 export default function Home() {
@@ -251,17 +252,10 @@ export default function Home() {
       <footer className="footer">
         <div className="container">
           <div className="footer-links">
-            <a href="#">À propos</a>
-            <a href="#">Vision</a>
-            <a href="#">Contact</a>
-            <a href="#">Partenaires</a>
-            <a href="#">Mentions</a>
-            <a href="#">Confidentialité</a>
-            <a href="#" className="disabled">API (à venir)</a>
+            <Link href="/">Accueil</Link>
+            <Link href="/ai-et-votre-entreprise">IA & votre entreprise</Link>
           </div>
-          <div className="footer-copy">
-            &copy; 2025 AI VISIONARY.
-          </div>
+          <p className="footer-copy">© 2025 AI VISIONARY. Tous droits réservés.</p>
         </div>
       </footer>
 
