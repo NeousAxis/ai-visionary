@@ -150,8 +150,8 @@ Je vous propose de générer votre "ASR Light" (AYO Singular Record - Carte d'id
 🔎 ANALYSE DE FOND & PROJECTIONS
 [Nom Entreprise] est cohérente sur le fond, mais faiblement lisible structurellement pour les IA, sans aucune contradiction avec ses valeurs.
 
-💡 CE QUE AYO PROPOSERAIT D'AJOUTER (PLAN DE STRUCTURATION)
-Conformément aux nécessités techniques des IA, AYO n’optimise pas, il structure.
+💡 CE QUE JE VOUS PROPOSERAIS D'AJOUTER (PLAN DE STRUCTURATION)
+Conformément aux nécessités techniques des IA, je n’optimise pas, je structure avec attention vos données.
 
 📁 1. /.ayo/asr.json
 ASR officiel publié par l’entité.
