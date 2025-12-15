@@ -10,6 +10,7 @@ export default function AyoChat() {
     const [error, setError] = useState<string | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [hasGreeted, setHasGreeted] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -42,13 +43,23 @@ export default function AyoChat() {
         setIsLoading(true);
         setError(null);
 
+        const INITIAL_BOT_MESSAGE = {
+            role: 'assistant',
+            content: `👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.
+
+Je vais établir votre Diagnostic de Visibilité IA (Gratuit).
+Pour cela, répondez à ces 3 questions.
+
+1. Quel est le NOM de votre entreprise ?`
+        };
+
         try {
             // 2. Manual Network Request
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [...messages, userMessage]
+                    messages: [INITIAL_BOT_MESSAGE, ...messages, userMessage]
                 })
             });
 
@@ -63,19 +74,50 @@ export default function AyoChat() {
                 throw new Error(errorDetails);
             }
 
-            // 3. READ JSON RESPONSE (Standard fetch, no stream)
+            // 3. READ JSON RESPONSE
             const data = await response.json();
 
             if (!data.text) throw new Error("Réponse vide de l'IA");
 
-            const botMessageId = (Date.now() + 1).toString();
-            setMessages(prev => [...prev, { role: 'assistant', content: data.text, id: botMessageId }]);
+            // CHECK FOR PROGRESSIVE CONTENT (Analysis split by |||)
+            if (data.text.includes('|||')) {
+                const chunks = data.text.split('|||');
+                setIsLoading(false); // Stop standard loading
+                setIsAnalyzing(true); // Start analysis mode
+
+                // Helper to add message interactively
+                const addChunk = (content: string, delay: number) => {
+                    return new Promise<void>(resolve => {
+                        setTimeout(() => {
+                            setMessages(prev => [...prev, {
+                                role: 'assistant',
+                                content: content.trim(),
+                                id: Date.now().toString() + Math.random() // Unique ID
+                            }]);
+                            resolve();
+                        }, delay);
+                    });
+                };
+
+                // Sequence: 9s -> Chunk 1 -> 9s -> Chunk 2 -> 9s -> Chunk 3
+                await addChunk(chunks[0], 9000);
+                if (chunks[1]) await addChunk(chunks[1], 9000);
+                if (chunks[2]) await addChunk(chunks[2], 9000);
+
+                setIsAnalyzing(false);
+
+            } else {
+                // NORMAL FAST RESPONSE
+                const botMessageId = (Date.now() + 1).toString();
+                setMessages(prev => [...prev, { role: 'assistant', content: data.text, id: botMessageId }]);
+                setIsLoading(false);
+            }
 
         } catch (err: any) {
             console.error("Manual Fetch Error:", err);
             setError(err.message || "Erreur de connexion");
-        } finally {
             setIsLoading(false);
+            setIsAnalyzing(false);
         }
     };
 
@@ -111,6 +153,13 @@ export default function AyoChat() {
 
                     {isLoading && (
                         <div className="typing-indicator" style={{ display: 'block' }}>AYO réfléchit...</div>
+                    )}
+
+                    {/* NEW: Explicit Analysis Indicator */}
+                    {isAnalyzing && (
+                        <div className="typing-indicator" style={{ display: 'block', color: '#00f7ff' }}>
+                            ⚙️ AYO analyse vos données (Traitement profond)...
+                        </div>
                     )}
 
                     {error && (
