@@ -1,6 +1,8 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Footer from '../components/Footer';
+import FAQ from '../components/FAQ';
 
 export default function ComprendrePage() {
     return (
@@ -165,15 +167,12 @@ export default function ComprendrePage() {
                 </div>
             </section>
 
+            {/* FAQ */}
+            <FAQ />
+
             {/* Footer */}
-            <footer className="footer">
-                <div className="container">
-                    <div className="footer-links">
-                        <Link href="/">Accueil</Link>
-                    </div>
-                    <p className="footer-copy">© 2025 AI VISIONARY. Tous droits réservés.</p>
-                </div>
-            </footer>
+            <Footer />
         </main>
     );
 }
+

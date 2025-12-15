@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import FAQ from './components/FAQ';
+import Footer from './components/Footer';
 import AyoChat from './components/AyoChat';
 
 export default function Home() {
@@ -249,20 +249,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 9.5 — FAQ */}
-      <FAQ />
-
       {/* SECTION 10 — Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-links">
-            <Link href="/">Accueil</Link>
-            <Link href="/ai-et-votre-entreprise">IA & votre entreprise</Link>
-          </div>
-          <p className="footer-copy">© 2025 AI VISIONARY. Tous droits réservés.</p>
-        </div>
-      </footer>
-
+      <Footer />
 
 
       {/* THE CHATBOT WIDGET */}
