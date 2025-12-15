@@ -153,45 +153,43 @@ FIN DU SCRIPT.
 `;
 
 // Helper: Fetch and clean website content
-async function fetchWebsiteContent(url: string): Promise<string> {
+async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJsonLd: boolean }> {
     try {
         let targetUrl = url.trim();
         if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
 
-        console.log(`Attempting to fetch real content from: ${targetUrl}`);
+        console.log(`Analyzing real site: ${targetUrl}`);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout max
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout for real analysis
 
         const res = await fetch(targetUrl, {
             signal: controller.signal,
             headers: {
                 'User-Agent': 'Mozilla/5.0 (compatible; AYO-Bot/1.0; +http://ai-visionary.com)',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
             }
         });
 
         clearTimeout(timeoutId);
 
-        if (!res.ok) {
-            console.warn(`Failed to fetch ${targetUrl}: ${res.status}`);
-            return "";
-        }
+        if (!res.ok) return { text: "", hasJsonLd: false };
 
         const html = await res.text();
 
-        // Basic naive cleanup to extract meaningful text
-        // 1. Remove scripts and styles
-        const noScript = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, " ").replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, " ");
-        // 2. Remove tags
-        const rawText = noScript.replace(/<[^>]+>/g, " ");
-        // 3. Normalize whitespace
-        const cleanText = rawText.replace(/\s+/g, " ").trim();
+        // 🕵️ RÉALITÉ TECHNIQUE : DÉTECTION DU JSON-LD
+        // On cherche la balise <script type="application/ld+json">
+        const hasJsonLd = html.toLowerCase().includes('application/ld+json');
 
-        return cleanText.substring(0, 10000); // Limit context to 10k chars
+        // Cleanup text for Semantic Analysis
+        const noScript = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, " ").replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, " ");
+        const rawText = noScript.replace(/<[^>]+>/g, " ");
+        const cleanText = rawText.replace(/\s+/g, " ").trim().substring(0, 15000);
+
+        return { text: cleanText, hasJsonLd };
+
     } catch (e) {
-        console.error("Fetch Website Error:", e);
-        return "";
+        console.error("Analysis Error:", e);
+        return { text: "", hasJsonLd: false };
     }
 }
 
@@ -200,14 +198,12 @@ export async function POST(req: Request) {
         const { messages } = await req.json();
 
         // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS
-        // If we are at the step where Analysis is generated (User just sent Country -> msg 6)
-        // Sequence: 0:Bot, 1:User(Name), 2:Bot, 3:User(URL), 4:Bot, 5:User(Country)
-        let websiteContext = "";
+        let websiteData = { text: "", hasJsonLd: false };
 
         if (messages.length === 6) {
-            const urlMessage = messages[3]; // The user's URL input
+            const urlMessage = messages[3];
             if (urlMessage && urlMessage.role === 'user') {
-                websiteContext = await fetchWebsiteContent(urlMessage.content);
+                websiteData = await fetchWebsiteContent(urlMessage.content);
             }
         }
 
@@ -267,9 +263,25 @@ export async function POST(req: Request) {
 
         // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
         let finalSystemPrompt = SYSTEM_PROMPT;
-        if (websiteContext) {
-            console.log("Injecting website content into AI context...");
-            finalSystemPrompt += `\n\n🚨 [SOURCE DE VÉRITÉ - CONTENU RÉEL DU SITE WEB DE L'UTILISATEUR] 🚨\nVoici le texte brut extrait à l'instant de la page d'accueil de l'utilisateur (${messages[3]?.content}).\nUTILISE CES INFORMATIONS POUR DÉTERMINER "FORME JURIDIQUE" et "SECTEUR D'ACTIVITÉ". NE T'INVENTE PAS D'HISTOIRES.\n\n"""\n${websiteContext}\n"""`;
+
+        // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE
+        if (websiteData.text) {
+            console.log("Injecting real website content into AI context...");
+
+            const jsonStatus = websiteData.hasJsonLd ? "✅ DÉTECTÉ (Présent dans le code source)" : "❌ NON DÉTECTÉ (Absent du code source)";
+
+            finalSystemPrompt += `\n\n🚨 [RAPPORT D'ANALYSE TECHNIQUE RÉEL] 🚨
+1. CONTENU DU SITE : Voici le texte brut extrait de la page d'accueil (${messages[3]?.content}).
+2. ANALYSE TECHNIQUE (FAIT ÉTABLI) :
+   - JSON-LD : ${jsonStatus}
+   
+⚠️ CONSIGNE CRITIQUE :
+- Utilise le texte ci-dessous pour déterminer "Forme Juridique" et "Secteur d'Activité".
+- Pour la section "STRUCTURE TECHNIQUE", tu reportes STRICTEMENT le statut JSON-LD indiqué ci-dessus ("${jsonStatus}"). NE L'INVENTE PAS.
+
+"""
+${websiteData.text}
+"""`;
         } else if (messages.length === 6) {
             console.log("No website content could be fetched (or failed). AI will infer from name.");
         }
