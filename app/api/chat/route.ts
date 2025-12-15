@@ -150,12 +150,36 @@ export async function POST(req: Request) {
                 // DYNAMIC MODEL DISCOVERY
                 // Instead of guessing, let's ask Google what they have today.
                 try {
-                    // console.log("Auto-detecting available Gemini model..."); 
-                    // optimization: hardcode flashback to save latency on this call
-                    modelToUse = google('gemini-1.5-flash');
+                    console.log("Auto-detecting available Gemini model...");
+                    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
+                    const modelsData = await modelsResponse.json();
+
+                    if (modelsData.models) {
+                        // Find a model that supports generateContent
+                        // Favor 'flash' (fastest) or 'pro' (best)
+                        const bestModel = modelsData.models.find((m: any) =>
+                            m.supportedGenerationMethods.includes('generateContent') &&
+                            (m.name.includes('flash') || m.name.includes('gemini-1.5') || m.name.includes('pro'))
+                        );
+
+                        if (bestModel) {
+                            // API returns "models/gemini-1.5-flash-001" etc.
+                            // The AI SDK usually expects the ID without "models/" OR handles it. 
+                            // We will strip "models/" to be safe as the SDK is often "google('gemini-pro')".
+                            const modelId = bestModel.name.replace('models/', '');
+                            console.log(`Auto-detected Best Model: ${modelId}`);
+                            modelToUse = google(modelId);
+                        } else {
+                            // Fallback if no specific match
+                            console.warn("No ideal model found in list, trying 'gemini-pro'");
+                            modelToUse = google('gemini-pro');
+                        }
+                    } else {
+                        throw new Error("Could not list models");
+                    }
                 } catch (e) {
-                    console.error("Model detection failed, using fallback.", e);
-                    modelToUse = google('gemini-1.5-flash');
+                    console.error("Model detection failed, using safe fallback 'gemini-pro'.", e);
+                    modelToUse = google('gemini-pro');
                 }
             } else {
                 throw new Error("No API Key found");
