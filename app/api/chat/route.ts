@@ -50,7 +50,8 @@ Ton but est d'éduquer et de vendre la structuration de données (ASR).
 1️⃣ BLOC IDENTITÉ
 Nom détecté : ✅ [Nom]
 Localisation : ✅ [Pays]
-Type d’activité : [Activité détectée PRÉCISE - Ex: RSE, Audit, Industrie - PAS de statut juridique] (Confiance 90%)
+Forme Juridique : [Si identifiée : SA, SARL, Association...]
+Secteur d’Activité : [Cœur de métier : RSE, BTP, Commerce... Ne pas confondre avec le statut] (Confiance 90%)
 |||
 2️⃣ STRUCTURE TECHNIQUE
 JSON-LD : ⚠️ Absent ou incomplet
