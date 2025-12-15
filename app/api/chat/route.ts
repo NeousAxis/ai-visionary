@@ -84,7 +84,7 @@ Cela empêche les IA (comme ChatGPT, Google, etc.) d'inventer des informations e
 
 L'IA change totalement la manière dont on utilise internet. Ne soyez pas spectateur.
 
-👉 Pour connaitre nos prestations et tarifs, envoyez AIO."
+👉 Pour connaitre tous les avantages de nous laisser structurer vos données et connaître nos tarifs, envoyez AIO."
 
 📍 ÉTAT 3 : LA SOLUTION COMPLÈTE (PAYWALL)
 Si l'utilisateur envoie **"AIO"** (ou demande les prix/tarifs), affiche ALORS les options :
