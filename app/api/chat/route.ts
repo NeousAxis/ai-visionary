@@ -156,22 +156,22 @@ export async function POST(req: Request) {
 
                     if (modelsData.models) {
                         // Find a model that supports generateContent
-                        // Favor 'flash' (fastest) or 'pro' (best)
+                        // ⚠️ CRITICAL: DO NOT USE 'FLASH' MODELS. They are unstable for this project.
+                        // We prioritize 'pro' or standard '1.5' versions.
                         const bestModel = modelsData.models.find((m: any) =>
                             m.supportedGenerationMethods.includes('generateContent') &&
-                            (m.name.includes('flash') || m.name.includes('gemini-1.5') || m.name.includes('pro'))
+                            !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
+                            (m.name.includes('gemini-1.5') || m.name.includes('pro'))
                         );
 
                         if (bestModel) {
-                            // API returns "models/gemini-1.5-flash-001" etc.
-                            // The AI SDK usually expects the ID without "models/" OR handles it. 
-                            // We will strip "models/" to be safe as the SDK is often "google('gemini-pro')".
+                            // API returns "models/gemini-1.5-pro-001" etc.
                             const modelId = bestModel.name.replace('models/', '');
-                            console.log(`Auto-detected Best Model: ${modelId}`);
+                            console.log(`Auto-detected Best Model (NO FLASH): ${modelId}`);
                             modelToUse = google(modelId);
                         } else {
-                            // Fallback if no specific match
-                            console.warn("No ideal model found in list, trying 'gemini-pro'");
+                            // Fallback if no specific match, force pro
+                            console.warn("No ideal 'pro' model found in list, forcing 'gemini-pro'");
                             modelToUse = google('gemini-pro');
                         }
                     } else {
