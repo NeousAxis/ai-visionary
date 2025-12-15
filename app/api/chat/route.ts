@@ -112,6 +112,7 @@ C'est l'optimisation pour les Intelligences Artificielles. C'est l'art de tradui
 Ce pack installe les fondations techniques indispensables pour [ELEMENT_ACTIVITE] :
 - Le "Fichier JSON-LD" : C'est le passeport technique exigé par Google et les moteurs de recherche.
 - Le "Fichier ASR" (AYO Singular Record) : C'est votre déclaration officielle. Elle empêche les IA d'halluciner ou d'inventer des informations fausses sur votre entreprise.
+  *Inclus : Sceau Cryptographique AYO (SHA-256/Ed25519) garantissant l'authenticité et l'intégrité de vos données auprès des agents IA.*
 
 💳 Paiement unique.
 
