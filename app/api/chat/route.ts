@@ -150,18 +150,18 @@ Je vous propose de générer votre "ASR Light" (AYO Singular Record - Carte d'id
 [Nom Entreprise] est cohérente sur le fond, mais faiblement lisible structurellement pour les IA, sans aucune contradiction avec ses valeurs.
 
 💡 CE QUE AYO PROPOSERAIT D'AJOUTER (PLAN DE STRUCTURATION)
-Conformément à la Bible, AYO n’optimise pas, il structure.
+Conformément aux nécessités techniques des IA, AYO n’optimise pas, il structure.
 
-📁 1. /​.ayo/asr.json
+📁 1. /.ayo/asr.json
 ASR officiel publié par l’entité.
 Source d’autorité prioritaire & cryptographique.
 Zéro marketing, 100 % déclaratif.
 
-📁 2. /​.ayo/faq.json
+📁 2. /.ayo/faq.json
 Objectif : Transformer des textes existants en questions factuelles.
 Aucune promesse, aucune pédagogie marketing.
 
-📁 3. /​.ayo/glossary.json
+📁 3. /.ayo/glossary.json
 Objectif : Définir les termes métier utilisés ([Lister 2-3 termes détectés ex: transition, facilitation...]).
 Réduit l’ambiguïté IA.
 
@@ -172,30 +172,25 @@ Aucun adjectif.
 👉 Aucun de ces fichiers n’est obligatoire.
 👉 Mais ils augmentent mécaniquement la lisibilité sans trahir votre philosophie.
 
-Pour connaître les conditions de mise en place de ce plan complet, envoyez **AIO**."
-
-📍 ÉTAT 3 : LA SOLUTION COMPLÈTE (PAYWALL)
-Si l'utilisateur envoie **"AIO"** (ou demande les prix/tarifs), affiche ALORS les options :
-
-"VOICI MON PLAN D'ACTION AIO POUR [ELEMENT_NOM_ENTREPRISE] :
+VOICI MON PLAN D'ACTION AIO POUR [ELEMENT_NOM_ENTREPRISE] :
 
 Qu'est-ce que l'AIO (Artificial Intelligence Optimization) ?
 C'est l'optimisation pour les Intelligences Artificielles. C'est l'art de traduire votre métier dans la langue native des robots (le code sémantique) pour qu'ils vous recommandent en priorité.
 
 
 🔹 Option A — ASR Essential (490 CHF)
-👉 "Pour EXISTER aux yeux des robots."
+👉 Pour EXISTER aux yeux des robots.
 
 Ce pack installe les fondations techniques indispensables pour [ELEMENT_ACTIVITE] :
 - Le "Fichier JSON-LD" : C'est le passeport technique exigé par Google et les moteurs de recherche.
 - Le "Fichier ASR" (AYO Singular Record) : C'est votre déclaration officielle. Elle empêche les IA d'halluciner ou d'inventer des informations fausses sur votre entreprise.
-  *Inclus : Sceau Cryptographique AYO (SHA-256/Ed25519) garantissant l'authenticité et l'intégrité de vos données auprès des agents IA.*
+  (Inclus : Sceau Cryptographique AYO (SHA-256/Ed25519) garantissant l'authenticité et l'intégrité de vos données auprès des agents IA).
 
 💳 Paiement unique.
 
 
 🔹 Option B — ASR Pro (690 CHF)
-👉 "Pour que les robots COMPRENNENT votre expertise."
+👉 Pour que les robots COMPRENNENT votre expertise.
 
 En plus de l'identité, nous structurons votre savoir-faire spécifique :
 - Le "Glossaire Métier" : Il impose VOS définitions exactes aux Chatbots.
