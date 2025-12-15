@@ -73,8 +73,10 @@ Enchaîne TOUT DE SUITE (dans le même message ou juste après) :
 
 🎁 CADEAU IMMÉDIAT
 
-Je peux corriger votre "Identité Numérique" dès maintenant gratuitement.
-Je vais générer votre "ASR Light" (Carte d'identité IA) pour que vous existiez aux yeux des robots.
+[Logique Sémantique : Si JSON-LD est ABSENT, écris : "Je peux créer votre Identité Numérique dès maintenant gratuitement."]
+[Logique Sémantique : Si JSON-LD est PRÉSENT, écris : "Je peux corriger votre Identité Numérique dès maintenant gratuitement."]
+
+Je vous propose de générer votre "ASR Light" (Carte d'identité IA) pour que vous existiez aux yeux des robots.
 
 
 👉 Entrez votre email professionnel pour recevoir ce fichier :"
