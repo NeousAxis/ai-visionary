@@ -13,7 +13,7 @@ export default function ComprendrePage() {
             </nav>
 
             {/* Hero Section */}
-            <section className="section" style={{ paddingTop: '2rem' }}>
+            <section className="section" style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
                 <div className="container hero-content">
                     <h1 className="headline" style={{ fontSize: '3rem' }}>
                         Comment les IA comprennent votre entreprise
