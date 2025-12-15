@@ -135,8 +135,8 @@ Enchaîne TOUT DE SUITE (dans le même message ou juste après) :
 "
 🎁 CADEAU IMMÉDIAT
 
-[Logique Sémantique : Si JSON-LD est ABSENT, écris : "Je peux créer et enrichir votre Identité Numérique dès maintenant gratuitement."]
-[Logique Sémantique : Si JSON-LD est PRÉSENT, écris : "Je peux corriger et enrichir votre Identité Numérique dès maintenant gratuitement."]
+[Logique Sémantique : Si JSON-LD est ABSENT, écris : "Je peux créer, enrichir et signer cryptographiquement votre Identité Numérique dès maintenant gratuitement."]
+[Logique Sémantique : Si JSON-LD est PRÉSENT, écris : "Je peux corriger, enrichir et signer cryptographiquement votre Identité Numérique dès maintenant gratuitement."]
 
 Je vous propose de générer votre "ASR Light" (Carte d'identité IA) pour que vous existiez aux yeux des robots de manière claire et indiscutable.
 
