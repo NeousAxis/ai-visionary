@@ -12,7 +12,10 @@ export default function Footer() {
                     <a href="#">À propos</a>
                     <a href="#">Vision</a>
                     <a href="#">Contact</a>
+                    <a href="#">Partenaires</a>
                     <a href="#">Mentions</a>
+                    <a href="#">Confidentialité</a>
+                    <a href="#" className="disabled">API (à venir)</a>
                 </div>
                 <p className="footer-copy">© 2025 AI VISIONARY. Tous droits réservés.</p>
             </div>
