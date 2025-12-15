@@ -57,6 +57,7 @@ JSON-LD : ⚠️ Absent ou incomplet
 Sitemap : ⚠️ Partiel
 Pages clés : Détectées
 
+|||
 3️⃣ LISIBILITÉ IA ESTIMÉE
 🟠 MOYENNE / 🔴 FAIBLE
 (Pas de score chiffré).

@@ -99,10 +99,12 @@ Pour cela, répondez à ces 3 questions.
                     });
                 };
 
-                // Sequence: 9s -> Chunk 1 -> 9s -> Chunk 2 -> 9s -> Chunk 3
-                await addChunk(chunks[0], 9000);
-                if (chunks[1]) await addChunk(chunks[1], 9000);
-                if (chunks[2]) await addChunk(chunks[2], 9000);
+                // Display all chunks sequentially with 9s delay each
+                for (const chunk of chunks) {
+                    if (chunk && chunk.trim()) {
+                        await addChunk(chunk, 9000);
+                    }
+                }
 
                 setIsAnalyzing(false);
 
