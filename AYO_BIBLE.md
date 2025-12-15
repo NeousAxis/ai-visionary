@@ -1067,30 +1067,40 @@ XVIII. SPECIFICATIONS CANONIQUES ASR (SCEAU, CONFORMITÉ, ÉMISSION)
 
 -- -- -- -- -- -- 
 
-XIX. EXEMPLE DE RÉFÉRENCE : ASSOCIATION ECLORE
+XIX. MODÈLE DE RÉFÉRENCE INTERNE (CONFIDENTIEL)
 
-1. ANALYSE DE L'ÉTAT ACTUEL (AVANT AYO)
-Réalité du site 'eclore-asso.org' à date :
-- Score Identité : 10/10
-- Score Offre : 10/20 (Manque typologie formelle)
-- Score Technique : 5/10 (⚠️ PAS d'ASR, PAS de JSON-LD)
-- Indicateurs : 0/20 (Absent)
-👉 SCORE TOTAL ACTUEL : 49/100.
-Statut : Données non structurées, interprétation IA difficile.
+Exemple Canonique : ASSOCIATION ECLORE
+Ce modèle définit la structure exacte attendue pour un ASR validé par AYO.
 
-2. CIBLE VISÉE (APRÈS AYO)
-Une fois le travail effectué (ASR scellé et publié) :
-- Score Technique : 10/10 (ASR_PUBLISHED valide)
-👉 SCORE TOTAL CIBLE : 66/100.
-Statut : Données structurées et certifiées.
+1. ANALYSE AIO DE RÉFÉRENCE
+- Secteur : Services experts / organisations d’intérêt public
+- Profil : Association, mission d'utilité publique, absence d'indicateurs assumée.
+- Score Cible : 66/100 (Maximum structurel pour ce profil).
 
-3. RÈGLE CANONIQUE ASR_PUBLISHED
-Dès que l'ASR sera publié sur le site :
-1. Il deviendra la vérité canonique.
-2. ASR_DERIVED sera **strictement INTERDIT**.
-3. AYO ne génère jamais de version dérivée (concurrente) si une version publiée existe.
+2. ASR CANONIQUE GÉNÉRÉ (EXEMPLE)
+{
+  "asr_id": "AYO-ASR-ECLORE-001",
+  "asr_version": "2025-01",
+  "statut": "ASR_PUBLISHED",
+  "identite": { 
+    "name": "Association Eclore", 
+    "legal_form": "Association",
+    "city": "Genève",
+    "mission": "Faciliter des dynamiques de transition..."
+  },
+  "offre": { 
+    "services": ["Rencontres", "Accompagnement", "Facilitation"] 
+  },
+  "structure_technique": {
+    "asr_seal": {
+      "issuer": "AYO",
+      "signature": "SIGNATURE_CRYPTOGRAPHIQUE_VALIDE"
+    }
+  }
+}
 
-3. EXEMPLE ASR SCELLÉ (Structure Validée)
+3. RAISON D'ÊTRE DE CET EXEMPLE
+Cet ASR démontre comment AYO structure une entité qui ne "vend" rien (pas de prix, pas de garantie) mais qui existe fortement (Identité + Mission). C'est le standard de qualité pour toute entité non-marchande.
 {
   "asr_id": "AYO-ASR-ECLORE-001",
   "identite": { ... },
