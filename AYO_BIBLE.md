@@ -1067,20 +1067,27 @@ XVIII. SPECIFICATIONS CANONIQUES ASR (SCEAU, CONFORMITÉ, ÉMISSION)
 
 -- -- -- -- -- -- 
 
-XIX. EXEMPLE DE RÉFÉRENCE & RÈGLE ASR_PUBLISHED
+XIX. EXEMPLE DE RÉFÉRENCE : ASSOCIATION ECLORE
 
-1. CAS RÉEL : ASSOCIATION ECLORE
-Analyse selon la Constitution AYO :
-- Secteur : Services experts / organisations d’intérêt public
-- Score Identité : 10/10 (Nom, mission, localisation clairs)
-- Score Offre : 18/20 (Services décrits, manque typologie formelle)
-- Score Technique : 7/10 (ASR publié, pas de JSON-LD)
-- Indicateurs : 0/20 (Absence honnête et assumée)
+1. ANALYSE DE L'ÉTAT ACTUEL (AVANT AYO)
+Réalité du site 'eclore-asso.org' à date :
+- Score Identité : 10/10
+- Score Offre : 10/20 (Manque typologie formelle)
+- Score Technique : 5/10 (⚠️ PAS d'ASR, PAS de JSON-LD)
+- Indicateurs : 0/20 (Absent)
+👉 SCORE TOTAL ACTUEL : 49/100.
+Statut : Données non structurées, interprétation IA difficile.
 
-2. RÈGLE CANONIQUE ASR_PUBLISHED
-Si une entité publie un ASR (ASR_PUBLISHED) :
-1. C'est la vérité canonique.
-2. ASR_DERIVED est **strictement INTERDIT**.
+2. CIBLE VISÉE (APRÈS AYO)
+Une fois le travail effectué (ASR scellé et publié) :
+- Score Technique : 10/10 (ASR_PUBLISHED valide)
+👉 SCORE TOTAL CIBLE : 66/100.
+Statut : Données structurées et certifiées.
+
+3. RÈGLE CANONIQUE ASR_PUBLISHED
+Dès que l'ASR sera publié sur le site :
+1. Il deviendra la vérité canonique.
+2. ASR_DERIVED sera **strictement INTERDIT**.
 3. AYO ne génère jamais de version dérivée (concurrente) si une version publiée existe.
 
 3. EXEMPLE ASR SCELLÉ (Structure Validée)
