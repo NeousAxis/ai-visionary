@@ -89,7 +89,7 @@ Je vous propose de générer votre "ASR Light" (Carte d'identité IA) pour que v
 
 L'ASR Light corrige votre identité, mais ne suffit pas pour VENDRE.
 
-Pourquoi structurer le reste ?
+Pourquoi structurer l'ensemble de vos données ?
 Cela empêche les IA (comme ChatGPT, Google, etc.) d'inventer des informations erronées ou de mal interpréter votre mission.
 "Surtout, la compréhension de vos données permet aux IA de correctement comprendre votre activité et de vous proposer dans les réponses apporter aux utilisateurs. C'est là que vous allez obtenir des clients et de la vraie visibilité."
 
