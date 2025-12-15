@@ -152,12 +152,64 @@ Vous êtes prêt pour le web de demain."
 FIN DU SCRIPT.
 `;
 
+// Helper: Fetch and clean website content
+async function fetchWebsiteContent(url: string): Promise<string> {
+    try {
+        let targetUrl = url.trim();
+        if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
+
+        console.log(`Attempting to fetch real content from: ${targetUrl}`);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout max
+
+        const res = await fetch(targetUrl, {
+            signal: controller.signal,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; AYO-Bot/1.0; +http://ai-visionary.com)',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            }
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+            console.warn(`Failed to fetch ${targetUrl}: ${res.status}`);
+            return "";
+        }
+
+        const html = await res.text();
+
+        // Basic naive cleanup to extract meaningful text
+        // 1. Remove scripts and styles
+        const noScript = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, " ").replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, " ");
+        // 2. Remove tags
+        const rawText = noScript.replace(/<[^>]+>/g, " ");
+        // 3. Normalize whitespace
+        const cleanText = rawText.replace(/\s+/g, " ").trim();
+
+        return cleanText.substring(0, 10000); // Limit context to 10k chars
+    } catch (e) {
+        console.error("Fetch Website Error:", e);
+        return "";
+    }
+}
+
 export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
 
-        // 🧠 INTELLIGENCE: NO SERVER DELAY (Timeout Prevention)
-        // The delay is now handled by the client-side (Frontend) using the "|||" separators.
+        // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS
+        // If we are at the step where Analysis is generated (User just sent Country -> msg 6)
+        // Sequence: 0:Bot, 1:User(Name), 2:Bot, 3:User(URL), 4:Bot, 5:User(Country)
+        let websiteContext = "";
+
+        if (messages.length === 6) {
+            const urlMessage = messages[3]; // The user's URL input
+            if (urlMessage && urlMessage.role === 'user') {
+                websiteContext = await fetchWebsiteContent(urlMessage.content);
+            }
+        }
 
         // 1. DYNAMIC PROVIDER SELECTION
         let modelToUse;
@@ -178,8 +230,6 @@ export async function POST(req: Request) {
 
                 const google = createGoogleGenerativeAI({ apiKey: googleKey });
 
-                // DYNAMIC MODEL DISCOVERY
-                // Instead of guessing, let's ask Google what they have today.
                 try {
                     console.log("Auto-detecting available Gemini model...");
                     const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
@@ -196,12 +246,10 @@ export async function POST(req: Request) {
                         );
 
                         if (bestModel) {
-                            // API returns "models/gemini-1.5-pro-001" etc.
                             const modelId = bestModel.name.replace('models/', '');
                             console.log(`Auto-detected Best Model (NO FLASH): ${modelId}`);
                             modelToUse = google(modelId);
                         } else {
-                            // Fallback if no specific match, force pro
                             console.warn("No ideal 'pro' model found in list, forcing 'gemini-pro'");
                             modelToUse = google('gemini-pro');
                         }
@@ -217,11 +265,20 @@ export async function POST(req: Request) {
             }
         }
 
+        // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
+        let finalSystemPrompt = SYSTEM_PROMPT;
+        if (websiteContext) {
+            console.log("Injecting website content into AI context...");
+            finalSystemPrompt += `\n\n🚨 [SOURCE DE VÉRITÉ - CONTENU RÉEL DU SITE WEB DE L'UTILISATEUR] 🚨\nVoici le texte brut extrait à l'instant de la page d'accueil de l'utilisateur (${messages[3]?.content}).\nUTILISE CES INFORMATIONS POUR DÉTERMINER "FORME JURIDIQUE" et "SECTEUR D'ACTIVITÉ". NE T'INVENTE PAS D'HISTOIRES.\n\n"""\n${websiteContext}\n"""`;
+        } else if (messages.length === 6) {
+            console.log("No website content could be fetched (or failed). AI will infer from name.");
+        }
+
         // DEBUG MODE: NO STREAMING
         console.log("Generating text (no stream)...");
         const result = await generateText({
             model: modelToUse,
-            system: SYSTEM_PROMPT,
+            system: finalSystemPrompt,
             messages,
         });
 
