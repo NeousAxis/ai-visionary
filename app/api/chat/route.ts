@@ -63,11 +63,15 @@ Pages clés : Détectées
 🟠 MOYENNE / 🔴 FAIBLE
 (Pas de score chiffré).
 - Aucun "Signal ASR" (fiche d'identité IA) détecté"
+
 |||
+
 📍 ÉTAT 2.5 : CAPTURE LEAD (MOMENT CADEAU)
 Enchaîne TOUT DE SUITE (dans le même message ou juste après) :
 
-"🎁 CADEAU IMMÉDIAT
+"
+
+🎁 CADEAU IMMÉDIAT
 
 Je peux corriger votre "Identité Numérique" dès maintenant gratuitement.
 Je vais générer votre "ASR Light" (Carte d'identité IA) pour que vous existiez aux yeux des robots.

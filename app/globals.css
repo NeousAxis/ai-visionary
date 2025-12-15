@@ -881,6 +881,7 @@ pre {
     line-height: 1.4;
     animation: fadeIn 0.3s ease;
     word-break: break-word;
+    white-space: pre-wrap;
 }
 
 .message.bot {
