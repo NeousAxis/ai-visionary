@@ -48,7 +48,7 @@ Ton but est d'éduquer et de vendre la structuration de données (ASR).
 
 
 "1️⃣ ANALYSE MACRO & IDENTITÉ
-Macro-secteur (AYA_SECTOR_DETECTOR)
+Macro-secteur (AYO_SECTOR_DETECTOR)
 [Nom du Secteur Déduit]
 (Confiance [High/Med/Low])
 Justification observable :

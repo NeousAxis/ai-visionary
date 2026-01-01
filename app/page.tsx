@@ -5,17 +5,24 @@ import AyoChat from './components/AyoChat';
 export default function Home() {
   return (
     <main>
-      {/* SECTION 1 — Hero (Accueil) */}
+      {/* SECTION 1 — Hero (AYO Only) */}
       <section id="hero" className="hero-section">
         <div className="container hero-content">
-          <h1 className="headline">AUJOURD'HUI, C'EST L'IA QUI VA TROUVER ET RECOMMANDER VOTRE ENTREPRISE</h1>
+          <h1 className="headline">RENDEZ VOTRE ENTREPRISE VISIBLE AUX INTELLIGENCES ARTIFICIELLES</h1>
           <div className="subheadline">
-            <p><strong>AYA</strong> est le premier moteur de recherche centré sur la typologie de vos données.</p>
-            <p><strong>AYO</strong> organise et structure les informations des entreprises pour les rendre compréhensibles par l’IA.</p>
-            <p className="tagline">Moins de bruit, plus de clarté.</p>
+            <p><strong>AYO</strong> structure l'identité numérique de votre entreprise pour qu'elle soit comprise, citée et recommandée par les assistants IA (ChatGPT, Gemini, Claude).</p>
+            <p className="tagline">Ne laissez pas les robots deviner qui vous êtes. Dites-le leur.</p>
           </div>
           <div className="cta-group">
-            <a href="#pricing" className="btn btn-primary">→ Structurer mon entreprise avec AYO</a>
+            <button
+              onClick={() => {
+                const chatBtn = document.getElementById('ayo-toggle');
+                if (chatBtn) chatBtn.click();
+              }}
+              className="btn btn-primary"
+            >
+              → Lancer mon audit IA gratuit
+            </button>
           </div>
         </div>
         <div className="hero-visual">
@@ -23,110 +30,93 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 2 — Le problème */}
+      {/* SECTION 2 — Le problème (Context IA) */}
       <section id="problem" className="section problem-section">
         <div className="container">
-          <h2 className="section-title">Le Web est saturé. Les entreprises disparaissent dans le bruit.</h2>
+          <h2 className="section-title">Pourquoi votre site web ne suffit plus.</h2>
           <div className="text-content">
-            <p>Le web se remplit chaque jour de contenus vides. L’IA amplifie largement ce bruit en générant des millions de contenus fantômes privés d'âme humaine. Résultat : une information moins fiable, un web moins lisible, une empreinte numérique qui s’alourdit et une connaissance qui s'appauvrit.</p>
-            <p>Les moteurs de recherche classiques classent les sites mais ne comprennent pas les données qu’ils contiennent.</p>
+            <p>Aujourd'hui, vos futurs clients ne cherchent plus sur Google, ils posent des questions à des IA. Mais ces intelligences artificielles ne "lisent" pas votre site comme un humain : elles cherchent des données structurées.</p>
             <ul className="problem-list">
-              <li>Les utilisateurs ne trouvent que les entreprises qui payent pour être vues</li>
-              <li>Les entreprises sérieuses qui n'ont pas les moyens restent invisibles</li>
-              <li>Les IA ne peuvent pas lire la majorité du Web</li>
+              <li>Si vos données sont floues, l'IA vous ignore par prudence.</li>
+              <li>Si vos informations sont mal structurées, l'IA peut "halluciner" ou se tromper sur vos services.</li>
+              <li>La majorité des entreprises sont aujourd'hui invisibles pour les assistants conversationnels.</li>
             </ul>
-            <p className="final-hook">Nous avons besoin d’un internet structuré, pas d’un Web où tout le monde est noyé dans la masse.</p>
+            <p className="final-hook">Pour être recommandé, vous ne devez plus seulement séduire les humains, vous devez convaincre les algorithmes.</p>
           </div>
         </div>
       </section>
 
-      {/* SECTION 3 — Solution : AYA + AIO */}
+      {/* SECTION 3 — Solution : AYO */}
       <section id="solution" className="section solution-section">
         <div className="container">
-          <h2 className="section-title">Une révolution technologique : structurer pour mieux être trouvé</h2>
-          <div className="grid-2">
-            {/* Bloc 1 — AIO */}
-            <div className="card solution-card aio-card">
-              <h3>AYO <span className="subtitle">Soyez référencé par toutes les IA.</span></h3>
-              <p>AYO transforme votre site en information structurée, exploitable et prioritaire pour les intelligences artificielles.</p>
-              <p>AYO analyse votre activité, structure vos informations clés, génère automatiquement les formats attendus par les IA modernes, données structurées, FAQ, glossaire, repères sémantiques, et les rend exploitables par les moteurs et agents IA.</p>
-              <p className="highlight">Vous n’avez rien à apprendre, rien à coder, rien à optimiser.</p>
-            </div>
-            {/* Bloc 2 — AYA */}
-            <div className="card solution-card aya-card">
-              <h3>AYA <span className="subtitle">Le moteur de recherche basé sur la qualité des données</span></h3>
-              <p>AYA ne classe pas les entreprises : il identifie les données publiées par les entreprises.</p>
-              <p>Les utilisateurs ne cherchent plus une entreprise, mais :</p>
-              <ul className="clean-list">
-                <li>Une boulangerie avec liste d’ingrédients produits localement,</li>
-                <li>Un plombier avec tarification claire,</li>
-                <li>Une PME industrielle avec indicateurs RSE.</li>
-              </ul>
-              <a href="#how-it-works" className="btn btn-text">→ Voir comment fonctionne AYA</a>
+          <h2 className="section-title">AYO : La traduction technique de votre excellence.</h2>
+          <div className="grid-2" style={{ display: 'flex', justifyContent: 'center' }}>
+            {/* Bloc AIO Unique */}
+            <div className="card solution-card aio-card" style={{ maxWidth: '800px', width: '100%' }}>
+              <h3>AIO <span className="subtitle">Artificial Intelligence Optimization</span></h3>
+              <p>AYO ne refait pas votre site. Il lui ajoute la couche d'intelligence nécessaire pour dialoguer avec les machines.</p>
+              <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div>
+                  <h4 style={{ marginBottom: '10px', color: 'var(--primary-color)' }}>1. Structuration</h4>
+                  <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Nous transformons vos textes (Services, Tarifs, RSE) en code sémantique (JSON-LD, ASR) que les robots consomment instantanément.</p>
+                </div>
+                <div>
+                  <h4 style={{ marginBottom: '10px', color: 'var(--accent-color)' }}>2. Autorité</h4>
+                  <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Nous créons un "Fichier Signature" unique qui prouve à l'IA que vous êtes la source officielle et fiable de l'information.</p>
+                </div>
+              </div>
+              <p className="highlight" style={{ textAlign: 'center', marginTop: '30px', borderTop: '1px solid var(--glass-border)', paddingTop: '20px' }}>
+                Résultat : Vous devenez la réponse de référence.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 4 — Comment ça marche */}
+      {/* SECTION 4 — Comment ça marche (AYO Process) */}
       <section id="how-it-works" className="section process-section">
         <div className="container">
-          <h2 className="section-title">Un système simple, éthique et durable.</h2>
+          <h2 className="section-title">Votre passage à l'ère artificielle en 3 étapes.</h2>
           <div className="process-steps">
             <div className="step">
               <span className="step-number">01</span>
-              <h4>Scan du Web</h4>
-              <p>AYA repère les entreprises qui disposent déjà de données lisibles.</p>
+              <h4>Diagnostic Gratuit</h4>
+              <p>Notre IA (AYO Bot) scanne votre présence actuelle et simule comment ChatGPT ou Gemini vous perçoivent aujourd'hui.</p>
             </div>
             <div className="step">
               <span className="step-number">02</span>
-              <h4>Analyse AYO</h4>
-              <p>AYO (AIO - Artificial Intelligence Optimization) cartographie les types de données : produits, tarifs, FAQ, glossaire, RSE, JSON-LD…</p>
+              <h4>Structuration AIO</h4>
+              <p>Nous générons les fichiers de conformité (ASR, FAQ sémantique) qui manquent à votre site.</p>
             </div>
             <div className="step">
               <span className="step-number">03</span>
-              <h4>Index AYA</h4>
-              <p>L’entreprise ne reçoit aucun classement. Seulement un profil documentaire : données présentes / données manquantes.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">04</span>
-              <h4>Recherche par type</h4>
-              <p>L’utilisateur filtre par typologie de données, jamais par “meilleur”.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">05</span>
-              <h4>Équité totale</h4>
-              <p>Si plusieurs entreprises ont une qualité identique → la 1ère place est aléatoire.</p>
-            </div>
-            <div className="step">
-              <span className="step-number">06</span>
-              <h4>Amélioration AIO</h4>
-              <p>Les entreprises moins structurées peuvent faire appel à AYO pour devenir lisibles.</p>
+              <h4>Publication & Veille</h4>
+              <p>Une fois les fichiers en ligne, votre entreprise devient "IA-Ready". Nous surveillons votre lisibilité.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 5 — Pourquoi c'est durable ? */}
+      {/* SECTION 5 — Why Sustainable? (Adapted) */}
       <section id="sustainability" className="section sustainability-section">
         <div className="container">
-          <h2 className="section-title">Un Web plus clair, moins énergivore, plus juste.</h2>
+          <h2 className="section-title">Moins de bruit, plus de sens.</h2>
           <div className="grid-4">
             <div className="feature-block">
-              <h4>Moins de bruit</h4>
-              <p>AYA et AYO (AIO) réduisent la création inutile de contenu. Ils mettent en valeur l’existant, structuré proprement.</p>
+              <h4>Précision</h4>
+              <p>Une donnée structurée ne laisse pas de place à l'interprétation hasardeuse des robots.</p>
             </div>
             <div className="feature-block">
-              <h4>Plus de lisibilité</h4>
-              <p>Les IA savent mieux lire les données bien structurées et les humains comprennent mieux les données des entreprises.</p>
+              <h4>Économie</h4>
+              <p>Plus besoin de générer des centaines d'articles de blog pour le SEO. L'information pure suffit.</p>
             </div>
             <div className="feature-block">
-              <h4>Équité systémique</h4>
-              <p>À qualité égale, chaque entreprise a la même probabilité d’apparaître.</p>
+              <h4>Contrôle</h4>
+              <p>C'est vous qui dictez à l'IA ce qu'elle doit dire de vous, pas l'inverse.</p>
             </div>
             <div className="feature-block">
-              <h4>Durabilité numérique</h4>
-              <p>Moins d’indexation lourde. Moins de calcul superflu. Moins de duplication.</p>
+              <h4>Pérennité</h4>
+              <p>Les standards sémantiques (Schema.org) sont le langage universel du web de demain.</p>
             </div>
           </div>
         </div>
@@ -135,7 +125,7 @@ export default function Home() {
       {/* SECTION 6 — Pour qui ? */}
       <section id="target" className="section target-section">
         <div className="container">
-          <h2 className="section-title">Pour les organisations qui veulent être visible et comprises.</h2>
+          <h2 className="section-title">Pour les organisations qui veulent être comprises.</h2>
           <div className="target-grid">
             <span className="target-badge">Artisans & commerces locaux</span>
             <span className="target-badge">PME de services</span>
@@ -145,87 +135,105 @@ export default function Home() {
             <span className="target-badge">Acteurs engagés RSE / ESG</span>
             <span className="target-badge">Établissements publics</span>
           </div>
-          <p className="target-text">AYA et AYO (AIO) ne favorisent pas les grandes entreprises : le critère de visibilité est la qualité de vos données, pas la taille de votre budget.</p>
+          <p className="target-text">L'IA ne juge pas la taille de votre budget, elle juge la qualité de vos données.</p>
         </div>
       </section>
 
-      {/* SECTION 7 — Tarification */}
+      {/* PRICING - AYO Only */}
       <section id="pricing" className="section pricing-section">
         <div className="container">
-          <h2 className="section-title">Accessible, équitable, sans engagement.</h2>
-          <div className="grid-3 pricing-grid">
-            {/* Bloc AIO */}
-            <div className="card pricing-card featured">
-              <h3>AIO <br /><span className="card-subtitle">Structuration IA-Ready</span></h3>
-              <div className="price">À partir de 99 CHF</div>
-              <p className="price-details">Par page essentielle : Accueil, Services, Produits, À propos, Contact, RSE.</p>
-            </div>
-            {/* Bloc AYA */}
+          <h2 className="section-title">Investissez dans votre infrastructure sémantique.</h2>
+          <div className="grid-3 pricing-grid" style={{}}>
+
             <div className="card pricing-card">
-              <h3>AYA <br /><span className="card-subtitle">Indexation gratuite</span></h3>
+              <h3>Audit AYO <br /><span className="card-subtitle">Diagnostic de visibilité</span></h3>
               <div className="price">Gratuit</div>
-              <p className="price-details">Votre entreprise est ajoutée automatiquement dès que vos données sont lisibles.</p>
+              <p className="price-details">Testez comment les IA vous voient aujourd'hui. Rapport immédiat via notre Chatbot.</p>
+              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
+                <button
+                  onClick={() => {
+                    const chatBtn = document.getElementById('ayo-toggle');
+                    if (chatBtn) chatBtn.click();
+                  }}
+                  className="btn btn-secondary"
+                  style={{ width: '100%' }}
+                >Lancer l'audit</button>
+              </div>
             </div>
-            {/* AYA Enterprise */}
+
+            <div className="card pricing-card featured">
+              <h3>Pack AIO Essential <br /><span className="card-subtitle">Mise aux normes IA</span></h3>
+              <div className="price">99 CHF</div>
+              <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. <br />Signature cryptographique incluse.</p>
+              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
+                <button
+                  onClick={() => {
+                    const chatBtn = document.getElementById('ayo-toggle');
+                    if (chatBtn) chatBtn.click();
+                  }}
+                  className="btn btn-primary"
+                  style={{ width: '100%' }}
+                >Vérifier mon éligibilité</button>
+              </div>
+            </div>
+
             <div className="card pricing-card">
-              <h3>AYA Enterprise <br /><span className="card-subtitle">Solutions avancées</span></h3>
-              <div className="price">490 CHF / an</div>
-              <p className="price-details">Pour les organisations qui veulent des mises à jour automatiques, API, synchro CRM, etc.</p>
+              <h3>Pack AIO Pro <br /><span className="card-subtitle">Expertise & Sémantique</span></h3>
+              <div className="price">Sur devis</div>
+              <p className="price-details">Pour les sites complexes : Glossaire métier, FAQ structurée, Architecture de données avancée.</p>
+              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
+                <a href="mailto:contact@ai-visionary.com" className="btn btn-secondary" style={{ width: '100%', display: 'inline-block' }}>Nous contacter</a>
+              </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* SECTION AYO TRIGGER */}
+      {/* AYO TRIGGER */}
       <section id="ayo-trigger" className="section ayo-trigger-section" style={{ textAlign: "center", padding: "60px 20px" }}>
         <div className="container">
-          <h2 className="section-title">Passez à l'action immédiate.</h2>
-          <p className="section-subtitle">Analysez votre entreprise gratuitement et obtenez votre plan d'action.</p>
+          <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
+          <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
           <button id="open-ayo-chat-central" className="btn btn-primary" style={{ fontSize: "1.2rem", padding: "15px 30px" }}>
-            → Analyser mon entreprise avec AYO
+            → Démarrer l'audit AYO
           </button>
         </div>
       </section>
 
-      {/* SECTION 8 — Démo / Exemple */}
+      {/* DEMO - Modified slightly to reflect "Business Ready for AI" */}
       <section id="demo" className="section demo-section">
         <div className="container">
-          <h2 className="section-title">À quoi ressemble une entreprise lisible ?</h2>
+          <h2 className="section-title"> Exemple : Ce que l'IA verra de vous après AYO</h2>
           <div className="grid-3">
             {/* Boulangerie */}
             <div className="card demo-card">
-              <h4>🍞 Boulangerie Locale</h4>
-              <div className="subtitle">Commerce de proximité</div>
+              <h4>🍞 Commerce Local</h4>
+              <div className="subtitle">La boulangerie de demain</div>
               <ul className="readable-list">
-                <li><strong>Identité</strong> Nom, horaires, localisation, contact</li>
-                <li><strong>Offre</strong> Fiches produits (Ingrédients, Allergènes, Prix)</li>
-                <li><strong>Preuves</strong> Engagements (Bio/Local), Process de fabrication</li>
-                <li><strong>Confiance</strong> Traçabilité, Sourcing, Conformité Hygiène</li>
-                <li><strong>Technique</strong> JSON-LD (LocalBusiness), Photos structurées</li>
+                <li><strong>Avant</strong> "Une bonne baguette traditionnelle..." (Texte)</li>
+                <li><strong>Après AYO</strong> productID: "Baguette", price: "1.20", currency: "EUR" (Donnée)</li>
+                <li><strong>Résultat</strong> Siri/Google peut répondre "Où acheter une baguette à 1.20€ ?"</li>
               </ul>
             </div>
             {/* Consultant */}
             <div className="card demo-card">
-              <h4>🧭 Consultant RSE</h4>
-              <div className="subtitle">Service B2B / Intellectuel</div>
+              <h4>🧭 Consultant</h4>
+              <div className="subtitle">L'expert identifiable</div>
               <ul className="readable-list">
-                <li><strong>Identité</strong> Expertises, CV, Vision, Positionnement</li>
-                <li><strong>Offre</strong> Méthodologies, Livrables détaillés, Tarifs</li>
-                <li><strong>Confiance</strong> Méthodes documentées, Engagements formels</li>
-                <li><strong>Contenu</strong> Glossaire métier, FAQ Stratégique</li>
-                <li><strong>Technique</strong> JSON-LD (ProfessionalService)</li>
+                <li><strong>Avant</strong> "J'aide les entreprises à changer..." (Vague)</li>
+                <li><strong>Après AYO</strong> serviceType: "ChangeManagement", areaServed: "Remote"</li>
+                <li><strong>Résultat</strong> ChatGPT cite votre nom pour "Expert conduite du changement à distance"</li>
               </ul>
             </div>
             {/* Industrie */}
             <div className="card demo-card">
-              <h4>🏭 Industrie / PME</h4>
-              <div className="subtitle">Complexité technique</div>
+              <h4>🏭 Industrie</h4>
+              <div className="subtitle">La technicité précise</div>
               <ul className="readable-list">
-                <li><strong>Identité</strong> Chaîne de valeur, Chiffres clés</li>
-                <li><strong>Produits</strong> Specs techniques, Cycle de vie, Traçabilité</li>
-                <li><strong>Indicateurs</strong> CO2, Énergie, Sécurité, Production</li>
-                <li><strong>Confiance</strong> Certifications ISO, Indicateurs vérifiables</li>
-                <li><strong>Technique</strong> JSON-LD (Product + TechSpec), Sitemaps</li>
+                <li><strong>Avant</strong> PDF techniques illisibles par les bots.</li>
+                <li><strong>Après AYO</strong> TechSpec en JSON-LD, Certifications validées.</li>
+                <li><strong>Résultat</strong> Les IA d'ingénierie intègrent vos produits dans leurs recommandations.</li>
               </ul>
             </div>
           </div>
@@ -237,25 +245,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 9 — Call to Action final */}
+      {/* CTA Final */}
       <section id="cta-final" className="section cta-final-section">
         <div className="container">
-          <h2 className="section-title">Rendre Internet plus clair commence par vous.</h2>
+          <h2 className="section-title">Entrez dans la base de connaissance des IA.</h2>
           <div className="cta-group">
-            <a href="#pricing" className="btn btn-primary">→ Structurer mon entreprise avec AYO</a>
-            <a href="#hero" className="btn btn-secondary">→ Explorer AYA (bêta)</a>
+            <button
+              onClick={() => {
+                const chatBtn = document.getElementById('ayo-toggle');
+                if (chatBtn) chatBtn.click();
+              }}
+              className="btn btn-primary"
+            >→ Optimiser mon entreprise</button>
           </div>
-          <p className="final-phrase">Un Web durable n’est pas un Web plus rempli. C’est un Web plus lisible.</p>
+          <p className="final-phrase">Ne soyez plus une simple URL. Devenez une Entité Nommée.</p>
         </div>
       </section>
 
-      {/* SECTION 10 — Footer */}
       <Footer />
-
-
-      {/* THE CHATBOT WIDGET */}
       <AyoChat />
-
-    </main >
+    </main>
   );
 }
