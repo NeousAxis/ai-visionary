@@ -196,7 +196,15 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
           <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
-          <button id="open-ayo-chat-central" className="btn btn-primary" style={{ fontSize: "1.2rem", padding: "15px 30px" }}>
+          <button
+            id="open-ayo-chat-central"
+            onClick={() => {
+              const chatBtn = document.getElementById('ayo-toggle');
+              if (chatBtn) chatBtn.click();
+            }}
+            className="btn btn-primary"
+            style={{ fontSize: "1.2rem", padding: "15px 30px" }}
+          >
             → Démarrer l'audit AYO
           </button>
         </div>
@@ -214,7 +222,7 @@ export default function Home() {
               <ul className="readable-list">
                 <li><strong>Avant</strong> "Une bonne baguette traditionnelle..." (Texte)</li>
                 <li><strong>Après AYO</strong> productID: "Baguette", price: "1.20", currency: "EUR" (Donnée)</li>
-                <li><strong>Résultat</strong> Siri/Google peut répondre "Où acheter une baguette à 1.20€ ?"</li>
+                <li><strong>Résultat</strong> Siri/Google peut répondre à "Où trouver la meilleure baguette ?" en vous citant.</li>
               </ul>
             </div>
             {/* Consultant */}
