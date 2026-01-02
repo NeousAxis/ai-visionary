@@ -126,7 +126,7 @@ export default function Home() {
       {/* SECTION 6 — Pour qui ? */}
       <section id="target" className="section target-section">
         <div className="container">
-          <h2 className="section-title">Pour les organisations qui veulent être comprises.</h2>
+          <h2 className="section-title">Pour toutes les entreprises qui veulent être comprises.</h2>
           <div className="target-grid">
             <span className="target-badge">Artisans & commerces locaux</span>
             <span className="target-badge">PME de services</span>
