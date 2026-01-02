@@ -220,9 +220,9 @@ export default function Home() {
               <h4>🍞 Commerce Local</h4>
               <div className="subtitle">La boulangerie de demain</div>
               <ul className="readable-list">
-                <li><strong>Avant</strong> "Une bonne baguette traditionnelle..." (Texte)</li>
-                <li><strong>Après AYO</strong> productID: "Baguette", price: "1.20", currency: "EUR" (Donnée)</li>
-                <li><strong>Résultat</strong> Siri/Google peut répondre à "Où trouver la meilleure baguette ?" en vous citant.</li>
+                <li><strong>Avant</strong> "Notre baguette tradition est la meilleure..." (Promesse subjective)</li>
+                <li><strong>Après AYO</strong> award: "Médaille d'Or", material: "Blé Local", process: "Levain Naturel"</li>
+                <li><strong>Résultat</strong> L'IA valide vos preuves et vous cite pour la requête "Où trouver la meilleure baguette ?"</li>
               </ul>
             </div>
             {/* Consultant */}
