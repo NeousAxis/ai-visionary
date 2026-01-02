@@ -101,7 +101,7 @@ export default function Home() {
       {/* SECTION 5 — Why Sustainable? (Adapted) */}
       <section id="sustainability" className="section sustainability-section">
         <div className="container">
-          <h2 className="section-title">Moins de bruit, plus de sens.</h2>
+          <h2 className="section-title">Mieux structuré, plus visible.</h2>
           <div className="grid-4">
             <div className="feature-block">
               <h4>Précision</h4>
