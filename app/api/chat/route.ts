@@ -291,8 +291,43 @@ export async function POST(req: Request) {
         const { messages } = await req.json();
         const lastMessage = messages[messages.length - 1];
 
+
+        // 1. DYNAMIC PROVIDER SELECTION (HOISTED)
+        let modelToUse;
+
+        // Priority to OpenAI ONLY if key exists
+        if (process.env.OPENAI_API_KEY) {
+            console.log("Using Provider: OpenAI");
+            modelToUse = openai('gpt-4o-mini');
+        } else {
+            // Fallback to Gemini
+            let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
+            if (googleKey) {
+                googleKey = googleKey.trim();
+                console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}...`);
+                const google = createGoogleGenerativeAI({ apiKey: googleKey });
+
+                try {
+                    // Fast fallback to 'gemini-pro' to avoid listing overhead/errors during critical start
+                    // Or enable auto-detect if stable. Let's use 'gemini-1.5-pro-latest' or 'gemini-pro' safely.
+                    // For stability now:
+                    modelToUse = google('gemini-1.5-flash'); // Flash is fast for extraction, but user banned it?
+                    // User said "NO FLASH". Okay.
+                    modelToUse = google('gemini-1.5-pro');
+
+                } catch (e) {
+                    console.error("Gemini Init Error:", e);
+                    modelToUse = google('gemini-pro');
+                }
+            } else {
+                throw new Error("No API Key found (OpenAI or Gemini)");
+            }
+        }
+
         // 🧠 REAL-TIME GENERATION
         const sessionAsrId = crypto.randomUUID();
+
         const sessionDate = new Date().toISOString();
 
         // 🔍 DETECT IF WE ARE IN ANALYSIS PHASE (State 1 -> 2)
@@ -633,59 +668,7 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                 });
             }
 
-            // 1. DYNAMIC PROVIDER SELECTION
-            let modelToUse;
 
-            // Priority to OpenAI ONLY if key exists
-            if (process.env.OPENAI_API_KEY) {
-                console.log("Using Provider: OpenAI");
-                modelToUse = openai('gpt-4o-mini');
-            } else {
-                // Fallback to Gemini
-                let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-
-                if (googleKey) {
-                    // Sanitize key (remove spaces)
-                    googleKey = googleKey.trim();
-
-                    // Debug Log (Masked)
-                    console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}... (Length: ${googleKey.length})`);
-
-                    const google = createGoogleGenerativeAI({ apiKey: googleKey });
-
-                    try {
-                        console.log("Auto-detecting available Gemini model...");
-                        const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
-                        const modelsData = await modelsResponse.json();
-
-                        if (modelsData.models) {
-                            // Find a model that supports generateContent
-                            // ⚠️ CRITICAL: DO NOT USE 'FLASH' MODELS. They are unstable for this project.
-                            // We prioritize 'pro' or standard '1.5' versions.
-                            const bestModel = modelsData.models.find((m: any) =>
-                                m.supportedGenerationMethods.includes('generateContent') &&
-                                !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
-                                (m.name.includes('gemini-1.5') || m.name.includes('pro'))
-                            );
-
-                            if (bestModel) {
-                                const modelId = bestModel.name.replace('models/', '');
-                                console.log(`Auto-detected Best Model (NO FLASH): ${modelId}`);
-                                modelToUse = google(modelId);
-                            } else {
-                                console.warn("No ideal 'pro' model found in list, forcing 'gemini-pro'");
-                                modelToUse = google('gemini-pro');
-                            }
-                        } else {
-                            throw new Error("Could not list models");
-                        }
-                    } catch (error) {
-                        console.error("Error auto-detecting Gemini model:", error);
-                        console.warn("Falling back to 'gemini-pro' due to detection error.");
-                        modelToUse = google('gemini-pro');
-                    }
-                }
-            }
 
             // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
             let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
