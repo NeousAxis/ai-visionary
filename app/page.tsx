@@ -36,7 +36,11 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Pourquoi votre site web ne suffit plus.</h2>
           <div className="text-content">
-            <p>Aujourd'hui, vos futurs clients ne cherchent plus sur Google, ils posent des questions à des IA. Mais ces intelligences artificielles ne "lisent" pas votre site comme un humain : elles cherchent des données structurées.</p>
+            <p style={{ fontSize: '1.15rem', marginBottom: '1.5rem' }}>
+              "Les IA répondent de plus en plus aux clients à la place des moteurs de recherche.<br />
+              Elles ne montrent que les entreprises qu’elles peuvent identifier sans ambiguïté.<br />
+              <strong style={{ color: 'var(--primary-color)' }}>AYO structure votre entreprise pour qu’elle reste visible dans ce nouveau monde.</strong>"
+            </p>
             <ul className="problem-list">
               <li>Si vos données sont floues, l'IA vous ignore par prudence.</li>
               <li>Si vos informations sont mal structurées, l'IA peut "halluciner" ou se tromper sur vos services.</li>
