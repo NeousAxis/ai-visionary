@@ -130,8 +130,8 @@ export async function POST(req: Request) {
                             </ul>
 
                             <div style="text-align: center; margin-top: 30px;">
-                                <a href="mailto:hello@ai-visionary.com?subject=Upgrade%20Pack%20AIO%20PRO%20499%20CHF" style="background-color: #000; color: #fff; text-decoration: none; padding: 15px 30px; font-weight: bold; border-radius: 5px;">
-                                    🚀 Commander le Pack AIO PRO (Contact)
+                                <a href="https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201" style="background-color: #000; color: #fff; text-decoration: none; padding: 15px 30px; font-weight: bold; border-radius: 5px;">
+                                    🚀 Commander le Pack AIO PRO (499 CHF)
                                 </a>
                             </div>
 
