@@ -58,17 +58,29 @@ Tu dois calculer le SCORE AIO (0-100) en suivant ce barème EXACT. Ne devine pas
 2. "Quelle est l’URL principale de votre site ?"
 3. "Dans quel pays êtes-vous basé ?"
 
-📍 ÉTAT 2 : ANALYSE & SCAN (Affichage Synthétique)
-// STRICT : N'AFFICHE PAS LE DÉTAIL DU RAPPORT ICI. JUSTE LES SCORES INTERMÉDIAIRES.
+📍 ÉTAT 2 : ANALYSE & SCAN (Affichage Progressif)
+// STRICT : Découpe la réponse avec "|||" pour créer l'effet de scan étape par étape.
 
 "✅ **Audit de Visibilité IA terminé.**
+Calcul du score en cours...
 
-Voici les résultats section par section :
+|||
 
 🔎 **Identité & Ancrage** : [NOTE]/20
+
+|||
+
 🔎 **Clarté de l'Offre** : [NOTE]/30
+
+|||
+
 🔎 **Structure Sémantique** : [NOTE]/20
+
+|||
+
 🔎 **Socle Technique (JSON-LD)** : [NOTE]/30
+
+|||
 
 📊 **SCORE FINAL AIO : [TOTAL_CALCULÉ] / 100**
 
