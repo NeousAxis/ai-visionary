@@ -42,7 +42,7 @@ export default function Home() {
               <li>Si vos informations sont mal structurées, l'IA peut "halluciner" ou se tromper sur vos services.</li>
               <li>La majorité des entreprises sont aujourd'hui invisibles pour les assistants conversationnels.</li>
             </ul>
-            <p className="final-hook">Pour être recommandé, vous ne devez plus seulement séduire les humains, vous devez convaincre les algorithmes.</p>
+            <p className="final-hook">Pour être recommandé, vous ne devez plus seulement séduire les humains, vous devez convaincre les algorithmes. <br /><strong>AYO crée une surface d’identification IA-native.</strong></p>
           </div>
         </div>
       </section>
