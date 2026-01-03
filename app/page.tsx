@@ -113,7 +113,7 @@ export default function Home() {
               <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <h4 style={{ marginBottom: '10px', color: 'var(--primary-color)' }}>1. Structuration</h4>
-                  <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Nous transformons vos textes (Services, Tarifs, RSE) en code sémantique (JSON-LD, ASR) que les robots consomment instantanément.</p>
+                  <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Nous transformons vos textes (Services, Tarifs, RSE) en code sémantique (JSON-LD, ASR) que les robots consultent instantanément.</p>
                 </div>
                 <div>
                   <h4 style={{ marginBottom: '10px', color: 'var(--accent-color)' }}>2. Autorité</h4>
@@ -129,7 +129,7 @@ export default function Home() {
             <p style={{ fontSize: "1.4rem", fontWeight: "bold", lineHeight: "1.4" }}>
               "Si une IA ne dispose pas d’informations suffisantes sur votre activité, <br />
               <span style={{ color: "#ef4444" }}>elle vous écarte sans vous comparer.</span> <br />
-              <span style={{ color: "var(--primary-color)" }}>AYO corrige ça.</span>"
+              <span style={{ color: "#ef4444" }}>AYO corrige ça.</span>"
             </p>
           </div>
         </div>
@@ -287,7 +287,7 @@ export default function Home() {
               className="btn btn-primary"
             >→ Optimiser mon entreprise</button>
           </div>
-          <p className="final-phrase">Ne soyez plus une simple URL. Devenez une Entité Nommée.</p>
+          <p className="final-phrase">Ne soyez plus une simple URL. Faites entrer votre Entreprise dans cette nouvelle ère.</p>
         </div>
       </section>
 
