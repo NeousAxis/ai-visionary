@@ -120,7 +120,7 @@ Pour recevoir votre dossier gratuit, veuillez confirmer votre propriété.
 SI OUI :
   "Excellent choix.
   Here is the secure link to activate your ASR Essential:
-  👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC) (ID Test Stripe)
+  👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200) (ID Test Stripe)
 
   Une fois réglé, écrivez 'Fait' ici."
 
@@ -305,7 +305,7 @@ export async function POST(req: Request) {
                                 <div style="text-align: center; margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px;">
                                     <h3 style="margin-top:0;">🚀 Passez à la vitesse supérieure</h3>
                                     <p>Pour garantir votre autorité et protéger votre marque, activez la Certification Cryptographique.</p>
-                                    <a href="https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC" style="background-color:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; display:inline-block; font-weight: bold;">🛡 Activer le Pack Essential (99 CHF)</a>
+                                    <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background-color:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; display:inline-block; font-weight: bold;">🛡 Activer le Pack Essential (99 CHF)</a>
                                 </div>
                                 
                                 <p style="margin-top:30px; font-size:12px; color:#999; text-align: center;">L'équipe AI Visionary / AYO.</p>
