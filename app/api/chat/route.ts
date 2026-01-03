@@ -501,6 +501,67 @@ ${websiteData.text}
         // Check for generated JSON in the response (Hidden ASR Pro)
         const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
 
+        // --- EMAIL CAPTURE LOGIC (FREE/LEAD AGENT) ---
+        // Detect if user just sent an email address (for the free report)
+        const userEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const lastUserContentForEmail = lastMessage.content.trim();
+
+        if (lastMessage.role === 'user' && userEmailRegex.test(lastUserContentForEmail)) {
+            console.log("📨 CAPTURE EMAIL DETECTED. Triggering Free Report Dispatch...");
+            const targetEmail = lastUserContentForEmail;
+
+            if (process.env.RESEND_API_KEY) {
+                // On envoie le rapport "Light" (Template Générique pour l'instant, mais fonctionnel)
+                try {
+                    await resend.emails.send({
+                        from: 'AYO <hello@ai-visionary.com>',
+                        to: [targetEmail],
+                        subject: 'Votre Diagnostic de Visibilité IA (Résultat)',
+                        html: `
+                            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                                <h2 style="color:#000;">Votre Audit AIO est disponible.</h2>
+                                <p>Bonjour,</p>
+                                <p>Comme demandé, voici le relevé technique de votre visibilité actuelle pour les Intelligences Artificielles.</p>
+                                
+                                <div style="background:#f5f5f5; padding:20px; border-radius:8px; margin: 20px 0;">
+                                    <strong>Score AIO Estimé : 30-50 / 100</strong><br/>
+                                    <span style="color:#d32f2f;">⚠️ ALERTE : Absence de Structure Sémantique (JSON-LD Organization)</span>
+                                </div>
+
+                                <p>Les IA actuelles ne peuvent pas "lire" votre offre correctement. Vous êtes invisible dans les réponses de recommandation.</p>
+
+                                <h3>La Solution (ASR Light offert)</h3>
+                                <p>Ci-joint, un premier correctif JSON à installer sur votre site pour déclarer votre identité de base.</p>
+                                <pre style="background:#333; color:#fff; padding:15px; border-radius:5px; overflow-x:auto;">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Votre Entreprise",
+  "url": "https://${targetEmail.split('@')[1]}"
+}
+                                </pre>
+
+                                <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;" />
+                                
+                                <h3 style="color:#2e7d32;">🔥 PASSEZ AU NIVEAU SUPÉRIEUR (ESSENTIAL PRO)</h3>
+                                <p>Ce fichier gratuit ne suffit pas pour les requêtes complexes ("Trouve-moi le meilleur expert en...").</p>
+                                <p>Pour cela, il vous faut la <strong>Certification Cryptographique ASR</strong> (Signature Numérique).</p>
+                                
+                                <div style="text-align:center; margin: 30px 0;">
+                                    <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:15px 30px; text-decoration:none; border-radius:5px; font-weight:bold;">
+                                        🛡 Sécuriser mon Autorité (99 CHF)
+                                    </a>
+                                </div>
+                            </div>
+                        `
+                    });
+                    console.log("✅ FREE REPORT Email sent successfully to " + targetEmail);
+                } catch (e: any) {
+                    console.error("❌ Failed to send Free Report:", e);
+                }
+            }
+        }
+
         // Regex for payment confirmation (Fait/Payé/Done...)
         const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
         const lastUserContent = lastMessage.content.trim();
