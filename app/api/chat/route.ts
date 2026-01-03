@@ -503,18 +503,20 @@ ${websiteData.text}
 
         // --- EMAIL CAPTURE LOGIC (FREE/LEAD AGENT) ---
         // Detect if user just sent an email address (for the free report)
-        const userEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // Relaxed Regex: Finds email anywhere in string
+        const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
         const lastUserContentForEmail = lastMessage.content.trim();
+        const emailMatch = lastUserContentForEmail.match(emailCaptureRegex);
 
-        if (lastMessage.role === 'user' && userEmailRegex.test(lastUserContentForEmail)) {
+        if (lastMessage.role === 'user' && emailMatch) {
             console.log("📨 CAPTURE EMAIL DETECTED. Triggering Free Report Dispatch...");
-            const targetEmail = lastUserContentForEmail;
+            const targetEmail = emailMatch[0]; // The extracted email
 
             if (process.env.RESEND_API_KEY) {
                 // On envoie le rapport "Light" (Template Générique pour l'instant, mais fonctionnel)
                 try {
                     await resend.emails.send({
-                        from: 'AYO <hello@ai-visionary.com>',
+                        from: 'AYO <contact@ai-visionary.com>',
                         to: [targetEmail],
                         subject: 'Votre Diagnostic de Visibilité IA (Résultat)',
                         html: `
