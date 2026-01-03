@@ -309,15 +309,40 @@ export async function POST(req: Request) {
                 const google = createGoogleGenerativeAI({ apiKey: googleKey });
 
                 try {
-                    // Fast fallback to 'gemini-pro' to avoid listing overhead/errors during critical start
-                    // Or enable auto-detect if stable. Let's use 'gemini-1.5-pro-latest' or 'gemini-pro' safely.
-                    // For stability now:
-                    modelToUse = google('gemini-1.5-flash'); // Flash is fast for extraction, but user banned it?
-                    // User said "NO FLASH". Okay.
-                    modelToUse = google('gemini-1.5-pro');
+                    // 1. AUTO-DETECT AVAILABLE MODELS (Robust Way)
+                    console.log("Auto-detecting available Gemini model...");
+                    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
 
+                    if (!modelsResponse.ok) {
+                        throw new Error(`Failed to list models: ${modelsResponse.statusText}`);
+                    }
+
+                    const modelsData = await modelsResponse.json();
+
+                    if (modelsData.models) {
+                        // Find best model: Supports generateContent, NOT flash (as per user), prefers 1.5 or pro
+                        const bestModel = modelsData.models.find((m: any) =>
+                            m.supportedGenerationMethods.includes('generateContent') &&
+                            !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
+                            (m.name.includes('gemini-1.5') || m.name.includes('pro'))
+                        );
+
+                        if (bestModel) {
+                            // API returns 'models/gemini-1.5-pro-001', we need 'gemini-1.5-pro-001' (sometimes with or without 'models/')
+                            // The Google SDK usually expects just the ID, but let's be safe.
+                            const modelId = bestModel.name.replace('models/', '');
+                            console.log(`✅ Auto-detected Best Model: ${modelId}`);
+                            modelToUse = google(modelId);
+                        } else {
+                            console.warn("No specific '1.5' or 'pro' model found (excluding flash). Fallback to 'gemini-pro'.");
+                            modelToUse = google('gemini-pro');
+                        }
+                    } else {
+                        throw new Error("No models list returned.");
+                    }
                 } catch (e) {
-                    console.error("Gemini Init Error:", e);
+                    console.error("Gemini Auto-Detect Failed:", e);
+                    // Ultimate Fallback: Try a known stable alias
                     modelToUse = google('gemini-pro');
                 }
             } else {
