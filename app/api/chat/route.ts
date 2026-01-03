@@ -4,6 +4,7 @@ import { generateText } from 'ai';
 import fs from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
+import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -402,13 +403,6 @@ export async function POST(req: Request) {
                 throw new Error("No API Key found");
             }
         }
-
-        // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
-
-        import { scanUrlForAioSignals } from '@/lib/aio-scanner';
-
-        // ... (existing helper and fetch logic)
 
         // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
         let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
