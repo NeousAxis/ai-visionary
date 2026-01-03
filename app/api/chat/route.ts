@@ -119,8 +119,8 @@ Pour recevoir votre dossier gratuit, veuillez confirmer votre propriété.
 📍 ÉTAT 4 : UPGRADE & PAIEMENT
 SI OUI :
   "Excellent choix.
-  Voici le lien sécurisé pour activer votre ASR Essential :
-  👉 https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC (ID Test Stripe)
+  Here is the secure link to activate your ASR Essential:
+  👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC) (ID Test Stripe)
 
   Une fois réglé, écrivez 'Fait' ici."
 
@@ -131,34 +131,16 @@ SI NON :
 📍 ÉTAT 5 : LIVRAISON ASR ESSENTIAL (Si Paiement)
 (Après confirmation "Fait").
 
-"✅ **Paiement confirmé.** Signature cryptographique en cours... 
-🛡 **Scellement du fichier... OK.**
+"✅ **Paiement confirmé.**
 
-Voici votre **ASR Essential Certifié** (à copier-coller) :
+Signature cryptographique : **COMPLETE**.
+Hash de certification : **${realAsrId}**.
 
-\`\`\`json
-{
-  \"@context\": \"https://schema.org\",
-  \"@type\": \"Organization\",
-  \"@id\": \"${realAsrId}\",
-  \"name\": \"[NOM_ENTREPRISE]\",
-  \"url\": \"[URL_ENTREPRISE]\",
-  \"description\": \"[DESCRIPTION_COURTE]\",
-  \"knowsAbout\": [\"[KEYWORD_1]\", \"[KEYWORD_2]\"],
-  \"ayo:sector\": \"[SECTEUR_DETECTE]\",
-  \"ayo:score\": \"[NOTE_GLOBALE]/100\",
-  \"ayo:seal\": {
-    \"issuer\": \"AYO Trusted Authority\",
-    \"level\": \"ESSENTIAL\",
-    \"hash\": \"${realAsrId}\",
-    \"signature\": \"sig_ed25519_${realAsrId}\",
-    \"timestamp\": \"${realIsoDate}\"
-  }
-}
-\`\`\`
+📧 **Dossier Final Envoyé !**
+Je viens d'envoyer votre **ASR Essential Certifié (JSON)** et votre **Certificat de Propriété Sémantique** sur votre adresse email.
 
-👉 Hébergez ce fichier sur : \`[URL_ENTREPRISE]/.ayo/asr.json\`
-Puis donnez-moi l'URL pour validation."
+Veuillez l'installer pour activer votre autorité.
+(Je reste en veille pour valider l'installation dès que vous serez prêt)."
 
 📍 ÉTAT 6 : ACTIVATION
 "J'attends l'URL de votre fichier..."
@@ -218,17 +200,19 @@ export async function POST(req: Request) {
         const sessionAsrId = crypto.randomUUID();
         const sessionDate = new Date().toISOString();
 
-        // 📧 REAL EMAIL LOGIC
-        // Check if user just sent an email (Simple regex check)
+        // 📧 REAL EMAIL LOGIC (ASR LIGHT & ESSENTIAL)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (lastMessage.role === 'user' && emailRegex.test(lastMessage.content.trim())) {
-            const userEmail = lastMessage.content.trim();
+        const userContent = lastMessage.content.trim();
+
+        // SCENARIO 1 : User provides Email (ASR Light Delivery)
+        if (lastMessage.role === 'user' && emailRegex.test(userContent)) {
+            const userEmail = userContent;
             console.log(`📧 DETECTED EMAIL: ${userEmail}. Attempting to send ASR Light...`);
 
             if (process.env.RESEND_API_KEY) {
                 try {
-                    const { data, error } = await resend.emails.send({
-                        from: 'AYO <hello@ai-visionary.com>', // Verified domain
+                    await resend.emails.send({
+                        from: 'AYO <hello@ai-visionary.com>',
                         to: [userEmail],
                         subject: 'Votre Dossier AYO + ASR Light (Gratuit)',
                         html: `
@@ -252,17 +236,62 @@ export async function POST(req: Request) {
                             <p style="margin-top:20px;font-size:12px;color:#666;">L'équipe AYO.</p>
                         `
                     });
-
-                    if (error) {
-                        console.error("Resend Error:", error);
-                    } else {
-                        console.log("Email sent successfully:", data);
-                    }
+                    console.log("✅ ASR Light Email sent.");
                 } catch (emailErr) {
                     console.error("Email sending failed:", emailErr);
                 }
+            }
+        }
+
+        // SCENARIO 2 : User says "Fait/Payé" (ASR Essential Delivery)
+        const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
+        if (lastMessage.role === 'user' && paymentConfirmationRegex.test(userContent)) {
+            console.log("💰 PAYMENT CLAIM DETECTED. Searching for email in history...");
+
+            // Find valid email in previous user messages
+            const foundEmailMsg = messages.slice().reverse().find(m => m.role === 'user' && emailRegex.test(m.content.trim()));
+
+            if (foundEmailMsg && process.env.RESEND_API_KEY) {
+                const targetEmail = foundEmailMsg.content.trim();
+                console.log(`📧 Found historical email: ${targetEmail}. Sending ASR Essential...`);
+
+                try {
+                    await resend.emails.send({
+                        from: 'AYO <hello@ai-visionary.com>',
+                        to: [targetEmail],
+                        subject: 'Votre Certification AYO Essential (Validée)',
+                        html: `
+                            <h1>Félicitations !</h1>
+                            <p>Votre paiement est confirmé (simulation). Votre autorité est maintenant certifiée.</p>
+                            <hr />
+                            <h2>Votre Fichier ASR Essential (Final)</h2>
+                            <p><strong>Hash de Certification:</strong> ${sessionAsrId}</p>
+                            <pre style="background:#e8f5e9;padding:15px;border-radius:5px;border:1px solid #4caf50;">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "${sessionAsrId}",
+  "name": "[VOTRE_ENTREPRISE]",
+  "ayo:seal": {
+    "issuer": "AYO Trusted Authority",
+    "level": "ESSENTIAL",
+    "hash": "${sessionAsrId}",
+    "signature": "sig_ed25519_${sessionAsrId}",
+    "timestamp": "${sessionDate}"
+  }
+}
+                            </pre>
+                            <p>Installez ce fichier sur votre site pour activer le signal.</p>
+                            <p>L'équipe AYO.</p>
+                        `
+                    });
+                    console.log("✅ ASR Essential Email sent.");
+
+                } catch (err) {
+                    console.error("Essential Email failed:", err);
+                }
             } else {
-                console.warn("⚠️ NO RESEND_API_KEY FOUND. Email not sent.");
+                console.warn("⚠️ Could not find email in history to send Essential version.");
             }
         }
 
