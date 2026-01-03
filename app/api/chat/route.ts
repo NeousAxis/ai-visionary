@@ -311,63 +311,133 @@ export async function POST(req: Request) {
             console.log("✅ ACCESS GRANTED (Universal Pass). Sending Report...");
 
             // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
-            const analysisMsg = messages.slice().reverse().find((m: any) => m.role === 'assistant' && m.content.includes('SCORE FINAL'));
-            let analysisHtml = "<p><em>Analyse non disponible dans l'historique immédiat.</em></p>";
+            // We search for the message containing the '|||' marker which is MANDATORY in the new V3 prompt
+            const analysisMsg = messages.slice().reverse().find((m: any) =>
+                m.role === 'assistant' && m.content.includes('|||')
+            );
 
+            let analysisHtml = "";
+
+            let extractedScore = 0;
             if (analysisMsg) {
-                // Determine content to show based on V3 Prompt Output (|||)
-                if (analysisMsg.content.includes('|||')) {
-                    // New Format Parse
-                    const parts = analysisMsg.content.split('|||');
-                    analysisHtml = parts.map((p: string) => p.trim()).filter((p: string) => p.startsWith('🔎') || p.startsWith('📊')).map((l: string) => `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${l.replace(/\*\*/g, '')}</p>`).join('');
-                } else {
-                    // Legacy Format Parse
-                    const lines = analysisMsg.content.split('\n').filter((l: string) => l.includes('🔎') || l.includes('📊'));
-                    analysisHtml = lines.map((l: string) => `<p style="margin: 5px 0;">${l.replace(/\*\*/g, '<strong>').replace(/\*\*/g, '</strong>')}</p>`).join('');
-                }
+                // Extract Score Logic
+                const scoreMatch = analysisMsg.content.match(/SCORE FINAL AIO\s*:\s*(\d+)/i);
+                if (scoreMatch) extractedScore = parseInt(scoreMatch[1], 10);
+
+                // The original parsing logic for analysisHtml needs to be inside this if (analysisMsg) block
+                // and should only proceed if '|||' is present, as per the original code's intent.
+                // The user's provided snippet has `if (analysisMsg.content.includes('|||')) { ... }`
+                // but the original code already checks for `includes('|||')` in the `find` method.
+                // So, the `if (analysisMsg)` is sufficient here.
+
+                console.log("✅ FOUND ANALYSIS MESSAGE. Parsing content...");
+                // Parse V3 Format (||| split)
+                const parts = analysisMsg.content.split('|||');
+                // Filter parts that look like scores (contain emojis or keywords)
+                const scoreParts = parts.filter((p: string) => p.includes('🔎') || p.includes('📊') || p.includes('Identité') || p.includes('Score'));
+
+                analysisHtml = scoreParts.map((p: string) => {
+                    const cleanLine = p.trim().replace(/\*\*/g, ''); // Remove markdown bold
+                    return `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${cleanLine}</p>`;
+                }).join('');
+            } else {
+                console.warn("⚠️ Analysis Message with '|||' NOT FOUND. Falling back to generic text.");
+                analysisHtml = "<p><em>Le détail de votre score n'a pas pu être récupéré automatiquement. Veuillez consulter le chat.</em></p>";
+            }
+
+            // DYNAMIC EMAIL CONTENT BUILDER
+            let verdictHtml = "";
+            let offerHtml = "";
+            const targetEmail = userEmail; // Ensure targetEmail is defined for the template
+
+            if (extractedScore >= 90) {
+                // SCENARIO: PERFECT SCORE (BRAVO)
+                verdictHtml = `
+                    <div style="background:#e8f5e9; padding:20px; border-radius:8px; border:1px solid #c8e6c9;">
+                        <h3 style="color:#2e7d32; margin-top:0;">✅ EXCELLENT : Vous êtes 100% Compatible IA.</h3>
+                        <p>Votre architecture est déjà optimisée. Les moteurs de réponse (ChatGPT, Gemini) peuvent vous lire sans obstacle.</p>
+                        <p><strong>Action requise :</strong> Aucune pour l'instant. Votre avance technologique est validée.</p>
+                        <p style="font-size:13px; color:#555;">Conseil : Le web évolue vite. Revenez faire un audit gratuit dans 9 à 12 mois.</p>
+                    </div>`;
+                offerHtml = ``; // No hard sell for perfect sites
+            } else if (extractedScore >= 50) {
+                // SCENARIO: GOOD BUT NOT SECURED
+                verdictHtml = `
+                    <div style="background:#fff3e0; padding:20px; border-radius:8px; border:1px solid #ffe0b2;">
+                        <h3 style="color:#ef6c00; margin-top:0;">⚠️ BON DÉBUT : Vous êtes visible, mais vulnérable.</h3>
+                        <p>Vous avez fait le travail de base. Cependant, sans <strong>Certification ASR</strong>, cette visibilité n'est pas "scellée".</p>
+                        <p>D'autres acteurs certifiés pourraient passer devant vous dans les recommandations d'experts.</p>
+                    </div>`;
+                offerHtml = `
+                    <div style="margin-top:30px;">
+                        <h3 style="color:#2c3e50;">Passez de "Visible" à "Autorité Certifiée"</h3>
+                        <p>AYO peut encore améliorer votre impact en verrouillant vos données clés (Offre, Tarifs) via une signature cryptographique.</p>
+                        <div style="text-align:center; margin: 20px 0;">
+                             <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
+                                 🛡 Sécuriser mon Avance (Pack Essential - 99 CHF)
+                             </a>
+                        </div>
+                    </div>`;
+            } else {
+                // SCENARIO: CRITICAL (<50)
+                verdictHtml = `
+                    <div style="background:#ffebee; padding:20px; border-radius:8px; border:1px solid #ffcdd2;">
+                        <h3 style="color:#c62828; margin-top:0;">🚫 CRITIQUE : Vous êtes invisible pour les IA.</h3>
+                        <p>Votre site est conçu pour les humains (visuel), mais techniquement muet pour les machines (sémantique).</p>
+                        <p>Conséquence : Vous êtes exclu des réponses générées par les nouveaux moteurs de recherche.</p>
+                    </div>`;
+                offerHtml = `
+                    <h3 style="color:#2c3e50; margin-top:30px;">🎁 Étape 1 : Le Correctif d'Urgence (AYO Light)</h3>
+                    <p>Installez ce fichier offert pour déclarer votre existence minimale :</p>
+                    <div style="background:#2d3436; color:#dfe6e9; padding:15px; border-radius:5px; overflow-x:auto; font-family:monospace; font-size:12px;">
+<pre style="margin:0;">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Votre Entreprise",
+  "url": "https://${targetEmail.split('@')[1] || 'votresite.com'}"
+}
+</pre>
+                    </div>
+                    
+                    <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-top:30px; border:1px solid #ddd;">
+                        <h3 style="color:#000; margin-top:0;">🚀 La Solution Complète (Essential & PRO)</h3>
+                        <p>Le fichier gratuit ne suffit pas. Pour dominer votre secteur, il vous faut :</p>
+                        <ul style="font-size:14px;">
+                            <li><strong>Certification ASR</strong> (Pour l'autorité).</li>
+                            <li><strong>FAQ Sémantique & Glossaire</strong> (Pour le Pack PRO).</li>
+                        </ul>
+                        <div style="text-align:center; margin-top:20px;">
+                             <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#2e7d32; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
+                                 Voir les Solutions AYO
+                             </a>
+                        </div>
+                    </div>`;
             }
 
             if (process.env.RESEND_API_KEY) {
                 try {
                     await resend.emails.send({
                         from: 'AYO <hello@ai-visionary.com>',
-                        to: [userEmail],
-                        subject: 'Votre Diagnostic de Visibilité IA (Résultat)',
+                        to: [targetEmail],
+                        subject: `Résultat Audit AIO : ${extractedScore}/100`, // Dynamic Subject
                         html: `
-                            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                                <h2 style="color:#000;">Votre Audit AIO est disponible.</h2>
-                                <p>Bonjour,</p>
-                                <p>Comme demandé, voici le relevé technique de votre visibilité actuelle pour les Intelligences Artificielles.</p>
-                                
-                                <div style="background:#f5f5f5; padding:20px; border-radius:8px; margin: 20px 0;">
-                                    <h2 style="margin-top:0; font-size:18px;">📊 Résultats de l'Audit</h2>
+                            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; line-height: 1.6;">
+                                <div style="text-align:center; padding: 20px 0;">
+                                    <h1 style="color:#000; margin-bottom:5px;">Votre Score de Visibilité IA</h1>
+                                    <p style="font-size:24px; font-weight:bold; color:#333; margin:0;">${extractedScore} / 100</p>
+                                </div>
+
+                                ${verdictHtml}
+
+                                <div style="margin: 30px 0;">
+                                    <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Détail de l'Analyse</h3>
                                     ${analysisHtml}
                                 </div>
 
-                                <p><strong>Constat :</strong> Votre site manque de balises sémantiques (JSON-LD Organization). Les IA ne peuvent pas vous identifier avec certitude.</p>
+                                ${offerHtml}
 
-                                <h3>1. La Solution Gratuite (ASR Light)</h3>
-                                <p>Copiez ce code <code>asr.json</code> à la racine de votre site (dossier /.ayo/) :</p>
-                                <pre style="background:#222; color:#81c784; padding:15px; border-radius:5px; overflow-x:auto;">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Votre Entreprise",
-  "url": "https://${userEmail.split('@')[1]}", 
-  "contactPoint": { "@type": "ContactPoint", "email": "${userEmail}" }
-}
-                                </pre>
-
-                                <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;" />
-                                
-                                <h3 style="color:#2e7d32;">2. La Solution Complète (Essential Pro)</h3>
-                                <p>Pour apparaître dans les recommandations ("Qui est le meilleur expert ?"), il vous faut la Certification Cryptographique ASR.</p>
-                                
-                                <div style="text-align:center; margin: 30px 0;">
-                                    <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:15px 30px; text-decoration:none; border-radius:5px; font-weight:bold;">
-                                        🛡 Sécuriser mon Autorité (99 CHF)
-                                    </a>
-                                </div>
+                                <p style="margin-top:50px; font-size:12px; color:#999; text-align: center;">AI Visionary - L'infrastructure de vérité pour l'Intelligence Artificielle.</p>
                             </div>
                         `
                     });
