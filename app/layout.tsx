@@ -6,12 +6,12 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "AI VISIONARY - AYA + AIO",
+  title: "AI VISIONARY",
   description: "Un Internet lisible. Une visibilité durable. AYA et AIO structurent et rendent lisible le web pour l'IA.",
   icons: {
-    icon: '/final-favicon.svg',
-    shortcut: '/final-favicon.svg',
-    apple: '/final-favicon.svg',
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
 };
 
