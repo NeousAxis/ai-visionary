@@ -88,7 +88,10 @@ Calcul du score en cours...
 
 🔒 **RÉSULTAT DÉTAILLÉ VERROUILLÉ**
 J'ai généré votre **ASR Light** (Carte d'identité numérique) qui corrige les points manquants.
-Pour le recevoir ainsi que le rapport complet, veuillez confirmer votre propriété.
+
+(ℹ️ *Note : Il existe une version **Essential** (Certifiée & Signée) pour 99 CHF, je vous proposerai l'upgrade juste après.*)
+
+Pour recevoir votre dossier gratuit, veuillez confirmer votre propriété.
 
 👉 **Entrez votre email professionnel ([DOMAINE_URL_ENTREPRISE]) :**
 (Envoi immédiat et sécurisé)."
@@ -244,8 +247,9 @@ export async function POST(req: Request) {
   "generatedAt": "${sessionDate}"
 }
                             </pre>
-                            <p>Pour obtenir la certification complète, répondez "Oui" dans le chat.</p>
-                            <p>L'équipe AYO.</p>
+                            <p>Pour obtenir la certification complète, répondez "Oui" dans le chat ou cliquez ci-dessous :</p>
+                            <a href="https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC" style="background-color:#000;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;margin-top:10px;">🛡 Activer la Certification (99 CHF)</a>
+                            <p style="margin-top:20px;font-size:12px;color:#666;">L'équipe AYO.</p>
                         `
                     });
 
