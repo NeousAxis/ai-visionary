@@ -406,25 +406,56 @@ export async function POST(req: Request) {
         // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
         let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
 
-        // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE
-        if (websiteData.text) {
+        import { scanUrlForAioSignals } from '@/lib/aio-scanner';
+
+        // ... (existing helper and fetch logic)
+
+        // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
+        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
+
+        // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
+        // Detect if the user message is a URL (Basic Heuristic for State 1/2)
+        const lastUserMsg = messages[messages.length - 1].content;
+        const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
+
+        // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
+        if (websiteData.text || (urlMatch && messages.length <= 4)) {
+            console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
+
+            // Determine URL to scan (either from state or extraction)
+            let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
+
+            if (urlToScan) {
+                const scanResult = await scanUrlForAioSignals(urlToScan);
+
+                finalSystemPrompt += `\n\n🚨 [RAPPORT D'ANALYSE TECHNIQUE RÉEL - SCANNER AIO] 🚨
+1. URL ANALYSÉE : ${scanResult.url}
+2. RÉSULTATS DU SCAN (FAITS AVÉRÉS) :
+   - ACCESSIBILITÉ : ${scanResult.isReachable ? "✅ Site Accessible" : "❌ Site Inaccessible"}
+   - JSON-LD (Sémantique) : ${scanResult.hasJsonLd ? `✅ DÉTECTÉ (${scanResult.jsonLdCount} blocs)` : "❌ NON DÉTECTÉ"}
+   - FICHIER ASR (.ayo/asr.json) : ${scanResult.hasAsrFile ? "🏆 ✅ OFFICIELLEMENT DÉTECTÉ (Site Certifié AIO)" : "❌ ABSENT"}
+   - FAQ : ${scanResult.hasFaqContent ? "✅ CONTENU FAQ DÉTECTÉ" : "❌ Aucune FAQ détectée"}
+   - SCHEMA FAQPAGE : ${scanResult.hasFaqSchema ? "✅ SCHEMA FAQ STRUCTURÉ" : (scanResult.hasFaqContent ? "⚠️ Contenu FAQ présent mais NON STRUCTURÉ (Manque JSON-LD)" : "⚪ Non applicable")}
+   - META TITRE : "${scanResult.metaTitle || 'Aucun'}"
+   - META DESCRIPTION : "${scanResult.metaDescription || 'Aucune'}"
+
+⚠️ CONSIGNE DE SCORING INTERNE (NON DISCUTABLE) :
+- Si "FICHIER ASR" est DÉTECTÉ (🏆) : NOTE TECHNIQUE = 30/30 AUTOMATIQUE + AFFICHER "✅ ASR Certifié".
+- Si "SCHEMA FAQPAGE" est absent alors que "CONTENU FAQ" est présent : PÉNALITÉ CLARTÉ (-10 pts) + Mentionner "Votre FAQ est visible par les humains mais invisible pour les IA".
+- Utilise ces faits pour remplir les sections du rapport sans inventer.
+`;
+            }
+
             console.log("Injecting real website content into AI context...");
 
-            const jsonStatus = websiteData.hasJsonLd ? "✅ DÉTECTÉ (Présent dans le code source)" : "❌ NON DÉTECTÉ (Absent du code source)";
-
-            finalSystemPrompt += `\n\n🚨 [RAPPORT D'ANALYSE TECHNIQUE RÉEL] 🚨
-1. CONTENU DU SITE : Voici le texte brut extrait de la page d'accueil (${messages[3]?.content}).
-2. ANALYSE TECHNIQUE (FAIT ÉTABLI) :
-   - JSON-LD : ${jsonStatus}
-   
-⚠️ CONSIGNE CRITIQUE :
-- Utilise le texte ci-dessous pour déterminer "Forme Juridique" et "Secteur d'Activité".
-- Pour la section "STRUCTURE TECHNIQUE", tu reportes STRICTEMENT le statut JSON-LD indiqué ci-dessus ("${jsonStatus}"). NE L'INVENTE PAS.
-
+            // Keep the text injection for content analysis
+            finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
 """
 ${websiteData.text}
 """`;
+
         } else if (messages.length === 6) {
+            // ... existing fallback
             console.log("No website content could be fetched (or failed). AI will infer from name.");
         }
 
