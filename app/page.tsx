@@ -112,6 +112,13 @@ export default function Home() {
               </p>
             </div>
           </div>
+          <div style={{ textAlign: "center", marginTop: "40px", maxWidth: "800px", margin: "40px auto 0" }}>
+            <p style={{ fontSize: "1.4rem", fontWeight: "bold", lineHeight: "1.4" }}>
+              "Si une IA ne peut pas comprendre votre entreprise, <br />
+              <span style={{ color: "#ef4444" }}>elle vous écarte sans vous comparer.</span> <br />
+              <span style={{ color: "var(--primary-color)" }}>AYO corrige ça.</span>"
+            </p>
+          </div>
         </div>
       </section>
 
@@ -177,7 +184,10 @@ export default function Home() {
             <span className="target-badge">Acteurs engagés RSE / ESG</span>
             <span className="target-badge">Établissements publics</span>
           </div>
-          <p className="target-text">L'IA ne juge pas la taille de votre budget, elle juge la qualité de vos données.</p>
+          <p className="target-text" style={{ fontSize: '1.2rem', marginTop: '30px', lineHeight: '1.6' }}>
+            "Aujourd’hui, la visibilité ne dépend plus du référencement, mais de la capacité des IA à vous identifier.<br />
+            <strong>AYO prépare votre entreprise à ce nouveau filtre.</strong>"
+          </p>
         </div>
       </section>
 
