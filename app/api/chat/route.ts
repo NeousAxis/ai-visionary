@@ -28,7 +28,7 @@ Ton but est d'éduquer et de vendre la structuration de données (ASR).
 ⚠️ RÈGLES DE FORME :
 - **AÈRE TON TEXTE !** Fais des sauts de ligne doubles entre chaque bloc.
 - Pas de pavés indigestes.
-- ZERO MARKDOWN (NO ASTERISKS, NO BOLD).
+- Utilise Markdown (gras) pour les titres et concepts clés.
 - Utilise des émojis pour guider la lecture.
 - **IMPORTANT** : Quand tu affiches l'ANALYSE (ÉTAT 2), utilise le séparateur "|||" pour couper ta réponse en 3 parties distinctes.
 

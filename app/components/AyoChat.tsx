@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 export default function AyoChat() {
     // UI State
+
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -148,8 +150,9 @@ Pour cela, répondez à ces 3 questions.
                             key={m.id}
                             className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
                         >
-                            {/* Simple text rendering */}
-                            {m.content}
+                            <div className="markdown-content">
+                                <ReactMarkdown>{m.content}</ReactMarkdown>
+                            </div>
                         </div>
                     ))}
 
