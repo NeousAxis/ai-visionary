@@ -253,73 +253,72 @@ export default function Home() {
           </div>
 
         </div>
-      </div>
-    </section>
+      </section>
 
-      {/* AYO TRIGGER */ }
-  <section id="ayo-trigger" className="section ayo-trigger-section" style={{ textAlign: "center", padding: "60px 20px" }}>
-    <div className="container">
-      <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
-      <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
-      <button
-        id="open-ayo-chat-central"
-        onClick={() => {
-          const chatBtn = document.getElementById('ayo-toggle');
-          if (chatBtn) chatBtn.click();
-        }}
-        className="btn btn-primary"
-        style={{ fontSize: "1.2rem", padding: "15px 30px" }}
-      >
-        → Démarrer l'audit AYO
-      </button>
-    </div>
-  </section>
+      {/* AYO TRIGGER */}
+      <section id="ayo-trigger" className="section ayo-trigger-section" style={{ textAlign: "center", padding: "60px 20px" }}>
+        <div className="container">
+          <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
+          <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
+          <button
+            id="open-ayo-chat-central"
+            onClick={() => {
+              const chatBtn = document.getElementById('ayo-toggle');
+              if (chatBtn) chatBtn.click();
+            }}
+            className="btn btn-primary"
+            style={{ fontSize: "1.2rem", padding: "15px 30px" }}
+          >
+            → Démarrer l'audit AYO
+          </button>
+        </div>
+      </section>
 
-  {/* DEMO - Modified slightly to reflect "Business Ready for AI" */ }
-  <section id="demo" className="section demo-section">
-    <div className="container">
-      <h2 className="section-title"> Exemple : Ce que l'IA verra de vous après AYO</h2>
-      <div className="grid-3">
-        {/* Boulangerie */}
-        <div className="card demo-card">
-          <h4>🍞 Commerce Local</h4>
-          <div className="subtitle">La boulangerie de demain</div>
-          <ul className="readable-list">
-            <li><strong>Avant</strong> "Notre baguette tradition est la meilleure..." (Promesse subjective)</li>
-            <li><strong>Après AYO</strong> award: "Médaille d'Or", material: "Blé Local", process: "Levain Naturel"</li>
-            <li><strong>Résultat</strong> L'IA valide vos preuves et vous cite pour la requête "Où trouver la meilleure baguette ?"</li>
-          </ul>
+      {/* DEMO - Modified slightly to reflect "Business Ready for AI" */}
+      <section id="demo" className="section demo-section">
+        <div className="container">
+          <h2 className="section-title"> Exemple : Ce que l'IA verra de vous après AYO</h2>
+          <div className="grid-3">
+            {/* Boulangerie */}
+            <div className="card demo-card">
+              <h4>🍞 Commerce Local</h4>
+              <div className="subtitle">La boulangerie de demain</div>
+              <ul className="readable-list">
+                <li><strong>Avant</strong> "Notre baguette tradition est la meilleure..." (Promesse subjective)</li>
+                <li><strong>Après AYO</strong> award: "Médaille d'Or", material: "Blé Local", process: "Levain Naturel"</li>
+                <li><strong>Résultat</strong> L'IA valide vos preuves et vous cite pour la requête "Où trouver la meilleure baguette ?"</li>
+              </ul>
+            </div>
+            {/* Consultant */}
+            <div className="card demo-card">
+              <h4>🧭 Consultant</h4>
+              <div className="subtitle">L'expert identifiable</div>
+              <ul className="readable-list">
+                <li><strong>Avant</strong> "J'aide les entreprises à changer..." (Vague)</li>
+                <li><strong>Après AYO</strong> serviceType: "ChangeManagement", areaServed: "Remote"</li>
+                <li><strong>Résultat</strong> ChatGPT cite votre nom pour "Expert conduite du changement à distance"</li>
+              </ul>
+            </div>
+            {/* Industrie */}
+            <div className="card demo-card">
+              <h4>🏭 Industrie</h4>
+              <div className="subtitle">La technicité précise</div>
+              <ul className="readable-list">
+                <li><strong>Avant</strong> PDF techniques illisibles par les bots.</li>
+                <li><strong>Après AYO</strong> TechSpec en JSON-LD, Certifications validées.</li>
+                <li><strong>Résultat</strong> Les IA d'ingénierie intègrent vos produits dans leurs recommandations.</li>
+              </ul>
+            </div>
+          </div>
+          <div style={{ textAlign: "center", marginTop: "40px" }}>
+            <p style={{ color: "var(--text-muted)", maxWidth: "700px", margin: "0 auto", fontStyle: "italic" }}>
+              "Une entreprise lisible expose des données structurées, interconnectées et vérifiables. C'est la seule façon d'être recommandé par une IA."
+            </p>
+          </div>
         </div>
-        {/* Consultant */}
-        <div className="card demo-card">
-          <h4>🧭 Consultant</h4>
-          <div className="subtitle">L'expert identifiable</div>
-          <ul className="readable-list">
-            <li><strong>Avant</strong> "J'aide les entreprises à changer..." (Vague)</li>
-            <li><strong>Après AYO</strong> serviceType: "ChangeManagement", areaServed: "Remote"</li>
-            <li><strong>Résultat</strong> ChatGPT cite votre nom pour "Expert conduite du changement à distance"</li>
-          </ul>
-        </div>
-        {/* Industrie */}
-        <div className="card demo-card">
-          <h4>🏭 Industrie</h4>
-          <div className="subtitle">La technicité précise</div>
-          <ul className="readable-list">
-            <li><strong>Avant</strong> PDF techniques illisibles par les bots.</li>
-            <li><strong>Après AYO</strong> TechSpec en JSON-LD, Certifications validées.</li>
-            <li><strong>Résultat</strong> Les IA d'ingénierie intègrent vos produits dans leurs recommandations.</li>
-          </ul>
-        </div>
-      </div>
-      <div style={{ textAlign: "center", marginTop: "40px" }}>
-        <p style={{ color: "var(--text-muted)", maxWidth: "700px", margin: "0 auto", fontStyle: "italic" }}>
-          "Une entreprise lisible expose des données structurées, interconnectées et vérifiables. C'est la seule façon d'être recommandé par une IA."
-        </p>
-      </div>
-    </div>
-  </section>
+      </section>
 
-  {/* CTA Final */ }
+      {/* CTA Final */}
       <section id="cta-final" className="section cta-final-section">
         <div className="container">
           <h2 className="section-title">Entrez dans la base de connaissance des IA.</h2>
