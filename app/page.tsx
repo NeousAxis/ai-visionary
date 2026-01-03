@@ -12,7 +12,7 @@ export default function Home() {
           <h1 className="headline">Aujourd’hui, vos clients passent par des IA pour chercher des professionnels.</h1>
           <div className="subheadline">
             <p>Si votre site n’est pas correctement documenté, vous n’êtes pas recommandé par les IA.</p>
-            <p className="tagline">Ne laissez pas les IA deviner à partir d’informations incomplètes. Documentez clairement votre activité.</p>
+            <p className="tagline">Ne laissez pas les IA deviner à partir d’informations incomplètes. Optimisez vos informations pour les IA.</p>
           </div>
           <div className="cta-group">
             <button
