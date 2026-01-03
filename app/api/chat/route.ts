@@ -224,7 +224,7 @@ export async function POST(req: Request) {
             if (process.env.RESEND_API_KEY) {
                 try {
                     const { data, error } = await resend.emails.send({
-                        from: 'AYO <ayo@ai-visionary.com>', // Requires DNS verification
+                        from: 'AYO <hello@ai-visionary.com>', // Verified domain
                         to: [userEmail],
                         subject: 'Votre Dossier AYO + ASR Light (Gratuit)',
                         html: `
