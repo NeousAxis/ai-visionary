@@ -3,9 +3,13 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import fs from 'fs';
 import path from 'path';
+import { Resend } from 'resend';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
+
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Load the "Brain" (Context & Rules)
 const dataSectorsPath = path.join(process.cwd(), 'public', 'AYO_SECTORS_V1.json');
@@ -83,20 +87,23 @@ SI EMAIL GENERIQUE (gmail, hotmail, yahoo...) OU HORS DOMAINE :
 SI EMAIL VALIDE (PRO) :
   "✅ **Email validé.**
   
-  Je viens d'envoyer votre **Rapport d'Audit Complet** + votre **ASR Light (JSON)** à l'adresse : [EMAIL_USER].
-  (Vérifiez vos spams d'ici 1 minute).
+  📨 **Envoi en cours vers [EMAIL_USER]...**
+  Le système d'envoi sécurisé AYO a pris en charge votre dossier. Vous devriez recevoir :
+  1. Votre Rapport d'Audit Complet.
+  2. Votre Fichier ASR Light (JSON).
+  
+  (Si vous ne recevez rien, vérifiez vos spams).
 
   ---
   
-  💡 **EN ATTENDANT QUE VOUS LISIEZ CERTAINEMENT VOTRE MAIL...**
+  💡 **OPPORTUNITÉ STRATÉGIQUE**
   
-  Votre score actuel ([NOTE_GLOBALE]/100) est insuffisant pour garantir votre visibilité sur ChatGPT.
-  L'ASR Light est un bon début, mais il ne certifie pas votre expertise.
+  Votre score actuel ([NOTE_GLOBALE]/100) est un bon point de départ, mais seul l'ASR Certifié garantit votre autorité.
   
   Voulez-vous que je sécurise immédiatement votre **Nom de Domaine Sémantique** avec la version **Essential** (Certification + Signature Cryptographique) ?
   
   👉 **Répondez 'Oui' pour sécuriser votre autorité (99 CHF).**
-  👉 ou 'Non' pour rester avec la version gratuite envoyée par email."
+  👉 ou 'Non' pour rester avec la version gratuite (déjà envoyée)."
 
 📍 ÉTAT 4 : UPGRADE & PAIEMENT
 SI REPONSE "OUI" (Upgrade Essential) :
@@ -110,8 +117,6 @@ SI REPONSE "OUI" (Upgrade Essential) :
 
 SI REPONSE "NON" :
   "C'est noté.
-  Votre version gratuite est dans votre boîte mail. N'oubliez pas de l'installer sur votre serveur pour activer votre signal de base.
-  
   Je reste ici si vous changez d'avis."
   [FIN]
 
@@ -203,10 +208,58 @@ async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJson
 export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
+        const lastMessage = messages[messages.length - 1];
 
         // 🧠 REAL-TIME GENERATION
         const sessionAsrId = crypto.randomUUID();
         const sessionDate = new Date().toISOString();
+
+        // 📧 REAL EMAIL LOGIC
+        // Check if user just sent an email (Simple regex check)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (lastMessage.role === 'user' && emailRegex.test(lastMessage.content.trim())) {
+            const userEmail = lastMessage.content.trim();
+            console.log(`📧 DETECTED EMAIL: ${userEmail}. Attempting to send ASR Light...`);
+
+            if (process.env.RESEND_API_KEY) {
+                try {
+                    const { data, error } = await resend.emails.send({
+                        from: 'AYO <onboarding@resend.dev>', // UPDATE THIS WITH YOUR VERIFIED DOMAIN
+                        to: [userEmail],
+                        subject: 'Votre Dossier AYO + ASR Light (Gratuit)',
+                        html: `
+                            <h1>Bonjour,</h1>
+                            <p>Voici votre dossier de visibilité IA généré par AYO.</p>
+                            <p><strong>Session ID:</strong> ${sessionAsrId}</p>
+                            <hr />
+                            <h2>Votre Fichier ASR Light</h2>
+                            <p>Copiez ce contenu dans un fichier nommé <code>asr.json</code> :</p>
+                            <pre style="background:#f4f4f4;padding:15px;border-radius:5px;">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "${sessionAsrId}",
+  "status": "AYO_LIGHT_VERIFIED",
+  "generatedAt": "${sessionDate}"
+}
+                            </pre>
+                            <p>Pour obtenir la certification complète, répondez "Oui" dans le chat.</p>
+                            <p>L'équipe AYO.</p>
+                        `
+                    });
+
+                    if (error) {
+                        console.error("Resend Error:", error);
+                    } else {
+                        console.log("Email sent successfully:", data);
+                    }
+                } catch (emailErr) {
+                    console.error("Email sending failed:", emailErr);
+                }
+            } else {
+                console.warn("⚠️ NO RESEND_API_KEY FOUND. Email not sent.");
+            }
+        }
 
         // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS
         let websiteData = { text: "", hasJsonLd: false };
@@ -216,6 +269,15 @@ export async function POST(req: Request) {
             if (urlMessage && urlMessage.role === 'user') {
                 websiteData = await fetchWebsiteContent(urlMessage.content);
             }
+        }
+
+        // 💾 DATABASE PERSISTENCE (Simulation Log)
+        if (messages.length > 2) {
+            console.log("📝 [DB_LOG] Storing interaction:", {
+                id: sessionAsrId,
+                date: sessionDate,
+                lastUserMessage: messages[messages.length - 1].content
+            });
         }
 
         // 1. DYNAMIC PROVIDER SELECTION
