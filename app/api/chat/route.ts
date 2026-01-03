@@ -925,8 +925,6 @@ ${websiteData.text}
                     } catch (err) {
                         console.error("ASR PRO Email failed:", err);
                     }
-                } else {
-                    console.warn("⚠️ ASR PRO: Could not find email in history.");
                 }
             }
 
@@ -935,11 +933,13 @@ ${websiteData.text}
                 headers: { 'Content-Type': 'application/json' }
             });
 
-        } catch (error: any) {
-            console.error("Detailed API Error:", error);
-            return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
+        } // End of inner logic (if any) or Main Try
+
+    } catch (error: any) {
+        console.error("Detailed API Error:", error);
+        return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
+}
