@@ -380,7 +380,7 @@ ${scanResult.text}
             // CALL LLM FOR EXTRACTION ONLY
             console.log("... Extracting Signals via LLM ...");
             const extractionResult = await generateText({
-                model: openai('gpt-4o'), // Use powerful model for extraction
+                model: modelToUse, // Use the dynamically selected model (Gemini or OpenAI)
                 temperature: 0, // Zero temp for strict extraction
                 system: EXTRACTION_PROMPT,
                 messages: [{ role: 'user', content: "Extract JSON now." }]
