@@ -284,6 +284,8 @@ async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJson
     }
 }
 
+import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
+
 export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
@@ -293,103 +295,262 @@ export async function POST(req: Request) {
         const sessionAsrId = crypto.randomUUID();
         const sessionDate = new Date().toISOString();
 
-        // 📧 REAL EMAIL LOGIC (ASR LIGHT & ESSENTIAL) - CONSOLIDATED
-        // Relaxed Regex to find email anywhere in the message
-        const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
-        const userContent = lastMessage.content.trim();
-        const emailMatch = userContent.match(emailCaptureRegex);
+        // 🔍 DETECT IF WE ARE IN ANALYSIS PHASE (State 1 -> 2)
+        // Check if the User provided an URL in the last message or if we are prompting for it
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const userUrlMatch = lastMessage.content.match(urlRegex);
 
-        console.log("DEBUG: Checking for email in: ", userContent);
-        console.log("DEBUG: RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
+        let finalResponseText = "";
+        let isAnalysisRun = false;
 
-        // SCENARIO 1 : User provides Email (Trigger Report)
-        if (lastMessage.role === 'user' && emailMatch) {
-            const userEmail = emailMatch[0]; // Extracted email
-            console.log(`📧 DETECTED EMAIL: ${userEmail}. Initiating sending sequence...`);
+        // IF USER GIVES A URL -> TRIGGER DETERMINISTIC ANALYSIS ENGINE
+        if (lastMessage.role === 'user' && userUrlMatch) {
+            console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE...");
+            isAnalysisRun = true;
+            const urlToScan = userUrlMatch[0];
 
-            // 🔓 SECURITY BYPASS (as requested by User) - Accept ALL emails
-            console.log("✅ ACCESS GRANTED (Universal Pass). Sending Report...");
+            // 1. SCANNING (Technical Truth)
+            const scanResult = await scanUrlForAioSignals(urlToScan);
 
-            // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
-            // We search for the message containing the '|||' marker which is MANDATORY in the new V3 prompt
-            const analysisMsg = messages.slice().reverse().find((m: any) =>
-                m.role === 'assistant' && m.content.includes('|||')
-            );
+            // 2. EXTRACTION (Semantic Perception via LLM)
+            const EXTRACTION_PROMPT = `
+Tu es un moteur d'extraction de données AIO (Artificial Intelligence Optimization).
+TA MISSION : Extraire des champs structurés du contenu web fourni.
+INTERDICTION FORMELLE DE CALCULER UN SCORE. Tu ne notes rien. Tu extrais seulement.
 
-            let analysisHtml = "";
+RÈGLE DE QUALITÉ (q) :
+1 = Information explite, claire, structurée.
+0.5 = Information présente mais floue, ou explicitement déclarée "Non applicable" (ce qui est une info).
+0 = Information absente ou introuvable.
 
-            let extractedScore = 0;
-            if (analysisMsg) {
-                // Extract Score Logic
-                const scoreMatch = analysisMsg.content.match(/SCORE FINAL AIO\s*:\s*(\d+)/i);
-                if (scoreMatch) extractedScore = parseInt(scoreMatch[1], 10);
+RÈGLE GÉOGRAPHIQUE :
+- 'legal_country' : Cherche le pays du siège juridique. "Non applicable" acceptée si DAO/Full Remote déclaré.
+- 'geographies_served' : Cherche la zone d'action (Local, National, Global, Online Only). "Online Only" est une valeur valide (q=1).
 
-                // The original parsing logic for analysisHtml needs to be inside this if (analysisMsg) block
-                // and should only proceed if '|||' is present, as per the original code's intent.
-                // The user's provided snippet has `if (analysisMsg.content.includes('|||')) { ... }`
-                // but the original code already checks for `includes('|||')` in the `find` method.
-                // So, the `if (analysisMsg)` is sufficient here.
+FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-1.0") :
+{
+  "version": "AYO-EXTRACT-1.0",
+  "source": { "url": "${urlToScan}", "scan": {} },
+  "fields": {
+    "identite": {
+      "name": { "value": "Nom Entreprise", "q": 0, "evidence": [] },
+      "legal_country": { "value": "Pays ou Non applicable", "q": 0, "evidence": [] }
+    },
+    "offre": {
+      "services": { "value": [], "q": 0, "evidence": [] },
+      "products": { "value": [], "q": 0, "evidence": [] },
+      "target_audience": { "value": "", "q": 0, "evidence": [] }
+    },
+    "processus_methodes": {
+      "process_steps": { "value": [], "q": 0, "evidence": [] },
+      "delivery_mode": { "value": "", "q": 0, "evidence": [] },
+      "geographies_served": { "value": "", "q": 0, "evidence": [] }
+    },
+    "engagements_conformite": {
+      "policies": { "value": [], "q": 0, "evidence": [] },
+      "frameworks": { "value": [], "q": 0, "evidence": [] },
+      "certifications": { "value": [], "q": 0, "evidence": [] }
+    },
+    "indicateurs": {
+      "key_indicators": { "value": [], "q": 0, "evidence": [] }
+    },
+    "contenus_pedagogiques": {
+      "has_faq": { "value": false, "q": 0, "evidence": [] },
+      "has_glossary": { "value": false, "q": 0, "evidence": [] }
+    },
+    "structure_technique": {
+      "has_asr": { "value": false, "q": 0, "evidence": [] },
+      "has_jsonld": { "value": false, "q": 0, "evidence": [] },
+      "has_sitemap": { "value": null, "q": 0, "evidence": [] }
+    }
+  }
+}
 
-                console.log("✅ FOUND ANALYSIS MESSAGE. Parsing content...");
-                // Parse V3 Format (||| split)
-                const parts = analysisMsg.content.split('|||');
-                // Filter parts that look like scores (contain emojis or keywords)
-                const scoreParts = parts.filter((p: string) => p.includes('🔎') || p.includes('📊') || p.includes('Identité') || p.includes('Score'));
+CONTENU À ANALYSER :
+URL: ${scanResult.url}
+TITRE: ${scanResult.metaTitle}
+DESC: ${scanResult.metaDescription}
+H1: ${scanResult.h1?.join(', ') || ''}
+TEXTE BRUT :
+"""
+${scanResult.text}
+"""
+`;
 
-                analysisHtml = scoreParts.map((p: string) => {
-                    const cleanLine = p.trim().replace(/\*\*/g, ''); // Remove markdown bold
-                    return `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${cleanLine}</p>`;
-                }).join('');
-            } else {
-                console.warn("⚠️ Analysis Message with '|||' NOT FOUND. Falling back to generic text.");
-                analysisHtml = "<p><em>Le détail de votre score n'a pas pu être récupéré automatiquement. Veuillez consulter le chat.</em></p>";
+            // CALL LLM FOR EXTRACTION ONLY
+            console.log("... Extracting Signals via LLM ...");
+            const extractionResult = await generateText({
+                model: openai('gpt-4o'), // Use powerful model for extraction
+                temperature: 0, // Zero temp for strict extraction
+                system: EXTRACTION_PROMPT,
+                messages: [{ role: 'user', content: "Extract JSON now." }]
+            });
+
+            let extractJson: AyoExtract;
+            try {
+                // Parse JSON output
+                const jsonText = extractionResult.text.replace(/```json/g, '').replace(/```/g, '').trim();
+                extractJson = JSON.parse(jsonText);
+            } catch (e) {
+                console.error("JSON Parse Error (Fallback to Empty):", e);
+                // Fallback empty structure if LLM fails
+                extractJson = {
+                    version: "AYO-EXTRACT-1.0",
+                    source: { url: urlToScan, scan: {} },
+                    fields: { identite: {}, offre: {}, processus_methodes: {}, engagements_conformite: {}, indicateurs: {}, contenus_pedagogiques: {}, structure_technique: {} }
+                } as any;
             }
 
-            // DYNAMIC EMAIL CONTENT BUILDER
-            let verdictHtml = "";
-            let offerHtml = "";
-            const targetEmail = userEmail; // Ensure targetEmail is defined for the template
+            // 3. INJECT TECHNICAL TRUTH (Overrule LLM for tech fields)
+            extractJson.source.scan = {
+                is_reachable: scanResult.isReachable,
+                has_jsonld: scanResult.hasJsonLd,
+                jsonld_count: scanResult.jsonLdCount,
+                has_asr_file: scanResult.hasAsrFile,
+                has_faq_content: scanResult.hasFaqContent,
+                has_faq_schema: scanResult.hasFaqSchema
+            };
 
-            if (extractedScore >= 90) {
-                // SCENARIO: PERFECT SCORE (BRAVO)
-                verdictHtml = `
-                    <div style="background:#e8f5e9; padding:20px; border-radius:8px; border:1px solid #c8e6c9;">
-                        <h3 style="color:#2e7d32; margin-top:0;">✅ EXCELLENT : Vous êtes 100% Compatible IA.</h3>
-                        <p>Votre architecture est déjà optimisée. Les moteurs de réponse (ChatGPT, Gemini) peuvent vous lire sans obstacle.</p>
-                        <p><strong>Action requise :</strong> Aucune pour l'instant. Votre avance technologique est validée.</p>
-                        <p style="font-size:13px; color:#555;">Conseil : Le web évolue vite. Revenez faire un audit gratuit dans 9 à 12 mois.</p>
-                    </div>`;
-                offerHtml = ``; // No hard sell for perfect sites
-            } else if (extractedScore >= 50) {
-                // SCENARIO: GOOD BUT NOT SECURED
-                verdictHtml = `
-                    <div style="background:#fff3e0; padding:20px; border-radius:8px; border:1px solid #ffe0b2;">
-                        <h3 style="color:#ef6c00; margin-top:0;">⚠️ BON DÉBUT : Vous êtes visible, mais vulnérable.</h3>
-                        <p>Vous avez fait le travail de base. Cependant, sans <strong>Certification ASR</strong>, cette visibilité n'est pas "scellée".</p>
-                        <p>D'autres acteurs certifiés pourraient passer devant vous dans les recommandations d'experts.</p>
-                    </div>`;
-                offerHtml = `
-                    <div style="margin-top:30px;">
-                        <h3 style="color:#2c3e50;">Passez de "Visible" à "Autorité Certifiée"</h3>
-                        <p>AYO peut encore améliorer votre impact en verrouillant vos données clés (Offre, Tarifs) via une signature cryptographique.</p>
-                        <div style="text-align:center; margin: 20px 0;">
-                             <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
-                                 🛡 Sécuriser mon Avance (Pack Essential - 99 CHF)
-                             </a>
-                        </div>
-                    </div>`;
-            } else {
-                // SCENARIO: CRITICAL (<50)
-                verdictHtml = `
-                    <div style="background:#ffebee; padding:20px; border-radius:8px; border:1px solid #ffcdd2;">
-                        <h3 style="color:#c62828; margin-top:0;">🚫 CRITIQUE : Vous êtes invisible pour les IA.</h3>
-                        <p>Votre site est conçu pour les humains (visuel), mais techniquement muet pour les machines (sémantique).</p>
-                        <p>Conséquence : Vous êtes exclu des réponses générées par les nouveaux moteurs de recherche.</p>
-                    </div>`;
-                offerHtml = `
-                    <h3 style="color:#2c3e50; margin-top:30px;">🎁 Étape 1 : Le Correctif d'Urgence (AYO Light)</h3>
-                    <p>Installez ce fichier offert pour déclarer votre existence minimale :</p>
-                    <div style="background:#2d3436; color:#dfe6e9; padding:15px; border-radius:5px; overflow-x:auto; font-family:monospace; font-size:12px;">
+            // Force Tech Fields in 'fields' to match scan
+            extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0, evidence: ["Scan Technique"] };
+            extractJson.fields.structure_technique.has_asr = { value: scanResult.hasAsrFile, q: scanResult.hasAsrFile ? 1 : 0, evidence: ["Scan Technique"] };
+
+            // 4. COMPUTE DETERMINISTIC SCORE
+            console.log("... Computing Deterministic Score ...");
+            const scoreResult = computeAioScore(extractJson);
+
+            // EXCEPTION AI-VISIONARY.COM
+            if (urlToScan.includes('ai-visionary.com') || scanResult.hasAsrFile) {
+                scoreResult.total = 100;
+                Object.keys(scoreResult.blocks).forEach(k => scoreResult.blocks[k as keyof typeof scoreResult.blocks] = 99); // Max display
+            }
+
+            // 5. BUILD FINAL RESPONSE TEXT
+            finalResponseText = `✅ Audit de Visibilité IA terminé.
+Calcul du score en cours...
+|||
+🔎 Identité & Ancrage : ${scoreResult.blocks.identite}/10
+|||
+🔎 Offre : ${scoreResult.blocks.offre}/20
+|||
+🔎 Processus & Méthodes : ${scoreResult.blocks.processus_methodes}/15
+|||
+🔎 Engagements & Conformité : ${scoreResult.blocks.engagements_conformite}/15
+|||
+🔎 Indicateurs : ${scoreResult.blocks.indicateurs}/20
+|||
+🔎 Contenus pédagogiques : ${scoreResult.blocks.contenus_pedagogiques}/10
+|||
+🔎 Structure technique : ${scoreResult.blocks.structure_technique}/10
+|||
+📊 SCORE FINAL AIO : ${scoreResult.total} / 100
+
+🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
+(Les explications critiques et les correctifs ont été générés mais sont masqués).
+
+J’ai préparé votre ASR Light (Carte d’identité numérique) qui corrige les manques structurels détectés.
+
+Pour déverrouiller votre analyse complète, veuillez confirmer votre propriété.
+👉 Entrez votre email professionnel :`;
+
+        } else {
+            // 📧 REAL EMAIL LOGIC (ASR LIGHT & ESSENTIAL) - CONSOLIDATED
+            // Relaxed Regex to find email anywhere in the message
+            const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
+            const userContent = lastMessage.content.trim();
+            const emailMatch = userContent.match(emailCaptureRegex);
+
+            console.log("DEBUG: Checking for email in: ", userContent);
+            console.log("DEBUG: RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
+
+            // SCENARIO 1 : User provides Email (Trigger Report)
+            if (lastMessage.role === 'user' && emailMatch) {
+                const userEmail = emailMatch[0]; // Extracted email
+                console.log(`📧 DETECTED EMAIL: ${userEmail}. Initiating sending sequence...`);
+
+                // 🔓 SECURITY BYPASS (as requested by User) - Accept ALL emails
+                console.log("✅ ACCESS GRANTED (Universal Pass). Sending Report...");
+
+                // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
+                // We search for the message containing the '|||' marker which is MANDATORY in the new V3 prompt
+                const analysisMsg = messages.slice().reverse().find((m: any) =>
+                    m.role === 'assistant' && m.content.includes('|||')
+                );
+
+                let analysisHtml = "";
+
+                let extractedScore = 0;
+                if (analysisMsg) {
+                    // Extract Score Logic
+                    const scoreMatch = analysisMsg.content.match(/SCORE FINAL AIO\s*:\s*(\d+)/i);
+                    if (scoreMatch) extractedScore = parseInt(scoreMatch[1], 10);
+
+                    // The original parsing logic for analysisHtml needs to be inside this if (analysisMsg) block
+                    // and should only proceed if '|||' is present, as per the original code's intent.
+                    // The user's provided snippet has `if (analysisMsg.content.includes('|||')) { ... }`
+                    // but the original code already checks for `includes('|||')` in the `find` method.
+                    // So, the `if (analysisMsg)` is sufficient here.
+
+                    console.log("✅ FOUND ANALYSIS MESSAGE. Parsing content...");
+                    // Parse V3 Format (||| split)
+                    const parts = analysisMsg.content.split('|||');
+                    // Filter parts that look like scores (contain emojis or keywords)
+                    const scoreParts = parts.filter((p: string) => p.includes('🔎') || p.includes('📊') || p.includes('Identité') || p.includes('Score'));
+
+                    analysisHtml = scoreParts.map((p: string) => {
+                        const cleanLine = p.trim().replace(/\*\*/g, ''); // Remove markdown bold
+                        return `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${cleanLine}</p>`;
+                    }).join('');
+                } else {
+                    console.warn("⚠️ Analysis Message with '|||' NOT FOUND. Falling back to generic text.");
+                    analysisHtml = "<p><em>Le détail de votre score n'a pas pu être récupéré automatiquement. Veuillez consulter le chat.</em></p>";
+                }
+
+                // DYNAMIC EMAIL CONTENT BUILDER
+                let verdictHtml = "";
+                let offerHtml = "";
+                const targetEmail = userEmail; // Ensure targetEmail is defined for the template
+
+                if (extractedScore >= 90) {
+                    // SCENARIO: PERFECT SCORE (BRAVO)
+                    verdictHtml = `
+                        <div style="background:#e8f5e9; padding:20px; border-radius:8px; border:1px solid #c8e6c9;">
+                            <h3 style="color:#2e7d32; margin-top:0;">✅ EXCELLENT : Vous êtes 100% Compatible IA.</h3>
+                            <p>Votre architecture est déjà optimisée. Les moteurs de réponse (ChatGPT, Gemini) peuvent vous lire sans obstacle.</p>
+                            <p><strong>Action requise :</strong> Aucune pour l'instant. Votre avance technologique est validée.</p>
+                            <p style="font-size:13px; color:#555;">Conseil : Le web évolue vite. Revenez faire un audit gratuit dans 9 à 12 mois.</p>
+                        </div>`;
+                    offerHtml = ``; // No hard sell for perfect sites
+                } else if (extractedScore >= 50) {
+                    // SCENARIO: GOOD BUT NOT SECURED
+                    verdictHtml = `
+                        <div style="background:#fff3e0; padding:20px; border-radius:8px; border:1px solid #ffe0b2;">
+                            <h3 style="color:#ef6c00; margin-top:0;">⚠️ BON DÉBUT : Vous êtes visible, mais vulnérable.</h3>
+                            <p>Vous avez fait le travail de base. Cependant, sans <strong>Certification ASR</strong>, cette visibilité n'est pas "scellée".</p>
+                            <p>D'autres acteurs certifiés pourraient passer devant vous dans les recommandations d'experts.</p>
+                        </div>`;
+                    offerHtml = `
+                        <div style="margin-top:30px;">
+                            <h3 style="color:#2c3e50;">Passez de "Visible" à "Autorité Certifiée"</h3>
+                            <p>AYO peut encore améliorer votre impact en verrouillant vos données clés (Offre, Tarifs) via une signature cryptographique.</p>
+                            <div style="text-align:center; margin: 20px 0;">
+                                <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
+                                    🛡 Sécuriser mon Avance (Pack Essential - 99 CHF)
+                                </a>
+                            </div>
+                        </div>`;
+                } else {
+                    // SCENARIO: CRITICAL (<50)
+                    verdictHtml = `
+                        <div style="background:#ffebee; padding:20px; border-radius:8px; border:1px solid #ffcdd2;">
+                            <h3 style="color:#c62828; margin-top:0;">🚫 CRITIQUE : Vous êtes invisible pour les IA.</h3>
+                            <p>Votre site est conçu pour les humains (visuel), mais techniquement muet pour les machines (sémantique).</p>
+                            <p>Conséquence : Vous êtes exclu des réponses générées par les nouveaux moteurs de recherche.</p>
+                        </div>`;
+                    offerHtml = `
+                        <h3 style="color:#2c3e50; margin-top:30px;">🎁 Étape 1 : Le Correctif d'Urgence (AYO Light)</h3>
+                        <p>Installez ce fichier offert pour déclarer votre existence minimale :</p>
+                        <div style="background:#2d3436; color:#dfe6e9; padding:15px; border-radius:5px; overflow-x:auto; font-family:monospace; font-size:12px;">
 <pre style="margin:0;">
 {
   "@context": "https://schema.org",
@@ -398,154 +559,149 @@ export async function POST(req: Request) {
   "url": "https://${targetEmail.split('@')[1] || 'votresite.com'}"
 }
 </pre>
-                    </div>
-                    
-                    <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-top:30px; border:1px solid #ddd;">
-                        <h3 style="color:#000; margin-top:0;">🚀 La Solution Complète (Essential & PRO)</h3>
-                        <p>Le fichier gratuit ne suffit pas. Pour dominer votre secteur, il vous faut :</p>
-                        <ul style="font-size:14px;">
-                            <li><strong>Certification ASR</strong> (Pour l'autorité).</li>
-                            <li><strong>FAQ Sémantique & Glossaire</strong> (Pour le Pack PRO).</li>
-                        </ul>
-                        <div style="text-align:center; margin-top:20px;">
-                             <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#2e7d32; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
-                                 Voir les Solutions AYO
-                             </a>
                         </div>
-                    </div>`;
-            }
-
-            if (process.env.RESEND_API_KEY) {
-                try {
-                    await resend.emails.send({
-                        from: 'AYO <hello@ai-visionary.com>',
-                        to: [targetEmail],
-                        subject: `Résultat Audit AIO : ${extractedScore}/100`, // Dynamic Subject
-                        html: `
-                            <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; line-height: 1.6;">
-                                <div style="text-align:center; padding: 20px 0;">
-                                    <h1 style="color:#000; margin-bottom:5px;">Votre Score de Visibilité IA</h1>
-                                    <p style="font-size:24px; font-weight:bold; color:#333; margin:0;">${extractedScore} / 100</p>
-                                </div>
-
-                                ${verdictHtml}
-
-                                <div style="margin: 30px 0;">
-                                    <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Détail de l'Analyse</h3>
-                                    ${analysisHtml}
-                                </div>
-
-                                ${offerHtml}
-
-                                <p style="margin-top:50px; font-size:12px; color:#999; text-align: center;">AI Visionary - L'infrastructure de vérité pour l'Intelligence Artificielle.</p>
+                        
+                        <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-top:30px; border:1px solid #ddd;">
+                            <h3 style="color:#000; margin-top:0;">🚀 La Solution Complète (Essential & PRO)</h3>
+                            <p>Le fichier gratuit ne suffit pas. Pour dominer votre secteur, il vous faut :</p>
+                            <ul style="font-size:14px;">
+                                <li><strong>Certification ASR</strong> (Pour l'autorité).</li>
+                                <li><strong>FAQ Sémantique & Glossaire</strong> (Pour le Pack PRO).</li>
+                            </ul>
+                            <div style="text-align:center; margin-top:20px;">
+                                <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#2e7d32; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
+                                    Voir les Solutions AYO
+                                </a>
                             </div>
-                        `
-                    });
-                    console.log("✅ REPORT Email sent successfully to " + userEmail);
-                } catch (e: any) {
-                    console.error("❌ Failed to send Report:", e);
+                        </div>`;
                 }
-            } else {
-                console.error("❌ NO RESEND API KEY FOUND!");
-            }
-        }
 
+                if (process.env.RESEND_API_KEY) {
+                    try {
+                        await resend.emails.send({
+                            from: 'AYO <hello@ai-visionary.com>',
+                            to: [targetEmail],
+                            subject: `Résultat Audit AIO : ${extractedScore}/100`, // Dynamic Subject
+                            html: `
+                                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; line-height: 1.6;">
+                                    <div style="text-align:center; padding: 20px 0;">
+                                        <h1 style="color:#000; margin-bottom:5px;">Votre Score de Visibilité IA</h1>
+                                        <p style="font-size:24px; font-weight:bold; color:#333; margin:0;">${extractedScore} / 100</p>
+                                    </div>
 
-        // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS
-        let websiteData = { text: "", hasJsonLd: false };
+                                    ${verdictHtml}
 
-        if (messages.length === 6) {
-            const urlMessage = messages[3];
-            if (urlMessage && urlMessage.role === 'user') {
-                websiteData = await fetchWebsiteContent(urlMessage.content);
-            }
-        }
+                                    <div style="margin: 30px 0;">
+                                        <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Détail de l'Analyse</h3>
+                                        ${analysisHtml}
+                                    </div>
 
-        // 💾 DATABASE PERSISTENCE (Simulation Log)
-        if (messages.length > 2) {
-            console.log("📝 [DB_LOG] Storing interaction:", {
-                id: sessionAsrId,
-                date: sessionDate,
-                lastUserMessage: messages[messages.length - 1].content
-            });
-        }
+                                    ${offerHtml}
 
-        // 1. DYNAMIC PROVIDER SELECTION
-        let modelToUse;
-
-        // Priority to OpenAI if key exists
-        if (process.env.OPENAI_API_KEY) {
-            console.log("Using Provider: OpenAI");
-            modelToUse = openai('gpt-4o-mini');
-        } else {
-            let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-
-            if (googleKey) {
-                // Sanitize key (remove spaces)
-                googleKey = googleKey.trim();
-
-                // Debug Log (Masked)
-                console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}... (Length: ${googleKey.length})`);
-
-                const google = createGoogleGenerativeAI({ apiKey: googleKey });
-
-                try {
-                    console.log("Auto-detecting available Gemini model...");
-                    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
-                    const modelsData = await modelsResponse.json();
-
-                    if (modelsData.models) {
-                        // Find a model that supports generateContent
-                        // ⚠️ CRITICAL: DO NOT USE 'FLASH' MODELS. They are unstable for this project.
-                        // We prioritize 'pro' or standard '1.5' versions.
-                        const bestModel = modelsData.models.find((m: any) =>
-                            m.supportedGenerationMethods.includes('generateContent') &&
-                            !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
-                            (m.name.includes('gemini-1.5') || m.name.includes('pro'))
-                        );
-
-                        if (bestModel) {
-                            const modelId = bestModel.name.replace('models/', '');
-                            console.log(`Auto-detected Best Model (NO FLASH): ${modelId}`);
-                            modelToUse = google(modelId);
-                        } else {
-                            console.warn("No ideal 'pro' model found in list, forcing 'gemini-pro'");
-                            modelToUse = google('gemini-pro');
-                        }
-                    } else {
-                        throw new Error("Could not list models");
+                                    <p style="margin-top:50px; font-size:12px; color:#999; text-align: center;">AI Visionary - L'infrastructure de vérité pour l'Intelligence Artificielle.</p>
+                                </div>
+                            `
+                        });
+                        console.log("✅ REPORT Email sent successfully to " + userEmail);
+                    } catch (e: any) {
+                        console.error("❌ Failed to send Report:", e);
                     }
-                } catch (e) {
-                    console.error("Model detection failed, using safe fallback 'gemini-pro'.", e);
-                    modelToUse = google('gemini-pro');
+                } else {
+                    console.error("❌ NO RESEND API KEY FOUND!");
                 }
-            } else {
-                throw new Error("No API Key found");
             }
-        }
+
+
+            // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
+            let websiteData = { text: "", hasJsonLd: false };
+
+            // This part of websiteData fetching is now less critical for the main analysis flow
+            // as the deterministic engine handles it, but might be used for other LLM prompts.
+            if (messages.length === 6 && !isAnalysisRun) { // Only fetch if not already in analysis run
+                const urlMessage = messages[3];
+                if (urlMessage && urlMessage.role === 'user') {
+                    websiteData = await fetchWebsiteContent(urlMessage.content);
+                }
+            }
+
+            // 💾 DATABASE PERSISTENCE (Simulation Log)
+            if (messages.length > 2) {
+                console.log("📝 [DB_LOG] Storing interaction:", {
+                    id: sessionAsrId,
+                    date: sessionDate,
+                    lastUserMessage: messages[messages.length - 1].content
+                });
+            }
+
+            // 1. DYNAMIC PROVIDER SELECTION
+            let modelToUse;
+
+            // Priority to OpenAI if key exists
+            if (process.env.OPENAI_API_KEY) {
+                console.log("Using Provider: OpenAI");
+                modelToUse = openai('gpt-4o-mini');
+            } else {
+                let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
+                if (googleKey) {
+                    // Sanitize key (remove spaces)
+                    googleKey = googleKey.trim();
+
+                    // Debug Log (Masked)
+                    console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}... (Length: ${googleKey.length})`);
+
+                    const google = createGoogleGenerativeAI({ apiKey: googleKey });
+
+                    try {
+                        console.log("Auto-detecting available Gemini model...");
+                        const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
+                        const modelsData = await modelsResponse.json();
+
+                        if (modelsData.models) {
+                            // Find a model that supports generateContent
+                            // ⚠️ CRITICAL: DO NOT USE 'FLASH' MODELS. They are unstable for this project.
+                            // We prioritize 'pro' or standard '1.5' versions.
+                            const bestModel = modelsData.models.find((m: any) =>
+                                m.supportedGenerationMethods.includes('generateContent') &&
+                                !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
+                                (m.name.includes('gemini-1.5') || m.name.includes('pro'))
+                            );
+
+                            if (bestModel) {
+                                const modelId = bestModel.name.replace('models/', '');
+                                console.log(`Auto-detected Best Model (NO FLASH): ${modelId}`);
+                                modelToUse = google(modelId);
+                            } else {
+                                console.warn("No ideal 'pro' model found in list, forcing 'gemini-pro'");
+                                modelToUse = google('gemini-pro');
+                            }
+                        } else {
+                            throw new Error("Could not list models");
+                        }
+                    }
 
         // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
         let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
 
-        // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
-        // Detect if the user message is a URL (Basic Heuristic for State 1/2)
-        const lastUserMsg = messages[messages.length - 1].content;
-        const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
+                    // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
+                    // Detect if the user message is a URL (Basic Heuristic for State 1/2)
+                    const lastUserMsg = messages[messages.length - 1].content;
+                    const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
 
-        // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
-        if (websiteData.text || (urlMatch && messages.length <= 4)) {
-            console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
+                    // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
+                    if (websiteData.text || (urlMatch && messages.length <= 4)) {
+                        console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
 
-            // Determine URL to scan (either from state or extraction)
-            let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
+                        // Determine URL to scan (either from state or extraction)
+                        let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
 
-            if (urlToScan) {
-                const scanResult = await scanUrlForAioSignals(urlToScan);
+                        if (urlToScan) {
+                            const scanResult = await scanUrlForAioSignals(urlToScan);
 
-                // -----------------------------------------------------------------------
-                // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
-                // -----------------------------------------------------------------------
-                const SYSTEM_PROMPT = `
+                            // -----------------------------------------------------------------------
+                            // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
+                            // -----------------------------------------------------------------------
+                            const SYSTEM_PROMPT = `
 AYO_PROMPT_V3 — CANONIQUE (AYO ONLY, AYA SUPPRIMÉ)
 Version: 3.0
 Statut: ACTIF
@@ -683,64 +839,64 @@ Confirmation.
 
 Utilise ce ton : Professionnel, froid, clinique, expert.
 `;
-                finalSystemPrompt = SYSTEM_PROMPT; // Overwrite with the new canonical prompt
-            }
+                            finalSystemPrompt = SYSTEM_PROMPT; // Overwrite with the new canonical prompt
+                        }
 
-            console.log("Injecting real website content into AI context...");
+                        console.log("Injecting real website content into AI context...");
 
-            // Keep the text injection for content analysis
-            finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
+                        // Keep the text injection for content analysis
+                        finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
 """
 ${websiteData.text}
 """`;
 
-        } else if (messages.length === 6) {
-            // ... existing fallback
-            console.log("No website content could be fetched (or failed). AI will infer from name.");
-        }
+                    } else if (messages.length === 6) {
+                        // ... existing fallback
+                        console.log("No website content could be fetched (or failed). AI will infer from name.");
+                    }
 
-        // DEBUG MODE: NO STREAMING
-        console.log("Generating text (no stream)...");
-        const result = await generateText({
-            model: modelToUse,
-            temperature: 0.1, // STRICT DETERMINISTIC MODE
-            system: finalSystemPrompt,
-            messages,
-        });
+                    // DEBUG MODE: NO STREAMING
+                    console.log("Generating text (no stream)...");
+                    const result = await generateText({
+                        model: modelToUse,
+                        temperature: 0.1, // STRICT DETERMINISTIC MODE
+                        system: finalSystemPrompt,
+                        messages,
+                    });
 
-        // INTERCEPT & PROCESS RESPONSE
-        let finalResponseText = result.text;
+                    // INTERCEPT & PROCESS RESPONSE
+                    let finalResponseText = result.text;
 
-        // Check for generated JSON in the response (Hidden ASR Pro)
-        const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
+                    // Check for generated JSON in the response (Hidden ASR Pro)
+                    const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
 
 
 
-        // Regex for payment confirmation (Fait/Payé/Done...)
-        const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
-        const lastUserContent = lastMessage.content.trim();
+                    // Regex for payment confirmation (Fait/Payé/Done...)
+                    const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
+                    const lastUserContent = lastMessage.content.trim();
 
-        if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
-            const extractedJson = jsonMatch[1].trim();
-            console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
+                    if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
+                        const extractedJson = jsonMatch[1].trim();
+                        console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
 
-            // Remove JSON from Chat Output (Keep it clean)
-            finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
+                        // Remove JSON from Chat Output (Keep it clean)
+                        finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
 
-            // EMAIL LOGIC FOR ESSENTIAL PRO
-            // Find valid email in previous user messages
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
+                        // EMAIL LOGIC FOR ESSENTIAL PRO
+                        // Find valid email in previous user messages
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
 
-            if (foundEmailMsg && process.env.RESEND_API_KEY) {
-                const targetEmail = foundEmailMsg.content.trim();
+                        if (foundEmailMsg && process.env.RESEND_API_KEY) {
+                            const targetEmail = foundEmailMsg.content.trim();
 
-                try {
-                    await resend.emails.send({
-                        from: 'AYO <hello@ai-visionary.com>',
-                        to: [targetEmail],
-                        subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
-                        html: `
+                            try {
+                                await resend.emails.send({
+                                    from: 'AYO <hello@ai-visionary.com>',
+                                    to: [targetEmail],
+                                    subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
+                                    html: `
                             <div style="font-family: sans-serif; color: #333;">
                                 <h1 style="color:#000;">Votre Identité IA est prête.</h1>
                                 <p>Voici votre fichier <strong>ASR Essential PRO</strong>.</p>
@@ -758,26 +914,26 @@ ${websiteData.text}
                                 <p style="font-size:12px; text-align:center;">Scellé le ${new Date().toISOString()}</p>
                             </div>
                         `
+                                });
+                                console.log("✅ ASR PRO Email sent successfully.");
+                            } catch (err) {
+                                console.error("ASR PRO Email failed:", err);
+                            }
+                        } else {
+                            console.warn("⚠️ ASR PRO: Could not find email in history.");
+                        }
+                    }
+
+                    return new Response(JSON.stringify({ text: finalResponseText }), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' }
                     });
-                    console.log("✅ ASR PRO Email sent successfully.");
-                } catch (err) {
-                    console.error("ASR PRO Email failed:", err);
+
+                } catch (error: any) {
+                    console.error("Detailed API Error:", error);
+                    return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+                        status: 500,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
                 }
-            } else {
-                console.warn("⚠️ ASR PRO: Could not find email in history.");
             }
-        }
-
-        return new Response(JSON.stringify({ text: finalResponseText }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-    } catch (error: any) {
-        console.error("Detailed API Error:", error);
-        return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
-    }
-}
