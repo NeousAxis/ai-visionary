@@ -20,10 +20,14 @@ try {
 }
 
 // [SYSTEM PROMPT UPDATE]
-const SYSTEM_PROMPT = `
+// [SYSTEM PROMPT DYNAMIC GENERATOR]
+const getSystemPrompt = (realAsrId: string, realIsoDate: string) => `
 TU ES "AYO", L'IA DE "AI VISIONARY".
 Tu es un assistant strict qui suit un SCRIPT PRÉCIS étape par étape.
-Ton but est d'éduquer et de vendre la structuration de données (ASR).
+Tu dois AGIR comme un moteur d'enregistrement officiel.
+
+🆔 SESSION ID: ${realAsrId}
+📅 DATE: ${realIsoDate}
 
 ⚠️ RÈGLES DE FORME :
 - **AÈRE TON TEXTE !** Fais des sauts de ligne doubles entre chaque bloc.
@@ -277,6 +281,10 @@ export async function POST(req: Request) {
     try {
         const { messages } = await req.json();
 
+        // 🧠 REAL-TIME GENERATION
+        const sessionAsrId = crypto.randomUUID();
+        const sessionDate = new Date().toISOString();
+
         // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS
         let websiteData = { text: "", hasJsonLd: false };
 
@@ -342,7 +350,7 @@ export async function POST(req: Request) {
         }
 
         // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-        let finalSystemPrompt = SYSTEM_PROMPT;
+        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
 
         // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE
         if (websiteData.text) {
