@@ -2,19 +2,11 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import Stripe from 'stripe';
 
-// Initialize Services
-// Note: We use process.env directly. Ensure STRIPE_SECRET_KEY is set in Vercel.
+// Initialize Services (Resend is safe to init outside)
 const resend = new Resend(process.env.RESEND_API_KEY);
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2024-12-18.acacia' // Updated to latest or compatible version
-});
 
-// Helper to generate the ASR PRO JSON (Since we are stateless here, we generate a TEMPLATE filled with metadata from Stripe session)
+// Helper to generate the ASR PRO JSON
 function generateAsrProJson(customerEmail: string, sessionDate: string, sessionId: string) {
-    // Ideally, we would retrieve the AI analysis from a DB. 
-    // WITHOUT DB, we provide a structured TEMPLATE that the user can verify, or we ask them to use the Chatbot again to "Regenerate" if they want the specific data.
-    // BUT BETTER: We provide a highly educated "Base" structure.
-
     return JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Organization",
@@ -61,6 +53,18 @@ function generateAsrProJson(customerEmail: string, sessionDate: string, sessionI
 }
 
 export async function POST(req: Request) {
+    // Lazy init Stripe inside handler
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    let stripe: Stripe | null = null;
+
+    if (stripeKey) {
+        stripe = new Stripe(stripeKey, {
+            apiVersion: '2024-12-18.acacia' as any
+        });
+    } else {
+        console.warn("⚠️ STRIPE_SECRET_KEY is missing.");
+    }
+
     try {
         const body = await req.json();
         const { session_id } = body;
@@ -71,35 +75,26 @@ export async function POST(req: Request) {
 
         console.log(`Processing Success for Session: ${session_id}`);
 
-        // 1. Retrieve Session from Stripe to get Customer Email & Verify Payment
-        // If no secret key, we mock it for dev/safety if wanted, but better to fail.
         let customerEmail = "client@example.com";
-        let paymentStatus = "paid"; // Assume paid if redirected, but verification is better.
+        let paymentStatus = "paid";
 
-        if (process.env.STRIPE_SECRET_KEY) {
+        if (stripe) {
             try {
                 const session = await stripe.checkout.sessions.retrieve(session_id);
                 if (session.customer_details?.email) {
                     customerEmail = session.customer_details.email;
-                    paymentStatus = session.payment_status; // "paid" or "unpaid"
+                    paymentStatus = session.payment_status;
                 }
             } catch (stripeErr) {
                 console.error("Stripe Retrieval Error:", stripeErr);
-                // Fallback: If we can't talk to Stripe, we might stop or proceed with caution.
-                // For this demo flow, we assume success if the user has the ID.
             }
         }
 
-        if (paymentStatus !== 'paid') {
-            console.warn(`Session ${session_id} is not paid.`);
-            // Technically we should stop, but for "Async Payment" methods it might be "unpaid" yet pending.
-        }
-
-        // 2. Generate Files
+        // Generate Files
         const sessionDate = new Date().toISOString();
         const asrProJson = generateAsrProJson(customerEmail, sessionDate, session_id);
 
-        // 3. Send Email via Resend
+        // Send Email via Resend
         if (process.env.RESEND_API_KEY) {
             await resend.emails.send({
                 from: 'AYO <hello@ai-visionary.com>',
