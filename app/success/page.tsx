@@ -1,0 +1,106 @@
+"use client";
+
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+
+function SuccessContent() {
+    const searchParams = useSearchParams();
+    const sessionId = searchParams.get('session_id');
+    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+
+    useEffect(() => {
+        if (!sessionId) {
+            setStatus('error'); // No session ID, likely direct access
+            return;
+        }
+
+        // Call the backend API to trigger "Post-Payment" actions (Email Generation & Sending)
+        const triggerDelivery = async () => {
+            try {
+                const res = await fetch('/api/webhooks/checkout-success', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                if (res.ok) {
+                    setStatus('success');
+                } else {
+                    console.error("Delivery API failed");
+                    setStatus('error');
+                }
+            } catch (err) {
+                console.error("Network error during delivery trigger", err);
+                setStatus('error');
+            }
+        };
+
+        triggerDelivery();
+    }, [sessionId]);
+
+    return (
+        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8 text-center font-sans">
+            <div className="max-w-2xl w-full bg-white/5 border border-white/10 rounded-2xl p-10 shadow-2xl backdrop-blur-sm">
+
+                {status === 'loading' && (
+                    <>
+                        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-400 mx-auto mb-6"></div>
+                        <h1 className="text-3xl font-bold mb-4">Vérification de votre paiement...</h1>
+                        <p className="text-gray-400">Nous sécurisons votre transaction et préparons votre identité IA.</p>
+                    </>
+                )}
+
+                {status === 'success' && (
+                    <>
+                        <div className="text-6xl mb-6">✅</div>
+                        <h1 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">
+                            Félicitations !
+                        </h1>
+                        <p className="text-xl mb-8 text-gray-300">
+                            Votre commande pour le <strong className="text-white">Pack ASR Essential PRO</strong> est confirmée.
+                        </p>
+
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 mb-8 text-left">
+                            <h3 className="text-lg font-semibold text-emerald-400 mb-2">🚀 Prochaines étapes :</h3>
+                            <ul className="list-disc pl-5 space-y-2 text-gray-300">
+                                <li>Votre <strong>ASR Essential PRO (JSON)</strong> a été généré.</li>
+                                <li>Il vient d'être envoyé à l'adresse email utilisée lors du paiement.</li>
+                                <li>Consultez vos emails (et spams) d'ici 2 minutes.</li>
+                            </ul>
+                        </div>
+
+                        <div className="flex flex-col gap-4">
+                            <Link href="/" className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">
+                                Retour à l'accueil
+                            </Link>
+                        </div>
+                    </>
+                )}
+
+                {status === 'error' && (
+                    <>
+                        <div className="text-6xl mb-6">⚠️</div>
+                        <h1 className="text-3xl font-bold mb-4">Nous n'avons pas pu valider automatiquement</h1>
+                        <p className="text-gray-400 mb-6">
+                            Si vous avez bien effectué le paiement, pas d'inquiétude. Notre système va réessayer.
+                            Vérifiez vos emails dans quelques minutes.
+                        </p>
+                        <Link href="/" className="text-emerald-400 hover:underline">
+                            Contacter le support ou retourner à l'accueil
+                        </Link>
+                    </>
+                )}
+
+            </div>
+        </div>
+    );
+}
+
+export default function SuccessPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Chargement...</div>}>
+            <SuccessContent />
+        </Suspense>
+    );
+}
