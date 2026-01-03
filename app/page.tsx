@@ -101,6 +101,15 @@ export default function Home() {
             <div className="card solution-card aio-card" style={{ maxWidth: '800px', width: '100%' }}>
               <h3>AIO <span className="subtitle">Artificial Intelligence Optimization</span></h3>
               <p>AYO ne refait pas votre site. Il lui ajoute la couche d'intelligence nécessaire pour dialoguer avec les machines.</p>
+
+              <div style={{ margin: '30px 0', padding: '20px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-main)' }}>
+                  Concrètement, AYO crée une surface d’identification IA-native : l'ASR (AYO Singular Record).
+                </p>
+                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
+                  "Un ASR est une déclaration canonique, unique et structurée d’une entité, destinée à être lue, interprétée et utilisée par des IA sans ambiguïté ni extrapolation."
+                </p>
+              </div>
               <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <h4 style={{ marginBottom: '10px', color: 'var(--primary-color)' }}>1. Structuration</h4>
