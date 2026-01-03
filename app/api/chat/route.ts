@@ -131,19 +131,68 @@ SI NON :
 📍 ÉTAT 5 : LIVRAISON ASR ESSENTIAL (Si Paiement)
 (Après confirmation "Fait").
 
-"✅ **Paiement confirmé.**
+TÂCHE :
+1. Récupère ta meilleure analyse de l'entreprise (State 2).
+2. Construis le fichier JSON "ASR ESSENTIAL PRO" suivant la structure CANONIQUE (12 Blocs).
+3. Remplis les champs intelligemment.
+4. Affiche le JSON dans un bloc de code.
 
-Signature cryptographique : **COMPLETE**.
+STRUCTURE DU JSON À GÉNÉRER :
+\`\`\`json
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "${realAsrId}",
+  "name": "[NOM]",
+  "url": "[URL]",
+  "location": "[PAYS]",
+  
+  "ayo:offer": {
+    "services": ["..."],
+    "deliverables": ["..."]
+  },
+  
+  "ayo:process": {
+    "steps": ["..."],
+    "delivery_mode": "..."
+  },
+  
+  "ayo:scope": {
+    "in_scope": ["..."],
+    "out_of_scope": ["..."], 
+    "target_audience": ["..."]
+  },
+  
+  "ayo:tech": {
+    "json_ld_present": true/false
+  },
+  
+  "ayo:score": {
+    "value": "[NOTE]/100",
+    "details": { "identity": "../20", "offer": "../30", "clarity": "../20", "tech": "../30" },
+    "method": "AYO_V2_Strict"
+  },
+  
+  "ayo:seal": {
+    "issuer": "AYO Trusted Authority",
+    "level": "ESSENTIAL_PRO",
+    "hash": "${realAsrId}",
+    "signature": "sig_ed25519_${realAsrId}",
+    "timestamp": "${realIsoDate}"
+  }
+}
+\`\`\`
+
+MESSAGE À L'UTILISATEUR (Après le bloc JSON) :
+"✅ **Paiement confirmé.**
 Hash de certification : **${realAsrId}**.
 
 📧 **Dossier Final Envoyé !**
-Je viens d'envoyer votre **ASR Essential Certifié (JSON)** et votre **Certificat de Propriété Sémantique** sur votre adresse email.
-
-Veuillez l'installer pour activer votre autorité.
-(Je reste en veille pour valider l'installation dès que vous serez prêt)."
+Votre ASR Essential PRO (Structure Décisionnelle Complète) est dans votre boîte mail.
+Installez-le pour activer votre autorité."
 
 📍 ÉTAT 6 : ACTIVATION
-"J'attends l'URL de votre fichier..."
+"J'attends l'URL..."
 
 📍 ÉTAT 7 : VALIDATION FINALE
 "✅ **Signal Détecté.** Entreprise certifiée."
@@ -270,57 +319,6 @@ export async function POST(req: Request) {
             }
         }
 
-        // SCENARIO 2 : User says "Fait/Payé" (ASR Essential Delivery)
-        const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
-        if (lastMessage.role === 'user' && paymentConfirmationRegex.test(userContent)) {
-            console.log("💰 PAYMENT CLAIM DETECTED. Searching for email in history...");
-
-            // Find valid email in previous user messages
-            const foundEmailMsg = messages.slice().reverse().find(m => m.role === 'user' && emailRegex.test(m.content.trim()));
-
-            if (foundEmailMsg && process.env.RESEND_API_KEY) {
-                const targetEmail = foundEmailMsg.content.trim();
-                console.log(`📧 Found historical email: ${targetEmail}. Sending ASR Essential...`);
-
-                try {
-                    await resend.emails.send({
-                        from: 'AYO <hello@ai-visionary.com>',
-                        to: [targetEmail],
-                        subject: 'Votre Certification AYO Essential (Validée)',
-                        html: `
-                            <h1>Félicitations !</h1>
-                            <p>Votre paiement est confirmé (simulation). Votre autorité est maintenant certifiée.</p>
-                            <hr />
-                            <h2>Votre Fichier ASR Essential (Final)</h2>
-                            <p><strong>Hash de Certification:</strong> ${sessionAsrId}</p>
-                            <pre style="background:#e8f5e9;padding:15px;border-radius:5px;border:1px solid #4caf50;">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": "${sessionAsrId}",
-  "name": "[VOTRE_ENTREPRISE]",
-  "ayo:seal": {
-    "issuer": "AYO Trusted Authority",
-    "level": "ESSENTIAL",
-    "hash": "${sessionAsrId}",
-    "signature": "sig_ed25519_${sessionAsrId}",
-    "timestamp": "${sessionDate}"
-  }
-}
-                            </pre>
-                            <p>Installez ce fichier sur votre site pour activer le signal.</p>
-                            <p>L'équipe AYO.</p>
-                        `
-                    });
-                    console.log("✅ ASR Essential Email sent.");
-
-                } catch (err) {
-                    console.error("Essential Email failed:", err);
-                }
-            } else {
-                console.warn("⚠️ Could not find email in history to send Essential version.");
-            }
-        }
 
         // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS
         let websiteData = { text: "", hasJsonLd: false };
@@ -429,9 +427,65 @@ ${websiteData.text}
             messages,
         });
 
-        console.log("Generation success:", result.text.substring(0, 50) + "...");
+        // INTERCEPT & PROCESS RESPONSE
+        let finalResponseText = result.text;
 
-        return new Response(JSON.stringify({ text: result.text }), {
+        // Check for generated JSON in the response (Hidden ASR Pro)
+        const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
+
+        // Regex for payment confirmation (Fait/Payé/Done...)
+        const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
+        const lastUserContent = lastMessage.content.trim();
+
+        if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
+            const extractedJson = jsonMatch[1].trim();
+            console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
+
+            // Remove JSON from Chat Output (Keep it clean)
+            finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
+
+            // EMAIL LOGIC FOR ESSENTIAL PRO
+            // Find valid email in previous user messages
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
+
+            if (foundEmailMsg && process.env.RESEND_API_KEY) {
+                const targetEmail = foundEmailMsg.content.trim();
+
+                try {
+                    await resend.emails.send({
+                        from: 'AYO <hello@ai-visionary.com>',
+                        to: [targetEmail],
+                        subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
+                        html: `
+                            <div style="font-family: sans-serif; color: #333;">
+                                <h1 style="color:#000;">Votre Identité IA est prête.</h1>
+                                <p>Voici votre fichier <strong>ASR Essential PRO</strong>.</p>
+                                <p>Contrairement à la version Light, ce fichier scelle votre <strong>Structure Décisionnelle</strong> (Ce que vous faites, comment, et pour qui).</p>
+                                
+                                <div style="background:#e8f5e9; padding:15px; border-radius:8px; border:1px solid #4caf50; margin: 20px 0;">
+                                    <h3 style="margin-top:0; color:#2e7d32;">✅ Fichier Certifié (ASR PRO)</h3>
+                                    <pre style="background:#fff; padding:15px; overflow-x:auto; font-size:12px;">${extractedJson}</pre>
+                                </div>
+                                
+                                <p><strong>Instruction :</strong> Remplacez votre ancien fichier <code>asr.json</code> par celui-ci.</p>
+                                <p style="color:#666;">Seules les données présentes dans ce fichier seront prises pour vérité absolue par les moteurs de réponse.</p>
+                                
+                                <hr />
+                                <p style="font-size:12px; text-align:center;">Scellé le ${new Date().toISOString()}</p>
+                            </div>
+                        `
+                    });
+                    console.log("✅ ASR PRO Email sent successfully.");
+                } catch (err) {
+                    console.error("ASR PRO Email failed:", err);
+                }
+            } else {
+                console.warn("⚠️ ASR PRO: Could not find email in history.");
+            }
+        }
+
+        return new Response(JSON.stringify({ text: finalResponseText }), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
