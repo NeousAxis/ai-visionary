@@ -107,7 +107,7 @@ export default function Home() {
                   AIO (Artificial Intelligence Optimization) : L'art de structurer l'information.
                 </p>
                 <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                  "Un ASR est une déclaration canonique, unique et structurée d’une entité, destinée à être lue, interprétée et utilisée par des IA sans ambiguïté ni extrapolation."
+                  "Un ASR (AYO Singular Record) est une déclaration canonique, unique et structurée d’une entité, destinée à être lue, interprétée et utilisée par des IA sans ambiguïté ni extrapolation."
                 </p>
               </div>
               <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
