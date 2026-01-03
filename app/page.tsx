@@ -10,7 +10,7 @@ export default function Home() {
       <section id="hero" className="hero-section">
         <div className="container hero-content">
           <div className="logo-container" style={{ marginBottom: '40px', textAlign: 'center' }}>
-            <img src="/logo.png" alt="AI VISIONARY" style={{ height: '120px', width: 'auto', margin: '0 auto' }} />
+            <img src="/logo.png" alt="AI VISIONARY" style={{ height: '180px', width: 'auto', margin: '0 auto' }} />
           </div>
           <h1 className="headline">Aujourd’hui, vos clients passent par des IA pour chercher des professionnels.</h1>
           <div className="subheadline">
