@@ -293,25 +293,38 @@ export async function POST(req: Request) {
         const sessionAsrId = crypto.randomUUID();
         const sessionDate = new Date().toISOString();
 
-        // 📧 REAL EMAIL LOGIC (ASR LIGHT & ESSENTIAL)
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // 📧 REAL EMAIL LOGIC (ASR LIGHT & ESSENTIAL) - CONSOLIDATED
+        // Relaxed Regex to find email anywhere in the message
+        const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
         const userContent = lastMessage.content.trim();
+        const emailMatch = userContent.match(emailCaptureRegex);
 
-        // SCENARIO 1 : User provides Email (ASR Light Delivery)
-        if (lastMessage.role === 'user' && emailRegex.test(userContent)) {
-            const userEmail = userContent;
-            console.log(`📧 DETECTED EMAIL: ${userEmail}. Attempting to send ASR Light...`);
+        console.log("DEBUG: Checking for email in: ", userContent);
+        console.log("DEBUG: RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
+
+        // SCENARIO 1 : User provides Email (Trigger Report)
+        if (lastMessage.role === 'user' && emailMatch) {
+            const userEmail = emailMatch[0]; // Extracted email
+            console.log(`📧 DETECTED EMAIL: ${userEmail}. Initiating sending sequence...`);
+
+            // 🔓 SECURITY BYPASS (as requested by User) - Accept ALL emails
+            console.log("✅ ACCESS GRANTED (Universal Pass). Sending Report...");
 
             // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
-            // Find the last assistant message that contains the score analysis
-            const analysisMsg = messages.slice().reverse().find(m => m.role === 'assistant' && m.content.includes('SCORE FINAL'));
-            let analysisHtml = "<p><em>Analyse non disponible dans l'historique sans état.</em></p>";
+            const analysisMsg = messages.slice().reverse().find((m: any) => m.role === 'assistant' && m.content.includes('SCORE FINAL'));
+            let analysisHtml = "<p><em>Analyse non disponible dans l'historique immédiat.</em></p>";
 
             if (analysisMsg) {
-                // Formatting the analysis for Email (convert Markdown to simple HTML)
-                // We extract lines starting with emojis 🔎 or 📊
-                const lines = analysisMsg.content.split('\n').filter((l: string) => l.includes('🔎') || l.includes('📊'));
-                analysisHtml = lines.map((l: string) => `<p style="margin: 5px 0;">${l.replace(/\*\*/g, '<strong>').replace(/\*\*/g, '</strong>')}</p>`).join('');
+                // Determine content to show based on V3 Prompt Output (|||)
+                if (analysisMsg.content.includes('|||')) {
+                    // New Format Parse
+                    const parts = analysisMsg.content.split('|||');
+                    analysisHtml = parts.map((p: string) => p.trim()).filter((p: string) => p.startsWith('🔎') || p.startsWith('📊')).map((l: string) => `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${l.replace(/\*\*/g, '')}</p>`).join('');
+                } else {
+                    // Legacy Format Parse
+                    const lines = analysisMsg.content.split('\n').filter((l: string) => l.includes('🔎') || l.includes('📊'));
+                    analysisHtml = lines.map((l: string) => `<p style="margin: 5px 0;">${l.replace(/\*\*/g, '<strong>').replace(/\*\*/g, '</strong>')}</p>`).join('');
+                }
             }
 
             if (process.env.RESEND_API_KEY) {
@@ -319,47 +332,51 @@ export async function POST(req: Request) {
                     await resend.emails.send({
                         from: 'AYO <hello@ai-visionary.com>',
                         to: [userEmail],
-                        subject: 'Votre Dossier AYO + ASR Light (Gratuit)',
+                        subject: 'Votre Diagnostic de Visibilité IA (Résultat)',
                         html: `
-                            <div style="font-family: sans-serif; color: #333;">
-                                <h1>Votre Audit de Visibilité IA</h1>
-                                <p>Voici les résultats de l'analyse effectuée par AYO.</p>
-                                <p><strong>Session ID:</strong> ${sessionAsrId}</p>
+                            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                                <h2 style="color:#000;">Votre Audit AIO est disponible.</h2>
+                                <p>Bonjour,</p>
+                                <p>Comme demandé, voici le relevé technique de votre visibilité actuelle pour les Intelligences Artificielles.</p>
                                 
-                                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                                    <h2 style="margin-top:0;">📊 Résultats de l'Audit</h2>
+                                <div style="background:#f5f5f5; padding:20px; border-radius:8px; margin: 20px 0;">
+                                    <h2 style="margin-top:0; font-size:18px;">📊 Résultats de l'Audit</h2>
                                     ${analysisHtml}
                                 </div>
 
-                                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-                                
-                                <h2>🎁 Votre Fichier ASR Light (Offert)</h2>
-                                <p>Ce fichier permet aux IA de vous identifier. Copiez ce contenu dans un fichier nommé <code>asr.json</code> à la racine de votre site :</p>
-                                <pre style="background:#2d2d2d; color: #fff; padding:15px; border-radius:5px; overflow-x: auto;">
+                                <p><strong>Constat :</strong> Votre site manque de balises sémantiques (JSON-LD Organization). Les IA ne peuvent pas vous identifier avec certitude.</p>
+
+                                <h3>1. La Solution Gratuite (ASR Light)</h3>
+                                <p>Copiez ce code <code>asr.json</code> à la racine de votre site (dossier /.ayo/) :</p>
+                                <pre style="background:#222; color:#81c784; padding:15px; border-radius:5px; overflow-x:auto;">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "@id": "${sessionAsrId}",
-  "status": "AYO_LIGHT_VERIFIED",
   "name": "Votre Entreprise",
-  "generatedAt": "${sessionDate}"
+  "url": "https://${userEmail.split('@')[1]}", 
+  "contactPoint": { "@type": "ContactPoint", "email": "${userEmail}" }
 }
                                 </pre>
 
-                                <div style="text-align: center; margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px;">
-                                    <h3 style="margin-top:0;">🚀 Passez à la vitesse supérieure</h3>
-                                    <p>Pour garantir votre autorité et protéger votre marque, activez la Certification Cryptographique.</p>
-                                    <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background-color:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; display:inline-block; font-weight: bold;">🛡 Activer le Pack Essential (99 CHF)</a>
-                                </div>
+                                <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;" />
                                 
-                                <p style="margin-top:30px; font-size:12px; color:#999; text-align: center;">L'équipe AI Visionary / AYO.</p>
+                                <h3 style="color:#2e7d32;">2. La Solution Complète (Essential Pro)</h3>
+                                <p>Pour apparaître dans les recommandations ("Qui est le meilleur expert ?"), il vous faut la Certification Cryptographique ASR.</p>
+                                
+                                <div style="text-align:center; margin: 30px 0;">
+                                    <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:15px 30px; text-decoration:none; border-radius:5px; font-weight:bold;">
+                                        🛡 Sécuriser mon Autorité (99 CHF)
+                                    </a>
+                                </div>
                             </div>
                         `
                     });
-                    console.log("✅ ASR Light Email sent.");
-                } catch (emailErr) {
-                    console.error("Email sending failed:", emailErr);
+                    console.log("✅ REPORT Email sent successfully to " + userEmail);
+                } catch (e: any) {
+                    console.error("❌ Failed to send Report:", e);
                 }
+            } else {
+                console.error("❌ NO RESEND API KEY FOUND!");
             }
         }
 
@@ -626,108 +643,7 @@ ${websiteData.text}
         // Check for generated JSON in the response (Hidden ASR Pro)
         const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
 
-        // --- EMAIL CAPTURE LOGIC (FREE/LEAD AGENT) ---
-        // Detect if user just sent an email address (for the free report)
-        // Relaxed Regex: Finds email anywhere in string
-        const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
-        const lastUserContentForEmail = lastMessage.content.trim();
-        const emailMatch = lastUserContentForEmail.match(emailCaptureRegex);
 
-        if (lastMessage.role === 'user' && emailMatch) {
-            const targetEmail = emailMatch[0]; // The extracted email
-            const emailDomain = targetEmail.split('@')[1].toLowerCase();
-
-            // Retrieve Analyzed URL from history (stored in AI context or messages)
-            // We look for the URL provided in message 3 (as per State 1 logic)
-            // Or we deduce it from the System Prompt injection if available.
-
-            // Quick Hack: We scan previous user messages to find the URL
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const userMessages = messages.filter((m: any) => m.role === 'user');
-            let detectedUrl = "";
-
-            for (const m of userMessages) {
-                const match = m.content.match(urlRegex);
-                if (match) {
-                    detectedUrl = match[0];
-                    break; // Take the first URL mentioned
-                }
-            }
-
-            // Extract domain from detected URL
-            let siteDomain = "";
-            try {
-                if (detectedUrl) {
-                    const urlObj = new URL(detectedUrl);
-                    siteDomain = urlObj.hostname.replace('www.', '').toLowerCase();
-                }
-            } catch (e) { }
-
-            console.log(`🔐 SECURITY CHECK: Email Domain (${emailDomain}) vs Site Domain (${siteDomain})`);
-
-            // --- CRITICAL UPDATE: SECURITY DISABLED FOR UX ---
-            // We allow ALL emails to pass. The strict domain check was too brittle (e.g. nearyou.xyz vs nearyouapp.xyz).
-            const isDomainMatch = true;
-
-            if (isDomainMatch) {
-                console.log("✅ ACCESS GRANTED. (Universal Pass)");
-                if (process.env.RESEND_API_KEY) {
-                    // On envoie le rapport...
-                    try {
-                        await resend.emails.send({
-                            from: 'AYO <hello@ai-visionary.com>',
-                            to: [targetEmail],
-                            subject: 'Votre Diagnostic de Visibilité IA (Résultat)',
-                            text: `Bonjour, voici votre audit AIO. Score estimé : 30-50/100. Votre site manque de structure sémantique (JSON-LD). Vous trouverez ci-joint les instructions pour corriger cela avec ASR Light. Pour une protection complète, passez à la version Essential Pro.`,
-                            html: `
-                             <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-                                 <h2 style="color:#000;">Votre Audit AIO est disponible.</h2>
-                                 <p>Bonjour,</p>
-                                 <p>Comme demandé, voici le relevé technique de votre visibilité actuelle pour les Intelligences Artificielles.</p>
-                                 
-                                 <div style="background:#f5f5f5; padding:20px; border-radius:8px; margin: 20px 0;">
-                                     <strong>Score AIO Estimé : 30-50 / 100</strong><br/>
-                                     <span style="color:#d32f2f;">⚠️ ALERTE : Absence de Structure Sémantique (JSON-LD Organization)</span>
-                                 </div>
- 
-                                 <p>Les IA actuelles ne peuvent pas "lire" votre offre correctement. Vous êtes invisible dans les réponses de recommandation.</p>
- 
-                                 <h3>La Solution (ASR Light offert)</h3>
-                                 <p>Ci-joint, un premier correctif JSON à installer sur votre site pour déclarer votre identité de base.</p>
-                                 <pre style="background:#333; color:#fff; padding:15px; border-radius:5px; overflow-x:auto;">
- {
-   "@context": "https://schema.org",
-   "@type": "Organization",
-   "name": "Votre Entreprise",
-   "url": "https://${targetEmail.split('@')[1]}"
- }
-                                 </pre>
- 
-                                 <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;" />
-                                 
-                                 <h3 style="color:#2e7d32;">🔥 PASSEZ AU NIVEAU SUPÉRIEUR (ESSENTIAL PRO)</h3>
-                                 <p>Ce fichier gratuit ne suffit pas pour les requêtes complexes ("Trouve-moi le meilleur expert en...").</p>
-                                 <p>Pour cela, il vous faut la <strong>Certification Cryptographique ASR</strong> (Signature Numérique).</p>
-                                 
-                                 <div style="text-align:center; margin: 30px 0;">
-                                     <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:15px 30px; text-decoration:none; border-radius:5px; font-weight:bold;">
-                                         🛡 Sécuriser mon Autorité (99 CHF)
-                                     </a>
-                                 </div>
-                             </div>
-                         `
-                        });
-                        console.log("✅ FREE REPORT Email sent successfully to " + targetEmail);
-                    } catch (e: any) {
-                        console.error("❌ Failed to send Free Report:", e);
-                    }
-                }
-            } else {
-                console.warn(`⛔ ACCESS DENIED: Email domain (${emailDomain}) does not match site (${siteDomain}).`);
-                // Note: Ideally we should inform the user here, but the AI handles the text response.
-                // We can inject a hidden refusal hint into the final prompt if we wanted, but for now we just block the email.
-            }
-        }
 
         // Regex for payment confirmation (Fait/Payé/Done...)
         const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
