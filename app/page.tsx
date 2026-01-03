@@ -87,7 +87,7 @@ export default function Home() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-main)' }}>👉 Vous pouvez mettre tous les mots clés possibles, la visibilité dépend désormais de la manière dont sont structurées vos informations sur votre site pour les IA.</p>
+            <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-main)' }}>👉 Les mots clés ne vous rendront pas plus visible, désormais c'est la structure de vos informations qui vous rend "appréciable" pour les IA.</p>
           </div>
         </div>
       </section>
