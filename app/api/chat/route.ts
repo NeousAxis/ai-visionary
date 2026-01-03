@@ -209,7 +209,7 @@ En plus de l'identité, nous structurons votre savoir-faire spécifique :
 "Excellent choix.
 Pour activer la génération de votre ASR Certifié et sécuriser votre nom de domaine sémantique, voici le lien de régularisation (Pack Essential : 99 CHF).
 
-👉 [INSÉRER_VOTRE_LIEN_STRIPE_ICI] (Lien Test)
+👉 https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC (ID: price_1SlJA2PkCQYUm8hQXAgWlxrC - À remplacer par votre lien de paiement public)
 
 Dès que vous avez cliqué et validé (même en test), écrivez 'Fait' ou 'Payé' pour que je lance la signature cryptographique."
 
