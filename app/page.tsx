@@ -11,7 +11,7 @@ export default function Home() {
         <div className="container hero-content">
           <h1 className="headline">RENDEZ VOTRE ENTREPRISE VISIBLE AUX INTELLIGENCES ARTIFICIELLES</h1>
           <div className="subheadline">
-            <p><strong>AYO</strong> crée la carte d'identité numérique de votre entreprise pour qu'elle soit comprise, citée et recommandée par les assistants IA (ChatGPT, Gemini, Claude).</p>
+            <p><strong>AYO</strong> crée la carte d'identité numérique de votre entreprise pour qu'elle soit recommandée par les assistants IA (ChatGPT, Gemini, Claude).</p>
             <p className="tagline">Ne laissez pas les robots deviner qui vous êtes. Dites-le leur.</p>
           </div>
           <div className="cta-group">
