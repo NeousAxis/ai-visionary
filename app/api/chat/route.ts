@@ -678,30 +678,36 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                         } else {
                             throw new Error("Could not list models");
                         }
+                    } catch (error) {
+                        console.error("Error auto-detecting Gemini model:", error);
+                        console.warn("Falling back to 'gemini-pro' due to detection error.");
+                        modelToUse = google('gemini-pro');
                     }
+                }
+            }
 
-        // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
+            // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
+            let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
 
-                    // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
-                    // Detect if the user message is a URL (Basic Heuristic for State 1/2)
-                    const lastUserMsg = messages[messages.length - 1].content;
-                    const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
+            // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
+            // Detect if the user message is a URL (Basic Heuristic for State 1/2)
+            const lastUserMsg = messages[messages.length - 1].content;
+            const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
 
-                    // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
-                    if (websiteData.text || (urlMatch && messages.length <= 4)) {
-                        console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
+            // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
+            if (websiteData.text || (urlMatch && messages.length <= 4)) {
+                console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
 
-                        // Determine URL to scan (either from state or extraction)
-                        let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
+                // Determine URL to scan (either from state or extraction)
+                let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
 
-                        if (urlToScan) {
-                            const scanResult = await scanUrlForAioSignals(urlToScan);
+                if (urlToScan) {
+                    const scanResult = await scanUrlForAioSignals(urlToScan);
 
-                            // -----------------------------------------------------------------------
-                            // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
-                            // -----------------------------------------------------------------------
-                            const SYSTEM_PROMPT = `
+                    // -----------------------------------------------------------------------
+                    // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
+                    // -----------------------------------------------------------------------
+                    const SYSTEM_PROMPT = `
 AYO_PROMPT_V3 — CANONIQUE (AYO ONLY, AYA SUPPRIMÉ)
 Version: 3.0
 Statut: ACTIF
@@ -839,64 +845,64 @@ Confirmation.
 
 Utilise ce ton : Professionnel, froid, clinique, expert.
 `;
-                            finalSystemPrompt = SYSTEM_PROMPT; // Overwrite with the new canonical prompt
-                        }
+                    finalSystemPrompt = SYSTEM_PROMPT; // Overwrite with the new canonical prompt
+                }
 
-                        console.log("Injecting real website content into AI context...");
+                console.log("Injecting real website content into AI context...");
 
-                        // Keep the text injection for content analysis
-                        finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
+                // Keep the text injection for content analysis
+                finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
 """
 ${websiteData.text}
 """`;
 
-                    } else if (messages.length === 6) {
-                        // ... existing fallback
-                        console.log("No website content could be fetched (or failed). AI will infer from name.");
-                    }
+            } else if (messages.length === 6) {
+                // ... existing fallback
+                console.log("No website content could be fetched (or failed). AI will infer from name.");
+            }
 
-                    // DEBUG MODE: NO STREAMING
-                    console.log("Generating text (no stream)...");
-                    const result = await generateText({
-                        model: modelToUse,
-                        temperature: 0.1, // STRICT DETERMINISTIC MODE
-                        system: finalSystemPrompt,
-                        messages,
-                    });
+            // DEBUG MODE: NO STREAMING
+            console.log("Generating text (no stream)...");
+            const result = await generateText({
+                model: modelToUse,
+                temperature: 0.1, // STRICT DETERMINISTIC MODE
+                system: finalSystemPrompt,
+                messages,
+            });
 
-                    // INTERCEPT & PROCESS RESPONSE
-                    let finalResponseText = result.text;
+            // INTERCEPT & PROCESS RESPONSE
+            let finalResponseText = result.text;
 
-                    // Check for generated JSON in the response (Hidden ASR Pro)
-                    const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
+            // Check for generated JSON in the response (Hidden ASR Pro)
+            const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
 
 
 
-                    // Regex for payment confirmation (Fait/Payé/Done...)
-                    const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
-                    const lastUserContent = lastMessage.content.trim();
+            // Regex for payment confirmation (Fait/Payé/Done/Paid...)
+            const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
+            const lastUserContent = lastMessage.content.trim();
 
-                    if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
-                        const extractedJson = jsonMatch[1].trim();
-                        console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
+            if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
+                const extractedJson = jsonMatch[1].trim();
+                console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
 
-                        // Remove JSON from Chat Output (Keep it clean)
-                        finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
+                // Remove JSON from Chat Output (Keep it clean)
+                finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
 
-                        // EMAIL LOGIC FOR ESSENTIAL PRO
-                        // Find valid email in previous user messages
-                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
+                // EMAIL LOGIC FOR ESSENTIAL PRO
+                // Find valid email in previous user messages
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
 
-                        if (foundEmailMsg && process.env.RESEND_API_KEY) {
-                            const targetEmail = foundEmailMsg.content.trim();
+                if (foundEmailMsg && process.env.RESEND_API_KEY) {
+                    const targetEmail = foundEmailMsg.content.trim();
 
-                            try {
-                                await resend.emails.send({
-                                    from: 'AYO <hello@ai-visionary.com>',
-                                    to: [targetEmail],
-                                    subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
-                                    html: `
+                    try {
+                        await resend.emails.send({
+                            from: 'AYO <hello@ai-visionary.com>',
+                            to: [targetEmail],
+                            subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
+                            html: `
                             <div style="font-family: sans-serif; color: #333;">
                                 <h1 style="color:#000;">Votre Identité IA est prête.</h1>
                                 <p>Voici votre fichier <strong>ASR Essential PRO</strong>.</p>
@@ -914,26 +920,26 @@ ${websiteData.text}
                                 <p style="font-size:12px; text-align:center;">Scellé le ${new Date().toISOString()}</p>
                             </div>
                         `
-                                });
-                                console.log("✅ ASR PRO Email sent successfully.");
-                            } catch (err) {
-                                console.error("ASR PRO Email failed:", err);
-                            }
-                        } else {
-                            console.warn("⚠️ ASR PRO: Could not find email in history.");
-                        }
+                        });
+                        console.log("✅ ASR PRO Email sent successfully.");
+                    } catch (err) {
+                        console.error("ASR PRO Email failed:", err);
                     }
-
-                    return new Response(JSON.stringify({ text: finalResponseText }), {
-                        status: 200,
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                } catch (error: any) {
-                    console.error("Detailed API Error:", error);
-                    return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+                } else {
+                    console.warn("⚠️ ASR PRO: Could not find email in history.");
                 }
             }
+
+            return new Response(JSON.stringify({ text: finalResponseText }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+        } catch (error: any) {
+            console.error("Detailed API Error:", error);
+            return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    }
