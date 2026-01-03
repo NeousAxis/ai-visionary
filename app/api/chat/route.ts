@@ -249,7 +249,7 @@ Copiez ce bloc de code et enregistrez-le sous le nom : \`asr.json\` à la racine
 👉 Une fois hébergé, donnez-moi l'URL du fichier pour validation finale."
 
 📍 ÉTAT 6 : ACTIVATION
-"J'attends l'URL de votre fichier `asr.json` pour vérifier qu'il est bien accessible aux robots."
+"J'attends l'URL de votre fichier \`asr.json\` pour vérifier qu'il est bien accessible aux robots."
 
 📍 ÉTAT 7 : VALIDATION
 "✅ ASR détecté et valide.
