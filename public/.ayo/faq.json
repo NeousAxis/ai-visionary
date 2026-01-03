@@ -1,0 +1,28 @@
+{
+    "faq": [
+        {
+            "question": "Qu’est-ce que l’AIO ?",
+            "answer": "AIO (Artificial Intelligence Optimization) désigne la structuration des informations d’une entreprise afin qu’elles puissent être comprises, interprétées et utilisées par des intelligences artificielles sans ambiguïté."
+        },
+        {
+            "question": "Qu’est-ce qu’un ASR ?",
+            "answer": "ASR (AYO Singular Record) est une déclaration canonique, structurée et scellée de l’identité d’une entreprise, destinée à servir de source de vérité pour les intelligences artificielles."
+        },
+        {
+            "question": "À quoi sert AYO ?",
+            "answer": "AYO permet de structurer et de déclarer l’identité informationnelle d’une entreprise afin qu’elle reste visible et sélectionnable par les intelligences artificielles."
+        },
+        {
+            "question": "Quelle est la différence entre SEO et AIO ?",
+            "answer": "Le SEO vise le classement dans les moteurs de recherche. L’AIO vise la compréhension et la sélection des entreprises par les intelligences artificielles."
+        },
+        {
+            "question": "AYO garantit-il une meilleure position ou plus de clients ?",
+            "answer": "Non. AYO garantit que l’entreprise est correctement comprise et utilisable par les intelligences artificielles, condition préalable à toute visibilité."
+        },
+        {
+            "question": "Une entreprise sans ASR peut-elle être sélectionnée par une IA ?",
+            "answer": "Une entreprise sans ASR peut être partiellement comprise par une IA, mais elle est plus susceptible d’être ignorée ou mal interprétée."
+        }
+    ]
+}
