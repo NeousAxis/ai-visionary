@@ -9,6 +9,9 @@ export default function Home() {
       {/* SECTION 1 — Hero (AYO Only) */}
       <section id="hero" className="hero-section">
         <div className="container hero-content">
+          <div className="logo-container" style={{ marginBottom: '40px' }}>
+            <img src="/logo-ai-visionary.png" alt="AI VISIONARY" style={{ height: '60px', width: 'auto' }} />
+          </div>
           <h1 className="headline">Aujourd’hui, vos clients passent par des IA pour chercher des professionnels.</h1>
           <div className="subheadline">
             <p>Si votre site n’est pas correctement documenté pour les IA, vous n’êtes pas recommandé par ChatGPT, Gemini, Claude, etc.</p>
