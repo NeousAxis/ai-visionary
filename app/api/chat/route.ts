@@ -588,8 +588,8 @@ Message : "AYO analyse si votre entreprise est lisible par les IA. Donnez-moi : 
 
 ÉTAT 1 — COLLECTE
 - Si l'utilisateur donne l'URL, DÉDUIS le Nom.
-- QUESTION OBLIGATOIRE (si non fournie) : "Où est votre siège social et quelle est votre zone d'action (Locale, Nationale, Globale ou En ligne) ?"
-- Lance l'analyse une fois ces infos reçues.
+- QUESTION OBLIGATOIRE (si info manquante) : "Pour l'ancrage juridique, où est situé le siège de l'entité ? Et quelle est votre zone opérationnelle (Locale, Globale ou 100% En ligne) ?"
+- Lance l'analyse UNIQUEMENT quand tu as : Nom + URL + Ancrage Juridique + Zone.
 
 ÉTAT 2 — ANALYSE & SCAN
 Utilise les données scannées ci-dessus.
