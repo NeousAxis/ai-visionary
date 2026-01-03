@@ -519,6 +519,7 @@ ${websiteData.text}
                         from: 'AYO <hello@ai-visionary.com>',
                         to: [targetEmail],
                         subject: 'Votre Diagnostic de Visibilité IA (Résultat)',
+                        text: `Bonjour, voici votre audit AIO. Score estimé : 30-50/100. Votre site manque de structure sémantique (JSON-LD). Vous trouverez ci-joint les instructions pour corriger cela avec ASR Light. Pour une protection complète, passez à la version Essential Pro.`,
                         html: `
                             <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                                 <h2 style="color:#000;">Votre Audit AIO est disponible.</h2>
