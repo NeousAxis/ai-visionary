@@ -6,9 +6,7 @@ export default function Footer() {
     return (
         <footer className="footer">
             <div className="container">
-                <div style={{ marginBottom: '30px', opacity: 0.8 }}>
-                    <img src="/logo.png" alt="AI VISIONARY" style={{ height: '40px', width: 'auto' }} />
-                </div>
+
                 <div className="footer-links">
                     <Link href="/">Accueil</Link>
                     <Link href="/ai-et-votre-entreprise">IA & votre entreprise</Link>
