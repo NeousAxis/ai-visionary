@@ -58,17 +58,50 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
             const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
             result.metaDescription = descMatch ? descMatch[1] : null;
 
-            // --- ANALYSE JSON-LD ---
-            // On cherche les blocs de script type="application/ld+json"
-            const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>/gi;
-            const jsonLdMatches = html.match(jsonLdRegex);
+            // --- ANALYSE JSON-LD (CONTENU) ---
+            const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+            let match;
+            let meaningfulSchemaFound = false;
+            const foundTypes: string[] = [];
 
-            if (jsonLdMatches) {
-                result.hasJsonLd = true;
-                result.jsonLdCount = jsonLdMatches.length;
-                result.scoreFactors.push(`✅ ${jsonLdMatches.length} blocs de Données Structurées détectés.`);
+            while ((match = jsonLdRegex.exec(html)) !== null) {
+                try {
+                    const content = match[1];
+                    const data = JSON.parse(content);
+                    const typeLower = (data['@type'] || "").toLowerCase();
 
-                // Check for specific schemas inside the HTML logic (simple string check for robustness without heavy parsing)
+                    // On collecte tous les types trouvés
+                    foundTypes.push(data['@type']);
+
+                    // VERIFICATION QUALITATIVE
+                    // On cherche des types "Entity" qui définissent l'entreprise, pas juste la page.
+                    if (
+                        typeLower.includes('organization') ||
+                        typeLower.includes('localbusiness') ||
+                        typeLower.includes('corporation') ||
+                        typeLower.includes('professionalservice') ||
+                        typeLower.includes('store') ||
+                        typeLower.includes('medicalbusiness')
+                    ) {
+                        meaningfulSchemaFound = true;
+                    }
+                } catch (e) {
+                    // Ignore parse errors
+                }
+            }
+
+            result.jsonLdCount = foundTypes.length;
+
+            if (foundTypes.length > 0) {
+                if (meaningfulSchemaFound) {
+                    result.hasJsonLd = true;
+                    result.scoreFactors.push(`✅ Sémantique d'Entité DÉTECTÉE (Types: ${foundTypes.join(', ')}).`);
+                } else {
+                    result.hasJsonLd = false; // ON FORCE À FAUX SI CE N'EST PAS UNE ENTITE
+                    result.scoreFactors.push(`⚠️ JSON-LD détecté mais FAIBLE VALEUR (Types: ${foundTypes.join(', ')}). Ce n'est pas une déclaration d'Entité (Organization).`);
+                }
+
+                // FAQ Check Specific
                 if (lowerHtml.includes('"@type": "faqpage"') || lowerHtml.includes('"@type":"faqpage"')) {
                     result.hasFaqSchema = true;
                     result.scoreFactors.push(`✅ Schéma FAQPage officiel détecté.`);
