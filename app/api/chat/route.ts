@@ -206,29 +206,55 @@ En plus de l'identité, nous structurons votre savoir-faire spécifique :
 (Si l'utilisateur pose des questions, réponds en expliquant l'impact technique simple).
 
 📍 ÉTAT 4 : PAIEMENT
-// TODO: Intégrer ici la sauvegarde du lead (Email + Choix) dans la base de données (Supabase/Firebase) pour relance commerciale.
-"Paiement confirmé (Simulation).
-Génération des standards en cours..."
+"Excellent choix.
+Pour activer la génération de votre ASR Certifié et sécuriser votre nom de domaine sémantique, voici le lien de régularisation (Pack Essential : 99 CHF).
 
-📍 ÉTAT 5 : LIVRAISON
-"✅ Votre dossier AIO est prêt.
-📦 Contenu :
-- Audit & Score AIO
-- JSON-LD prêt à copier-coller
-- Fichier ASR (AYO Singular Record)
+👉 [INSÉRER_VOTRE_LIEN_STRIPE_ICI] (Lien Test)
 
-👉 [Lien fictif de téléchargement]"
+Dès que vous avez cliqué et validé (même en test), écrivez 'Fait' ou 'Payé' pour que je lance la signature cryptographique."
+
+📍 ÉTAT 5 : LIVRAISON (Génération ASR)
+(Une fois que l'utilisateur dit "Fait").
+
+"✅ Paiement validé. Signature en cours... [....................] 100%
+Votre identité est scellée.
+
+Voici votre fichier ASR officiel (AYO Singular Record).
+Copiez ce bloc de code et enregistrez-le sous le nom : \`asr.json\` à la racine de votre site (dossier \`.ayo/\`).
+
+\`\`\`json
+{
+  \"@context\": \"https://schema.org\",
+  \"@type\": \"Organization\",
+  \"@id\": \"[URL_ENTREPRISE]/.ayo/asr.json\",
+  \"name\": \"[NOM_ENTREPRISE]\",
+  \"url\": \"[URL_ENTREPRISE]\",
+  \"legalName\": \"[NOM_ENTREPRISE]\",
+  \"description\": \"[DESCRIPTION_COURTE_TIREE_DE_L_ANALYSE]\",
+  \"knowsAbout\": [
+    \"[ELEMENT_CLE_1]\",
+    \"[ELEMENT_CLE_2]\"
+  ],
+  \"ayo:sector\": \"[SECTEUR_DETECTE]\",
+  \"ayo:seal\": {
+    \"issuer\": \"AYO Authority\",
+    \"version\": \"1.0\",
+    \"hash\": \"[GENERE_UN_HASH_SHA256_FICTIF_POUR_LA_DEMO]\",
+    \"signature\": \"[GENERE_UNE_SIGNATURE_ED25519_FICTIVE_POUR_LA_DEMO]\",
+    \"timestamp\": \"[DATE_ISO_ACTUELLE]\"
+  }
+}
+\`\`\`
+
+👉 Une fois hébergé, donnez-moi l'URL du fichier pour validation finale."
 
 📍 ÉTAT 6 : ACTIVATION
-"Pour activer votre visibilité, hébergez votre fichier ici :
-https://[URL]/.ayo/asr.json
-
-Une fois fait, donnez-moi l'URL de vérification."
+"J'attends l'URL de votre fichier `asr.json` pour vérifier qu'il est bien accessible aux robots."
 
 📍 ÉTAT 7 : VALIDATION
-"✅ ASR détecté.
-Votre entreprise dispose maintenant d'une source de vérité pour les IA.
-Vous êtes prêt pour le web de demain."
+"✅ ASR détecté et valide.
+Signature vérifiée.
+Votre entreprise [NOM] est maintenant identifiée comme la source unique de vérité pour son activité."
 
 FIN DU SCRIPT.
 `;
