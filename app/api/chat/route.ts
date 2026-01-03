@@ -209,6 +209,18 @@ export async function POST(req: Request) {
             const userEmail = userContent;
             console.log(`📧 DETECTED EMAIL: ${userEmail}. Attempting to send ASR Light...`);
 
+            // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
+            // Find the last assistant message that contains the score analysis
+            const analysisMsg = messages.slice().reverse().find(m => m.role === 'assistant' && m.content.includes('SCORE FINAL'));
+            let analysisHtml = "<p><em>Analyse non disponible dans l'historique sans état.</em></p>";
+
+            if (analysisMsg) {
+                // Formatting the analysis for Email (convert Markdown to simple HTML)
+                // We extract lines starting with emojis 🔎 or 📊
+                const lines = analysisMsg.content.split('\n').filter((l: string) => l.includes('🔎') || l.includes('📊'));
+                analysisHtml = lines.map((l: string) => `<p style="margin: 5px 0;">${l.replace(/\*\*/g, '<strong>').replace(/\*\*/g, '</strong>')}</p>`).join('');
+            }
+
             if (process.env.RESEND_API_KEY) {
                 try {
                     await resend.emails.send({
@@ -216,24 +228,39 @@ export async function POST(req: Request) {
                         to: [userEmail],
                         subject: 'Votre Dossier AYO + ASR Light (Gratuit)',
                         html: `
-                            <h1>Bonjour,</h1>
-                            <p>Voici votre dossier de visibilité IA généré par AYO.</p>
-                            <p><strong>Session ID:</strong> ${sessionAsrId}</p>
-                            <hr />
-                            <h2>Votre Fichier ASR Light</h2>
-                            <p>Copiez ce contenu dans un fichier nommé <code>asr.json</code> :</p>
-                            <pre style="background:#f4f4f4;padding:15px;border-radius:5px;">
+                            <div style="font-family: sans-serif; color: #333;">
+                                <h1>Votre Audit de Visibilité IA</h1>
+                                <p>Voici les résultats de l'analyse effectuée par AYO.</p>
+                                <p><strong>Session ID:</strong> ${sessionAsrId}</p>
+                                
+                                <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                                    <h2 style="margin-top:0;">📊 Résultats de l'Audit</h2>
+                                    ${analysisHtml}
+                                </div>
+
+                                <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+                                
+                                <h2>🎁 Votre Fichier ASR Light (Offert)</h2>
+                                <p>Ce fichier permet aux IA de vous identifier. Copiez ce contenu dans un fichier nommé <code>asr.json</code> à la racine de votre site :</p>
+                                <pre style="background:#2d2d2d; color: #fff; padding:15px; border-radius:5px; overflow-x: auto;">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
   "@id": "${sessionAsrId}",
   "status": "AYO_LIGHT_VERIFIED",
+  "name": "Votre Entreprise",
   "generatedAt": "${sessionDate}"
 }
-                            </pre>
-                            <p>Pour obtenir la certification complète, répondez "Oui" dans le chat ou cliquez ci-dessous :</p>
-                            <a href="https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC" style="background-color:#000;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;display:inline-block;margin-top:10px;">🛡 Activer la Certification (99 CHF)</a>
-                            <p style="margin-top:20px;font-size:12px;color:#666;">L'équipe AYO.</p>
+                                </pre>
+
+                                <div style="text-align: center; margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 8px;">
+                                    <h3 style="margin-top:0;">🚀 Passez à la vitesse supérieure</h3>
+                                    <p>Pour garantir votre autorité et protéger votre marque, activez la Certification Cryptographique.</p>
+                                    <a href="https://buy.stripe.com/test_price_1SlJA2PkCQYUm8hQXAgWlxrC" style="background-color:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; display:inline-block; font-weight: bold;">🛡 Activer le Pack Essential (99 CHF)</a>
+                                </div>
+                                
+                                <p style="margin-top:30px; font-size:12px; color:#999; text-align: center;">L'équipe AI Visionary / AYO.</p>
+                            </div>
                         `
                     });
                     console.log("✅ ASR Light Email sent.");
