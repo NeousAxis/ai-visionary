@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   title: "AI VISIONARY",
   description: "Un Internet lisible. Une visibilité durable. AYA et AIO structurent et rendent lisible le web pour l'IA.",
   icons: {
-    icon: '/logo.png', // Fallback manuel si Next.js n'a pas fini de générer
+    icon: '/favicon.png?v=FINAL',
+    shortcut: '/favicon.png?v=FINAL',
+    apple: '/favicon.png?v=FINAL',
   },
 };
 
