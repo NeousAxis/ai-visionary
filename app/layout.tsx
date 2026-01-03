@@ -8,11 +8,7 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 export const metadata: Metadata = {
   title: "AI VISIONARY",
   description: "Un Internet lisible. Une visibilité durable. AYA et AIO structurent et rendent lisible le web pour l'IA.",
-  icons: {
-    icon: '/favicon.png?v=FINAL',
-    shortcut: '/favicon.png?v=FINAL',
-    apple: '/favicon.png?v=FINAL',
-  },
+
 };
 
 export default function RootLayout({
