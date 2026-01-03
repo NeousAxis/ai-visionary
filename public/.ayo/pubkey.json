@@ -1,0 +1,8 @@
+{
+    "issuer": "AI-VISIONARY",
+    "keyId": "ayo-root-2026",
+    "algorithm": "ed25519",
+    "publicKey": "P3xGmNXcG23Fnis1BdVBY27qbV0/O6EmYd/28PdH1O0=",
+    "createdAt": "2026-01-03",
+    "scope": "ASR sealing"
+}
