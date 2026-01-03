@@ -516,7 +516,7 @@ ${websiteData.text}
                 // On envoie le rapport "Light" (Template Générique pour l'instant, mais fonctionnel)
                 try {
                     await resend.emails.send({
-                        from: 'AYO <contact@ai-visionary.com>',
+                        from: 'AYO <hello@ai-visionary.com>',
                         to: [targetEmail],
                         subject: 'Votre Diagnostic de Visibilité IA (Résultat)',
                         html: `
