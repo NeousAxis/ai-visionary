@@ -95,7 +95,7 @@ export default function Home() {
       {/* SECTION 3 — Solution : AYO */}
       <section id="solution" className="section solution-section">
         <div className="container">
-          <h2 className="section-title">AYO met à plat les informations essentielles de votre activité pour qu’elles soient exploitables par les IA.</h2>
+          <h2 className="section-title">AYO structure les informations essentielles de votre activité pour qu’elles soient exploitables par les IA.</h2>
           <div className="grid-2" style={{ display: 'flex', justifyContent: 'center' }}>
             {/* Bloc AIO Unique */}
             <div className="card solution-card aio-card" style={{ maxWidth: '800px', width: '100%' }}>
