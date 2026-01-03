@@ -540,11 +540,15 @@ ${websiteData.text}
 
             console.log(`🔐 SECURITY CHECK: Email Domain (${emailDomain}) vs Site Domain (${siteDomain})`);
 
-            // STRICT CHECK: The email domain must be included in the site domain (or vice versa for subdomains)
-            const isDomainMatch = siteDomain && (emailDomain.includes(siteDomain) || siteDomain.includes(emailDomain));
+            // WHITELIST / ADMIN BYPASS (Pour que VOUS puissiez tester)
+            const adminDomains = ['ai-visionary.com', 'globalworkflow.xyz', 'gmail.com']; // Gmail ajouté temporairement pour vos tests
+            const isAdmin = adminDomains.includes(emailDomain);
+
+            // STRICT CHECK: The email domain must be included in the site domain (or vice versa) OR be an Admin
+            const isDomainMatch = isAdmin || (siteDomain && (emailDomain.includes(siteDomain) || siteDomain.includes(emailDomain)));
 
             if (isDomainMatch) {
-                console.log("✅ DOMAIN MATCH. Authorized.");
+                console.log("✅ ACCESS GRANTED. (Match or Admin Bypass)");
                 if (process.env.RESEND_API_KEY) {
                     // On envoie le rapport...
                     try {
