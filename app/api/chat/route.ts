@@ -634,14 +634,14 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
             }
 
             // 1. DYNAMIC PROVIDER SELECTION
-            // Default to OpenAI Mini as safe baseline
-            let modelToUse = openai('gpt-4o-mini');
+            let modelToUse;
 
-            // Priority to OpenAI if key exists (Override default if specific logic needed, or keep as is)
+            // Priority to OpenAI ONLY if key exists
             if (process.env.OPENAI_API_KEY) {
                 console.log("Using Provider: OpenAI");
-                // Already set to default
+                modelToUse = openai('gpt-4o-mini');
             } else {
+                // Fallback to Gemini
                 let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
                 if (googleKey) {
