@@ -290,7 +290,7 @@ export default function Home() {
               className="btn btn-primary"
             >→ Optimiser mon entreprise</button>
           </div>
-          <p className="final-phrase">Ne soyez plus une simple URL. Faites entrer votre Entreprise dans cette nouvelle ère.</p>
+          <p className="final-phrase">Ne soyez plus une simple URL. Devenez visible par les IA.</p>
         </div>
       </section>
 
