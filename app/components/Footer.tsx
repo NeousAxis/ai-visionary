@@ -7,7 +7,7 @@ export default function Footer() {
         <footer className="footer">
             <div className="container">
                 <div style={{ marginBottom: '30px', opacity: 0.8 }}>
-                    <img src="/logo-ai-visionary.png" alt="AI VISIONARY" style={{ height: '40px', width: 'auto' }} />
+                    <img src="/logo.png" alt="AI VISIONARY" style={{ height: '40px', width: 'auto' }} />
                 </div>
                 <div className="footer-links">
                     <Link href="/">Accueil</Link>

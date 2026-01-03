@@ -1,0 +1,34 @@
+PACK AIO PRO – Expertise & Sémantique
+499 CHF : 📦 LIVRABLES DU PACK AIO PRO
+1️⃣ Glossaire métier structuré (/.ayo/glossary.json)
+Définitions propres au métier du client
+Concepts ambigus fixés (ex. : “audit”, “diagnostic”, “accompagnement”, etc.)
+Sens figé, exploitable par IA
+10 à 30 entrées selon complexité
+👉 Empêche les IA de projeter des définitions génériques.
+2️⃣ FAQ structurée IA-native (/.ayo/faq.json)
+Questions réellement posées aux IA
+Réponses déclaratives, non commerciales
+Clarification :
+ce que le service est
+ce qu’il n’est pas
+pour qui / pas pour qui
+👉 Réduit drastiquement l’ambiguïté décisionnelle.
+3️⃣ Architecture de données avancée
+Selon l’existant :
+JSON-LD enrichi (Organization, Service, FAQPage, etc.)
+Hiérarchisation claire des entités
+Suppression des collisions sémantiques
+Alignement avec ASR (si existant)
+👉 L’IA ne “lit” plus le site,
+👉 elle navigue dans une structure cohérente.
+4️⃣ Manifest AYO mis à jour (/.ayo/manifest.json)
+Déclaration explicite des sources de vérité
+Ordre de priorité sémantique
+Politique d’interprétation claire
+👉 Donne aux IA la carte du territoire.
+🔐 Ce qui est inclus / exclu (important)
+Inclus
+Création des fichiers s’ils sont absents
+Ou correction s’ils existent mais sont faibles
+Formats machine-first, pas humains 

@@ -1,0 +1,163 @@
+ASR — AYO ESSENTIAL PRO
+
+https://www.ai-visionary.com/.ayo/asr.json
+
+
+
+
+
+{
+  "@context": [
+    "https://schema.org",
+    { "ayo": "https://www.ai-visionary.com/ns/ayo#" }
+  ],
+
+  "@type": "Organization",
+  "@id": "https://www.ai-visionary.com/#organization",
+
+  "name": "AI-Visionary",
+  "url": "https://www.ai-visionary.com/",
+  "description": "Cabinet et service spécialisé dans la structuration de données et de contenus afin de rendre les entreprises lisibles, identifiables et sélectionnables par les intelligences artificielles (AIO).",
+
+  "areaServed": ["CH", "FR", "BE"],
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "CH"
+  },
+
+  "ayo:sector": {
+    "primary": "Artificial Intelligence Services",
+    "secondary": [
+      "Artificial Intelligence Optimization (AIO)",
+      "Data Structuring",
+      "Digital Knowledge Representation"
+    ]
+  },
+
+  "ayo:offer": {
+    "services": [
+      "AI-readiness audit",
+      "Information structuring for IA",
+      "AIO score evaluation",
+      "ASR (AYO Singular Record) generation"
+    ]
+  },
+
+  "ayo:deliverables": [
+    {
+      "name": "AIO Audit Report",
+      "format": "text / structured report",
+      "description": "Analyse de la lisibilité et de la structuration informationnelle d’une entreprise pour les IA."
+    },
+    {
+      "name": "Structured Data Package",
+      "format": "JSON-LD",
+      "description": "Données structurées destinées à être interprétées directement par des IA."
+    },
+    {
+      "name": "ASR File",
+      "format": "JSON",
+      "description": "Déclaration canonique et scellée de l’identité IA-native de l’entreprise."
+    }
+  ],
+
+  "ayo:process": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Analysis",
+        "output": "AIO diagnostic and raw signals"
+      },
+      {
+        "step": 2,
+        "name": "Structuring",
+        "output": "Normalized data model and entity definition"
+      },
+      {
+        "step": 3,
+        "name": "Validation & Sealing",
+        "output": "Certified ASR and structured assets"
+      }
+    ]
+  },
+
+  "ayo:scope": {
+    "in_scope": [
+      "SMEs",
+      "consultants",
+      "local businesses",
+      "service-oriented organizations"
+    ],
+    "out_of_scope": [
+      "Pure e-commerce optimization",
+      "SEO ranking optimization",
+      "Advertising performance campaigns"
+    ]
+  },
+
+  "ayo:audience": [
+    "Small and medium enterprises",
+    "Independent professionals",
+    "Organizations seeking IA visibility"
+  ],
+
+  "ayo:geography": {
+    "served_regions": ["Europe francophone"],
+    "languages": ["fr", "en"]
+  },
+
+  "ayo:technicalReadiness": {
+    "jsonld": true,
+    "sitemap": true,
+    "asrEndpoint": "https://www.ai-visionary.com/.ayo/asr.json"
+  },
+
+  "ayo:limitsAndUnknowns": {
+    "not_measured": [
+      "Direct traffic impact",
+      "Lead conversion rate after ASR publication"
+    ],
+    "unknown": [
+      "Future IA ranking behaviors",
+      "Model-specific weighting of structured data"
+    ],
+    "not_provided": [
+      "Guarantee of ranking or recommendation by any IA"
+    ]
+  },
+
+  "ayo:aioEvaluation": {
+    "globalScore": 80,
+    "scale": 100,
+    "method": "AYO AIO Structural Readability Framework",
+    "version": "1.0",
+    "computedAt": "2026-01-03",
+    "breakdown": {
+      "identity": 8,
+      "offer": 15,
+      "process": 12,
+      "engagement": 10,
+      "indicators": 5,
+      "pedagogy": 7,
+      "technicalStructure": 8
+    }
+  },
+
+  "ayo:seal": {
+    "level": "ESSENTIAL",
+    "issuer": "AYO Trusted Authority",
+    "issuedAt": "2026-01-03T03:00:11Z",
+    "payloadHash": {
+      "algorithm": "sha256",
+      "value": "<TO_BE_GENERATED_BY_AYO>"
+    },
+    "signature": {
+      "algorithm": "ed25519",
+      "value": "<TO_BE_GENERATED_BY_AYO>",
+      "keyId": "<AYO_PUBLIC_KEY_ID>"
+    }
+  }
+}
+
+
+
