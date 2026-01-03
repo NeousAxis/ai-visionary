@@ -211,7 +211,7 @@ export default function Home() {
           <div className="grid-3 pricing-grid" style={{}}>
 
             <div className="card pricing-card">
-              <h3>Audit AYO <br /><span className="card-subtitle">Diagnostic de visibilité</span></h3>
+              <h3>AYO Light <br /><span className="card-subtitle">Diagnostic de visibilité</span></h3>
               <div className="price">Gratuit</div>
               <p className="price-details">Testez comment les IA vous voient aujourd'hui. Rapport immédiat via notre Chatbot.</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
