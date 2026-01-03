@@ -15,6 +15,8 @@ export interface AioScanResult {
     hasFaqSchema: boolean; // Détecte le schéma spécifique FAQPage
     metaTitle: string | null;
     metaDescription: string | null;
+    h1: string[];
+    text: string;
     scoreFactors: string[];
 }
 
@@ -29,6 +31,8 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
         hasFaqSchema: false,
         metaTitle: null,
         metaDescription: null,
+        h1: [],
+        text: "",
         scoreFactors: []
     };
 
@@ -41,7 +45,7 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
 
         // 2. Fetch du HTML Principal
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout (More time for full load)
 
         const response = await fetch(url, { signal: controller.signal, headers: { 'User-Agent': 'AYO-Bot/1.0 (AI Visionary Scanner)' } });
         clearTimeout(timeoutId);
@@ -57,6 +61,21 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
 
             const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i);
             result.metaDescription = descMatch ? descMatch[1] : null;
+
+            // --- EXTRACTION CONTENU (H1 & TEXTE BRUT) ---
+            const h1Regex = /<h1[^>]*>([^<]+)<\/h1>/gi;
+            let h1Match;
+            while ((h1Match = h1Regex.exec(html)) !== null) {
+                result.h1.push(h1Match[1].trim());
+            }
+
+            // Simple text extraction (stripping tags) - for LLM context
+            result.text = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, "")
+                .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, "")
+                .replace(/<[^>]+>/g, "\n")
+                .replace(/\s+/g, " ")
+                .trim()
+                .substring(0, 15000); // Limit context size
 
             // --- ANALYSE JSON-LD (CONTENU) ---
             const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
