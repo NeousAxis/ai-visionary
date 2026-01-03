@@ -1,0 +1,40 @@
+      {/* SECTION 2.5 — Comparatif SEO vs IA */}
+      <section id="comparison" className="section comparison-section" style={{ background: 'rgba(255,255,255,0.02)' }}>
+        <div className="container">
+            <h2 className="section-title" style={{ fontSize: '2rem' }}>CE QUI A CHANGÉ AVEC LES IA <br/><span style={{fontSize: '1.2rem', color: 'var(--text-muted)'}}>(ET QUE LE SEO NE COUVRE PAS)</span></h2>
+            
+            <div className="comparison-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', 
+                gap: '2rem',
+                marginTop: '3rem',
+                marginBottom: '3rem'
+            }}>
+                {/* Avant */}
+                <div className="col-avant" style={{ opacity: 0.7 }}>
+                    <h3 style={{ borderBottom: '1px solid var(--text-muted)', paddingBottom: '10px', marginBottom: '20px' }}>AVANT <span style={{fontSize:'0.8em', fontWeight:'normal'}}>(Google)</span></h3>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <li style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>Google indexe des pages <span style={{color:'var(--text-muted)'}}>→</span></li>
+                        <li style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>Le texte suffisait <span style={{color:'var(--text-muted)'}}>→</span></li>
+                        <li style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>Le marketing aidait <span style={{color:'var(--text-muted)'}}>→</span></li>
+                        <li style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>Être trouvé <span style={{color:'var(--text-muted)'}}>→</span></li>
+                    </ul>
+                </div>
+
+                {/* Maintenant */}
+                <div className="col-maintenant">
+                    <h3 style={{ borderBottom: '1px solid var(--primary-color)', paddingBottom: '10px', marginBottom: '20px', color: 'var(--primary-color)' }}>MAINTENANT <span style={{fontSize:'0.8em', fontWeight:'normal', color:'white'}}>(IA)</span></h3>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontWeight: 'bold' }}>
+                        <li style={{ color: 'var(--text-main)' }}>Les IA sélectionnent des entités</li>
+                        <li style={{ color: 'var(--text-main)' }}>La structure devient obligatoire</li>
+                        <li style={{ color: '#ef4444' }}>Le marketing brouille</li>
+                        <li style={{ color: 'var(--accent-color)' }}>Être retenu</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-main)' }}>👉 La visibilité n’est plus une question d’accès, <br/>mais de lisibilité.</p>
+            </div>
+        </div>
+      </section>
