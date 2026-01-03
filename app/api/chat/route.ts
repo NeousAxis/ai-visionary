@@ -557,7 +557,10 @@ IX) SCRIPT CONVERSATIONNEL — ÉTATS
 Message : "AYO analyse si votre entreprise est lisible par les IA. Donnez-moi : 1) Nom, 2) URL, 3) Pays."
 
 ÉTAT 1 — COLLECTE
-Demander les infos manquantes.
+- Si l'utilisateur donne l'URL, DÉDUIS LE NOM de l'entreprise à partir du domaine ou du titre scanné (ex: 'nearyouapp.xyz' -> 'NearYouApp').
+- Ne redemande PAS le nom s'il est évident ou détecté.
+- Confirme simplement : "Nom détecté : [Nom Déduit]".
+- Demande ensuite le PAYS si manquant.
 
 ÉTAT 2 — ANALYSE & SCAN
 Utilise les données scannées ci-dessus.
