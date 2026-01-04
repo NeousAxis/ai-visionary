@@ -197,7 +197,7 @@ export default function Home() {
                   }}
                   className="btn btn-primary"
                   style={{ width: '100%' }}
-                >Vérifier mon éligibilité</button>
+                >Analyser mon site</button>
               </div>
             </div>
 
@@ -206,7 +206,14 @@ export default function Home() {
               <div className="price">499 CHF</div>
               <p className="price-details">La couche de confiance totale pour les IA. Glossaire, FAQ Structurée, Architecture & Manifest.</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <a href="https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201" className="btn btn-secondary" style={{ width: '100%', display: 'inline-block' }}>Commander le Pack</a>
+                <button
+                  onClick={() => {
+                    const chatBtn = document.getElementById('ayo-toggle');
+                    if (chatBtn) chatBtn.click();
+                  }}
+                  className="btn btn-secondary"
+                  style={{ width: '100%' }}
+                >Analyser mon site</button>
               </div>
             </div>
           </div>
