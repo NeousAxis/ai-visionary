@@ -139,7 +139,7 @@ export function computeAioScore(extract: AyoExtract) {
         ),
         meta: {
             has_jsonld: extract.source.scan.has_jsonld,
-            has_asr,
+            has_asr: hasAsr,
             reachable: extract.source.scan.is_reachable,
         },
         method: "AYO_V1_BIBLE_WEIGHTS_PURE",
