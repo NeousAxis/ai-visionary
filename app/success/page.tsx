@@ -8,10 +8,12 @@ function SuccessContent() {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         if (!sessionId) {
             setStatus('error'); // No session ID, likely direct access
+            setErrorMessage("Session ID manquant dans l'URL.");
             return;
         }
 
@@ -27,12 +29,15 @@ function SuccessContent() {
                 if (res.ok) {
                     setStatus('success');
                 } else {
-                    console.error("Delivery API failed");
+                    const errData = await res.json().catch(() => ({}));
+                    console.error("Delivery API failed", errData);
                     setStatus('error');
+                    setErrorMessage(errData.error || `Erreur Serveur (${res.status})`);
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Network error during delivery trigger", err);
                 setStatus('error');
+                setErrorMessage(err.message || "Erreur Réseau");
             }
         };
 
@@ -86,6 +91,11 @@ function SuccessContent() {
                             Si vous avez bien effectué le paiement, pas d'inquiétude. Notre système va réessayer.
                             Vérifiez vos emails dans quelques minutes.
                         </p>
+                        {errorMessage && (
+                            <p className="text-red-400 text-sm mt-2 mb-6 font-mono bg-red-900/20 p-3 rounded border border-red-500/30">
+                                Détail technique : {errorMessage}
+                            </p>
+                        )}
                         <Link href="/" className="text-emerald-400 hover:underline">
                             Contacter le support ou retourner à l'accueil
                         </Link>

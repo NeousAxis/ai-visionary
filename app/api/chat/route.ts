@@ -178,7 +178,7 @@ SI PACK PRO :
   Vous passez directement au niveau **Expert**.
   
   Voici votre lien sécurisé pour activer le **Pack AIO Ultimate (Pro)** :
-  👉 [🚀 **Activer le Pack PRO (499 CHF)**](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200)
+  👉 [🚀 **Activer le Pack PRO (499 CHF)**](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201)
   
   *(Inclut : Audit Complet + Certification ASR Pro + Architectures AI-Native + Glossaire Sémantique)*
   
