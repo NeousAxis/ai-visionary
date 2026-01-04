@@ -50,9 +50,9 @@ export default function AyoChat() {
             content: `👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.
 
 Je vais établir votre Diagnostic de Visibilité IA (Gratuit).
-Pour cela, répondez à ces 3 questions.
+Pour cela, indiquez-moi simplement l'URL principale de votre site web.
 
-1. Quel est le NOM de votre entreprise ?`
+1. Quelle est votre URL ?`
         };
 
         try {
@@ -141,8 +141,8 @@ Pour cela, répondez à ces 3 questions.
                     <div className="message bot-message" style={{ background: 'rgba(255, 255, 255, 0.1)', alignSelf: 'flex-start', borderBottomLeftRadius: '2px' }}>
                         👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.<br /><br />
                         Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
-                        Pour cela, répondez à ces 3 questions.<br /><br />
-                        <strong>1. Quel est le NOM de votre entreprise ?</strong>
+                        Pour cela, indiquez-moi simplement l'URL principale de votre site web.<br /><br />
+                        <strong>1. Quelle est votre URL ?</strong>
                     </div>
 
                     {messages.map((m) => (
