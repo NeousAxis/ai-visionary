@@ -1,4 +1,7 @@
 
+// Force static for reliability? No, dynamic for streaming.
+export const dynamic = 'force-dynamic';
+
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import fs from 'fs';
