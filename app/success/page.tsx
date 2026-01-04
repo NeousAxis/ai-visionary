@@ -96,9 +96,14 @@ function SuccessContent() {
                                 Détail technique : {errorMessage}
                             </p>
                         )}
-                        <Link href="/" className="text-emerald-400 hover:underline">
-                            Contacter le support ou retourner à l'accueil
-                        </Link>
+                        <div className="flex flex-col gap-4">
+                            <a href="mailto:hello@ai-visionary.com?subject=Problème Paiement AYO (Session Error)" className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">
+                                Contacter le support (Email)
+                            </a>
+                            <Link href="/" className="text-emerald-400 hover:underline text-sm">
+                                Retourner à l'accueil
+                            </Link>
+                        </div>
                     </>
                 )}
 
