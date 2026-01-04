@@ -255,7 +255,7 @@ async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJson
         console.log(`Analyzing real site: ${targetUrl}`);
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout for real analysis
+        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout (Strict)
 
         const res = await fetch(targetUrl, {
             signal: controller.signal,
@@ -672,6 +672,19 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
             }
 
 
+
+
+            // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
+            // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
+            // This prevents the code from running a SECOND scan and a SECOND LLM call (Hallucination/Timeout).
+            if (isAnalysisRun && finalResponseText) {
+                console.log("✅ Returning Deterministic Analysis Result (Skipping secondary LLM call).");
+                return new Response(JSON.stringify({ text: finalResponseText }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
             // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
             let websiteData = { text: "", hasJsonLd: false };
 
@@ -880,7 +893,7 @@ ${websiteData.text}
             });
 
             // INTERCEPT & PROCESS RESPONSE
-            let finalResponseText = result.text;
+            finalResponseText = result.text;
 
             // Check for generated JSON in the response (Hidden ASR Pro)
             const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
