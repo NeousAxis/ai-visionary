@@ -94,8 +94,11 @@ export function computeAioScore(extract: AyoExtract) {
         const expected = EXPECTED_FIELDS[block];
 
         const rawQs = expected.map((field) => {
+            const blockObj = extract.fields?.[block];
+            if (!blockObj) return 0;
+
             // @ts-expect-error index dynamic but safe by design
-            const node = extract.fields[block][field];
+            const node = blockObj[field];
             return qOf(node);
         });
 
@@ -118,7 +121,7 @@ export function computeAioScore(extract: AyoExtract) {
     }
 
     // b) Si ASR absent : jamais 100 (max 90)
-    const hasAsr = extract.source.scan.has_asr_file === true || extract.fields.structure_technique.has_asr.value === true;
+    const hasAsr = extract.source.scan.has_asr_file === true || extract.fields?.structure_technique?.has_asr?.value === true;
     if (!hasAsr) {
         total = Math.min(total, 90);
     }

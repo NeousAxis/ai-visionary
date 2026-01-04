@@ -472,6 +472,9 @@ ${scanResult.text}
             };
 
             // Force Tech Fields in 'fields' to match scan
+            if (!extractJson.fields) extractJson.fields = {} as any;
+            if (!extractJson.fields.structure_technique) extractJson.fields.structure_technique = {} as any;
+
             extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0, evidence: ["Scan Technique"] };
             extractJson.fields.structure_technique.has_asr = { value: scanResult.hasAsrFile, q: scanResult.hasAsrFile ? 1 : 0, evidence: ["Scan Technique"] };
 
