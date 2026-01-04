@@ -566,9 +566,23 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 
                 let extractedScore = 0;
                 if (analysisMsg) {
-                    // Extract Score Logic
-                    const scoreMatch = analysisMsg.content.match(/SCORE FINAL AIO\s*:\s*(\d+)/i);
-                    if (scoreMatch) extractedScore = parseInt(scoreMatch[1], 10);
+                    // Extract Score Logic (Robust V2)
+                    // Matches: "**SCORE FINAL AIO** : 27/100" or "Note Globale : 27 / 100"
+                    const scoreMatch = analysisMsg.content.match(/(?:SCORE|NOTE).{0,30}(\d{1,3})\s*\/\s*100/i);
+
+                    if (scoreMatch) {
+                        extractedScore = parseInt(scoreMatch[1], 10);
+                        console.log(`✅ EXTRATED SCORE: ${extractedScore}/100`);
+                    } else {
+                        console.warn("⚠️ Score regex failed on content:", analysisMsg.content.substring(0, 500));
+                        // Fallback: Try to find ANY "X/100" pattern if the main one fails? 
+                        // Maybe risky, but better than 0.
+                        const fallbackMatch = analysisMsg.content.match(/(\d{1,3})\s*\/\s*100/);
+                        if (fallbackMatch) {
+                            extractedScore = parseInt(fallbackMatch[1], 10);
+                            console.log(`⚠️ FALLBACK SCORE EXTRACTED: ${extractedScore}/100`);
+                        }
+                    }
 
                     // The original parsing logic for analysisHtml needs to be inside this if (analysisMsg) block
                     // and should only proceed if '|||' is present, as per the original code's intent.
