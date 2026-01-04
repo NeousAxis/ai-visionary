@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai';
+
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import fs from 'fs';
@@ -292,10 +292,10 @@ export async function POST(req: Request) {
         const lastMessage = messages[messages.length - 1];
 
 
-        // 1. DYNAMIC PROVIDER SELECTION (HOISTED)
+        // 1. DYNAMIC PROVIDER SELECTION (GEMINI ONLY - FORCE AYO)
         let modelToUse;
 
-        // Priority to Gemini (Requested by User)
+        // Force Gemini
         let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
         if (googleKey) {
@@ -340,12 +340,8 @@ export async function POST(req: Request) {
                 // Ultimate Fallback: Try a known stable alias
                 modelToUse = google('gemini-pro');
             }
-        } else if (process.env.OPENAI_API_KEY) {
-            // Fallback to OpenAI only if Gemini is missing
-            console.log("Gemini Key missing. Using Provider: OpenAI as fallback.");
-            modelToUse = openai('gpt-4o-mini');
         } else {
-            throw new Error("No API Key found (Gemini or OpenAI)");
+            throw new Error("CRITICAL: No GEMINI_API_KEY found. OpenAI is BANNED. System halted.");
         }
 
         // 🧠 REAL-TIME GENERATION
