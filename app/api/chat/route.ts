@@ -966,13 +966,12 @@ ${websiteData.text}
             headers: { 'Content-Type': 'application/json' }
         });
 
-    } // End of inner logic (if any) or Main Try
 
     } catch (error: any) {
-    console.error("Detailed API Error:", error);
-    return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-    });
-}
+        console.error("Detailed API Error:", error);
+        return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 }
