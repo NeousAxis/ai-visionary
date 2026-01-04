@@ -58,11 +58,9 @@ export async function POST(req: Request) {
     let stripe: Stripe | null = null;
 
     if (stripeKey) {
-        stripe = new Stripe(stripeKey, {
-            apiVersion: '2024-12-18.acacia' as any
-        });
+        stripe = new Stripe(stripeKey); // Use default SDK version for safety
     } else {
-        console.warn("⚠️ STRIPE_SECRET_KEY is missing.");
+        console.warn("⚠️ STRIPE_SECRET_KEY is missing in Env!");
     }
 
     try {
@@ -75,19 +73,31 @@ export async function POST(req: Request) {
 
         console.log(`Processing Success for Session: ${session_id}`);
 
-        let customerEmail = "client@example.com";
-        let paymentStatus = "paid";
+        let customerEmail = "";
+        let paymentStatus = "unknown";
 
         if (stripe) {
             try {
+                console.log("Retrieving Stripe Session...");
                 const session = await stripe.checkout.sessions.retrieve(session_id);
+                console.log("Stripe Session Retrieved. Customer Details:", session.customer_details);
+
                 if (session.customer_details?.email) {
                     customerEmail = session.customer_details.email;
                     paymentStatus = session.payment_status;
+                    console.log("✅ Email extracted from Stripe:", customerEmail);
+                } else {
+                    console.warn("⚠️ No email found in session.customer_details");
                 }
             } catch (stripeErr) {
-                console.error("Stripe Retrieval Error:", stripeErr);
+                console.error("❌ Stripe Retrieval Error:", stripeErr);
             }
+        }
+
+        // Fallback if Stripe failed or no email found
+        if (!customerEmail) {
+            console.error("❌ CRITICAL: Could not retrieve email. Using fallback.");
+            customerEmail = "hello@globalworkflow.xyz"; // HARDCODED FALLBACK FOR DEBUG (Requested by User)
         }
 
         // Generate Files
