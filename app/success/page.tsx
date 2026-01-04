@@ -71,7 +71,7 @@ function SuccessContent() {
                         </div>
 
                         <div className="flex flex-col gap-4">
-                            <Link href="/" className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">
+                            <Link href="/" className="inline-block bg-emerald-500 text-white font-bold py-3 px-8 rounded-full hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">
                                 Retour à l'accueil
                             </Link>
                         </div>
