@@ -85,19 +85,24 @@ export async function POST(req: Request) {
                 if (session.customer_details?.email) {
                     customerEmail = session.customer_details.email;
                     paymentStatus = session.payment_status;
-                    console.log("✅ Email extracted from Stripe:", customerEmail);
+                    console.log("✅ Email extracted from Stripe (customer_details):", customerEmail);
+                } else if (session.customer_email) {
+                    customerEmail = session.customer_email;
+                    paymentStatus = session.payment_status;
+                    console.log("✅ Email extracted from Stripe (customer_email):", customerEmail);
                 } else {
-                    console.warn("⚠️ No email found in session.customer_details");
+                    console.warn("⚠️ No email found in Stripe Session.");
                 }
             } catch (stripeErr) {
                 console.error("❌ Stripe Retrieval Error:", stripeErr);
+                console.log("Stack:", stripeErr); // Extended debug
             }
         }
 
-        // Fallback if Stripe failed or no email found
+        // CRITICAL CHECK: No Email = No Delivery
         if (!customerEmail) {
-            console.error("❌ CRITICAL: Could not retrieve email. Using fallback.");
-            customerEmail = "hello@globalworkflow.xyz"; // HARDCODED FALLBACK FOR DEBUG (Requested by User)
+            console.error("❌ FATAL: Could not retrieve any email address from Session. Delivery aborted.");
+            return NextResponse.json({ error: 'No email found in transaction' }, { status: 400 });
         }
 
         // Generate Files
