@@ -318,11 +318,10 @@ export async function POST(req: Request) {
                 const modelsData = await modelsResponse.json();
 
                 if (modelsData.models) {
-                    // Find best model: Supports generateContent, NOT flash (as per user), prefers 1.5 or pro
+                    // Find best model: Prioritize FLASH for speed (Anti-500)
                     const bestModel = modelsData.models.find((m: any) =>
                         m.supportedGenerationMethods.includes('generateContent') &&
-                        !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
-                        (m.name.includes('gemini-1.5') || m.name.includes('pro'))
+                        (m.name.includes('flash') || m.name.includes('gemini-1.5'))
                     );
 
                     if (bestModel) {
