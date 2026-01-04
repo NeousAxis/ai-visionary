@@ -295,59 +295,57 @@ export async function POST(req: Request) {
         // 1. DYNAMIC PROVIDER SELECTION (HOISTED)
         let modelToUse;
 
-        // Priority to OpenAI ONLY if key exists
-        if (process.env.OPENAI_API_KEY) {
-            console.log("Using Provider: OpenAI");
+        // Priority to Gemini (Requested by User)
+        let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
+        if (googleKey) {
+            googleKey = googleKey.trim();
+            console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}...`);
+            const google = createGoogleGenerativeAI({ apiKey: googleKey });
+
+            try {
+                // 1. AUTO-DETECT AVAILABLE MODELS (Robust Way)
+                console.log("Auto-detecting available Gemini model...");
+                const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
+
+                if (!modelsResponse.ok) {
+                    throw new Error(`Failed to list models: ${modelsResponse.statusText}`);
+                }
+
+                const modelsData = await modelsResponse.json();
+
+                if (modelsData.models) {
+                    // Find best model: Supports generateContent, NOT flash (as per user), prefers 1.5 or pro
+                    const bestModel = modelsData.models.find((m: any) =>
+                        m.supportedGenerationMethods.includes('generateContent') &&
+                        !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
+                        (m.name.includes('gemini-1.5') || m.name.includes('pro'))
+                    );
+
+                    if (bestModel) {
+                        // API returns 'models/gemini-1.5-pro-001', we need 'gemini-1.5-pro-001' (sometimes with or without 'models/')
+                        // The Google SDK usually expects just the ID, but let's be safe.
+                        const modelId = bestModel.name.replace('models/', '');
+                        console.log(`✅ Auto-detected Best Model: ${modelId}`);
+                        modelToUse = google(modelId);
+                    } else {
+                        console.warn("No specific '1.5' or 'pro' model found (excluding flash). Fallback to 'gemini-pro'.");
+                        modelToUse = google('gemini-pro');
+                    }
+                } else {
+                    throw new Error("No models list returned.");
+                }
+            } catch (e) {
+                console.error("Gemini Auto-Detect Failed:", e);
+                // Ultimate Fallback: Try a known stable alias
+                modelToUse = google('gemini-pro');
+            }
+        } else if (process.env.OPENAI_API_KEY) {
+            // Fallback to OpenAI only if Gemini is missing
+            console.log("Gemini Key missing. Using Provider: OpenAI as fallback.");
             modelToUse = openai('gpt-4o-mini');
         } else {
-            // Fallback to Gemini
-            let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-
-            if (googleKey) {
-                googleKey = googleKey.trim();
-                console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}...`);
-                const google = createGoogleGenerativeAI({ apiKey: googleKey });
-
-                try {
-                    // 1. AUTO-DETECT AVAILABLE MODELS (Robust Way)
-                    console.log("Auto-detecting available Gemini model...");
-                    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
-
-                    if (!modelsResponse.ok) {
-                        throw new Error(`Failed to list models: ${modelsResponse.statusText}`);
-                    }
-
-                    const modelsData = await modelsResponse.json();
-
-                    if (modelsData.models) {
-                        // Find best model: Supports generateContent, NOT flash (as per user), prefers 1.5 or pro
-                        const bestModel = modelsData.models.find((m: any) =>
-                            m.supportedGenerationMethods.includes('generateContent') &&
-                            !m.name.includes('flash') && // 🚫 EXPLICITLY BAN FLASH
-                            (m.name.includes('gemini-1.5') || m.name.includes('pro'))
-                        );
-
-                        if (bestModel) {
-                            // API returns 'models/gemini-1.5-pro-001', we need 'gemini-1.5-pro-001' (sometimes with or without 'models/')
-                            // The Google SDK usually expects just the ID, but let's be safe.
-                            const modelId = bestModel.name.replace('models/', '');
-                            console.log(`✅ Auto-detected Best Model: ${modelId}`);
-                            modelToUse = google(modelId);
-                        } else {
-                            console.warn("No specific '1.5' or 'pro' model found (excluding flash). Fallback to 'gemini-pro'.");
-                            modelToUse = google('gemini-pro');
-                        }
-                    } else {
-                        throw new Error("No models list returned.");
-                    }
-                } catch (e) {
-                    console.error("Gemini Auto-Detect Failed:", e);
-                    // Ultimate Fallback: Try a known stable alias
-                    modelToUse = google('gemini-pro');
-                }
-            } else {
-                throw new Error("No API Key found (OpenAI or Gemini)");
-            }
+            throw new Error("No API Key found (Gemini or OpenAI)");
         }
 
         // 🧠 REAL-TIME GENERATION
