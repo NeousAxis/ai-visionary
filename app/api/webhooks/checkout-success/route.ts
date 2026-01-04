@@ -178,7 +178,7 @@ export async function POST(req: Request) {
                             </ul>
 
                             <div style="text-align: center; margin-top: 30px;">
-                                <a href="https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201" style="background-color: #000; color: #fff; text-decoration: none; padding: 15px 30px; font-weight: bold; border-radius: 5px;">
+                                <a href="https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201" style="background-color: #000000; color: #ffffff !important; text-decoration: none; padding: 15px 30px; font-weight: bold; border-radius: 5px; border: 1px solid #333;">
                                     🚀 Commander le Pack AIO PRO (499 CHF)
                                 </a>
                             </div>

@@ -97,7 +97,9 @@ function SuccessContent() {
                             </p>
                         )}
                         <div className="flex flex-col gap-4">
-                            <a href="mailto:hello@ai-visionary.com?subject=Problème Paiement AYO (Session Error)" className="inline-block bg-white text-black font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors">
+                            <a href="mailto:hello@ai-visionary.com?subject=Problème Paiement AYO (Session Error)"
+                                className="inline-block bg-white font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors"
+                                style={{ color: '#000000' }}>
                                 Contacter le support (Email)
                             </a>
                             <Link href="/" className="text-emerald-400 hover:underline text-sm">
