@@ -125,10 +125,43 @@ export async function POST(req: Request) {
                             <p>Bonjour,</p>
                             <p>Félicitations pour votre décision. Votre commande est validée.</p>
                             
-                            <div style="background: #e0f7fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                                <h3 style="margin-top:0; color: #006064;">📦 Votre Identité Numérique (ASR PRO Template)</h3>
-                                <p style="font-size: 14px;">Ci-joint le modèle JSON Canonique prêt à être rempli et hébergé.</p>
+                                <h3 style="margin-top:0; color: #006064;">📦 Votre Identité Numérique (Code Source ASR)</h3>
+                                <p style="font-size: 14px;">Voici le code exact qui permet aux IA de vous identifier. Ce n'est pas un document PDF, c'est du <strong>code actif</strong>.</p>
                                 <pre style="background: #fff; padding: 10px; overflow-x: auto; font-size: 11px;">${asrProJson}</pre>
+                            </div>
+
+                            <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
+                                <h3 style="margin-top:0; color: #e65100;">🛠 COMMENT L'INSTALLER (Tutoriel Simple)</h3>
+                                <p style="font-size: 14px; font-weight:bold;">Ce code doit être mis sur votre site internet pour être vu par Google et les IA.</p>
+                                
+                                <h4 style="margin-bottom:5px;">OPTION 1 : Vous avez un Webmaster / Développeur</h4>
+                                <p style="font-size:13px; margin-top:0;">Envoyez-lui cet email et dites : <em>"Peux-tu créer un fichier nommé <code>asr.json</code>, coller ce code dedans, et le mettre dans un dossier nommé <code>.ayo</code> à la racine du site ?"</em></p>
+
+                                <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
+
+                                <h4 style="margin-bottom:5px;">OPTION 2 : Vous utilisez WordPress</h4>
+                                <ol style="font-size:13px; padding-left:20px; margin-top:0;">
+                                    <li>Copiez le code ci-dessus (tout le texte dans la case blanche).</li>
+                                    <li>Installez le plugin gratuit <strong>"WP File Manager"</strong>.</li>
+                                    <li>Ouvrez le File Manager, faites un Clic Droit > Nouveau Dossier > Nommez-le <code>.ayo</code></li>
+                                    <li>Entrez dans ce dossier, Clic Droit > Nouveau Fichier TXT > Nommez-le <code>asr.json</code></li>
+                                    <li>Clic Droit sur ce fichier > Code Editor > Collez le code > Sauvegardez.</li>
+                                    <li>C'est fini !</li>
+                                </ol>
+
+                                <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
+
+                                <h4 style="margin-bottom:5px;">OPTION 3 : Vous utilisez WIX, Squarespace ou Shopify</h4>
+                                <p style="font-size:13px;">Ces plateformes bloquent souvent les fichiers. Utilisez cette astuce :</p>
+                                <ol style="font-size:13px; padding-left:20px; margin-top:0;">
+                                    <li>Copiez le code ci-dessus.</li>
+                                    <li>Allez dans les <strong>Paramètres</strong> > <strong>Code personnalisé</strong> (ou Injection de code).</li>
+                                    <li>Ajoutez un nouveau script dans l'En-tête (Head).</li>
+                                    <li>Écrivez ceci : <code>&lt;script type="application/ld+json"&gt;</code></li>
+                                    <li>Collez votre code juste après.</li>
+                                    <li>Fermez avec : <code>&lt;/script&gt;</code></li>
+                                    <li>Sauvegardez. Les IA pourront le lire.</li>
+                                </ol>
                             </div>
 
                             <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
