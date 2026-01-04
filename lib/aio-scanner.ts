@@ -45,7 +45,7 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
 
         // 2. Fetch du HTML Principal
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout (More time for full load)
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout (Strict)
 
         const response = await fetch(url, { signal: controller.signal, headers: { 'User-Agent': 'AYO-Bot/1.0 (AI Visionary Scanner)' } });
         clearTimeout(timeoutId);
