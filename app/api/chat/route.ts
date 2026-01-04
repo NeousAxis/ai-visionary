@@ -672,64 +672,66 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
             }
 
 
+        }
 
 
-            // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
-            // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
-            // This prevents the code from running a SECOND scan and a SECOND LLM call (Hallucination/Timeout).
-            if (isAnalysisRun && finalResponseText) {
-                console.log("✅ Returning Deterministic Analysis Result (Skipping secondary LLM call).");
-                return new Response(JSON.stringify({ text: finalResponseText }), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' }
-                });
+
+        // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
+        // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
+        // This prevents the code from running a SECOND scan and a SECOND LLM call (Hallucination/Timeout).
+        if (isAnalysisRun && finalResponseText) {
+            console.log("✅ Returning Deterministic Analysis Result (Skipping secondary LLM call).");
+            return new Response(JSON.stringify({ text: finalResponseText }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
+        // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
+        let websiteData = { text: "", hasJsonLd: false };
+
+        // This part of websiteData fetching is now less critical for the main analysis flow
+        // as the deterministic engine handles it, but might be used for other LLM prompts.
+        if (messages.length === 6 && !isAnalysisRun) { // Only fetch if not already in analysis run
+            const urlMessage = messages[3];
+            if (urlMessage && urlMessage.role === 'user') {
+                websiteData = await fetchWebsiteContent(urlMessage.content);
             }
+        }
 
-            // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
-            let websiteData = { text: "", hasJsonLd: false };
-
-            // This part of websiteData fetching is now less critical for the main analysis flow
-            // as the deterministic engine handles it, but might be used for other LLM prompts.
-            if (messages.length === 6 && !isAnalysisRun) { // Only fetch if not already in analysis run
-                const urlMessage = messages[3];
-                if (urlMessage && urlMessage.role === 'user') {
-                    websiteData = await fetchWebsiteContent(urlMessage.content);
-                }
-            }
-
-            // 💾 DATABASE PERSISTENCE (Simulation Log)
-            if (messages.length > 2) {
-                console.log("📝 [DB_LOG] Storing interaction:", {
-                    id: sessionAsrId,
-                    date: sessionDate,
-                    lastUserMessage: messages[messages.length - 1].content
-                });
-            }
+        // 💾 DATABASE PERSISTENCE (Simulation Log)
+        if (messages.length > 2) {
+            console.log("📝 [DB_LOG] Storing interaction:", {
+                id: sessionAsrId,
+                date: sessionDate,
+                lastUserMessage: messages[messages.length - 1].content
+            });
+        }
 
 
 
-            // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-            let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
+        // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
+        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
 
-            // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
-            // Detect if the user message is a URL (Basic Heuristic for State 1/2)
-            const lastUserMsg = messages[messages.length - 1].content;
-            const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
+        // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
+        // Detect if the user message is a URL (Basic Heuristic for State 1/2)
+        const lastUserMsg = messages[messages.length - 1].content;
+        const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
 
-            // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
-            if (websiteData.text || (urlMatch && messages.length <= 4)) {
-                console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
+        // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
+        if (websiteData.text || (urlMatch && messages.length <= 4)) {
+            console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
 
-                // Determine URL to scan (either from state or extraction)
-                let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
+            // Determine URL to scan (either from state or extraction)
+            let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
 
-                if (urlToScan) {
-                    const scanResult = await scanUrlForAioSignals(urlToScan);
+            if (urlToScan) {
+                const scanResult = await scanUrlForAioSignals(urlToScan);
 
-                    // -----------------------------------------------------------------------
-                    // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
-                    // -----------------------------------------------------------------------
-                    const SYSTEM_PROMPT = `
+                // -----------------------------------------------------------------------
+                // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
+                // -----------------------------------------------------------------------
+                const SYSTEM_PROMPT = `
 AYO_PROMPT_V3 — CANONIQUE (AYO ONLY, AYA SUPPRIMÉ)
 Version: 3.0
 Statut: ACTIF
@@ -867,64 +869,64 @@ Confirmation.
 
 Utilise ce ton : Professionnel, froid, clinique, expert.
 `;
-                    finalSystemPrompt = SYSTEM_PROMPT; // Overwrite with the new canonical prompt
-                }
+                finalSystemPrompt = SYSTEM_PROMPT; // Overwrite with the new canonical prompt
+            }
 
-                console.log("Injecting real website content into AI context...");
+            console.log("Injecting real website content into AI context...");
 
-                // Keep the text injection for content analysis
-                finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
+            // Keep the text injection for content analysis
+            finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
 """
 ${websiteData.text}
 """`;
 
-            } else if (messages.length === 6) {
-                // ... existing fallback
-                console.log("No website content could be fetched (or failed). AI will infer from name.");
-            }
+        } else if (messages.length === 6) {
+            // ... existing fallback
+            console.log("No website content could be fetched (or failed). AI will infer from name.");
+        }
 
-            // DEBUG MODE: NO STREAMING
-            console.log("Generating text (no stream)...");
-            const result = await generateText({
-                model: modelToUse,
-                temperature: 0.1, // STRICT DETERMINISTIC MODE
-                system: finalSystemPrompt,
-                messages,
-            });
+        // DEBUG MODE: NO STREAMING
+        console.log("Generating text (no stream)...");
+        const result = await generateText({
+            model: modelToUse,
+            temperature: 0.1, // STRICT DETERMINISTIC MODE
+            system: finalSystemPrompt,
+            messages,
+        });
 
-            // INTERCEPT & PROCESS RESPONSE
-            finalResponseText = result.text;
+        // INTERCEPT & PROCESS RESPONSE
+        finalResponseText = result.text;
 
-            // Check for generated JSON in the response (Hidden ASR Pro)
-            const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
+        // Check for generated JSON in the response (Hidden ASR Pro)
+        const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
 
 
 
-            // Regex for payment confirmation (Fait/Payé/Done/Paid...)
-            const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
-            const lastUserContent = lastMessage.content.trim();
+        // Regex for payment confirmation (Fait/Payé/Done/Paid...)
+        const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
+        const lastUserContent = lastMessage.content.trim();
 
-            if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
-                const extractedJson = jsonMatch[1].trim();
-                console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
+        if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
+            const extractedJson = jsonMatch[1].trim();
+            console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
 
-                // Remove JSON from Chat Output (Keep it clean)
-                finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
+            // Remove JSON from Chat Output (Keep it clean)
+            finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
 
-                // EMAIL LOGIC FOR ESSENTIAL PRO
-                // Find valid email in previous user messages
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
+            // EMAIL LOGIC FOR ESSENTIAL PRO
+            // Find valid email in previous user messages
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
 
-                if (foundEmailMsg && process.env.RESEND_API_KEY) {
-                    const targetEmail = foundEmailMsg.content.trim();
+            if (foundEmailMsg && process.env.RESEND_API_KEY) {
+                const targetEmail = foundEmailMsg.content.trim();
 
-                    try {
-                        await resend.emails.send({
-                            from: 'AYO <hello@ai-visionary.com>',
-                            to: [targetEmail],
-                            subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
-                            html: `
+                try {
+                    await resend.emails.send({
+                        from: 'AYO <hello@ai-visionary.com>',
+                        to: [targetEmail],
+                        subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
+                        html: `
                             <div style="font-family: sans-serif; color: #333;">
                                 <h1 style="color:#000;">Votre Identité IA est prête.</h1>
                                 <p>Voici votre fichier <strong>ASR Essential PRO</strong>.</p>
@@ -942,26 +944,26 @@ ${websiteData.text}
                                 <p style="font-size:12px; text-align:center;">Scellé le ${new Date().toISOString()}</p>
                             </div>
                         `
-                        });
-                        console.log("✅ ASR PRO Email sent successfully.");
-                    } catch (err) {
-                        console.error("ASR PRO Email failed:", err);
-                    }
+                    });
+                    console.log("✅ ASR PRO Email sent successfully.");
+                } catch (err) {
+                    console.error("ASR PRO Email failed:", err);
                 }
             }
+        }
 
-            return new Response(JSON.stringify({ text: finalResponseText }), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-        } // End of inner logic (if any) or Main Try
-
-    } catch (error: any) {
-        console.error("Detailed API Error:", error);
-        return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
-            status: 500,
+        return new Response(JSON.stringify({ text: finalResponseText }), {
+            status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
-    }
+
+    } // End of inner logic (if any) or Main Try
+
+    } catch (error: any) {
+    console.error("Detailed API Error:", error);
+    return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+    });
+}
 }
