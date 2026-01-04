@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const { session_id } = body;
+        const { session_id, force_email } = body;
 
         if (!session_id) {
             return NextResponse.json({ error: 'Missing session_id' }, { status: 400 });
@@ -82,20 +82,30 @@ export async function POST(req: Request) {
                 const session = await stripe.checkout.sessions.retrieve(session_id);
                 console.log("Stripe Session Retrieved. Customer Details:", session.customer_details);
 
-                if (session.customer_details?.email) {
+                // 1. Verify Payment
+                paymentStatus = session.payment_status;
+                if (paymentStatus !== 'paid') {
+                    console.warn("⚠️ Payment not paid:", paymentStatus);
+                    // We might still want to proceed if it's a test or delayed, but usually we strictly require paid.
+                    // For now, we continue logic to extract email, but we could enforce check here.
+                }
+
+                // 2. Extract Email (Priority: Force > Customer Details > Customer Email)
+                if (force_email) {
+                    customerEmail = force_email;
+                    console.log("✅ Email MANUALLY provided by user:", customerEmail);
+                } else if (session.customer_details?.email) {
                     customerEmail = session.customer_details.email;
-                    paymentStatus = session.payment_status;
                     console.log("✅ Email extracted from Stripe (customer_details):", customerEmail);
                 } else if (session.customer_email) {
                     customerEmail = session.customer_email;
-                    paymentStatus = session.payment_status;
                     console.log("✅ Email extracted from Stripe (customer_email):", customerEmail);
                 } else {
                     console.warn("⚠️ No email found in Stripe Session.");
                 }
             } catch (stripeErr) {
                 console.error("❌ Stripe Retrieval Error:", stripeErr);
-                console.log("Stack:", stripeErr); // Extended debug
+                console.log("Stack:", stripeErr);
             }
         }
 

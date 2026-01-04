@@ -8,41 +8,31 @@ function SuccessContent() {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+    const [manualEmail, setManualEmail] = useState('');
+    const [isRetrying, setIsRetrying] = useState(false);
 
-    useEffect(() => {
-        if (!sessionId) {
-            setStatus('error'); // No session ID, likely direct access
-            setErrorMessage("Session ID manquant dans l'URL.");
-            return;
-        }
-
-        // Call the backend API to trigger "Post-Payment" actions (Email Generation & Sending)
-        const triggerDelivery = async () => {
-            try {
-                const res = await fetch('/api/webhooks/checkout-success', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: sessionId })
-                });
-
-                if (res.ok) {
-                    setStatus('success');
-                } else {
-                    const errData = await res.json().catch(() => ({}));
-                    console.error("Delivery API failed", errData);
-                    setStatus('error');
-                    setErrorMessage(errData.error || `Erreur Serveur (${res.status})`);
-                }
-            } catch (err: any) {
-                console.error("Network error during delivery trigger", err);
-                setStatus('error');
-                setErrorMessage(err.message || "Erreur Réseau");
+    const handleManualRetry = async () => {
+        if (!manualEmail.includes('@')) return;
+        setIsRetrying(true);
+        try {
+            const res = await fetch('/api/webhooks/checkout-success', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: sessionId, force_email: manualEmail })
+            });
+            if (res.ok) {
+                setStatus('success');
+            } else {
+                const errData = await res.json().catch(() => ({}));
+                setErrorMessage(errData.error || "Réessai échoué. Contactez le support.");
+                setIsRetrying(false);
             }
-        };
-
-        triggerDelivery();
-    }, [sessionId]);
+        } catch (e) {
+            setErrorMessage("Erreur réseau lors du réessai.");
+            setIsRetrying(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8 text-center font-sans">
@@ -70,7 +60,7 @@ function SuccessContent() {
                             <h3 className="text-lg font-semibold text-emerald-400 mb-2">🚀 Prochaines étapes :</h3>
                             <ul className="list-disc pl-5 space-y-2 text-gray-300">
                                 <li>Votre <strong>ASR Essential PRO (JSON)</strong> a été généré.</li>
-                                <li>Il vient d'être envoyé à l'adresse email utilisée lors du paiement.</li>
+                                <li>Il vient d'être envoyé à {manualEmail ? manualEmail : "votre adresse email"}.</li>
                                 <li>Consultez vos emails (et spams) d'ici 2 minutes.</li>
                             </ul>
                         </div>
@@ -87,10 +77,34 @@ function SuccessContent() {
                     <>
                         <div className="text-6xl mb-6">⚠️</div>
                         <h1 className="text-3xl font-bold mb-4">Nous n'avons pas pu valider automatiquement</h1>
-                        <p className="text-gray-400 mb-6">
-                            Si vous avez bien effectué le paiement, pas d'inquiétude. Notre système va réessayer.
-                            Vérifiez vos emails dans quelques minutes.
-                        </p>
+
+                        {errorMessage && errorMessage.includes('email') ? (
+                            <div className="bg-gray-800 p-6 rounded-lg mb-6 border border-gray-700">
+                                <p className="text-yellow-400 mb-4 font-bold">L'email n'a pas été transmis par Stripe.</p>
+                                <p className="text-gray-300 mb-4 text-sm">Entrez votre email ci-dessous pour recevoir vos fichiers immédiatement :</p>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="email"
+                                        placeholder="votre@email.com"
+                                        className="flex-1 p-3 rounded bg-black border border-gray-600 text-white focus:border-emerald-500 focus:outline-none"
+                                        value={manualEmail}
+                                        onChange={(e) => setManualEmail(e.target.value)}
+                                    />
+                                    <button
+                                        onClick={handleManualRetry}
+                                        disabled={isRetrying || !manualEmail}
+                                        className="bg-emerald-500 text-white px-6 py-3 rounded font-bold hover:bg-emerald-600 disabled:opacity-50"
+                                    >
+                                        {isRetrying ? '...' : 'Envoyer'}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-gray-400 mb-6">
+                                Si vous avez bien effectué le paiement, pas d'inquiétude. Notre système va réessayer.
+                            </p>
+                        )}
+
                         {errorMessage && (
                             <p className="text-red-400 text-sm mt-2 mb-6 font-mono bg-red-900/20 p-3 rounded border border-red-500/30">
                                 Détail technique : {errorMessage}
