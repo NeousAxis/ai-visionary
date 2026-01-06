@@ -1,11 +1,16 @@
 "use client";
 import Link from 'next/link';
+import { Suspense } from 'react';
 import Footer from './components/Footer';
 import AyoChat from './components/AyoChat';
+import PaymentHandler from './components/PaymentHandler';
 
 export default function Home() {
   return (
     <main>
+      <Suspense fallback={null}>
+        <PaymentHandler />
+      </Suspense>
       {/* SECTION 1 — Hero (AYO Only) */}
       <section id="hero" className="hero-section">
         <div className="container hero-content">
