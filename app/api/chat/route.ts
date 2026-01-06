@@ -8,6 +8,8 @@ import fs from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
+import { db } from '@/lib/db';
+import crypto from 'crypto';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -31,32 +33,12 @@ try {
 // [SYSTEM PROMPT DYNAMIC GENERATOR]
 const getSystemPrompt = (realAsrId: string, realIsoDate: string, targetUrl: string = "", targetEmail: string = "") => {
     // Generate Stripe Params with Metadata (Client Reference ID)
-    let stripeSuffix = "";
+    // CRITICAL UPDATE: We use the Session UUID directly to link with our Database Source of Truth
+    let stripeSuffix = `?client_reference_id=${realAsrId}`;
 
-    // We want to encode both URL and Email to ensure delivery even if Stripe session fails to capture email properly
-    if (targetUrl || targetEmail) {
-        try {
-            const payload: any = {};
-            if (targetUrl) payload.u = targetUrl;
-            if (targetEmail) payload.e = targetEmail;
-
-            // Compact JSON
-            const jsonStr = JSON.stringify(payload);
-            const b64 = Buffer.from(jsonStr).toString('base64');
-
-            // Check length safety (Stripe limit 255 chars)
-            if (b64.length <= 250) {
-                stripeSuffix = `?client_reference_id=${b64}`;
-                // Also try to prefill email field in Stripe if possible (supported by some checkout flows)
-                if (targetEmail) {
-                    stripeSuffix += `&prefilled_email=${encodeURIComponent(targetEmail)}`;
-                }
-            } else {
-                console.warn("Payload too long for Stripe client_reference_id", payload);
-            }
-        } catch (e) {
-            console.error("Stripe Param Encoding Error", e);
-        }
+    // Optional: Add prefilled email if available for UX
+    if (targetEmail) {
+        stripeSuffix += `&prefilled_email=${encodeURIComponent(targetEmail)}`;
     }
 
     return `
@@ -1014,6 +996,35 @@ ${websiteData.text}
 
         // Check for generated JSON in the response (Hidden ASR Pro)
         const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
+
+        // NEW: CRITICAL SAVE TO DB FOR SOURCE OF TRUTH
+        if (jsonMatch) {
+            const extractedJson = jsonMatch[1].trim();
+            try {
+                const parsed = JSON.parse(extractedJson);
+                // Extract score if available
+                let score = 0;
+                if (parsed['ayo:score'] && parsed['ayo:score'].value) {
+                    if (typeof parsed['ayo:score'].value === 'string') {
+                        score = parseInt(parsed['ayo:score'].value) || 0;
+                    } else {
+                        score = parsed['ayo:score'].value;
+                    }
+                }
+
+                // SAVE EXACT ANALYSIS TO DB (Source of Truth)
+                await db.saveAnalysis(sessionAsrId, {
+                    id: sessionAsrId,
+                    url: parsed.url,
+                    email: null,
+                    score: score,
+                    data: parsed
+                });
+                console.log(`💾 ANALYSIS SOURCE OF TRUTH SAVED: ${sessionAsrId}`);
+            } catch (e) {
+                console.error("❌ Failed to save source of truth to DB:", e);
+            }
+        }
 
 
 

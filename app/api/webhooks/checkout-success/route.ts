@@ -8,6 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
+import { db } from '@/lib/db';
 import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
 
 // --- LOGIQUE D'ANALYSE (DUPLIQUÉE DEPUIS CHAT ROUTE POUR AUTONOMIE WEBHOOK) ---
@@ -83,7 +84,7 @@ async function performFullAnalysis(targetUrl: string): Promise<any> {
     // Inject technical truth
     if (!extractJson.fields) extractJson.fields = {} as any;
     if (!extractJson.fields.structure_technique) extractJson.fields.structure_technique = {} as any;
-    extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0 };
+    extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0, evidence: ["Webhook Auto-Scan"] };
 
     const scoreResult = computeAioScore(extractJson);
 
@@ -221,22 +222,39 @@ export async function POST(req: Request) {
             }
         }
 
-        // 3. Fallback Decoding (Stripe Link ID)
+        // 3. SOURCE OF TRUTH: DATABASE CHECK
+        // We expect client_reference_id to be the Analysis UUID.
+        let analysisData = { score: 0, details: {}, extract: {} as any, url: "" }; // Default
         let companyInfo: { url?: string; name?: string } = {};
-        if (stripeSession && stripeSession.client_reference_id) {
-            try {
-                const jsonStr = Buffer.from(stripeSession.client_reference_id, 'base64').toString('utf-8');
-                const decoded = JSON.parse(jsonStr);
+        let dbRecord = null;
 
-                if (decoded.u) companyInfo.url = decoded.u;
-                // CRITICAL FALLBACK: Restore email from encoded ID if Stripe missed it
-                if (!customerEmail && decoded.e) {
-                    customerEmail = decoded.e;
-                    console.log("✅ RESTORED EMAIL from client_reference_id backup:", customerEmail);
-                }
-                console.log("✅ Decoded Info from Stripe Metadata:", { ...companyInfo, email_backup: decoded.e });
-            } catch (e) {
-                console.warn("⚠️ Failed to decode client_reference_id:", e);
+        if (stripeSession && stripeSession.client_reference_id) {
+            const refId = stripeSession.client_reference_id;
+            console.log(`🔎 Looking up Analysis ID in DB: ${refId}`);
+
+            // Try to load from DB
+            dbRecord = await db.getAnalysis(refId);
+
+            if (dbRecord) {
+                console.log("✅ FOUND SOURCE OF TRUTH IN DB!");
+                // Normalize data structure
+                const rawData = dbRecord.data;
+                analysisData = {
+                    score: dbRecord.score,
+                    details: rawData.details || {},
+                    extract: rawData.extract || (rawData.fields ? rawData.fields : rawData),
+                    url: dbRecord.url
+                };
+                companyInfo.url = dbRecord.url;
+            } else {
+                // FALLBACK: OLD LOGIC (Base64)
+                console.warn("⚠️ Analysis not found in DB. Trying Legacy Base64 Decode...");
+                try {
+                    const jsonStr = Buffer.from(refId, 'base64').toString('utf-8');
+                    const decoded = JSON.parse(jsonStr);
+                    if (decoded.u) companyInfo.url = decoded.u;
+                    if (!customerEmail && decoded.e) customerEmail = decoded.e;
+                } catch (e) { console.warn("Legacy Decode Failed:", e); }
             }
         }
 
@@ -260,10 +278,10 @@ export async function POST(req: Request) {
             }
         }
 
-        // 6. REAL ANALYSIS (Crucial Step)
-        let analysisData = { score: 0, details: {}, extract: {} as any, url: companyInfo.url };
-
-        if (companyInfo.url) {
+        // 6. FALLBACK ANALYSIS (Only if DB was empty but we have a URL)
+        // If we found the record in DB, analysisData is already populated.
+        if (!dbRecord && companyInfo.url) {
+            console.log("🔄 DB Empty -> Launching Live Fallback Analysis...");
             try {
                 // If URL was found in metadata, we relaunch analysis to send REAL DATA
                 const result = await performFullAnalysis(companyInfo.url);
