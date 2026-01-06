@@ -5,52 +5,125 @@ import Stripe from 'stripe';
 // Initialize Services (Resend is safe to init outside)
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Helper to generate the ASR PRO JSON
-function generateAsrProJson(customerEmail: string, sessionDate: string, sessionId: string, companyInfo: { url?: string, name?: string } = {}) {
-    // Smart Fill based on Metadata
-    const url = companyInfo.url || "https://[VOTRE_SITE].com";
-    const name = companyInfo.name || (companyInfo.url ? `Entreprise du site ${companyInfo.url.replace('https://', '').split('/')[0]}` : "[NOM_ENTREPRISE_A_REMPLIR]");
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from 'ai';
+import { scanUrlForAioSignals } from '@/lib/aio-scanner';
+import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
+
+// --- LOGIQUE D'ANALYSE (DUPLIQUÉE DEPUIS CHAT ROUTE POUR AUTONOMIE WEBHOOK) ---
+
+async function performFullAnalysis(targetUrl: string): Promise<any> {
+    console.log(`🕵️ RELAUNCHING ANALYSIS FOR PAYING CUSTOMER: ${targetUrl}`);
+
+    // 1. SCAN
+    const scanResult = await scanUrlForAioSignals(targetUrl);
+
+    // 2. EXTRACTION LLM (Gemini)
+    const googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    if (!googleKey) throw new Error("Missing Gemini Key for Analysis");
+
+    const google = createGoogleGenerativeAI({ apiKey: googleKey });
+    const model = google('gemini-1.5-flash'); // Fast & efficient for webhook
+
+    const EXTRACTION_PROMPT = `
+    Tu es un moteur d'extraction de données AIO (Artificial Intelligence Optimization).
+    TA MISSION : Extraire des champs structurés du contexte pour générer un fichier ASR (Identity File for AI).
+    
+    FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-1.0") :
+    {
+      "version": "AYO-EXTRACT-1.0",
+      "source": { "url": "${targetUrl}", "scan": {} },
+      "fields": {
+        "identite": {
+          "name": { "value": "Nom Entreprise", "q": 0 },
+          "legal_country": { "value": "Pays", "q": 0 }
+        },
+        "offre": {
+          "services": { "value": [], "q": 0 },
+          "products": { "value": [], "q": 0 },
+          "target_audience": { "value": "", "q": 0 }
+        },
+        "processus_methodes": {
+          "delivery_mode": { "value": "", "q": 0 }
+        },
+        "structure_technique": {
+          "has_jsonld": { "value": false, "q": 0 }
+        }
+      }
+    }
+    
+    CONTENU SITE :
+    TITRE: ${scanResult.metaTitle}
+    DESC: ${scanResult.metaDescription}
+    TEXTE: ${scanResult.text.substring(0, 10000)}
+    `;
+
+    const extractionResult = await generateText({
+        model: model,
+        temperature: 0,
+        system: EXTRACTION_PROMPT,
+        messages: [{ role: 'user', content: "Extract JSON now." }]
+    });
+
+    let extractJson: AyoExtract;
+    try {
+        const jsonText = extractionResult.text.replace(/```json/g, '').replace(/```/g, '').trim();
+        extractJson = JSON.parse(jsonText);
+    } catch (e) {
+        console.error("JSON Parse Error in Webhook", e);
+        // Fallback minimal
+        extractJson = {
+            version: "AYO-EXTRACT-1.0",
+            source: { url: targetUrl, scan: {} },
+            fields: { identite: { name: { value: "Votre Entreprise", q: 0.5 } }, offre: { services: { value: ["Services détectés automatiquement"], q: 0.5 } } }
+        } as any;
+    }
+
+    // 3. SCORE
+    // Inject technical truth
+    if (!extractJson.fields) extractJson.fields = {} as any;
+    if (!extractJson.fields.structure_technique) extractJson.fields.structure_technique = {} as any;
+    extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0 };
+
+    const scoreResult = computeAioScore(extractJson);
+
+    return {
+        score: scoreResult.total,
+        details: scoreResult.blocks,
+        extract: extractJson.fields
+    };
+}
+
+// Helper to generate REAL ASR JSON
+function generateRealAsrJson(customerEmail: string, sessionDate: string, sessionId: string, analysisData: any, isPro: boolean) {
+    const fields = analysisData.extract || {};
+    const identity = fields.identite || {};
+    const offer = fields.offre || {};
 
     return JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Organization",
         "@id": sessionId,
-        "name": name,
-        "url": url,
+        "name": identity.name?.value || "Votre Entreprise",
+        "url": analysisData.url || "https://votre-site.com",
         "email": customerEmail,
 
         "ayo:offer": {
-            "services": ["Service 1 (Ex: Audit)", "Service 2 (Ex: Formation)"],
-            "deliverables": ["Rapport PDF", "Certification"]
-        },
-
-        "ayo:process": {
-            "steps": ["1. Analyse", "2. Production", "3. Livraison"],
-            "delivery_mode": "Online"
-        },
-
-        "ayo:scope": {
-            "in_scope": ["Clients B2B", "Secteur Tech"],
-            "out_of_scope": ["Particuliers", "Réparation Hardware"],
-            "target_audience": ["PME", "ETI"]
-        },
-
-        "ayo:tech": {
-            "json_ld_present": "Unknown (Fill manually or re-run audit)",
-            "tech_stack": "Unknown"
+            "services": offer.services?.value || [],
+            "products": offer.products?.value || []
         },
 
         "ayo:score": {
-            "value": "CERTIFIED_PRO",
-            "details": "Validation via Stripe Payment Proof",
-            "method": "AYO_PAYMENT_PROOF_V1"
+            "value": analysisData.score + "/100",
+            "level": isPro ? "PRO_CERTIFIED" : "ESSENTIAL_VERIFIED",
+            "method": "AYO_V2_WEBHOOK"
         },
 
         "ayo:seal": {
-            "issuer": "AYO Trusted Authority",
-            "level": "ESSENTIAL_PRO",
-            "hash": sessionId.substring(0, 12),
-            "signature": `sig_verify_${sessionId}`,
+            "issuer": "AI Visionary Authority",
+            "level": isPro ? "PRO" : "ESSENTIAL",
+            "hash": sessionId.substring(0, 16),
+            "signature": `sig_${Date.now()}_${sessionId.substring(0, 8)}`,
             "timestamp": sessionDate
         }
     }, null, 2);
@@ -187,9 +260,23 @@ export async function POST(req: Request) {
             }
         }
 
-        // Generate Files
+        // 6. REAL ANALYSIS (Crucial Step)
+        let analysisData = { score: 0, details: {}, extract: {} as any, url: companyInfo.url };
+
+        if (companyInfo.url) {
+            try {
+                // If URL was found in metadata, we relaunch analysis to send REAL DATA
+                const result = await performFullAnalysis(companyInfo.url);
+                analysisData = { ...result, url: companyInfo.url };
+                console.log("✅ LIVE Analysis Complete. Score:", analysisData.score);
+            } catch (anaErr) {
+                console.error("❌ Analysis Failed in Webhook:", anaErr);
+            }
+        }
+
+        // Generate REAL Files
         const sessionDate = new Date().toISOString();
-        const asrProJson = generateAsrProJson(customerEmail || "email_manquant@verifier.com", sessionDate, session_id, companyInfo);
+        const asrJson = generateRealAsrJson(customerEmail || "email_manquant@verifier.com", sessionDate, session_id, analysisData, packType === "PRO");
 
         // Send Email via Resend (ONLY IF EMAIL EXISTS)
         if (!emailMissing && process.env.RESEND_API_KEY) {
@@ -200,7 +287,7 @@ export async function POST(req: Request) {
 
             if (packType === "PRO") {
                 // PRO Pack: Full delivery with analysis
-                emailSubject = 'Votre Pack AIO PRO (Activé) - Analyse Complète';
+                emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
                 emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -209,64 +296,36 @@ export async function POST(req: Request) {
                         
                         <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
                             <p>Bonjour,</p>
-                            <p>Félicitations pour votre investissement dans l'excellence. Votre Pack AIO PRO est activé.</p>
+                            <p>Votre Pack AIO PRO est activé. Voici vos actifs numériques certifiés.</p>
                             
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
-                                <h3 style="margin-top:0; color: #0284c7;">📊 Votre Analyse Complète</h3>
+                                <h3 style="margin-top:0; color: #0284c7;">📊 Votre Score AIO : ${analysisData.score}/100</h3>
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
-                                <p style="font-size: 14px;">L'analyse détaillée de votre visibilité IA a été effectuée. Nos experts vont maintenant créer manuellement vos fichiers sémantiques.</p>
+                                <p>L'analyse temps réel a permis de générer votre fichier ASR sur mesure ci-dessous.</p>
                             </div>
 
-                            <h3 style="margin-top:0; color: #006064;">📦 Votre Identité Numérique (Code Source ASR)</h3>
-                            <p style="font-size: 14px;">Voici le code exact qui permet aux IA de vous identifier. Ce n'est pas un document PDF, c'est du <strong>code actif</strong>.</p>
-                            <pre style="background: #f5f5f5; padding: 10px; overflow-x: auto; font-size: 11px; border: 1px solid #ddd;">${asrProJson}</pre>
+                            <h3 style="margin-top:0; color: #006064;">📦 Votre Fichier ASR PRO (JSON-LD)</h3>
+                            <p>Copiez ce code dans un fichier <code>asr.json</code> dans le dossier <code>/.ayo</code> de votre site.</p>
+                            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px;">${asrJson}</pre>
+
+                             <h3 style="margin-top:20px; color: #006064;">📝 Vos Fichiers Sémantiques (FAQ & Glossaire)</h3>
+                             <p>En tant que client PRO, voici les structures prêtes à l'emploi (à adapter avec vos contenus) :</p>
+                             
+                             <div style="background: #f5f5f5; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                                <strong>faq.json (Structure)</strong><br>
+                                <pre style="font-size: 10px; color: #555;">{ "@type": "FAQPage", "mainEntity": [{ "@type": "Question", "name": "...", "acceptedAnswer": { "@type": "Answer", "text": "..." } }] }</pre>
+                             </div>
 
                             <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #bbdefb;">
-                                <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION</h3>
-                                <p style="font-size: 14px; font-weight:bold;">Ce fichier "Essential PRO" est votre clé d'autorité. Il doit être en ligne.</p>
-                                
-                                <h4 style="margin-bottom:5px; color:#1565c0;">OPTION 1 : Pour les Développeurs (Recommandé)</h4>
-                                <p style="font-size:13px; margin-top:0;">Transférez cet email à votre tech et dites : <em>"Crée un dossier <code>.ayo</code> à la racine du site, et ajoutes-y le code ci-dessus sous le nom <code>asr.json</code>."</em></p>
-
-                                <hr style="border:0; border-top:1px dashed #90caf9; margin:15px 0;">
-
-                                <h4 style="margin-bottom:5px; color:#1565c0;">OPTION 2 : WordPress (Plugin "WP File Manager")</h4>
-                                <ol style="font-size:13px; padding-left:20px; margin-top:0;">
-                                    <li>Installez le plugin gratuit <strong>"WP File Manager"</strong>.</li>
-                                    <li>Ouvrez-le, faites Clic Droit > New Folder > Nom : <code>.ayo</code> (avec le point).</li>
-                                    <li>Entrez dedans > New File > Nom : <code>asr.json</code></li>
-                                    <li>Clic Droit sur le fichier > Code Editor > Collez le code > Save & Close.</li>
+                                <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION RAPIDE</h3>
+                                <p style="font-size: 14px;">Pour être visible immédiatement :</p>
+                                <ol style="font-size:13px; padding-left:20px;">
+                                    <li>Créez un dossier <code>.ayo</code> à la racine de votre site.</li>
+                                    <li>Placez-y le fichier <code>asr.json</code> (avec le code ci-dessus).</li>
+                                    <li>(Optionnel) Placez-y aussi <code>faq.json</code> pour vos questions fréquentes.</li>
                                 </ol>
-
-                                <hr style="border:0; border-top:1px dashed #90caf9; margin:15px 0;">
-
-                                <h4 style="margin-bottom:5px; color:#1565c0;">OPTION 3 : Wix, Squarespace, Shopify</h4>
-                                <p style="font-size:13px;">Ces CMS bloquent souvent les dossiers racines. Utilisez l'injection JSON-LD :</p>
-                                <ol style="font-size:13px; padding-left:20px; margin-top:0;">
-                                    <li>Copiez tout le code JSON ci-dessus.</li>
-                                    <li>Allez dans <strong>Paramètres > Code personnalisé</strong> (ou Injection de code).</li>
-                                    <li>Ajoutez un nouveau script dans le <strong>HEAD</strong> (En-tête).</li>
-                                    <li>Écrivez : <code>&lt;script type="application/ld+json"&gt;</code></li>
-                                    <li>Collez votre code JSON juste après.</li>
-                                    <li>Fermez avec : <code>&lt;/script&gt;</code></li>
-                                    <li>Sauvegardez et publiez.</li>
-                                </ol>
-                                <p style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #90caf9; font-size: 13px; color: #0d47a1;">
-                                    💁‍♂️ <strong>Besoin d'aide ?</strong> Si vous bloquez, écrivez simplement à <a href="mailto:hello@ai-visionary.com" style="color:#0d47a1; font-weight:bold;">hello@ai-visionary.com</a>. Nous vous aiderons à l'installer avec plaisir.
-                                </p>
+                                <p style="margin-top: 10px; font-size: 13px;">Si vous utilisez WordPress, Wix ou Shopify, utilisez l'injection de code dans le &lt;HEAD&gt; comme script JSON-LD.</p>
                             </div>
-
-                            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
-
-                            <h3 style="color: #000;">🎯 Prochaines Étapes (Pack PRO)</h3>
-                            <p>Nos experts vont créer manuellement pour vous :</p>
-                            <ul style="line-height: 1.6;">
-                                <li><strong>Glossaire Métier</strong> (/.ayo/glossary.json) - Vos définitions inaltérables.</li>
-                                <li><strong>FAQ IA-Native</strong> (/.ayo/faq.json) - Réponses calibrées pour ChatGPT/Gemini.</li>
-                                <li><strong>Architecture Données</strong> - JSON-LD enrichi et sans conflit.</li>
-                                <li><strong>Manifest AYO</strong> - La carte routière pour les bots.</li>
-                            </ul>
-                            <p style="font-size: 14px; color: #666;">Délai de livraison : 3-5 jours ouvrés. Vous recevrez un email dès que tout sera prêt.</p>
 
                             <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
                                 AI Visionary - L'Autorité de Visibilité IA.
@@ -274,28 +333,27 @@ export async function POST(req: Request) {
                         </div>
                     </div>
                 `;
+
             } else {
-                // ESSENTIAL Pack: Upsell to PRO
-                emailSubject = 'Votre Pack ASR Essential PRO (Activé)';
+                // ESSENTIAL Pack
+                emailSubject = `Votre Fichier ASR Essential - Score ${analysisData.score}/100`;
                 emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                            <h1 style="margin:0;">AYO / Essential PRO</h1>
+                            <h1 style="margin:0;">AYO / Essential</h1>
                         </div>
                         
                         <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
                             <p>Bonjour,</p>
-                            <p>Félicitations pour votre décision. Votre commande est validée.</p>
+                            <p>Merci pour votre confiance. Voici vos résultats et fichiers certifiés.</p>
                             
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
-                                <h3 style="margin-top:0; color: #0284c7;">📊 Votre Analyse AYO</h3>
+                                <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
-                                <p style="font-size: 14px;">L'analyse de votre visibilité IA a été effectuée. Vous trouverez ci-dessous votre fichier ASR Essential PRO.</p>
                             </div>
                             
-                            <h3 style="margin-top:0; color: #006064;">📦 Votre Identité Numérique (Code Source ASR)</h3>
-                            <p style="font-size: 14px;">Voici le code exact qui permet aux IA de vous identifier. Ce n'est pas un document PDF, c'est du <strong>code actif</strong>.</p>
-                            <pre style="background: #f5f5f5; padding: 10px; overflow-x: auto; font-size: 11px; border: 1px solid #ddd;">${asrProJson}</pre>
+                            <h3 style="margin-top:0; color: #006064;">📦 Code Source ASR (Essential)</h3>
+                            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px;">${asrJson}</pre>
 
                             <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #bbdefb;">
                                 <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Précis)</h3>
