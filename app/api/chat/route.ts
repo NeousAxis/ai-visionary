@@ -33,12 +33,38 @@ try {
 // [SYSTEM PROMPT DYNAMIC GENERATOR]
 const getSystemPrompt = (realAsrId: string, realIsoDate: string, targetUrl: string = "", targetEmail: string = "") => {
     // Generate Stripe Params with Metadata (Client Reference ID)
-    // CRITICAL UPDATE: We use the Session UUID directly to link with our Database Source of Truth
-    let stripeSuffix = `?client_reference_id=${realAsrId}`;
+    // CRITICAL FIX: We MUST encode URL/Email in the ID because we are Stateless (Serverless).
+    // DB persistence on /tmp does not work across Vercel lambdas.
+    let stripeSuffix = "";
 
-    // Optional: Add prefilled email if available for UX
-    if (targetEmail) {
-        stripeSuffix += `&prefilled_email=${encodeURIComponent(targetEmail)}`;
+    if (targetUrl || targetEmail) {
+        try {
+            const payload: any = {};
+            if (targetUrl) payload.u = targetUrl;
+            if (targetEmail) payload.e = targetEmail;
+
+            // Compact JSON + Base64
+            const jsonStr = JSON.stringify(payload);
+            const b64 = Buffer.from(jsonStr).toString('base64');
+
+            // Stripe limit is 255 chars.
+            if (b64.length <= 250) {
+                stripeSuffix = `?client_reference_id=${b64}`;
+                if (targetEmail) {
+                    stripeSuffix += `&prefilled_email=${encodeURIComponent(targetEmail)}`;
+                }
+            } else {
+                console.warn("Payload too long for Stripe client_reference_id, stripping email");
+                // Retry with just URL
+                if (targetUrl) {
+                    const smallPayload = JSON.stringify({ u: targetUrl });
+                    const smallB64 = Buffer.from(smallPayload).toString('base64');
+                    stripeSuffix = `?client_reference_id=${smallB64}`;
+                }
+            }
+        } catch (e) {
+            console.error("Stripe Param Encoding Error", e);
+        }
     }
 
     return `

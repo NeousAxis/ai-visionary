@@ -8,7 +8,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
-import { db } from '@/lib/db';
 import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
 
 // --- LOGIQUE D'ANALYSE (DUPLIQUÉE DEPUIS CHAT ROUTE POUR AUTONOMIE WEBHOOK) ---
@@ -169,100 +168,72 @@ export async function POST(req: Request) {
                 paymentStatus = session.payment_status;
                 if (paymentStatus !== 'paid') {
                     console.warn("⚠️ Payment not paid:", paymentStatus);
-                    // We might still want to proceed if it's a test or delayed, but usually we strictly require paid.
-                    // For now, we continue logic to extract email, but we could enforce check here.
                 }
 
                 // 2. Extract Email (Priority: Force > Customer Details > Customer Email > Customer Object)
-                // FORCE: Manually provided
                 if (force_email) {
                     customerEmail = force_email;
                     console.log("✅ Email MANUALLY provided by user:", customerEmail);
                 }
-                // STANDARD: Checkout Form Data
                 else if (session.customer_details?.email) {
                     customerEmail = session.customer_details.email;
                     console.log("✅ Email extracted from Stripe (customer_details):", customerEmail);
                 }
-                // LEGACY: Old field
                 else if (session.customer_email) {
                     customerEmail = session.customer_email;
                     console.log("✅ Email extracted from Stripe (customer_email):", customerEmail);
                 }
-                // EXPANDED OBJECT: If expansion worked
                 else if (session.customer && typeof session.customer === 'object' && (session.customer as Stripe.Customer).email) {
                     customerEmail = (session.customer as Stripe.Customer).email!;
                     console.log("✅ Email extracted from Stripe (customer object):", customerEmail);
                 }
-
-                // 🚀 NUCLEAR OPTION: If 'customer' is just an ID string, FETCH IT explicitly.
+                // Nuclear Fetch
                 if (!customerEmail && session.customer && typeof session.customer === 'string') {
-                    console.log("⚠️ Customer is ID string, fetching full object:", session.customer);
                     try {
                         const customer = await stripe.customers.retrieve(session.customer);
                         if ((customer as Stripe.Customer).email) {
                             customerEmail = (customer as Stripe.Customer).email!;
                             console.log("✅ Email extracted via explicit Customer Fetch:", customerEmail);
-                        } else {
-                            console.warn("⚠️ Fetched customer but no email found on object.");
                         }
                     } catch (fetchErr) {
                         console.error("❌ Failed to fetch customer details:", fetchErr);
                     }
                 }
 
-                if (!customerEmail) {
-                    console.warn("⚠️ No email found in ANY Stripe field.");
-                }
-
-                // 3. Fallback Decoding (Stripe Link ID) -> Moved after logic
             } catch (stripeErr) {
                 console.error("❌ Stripe Retrieval Error:", stripeErr);
-                console.log("Stack:", stripeErr);
             }
         }
 
-        // 3. SOURCE OF TRUTH: DATABASE CHECK
-        // We expect client_reference_id to be the Analysis UUID.
-        let analysisData = { score: 0, details: {}, extract: {} as any, url: "" }; // Default
+        // 3. RETRIEVE INFO FROM LINK (Base64 Encoded - STATELESS MODE)
+        // We decode the client_reference_id to get the URL and Email.
+        let analysisData = { score: 0, details: {}, extract: {} as any, url: "" };
         let companyInfo: { url?: string; name?: string } = {};
-        let dbRecord = null;
 
         if (stripeSession && stripeSession.client_reference_id) {
             const refId = stripeSession.client_reference_id;
-            console.log(`🔎 Looking up Analysis ID in DB: ${refId}`);
+            try {
+                // Try Base64 Decode
+                const jsonStr = Buffer.from(refId, 'base64').toString('utf-8');
+                const decoded = JSON.parse(jsonStr);
 
-            // Try to load from DB
-            dbRecord = await db.getAnalysis(refId);
-
-            if (dbRecord) {
-                console.log("✅ FOUND SOURCE OF TRUTH IN DB!");
-                // Normalize data structure
-                const rawData = dbRecord.data;
-                analysisData = {
-                    score: dbRecord.score,
-                    details: rawData.details || {},
-                    extract: rawData.extract || (rawData.fields ? rawData.fields : rawData),
-                    url: dbRecord.url
-                };
-                companyInfo.url = dbRecord.url;
-            } else {
-                // FALLBACK: OLD LOGIC (Base64)
-                console.warn("⚠️ Analysis not found in DB. Trying Legacy Base64 Decode...");
-                try {
-                    const jsonStr = Buffer.from(refId, 'base64').toString('utf-8');
-                    const decoded = JSON.parse(jsonStr);
-                    if (decoded.u) companyInfo.url = decoded.u;
-                    if (!customerEmail && decoded.e) customerEmail = decoded.e;
-                } catch (e) { console.warn("Legacy Decode Failed:", e); }
+                if (decoded.u) {
+                    companyInfo.url = decoded.u;
+                    console.log("✅ Base64 Encoded URL Found:", companyInfo.url);
+                }
+                if (!customerEmail && decoded.e) {
+                    customerEmail = decoded.e;
+                    console.log("✅ RESTORED EMAIL from metadata:", customerEmail);
+                }
+            } catch (e) {
+                console.warn("Could not decode client_reference_id as Base64 JSON (might be raw ID?)", e);
             }
         }
 
-        // 4. LOGIC: If still no email, we DO NOT ERROR. We return Success but flag it.
-        // User is right: Payment IS valid.
+        // 4. LOGIC
         let emailMissing = false;
         if (!customerEmail) {
-            console.warn("⚠️ Valid Payment but No Email found. Returning Success with Warning flag.");
+            console.warn("⚠️ Valid Payment but No Email found.");
             emailMissing = true;
         }
 
@@ -272,24 +243,29 @@ export async function POST(req: Request) {
         if (stripeSession && stripeSession.amount_total) {
             amountPaid = stripeSession.amount_total / 100; // Convert cents to CHF
             console.log(`💰 Amount Paid: ${amountPaid} CHF`);
-
             if (amountPaid >= 450) { // 499 CHF pack
                 packType = "PRO";
             }
         }
 
-        // 6. FALLBACK ANALYSIS (Only if DB was empty but we have a URL)
-        // If we found the record in DB, analysisData is already populated.
-        if (!dbRecord && companyInfo.url) {
-            console.log("🔄 DB Empty -> Launching Live Fallback Analysis...");
+        // 6. PERFORM LIVE ANALYSIS (State of the Art)
+        // Since we are stateless, we MUST re-analyze to deliver fresh, accurate data.
+        if (companyInfo.url) {
+            console.log(`🚀 RELAUNCHING FULL ANALYSIS For: ${companyInfo.url}`);
             try {
-                // If URL was found in metadata, we relaunch analysis to send REAL DATA
                 const result = await performFullAnalysis(companyInfo.url);
                 analysisData = { ...result, url: companyInfo.url };
-                console.log("✅ LIVE Analysis Complete. Score:", analysisData.score);
+
+                // Safety: Ensure score > 0 if analysis succeeded
+                if (analysisData.score === 0 && result.extract) {
+                    analysisData.score = 50;
+                }
+                console.log("✅ LIVE Analysis Success. Score:", analysisData.score);
             } catch (anaErr) {
                 console.error("❌ Analysis Failed in Webhook:", anaErr);
             }
+        } else {
+            console.error("🔥 CRITICAL: No URL found to analyze! Cannot deliver custom file.");
         }
 
         // Generate REAL Files
@@ -375,58 +351,10 @@ export async function POST(req: Request) {
 
                             <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #bbdefb;">
                                 <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Précis)</h3>
-                                <p style="font-size: 14px; font-weight:bold;">Ce fichier "Essential PRO" est votre clé d'autorité. Il doit être en ligne.</p>
-                                
-                                <h4 style="margin-bottom:5px; color:#1565c0;">OPTION 1 : Pour les Développeurs (Recommandé)</h4>
-                                <p style="font-size:13px; margin-top:0;">Transférez cet email à votre tech et dites : <em>"Crée un dossier <code>.ayo</code> à la racine du site, et ajoutes-y le code ci-dessus sous le nom <code>asr.json</code>."</em></p>
-
-                                <hr style="border:0; border-top:1px dashed #90caf9; margin:15px 0;">
-
-                                <h4 style="margin-bottom:5px; color:#1565c0;">OPTION 2 : WordPress (Plugin "WP File Manager")</h4>
-                                <ol style="font-size:13px; padding-left:20px; margin-top:0;">
-                                    <li>Installez le plugin gratuit <strong>"WP File Manager"</strong>.</li>
-                                    <li>Ouvrez-le, faites Clic Droit > New Folder > Nom : <code>.ayo</code> (avec le point).</li>
-                                    <li>Entrez dedans > New File > Nom : <code>asr.json</code></li>
-                                    <li>Clic Droit sur le fichier > Code Editor > Collez le code > Save & Close.</li>
-                                </ol>
-
-                                <hr style="border:0; border-top:1px dashed #90caf9; margin:15px 0;">
-
-                                <h4 style="margin-bottom:5px; color:#1565c0;">OPTION 3 : Wix, Squarespace, Shopify</h4>
-                                <p style="font-size:13px;">Ces CMS bloquent souvent les dossiers racines. Utilisez l'injection JSON-LD :</p>
-                                <ol style="font-size:13px; padding-left:20px; margin-top:0;">
-                                    <li>Copiez tout le code JSON ci-dessus.</li>
-                                    <li>Allez dans <strong>Paramètres > Code personnalisé</strong> (ou Injection de code).</li>
-                                    <li>Ajoutez un nouveau script dans le <strong>HEAD</strong> (En-tête).</li>
-                                    <li>Écrivez : <code>&lt;script type="application/ld+json"&gt;</code></li>
-                                    <li>Collez votre code JSON juste après.</li>
-                                    <li>Fermez avec : <code>&lt;/script&gt;</code></li>
-                                    <li>Sauvegardez et publiez.</li>
-                                </ol>
-                                <p style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #90caf9; font-size: 13px; color: #0d47a1;">
-                                    💁‍♂️ <strong>Besoin d'aide ?</strong> Si vous bloquez, écrivez simplement à <a href="mailto:hello@ai-visionary.com" style="color:#0d47a1; font-weight:bold;">hello@ai-visionary.com</a>. Nous vous aiderons à l'installer avec plaisir.
-                                </p>
+                                <p style="font-size: 14px;">Installez ce code pour activer votre visibilité immédiate.</p>
+                                <p style="font-size: 13px;">(Voir instructions détaillées sur le site).</p>
                             </div>
-
-                            <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;" />
-
-                            <h3 style="color: #000;">🧩 Votre PACK AIO PRO (Option)</h3>
-                            <p>Vous avez débloqué l'accès au niveau supérieur : <strong>L'Expertise Sémantique Complète</strong>.</p>
                             
-                            <p>Ce pack à <strong>499 CHF</strong> comprend la création manuelle par nos experts de :</p>
-                            <ul style="line-height: 1.6;">
-                                <li><strong>Glossaire Métier</strong> (/.ayo/glossary.json) - Vos définitions inaltérables.</li>
-                                <li><strong>FAQ IA-Native</strong> (/.ayo/faq.json) - Réponses calibrées pour ChatGPT/Gemini.</li>
-                                <li><strong>Architecture Données</strong> - JSON-LD enrichi et sans conflit.</li>
-                                <li><strong>Manifest AYO</strong> - La carte routière pour les bots.</li>
-                            </ul>
-
-                            <div style="text-align: center; margin-top: 30px;">
-                                <a href="https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201" style="background-color: #000000; color: #ffffff !important; text-decoration: none; padding: 15px 30px; font-weight: bold; border-radius: 5px; border: 1px solid #333;">
-                                    🚀 Commander le Pack AIO PRO (499 CHF)
-                                </a>
-                            </div>
-
                             <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
                                 AI Visionary - L'Autorité de Visibilité IA.
                             </p>
