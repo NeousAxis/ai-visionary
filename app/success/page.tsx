@@ -7,12 +7,57 @@ import Link from 'next/link';
 function SuccessContent() {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get('session_id');
-    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [errorMessage, setErrorMessage] = useState(''); // State for error messages
+    const [status, setStatus] = useState<'loading' | 'success' | 'email_required' | 'error'>('loading');
+    const [errorMessage, setErrorMessage] = useState('');
     const [manualEmail, setManualEmail] = useState('');
     const [isRetrying, setIsRetrying] = useState(false);
 
-    const handleManualRetry = async () => {
+    useEffect(() => {
+        if (!sessionId) {
+            return;
+        }
+
+        let isActive = true;
+
+        const autoCheck = async () => {
+            console.log("Starting Auto-Check for:", sessionId);
+            try {
+                const res = await fetch('/api/webhooks/checkout-success', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                if (!isActive) return;
+
+                if (res.ok) {
+                    setStatus('success');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    if (err.error && err.error.includes('No email')) {
+                        setStatus('email_required');
+                    } else {
+                        console.error("Verification failed:", err);
+                        setErrorMessage(err.error || "Erreur inconnue");
+                        setStatus('error');
+                    }
+                }
+            } catch (e) {
+                if (!isActive) return;
+                console.error("Network Error:", e);
+                setErrorMessage("Erreur réseau. Veuillez réessayer.");
+                setStatus('error');
+            }
+        };
+
+        if (status === 'loading') {
+            autoCheck();
+        }
+
+        return () => { isActive = false; };
+    }, [sessionId]);
+
+    const handleManualSubmit = async () => {
         if (!manualEmail.includes('@')) return;
         setIsRetrying(true);
         try {
@@ -25,104 +70,111 @@ function SuccessContent() {
                 setStatus('success');
             } else {
                 const errData = await res.json().catch(() => ({}));
-                setErrorMessage(errData.error || "Réessai échoué. Contactez le support.");
+                setErrorMessage(errData.error || "Envoi échoué. Réessayez ou contactez le support.");
+                alert("Erreur: " + (errData.error || "Inconnue"));
                 setIsRetrying(false);
             }
         } catch (e) {
-            setErrorMessage("Erreur réseau lors du réessai.");
+            alert("Erreur réseau.");
             setIsRetrying(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8 text-center font-sans">
-            <div className="max-w-2xl w-full bg-white/5 border border-white/10 rounded-2xl p-10 shadow-2xl backdrop-blur-sm">
+        <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center justify-center p-6 font-sans">
 
+            <div className="max-w-md w-full text-center">
+
+                {/* STATUS: LOADING */}
                 {status === 'loading' && (
-                    <>
-                        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-emerald-400 mx-auto mb-6"></div>
-                        <h1 className="text-3xl font-bold mb-4">Vérification de votre paiement...</h1>
-                        <p className="text-gray-400">Nous sécurisons votre transaction et préparons votre identité IA.</p>
-                    </>
+                    <div className="flex flex-col items-center">
+                        <div className="w-8 h-8 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-widest">Finalisation...</p>
+                    </div>
                 )}
 
+                {/* STATUS: SUCCESS */}
                 {status === 'success' && (
-                    <>
-                        <div className="text-6xl mb-6">✅</div>
-                        <h1 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">
-                            Félicitations !
+                    <div className="animate-fade-in">
+                        {/* ICON: Pure & Central */}
+                        <div className="w-24 h-24 mx-auto mb-10 flex items-center justify-center rounded-full bg-green-50 shadow-sm">
+                            <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+
+                        <h1 className="text-4xl font-extrabold text-black mb-6 tracking-tight mt-6">
+                            Paiement validé.
                         </h1>
-                        <p className="text-xl mb-8 text-gray-300">
-                            Votre commande pour le <strong className="text-white">Pack ASR Essential PRO</strong> est confirmée.
+
+                        <p className="text-gray-700 text-xl mb-12 font-light leading-relaxed max-w-lg mx-auto">
+                            Nous avons bien reçu votre commande.<br />
+                            L'activation de votre certificat ASR est immédiate.
                         </p>
 
-                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 mb-8 text-left">
-                            <h3 className="text-lg font-semibold text-emerald-400 mb-2">🚀 Prochaines étapes :</h3>
-                            <ul className="list-disc pl-5 space-y-2 text-gray-300">
-                                <li>Votre <strong>ASR Essential PRO (JSON)</strong> a été généré.</li>
-                                <li>Il vient d'être envoyé à {manualEmail ? manualEmail : "votre adresse email"}.</li>
-                                <li>Consultez vos emails (et spams) d'ici 2 minutes.</li>
-                            </ul>
-                        </div>
-
-                        <div className="flex flex-col gap-4">
-                            <Link href="/" className="inline-block bg-emerald-500 text-white font-bold py-3 px-8 rounded-full hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">
-                                Retour à l'accueil
-                            </Link>
-                        </div>
-                    </>
-                )}
-
-                {status === 'error' && (
-                    <>
-                        <div className="text-6xl mb-6">⚠️</div>
-                        <h1 className="text-3xl font-bold mb-4">Nous n'avons pas pu valider automatiquement</h1>
-
-                        {errorMessage && errorMessage.includes('email') ? (
-                            <div className="bg-gray-800 p-6 rounded-lg mb-6 border border-gray-700">
-                                <p className="text-yellow-400 mb-4 font-bold">L'email n'a pas été transmis par Stripe.</p>
-                                <p className="text-gray-300 mb-4 text-sm">Entrez votre email ci-dessous pour recevoir vos fichiers immédiatement :</p>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="email"
-                                        placeholder="votre@email.com"
-                                        className="flex-1 p-3 rounded bg-black border border-gray-600 text-white focus:border-emerald-500 focus:outline-none"
-                                        value={manualEmail}
-                                        onChange={(e) => setManualEmail(e.target.value)}
-                                    />
-                                    <button
-                                        onClick={handleManualRetry}
-                                        disabled={isRetrying || !manualEmail}
-                                        className="bg-emerald-500 text-white px-6 py-3 rounded font-bold hover:bg-emerald-600 disabled:opacity-50"
-                                    >
-                                        {isRetrying ? '...' : 'Envoyer'}
-                                    </button>
+                        {/* INFO BOX: Clean High Contrast */}
+                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 mb-12 text-left shadow-sm">
+                            <div className="flex items-start gap-5">
+                                <div className="mt-1 bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
+                                    <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-black uppercase tracking-wide mb-2">Livraison Email</h3>
+                                    <p className="text-base text-gray-800 leading-relaxed">
+                                        Vos fichiers <strong>Essential PRO</strong> ont été envoyés à votre adresse. Pensez à vérifier vos spams.
+                                    </p>
                                 </div>
                             </div>
-                        ) : (
-                            <p className="text-gray-400 mb-6">
-                                Si vous avez bien effectué le paiement, pas d'inquiétude. Notre système va réessayer.
-                            </p>
-                        )}
-
-                        {errorMessage && (
-                            <p className="text-red-400 text-sm mt-2 mb-6 font-mono bg-red-900/20 p-3 rounded border border-red-500/30">
-                                Détail technique : {errorMessage}
-                            </p>
-                        )}
-                        <div className="flex flex-col gap-4">
-                            <a href="mailto:hello@ai-visionary.com?subject=Problème Paiement AYO (Session Error)"
-                                className="inline-block bg-white font-bold py-3 px-8 rounded-full hover:bg-gray-200 transition-colors"
-                                style={{ color: '#000000' }}>
-                                Contacter le support (Email)
-                            </a>
-                            <Link href="/" className="text-emerald-400 hover:underline text-sm">
-                                Retourner à l'accueil
-                            </Link>
                         </div>
-                    </>
+
+                        <Link href="/" className="inline-block px-10 py-4 bg-black text-white font-bold text-base rounded-xl hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5">
+                            Retour à l'accueil
+                        </Link>
+                    </div>
                 )}
 
+                {/* STATUS: EMAIL REQUIRED */}
+                {status === 'email_required' && (
+                    <div className="animate-fade-in text-left">
+                        <div className="w-16 h-16 mb-6 flex items-center justify-center rounded-full bg-yellow-50 mx-auto">
+                            <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">Paiement Reçu</h1>
+                        <p className="text-gray-500 text-center mb-8">Pour finaliser la livraison, confirmez votre email.</p>
+
+                        <div className="flex gap-3">
+                            <input
+                                type="email"
+                                placeholder="votre@email.pro"
+                                className="flex-1 border-gray-200 bg-gray-50 text-gray-900 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all placeholder-gray-400"
+                                value={manualEmail}
+                                onChange={(e) => setManualEmail(e.target.value)}
+                            />
+                            <button
+                                onClick={handleManualSubmit}
+                                disabled={isRetrying || !manualEmail}
+                                className="px-6 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                            >
+                                {isRetrying ? '...' : 'Envoyer'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* STATUS: ERROR */}
+                {status === 'error' && (
+                    <div className="animate-fade-in text-center">
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">Petit souci technique</h2>
+                        <p className="text-gray-500 mb-6">{errorMessage}</p>
+                        <a href="mailto:hello@ai-visionary.com" className="text-sm font-medium text-black underline decoration-2 hover:text-gray-600">
+                            Contacter le support
+                        </a>
+                    </div>
+                )}
+            </div>
+
+            {/* Footer Minimal */}
+            <div className="fixed bottom-6 text-center w-full pointer-events-none">
+                <p className="text-[10px] text-gray-300 uppercase tracking-widest">AI Visionary Secure Checkout</p>
             </div>
         </div>
     );
@@ -130,7 +182,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Chargement...</div>}>
+        <Suspense fallback={<div className="min-h-screen bg-white text-black flex items-center justify-center">Chargement...</div>}>
             <SuccessContent />
         </Suspense>
     );

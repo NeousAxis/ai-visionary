@@ -257,6 +257,33 @@ ul {
     justify-content: center;
 }
 
+/* Logo Container with Floating Effect */
+.logo-container {
+    position: relative;
+    animation: floatLogo 3s ease-in-out infinite;
+}
+
+.logo-container img {
+    filter: drop-shadow(0 10px 25px rgba(139, 92, 246, 0.4)) drop-shadow(0 20px 40px rgba(139, 92, 246, 0.3)) drop-shadow(0 30px 60px rgba(0, 0, 0, 0.5));
+    transition: filter 0.3s ease;
+}
+
+.logo-container:hover img {
+    filter: drop-shadow(0 15px 30px rgba(139, 92, 246, 0.6)) drop-shadow(0 25px 50px rgba(139, 92, 246, 0.4)) drop-shadow(0 35px 70px rgba(0, 0, 0, 0.6));
+}
+
+@keyframes floatLogo {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
 /* Hero Visual Animation Background */
 .hero-visual {
     position: absolute;

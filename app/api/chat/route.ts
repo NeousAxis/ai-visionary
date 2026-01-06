@@ -29,7 +29,37 @@ try {
 
 // [SYSTEM PROMPT UPDATE]
 // [SYSTEM PROMPT DYNAMIC GENERATOR]
-const getSystemPrompt = (realAsrId: string, realIsoDate: string) => `
+const getSystemPrompt = (realAsrId: string, realIsoDate: string, targetUrl: string = "", targetEmail: string = "") => {
+    // Generate Stripe Params with Metadata (Client Reference ID)
+    let stripeSuffix = "";
+
+    // We want to encode both URL and Email to ensure delivery even if Stripe session fails to capture email properly
+    if (targetUrl || targetEmail) {
+        try {
+            const payload: any = {};
+            if (targetUrl) payload.u = targetUrl;
+            if (targetEmail) payload.e = targetEmail;
+
+            // Compact JSON
+            const jsonStr = JSON.stringify(payload);
+            const b64 = Buffer.from(jsonStr).toString('base64');
+
+            // Check length safety (Stripe limit 255 chars)
+            if (b64.length <= 250) {
+                stripeSuffix = `?client_reference_id=${b64}`;
+                // Also try to prefill email field in Stripe if possible (supported by some checkout flows)
+                if (targetEmail) {
+                    stripeSuffix += `&prefilled_email=${encodeURIComponent(targetEmail)}`;
+                }
+            } else {
+                console.warn("Payload too long for Stripe client_reference_id", payload);
+            }
+        } catch (e) {
+            console.error("Stripe Param Encoding Error", e);
+        }
+    }
+
+    return `
 TU ES "AYO", L'IA DE "AI VISIONARY".
 Tu es un assistant strict qui suit un SCRIPT PRÉCIS étape par étape.
 Tu dois AGIR comme un moteur d'enregistrement officiel.
@@ -161,7 +191,7 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
   Votre score actuel ([NOTE_GLOBALE]/100) est un début.
   Mais pour garantir votre autorité sur les IA (ChatGPT, Gemini), la Certification Cryptographique serait beaucoup plus efficace.
   
-  JE peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
+  Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
   
   👉 **Répondez 'Oui' pour sécuriser votre autorité.**
   👉 ou 'Non' pour en rester là pour l'instant.
@@ -171,7 +201,7 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 SI OUI :
   "Excellent choix.
   Here is the secure link to activate your ASR Essential:
-  👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200) (ID Test Stripe)
+  👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix}) (ID Test Stripe)
 
   Une fois réglé, écrivez 'Fait' ici."
 
@@ -181,7 +211,7 @@ SI PACK PRO :
   Vous passez directement au niveau **Expert**.
   
   Voici votre lien sécurisé pour activer le **Pack AIO Ultimate (Pro)** :
-  👉 [🚀 **Activer le Pack PRO (499 CHF)**](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201)
+  👉 [🚀 **Activer le Pack PRO (499 CHF)**](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
   
   *(Inclut : Audit Complet + Certification ASR Pro + Architectures AI-Native + Glossaire Sémantique)*
   
@@ -261,6 +291,7 @@ Installez-le pour activer votre autorité."
 "✅ **Signal Détecté.** Entreprise certifiée."
 FIN DU SCRIPT.
 `;
+}
 
 // Helper: Fetch and clean website content
 async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJsonLd: boolean }> {
@@ -648,7 +679,8 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                         </div>`;
                     offerHtml = `
                         <h3 style="color:#2c3e50; margin-top:30px;">🎁 Étape 1 : Le Correctif d'Urgence (AYO Light)</h3>
-                        <p>Installez ce fichier offert pour déclarer votre existence minimale :</p>
+                        <p>Installez ce fichier offert pour déclarer votre existence minimale aux intelligences artificielles :</p>
+                        
                         <div style="background:#2d3436; color:#dfe6e9; padding:15px; border-radius:5px; overflow-x:auto; font-family:monospace; font-size:12px;">
 <pre style="margin:0;">
 {
@@ -658,6 +690,41 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
   "url": "https://${targetEmail.split('@')[1] || 'votresite.com'}"
 }
 </pre>
+                        </div>
+
+                        <div style="background: #f0f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #d9e2ec;">
+                            <h3 style="margin-top:0; color: #102a43;">🛠 GUIDE D'INSTALLATION (Tuto Précis)</h3>
+                            <p style="font-size: 14px;">Ce code est inactif tant qu'il n'est pas sur votre site.</p>
+                            
+                            <h4 style="margin-bottom:5px; color:#334e68;">OPTION 1 : Pour les Développeurs (Recommandé)</h4>
+                            <p style="font-size:13px; margin-top:0;">Demandez à votre webmaster : <em>"Crée un dossier <code>.ayo</code> à la racine du site, et ajoutes-y ce fichier sous le nom <code>asr.json</code>."</em></p>
+
+                            <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
+
+                            <h4 style="margin-bottom:5px; color:#334e68;">OPTION 2 : WordPress (Sans code)</h4>
+                            <ol style="font-size:13px; padding-left:20px; margin-top:0;">
+                                <li>Installez le plugin gratuit <strong>"WP File Manager"</strong>.</li>
+                                <li>Ouvrez-le, faites Clic Droit > New Folder > Nom : <code>.ayo</code></li>
+                                <li>Ouvrez ce dossier > New File > Nom : <code>asr.json</code></li>
+                                <li>Clic Droit sur le fichier > Code Editor > Collez le code > Save.</li>
+                            </ol>
+
+                            <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
+
+                            <h4 style="margin-bottom:5px; color:#334e68;">OPTION 3 : Wix, Squarespace, Shopify</h4>
+                            <p style="font-size:13px;">Ces plateformes bloquent les fichiers racines. Utilisez l'injection :</p>
+                            <ol style="font-size:13px; padding-left:20px; margin-top:0;">
+                                <li>Allez dans <strong>Paramètres > Code personnalisé / Injection</strong>.</li>
+                                <li>Ajoutez un script dans le <strong>HEAD</strong>.</li>
+                                <li>Copiez ce bloc entier :<br>
+                                    <code>&lt;script type="application/ld+json"&gt;</code><br>
+                                    { "@context": "https://schema.org", ... }<br>
+                                    <code>&lt;/script&gt;</code>
+                                </li>
+                            </ol>
+                            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e0; font-size: 13px; color: #334e68;">
+                                💁‍♂️ <strong>Besoin d'aide ?</strong> Si vous bloquez, écrivez simplement à <a href="mailto:hello@ai-visionary.com" style="color:#102a43; font-weight:bold;">hello@ai-visionary.com</a>. Nous vous aiderons à l'installer avec plaisir.
+                            </p>
                         </div>
                         
                         <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-top:30px; border:1px solid #ddd;">
@@ -750,7 +817,16 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 
 
         // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate);
+        // Find URL in history to pass to Stripe
+        const historyUrlMatch = messages.find((m: any) => m.content.match(/(https?:\/\/[^\s]+)/));
+        const detectedUrl = historyUrlMatch ? historyUrlMatch.content.match(/(https?:\/\/[^\s]+)/)[0] : "";
+
+        // Find Email in history to pass to Stripe (Robust Backup)
+        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
+        const historyEmailMatch = messages.slice().reverse().find((m: any) => m.role === 'user' && m.content.match(emailRegex));
+        const detectedEmail = historyEmailMatch ? historyEmailMatch.content.match(emailRegex)[0] : "";
+
+        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
 
         // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
         // Detect if the user message is a URL (Basic Heuristic for State 1/2)
