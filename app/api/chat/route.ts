@@ -742,9 +742,13 @@ Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** e
 
 
         // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-        // Find URL in history to pass to Stripe
-        const historyUrlMatch = messages.find((m: any) => m.content.match(/(https?:\/\/[^\s]+)/));
-        const detectedUrl = historyUrlMatch ? historyUrlMatch.content.match(/(https?:\/\/[^\s]+)/)[0] : "";
+        // Find URL in history to pass to Stripe (Robust Regex)
+        const robustHistoryUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+        const historyUrlMatch = messages.find((m: any) => m.content.match(robustHistoryUrlRegex));
+        let detectedUrl = historyUrlMatch ? historyUrlMatch.content.match(robustHistoryUrlRegex)[0] : "";
+
+        // Normalize
+        if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
 
         // Find Email in history to pass to Stripe (Robust Backup)
         const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
