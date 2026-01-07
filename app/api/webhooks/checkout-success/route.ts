@@ -143,9 +143,18 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const { session_id, force_email } = body;
+
+        let session_id = body.session_id; // Frontend direct call support
+        let force_email = body.force_email;
+
+        // 🔔 DETECT STRIPE WEBHOOK EVENT STRUCTURE
+        if (body.type === 'checkout.session.completed' && body.data?.object?.id) {
+            console.log(`🔔 STRIPE WEBHOOK EVENT RECEIVED: ${body.type}`);
+            session_id = body.data.object.id;
+        }
 
         if (!session_id) {
+            console.error("❌ WEBHOOK ERROR: Missing session_id in payload", body);
             return NextResponse.json({ error: 'Missing session_id' }, { status: 400 });
         }
 
