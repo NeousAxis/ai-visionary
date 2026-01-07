@@ -301,6 +301,9 @@ export async function POST(req: Request) {
         const asrJson = generateRealAsrJson(customerEmail || "email_manquant@verifier.com", sessionDate, session_id, analysisData, packType === "PRO");
 
         // 🔐 VALIDATION EMAIL PRO (Security)
+        // 🚨 TEMP DEBUG: VALIDATION DISABLED TO TEST RESEND
+        const VALIDATION_DISABLED = true;
+
         let emailValidated = false;
         if (!emailMissing && customerEmail && companyInfo.url) {
             // Extract domain from analyzed URL
@@ -316,14 +319,19 @@ export async function POST(req: Request) {
             const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
 
             // Security Check: Email must belong to analyzed domain
-            if (analyzedDomain && emailDomain && emailDomain === analyzedDomain) {
+            if (VALIDATION_DISABLED || (analyzedDomain && emailDomain && emailDomain === analyzedDomain)) {
                 emailValidated = true;
-                console.log(`✅ WEBHOOK SECURITY VALIDATED: ${customerEmail} matches ${analyzedDomain}`);
+                if (VALIDATION_DISABLED) {
+                    console.log(`🚨 WEBHOOK DEBUG MODE: Email validation DISABLED. Accepting ${customerEmail}`);
+                } else {
+                    console.log(`✅ WEBHOOK SECURITY VALIDATED: ${customerEmail} matches ${analyzedDomain}`);
+                }
             } else {
                 console.warn(`❌ WEBHOOK SECURITY REJECTION: Email ${customerEmail} does not match analyzed domain ${analyzedDomain}`);
                 emailMissing = true; // Block email sending
             }
         }
+
 
         // Send Email via Resend (ONLY IF EMAIL EXISTS AND VALIDATED)
         if (!emailMissing && process.env.RESEND_API_KEY) {

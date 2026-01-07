@@ -629,8 +629,11 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                 // Extract email domain (e.g., hello@globalworkflow.xyz => globalworkflow.xyz)
                 const emailDomain = userEmail.split('@')[1]?.toLowerCase();
 
+                // 🚨 TEMP DEBUG: VALIDATION DISABLED TO TEST RESEND
+                const VALIDATION_DISABLED = true;
+
                 // Security Check: Email must belong to analyzed domain
-                if (!analyzedDomain || !emailDomain || emailDomain !== analyzedDomain) {
+                if (!VALIDATION_DISABLED && (!analyzedDomain || !emailDomain || emailDomain !== analyzedDomain)) {
                     console.warn(`❌ SECURITY REJECTION: Email ${userEmail} does not match analyzed domain ${analyzedDomain}`);
 
                     // Send rejection response to user
@@ -638,12 +641,16 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 
                     // Skip email sending
                 } else {
-                    console.log(`✅ SECURITY VALIDATED: ${userEmail} matches ${analyzedDomain}. Sending Report...`);
+                    if (VALIDATION_DISABLED) {
+                        console.log(`🚨 DEBUG MODE: Email validation DISABLED. Accepting ${userEmail}`);
+                    } else {
+                        console.log(`✅ SECURITY VALIDATED: ${userEmail} matches ${analyzedDomain}. Sending Report...`);
+                    }
                     // Continue with email sending (code below)
                 }
 
-                // Only proceed if security validation passed
-                if (emailDomain === analyzedDomain) {
+                // Only proceed if security validation passed OR validation is disabled
+                if (VALIDATION_DISABLED || emailDomain === analyzedDomain) {
                     // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
                     // We search for the message containing the '|||' marker which is MANDATORY in the new V3 prompt
                     const analysisMsg = messages.slice().reverse().find((m: any) =>
