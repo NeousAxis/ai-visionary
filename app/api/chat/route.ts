@@ -418,22 +418,22 @@ export async function POST(req: Request) {
 
         // 🔍 DETECT IF WE ARE IN ANALYSIS PHASE (State 1 -> 2)
         // Check if the User provided an URL in the last message or if we are prompting for it
-        // 🔍 DETECT IF WE ARE IN ANALYSIS PHASE (State 1 -> 2)
-        // Check if the User provided an URL in the last message or if we are prompting for it
-        // IMPROVED REGEX: Supports https://, http://, www., or bare domains ending in .com/.xyz/etc
-        const urlRegex = /((?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
+        // FIXED REGEX: Robust URL detection
+        const urlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 
-        const userUrlMatch = lastMessage.content.match(urlRegex);
+        const rawUrlMatch = lastMessage.content.match(urlRegex);
+
+        // CHECK IF IT IS AN EMAIL (Priority: If Email -> It's NOT a URL for analysis)
+        const triggerEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isTriggerEmail = lastMessage.content.trim().match(triggerEmailRegex);
+
+        const userUrlMatch = isTriggerEmail ? null : rawUrlMatch;
 
         let finalResponseText = "";
         let isAnalysisRun = false;
 
         // IF USER GIVES A URL -> TRIGGER DETERMINISTIC ANALYSIS ENGINE
-        // FIX: Ensure we do NOT trigger if it looks like an email (prevents loops)
-        const triggerEmailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/;
-        const isTriggerEmail = lastMessage.content.trim().match(triggerEmailRegex);
-
-        if (lastMessage.role === 'user' && userUrlMatch && !isTriggerEmail) {
+        if (lastMessage.role === 'user' && userUrlMatch) {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE...");
             isAnalysisRun = true;
             let urlToScan = userUrlMatch[0];
