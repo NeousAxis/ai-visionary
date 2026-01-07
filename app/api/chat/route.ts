@@ -201,7 +201,7 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
   
   Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
   
-  👉 **Répondez 'ESSENTIAL' pour sécuriser votre autorité.**
+  👉 **Répondez 'ESSENTIAL' pour sécuriser votre ID ASR.**
   👉 ou 'LIGHT' pour en rester là pour l'instant.
   👉 ou 'Pack Pro' pour obtenir directement votre Analyse détaillée + Certification Cryptographique (ASR Complète) + la création des fichiers AI-Native pour attirer les IA vers votre site."
 
