@@ -151,7 +151,15 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
                         >
                             <div className="markdown-content">
-                                <ReactMarkdown>{m.content}</ReactMarkdown>
+                                <ReactMarkdown
+                                    components={{
+                                        a: ({ node, ...props }) => (
+                                            <a {...props} target="_blank" rel="noopener noreferrer" />
+                                        )
+                                    }}
+                                >
+                                    {m.content}
+                                </ReactMarkdown>
                             </div>
                         </div>
                     ))}
