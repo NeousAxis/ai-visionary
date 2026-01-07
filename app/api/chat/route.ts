@@ -418,7 +418,11 @@ export async function POST(req: Request) {
 
         // 🔍 DETECT IF WE ARE IN ANALYSIS PHASE (State 1 -> 2)
         // Check if the User provided an URL in the last message or if we are prompting for it
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        // 🔍 DETECT IF WE ARE IN ANALYSIS PHASE (State 1 -> 2)
+        // Check if the User provided an URL in the last message or if we are prompting for it
+        // IMPROVED REGEX: Supports https://, http://, www., or bare domains ending in .com/.xyz/etc
+        const urlRegex = /((?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
+
         const userUrlMatch = lastMessage.content.match(urlRegex);
 
         let finalResponseText = "";
@@ -428,7 +432,12 @@ export async function POST(req: Request) {
         if (lastMessage.role === 'user' && userUrlMatch) {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE...");
             isAnalysisRun = true;
-            const urlToScan = userUrlMatch[0];
+            let urlToScan = userUrlMatch[0];
+
+            // Normalize URL: Ensure https://
+            if (!urlToScan.startsWith('http')) {
+                urlToScan = 'https://' + urlToScan;
+            }
 
             // 1. SCANNING (Technical Truth)
             const scanResult = await scanUrlForAioSignals(urlToScan);
@@ -615,9 +624,19 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                 console.log(`📧 DETECTED EMAIL: ${userEmail}. Initiating sending sequence...`);
 
                 // 🔐 VALIDATION EMAIL PRO (Security)
-                // Extract analyzed URL from conversation history
-                const historyUrlMatch = messages.find((m: any) => m.content.match(/(https?:\/\/[^\s]+)/));
-                const analyzedUrl = historyUrlMatch ? historyUrlMatch.content.match(/(https?:\/\/[^\s]+)/)?.[0] : "";
+
+                // Extract analyzed URL from conversation history using robust Regex
+                const historyUrlRegex = /((?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
+
+                // Find the user message that contained the URL
+                const historyUrlMatchMsg = messages.find((m: any) => m.role === 'user' && m.content.match(historyUrlRegex));
+                let analyzedUrl = "";
+
+                if (historyUrlMatchMsg) {
+                    const match = historyUrlMatchMsg.content.match(historyUrlRegex);
+                    if (match) analyzedUrl = match[0];
+                    if (analyzedUrl && !analyzedUrl.startsWith('http')) analyzedUrl = 'https://' + analyzedUrl;
+                }
 
                 // Extract domain from URL (e.g., https://globalworkflow.xyz => globalworkflow.xyz)
                 let analyzedDomain = "";
