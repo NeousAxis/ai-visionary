@@ -429,7 +429,11 @@ export async function POST(req: Request) {
         let isAnalysisRun = false;
 
         // IF USER GIVES A URL -> TRIGGER DETERMINISTIC ANALYSIS ENGINE
-        if (lastMessage.role === 'user' && userUrlMatch) {
+        // FIX: Ensure we do NOT trigger if it looks like an email (prevents loops)
+        const triggerEmailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/;
+        const isTriggerEmail = lastMessage.content.trim().match(triggerEmailRegex);
+
+        if (lastMessage.role === 'user' && userUrlMatch && !isTriggerEmail) {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE...");
             isAnalysisRun = true;
             let urlToScan = userUrlMatch[0];
@@ -628,15 +632,20 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                 // Extract analyzed URL from conversation history using robust Regex
                 const historyUrlRegex = /((?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
 
-                // Find the user message that contained the URL
-                const historyUrlMatchMsg = messages.find((m: any) => m.role === 'user' && m.content.match(historyUrlRegex));
-                let analyzedUrl = "";
+                // Find the user message that contained the URL (and was NOT an email)
+                const historyUrlMatchMsg = messages.find((m: any) => {
+                    const isMsgEmail = m.content.trim().match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/);
+                    return m.role === 'user' && m.content.match(historyUrlRegex) && !isMsgEmail;
+                });
 
+                let analyzedUrl = "";
                 if (historyUrlMatchMsg) {
                     const match = historyUrlMatchMsg.content.match(historyUrlRegex);
                     if (match) analyzedUrl = match[0];
                     if (analyzedUrl && !analyzedUrl.startsWith('http')) analyzedUrl = 'https://' + analyzedUrl;
                 }
+
+
 
                 // Extract domain from URL (e.g., https://globalworkflow.xyz => globalworkflow.xyz)
                 let analyzedDomain = "";
