@@ -9,6 +9,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
+import { db } from '@/lib/db';
 
 // --- LOGIQUE D'ANALYSE (DUPLIQUÉE DEPUIS CHAT ROUTE POUR AUTONOMIE WEBHOOK) ---
 
@@ -248,10 +249,36 @@ export async function POST(req: Request) {
             }
         }
 
-        // 6. PERFORM LIVE ANALYSIS (State of the Art)
-        // Since we are stateless, we MUST re-analyze to deliver fresh, accurate data.
-        if (companyInfo.url) {
-            console.log(`🚀 RELAUNCHING FULL ANALYSIS For: ${companyInfo.url}`);
+        // 6. RETRIEVE ANALYSIS FROM DATABASE (Source of Truth)
+        // The analysis was saved during the chat session with the same session_id
+        console.log(`💾 RETRIEVING ANALYSIS FROM DB FOR SESSION: ${session_id}`);
+
+        let dbAnalysis = null;
+        try {
+            dbAnalysis = await db.getAnalysis(session_id);
+            if (dbAnalysis) {
+                console.log(`✅ DB HIT: Analysis found for ${session_id}. Score: ${dbAnalysis.score}`);
+                analysisData = {
+                    score: dbAnalysis.score || 0,
+                    details: {}, // Not stored in DB, but not critical for email
+                    extract: dbAnalysis.data?.fields || {},
+                    url: dbAnalysis.url || companyInfo.url || ""
+                };
+
+                // Update companyInfo if not already set
+                if (!companyInfo.url && dbAnalysis.url) {
+                    companyInfo.url = dbAnalysis.url;
+                }
+            } else {
+                console.warn(`⚠️ DB MISS: No analysis found for ${session_id}. Database may have been cleared (/tmp issue).`);
+            }
+        } catch (dbErr) {
+            console.error("❌ DB Read Error:", dbErr);
+        }
+
+        // FALLBACK: If DB read fails or data is missing, perform minimal analysis
+        if (!dbAnalysis && companyInfo.url) {
+            console.log(`🔄 FALLBACK: Performing minimal analysis for ${companyInfo.url}`);
             try {
                 const result = await performFullAnalysis(companyInfo.url);
                 analysisData = { ...result, url: companyInfo.url };
@@ -260,13 +287,14 @@ export async function POST(req: Request) {
                 if (analysisData.score === 0 && result.extract) {
                     analysisData.score = 50;
                 }
-                console.log("✅ LIVE Analysis Success. Score:", analysisData.score);
+                console.log("✅ FALLBACK Analysis Success. Score:", analysisData.score);
             } catch (anaErr) {
-                console.error("❌ Analysis Failed in Webhook:", anaErr);
+                console.error("❌ Fallback Analysis Failed:", anaErr);
             }
-        } else {
-            console.error("🔥 CRITICAL: No URL found to analyze! Cannot deliver custom file.");
+        } else if (!dbAnalysis && !companyInfo.url) {
+            console.error("🔥 CRITICAL: No URL found and no DB data! Cannot deliver custom file.");
         }
+
 
         // Generate REAL Files
         const sessionDate = new Date().toISOString();

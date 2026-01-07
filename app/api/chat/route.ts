@@ -549,6 +549,24 @@ ${scanResult.text}
                 Object.keys(scoreResult.blocks).forEach(k => scoreResult.blocks[k as keyof typeof scoreResult.blocks] = 99); // Max display
             }
 
+            //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
+            try {
+                await db.saveAnalysis(sessionAsrId, {
+                    id: sessionAsrId,
+                    url: urlToScan,
+                    email: null, // Will be updated when user provides email
+                    score: scoreResult.total,
+                    data: {
+                        fields: extractJson.fields,
+                        blocks: scoreResult.blocks,
+                        scan: scanResult
+                    }
+                });
+                console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
+            } catch (dbErr) {
+                console.error("❌ Failed to save analysis to DB:", dbErr);
+            }
+
             // 5. BUILD FINAL RESPONSE TEXT
             finalResponseText = `✅ Audit de Visibilité IA terminé.
 Calcul du score en cours...
