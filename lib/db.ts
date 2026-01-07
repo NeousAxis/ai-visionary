@@ -33,7 +33,7 @@ if (!getApps().length) {
 }
 
 // Get Firestore instance
-const db = getFirestore();
+const firestore = getFirestore();
 
 export const database = {
     /**
@@ -41,7 +41,7 @@ export const database = {
      */
     saveAnalysis: async (id: string, record: Partial<AnalysisRecord>): Promise<void> => {
         try {
-            const docRef = db.collection('analyses').doc(id);
+            const docRef = firestore.collection('analyses').doc(id);
 
             const dataToSave = {
                 ...record,
@@ -62,7 +62,7 @@ export const database = {
      */
     getAnalysis: async (id: string): Promise<AnalysisRecord | null> => {
         try {
-            const docRef = db.collection('analyses').doc(id);
+            const docRef = firestore.collection('analyses').doc(id);
             const doc = await docRef.get();
 
             if (!doc.exists) {
@@ -82,3 +82,4 @@ export const database = {
 
 // Export as 'db' for backward compatibility
 export const db = database;
+
