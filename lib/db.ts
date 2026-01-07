@@ -20,10 +20,19 @@ if (!getApps().length) {
         console.log('📋 FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL ? 'Present ✅' : 'Missing ❌');
         console.log('📋 FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY ? 'Present ✅' : 'Missing ❌');
 
+        // FIX: Handle all possible newline formats in private key
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+        if (privateKey) {
+            // Replace literal \n with actual newlines
+            privateKey = privateKey.replace(/\\n/g, '\n');
+            // Also handle double backslashes (escaped in some environments)
+            privateKey = privateKey.replace(/\\\\n/g, '\n');
+        }
+
         const serviceAccount = {
             projectId: process.env.FIREBASE_PROJECT_ID,
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+            privateKey: privateKey
         };
 
         if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
