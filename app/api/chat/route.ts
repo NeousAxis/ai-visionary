@@ -550,7 +550,10 @@ ${scanResult.text}
             }
 
             //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
+            console.log(`🔥 DEBUG: About to save analysis. SessionID: ${sessionAsrId}, Score: ${scoreResult.total}`);
+            console.log(`🔥 DEBUG: db object exists:`, typeof db, typeof db.saveAnalysis);
             try {
+                console.log(`🔥 DEBUG: Calling db.saveAnalysis...`);
                 await db.saveAnalysis(sessionAsrId, {
                     id: sessionAsrId,
                     url: urlToScan,
@@ -563,8 +566,9 @@ ${scanResult.text}
                     }
                 });
                 console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
-            } catch (dbErr) {
+            } catch (dbErr: any) {
                 console.error("❌ Failed to save analysis to DB:", dbErr);
+                console.error("❌ Error details:", dbErr.message, dbErr.stack);
             }
 
             // 5. BUILD FINAL RESPONSE TEXT
