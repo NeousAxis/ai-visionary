@@ -250,30 +250,44 @@ export async function POST(req: Request) {
         }
 
         // 6. RETRIEVE ANALYSIS FROM DATABASE (Source of Truth)
-        // The analysis was saved during the chat session with the same session_id
-        console.log(`💾 RETRIEVING ANALYSIS FROM DB FOR SESSION: ${session_id}`);
+        // STRATEGY: 
+        // 1. Try by Session ID (Unlikely unless passed explicitly)
+        // 2. Try by URL (Most robust link from Chat)
+        console.log(`💾 RETRIEVING ANALYSIS FROM DB...`);
 
         let dbAnalysis = null;
-        try {
-            dbAnalysis = await db.getAnalysis(session_id);
-            if (dbAnalysis) {
-                console.log(`✅ DB HIT: Analysis found for ${session_id}. Score: ${dbAnalysis.score}`);
-                analysisData = {
-                    score: dbAnalysis.score || 0,
-                    details: {}, // Not stored in DB, but not critical for email
-                    extract: dbAnalysis.data?.fields || {},
-                    url: dbAnalysis.url || companyInfo.url || ""
-                };
 
-                // Update companyInfo if not already set
-                if (!companyInfo.url && dbAnalysis.url) {
-                    companyInfo.url = dbAnalysis.url;
+        // Try getting analysis by URL (decoded from client_reference_id)
+        if (companyInfo.url) {
+            console.log(`🔎 Looking up latest analysis for URL: ${companyInfo.url}`);
+            try {
+                dbAnalysis = await db.getLatestAnalysisByUrl(companyInfo.url);
+                if (dbAnalysis) {
+                    console.log(`✅ DB HIT BY URL: Found analysis ${dbAnalysis.id}. Score: ${dbAnalysis.score}`);
                 }
-            } else {
-                console.warn(`⚠️ DB MISS: No analysis found for ${session_id}. Database may have been cleared (/tmp issue).`);
+            } catch (urlDbErr) {
+                console.error("❌ DB URL Lookup Error:", urlDbErr);
             }
-        } catch (dbErr) {
-            console.error("❌ DB Read Error:", dbErr);
+        }
+
+        // If not found by URL, try session_id (Legacy/Fallback)
+        if (!dbAnalysis) {
+            try {
+                dbAnalysis = await db.getAnalysis(session_id);
+                if (dbAnalysis) console.log(`✅ DB HIT BY ID: ${session_id}`);
+            } catch (idErr) { /* ignore */ }
+        }
+
+        if (dbAnalysis) {
+            analysisData = {
+                score: dbAnalysis.score || 0,
+                details: {},
+                extract: dbAnalysis.data?.fields || {},
+                url: dbAnalysis.url || companyInfo.url || ""
+            };
+            // Consider this validated since it comes from DB
+        } else {
+            console.warn(`⚠️ DB MISS: No analysis found for URL ${companyInfo.url} or ID ${session_id}.`);
         }
 
         // FALLBACK: If DB read fails or data is missing, perform minimal analysis
