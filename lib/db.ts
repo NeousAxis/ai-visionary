@@ -97,6 +97,41 @@ export const database = {
             console.error('❌ [Firestore] Read Error:', error);
             throw error;
         }
+    },
+
+    /**
+     * Retrieve the latest analysis for a given URL
+     */
+    getLatestAnalysisByUrl: async (url: string): Promise<AnalysisRecord | null> => {
+        try {
+            const snapshot = await firestore.collection('analyses')
+                .where('url', '==', url)
+                .orderBy('timestamp', 'desc')
+                .limit(1)
+                .get();
+
+            if (snapshot.empty) {
+                console.log(`⚠️ [Firestore] No analysis found for URL: ${url}`);
+                return null;
+            }
+
+            const data = snapshot.docs[0].data() as AnalysisRecord;
+            console.log(`✅ [Firestore] Latest analysis retrieved for URL: ${url}`);
+            return data;
+        } catch (error) {
+            console.error('❌ [Firestore] Query By URL Error:', error);
+            // Fallback: query without sorting if index is missing
+            try {
+                const snapshot = await firestore.collection('analyses')
+                    .where('url', '==', url)
+                    .limit(1)
+                    .get();
+                if (!snapshot.empty) return snapshot.docs[0].data() as AnalysisRecord;
+            } catch (e) {
+                console.error('❌ [Firestore] Fallback Query Error:', e);
+            }
+            return null;
+        }
     }
 };
 

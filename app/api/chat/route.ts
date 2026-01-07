@@ -622,262 +622,90 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
             console.log("DEBUG: Checking for email in: ", userContent);
             console.log("DEBUG: RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
 
-            // SCENARIO 1 : User provides Email (Trigger Report)
+            // SCENARIO 1 : User provides Email (Update DB & Offer Payment)
             if (lastMessage.role === 'user' && emailMatch) {
-                const userEmail = emailMatch[0]; // Extracted email
-                console.log(`📧 DETECTED EMAIL: ${userEmail}. Initiating sending sequence...`);
+                const userEmail = emailMatch[0];
+                console.log(`📧 DETECTED EMAIL: ${userEmail}. Updating Analysis Record...`);
 
-                // 🔐 VALIDATION EMAIL PRO (Security)
-
-                // Extract analyzed URL from conversation history using robust Regex
-                const historyUrlRegex = /((?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*))/gi;
-
+                // 1. Find the URL created in previous steps from history
+                const historyUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+                
                 // Find the user message that contained the URL (and was NOT an email)
                 const historyUrlMatchMsg = messages.find((m: any) => {
                     const isMsgEmail = m.content.trim().match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/);
                     return m.role === 'user' && m.content.match(historyUrlRegex) && !isMsgEmail;
                 });
-
-                let analyzedUrl = "";
+                
+                let detectedUrl = "";
                 if (historyUrlMatchMsg) {
-                    const match = historyUrlMatchMsg.content.match(historyUrlRegex);
-                    if (match) analyzedUrl = match[0];
-                    if (analyzedUrl && !analyzedUrl.startsWith('http')) analyzedUrl = 'https://' + analyzedUrl;
+                     const match = historyUrlMatchMsg.content.match(historyUrlRegex);
+                     if (match) detectedUrl = match[0];
+                     if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
                 }
 
+                let analysisFound = false;
 
-
-                // Extract domain from URL (e.g., https://globalworkflow.xyz => globalworkflow.xyz)
-                let analyzedDomain = "";
-                if (analyzedUrl) {
+                if (detectedUrl) {
+                    console.log(`🔍 Linking Email ${userEmail} to URL ${detectedUrl}...`);
+                    // 2. RETRIEVE ANALYSIS FROM DB (Stateless Link)
                     try {
-                        const urlObj = new URL(analyzedUrl);
-                        analyzedDomain = urlObj.hostname.replace(/^www\./, ''); // Remove www. prefix
-                    } catch (e) {
-                        console.error("Failed to parse analyzed URL:", e);
+                         const existingAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
+                         
+                         if (existingAnalysis) {
+                             analysisFound = true;
+                             // 3. UPDATE RECORD WITH EMAIL
+                             await db.saveAnalysis(existingAnalysis.id, {
+                                 email: userEmail
+                             });
+                             console.log(`✅ DB UPDATED: ${userEmail} linked to Analysis ${existingAnalysis.id}`);
+                             
+                             // Update context for Stripe generation later
+                             // But we generate links manually below for clarity
+                         } else {
+                             console.warn(`⚠️ No existing analysis found in DB for ${detectedUrl}`);
+                         }
+                    } catch (dbErr) {
+                        console.error("❌ Failed to link email to analysis:", dbErr);
                     }
                 }
 
-                // Extract email domain (e.g., hello@globalworkflow.xyz => globalworkflow.xyz)
-                const emailDomain = userEmail.split('@')[1]?.toLowerCase();
-
-                // 🚨 TEMP DEBUG: VALIDATION DISABLED TO TEST RESEND
-                const VALIDATION_DISABLED = true;
-
-                // Security Check: Email must belong to analyzed domain
-                if (!VALIDATION_DISABLED && (!analyzedDomain || !emailDomain || emailDomain !== analyzedDomain)) {
-                    console.warn(`❌ SECURITY REJECTION: Email ${userEmail} does not match analyzed domain ${analyzedDomain}`);
-
-                    // Send rejection response to user
-                    finalResponseText = `❌ **Validation Refusée**\n\nPour des raisons de sécurité, seuls les emails professionnels du domaine analysé peuvent recevoir l'ASR.\n\nVous avez fourni : \`${userEmail}\`\nDomaine analysé : \`${analyzedDomain}\`\n\n⚠️ **Erreur de correspondance détectée.**\n\nVeuillez utiliser un email professionnel de type \`nom@${analyzedDomain}\` pour confirmer votre propriété du domaine.`;
-
-                    // Skip email sending
-                } else {
-                    if (VALIDATION_DISABLED) {
-                        console.log(`🚨 DEBUG MODE: Email validation DISABLED. Accepting ${userEmail}`);
-                    } else {
-                        console.log(`✅ SECURITY VALIDATED: ${userEmail} matches ${analyzedDomain}. Sending Report...`);
+                // 4. GENERATE STRIPE LINKS (Using Payload)
+                // We encode the URL and Email so Webhook can retrieve them regardless of DB state fallback
+                let stripeSuffix = "";
+                try {
+                    const payload = { u: detectedUrl || "unknown", e: userEmail };
+                    const jsonStr = JSON.stringify(payload);
+                    const b64 = Buffer.from(jsonStr).toString('base64');
+                    // Ensure < 255 chars
+                    if (b64.length <= 250) {
+                        stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
                     }
-                    // Continue with email sending (code below)
-                }
+                } catch (e) { console.error("Stripe Param Error", e); }
 
-                // Only proceed if security validation passed OR validation is disabled
-                if (VALIDATION_DISABLED || emailDomain === analyzedDomain) {
-                    // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
-                    // We search for the message containing the '|||' marker which is MANDATORY in the new V3 prompt
-                    const analysisMsg = messages.slice().reverse().find((m: any) =>
-                        m.role === 'assistant' && m.content.includes('|||')
-                    );
 
-                    let analysisHtml = "";
+                // 5. RESPOND WITH PAYMENT OPTIONS (No Email Sent)
+                finalResponseText = `✅ **Email enregistré.**
 
-                    let extractedScore = 0;
-                    if (analysisMsg) {
-                        // Extract Score Logic (Robust V2)
-                        // Matches: "**SCORE FINAL AIO** : 27/100" or "Note Globale : 27 / 100"
-                        const scoreMatch = analysisMsg.content.match(/(?:SCORE|NOTE).{0,30}(\d{1,3})\s*\/\s*100/i);
+Votre dossier est prêt et archivé.
 
-                        if (scoreMatch) {
-                            extractedScore = parseInt(scoreMatch[1], 10);
-                            console.log(`✅ EXTRATED SCORE: ${extractedScore}/100`);
-                        } else {
-                            console.warn("⚠️ Score regex failed on content:", analysisMsg.content.substring(0, 500));
-                            // Fallback: Try to find ANY "X/100" pattern if the main one fails? 
-                            // Maybe risky, but better than 0.
-                            const fallbackMatch = analysisMsg.content.match(/(\d{1,3})\s*\/\s*100/);
-                            if (fallbackMatch) {
-                                extractedScore = parseInt(fallbackMatch[1], 10);
-                                console.log(`⚠️ FALLBACK SCORE EXTRACTED: ${extractedScore}/100`);
-                            }
-                        }
+Pour recevoir votre **Certification ASR** et les documents techniques, choisissez votre niveau d'activation :
 
-                        // The original parsing logic for analysisHtml needs to be inside this if (analysisMsg) block
-                        // and should only proceed if '|||' is present, as per the original code's intent.
-                        // The user's provided snippet has `if (analysisMsg.content.includes('|||')) { ... }`
-                        // but the original code already checks for `includes('|||')` in the `find` method.
-                        // So, the `if (analysisMsg)` is sufficient here.
+1️⃣ **Essential (99 CHF)**
+*Idéal pour sécuriser l'existant.*
+👉 [Activer ASR Essential](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})
+*(Envoi immédiat des fichiers certifiés après paiement)*
 
-                        console.log("✅ FOUND ANALYSIS MESSAGE. Parsing content...");
-                        // Parse V3 Format (||| split)
-                        const parts = analysisMsg.content.split('|||');
-                        // Filter parts that look like scores (contain emojis or keywords)
-                        const scoreParts = parts.filter((p: string) => p.includes('🔎') || p.includes('📊') || p.includes('Identité') || p.includes('Score'));
+2️⃣ **Pack PRO (499 CHF)**
+*Pour une autorité totale sur les IA.*
+👉 [Activer Pack PRO](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
+*(Inclut : Glossaire Sémantique, FAQ IA-Native + Correction complète)*
 
-                        analysisHtml = scoreParts.map((p: string) => {
-                            const cleanLine = p.trim().replace(/\*\*/g, ''); // Remove markdown bold
-                            return `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${cleanLine}</p>`;
-                        }).join('');
-                    } else {
-                        console.warn("⚠️ Analysis Message with '|||' NOT FOUND. Falling back to generic text.");
-                        analysisHtml = "<p><em>Le détail de votre score n'a pas pu être récupéré automatiquement. Veuillez consulter le chat.</em></p>";
-                    }
+---
+*Dès confirmation du règlement par Stripe, notre système générera et vous enverra automatiquement votre pack par email.*`;
 
-                    // DYNAMIC EMAIL CONTENT BUILDER
-                    let verdictHtml = "";
-                    let offerHtml = "";
-                    const targetEmail = userEmail; // Ensure targetEmail is defined for the template
-
-                    if (extractedScore >= 90) {
-                        // SCENARIO: PERFECT SCORE (BRAVO)
-                        verdictHtml = `
-                        <div style="background:#e8f5e9; padding:20px; border-radius:8px; border:1px solid #c8e6c9;">
-                            <h3 style="color:#2e7d32; margin-top:0;">✅ EXCELLENT : Vous êtes 100% Compatible IA.</h3>
-                            <p>Votre architecture est déjà optimisée. Les moteurs de réponse (ChatGPT, Gemini) peuvent vous lire sans obstacle.</p>
-                            <p><strong>Action requise :</strong> Aucune pour l'instant. Votre avance technologique est validée.</p>
-                            <p style="font-size:13px; color:#555;">Conseil : Le web évolue vite. Revenez faire un audit gratuit dans 9 à 12 mois.</p>
-                        </div>`;
-                        offerHtml = ``; // No hard sell for perfect sites
-                    } else if (extractedScore >= 50) {
-                        // SCENARIO: GOOD BUT NOT SECURED
-                        verdictHtml = `
-                        <div style="background:#fff3e0; padding:20px; border-radius:8px; border:1px solid #ffe0b2;">
-                            <h3 style="color:#ef6c00; margin-top:0;">⚠️ BON DÉBUT : Vous êtes visible, mais vulnérable.</h3>
-                            <p>Vous avez fait le travail de base. Cependant, sans <strong>Certification ASR</strong>, cette visibilité n'est pas "scellée".</p>
-                            <p>D'autres acteurs certifiés pourraient passer devant vous dans les recommandations d'experts.</p>
-                        </div>`;
-                        offerHtml = `
-                        <div style="margin-top:30px;">
-                            <h3 style="color:#2c3e50;">Passez de "Visible" à "Autorité Certifiée"</h3>
-                            <p>AYO peut encore améliorer votre impact en verrouillant vos données clés (Offre, Tarifs) via une signature cryptographique.</p>
-                            <div style="text-align:center; margin: 20px 0;">
-                                <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#000; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
-                                    🛡 Sécuriser mon Avance (Pack Essential - 99 CHF)
-                                </a>
-                            </div>
-                        </div>`;
-                    } else {
-                        // SCENARIO: CRITICAL (<50)
-                        verdictHtml = `
-                        <div style="background:#ffebee; padding:20px; border-radius:8px; border:1px solid #ffcdd2;">
-                            <h3 style="color:#c62828; margin-top:0;">🚫 CRITIQUE : Vous êtes invisible pour les IA.</h3>
-                            <p>Votre site est conçu pour les humains (visuel), mais techniquement muet pour les machines (sémantique).</p>
-                            <p>Conséquence : Vous êtes exclu des réponses générées par les nouveaux moteurs de recherche.</p>
-                        </div>`;
-                        offerHtml = `
-                        <h3 style="color:#2c3e50; margin-top:30px;">🎁 Étape 1 : Le Correctif d'Urgence (AYO Light)</h3>
-                        <p>Installez ce fichier offert pour déclarer votre existence minimale aux intelligences artificielles :</p>
-                        
-                        <div style="background:#2d3436; color:#dfe6e9; padding:15px; border-radius:5px; overflow-x:auto; font-family:monospace; font-size:12px;">
-<pre style="margin:0;">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Votre Entreprise",
-  "url": "https://${targetEmail.split('@')[1] || 'votresite.com'}"
-}
-</pre>
-                        </div>
-
-                        <div style="background: #f0f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #d9e2ec;">
-                            <h3 style="margin-top:0; color: #102a43;">🛠 GUIDE D'INSTALLATION (Tuto Précis)</h3>
-                            <p style="font-size: 14px;">Ce code est inactif tant qu'il n'est pas sur votre site.</p>
-                            
-                            <h4 style="margin-bottom:5px; color:#334e68;">OPTION 1 : Pour les Développeurs (Recommandé)</h4>
-                            <p style="font-size:13px; margin-top:0;">Demandez à votre webmaster : <em>"Crée un dossier <code>.ayo</code> à la racine du site, et ajoutes-y ce fichier sous le nom <code>asr.json</code>."</em></p>
-
-                            <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
-
-                            <h4 style="margin-bottom:5px; color:#334e68;">OPTION 2 : WordPress (Sans code)</h4>
-                            <ol style="font-size:13px; padding-left:20px; margin-top:0;">
-                                <li>Installez le plugin gratuit <strong>"WP File Manager"</strong>.</li>
-                                <li>Ouvrez-le, faites Clic Droit > New Folder > Nom : <code>.ayo</code></li>
-                                <li>Ouvrez ce dossier > New File > Nom : <code>asr.json</code></li>
-                                <li>Clic Droit sur le fichier > Code Editor > Collez le code > Save.</li>
-                            </ol>
-
-                            <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
-
-                            <h4 style="margin-bottom:5px; color:#334e68;">OPTION 3 : Wix, Squarespace, Shopify</h4>
-                            <p style="font-size:13px;">Ces plateformes bloquent les fichiers racines. Utilisez l'injection :</p>
-                            <ol style="font-size:13px; padding-left:20px; margin-top:0;">
-                                <li>Allez dans <strong>Paramètres > Code personnalisé / Injection</strong>.</li>
-                                <li>Ajoutez un script dans le <strong>HEAD</strong>.</li>
-                                <li>Copiez ce bloc entier :<br>
-                                    <code>&lt;script type="application/ld+json"&gt;</code><br>
-                                    { "@context": "https://schema.org", ... }<br>
-                                    <code>&lt;/script&gt;</code>
-                                </li>
-                            </ol>
-                            <p style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #cbd5e0; font-size: 13px; color: #334e68;">
-                                💁‍♂️ <strong>Besoin d'aide ?</strong> Si vous bloquez, écrivez simplement à <a href="mailto:hello@ai-visionary.com" style="color:#102a43; font-weight:bold;">hello@ai-visionary.com</a>. Nous vous aiderons à l'installer avec plaisir.
-                            </p>
-                        </div>
-                        
-                        <div style="background:#f8f9fa; padding:20px; border-radius:8px; margin-top:30px; border:1px solid #ddd;">
-                            <h3 style="color:#000; margin-top:0;">🚀 La Solution Complète (Essential & PRO)</h3>
-                            <p>Le fichier gratuit ne suffit pas. Pour dominer votre secteur, il vous faut :</p>
-                            <ul style="font-size:14px;">
-                                <li><strong>Certification ASR</strong> (Pour l'autorité).</li>
-                                <li><strong>FAQ Sémantique & Glossaire</strong> (Pour le Pack PRO).</li>
-                            </ul>
-                            <div style="text-align:center; margin-top:20px;">
-                                <a href="https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200" style="background:#2e7d32; color:#fff; padding:12px 25px; text-decoration:none; border-radius:5px; font-weight:bold;">
-                                    Voir les Solutions AYO
-                                </a>
-                            </div>
-                        </div>`;
-                    }
-
-                    if (process.env.RESEND_API_KEY) {
-                        try {
-                            await resend.emails.send({
-                                from: 'AYO <hello@ai-visionary.com>',
-                                to: [targetEmail],
-                                subject: `Résultat Audit AIO : ${extractedScore}/100`, // Dynamic Subject
-                                html: `
-                                <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; line-height: 1.6;">
-                                    <div style="text-align:center; padding: 20px 0;">
-                                        <h1 style="color:#000; margin-bottom:5px;">Votre Score de Visibilité IA</h1>
-                                        <p style="font-size:24px; font-weight:bold; color:#333; margin:0;">${extractedScore} / 100</p>
-                                    </div>
-
-                                    ${verdictHtml}
-
-                                    <div style="margin: 30px 0;">
-                                        <h3 style="border-bottom:1px solid #eee; padding-bottom:10px;">Détail de l'Analyse</h3>
-                                        ${analysisHtml}
-                                    </div>
-
-                                    ${offerHtml}
-
-                                    <p style="margin-top:50px; font-size:12px; color:#999; text-align: center;">AI Visionary - L'infrastructure de vérité pour l'Intelligence Artificielle.</p>
-                                </div>
-                            `
-                            });
-                            console.log("✅ REPORT Email sent successfully to " + userEmail);
-                        } catch (e: any) {
-                            console.error("❌ Failed to send Report:", e);
-                        }
-                    } else {
-                        console.error("❌ NO RESEND API KEY FOUND!");
-                    }
-                } // End of security validation check
             }
 
-
-        }
-
-
+            
 
         // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
         // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
