@@ -272,7 +272,32 @@ export async function POST(req: Request) {
         const sessionDate = new Date().toISOString();
         const asrJson = generateRealAsrJson(customerEmail || "email_manquant@verifier.com", sessionDate, session_id, analysisData, packType === "PRO");
 
-        // Send Email via Resend (ONLY IF EMAIL EXISTS)
+        // 🔐 VALIDATION EMAIL PRO (Security)
+        let emailValidated = false;
+        if (!emailMissing && customerEmail && companyInfo.url) {
+            // Extract domain from analyzed URL
+            let analyzedDomain = "";
+            try {
+                const urlObj = new URL(companyInfo.url);
+                analyzedDomain = urlObj.hostname.replace(/^www\./, ''); // Remove www. prefix
+            } catch (e) {
+                console.error("Failed to parse URL for domain validation:", e);
+            }
+
+            // Extract email domain
+            const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+
+            // Security Check: Email must belong to analyzed domain
+            if (analyzedDomain && emailDomain && emailDomain === analyzedDomain) {
+                emailValidated = true;
+                console.log(`✅ WEBHOOK SECURITY VALIDATED: ${customerEmail} matches ${analyzedDomain}`);
+            } else {
+                console.warn(`❌ WEBHOOK SECURITY REJECTION: Email ${customerEmail} does not match analyzed domain ${analyzedDomain}`);
+                emailMissing = true; // Block email sending
+            }
+        }
+
+        // Send Email via Resend (ONLY IF EMAIL EXISTS AND VALIDATED)
         if (!emailMissing && process.env.RESEND_API_KEY) {
 
             // Email content varies by pack type

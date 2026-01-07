@@ -211,7 +211,7 @@ SI OUI :
   Here is the secure link to activate your ASR Essential:
   👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix}) (ID Test Stripe)
 
-  Une fois réglé, écrivez 'Fait' ici."
+  Une fois le paiement confirmé, vos fichiers seront automatiquement envoyés par email (sous quelques minutes)."
 
 SI PACK PRO :
   "🏆 **Choix Visionnaire.**
@@ -223,7 +223,7 @@ SI PACK PRO :
   
   *(Inclut : Audit Complet + Certification ASR Pro + Architectures AI-Native + Glossaire Sémantique)*
   
-  Une fois réglé, écrivez 'Fait' ici."
+  Une fois le paiement confirmé, vos fichiers seront automatiquement envoyés par email (sous quelques minutes)."
 
 SI NON :
   "C'est noté. Je reste ici si besoin."
@@ -592,82 +592,113 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                 const userEmail = emailMatch[0]; // Extracted email
                 console.log(`📧 DETECTED EMAIL: ${userEmail}. Initiating sending sequence...`);
 
-                // 🔓 SECURITY BYPASS (as requested by User) - Accept ALL emails
-                console.log("✅ ACCESS GRANTED (Universal Pass). Sending Report...");
+                // 🔐 VALIDATION EMAIL PRO (Security)
+                // Extract analyzed URL from conversation history
+                const historyUrlMatch = messages.find((m: any) => m.content.match(/(https?:\/\/[^\s]+)/));
+                const analyzedUrl = historyUrlMatch ? historyUrlMatch.content.match(/(https?:\/\/[^\s]+)/)?.[0] : "";
 
-                // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
-                // We search for the message containing the '|||' marker which is MANDATORY in the new V3 prompt
-                const analysisMsg = messages.slice().reverse().find((m: any) =>
-                    m.role === 'assistant' && m.content.includes('|||')
-                );
-
-                let analysisHtml = "";
-
-                let extractedScore = 0;
-                if (analysisMsg) {
-                    // Extract Score Logic (Robust V2)
-                    // Matches: "**SCORE FINAL AIO** : 27/100" or "Note Globale : 27 / 100"
-                    const scoreMatch = analysisMsg.content.match(/(?:SCORE|NOTE).{0,30}(\d{1,3})\s*\/\s*100/i);
-
-                    if (scoreMatch) {
-                        extractedScore = parseInt(scoreMatch[1], 10);
-                        console.log(`✅ EXTRATED SCORE: ${extractedScore}/100`);
-                    } else {
-                        console.warn("⚠️ Score regex failed on content:", analysisMsg.content.substring(0, 500));
-                        // Fallback: Try to find ANY "X/100" pattern if the main one fails? 
-                        // Maybe risky, but better than 0.
-                        const fallbackMatch = analysisMsg.content.match(/(\d{1,3})\s*\/\s*100/);
-                        if (fallbackMatch) {
-                            extractedScore = parseInt(fallbackMatch[1], 10);
-                            console.log(`⚠️ FALLBACK SCORE EXTRACTED: ${extractedScore}/100`);
-                        }
+                // Extract domain from URL (e.g., https://globalworkflow.xyz => globalworkflow.xyz)
+                let analyzedDomain = "";
+                if (analyzedUrl) {
+                    try {
+                        const urlObj = new URL(analyzedUrl);
+                        analyzedDomain = urlObj.hostname.replace(/^www\./, ''); // Remove www. prefix
+                    } catch (e) {
+                        console.error("Failed to parse analyzed URL:", e);
                     }
-
-                    // The original parsing logic for analysisHtml needs to be inside this if (analysisMsg) block
-                    // and should only proceed if '|||' is present, as per the original code's intent.
-                    // The user's provided snippet has `if (analysisMsg.content.includes('|||')) { ... }`
-                    // but the original code already checks for `includes('|||')` in the `find` method.
-                    // So, the `if (analysisMsg)` is sufficient here.
-
-                    console.log("✅ FOUND ANALYSIS MESSAGE. Parsing content...");
-                    // Parse V3 Format (||| split)
-                    const parts = analysisMsg.content.split('|||');
-                    // Filter parts that look like scores (contain emojis or keywords)
-                    const scoreParts = parts.filter((p: string) => p.includes('🔎') || p.includes('📊') || p.includes('Identité') || p.includes('Score'));
-
-                    analysisHtml = scoreParts.map((p: string) => {
-                        const cleanLine = p.trim().replace(/\*\*/g, ''); // Remove markdown bold
-                        return `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${cleanLine}</p>`;
-                    }).join('');
-                } else {
-                    console.warn("⚠️ Analysis Message with '|||' NOT FOUND. Falling back to generic text.");
-                    analysisHtml = "<p><em>Le détail de votre score n'a pas pu être récupéré automatiquement. Veuillez consulter le chat.</em></p>";
                 }
 
-                // DYNAMIC EMAIL CONTENT BUILDER
-                let verdictHtml = "";
-                let offerHtml = "";
-                const targetEmail = userEmail; // Ensure targetEmail is defined for the template
+                // Extract email domain (e.g., hello@globalworkflow.xyz => globalworkflow.xyz)
+                const emailDomain = userEmail.split('@')[1]?.toLowerCase();
 
-                if (extractedScore >= 90) {
-                    // SCENARIO: PERFECT SCORE (BRAVO)
-                    verdictHtml = `
+                // Security Check: Email must belong to analyzed domain
+                if (!analyzedDomain || !emailDomain || emailDomain !== analyzedDomain) {
+                    console.warn(`❌ SECURITY REJECTION: Email ${userEmail} does not match analyzed domain ${analyzedDomain}`);
+
+                    // Send rejection response to user
+                    finalResponseText = `❌ **Validation Refusée**\n\nPour des raisons de sécurité, seuls les emails professionnels du domaine analysé peuvent recevoir l'ASR.\n\nVous avez fourni : \`${userEmail}\`\nDomaine analysé : \`${analyzedDomain}\`\n\n⚠️ **Erreur de correspondance détectée.**\n\nVeuillez utiliser un email professionnel de type \`nom@${analyzedDomain}\` pour confirmer votre propriété du domaine.`;
+
+                    // Skip email sending
+                } else {
+                    console.log(`✅ SECURITY VALIDATED: ${userEmail} matches ${analyzedDomain}. Sending Report...`);
+                    // Continue with email sending (code below)
+                }
+
+                // Only proceed if security validation passed
+                if (emailDomain === analyzedDomain) {
+                    // 🕵️ RETRIEVE ANALYSIS FROM HISTORY
+                    // We search for the message containing the '|||' marker which is MANDATORY in the new V3 prompt
+                    const analysisMsg = messages.slice().reverse().find((m: any) =>
+                        m.role === 'assistant' && m.content.includes('|||')
+                    );
+
+                    let analysisHtml = "";
+
+                    let extractedScore = 0;
+                    if (analysisMsg) {
+                        // Extract Score Logic (Robust V2)
+                        // Matches: "**SCORE FINAL AIO** : 27/100" or "Note Globale : 27 / 100"
+                        const scoreMatch = analysisMsg.content.match(/(?:SCORE|NOTE).{0,30}(\d{1,3})\s*\/\s*100/i);
+
+                        if (scoreMatch) {
+                            extractedScore = parseInt(scoreMatch[1], 10);
+                            console.log(`✅ EXTRATED SCORE: ${extractedScore}/100`);
+                        } else {
+                            console.warn("⚠️ Score regex failed on content:", analysisMsg.content.substring(0, 500));
+                            // Fallback: Try to find ANY "X/100" pattern if the main one fails? 
+                            // Maybe risky, but better than 0.
+                            const fallbackMatch = analysisMsg.content.match(/(\d{1,3})\s*\/\s*100/);
+                            if (fallbackMatch) {
+                                extractedScore = parseInt(fallbackMatch[1], 10);
+                                console.log(`⚠️ FALLBACK SCORE EXTRACTED: ${extractedScore}/100`);
+                            }
+                        }
+
+                        // The original parsing logic for analysisHtml needs to be inside this if (analysisMsg) block
+                        // and should only proceed if '|||' is present, as per the original code's intent.
+                        // The user's provided snippet has `if (analysisMsg.content.includes('|||')) { ... }`
+                        // but the original code already checks for `includes('|||')` in the `find` method.
+                        // So, the `if (analysisMsg)` is sufficient here.
+
+                        console.log("✅ FOUND ANALYSIS MESSAGE. Parsing content...");
+                        // Parse V3 Format (||| split)
+                        const parts = analysisMsg.content.split('|||');
+                        // Filter parts that look like scores (contain emojis or keywords)
+                        const scoreParts = parts.filter((p: string) => p.includes('🔎') || p.includes('📊') || p.includes('Identité') || p.includes('Score'));
+
+                        analysisHtml = scoreParts.map((p: string) => {
+                            const cleanLine = p.trim().replace(/\*\*/g, ''); // Remove markdown bold
+                            return `<p style="margin: 5px 0; border-bottom:1px solid #eee; padding:5px;">${cleanLine}</p>`;
+                        }).join('');
+                    } else {
+                        console.warn("⚠️ Analysis Message with '|||' NOT FOUND. Falling back to generic text.");
+                        analysisHtml = "<p><em>Le détail de votre score n'a pas pu être récupéré automatiquement. Veuillez consulter le chat.</em></p>";
+                    }
+
+                    // DYNAMIC EMAIL CONTENT BUILDER
+                    let verdictHtml = "";
+                    let offerHtml = "";
+                    const targetEmail = userEmail; // Ensure targetEmail is defined for the template
+
+                    if (extractedScore >= 90) {
+                        // SCENARIO: PERFECT SCORE (BRAVO)
+                        verdictHtml = `
                         <div style="background:#e8f5e9; padding:20px; border-radius:8px; border:1px solid #c8e6c9;">
                             <h3 style="color:#2e7d32; margin-top:0;">✅ EXCELLENT : Vous êtes 100% Compatible IA.</h3>
                             <p>Votre architecture est déjà optimisée. Les moteurs de réponse (ChatGPT, Gemini) peuvent vous lire sans obstacle.</p>
                             <p><strong>Action requise :</strong> Aucune pour l'instant. Votre avance technologique est validée.</p>
                             <p style="font-size:13px; color:#555;">Conseil : Le web évolue vite. Revenez faire un audit gratuit dans 9 à 12 mois.</p>
                         </div>`;
-                    offerHtml = ``; // No hard sell for perfect sites
-                } else if (extractedScore >= 50) {
-                    // SCENARIO: GOOD BUT NOT SECURED
-                    verdictHtml = `
+                        offerHtml = ``; // No hard sell for perfect sites
+                    } else if (extractedScore >= 50) {
+                        // SCENARIO: GOOD BUT NOT SECURED
+                        verdictHtml = `
                         <div style="background:#fff3e0; padding:20px; border-radius:8px; border:1px solid #ffe0b2;">
                             <h3 style="color:#ef6c00; margin-top:0;">⚠️ BON DÉBUT : Vous êtes visible, mais vulnérable.</h3>
                             <p>Vous avez fait le travail de base. Cependant, sans <strong>Certification ASR</strong>, cette visibilité n'est pas "scellée".</p>
                             <p>D'autres acteurs certifiés pourraient passer devant vous dans les recommandations d'experts.</p>
                         </div>`;
-                    offerHtml = `
+                        offerHtml = `
                         <div style="margin-top:30px;">
                             <h3 style="color:#2c3e50;">Passez de "Visible" à "Autorité Certifiée"</h3>
                             <p>AYO peut encore améliorer votre impact en verrouillant vos données clés (Offre, Tarifs) via une signature cryptographique.</p>
@@ -677,15 +708,15 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                                 </a>
                             </div>
                         </div>`;
-                } else {
-                    // SCENARIO: CRITICAL (<50)
-                    verdictHtml = `
+                    } else {
+                        // SCENARIO: CRITICAL (<50)
+                        verdictHtml = `
                         <div style="background:#ffebee; padding:20px; border-radius:8px; border:1px solid #ffcdd2;">
                             <h3 style="color:#c62828; margin-top:0;">🚫 CRITIQUE : Vous êtes invisible pour les IA.</h3>
                             <p>Votre site est conçu pour les humains (visuel), mais techniquement muet pour les machines (sémantique).</p>
                             <p>Conséquence : Vous êtes exclu des réponses générées par les nouveaux moteurs de recherche.</p>
                         </div>`;
-                    offerHtml = `
+                        offerHtml = `
                         <h3 style="color:#2c3e50; margin-top:30px;">🎁 Étape 1 : Le Correctif d'Urgence (AYO Light)</h3>
                         <p>Installez ce fichier offert pour déclarer votre existence minimale aux intelligences artificielles :</p>
                         
@@ -748,15 +779,15 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                                 </a>
                             </div>
                         </div>`;
-                }
+                    }
 
-                if (process.env.RESEND_API_KEY) {
-                    try {
-                        await resend.emails.send({
-                            from: 'AYO <hello@ai-visionary.com>',
-                            to: [targetEmail],
-                            subject: `Résultat Audit AIO : ${extractedScore}/100`, // Dynamic Subject
-                            html: `
+                    if (process.env.RESEND_API_KEY) {
+                        try {
+                            await resend.emails.send({
+                                from: 'AYO <hello@ai-visionary.com>',
+                                to: [targetEmail],
+                                subject: `Résultat Audit AIO : ${extractedScore}/100`, // Dynamic Subject
+                                html: `
                                 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; max-width: 650px; margin: 0 auto; line-height: 1.6;">
                                     <div style="text-align:center; padding: 20px 0;">
                                         <h1 style="color:#000; margin-bottom:5px;">Votre Score de Visibilité IA</h1>
@@ -775,14 +806,15 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                                     <p style="margin-top:50px; font-size:12px; color:#999; text-align: center;">AI Visionary - L'infrastructure de vérité pour l'Intelligence Artificielle.</p>
                                 </div>
                             `
-                        });
-                        console.log("✅ REPORT Email sent successfully to " + userEmail);
-                    } catch (e: any) {
-                        console.error("❌ Failed to send Report:", e);
+                            });
+                            console.log("✅ REPORT Email sent successfully to " + userEmail);
+                        } catch (e: any) {
+                            console.error("❌ Failed to send Report:", e);
+                        }
+                    } else {
+                        console.error("❌ NO RESEND API KEY FOUND!");
                     }
-                } else {
-                    console.error("❌ NO RESEND API KEY FOUND!");
-                }
+                } // End of security validation check
             }
 
 
@@ -1054,55 +1086,8 @@ ${websiteData.text}
 
 
 
-        // Regex for payment confirmation (Fait/Payé/Done/Paid...)
-        const paymentConfirmationRegex = /\b(fait|payé|payer|done|paid)\b/i;
-        const lastUserContent = lastMessage.content.trim();
-
-        if (jsonMatch && lastMessage.role === 'user' && paymentConfirmationRegex.test(lastUserContent)) {
-            const extractedJson = jsonMatch[1].trim();
-            console.log("💰 INTERCEPTED ASR PRO JSON. Sending via Email...");
-
-            // Remove JSON from Chat Output (Keep it clean)
-            finalResponseText = finalResponseText.replace(/```json[\s\S]*?```/, "✅ **Dossier Sécurisé Transmis.**");
-
-            // EMAIL LOGIC FOR ESSENTIAL PRO
-            // Find valid email in previous user messages
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const foundEmailMsg = messages.slice().reverse().find((m: any) => m.role === 'user' && emailRegex.test(m.content.trim()));
-
-            if (foundEmailMsg && process.env.RESEND_API_KEY) {
-                const targetEmail = foundEmailMsg.content.trim();
-
-                try {
-                    await resend.emails.send({
-                        from: 'AYO <hello@ai-visionary.com>',
-                        to: [targetEmail],
-                        subject: 'Votre Certification AYO Essential PRO (Confidentiel)',
-                        html: `
-                            <div style="font-family: sans-serif; color: #333;">
-                                <h1 style="color:#000;">Votre Identité IA est prête.</h1>
-                                <p>Voici votre fichier <strong>ASR Essential PRO</strong>.</p>
-                                <p>Contrairement à la version Light, ce fichier scelle votre <strong>Structure Décisionnelle</strong> (Ce que vous faites, comment, et pour qui).</p>
-                                
-                                <div style="background:#e8f5e9; padding:15px; border-radius:8px; border:1px solid #4caf50; margin: 20px 0;">
-                                    <h3 style="margin-top:0; color:#2e7d32;">✅ Fichier Certifié (ASR PRO)</h3>
-                                    <pre style="background:#fff; padding:15px; overflow-x:auto; font-size:12px;">${extractedJson}</pre>
-                                </div>
-                                
-                                <p><strong>Instruction :</strong> Remplacez votre ancien fichier <code>asr.json</code> par celui-ci.</p>
-                                <p style="color:#666;">Seules les données présentes dans ce fichier seront prises pour vérité absolue par les moteurs de réponse.</p>
-                                
-                                <hr />
-                                <p style="font-size:12px; text-align:center;">Scellé le ${new Date().toISOString()}</p>
-                            </div>
-                        `
-                    });
-                    console.log("✅ ASR PRO Email sent successfully.");
-                } catch (err) {
-                    console.error("ASR PRO Email failed:", err);
-                }
-            }
-        }
+        // REMOVED: "Fait" logic - Payment confirmation is now handled ONLY by Stripe Webhook
+        // This prevents users from bypassing payment by simply typing "Fait" in the chat
 
         return new Response(JSON.stringify({ text: finalResponseText }), {
             status: 200,
