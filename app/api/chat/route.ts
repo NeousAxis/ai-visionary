@@ -629,18 +629,18 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 
                 // 1. Find the URL created in previous steps from history
                 const historyUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-                
+
                 // Find the user message that contained the URL (and was NOT an email)
                 const historyUrlMatchMsg = messages.find((m: any) => {
                     const isMsgEmail = m.content.trim().match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/);
                     return m.role === 'user' && m.content.match(historyUrlRegex) && !isMsgEmail;
                 });
-                
+
                 let detectedUrl = "";
                 if (historyUrlMatchMsg) {
-                     const match = historyUrlMatchMsg.content.match(historyUrlRegex);
-                     if (match) detectedUrl = match[0];
-                     if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
+                    const match = historyUrlMatchMsg.content.match(historyUrlRegex);
+                    if (match) detectedUrl = match[0];
+                    if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
                 }
 
                 let analysisFound = false;
@@ -649,21 +649,21 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                     console.log(`🔍 Linking Email ${userEmail} to URL ${detectedUrl}...`);
                     // 2. RETRIEVE ANALYSIS FROM DB (Stateless Link)
                     try {
-                         const existingAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
-                         
-                         if (existingAnalysis) {
-                             analysisFound = true;
-                             // 3. UPDATE RECORD WITH EMAIL
-                             await db.saveAnalysis(existingAnalysis.id, {
-                                 email: userEmail
-                             });
-                             console.log(`✅ DB UPDATED: ${userEmail} linked to Analysis ${existingAnalysis.id}`);
-                             
-                             // Update context for Stripe generation later
-                             // But we generate links manually below for clarity
-                         } else {
-                             console.warn(`⚠️ No existing analysis found in DB for ${detectedUrl}`);
-                         }
+                        const existingAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
+
+                        if (existingAnalysis) {
+                            analysisFound = true;
+                            // 3. UPDATE RECORD WITH EMAIL
+                            await db.saveAnalysis(existingAnalysis.id, {
+                                email: userEmail
+                            });
+                            console.log(`✅ DB UPDATED: ${userEmail} linked to Analysis ${existingAnalysis.id}`);
+
+                            // Update context for Stripe generation later
+                            // But we generate links manually below for clarity
+                        } else {
+                            console.warn(`⚠️ No existing analysis found in DB for ${detectedUrl}`);
+                        }
                     } catch (dbErr) {
                         console.error("❌ Failed to link email to analysis:", dbErr);
                     }
@@ -686,26 +686,21 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                 // 5. RESPOND WITH PAYMENT OPTIONS (No Email Sent)
                 finalResponseText = `✅ **Email enregistré.**
 
-Votre dossier est prêt et archivé.
+(Votre dossier est en cours de préparation, il vous sera envoyé quelques minutes après le paiement).
 
-Pour recevoir votre **Certification ASR** et les documents techniques, choisissez votre niveau d'activation :
+Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** et les documents techniques :
 
 1️⃣ **Essential (99 CHF)**
 *Idéal pour sécuriser l'existant.*
 👉 [Activer ASR Essential](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})
-*(Envoi immédiat des fichiers certifiés après paiement)*
 
 2️⃣ **Pack PRO (499 CHF)**
 *Pour une autorité totale sur les IA.*
 👉 [Activer Pack PRO](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
-*(Inclut : Glossaire Sémantique, FAQ IA-Native + Correction complète)*
-
----
-*Dès confirmation du règlement par Stripe, notre système générera et vous enverra automatiquement votre pack par email.*`;
+*(Inclut : Glossaire Sémantique, FAQ IA-Native + Correction complète)*`;
 
             }
-
-            
+        } // END OF ELSE BLOCK (Email Logic)
 
         // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
         // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
