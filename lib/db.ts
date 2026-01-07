@@ -15,21 +15,32 @@ type AnalysisRecord = {
 if (!getApps().length) {
     try {
         // Vercel Environment Variables for Firebase
+        console.log('🔧 Initializing Firebase Admin...');
+        console.log('📋 FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID ? 'Present ✅' : 'Missing ❌');
+        console.log('📋 FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL ? 'Present ✅' : 'Missing ❌');
+        console.log('📋 FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY ? 'Present ✅' : 'Missing ❌');
+
         const serviceAccount = {
             projectId: process.env.FIREBASE_PROJECT_ID,
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
             privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
         };
 
+        if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
+            throw new Error('Missing Firebase credentials in environment variables');
+        }
+
         initializeApp({
             credential: cert(serviceAccount as any)
         });
 
-        console.log('✅ Firebase Admin initialized');
+        console.log('✅ Firebase Admin initialized successfully');
     } catch (error) {
         console.error('❌ Firebase Admin initialization failed:', error);
         throw error;
     }
+} else {
+    console.log('✅ Firebase Admin already initialized (reusing existing app)');
 }
 
 // Get Firestore instance
