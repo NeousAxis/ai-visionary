@@ -1,51 +1,84 @@
-import fs from 'fs';
-import path from 'path';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
-// Simulation d'une DB persistante via le système de fichiers (fonctionne sur /tmp en serverless pour des sessions courtes)
-// En production lourde, ceci devrait être remplacé par Vercel KV (Redis) ou Postgres.
-
-const DB_PATH = '/tmp/ayo_analysis_db.json';
-
+// Type definition for analysis records
 type AnalysisRecord = {
-    id: string; // The Analysis ID (passed as client_reference_id)
+    id: string;
     url: string;
     email: string | null;
     score: number;
-    data: any; // The Full JSON-LD / Analysis data
+    data: any;
     timestamp: string;
 };
 
-// Initialiser DB si besoin
-function initDB() {
-    if (!fs.existsSync(DB_PATH)) {
-        fs.writeFileSync(DB_PATH, JSON.stringify({}));
+// Initialize Firebase Admin (singleton pattern)
+if (!getApps().length) {
+    try {
+        // Vercel Environment Variables for Firebase
+        const serviceAccount = {
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+        };
+
+        initializeApp({
+            credential: cert(serviceAccount as any)
+        });
+
+        console.log('✅ Firebase Admin initialized');
+    } catch (error) {
+        console.error('❌ Firebase Admin initialization failed:', error);
+        throw error;
     }
 }
 
-export const db = {
-    saveAnalysis: async (id: string, record: Partial<AnalysisRecord>) => {
+// Get Firestore instance
+const db = getFirestore();
+
+export const database = {
+    /**
+     * Save or update an analysis record
+     */
+    saveAnalysis: async (id: string, record: Partial<AnalysisRecord>): Promise<void> => {
         try {
-            initDB();
-            const current = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-            const updated = {
-                ...current,
-                [id]: { ...current[id], ...record, timestamp: new Date().toISOString() }
+            const docRef = db.collection('analyses').doc(id);
+
+            const dataToSave = {
+                ...record,
+                timestamp: new Date().toISOString(),
+                id: id
             };
-            fs.writeFileSync(DB_PATH, JSON.stringify(updated));
-            console.log(`💾 [DB] Analysis saved for ID: ${id}`);
-        } catch (e) {
-            console.error("❌ DB Save Error:", e);
+
+            await docRef.set(dataToSave, { merge: true });
+            console.log(`💾 [Firestore] Analysis saved for ID: ${id}`);
+        } catch (error) {
+            console.error('❌ [Firestore] Save Error:', error);
+            throw error;
         }
     },
 
+    /**
+     * Retrieve an analysis record by ID
+     */
     getAnalysis: async (id: string): Promise<AnalysisRecord | null> => {
         try {
-            initDB();
-            const current = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-            return current[id] || null;
-        } catch (e) {
-            console.error("❌ DB Read Error:", e);
-            return null;
+            const docRef = db.collection('analyses').doc(id);
+            const doc = await docRef.get();
+
+            if (!doc.exists) {
+                console.warn(`⚠️ [Firestore] No analysis found for ID: ${id}`);
+                return null;
+            }
+
+            const data = doc.data() as AnalysisRecord;
+            console.log(`✅ [Firestore] Analysis retrieved for ID: ${id}`);
+            return data;
+        } catch (error) {
+            console.error('❌ [Firestore] Read Error:', error);
+            throw error;
         }
     }
 };
+
+// Export as 'db' for backward compatibility
+export const db = database;
