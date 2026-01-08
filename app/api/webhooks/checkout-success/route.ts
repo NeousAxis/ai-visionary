@@ -216,13 +216,32 @@ export async function POST(req: Request) {
             }
         }
 
+        // 🚨 FALLBACK: USE PAYLOAD DATA DIRECTLY IF STRIPE API FAILED
+        // This is critical if STRIPE_SECRET_KEY is missing/invalid but webhook signature passed (or skipped in dev)
+        let payloadSession = stripeSession;
+        if (!payloadSession && body.data?.object) {
+            console.log("⚠️ Using raw payload data as fallback session (Stripe API failed)");
+            payloadSession = body.data.object;
+        }
+
+        // Fallback Email Extraction from Payload
+        if (!customerEmail && payloadSession) {
+            if (payloadSession.customer_details?.email) {
+                customerEmail = payloadSession.customer_details.email;
+                console.log("✅ Email extracted from RAW PAYLOAD (customer_details):", customerEmail);
+            } else if (payloadSession.customer_email) {
+                customerEmail = payloadSession.customer_email;
+                console.log("✅ Email extracted from RAW PAYLOAD (customer_email):", customerEmail);
+            }
+        }
+
         // 3. RETRIEVE INFO FROM LINK (Base64 Encoded - STATELESS MODE)
         // We decode the client_reference_id to get the URL and Email.
         let analysisData = { score: 0, details: {}, extract: {} as any, url: "" };
         let companyInfo: { url?: string; name?: string } = {};
 
-        if (stripeSession && stripeSession.client_reference_id) {
-            const refId = stripeSession.client_reference_id;
+        if (payloadSession && payloadSession.client_reference_id) {
+            const refId = payloadSession.client_reference_id;
             try {
                 // Try Base64 Decode
                 const jsonStr = Buffer.from(refId, 'base64').toString('utf-8');
