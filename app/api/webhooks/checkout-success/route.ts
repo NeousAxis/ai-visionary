@@ -450,11 +450,24 @@ export async function POST(req: Request) {
             } catch (err: any) {
                 console.error("❌ RESEND SENDING FAILED:", err);
                 emailError = err.message;
-                // If it's a key error, we WANT to throw so Stripe sees 500
-                if (err.message && (err.message.includes("API key") || err.message.includes("unauthorized"))) {
-                    throw new Error(`Critical Email Failure: ${err.message}`);
-                }
+                // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
+                throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
             }
+        }
+
+        if (!emailSent) {
+            console.error("❌ Email NOT sent (Logic skipped or previously failed).");
+            return NextResponse.json({
+                success: false,
+                error: "Email Logic Skipped or Failed (Check Logs)",
+                debug_trace: {
+                    payment_found: !!payloadSession,
+                    pack_detected: packType,
+                    email_target: customerEmail,
+                    email_valid: !emailMissing,
+                    email_error: emailError,
+                }
+            }, { status: 500 });
         }
 
         return NextResponse.json({
