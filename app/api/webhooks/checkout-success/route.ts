@@ -251,11 +251,16 @@ export async function POST(req: Request) {
             }
         }
 
-        // 5. Detect Payment Amount (from Payload if API failed)
+        // 5. Detect Payment Amount and Pack Type from Metadata
         let amountPaid = 0;
         let packType = "ESSENTIAL"; // Default
 
-        if (amountPaid === 0 && payloadSession && payloadSession.amount_total) {
+        // Priority 1: Use Stripe metadata if available
+        if (payloadSession?.metadata?.pack_type) {
+            packType = payloadSession.metadata.pack_type;
+            console.log(`✅ Pack Type from metadata: ${packType}`);
+        } else if (payloadSession && payloadSession.amount_total) {
+            // Fallback: Detect from amount
             amountPaid = payloadSession.amount_total / 100;
             console.log(`💰 Amount Paid (from payload): ${amountPaid} CHF`);
             if (amountPaid >= 450) {
@@ -263,104 +268,105 @@ export async function POST(req: Request) {
             }
         }
 
-        // 3. RETRIEVE INFO FROM LINK (Base64 Encoded - STATELESS MODE)
-        // We decode the client_reference_id to get the URL and Email.
+        // 3. RETRIEVE URL FROM EMAIL DOMAIN + FIREBASE
         let analysisData = { score: 0, details: {}, extract: {} as any, url: "" };
         let companyInfo: { url?: string; name?: string } = {};
 
-        if (payloadSession && payloadSession.client_reference_id) {
-            const refId = payloadSession.client_reference_id;
-            try {
-                // Try Base64 Decode
-                const jsonStr = Buffer.from(refId, 'base64').toString('utf-8');
-                const decoded = JSON.parse(jsonStr);
-
-                if (decoded.u) {
-                    companyInfo.url = decoded.u;
-                    console.log("✅ Base64 Encoded URL Found:", companyInfo.url);
-                }
-                if (!customerEmail && decoded.e) {
-                    customerEmail = decoded.e;
-                    console.log("✅ RESTORED EMAIL from metadata:", customerEmail);
-                }
-            } catch (e) {
-                console.warn("Could not decode client_reference_id as Base64 JSON (might be raw ID?)", e);
-            }
-        }
-
-        // 4. LOGIC & CHECKS
-        let emailMissing = false;
-        if (!customerEmail) {
-            console.warn("⚠️ Valid Payment but No Email found.");
-            emailMissing = true;
-        }
-
-        // 6. RETRIEVE ANALYSIS FROM DATABASE (Source of Truth)
-        console.log(`💾 RETRIEVING ANALYSIS FROM DB...`);
-        let dbAnalysis = null;
-        if (companyInfo.url) {
-            try {
-                dbAnalysis = await db.getLatestAnalysisByUrl(companyInfo.url);
-            } catch (urlDbErr) { console.error("❌ DB URL Lookup Error:", urlDbErr); }
-        }
-        if (!dbAnalysis) {
-            try { dbAnalysis = await db.getAnalysis(session_id); } catch (e) { }
-        }
-
-        if (dbAnalysis) {
-            analysisData = {
-                score: dbAnalysis.score || 0,
-                details: {},
-                extract: dbAnalysis.data?.fields || {},
-                url: dbAnalysis.url || companyInfo.url || ""
-            };
-        } else {
-            // FALLBACK ANALYSIS
-            if (companyInfo.url) {
-                console.log(`🔄 FALLBACK: Performing minimal analysis for ${companyInfo.url}`);
-                try {
-                    const result = await performFullAnalysis(companyInfo.url);
-                    analysisData = { ...result, url: companyInfo.url };
-                    if (analysisData.score === 0) analysisData.score = 50;
-                } catch (e) { console.error("Fallback Analysis Failed", e); }
-            }
-        }
-
-        // Generate REAL Files
-        const sessionDate = new Date().toISOString();
-        const asrJson = generateRealAsrJson(customerEmail || "email_missing", sessionDate, session_id, analysisData, packType === "PRO");
-
-        // 🔐 VALIDATION EMAIL
-        const VALIDATION_DISABLED = false;
-        let emailValidated = false;
-        if (!emailMissing && customerEmail && companyInfo.url) {
-            const urlObj = new URL(companyInfo.url);
-            const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
+        if (customerEmail) {
+            // Extract domain from email
             const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
 
-            if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
-                emailValidated = true;
-            } else {
-                console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain}`);
-                emailMissing = true;
+            if (emailDomain) {
+                // Construct likely URL from domain
+                const constructedUrl = `https://${emailDomain}`;
+                companyInfo.url = constructedUrl;
+                console.log(`🔍 Constructed URL from email domain: ${constructedUrl}`);
+
+                // Try to find analysis in Firebase for this URL
+                console.log(`💾 RETRIEVING ANALYSIS FROM DB for ${constructedUrl}...`);
+                let dbAnalysis = null;
+                try {
+                    dbAnalysis = await db.getLatestAnalysisByUrl(constructedUrl);
+                    if (dbAnalysis) {
+                        analysisData = {
+                            score: dbAnalysis.score || 0,
+                            details: {},
+                            extract: dbAnalysis.data?.fields || {},
+                            url: dbAnalysis.url || constructedUrl
+                        };
+                        console.log(`✅ Found analysis in DB with score: ${analysisData.score}`);
+                    } else {
+                        console.warn(`⚠️ No analysis found in DB for ${constructedUrl}`);
+                    }
+                } catch (urlDbErr) {
+                    console.error("❌ DB URL Lookup Error:", urlDbErr);
+                }
+
+                // Fallback: Try without https://
+                if (!dbAnalysis) {
+                    try {
+                        dbAnalysis = await db.getLatestAnalysisByUrl(emailDomain);
+                        if (dbAnalysis) {
+                            analysisData = {
+                                score: dbAnalysis.score || 0,
+                                details: {},
+                                extract: dbAnalysis.data?.fields || {},
+                                url: dbAnalysis.url || emailDomain
+                            };
+                            companyInfo.url = dbAnalysis.url;
+                            console.log(`✅ Found analysis in DB (without https) with score: ${analysisData.score}`);
+                        }
+                    } catch (e) {
+                        console.error("Second DB lookup failed:", e);
+                    }
+                }
+
+                // Ultimate fallback: Perform live analysis if nothing in DB
+                if (!dbAnalysis) {
+                    console.log(`🔄 FALLBACK: Performing live analysis for ${constructedUrl}`);
+                    try {
+                        const result = await performFullAnalysis(companyInfo.url);
+                        analysisData = { ...result, url: companyInfo.url };
+                        if (analysisData.score === 0) analysisData.score = 50;
+                    } catch (e) { console.error("Fallback Analysis Failed", e); }
+                }
             }
-        }
 
-        // Send Email via Resend
-        // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
-        // This stops "Silent Failures" (200 OK but no email).
-        let emailSent = false;
-        let emailError = null;
+            // Generate REAL Files
+            const sessionDate = new Date().toISOString();
+            const asrJson = generateRealAsrJson(customerEmail || "email_missing", sessionDate, session_id, analysisData, packType === "PRO");
 
-        if (!emailMissing) {
-            try {
-                // Email content varies by pack type
-                let emailSubject = '';
-                let emailHtml = '';
+            // 🔐 VALIDATION EMAIL
+            const VALIDATION_DISABLED = false;
+            let emailValidated = false;
+            if (!emailMissing && customerEmail && companyInfo.url) {
+                const urlObj = new URL(companyInfo.url);
+                const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
+                const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
 
-                if (packType === "PRO") {
-                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
-                    emailHtml = `
+                if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
+                    emailValidated = true;
+                } else {
+                    console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain}`);
+                    emailMissing = true;
+                }
+            }
+
+            // Send Email via Resend
+            // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
+            // This stops "Silent Failures" (200 OK but no email).
+            let emailSent = false;
+            let emailError = null;
+
+            if (!emailMissing) {
+                try {
+                    // Email content varies by pack type
+                    let emailSubject = '';
+                    let emailHtml = '';
+
+                    if (packType === "PRO") {
+                        emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
+                        emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="margin:0;">AYO / Pack AIO PRO</h1>
@@ -464,9 +470,9 @@ export async function POST(req: Request) {
                         </div>
                     </div>
                 `;
-                } else {
-                    emailSubject = `Votre Certification ASR Essential - Score ${analysisData.score}/100`;
-                    emailHtml = `
+                    } else {
+                        emailSubject = `Votre Certification ASR Essential - Score ${analysisData.score}/100`;
+                        emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="margin:0;">AYO / Essential</h1>
@@ -509,58 +515,58 @@ export async function POST(req: Request) {
                         </div>
                     </div>
                 `;
+                    }
+
+                    await resend.emails.send({
+                        from: 'AYO <hello@ai-visionary.com>',
+                        to: [customerEmail],
+                        subject: emailSubject,
+                        html: emailHtml
+                    });
+                    console.log(`✅ Success Email sent to ${customerEmail}`);
+                    emailSent = true;
+                } catch (err: any) {
+                    console.error("❌ RESEND SENDING FAILED:", err);
+                    emailError = err.message;
+                    // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
+                    throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
                 }
-
-                await resend.emails.send({
-                    from: 'AYO <hello@ai-visionary.com>',
-                    to: [customerEmail],
-                    subject: emailSubject,
-                    html: emailHtml
-                });
-                console.log(`✅ Success Email sent to ${customerEmail}`);
-                emailSent = true;
-            } catch (err: any) {
-                console.error("❌ RESEND SENDING FAILED:", err);
-                emailError = err.message;
-                // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
-                throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
             }
-        }
 
-        if (!emailSent) {
-            console.error("❌ Email NOT sent (Logic skipped or previously failed).");
+            if (!emailSent) {
+                console.error("❌ Email NOT sent (Logic skipped or previously failed).");
+                return NextResponse.json({
+                    success: false,
+                    error: "Email Logic Skipped or Failed (Check Logs)",
+                    debug_trace: {
+                        payment_found: !!payloadSession,
+                        pack_detected: packType,
+                        email_target: customerEmail,
+                        email_valid: !emailMissing,
+                        email_error: emailError,
+                    }
+                }, { status: 500 });
+            }
+
             return NextResponse.json({
-                success: false,
-                error: "Email Logic Skipped or Failed (Check Logs)",
+                success: true,
+                email_sent: emailSent,
                 debug_trace: {
                     payment_found: !!payloadSession,
                     pack_detected: packType,
                     email_target: customerEmail,
                     email_valid: !emailMissing,
                     email_error: emailError,
+                    resend_key_configured: !!process.env.RESEND_API_KEY,
+                    analyzed_url: companyInfo.url
                 }
+            });
+
+        } catch (error: any) {
+            console.error("Webhook Error", error);
+            return NextResponse.json({
+                error: error.message,
+                stack: "Detailed error in webhook logs"
             }, { status: 500 });
         }
-
-        return NextResponse.json({
-            success: true,
-            email_sent: emailSent,
-            debug_trace: {
-                payment_found: !!payloadSession,
-                pack_detected: packType,
-                email_target: customerEmail,
-                email_valid: !emailMissing,
-                email_error: emailError,
-                resend_key_configured: !!process.env.RESEND_API_KEY,
-                analyzed_url: companyInfo.url
-            }
-        });
-
-    } catch (error: any) {
-        console.error("Webhook Error", error);
-        return NextResponse.json({
-            error: error.message,
-            stack: "Detailed error in webhook logs"
-        }, { status: 500 });
     }
-}
