@@ -331,42 +331,50 @@ export async function POST(req: Request) {
                     } catch (e) { console.error("Fallback Analysis Failed", e); }
                 }
             }
+        }
 
-            // Generate REAL Files
-            const sessionDate = new Date().toISOString();
-            const asrJson = generateRealAsrJson(customerEmail || "email_missing", sessionDate, session_id, analysisData, packType === "PRO");
+        // 4. LOGIC & CHECKS  
+        let emailMissing = false;
+        if (!customerEmail) {
+            console.warn("⚠️ Valid Payment but No Email found.");
+            emailMissing = true;
+        }
 
-            // 🔐 VALIDATION EMAIL
-            const VALIDATION_DISABLED = false;
-            let emailValidated = false;
-            if (!emailMissing && customerEmail && companyInfo.url) {
-                const urlObj = new URL(companyInfo.url);
-                const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
-                const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+        // Generate REAL Files
+        const sessionDate = new Date().toISOString();
+        const asrJson = generateRealAsrJson(customerEmail || "email_missing", sessionDate, session_id, analysisData, packType === "PRO");
 
-                if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
-                    emailValidated = true;
-                } else {
-                    console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain}`);
-                    emailMissing = true;
-                }
+        // 🔐 VALIDATION EMAIL
+        const VALIDATION_DISABLED = false;
+        let emailValidated = false;
+        if (!emailMissing && customerEmail && companyInfo.url) {
+            const urlObj = new URL(companyInfo.url);
+            const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
+            const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+
+            if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
+                emailValidated = true;
+            } else {
+                console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain}`);
+                emailMissing = true;
             }
+        }
 
-            // Send Email via Resend
-            // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
-            // This stops "Silent Failures" (200 OK but no email).
-            let emailSent = false;
-            let emailError = null;
+        // Send Email via Resend
+        // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
+        // This stops "Silent Failures" (200 OK but no email).
+        let emailSent = false;
+        let emailError = null;
 
-            if (!emailMissing) {
-                try {
-                    // Email content varies by pack type
-                    let emailSubject = '';
-                    let emailHtml = '';
+        if (!emailMissing) {
+            try {
+                // Email content varies by pack type
+                let emailSubject = '';
+                let emailHtml = '';
 
-                    if (packType === "PRO") {
-                        emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
-                        emailHtml = `
+                if (packType === "PRO") {
+                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
+                    emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="margin:0;">AYO / Pack AIO PRO</h1>
@@ -470,9 +478,9 @@ export async function POST(req: Request) {
                         </div>
                     </div>
                 `;
-                    } else {
-                        emailSubject = `Votre Certification ASR Essential - Score ${analysisData.score}/100`;
-                        emailHtml = `
+                } else {
+                    emailSubject = `Votre Certification ASR Essential - Score ${analysisData.score}/100`;
+                    emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="margin:0;">AYO / Essential</h1>
@@ -515,58 +523,58 @@ export async function POST(req: Request) {
                         </div>
                     </div>
                 `;
-                    }
-
-                    await resend.emails.send({
-                        from: 'AYO <hello@ai-visionary.com>',
-                        to: [customerEmail],
-                        subject: emailSubject,
-                        html: emailHtml
-                    });
-                    console.log(`✅ Success Email sent to ${customerEmail}`);
-                    emailSent = true;
-                } catch (err: any) {
-                    console.error("❌ RESEND SENDING FAILED:", err);
-                    emailError = err.message;
-                    // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
-                    throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
                 }
-            }
 
-            if (!emailSent) {
-                console.error("❌ Email NOT sent (Logic skipped or previously failed).");
-                return NextResponse.json({
-                    success: false,
-                    error: "Email Logic Skipped or Failed (Check Logs)",
-                    debug_trace: {
-                        payment_found: !!payloadSession,
-                        pack_detected: packType,
-                        email_target: customerEmail,
-                        email_valid: !emailMissing,
-                        email_error: emailError,
-                    }
-                }, { status: 500 });
+                await resend.emails.send({
+                    from: 'AYO <hello@ai-visionary.com>',
+                    to: [customerEmail],
+                    subject: emailSubject,
+                    html: emailHtml
+                });
+                console.log(`✅ Success Email sent to ${customerEmail}`);
+                emailSent = true;
+            } catch (err: any) {
+                console.error("❌ RESEND SENDING FAILED:", err);
+                emailError = err.message;
+                // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
+                throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
             }
+        }
 
+        if (!emailSent) {
+            console.error("❌ Email NOT sent (Logic skipped or previously failed).");
             return NextResponse.json({
-                success: true,
-                email_sent: emailSent,
+                success: false,
+                error: "Email Logic Skipped or Failed (Check Logs)",
                 debug_trace: {
                     payment_found: !!payloadSession,
                     pack_detected: packType,
                     email_target: customerEmail,
                     email_valid: !emailMissing,
                     email_error: emailError,
-                    resend_key_configured: !!process.env.RESEND_API_KEY,
-                    analyzed_url: companyInfo.url
                 }
-            });
-
-        } catch (error: any) {
-            console.error("Webhook Error", error);
-            return NextResponse.json({
-                error: error.message,
-                stack: "Detailed error in webhook logs"
             }, { status: 500 });
         }
+
+        return NextResponse.json({
+            success: true,
+            email_sent: emailSent,
+            debug_trace: {
+                payment_found: !!payloadSession,
+                pack_detected: packType,
+                email_target: customerEmail,
+                email_valid: !emailMissing,
+                email_error: emailError,
+                resend_key_configured: !!process.env.RESEND_API_KEY,
+                analyzed_url: companyInfo.url
+            }
+        });
+
+    } catch (error: any) {
+        console.error("Webhook Error", error);
+        return NextResponse.json({
+            error: error.message,
+            stack: "Detailed error in webhook logs"
+        }, { status: 500 });
     }
+}
