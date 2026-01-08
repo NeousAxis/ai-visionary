@@ -331,7 +331,7 @@ export async function POST(req: Request) {
         const asrJson = generateRealAsrJson(customerEmail || "email_missing", sessionDate, session_id, analysisData, packType === "PRO");
 
         // 🔐 VALIDATION EMAIL
-        const VALIDATION_DISABLED = true;
+        const VALIDATION_DISABLED = false;
         let emailValidated = false;
         if (!emailMissing && customerEmail && companyInfo.url) {
             const urlObj = new URL(companyInfo.url);
