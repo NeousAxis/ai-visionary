@@ -347,37 +347,135 @@ export async function POST(req: Request) {
         }
 
         // Send Email via Resend
-        if (!emailMissing && process.env.RESEND_API_KEY) {
-            // ... (HTML Generation Logic - Keeping existing templates logic implies shorter replacement here or full block)
-            // RE-INSERTING THE HTML GENERATION LOGIC BRIEFLY TO MATCH STRUCTURE
-            let emailSubject = packType === "PRO" ? `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100` : `Votre Fichier ASR Essential - Score ${analysisData.score}/100`;
+        // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
+        // This stops "Silent Failures" (200 OK but no email).
+        let emailSent = false;
+        let emailError = null;
 
-            // SIMPLIFIED CALL FOR REPLACEMENT (Assuming user wants the fix mostly)
-            // CALLING EXISTING LOGIC STRUCTURE OR RE-USE VARIABLES
+        if (!emailMissing) {
+            try {
+                // Email content varies by pack type
+                let emailSubject = '';
+                let emailHtml = '';
 
-            // --- (Keep HTML Generation from previous file content manually or assume it's there? 
-            // Tool says "ReplacementContent". usage: I must provide the *full* content for the block I am replacing.
-            // The block spans from Line 216 ( FALLBACK START) to Line 456 (End of Send).
-            // I need to be careful not to delete the HTML templates.
-            // Wait, the "ReplacementContent" must be exact.
-            // I will leave the HTML generation intact by ending my replacement BEFORE it, or including it.
-            // Replacing up to line 260 first to fix extraction logic?
-            // The user wanted FORCE EMAIL fix.
-            // I'll do a focused replace for the Extraction Logic Block first.
+                if (packType === "PRO") {
+                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
+                    emailHtml = `
+                    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                        <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <h1 style="margin:0;">AYO / Pack AIO PRO</h1>
+                        </div>
+                        
+                        <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
+                            <p>Bonjour,</p>
+                            <p>Votre Pack AIO PRO est activé. Voici vos actifs numériques certifiés.</p>
+                            
+                            <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
+                                <h3 style="margin-top:0; color: #0284c7;">📊 Votre Score AIO : ${analysisData.score}/100</h3>
+                                ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
+                                <p>L'analyse temps réel a permis de générer votre fichier ASR sur mesure ci-dessous.</p>
+                            </div>
 
-        } else {
-            if (emailMissing) console.error("❌ SKIPPING EMAIL: Email address missing or rejected.");
-            if (!process.env.RESEND_API_KEY) console.error("❌ SKIPPING EMAIL: RESEND_API_KEY is missing in Environment Variables!");
+                            <h3 style="margin-top:0; color: #006064;">📦 Votre Fichier ASR PRO (JSON-LD)</h3>
+                            <p>Copiez ce code dans un fichier <code>asr.json</code> dans le dossier <code>/.ayo</code> de votre site.</p>
+                            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px;">${asrJson}</pre>
+
+                             <h3 style="margin-top:20px; color: #006064;">📝 Vos Fichiers Sémantiques (FAQ & Glossaire)</h3>
+                             <p>En tant que client PRO, voici les structures prêtes à l'emploi (à adapter avec vos contenus) :</p>
+                             
+                             <div style="background: #f5f5f5; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                                <strong>faq.json (Structure)</strong><br>
+                                <pre style="font-size: 10px; color: #555;">{ "@type": "FAQPage", "mainEntity": [{ "@type": "Question", "name": "...", "acceptedAnswer": { "@type": "Answer", "text": "..." } }] }</pre>
+                             </div>
+
+                            <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #bbdefb;">
+                                <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION RAPIDE</h3>
+                                <p style="font-size: 14px;">Pour être visible immédiatement :</p>
+                                <ol style="font-size:13px; padding-left:20px;">
+                                    <li>Créez un dossier <code>.ayo</code> à la racine de votre site.</li>
+                                    <li>Placez-y le fichier <code>asr.json</code> (avec le code ci-dessus).</li>
+                                    <li>(Optionnel) Placez-y aussi <code>faq.json</code> pour vos questions fréquentes.</li>
+                                </ol>
+                                <p style="margin-top: 10px; font-size: 13px;">Si vous utilisez WordPress, Wix ou Shopify, utilisez l'injection de code dans le &lt;HEAD&gt; comme script JSON-LD.</p>
+                            </div>
+
+                            <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
+                                AI Visionary - L'Autorité de Visibilité IA.
+                            </p>
+                        </div>
+                    </div>
+                `;
+                } else {
+                    emailSubject = `Votre Fichier ASR Essential - Score ${analysisData.score}/100`;
+                    emailHtml = `
+                    <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                        <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <h1 style="margin:0;">AYO / Essential</h1>
+                        </div>
+                        
+                        <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
+                            <p>Bonjour,</p>
+                            <p>Merci pour votre confiance. Voici vos résultats et fichiers certifiés.</p>
+                            
+                            <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
+                                <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
+                                ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
+                            </div>
+                            
+                            <h3 style="margin-top:0; color: #006064;">📦 Code Source ASR (Essential)</h3>
+                            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px;">${asrJson}</pre>
+
+                            <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #bbdefb;">
+                                <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Précis)</h3>
+                                <p style="font-size: 14px;">Installez ce code pour activer votre visibilité immédiate.</p>
+                                <p style="font-size: 13px;">(Voir instructions détaillées sur le site).</p>
+                            </div>
+                            
+                            <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
+                                AI Visionary - L'Autorité de Visibilité IA.
+                            </p>
+                        </div>
+                    </div>
+                `;
+                }
+
+                await resend.emails.send({
+                    from: 'AYO <hello@send.ai-visionary.com>',
+                    to: [customerEmail],
+                    subject: emailSubject,
+                    html: emailHtml
+                });
+                console.log(`✅ Success Email sent to ${customerEmail}`);
+                emailSent = true;
+            } catch (err: any) {
+                console.error("❌ RESEND SENDING FAILED:", err);
+                emailError = err.message;
+                // If it's a key error, we WANT to throw so Stripe sees 500
+                if (err.message && (err.message.includes("API key") || err.message.includes("unauthorized"))) {
+                    throw new Error(`Critical Email Failure: ${err.message}`);
+                }
+            }
         }
 
         return NextResponse.json({
             success: true,
-            email_missing: emailMissing,
-            email: customerEmail
+            email_sent: emailSent,
+            debug_trace: {
+                payment_found: !!payloadSession,
+                pack_detected: packType,
+                email_target: customerEmail,
+                email_valid: !emailMissing,
+                email_error: emailError,
+                resend_key_configured: !!process.env.RESEND_API_KEY,
+                analyzed_url: companyInfo.url
+            }
         });
 
     } catch (error: any) {
         console.error("Webhook Error", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({
+            error: error.message,
+            stack: "Detailed error in webhook logs"
+        }, { status: 500 });
     }
 }
