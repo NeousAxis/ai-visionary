@@ -201,13 +201,13 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
   
   Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
   
-  👉 **[🛡 Sécuriser mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
+  👉 [🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})
   *(Certification Immédiate & Envoi par email)*
 
-  👉 **[🚀 Devenir PRO & Autorité (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
+  👉 [🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
   *(Audit Complet + Glossaire Sémantique + Fichiers AI-Native)*
 
-  👉 ou tapez 'LIGHT' pour l'instant."
+  👉 Cliquer sur 'LIGHT' pour obtenir mon analyse détaillée + mon ASR simplifié pour l'instant."
 
 📍 ÉTAT 4 : UPGRADE & PAIEMENT
 SI OUI :
@@ -695,14 +695,13 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 
 Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** et les documents techniques :
 
-1️⃣ **Essential (99 CHF)**
-*Idéal pour sécuriser l'existant.*
-👉 [Activer ASR Essential](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})
+👉 [🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})
+(Certification Immédiate & Envoi par email)
 
-2️⃣ **Pack PRO (499 CHF)**
-*Pour une autorité totale sur les IA.*
-👉 [Activer Pack PRO](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
-*(Inclut : Glossaire Sémantique, FAQ IA-Native + Correction complète)*`;
+👉 [🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
+(Audit Complet + Glossaire Sémantique + Fichiers AI-Native)
+
+👉 Cliquer sur 'LIGHT' pour obtenir mon analyse détaillée + mon ASR simplifié pour l'instant.`;
 
             }
         } // END OF ELSE BLOCK (Email Logic)
