@@ -15,7 +15,7 @@ import crypto from 'crypto';
 export const maxDuration = 30;
 
 // Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
 
 // Load the "Brain" (Context & Rules)
 const dataSectorsPath = path.join(process.cwd(), 'public', 'AYO_SECTORS_V1.json');

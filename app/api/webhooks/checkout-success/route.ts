@@ -3,7 +3,8 @@ import { Resend } from 'resend';
 import Stripe from 'stripe';
 
 // Initialize Services (Resend is safe to init outside)
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Services (Resend is safe to init outside)
+const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
 
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
@@ -448,7 +449,7 @@ export async function POST(req: Request) {
             }
 
             await resend.emails.send({
-                from: 'AYO <hello@ai-visionary.com>',
+                from: 'AYO <hello@send.ai-visionary.com>',
                 to: [customerEmail],
                 subject: emailSubject,
                 html: emailHtml

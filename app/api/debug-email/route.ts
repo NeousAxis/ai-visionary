@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     try {
         console.log("🚀 Lancement du test email manuel...");
         const data = await resend.emails.send({
-            from: 'AYO <hello@ai-visionary.com>',
+            from: 'AYO <hello@send.ai-visionary.com>',
             to: ['cyrileger@gmail.com'], // Hardcoded pour le test
             subject: 'TEST DE DIAGNOSTIC AYO VERCEL',
             html: '<h1>Ceci est un email de test direct.</h1><p>Si vous lisez ceci, Resend fonctionne parfaitement sur Vercel.</p>'

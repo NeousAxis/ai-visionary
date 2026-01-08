@@ -11,57 +11,71 @@ type AnalysisRecord = {
     timestamp: string;
 };
 
+let isFirebaseInitialized = false;
+
 // Initialize Firebase Admin (singleton pattern)
 if (!getApps().length) {
     try {
-        // Vercel Environment Variables for Firebase
         console.log('🔧 Initializing Firebase Admin...');
-        console.log('📋 FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID ? 'Present ✅' : 'Missing ❌');
-        console.log('📋 FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL ? 'Present ✅' : 'Missing ❌');
-        console.log('📋 FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY ? 'Present ✅' : 'Missing ❌');
 
-        // FIX: Handle all possible newline formats in private key
+        // Check for Env Vars (Soft Check)
+        const projectId = process.env.FIREBASE_PROJECT_ID;
+        const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
         let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-        if (privateKey) {
-            // Replace literal \n with actual newlines
-            privateKey = privateKey.replace(/\\n/g, '\n');
-            // Also handle double backslashes (escaped in some environments)
-            privateKey = privateKey.replace(/\\\\n/g, '\n');
+
+        if (projectId && clientEmail && privateKey) {
+            // Handle newline formats in private key
+            privateKey = privateKey.replace(/\\n/g, '\n').replace(/\\\\n/g, '\n');
+
+            const serviceAccount = {
+                projectId,
+                clientEmail,
+                privateKey
+            };
+
+            initializeApp({
+                credential: cert(serviceAccount as any)
+            });
+
+            isFirebaseInitialized = true;
+            console.log('✅ Firebase Admin initialized successfully');
+        } else {
+            console.warn('⚠️ Firebase Credentials Missing. Running in Stateless/Fallback Mode. (DB features disabled)');
+            console.log('debug: missing vars', { projectId: !!projectId, clientEmail: !!clientEmail, privateKey: !!privateKey });
         }
-
-        const serviceAccount = {
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: privateKey
-        };
-
-        if (!serviceAccount.projectId || !serviceAccount.clientEmail || !serviceAccount.privateKey) {
-            throw new Error('Missing Firebase credentials in environment variables');
-        }
-
-        initializeApp({
-            credential: cert(serviceAccount as any)
-        });
-
-        console.log('✅ Firebase Admin initialized successfully');
     } catch (error) {
-        console.error('❌ Firebase Admin initialization failed:', error);
-        throw error;
+        console.error('❌ Firebase Admin initialization failed (Soft Fail):', error);
+        // Do not throw, just stay uninitialized
     }
 } else {
-    console.log('✅ Firebase Admin already initialized (reusing existing app)');
+    isFirebaseInitialized = true;
+    console.log('✅ Firebase Admin already initialized');
 }
 
-// Get Firestore instance
-const firestore = getFirestore();
+// Helper to safely get firestore
+const getDb = () => {
+    if (!isFirebaseInitialized) return null;
+    try {
+        return getFirestore();
+    } catch (e) {
+        console.error("Error accessing Firestore:", e);
+        return null;
+    }
+}
 
 export const database = {
     /**
      * Save or update an analysis record
      */
     saveAnalysis: async (id: string, record: Partial<AnalysisRecord>): Promise<void> => {
+        const dbInstance = getDb();
+        if (!dbInstance) {
+            console.log(`⚠️ DB Disabled: Skipping save for ID ${id}`);
+            return;
+        }
+
         try {
-            const docRef = firestore.collection('analyses').doc(id);
+            const docRef = dbInstance.collection('analyses').doc(id);
 
             const dataToSave = {
                 ...record,
@@ -73,7 +87,7 @@ export const database = {
             console.log(`💾 [Firestore] Analysis saved for ID: ${id}`);
         } catch (error) {
             console.error('❌ [Firestore] Save Error:', error);
-            throw error;
+            // Don't throw to preserve flow
         }
     },
 
@@ -81,8 +95,11 @@ export const database = {
      * Retrieve an analysis record by ID
      */
     getAnalysis: async (id: string): Promise<AnalysisRecord | null> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
+
         try {
-            const docRef = firestore.collection('analyses').doc(id);
+            const docRef = dbInstance.collection('analyses').doc(id);
             const doc = await docRef.get();
 
             if (!doc.exists) {
@@ -95,7 +112,7 @@ export const database = {
             return data;
         } catch (error) {
             console.error('❌ [Firestore] Read Error:', error);
-            throw error;
+            return null;
         }
     },
 
@@ -103,8 +120,11 @@ export const database = {
      * Retrieve the latest analysis for a given URL
      */
     getLatestAnalysisByUrl: async (url: string): Promise<AnalysisRecord | null> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
+
         try {
-            const snapshot = await firestore.collection('analyses')
+            const snapshot = await dbInstance.collection('analyses')
                 .where('url', '==', url)
                 .orderBy('timestamp', 'desc')
                 .limit(1)
@@ -122,7 +142,7 @@ export const database = {
             console.error('❌ [Firestore] Query By URL Error:', error);
             // Fallback: query without sorting if index is missing
             try {
-                const snapshot = await firestore.collection('analyses')
+                const snapshot = await dbInstance.collection('analyses')
                     .where('url', '==', url)
                     .limit(1)
                     .get();
