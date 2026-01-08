@@ -368,35 +368,78 @@ export async function POST(req: Request) {
                         
                         <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
                             <p>Bonjour,</p>
-                            <p>Votre Pack AIO PRO est activé. Voici vos actifs numériques certifiés.</p>
+                            <p>Votre Pack AIO PRO est activé. Voici l'intégralité de vos actifs numériques pour l'autorité IA.</p>
                             
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
-                                <h3 style="margin-top:0; color: #0284c7;">📊 Votre Score AIO : ${analysisData.score}/100</h3>
+                                <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
-                                <p>L'analyse temps réel a permis de générer votre fichier ASR sur mesure ci-dessous.</p>
+                                <p>L'analyse temps réel a permis de générer votre stratégie complète ci-dessous.</p>
                             </div>
 
-                            <h3 style="margin-top:0; color: #006064;">📦 Votre Fichier ASR PRO (JSON-LD)</h3>
-                            <p>Copiez ce code dans un fichier <code>asr.json</code> dans le dossier <code>/.ayo</code> de votre site.</p>
+                            <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+
+                            <h3 style="margin-top:0; color: #006064;">1. Fichier Principal : asr.json (PRO)</h3>
+                            <p style="font-size:13px;">Copiez ce code intégralement dans un fichier nommé <code>asr.json</code>.</p>
                             <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px;">${asrJson}</pre>
 
-                             <h3 style="margin-top:20px; color: #006064;">📝 Vos Fichiers Sémantiques (FAQ & Glossaire)</h3>
-                             <p>En tant que client PRO, voici les structures prêtes à l'emploi (à adapter avec vos contenus) :</p>
-                             
-                             <div style="background: #f5f5f5; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-                                <strong>faq.json (Structure)</strong><br>
-                                <pre style="font-size: 10px; color: #555;">{ "@type": "FAQPage", "mainEntity": [{ "@type": "Question", "name": "...", "acceptedAnswer": { "@type": "Answer", "text": "..." } }] }</pre>
-                             </div>
+                            <h3 style="margin-top:25px; color: #006064;">2. Structure Sémantique : faq.json</h3>
+                            <p style="font-size:13px;">Copiez ce modèle dans un fichier <code>faq.json</code> et remplissez les réponses.</p>
+                            <pre style="background: #f5f5f5; color: #333; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px; border: 1px solid #ddd;">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quels sont vos services principaux ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "..."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quels sont vos tarifs ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "..."
+      }
+    }
+  ]
+}</pre>
 
-                            <div style="background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #bbdefb;">
-                                <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION RAPIDE</h3>
-                                <p style="font-size: 14px;">Pour être visible immédiatement :</p>
-                                <ol style="font-size:13px; padding-left:20px;">
-                                    <li>Créez un dossier <code>.ayo</code> à la racine de votre site.</li>
-                                    <li>Placez-y le fichier <code>asr.json</code> (avec le code ci-dessus).</li>
-                                    <li>(Optionnel) Placez-y aussi <code>faq.json</code> pour vos questions fréquentes.</li>
+                            <h3 style="margin-top:25px; color: #006064;">3. Structure Sémantique : glossary.json</h3>
+                            <p style="font-size:13px;">Copiez ce modèle dans un fichier <code>glossary.json</code> pour définir votre vocabulaire métier.</p>
+                            <pre style="background: #f5f5f5; color: #333; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px; border: 1px solid #ddd;">{
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  "name": "Glossaire Technique ${companyInfo.name || "Entreprise"}",
+  "hasDefinedTerm": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Terme 1",
+      "description": "Définition précise pour l'IA..."
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Terme 2",
+      "description": "Définition précise..."
+    }
+  ]
+}</pre>
+
+                            <div style="background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 30px 0; border: 1px solid #bbdefb;">
+                                <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Pas à Pas)</h3>
+                                <p style="font-size: 14px; font-weight: bold;">Objectif : Rendre ces fichiers accessibles aux IA.</p>
+                                <ol style="font-size:13px; padding-left:20px; line-height: 1.6;">
+                                    <li>Accédez à votre serveur (FTP) ou gestionnaire de fichiers.</li>
+                                    <li>À la racine de votre site (au même niveau que <code>index.html</code>), créez un nouveau dossier nommé exactement : <br><code>.ayo</code> (avec le point devant).</li>
+                                    <li>Dans ce dossier <code>.ayo</code>, créez les 3 fichiers (<code>asr.json</code>, <code>faq.json</code>, <code>glossary.json</code>) et collez-y les codes ci-dessus.</li>
+                                    <li>Vérifiez l'accès en tapant dans votre navigateur : <br><code>https://votre-site.com/.ayo/asr.json</code></li>
                                 </ol>
-                                <p style="margin-top: 10px; font-size: 13px;">Si vous utilisez WordPress, Wix ou Shopify, utilisez l'injection de code dans le &lt;HEAD&gt; comme script JSON-LD.</p>
+                                <p style="margin-top: 15px; font-size: 13px; font-style: italic;">
+                                    <strong>Alternative WordPress/Wix :</strong> Si vous ne pouvez pas créer de dossier, copiez le contenu du <code>asr.json</code> et collez-le dans le <code>&lt;HEAD&gt;</code> de votre site, entouré des balises :<br>
+                                    <code>&lt;script type="application/ld+json"&gt; ... CODE ICI ... &lt;/script&gt;</code>
+                                </p>
                             </div>
 
                             <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
