@@ -427,18 +427,34 @@ export async function POST(req: Request) {
   ]
 }</pre>
 
+                            <h3 style="margin-top:25px; color: #006064;">4. Manifeste IA : manifest.json</h3>
+                            <p style="font-size:13px;">Copiez ce modèle dans un fichier <code>manifest.json</code> pour déclarer vos droits d'accès.</p>
+                            <pre style="background: #f5f5f5; color: #333; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px; border: 1px solid #ddd;">{
+  "name": "AI Manifest ${companyInfo.name || "Entreprise"}",
+  "version": "1.0",
+  "permissions": {
+    "allow_scraping": ["GoogleBot", "GPTBot", "CCBot"],
+    "deny_scraping": ["MaliciousBot"]
+  },
+  "api_access": {
+    "status": "open",
+    "endpoint": "/.ayo/asr.json"
+  }
+}</pre>
+
                             <div style="background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 30px 0; border: 1px solid #bbdefb;">
                                 <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Pas à Pas)</h3>
-                                <p style="font-size: 14px; font-weight: bold;">Objectif : Rendre ces fichiers accessibles aux IA.</p>
+                                <p style="font-size: 14px; font-weight: bold;">Objectif : Rendre ces 4 fichiers accessibles aux IA.</p>
                                 <ol style="font-size:13px; padding-left:20px; line-height: 1.6;">
                                     <li>Accédez à votre serveur (FTP) ou gestionnaire de fichiers.</li>
                                     <li>À la racine de votre site (au même niveau que <code>index.html</code>), créez un nouveau dossier nommé exactement : <br><code>.ayo</code> (avec le point devant).</li>
-                                    <li>Dans ce dossier <code>.ayo</code>, créez les 3 fichiers (<code>asr.json</code>, <code>faq.json</code>, <code>glossary.json</code>) et collez-y les codes ci-dessus.</li>
+                                    <li>Dans ce dossier <code>.ayo</code>, créez les 4 fichiers (<code>asr.json</code>, <code>faq.json</code>, <code>glossary.json</code>, <code>manifest.json</code>) et collez-y les codes ci-dessus.</li>
                                     <li>Vérifiez l'accès en tapant dans votre navigateur : <br><code>https://votre-site.com/.ayo/asr.json</code></li>
                                 </ol>
                                 <p style="margin-top: 15px; font-size: 13px; font-style: italic;">
                                     <strong>Alternative WordPress/Wix :</strong> Si vous ne pouvez pas créer de dossier, copiez le contenu du <code>asr.json</code> et collez-le dans le <code>&lt;HEAD&gt;</code> de votre site, entouré des balises :<br>
                                     <code>&lt;script type="application/ld+json"&gt; ... CODE ICI ... &lt;/script&gt;</code>
+                                    <br>(Note: FAQ et Glossaire peuvent aussi être injectés de la même façon dans des balises script séparées).
                                 </p>
                             </div>
 
