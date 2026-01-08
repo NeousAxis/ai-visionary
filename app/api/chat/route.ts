@@ -176,7 +176,9 @@ J'ai préparé votre **ASR Light** (Carte d'identité numérique) qui corrige ce
 
 Pour déverrouiller votre analyse complète, veuillez confirmer votre propriété.
 
-👉 **Entrez votre email professionnel ([DOMAINE_URL_ENTREPRISE]) :**
+👉 **Entrez votre email professionnel de l'entreprise :**
+⚠️ *Important : Seuls les emails du domaine analysé sont acceptés pour des raisons de sécurité.*
+(Ex: si vous analysez example.com, utilisez contact@example.com)
 (Envoi immédiat et sécurisé)."
 
 ⚠️ RÈGLES D'AFFICHAGE CRITIQUES (CHAT) :
