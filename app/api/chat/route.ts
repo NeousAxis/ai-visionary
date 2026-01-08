@@ -675,23 +675,56 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
                     }
                 }
 
-                // 4. GENERATE STRIPE LINKS (Using Payload)
-                // We encode the URL and Email so Webhook can retrieve them regardless of DB state fallback
-                let stripeSuffix = "";
-                try {
-                    const payload = { u: detectedUrl || "unknown", e: userEmail };
-                    const jsonStr = JSON.stringify(payload);
-                    const b64 = Buffer.from(jsonStr).toString('base64');
-                    // Ensure < 255 chars
-                    if (b64.length <= 250) {
-                        stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
+                // 4. VALIDATE EMAIL DOMAIN (Security Check)
+                let emailDomainValid = false;
+                let domainMismatchMessage = "";
+
+                if (detectedUrl) {
+                    try {
+                        const urlObj = new URL(detectedUrl);
+                        const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
+                        const emailDomain = userEmail.split('@')[1]?.toLowerCase();
+
+                        if (emailDomain === analyzedDomain) {
+                            emailDomainValid = true;
+                        } else {
+                            domainMismatchMessage = `❌ **Email Refusé**
+
+L'email \`${userEmail}\` ne correspond pas au domaine de votre site (\`${analyzedDomain}\`).
+
+⚠️ **Pour des raisons de sécurité, seuls les emails professionnels de l'entreprise analysée sont acceptés.**
+Ces fichiers contiennent des informations sensibles de votre organisation.
+
+👉 **Veuillez entrer un email du domaine \`${analyzedDomain}\`**
+(Ex: contact@${analyzedDomain} ou hello@${analyzedDomain})`;
+                        }
+                    } catch (e) {
+                        console.error("Domain validation error:", e);
+                        emailDomainValid = true; // Fallback: accept if URL parsing fails
                     }
-                } catch (e) { console.error("Stripe Param Error", e); }
+                }
+
+                // If email domain doesn't match, reject and ask again
+                if (!emailDomainValid && domainMismatchMessage) {
+                    finalResponseText = domainMismatchMessage;
+                } else {
+                    // 5. GENERATE STRIPE LINKS (Using Payload)
+                    // We encode the URL and Email so Webhook can retrieve them regardless of DB state fallback
+                    let stripeSuffix = "";
+                    try {
+                        const payload = { u: detectedUrl || "unknown", e: userEmail };
+                        const jsonStr = JSON.stringify(payload);
+                        const b64 = Buffer.from(jsonStr).toString('base64');
+                        // Ensure < 255 chars
+                        if (b64.length <= 250) {
+                            stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
+                        }
+                    } catch (e) { console.error("Stripe Param Error", e); }
 
 
-                // 5. RESPOND WITH PAYMENT OPTIONS (No Email Sent)
-                // v2.1 Strict No-Email Flow
-                finalResponseText = `✅ **Email enregistré.**
+                    // 6. RESPOND WITH PAYMENT OPTIONS (No Email Sent)
+                    // v2.1 Strict No-Email Flow
+                    finalResponseText = `✅ **Email enregistré.**
 
 (Votre dossier est en cours de préparation, il vous sera envoyé quelques minutes après le paiement).
 
@@ -704,6 +737,7 @@ Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** e
 (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
 
 👉 Cliquer sur 'LIGHT' (Analyse détaillée + Certification ASR simple)`;
+                }
 
             }
         } // END OF ELSE BLOCK (Email Logic)
