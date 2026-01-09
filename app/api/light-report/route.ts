@@ -52,7 +52,7 @@ export async function GET(req: Request) {
 
         // 3. Send Email
         const emailResponse = await resend.emails.send({
-            from: 'AYO <hello@ai-visionary.com>',
+            from: 'AYO <hello@send.ai-visionary.com>',
             to: [email],
             subject: 'Votre Certification ASR Light (Gratuit) - AI Visionary',
             html: `
