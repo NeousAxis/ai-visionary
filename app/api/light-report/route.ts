@@ -51,7 +51,7 @@ export async function GET(req: Request) {
         );
 
         // 3. Send Email
-        await resend.emails.send({
+        const emailResponse = await resend.emails.send({
             from: 'AYO <hello@ai-visionary.com>',
             to: [email],
             subject: 'Votre Certification ASR Light (Gratuit) - AI Visionary',
@@ -63,24 +63,22 @@ export async function GET(req: Request) {
                     
                     <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
                         <p><strong>Score AIO :</strong> ${Math.round(analysisData.score)} / 100</p>
-                        <p><strong>Statut :</strong> Non Certifié (Version Gratuite)</p>
                     </div>
 
-                    <p>Vous trouverez ci-joint votre fichier <code>asr.json</code>.</p>
+                    <h3>📦 VOTRE CODE ASR (JSON)</h3>
+                    <p>Copiez ce code si la pièce jointe est bloquée :</p>
+                    <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; border-radius: 5px; font-size: 11px;">
+${JSON.stringify(asrJson, null, 2)}
+                    </pre>
                     
                     <h3>⚠️ Installation</h3>
-                    <p>Ce fichier doit être placé à la racine de votre site dans le dossier <code>/.ayo/</code> pour être détecté par les moteurs d'IA.</p>
+                    <p>Ce code doit être sauvegardé dans un fichier <code>asr.json</code> et placé dans le dossier <code>/.ayo/</code>.</p>
                     <p><code>https://${analysisData.url.replace('https://', '')}/.ayo/asr.json</code></p>
 
                     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
                     
                     <p style="font-size: 14px; color: #666;">
-                        <strong>Besoin d'aller plus loin ?</strong><br>
-                        Passez à la version <strong>Essential</strong> ou <strong>PRO</strong> pour obtenir la certification Verified, 
-                        la signature cryptographique et les corrections SEO détaillées.
-                    </p>
-                    <p>
-                        <a href="https://ai-visionary.com" style="background: #000; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Retourner sur AI Visionary</a>
+                        <a href="https://ai-visionary.com" style="color: #000; text-decoration: underline;">Retourner sur AI Visionary</a>
                     </p>
                 </div>
             `,
@@ -92,11 +90,19 @@ export async function GET(req: Request) {
             ],
         });
 
+        // Check for specific Resend error even in success flow if any
+        if (emailResponse.error) {
+            throw new Error(emailResponse.error.message);
+        }
+
         return new Response(`
             <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
                 <h1 style="color: #10b981;">✅ Dossier envoyé !</h1>
-                <p>Votre ASR Light a été envoyé à <strong>${email}</strong>.</p>
-                <p>Vérifiez vos emails (et vos spams).</p>
+                <p>Email envoyé à <strong>${email}</strong>.</p>
+                <div style="background: #f0fdf4; padding: 10px; display: inline-block; margin: 15px 0; border-radius: 5px; color: #15803d; font-family: monospace;">
+                    ID Suivi : ${emailResponse.data?.id}
+                </div>
+                <p style="font-size: 0.9rem; color: #666;">Si vous ne recevez rien, vérifiez vos spams ou contactez le support avec l'ID ci-dessus.</p>
                 <br>
                 <a href="/" style="color: #6366f1; text-decoration: none;">&larr; Retour à l'accueil</a>
             </div>
