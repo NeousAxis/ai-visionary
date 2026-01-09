@@ -185,34 +185,49 @@ export async function POST(req: Request) {
         // 🚨 FALLBACK: USE PAYLOAD DATA DIRECTLY IF STRIPE API FAILED
         // This is critical if STRIPE_SECRET_KEY is missing/invalid but webhook signature passed (or skipped in dev)
         let payloadSession = stripeSession;
-        if (!payloadSession && body.data?.object) {
-            console.log("⚠️ Using raw payload data as fallback session (Stripe API failed)");
-            payloadSession = body.data.object;
+
+        if (!payloadSession) {
+            try {
+                // BUGFIX: body is ALREADY a JSON object from req.json(), NOT a string.
+                const jsonBody = body;
+                if (jsonBody.data?.object) {
+                    console.warn("⚠️ STRIPE API FAILED but using RAW JSON payload directly (Unsafe Mode active)");
+                    payloadSession = jsonBody.data.object as any;
+
+                    // Manually extract session ID since we bypassed Stripe object construction
+                    if (!session_id && (payloadSession as any).id) session_id = (payloadSession as any).id;
+                }
+            } catch (parseErr) {
+                console.error("❌ Failed to parse body as JSON for fallback", parseErr);
+            }
         }
 
         // Validate Payment Status from Payload if needed
-        if (payloadSession && payloadSession.payment_status) {
-            paymentStatus = payloadSession.payment_status;
+        if (payloadSession && (payloadSession as any).payment_status) {
+            paymentStatus = (payloadSession as any).payment_status;
         }
 
         if (paymentStatus !== 'paid') {
-            console.warn(`⚠️ Payment Status is '${paymentStatus}'. Analyzing anyway but keeping note.`);
             // Note: 'checkout.session.completed' usually means success, but explicit check is safer.
+            console.warn(`⚠️ Payment Status is '${paymentStatus}'. Analyzing anyway but keeping note.`);
         }
 
         // Fallback Email Extraction from Payload
         // PRIORITY: 1. Force Email (Manual) 2. Stripe API 3. Payload
+        // Cast payloadSession to any to avoid TS errors
+        const safePayload = payloadSession as any;
+
         if (!customerEmail && force_email) {
             customerEmail = force_email;
             console.log("✅ Email MANUALLY provided by user:", customerEmail);
         }
 
-        if (!customerEmail && payloadSession) {
-            if (payloadSession.customer_details?.email) {
-                customerEmail = payloadSession.customer_details.email;
+        if (!customerEmail && safePayload) {
+            if (safePayload.customer_details?.email) {
+                customerEmail = safePayload.customer_details.email;
                 console.log("✅ Email extracted from RAW PAYLOAD (customer_details):", customerEmail);
-            } else if (payloadSession.customer_email) {
-                customerEmail = payloadSession.customer_email;
+            } else if (safePayload.customer_email) {
+                customerEmail = safePayload.customer_email;
                 console.log("✅ Email extracted from RAW PAYLOAD (customer_email):", customerEmail);
             }
         }
