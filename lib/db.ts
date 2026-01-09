@@ -152,6 +152,44 @@ export const database = {
             }
             return null;
         }
+    },
+
+    /**
+     * Retrieve the latest analysis for a given EMAIL
+     */
+    getLatestAnalysisByEmail: async (email: string): Promise<AnalysisRecord | null> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
+
+        try {
+            const snapshot = await dbInstance.collection('analyses')
+                .where('email', '==', email)
+                .orderBy('timestamp', 'desc')
+                .limit(1)
+                .get();
+
+            if (snapshot.empty) {
+                console.log(`⚠️ [Firestore] No analysis found for EMAIL: ${email}`);
+                return null;
+            }
+
+            const data = snapshot.docs[0].data() as AnalysisRecord;
+            console.log(`✅ [Firestore] Latest analysis retrieved for EMAIL: ${email}`);
+            return data;
+        } catch (error) {
+            console.error('❌ [Firestore] Query By EMAIL Error:', error);
+            // Fallback: query without sorting if index is missing
+            try {
+                const snapshot = await dbInstance.collection('analyses')
+                    .where('email', '==', email)
+                    .limit(1)
+                    .get();
+                if (!snapshot.empty) return snapshot.docs[0].data() as AnalysisRecord;
+            } catch (e) {
+                console.error('❌ [Firestore] Fallback Query Error:', e);
+            }
+            return null;
+        }
     }
 };
 

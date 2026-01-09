@@ -268,70 +268,79 @@ export async function POST(req: Request) {
             }
         }
 
-        // 3. RETRIEVE URL FROM EMAIL DOMAIN + FIREBASE
+
+        // 3. RETRIEVE ANALYSIS FROM FIREBASE BY EMAIL (NEW LOGIC)
         let analysisData = { score: 0, details: {}, extract: {} as any, url: "" };
         let companyInfo: { url?: string; name?: string } = {};
 
         if (customerEmail) {
-            // Extract domain from email
-            const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+            console.log(`💾 RETRIEVING ANALYSIS FROM DB by EMAIL: ${customerEmail}...`);
 
-            if (emailDomain) {
-                // Construct likely URL from domain
-                const constructedUrl = `https://${emailDomain}`;
-                companyInfo.url = constructedUrl;
-                console.log(`🔍 Constructed URL from email domain: ${constructedUrl}`);
-
-                // Try to find analysis in Firebase for this URL
-                console.log(`💾 RETRIEVING ANALYSIS FROM DB for ${constructedUrl}...`);
-                let dbAnalysis = null;
-                try {
-                    dbAnalysis = await db.getLatestAnalysisByUrl(constructedUrl);
-                    if (dbAnalysis) {
-                        analysisData = {
-                            score: dbAnalysis.score || 0,
-                            details: {},
-                            extract: dbAnalysis.data?.fields || {},
-                            url: dbAnalysis.url || constructedUrl
-                        };
-                        console.log(`✅ Found analysis in DB with score: ${analysisData.score}`);
-                    } else {
-                        console.warn(`⚠️ No analysis found in DB for ${constructedUrl}`);
-                    }
-                } catch (urlDbErr) {
-                    console.error("❌ DB URL Lookup Error:", urlDbErr);
+            // 🎯 PRIORITY METHOD: Search directly by email
+            let dbAnalysis = null;
+            try {
+                dbAnalysis = await db.getLatestAnalysisByEmail(customerEmail);
+                if (dbAnalysis) {
+                    analysisData = {
+                        score: dbAnalysis.score || 0,
+                        details: {},
+                        extract: dbAnalysis.data?.fields || {},
+                        url: dbAnalysis.url || ""
+                    };
+                    companyInfo.url = dbAnalysis.url;
+                    console.log(`✅ Found analysis in DB by EMAIL with score: ${analysisData.score}, URL: ${dbAnalysis.url}`);
+                } else {
+                    console.warn(`⚠️ No analysis found in DB for email: ${customerEmail}`);
                 }
+            } catch (dbErr) {
+                console.error("❌ DB EMAIL Lookup Error:", dbErr);
+            }
 
-                // Fallback: Try without https://
-                if (!dbAnalysis) {
+            // FALLBACK: Try to construct URL from email domain
+            if (!dbAnalysis) {
+                const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+                if (emailDomain) {
+                    const constructedUrl = `https://${emailDomain}`;
+                    console.log(`🔍 FALLBACK: Trying constructed URL from domain: ${constructedUrl}`);
+
                     try {
-                        dbAnalysis = await db.getLatestAnalysisByUrl(emailDomain);
+                        dbAnalysis = await db.getLatestAnalysisByUrl(constructedUrl);
                         if (dbAnalysis) {
                             analysisData = {
                                 score: dbAnalysis.score || 0,
                                 details: {},
                                 extract: dbAnalysis.data?.fields || {},
-                                url: dbAnalysis.url || emailDomain
+                                url: dbAnalysis.url || constructedUrl
                             };
                             companyInfo.url = dbAnalysis.url;
-                            console.log(`✅ Found analysis in DB (without https) with score: ${analysisData.score}`);
+                            console.log(`✅ Found analysis via URL fallback with score: ${analysisData.score}`);
                         }
                     } catch (e) {
-                        console.error("Second DB lookup failed:", e);
+                        console.error("URL Fallback lookup failed:", e);
                     }
                 }
+            }
 
-                // Ultimate fallback: Perform live analysis if nothing in DB
-                if (!dbAnalysis) {
-                    console.log(`🔄 FALLBACK: Performing live analysis for ${constructedUrl}`);
+            // ULTIMATE FALLBACK: Perform live analysis if nothing in DB
+            if (!dbAnalysis) {
+                const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+                const constructedUrl = emailDomain ? `https://${emailDomain}` : "";
+
+                if (constructedUrl) {
+                    console.log(`🔄 ULTIMATE FALLBACK: Performing live analysis for ${constructedUrl}`);
                     try {
-                        const result = await performFullAnalysis(companyInfo.url);
-                        analysisData = { ...result, url: companyInfo.url };
+                        const result = await performFullAnalysis(constructedUrl);
+                        analysisData = { ...result, url: constructedUrl };
+                        companyInfo.url = constructedUrl;
                         if (analysisData.score === 0) analysisData.score = 50;
-                    } catch (e) { console.error("Fallback Analysis Failed", e); }
+                        console.log(`✅ Live analysis completed with score: ${analysisData.score}`);
+                    } catch (e) {
+                        console.error("❌ Fallback Analysis Failed", e);
+                    }
                 }
             }
         }
+
 
         // 4. LOGIC & CHECKS  
         let emailMissing = false;
