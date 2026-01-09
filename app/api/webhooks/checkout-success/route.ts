@@ -121,8 +121,9 @@ export async function POST(req: Request) {
         }
 
         if (!session_id) {
-            console.error("❌ WEBHOOK ERROR: Missing session_id in payload", body);
-            return NextResponse.json({ error: 'Missing session_id' }, { status: 400 });
+            // IGNORE non-checkout events gracefully to keep Stripe happy (Green Logs)
+            console.log(`ℹ️ Ignored Event: ${body.type} (No session_id)`);
+            return NextResponse.json({ received: true }, { status: 200 });
         }
 
         console.log(`Processing Success for Session: ${session_id}`);
