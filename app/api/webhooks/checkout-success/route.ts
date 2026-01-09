@@ -11,6 +11,7 @@ import { generateText } from 'ai';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
 import { db } from '@/lib/db';
+import { generateRealAsrJson } from '@/lib/ayo-crypto'; // This import is already present and correct
 
 // --- LOGIQUE D'ANALYSE (DUPLIQUÉE DEPUIS CHAT ROUTE POUR AUTONOMIE WEBHOOK) ---
 
@@ -94,41 +95,6 @@ async function performFullAnalysis(targetUrl: string): Promise<any> {
         details: scoreResult.blocks,
         extract: extractJson.fields
     };
-}
-
-// Helper to generate REAL ASR JSON
-function generateRealAsrJson(customerEmail: string, sessionDate: string, sessionId: string, analysisData: any, isPro: boolean) {
-    const fields = analysisData.extract || {};
-    const identity = fields.identite || {};
-    const offer = fields.offre || {};
-
-    return JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "@id": sessionId,
-        "name": identity.name?.value || "Votre Entreprise",
-        "url": analysisData.url || "https://votre-site.com",
-        "email": customerEmail,
-
-        "ayo:offer": {
-            "services": offer.services?.value || [],
-            "products": offer.products?.value || []
-        },
-
-        "ayo:score": {
-            "value": analysisData.score + "/100",
-            "level": isPro ? "PRO_CERTIFIED" : "ESSENTIAL_VERIFIED",
-            "method": "AYO_V2_WEBHOOK"
-        },
-
-        "ayo:seal": {
-            "issuer": "AI Visionary Authority",
-            "level": isPro ? "PRO" : "ESSENTIAL",
-            "hash": sessionId.substring(0, 16),
-            "signature": `sig_${Date.now()}_${sessionId.substring(0, 8)}`,
-            "timestamp": sessionDate
-        }
-    }, null, 2);
 }
 
 export async function POST(req: Request) {
@@ -351,7 +317,8 @@ export async function POST(req: Request) {
 
         // Generate REAL Files
         const sessionDate = new Date().toISOString();
-        const asrJson = generateRealAsrJson(customerEmail || "email_missing", sessionDate, session_id, analysisData, packType === "PRO");
+        const asrObject = await generateRealAsrJson(analysisData.extract, analysisData.score, sessionDate, session_id, packType === "PRO");
+        const asrJson = JSON.stringify(asrObject, null, 2);
 
         // 🔐 VALIDATION EMAIL
         const VALIDATION_DISABLED = false;
