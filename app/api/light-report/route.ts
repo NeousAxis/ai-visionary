@@ -106,7 +106,18 @@ export async function GET(req: Request) {
 
     } catch (error: any) {
         console.error("❌ Send Light Error:", error);
-        return new Response(`<h1>❌ Erreur</h1><p>${error.message}</p>`, {
+        return new Response(`
+            <div style="font-family: sans-serif; text-align: center; margin-top: 50px; color: #dc2626;">
+                <h1>❌ Erreur d'envoi</h1>
+                <p>Impossible d'envoyer l'email à <strong>${email}</strong>.</p>
+                <div style="background: #fef2f2; padding: 15px; border: 1px solid #fca5a5; display: inline-block; text-align: left; margin-top: 20px;">
+                    <strong>Message Technique :</strong><br>
+                    <code>${error.message || JSON.stringify(error)}</code>
+                </div>
+                <br><br>
+                <p>Vérifiez que votre clé API Resend est valide et que le domaine est vérifié.</p>
+            </div>
+        `, {
             headers: { 'Content-Type': 'text/html; charset=utf-8' },
         });
     }

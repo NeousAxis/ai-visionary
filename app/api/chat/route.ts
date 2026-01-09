@@ -202,13 +202,13 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
   
   Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
   
-  👉 [🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})
+  👉 **[🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
    (Certification ASR Essential + Analyse détaillée & Envoi par email)
 
-   👉 [🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
+   👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
    (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
 
-   👉 Cliquer sur 'LIGHT' (Analyse détaillée + Certification ASR simple)"
+   👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmail)})** (Analyse détaillée + Certification ASR simple)"
 
 📍 ÉTAT 4 : UPGRADE & PAIEMENT
 SI OUI :
