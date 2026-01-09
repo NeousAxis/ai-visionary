@@ -1,4 +1,3 @@
-
 // Force static for reliability? No, dynamic for streaming.
 export const dynamic = 'force-dynamic';
 
@@ -199,7 +198,7 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
   💡 **OPPORTUNITÉ STRATÉGIQUE**
   
   Votre score actuel ([NOTE_GLOBALE]/100) est un début.
-  Mais pour garantir votre autorité sur les IA (ChatGPT, Gemini), la Certification Cryptographique serait beaucoup plus efficace.
+  Mais pour garantir votre intégrité identitaire sur les IA (ChatGPT, Gemini), la Certification Cryptographique serait beaucoup plus efficace.
   
   Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
   
