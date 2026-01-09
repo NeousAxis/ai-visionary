@@ -175,8 +175,9 @@ J'ai préparé votre **ASR Light** (Carte d'identité numérique) qui corrige ce
 
 Pour déverrouiller votre analyse complète, veuillez confirmer votre propriété.
 
-👉 **Entrez votre email professionnel :**
-(Toute adresse email valide est acceptée pour recevoir le dossier).
+👉 **Entrez votre email professionnel de l'entreprise :**
+⚠️ *Important : Seuls les emails du domaine analysé sont acceptés pour des raisons de sécurité.*
+(Ex: si vous analysez example.com, utilisez contact@example.com)
 (Envoi immédiat et sécurisé)."
 
 ⚠️ RÈGLES D'AFFICHAGE CRITIQUES (CHAT) :
@@ -185,7 +186,7 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 - GARDE LES EXPLICATIONS POUR L'EMAIL.
 
 📍 ÉTAT 3 : VÉRIFICATION EMAIL & DÉLIVRANCE
-[LOGIQUE : Email reçu]
+[LOGIQUE : Si email valide et correspond au domaine]
   "✅ **Email validé.**
   
   📨 **Envoi en cours vers [EMAIL_USER]...**
@@ -682,11 +683,11 @@ J’ai préparé votre ASR Light (Carte d’identité numérique) qui corrige le
                         const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
                         const emailDomain = userEmail.split('@')[1]?.toLowerCase();
 
-                        // 🔓 SECURITY UNLOCKED FOR TESTING: Allow any email
-                        if (true || emailDomain === analyzedDomain) {
+                        // 🔒 SECURITY STRICT MODE: Only allow domain match
+                        if (emailDomain === analyzedDomain) {
                             emailDomainValid = true;
                         } else {
-                            // (Code unreachable now)
+                            // (Code reachable if mismatch)
                             domainMismatchMessage = `❌ **Email Refusé**
 
 L'email \`${userEmail}\` ne correspond pas au domaine de votre site (\`${analyzedDomain}\`).

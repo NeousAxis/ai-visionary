@@ -111,9 +111,8 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
-        // 🕵️‍♂️ MOUCHARD: SPY ON INCOMING TRAFFIC
-        // Send an email to ADMIN every time this URL is hit.
-        console.log("🕵️‍♂️ WEBHOOK HIT! Sending Spy Email...");
+        // 🕵️‍♂️ MOUCHARD: SPY ON INCOMING TRAFFIC (DISABLED FOR PROD)
+        /* console.log("🕵️‍♂️ WEBHOOK HIT! Sending Spy Email...");
         try {
             const spyResend = new Resend(process.env.RESEND_API_KEY);
             await spyResend.emails.send({
@@ -122,7 +121,7 @@ export async function POST(req: Request) {
                 subject: `🪲 Webhook HIT: ${body.type || 'Unknown'}`,
                 html: `<pre>${JSON.stringify(body, null, 2).substring(0, 1000)}</pre>`
             });
-        } catch (spyErr) { console.error("Spy failed", spyErr); }
+        } catch (spyErr) { console.error("Spy failed", spyErr); } */
 
         let session_id = body.session_id; // Frontend direct call support
         let force_email = body.force_email;
@@ -360,7 +359,7 @@ export async function POST(req: Request) {
         }
 
         // 🔐 VALIDATION EMAIL
-        const VALIDATION_DISABLED = true; // FIXME: Re-enable for Prod strictness later
+        const VALIDATION_DISABLED = false; // PROD MODE: STRICT
         let emailValidated = false;
         if (!emailMissing && customerEmail && companyInfo.url) {
             const urlObj = new URL(companyInfo.url);
