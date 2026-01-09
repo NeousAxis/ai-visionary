@@ -124,9 +124,9 @@ export const database = {
         if (!dbInstance) return null;
 
         try {
+            // SIMPLIFIED: Removed orderBy to avoid "Index Link" error
             const snapshot = await dbInstance.collection('analyses')
                 .where('url', '==', url)
-                .orderBy('timestamp', 'desc')
                 .limit(1)
                 .get();
 
@@ -136,20 +136,10 @@ export const database = {
             }
 
             const data = snapshot.docs[0].data() as AnalysisRecord;
-            console.log(`✅ [Firestore] Latest analysis retrieved for URL: ${url}`);
+            console.log(`✅ [Firestore] Analysis retrieved for URL: ${url}`);
             return data;
         } catch (error) {
             console.error('❌ [Firestore] Query By URL Error:', error);
-            // Fallback: query without sorting if index is missing
-            try {
-                const snapshot = await dbInstance.collection('analyses')
-                    .where('url', '==', url)
-                    .limit(1)
-                    .get();
-                if (!snapshot.empty) return snapshot.docs[0].data() as AnalysisRecord;
-            } catch (e) {
-                console.error('❌ [Firestore] Fallback Query Error:', e);
-            }
             return null;
         }
     },
@@ -162,9 +152,9 @@ export const database = {
         if (!dbInstance) return null;
 
         try {
+            // SIMPLIFIED: Removed orderBy to avoid "Index Link" error
             const snapshot = await dbInstance.collection('analyses')
                 .where('email', '==', email)
-                .orderBy('timestamp', 'desc')
                 .limit(1)
                 .get();
 
@@ -174,20 +164,10 @@ export const database = {
             }
 
             const data = snapshot.docs[0].data() as AnalysisRecord;
-            console.log(`✅ [Firestore] Latest analysis retrieved for EMAIL: ${email}`);
+            console.log(`✅ [Firestore] Analysis retrieved for EMAIL: ${email}`);
             return data;
         } catch (error) {
             console.error('❌ [Firestore] Query By EMAIL Error:', error);
-            // Fallback: query without sorting if index is missing
-            try {
-                const snapshot = await dbInstance.collection('analyses')
-                    .where('email', '==', email)
-                    .limit(1)
-                    .get();
-                if (!snapshot.empty) return snapshot.docs[0].data() as AnalysisRecord;
-            } catch (e) {
-                console.error('❌ [Firestore] Fallback Query Error:', e);
-            }
             return null;
         }
     }
