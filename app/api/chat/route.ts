@@ -175,9 +175,8 @@ J'ai préparé votre **ASR Light** (Carte d'identité numérique) qui corrige ce
 
 Pour déverrouiller votre analyse complète, veuillez confirmer votre propriété.
 
-👉 **Entrez votre email professionnel de l'entreprise :**
-⚠️ *Important : Seuls les emails du domaine analysé sont acceptés pour des raisons de sécurité.*
-(Ex: si vous analysez example.com, utilisez contact@example.com)
+👉 **Entrez votre email professionnel :**
+(Toute adresse email valide est acceptée pour recevoir le dossier).
 (Envoi immédiat et sécurisé)."
 
 ⚠️ RÈGLES D'AFFICHAGE CRITIQUES (CHAT) :
@@ -186,7 +185,7 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 - GARDE LES EXPLICATIONS POUR L'EMAIL.
 
 📍 ÉTAT 3 : VÉRIFICATION EMAIL & DÉLIVRANCE
-[LOGIQUE : Si email valide]
+[LOGIQUE : Email reçu]
   "✅ **Email validé.**
   
   📨 **Envoi en cours vers [EMAIL_USER]...**
