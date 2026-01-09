@@ -907,6 +907,28 @@ pre {
     border-bottom-right-radius: 2px;
 }
 
+/* FIX: Markdown Styling in Chat */
+.message strong,
+.message b {
+    font-weight: 800;
+    color: #fff;
+}
+
+.message a {
+    color: #38bdf8 !important;
+    /* Light Blue to stand out on dark bg */
+    text-decoration: underline;
+    font-weight: 700;
+    cursor: pointer !important;
+    pointer-events: auto;
+}
+
+.message a:hover {
+    color: #7dd3fc !important;
+    text-decoration: none;
+}
+
+
 .typing-indicator {
     padding: 10px;
     background: rgba(255, 255, 255, 0.05);
