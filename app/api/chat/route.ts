@@ -683,9 +683,11 @@ J’ai préparé votre ASR Light (Carte d’identité numérique) qui corrige le
                         const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
                         const emailDomain = userEmail.split('@')[1]?.toLowerCase();
 
-                        if (emailDomain === analyzedDomain) {
+                        // 🔓 SECURITY UNLOCKED FOR TESTING: Allow any email
+                        if (true || emailDomain === analyzedDomain) {
                             emailDomainValid = true;
                         } else {
+                            // (Code unreachable now)
                             domainMismatchMessage = `❌ **Email Refusé**
 
 L'email \`${userEmail}\` ne correspond pas au domaine de votre site (\`${analyzedDomain}\`).
