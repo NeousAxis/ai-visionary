@@ -315,10 +315,16 @@ export async function POST(req: Request) {
             emailMissing = true;
         }
 
-        // Generate REAL Files
+        // Generate REAL Files (SAFE WRAPPER)
         const sessionDate = new Date().toISOString();
-        const asrObject = await generateRealAsrJson(analysisData.extract, analysisData.score, sessionDate, session_id, packType === "PRO");
-        const asrJson = JSON.stringify(asrObject, null, 2);
+        let asrJson = "{}";
+        try {
+            const asrObject = await generateRealAsrJson(analysisData.extract, analysisData.score, sessionDate, session_id, packType === "PRO");
+            asrJson = JSON.stringify(asrObject, null, 2);
+        } catch (genErr) {
+            console.error("❌ CRITICAL: Failed to generate ASR JSON. Using empty fallback.", genErr);
+            asrJson = JSON.stringify({ error: "Generation Failed", contact: "support@ai-visionary.com" }, null, 2);
+        }
 
         // 🔐 VALIDATION EMAIL
         const VALIDATION_DISABLED = true; // FIXME: Re-enable for Prod strictness later
