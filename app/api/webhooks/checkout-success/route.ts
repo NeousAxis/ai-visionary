@@ -321,7 +321,7 @@ export async function POST(req: Request) {
         const asrJson = JSON.stringify(asrObject, null, 2);
 
         // 🔐 VALIDATION EMAIL
-        const VALIDATION_DISABLED = false;
+        const VALIDATION_DISABLED = true; // FIXME: Re-enable for Prod strictness later
         let emailValidated = false;
         if (!emailMissing && customerEmail && companyInfo.url) {
             const urlObj = new URL(companyInfo.url);
