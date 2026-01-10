@@ -402,8 +402,9 @@ export async function POST(req: Request) {
                     emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
                     emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+                        <head><meta charset="utf-8"></head>
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                            <h1 style="margin:0;">AYO / Pack AIO PRO �🇨🇭</h1>
+                            <h1 style="margin:0;">AYO / Pack AIO PRO &#128274;&#127464;&#127469;</h1>
                         </div>
                         
                         <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
@@ -509,7 +510,7 @@ export async function POST(req: Request) {
                     emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                            <h1 style="margin:0;">AYO / Essential �🇨🇭</h1>
+                            <h1 style="margin:0;">AYO / Essential &#128274;&#127464;&#127469;</h1>
                         </div>
                         
                         <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
