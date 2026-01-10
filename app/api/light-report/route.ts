@@ -57,7 +57,7 @@ export async function GET(req: Request) {
             subject: 'Votre Certification ASR Light (Gratuit) - AI Visionary',
             html: `
                 <div style="font-family: sans-serif; color: #333;">
-                    <h1>Votre Pack AYO Light est prêt 🛡</h1>
+                    <h1>Votre Pack AYO Light est prêt 🛡🇨🇭</h1>
                     <p>Bonjour,</p>
                     <p>Voici votre certification ASR standard (version Light) suite à l'analyse de <strong>${analysisData.url}</strong>.</p>
                     
