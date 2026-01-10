@@ -519,8 +519,15 @@ export async function POST(req: Request) {
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
                                 <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
-                                <p>Votre analyse détaillée complète est ci-dessous.</p>
                             </div>
+
+                            ${(analysisData as any).data?.audit_report || `
+                                <div style="background:#fff7ed; padding:15px; border-radius:4px; margin:20px 0; border:1px solid #fed7aa;">
+                                    <p style="color:#c2410c; margin:0;"><strong>Analyse :</strong> Des lacunes structurelles (Identité, Sémantique, Technique) ont été détectées, bloquant la lecture par les IA.</p>
+                                </div>
+                            `}
+                            
+                            <p>Votre Pack correctif complet est ci-dessous.</p>
                             
                             <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 

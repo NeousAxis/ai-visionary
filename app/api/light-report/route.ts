@@ -31,7 +31,8 @@ export async function GET(req: Request) {
             analysisData = {
                 score: analysis.score,
                 extract: analysis.data?.fields || {},
-                url: analysis.url
+                url: analysis.url,
+                audit_report: analysis.data?.audit_report
             };
         } else {
             // Fallback: try by domain? Or just fail gently?
@@ -64,6 +65,8 @@ export async function GET(req: Request) {
                     <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
                         <p><strong>Score AIO :</strong> ${Math.round(analysisData.score)} / 100</p>
                     </div>
+
+                    ${(analysisData as any).audit_report || ''}
 
                     <h3>📦 VOTRE CODE ASR (JSON)</h3>
                     <p>Copiez ce code si la pièce jointe est bloquée :</p>

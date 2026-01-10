@@ -567,9 +567,45 @@ ${scanResult.text}
                 Object.keys(scoreResult.blocks).forEach(k => scoreResult.blocks[k as keyof typeof scoreResult.blocks] = 99); // Max display
             }
 
+            // 4b. GENERATE AUDIT FEEDBACK (HUMAN READABLE EXPLANATION)
+            const auditFeedback = [];
+
+            // Analyze Identity
+            if (scoreResult.blocks.identite < 8) auditFeedback.push("❌ Identité Numérique incomplète (Manque Logo ou Description officielle).");
+            else auditFeedback.push("✅ Identité Numérique validée.");
+
+            // Analyze Offer
+            if (scoreResult.blocks.offre < 10) auditFeedback.push("❌ Offre de services mal comprise par l'IA (Sémantique floue).");
+            else if (scoreResult.blocks.offre < 18) auditFeedback.push("⚠️ Offre détectée mais manque de précision technique pour le référencement.");
+            else auditFeedback.push("✅ Offre de services parfaitement structurée.");
+
+            // Analyze Tech
+            const techMisses = [];
+            if (!scanResult.hasJsonLd) techMisses.push("Données Structurées (JSON-LD)");
+            if (!scanResult.hasAsrFile) techMisses.push("Fichier ASR de certification");
+            if (!scanResult.metaDescription) techMisses.push("Méta-description");
+
+            if (techMisses.length > 0) auditFeedback.push(`❌ Lacunes Techniques critiques : ${techMisses.join(', ')}.`);
+            else auditFeedback.push("✅ Infrastructure technique de base validée.");
+
+            // Analyze Credibility
+            if (scoreResult.blocks.engagements_conformite < 5) auditFeedback.push("⚠️ Aucun signal de confiance (Mentions légales, RSE, Certifications) détecté.");
+
+            const auditReportHtml = `
+                <div style="background:#fff0f0; border-left:4px solid #dc2626; padding:15px; margin:20px 0; border-radius:4px;">
+                    <h3 style="color:#991b1b; margin-top:0;">🛑 Diagnostic des Manquements DETECTÉS :</h3>
+                    <ul style="color:#7f1d1d; margin-bottom:0;">
+                        ${auditFeedback.map(item => `<li style="margin-bottom:5px;">${item}</li>`).join('')}
+                    </ul>
+                    <p style="font-size:12px; margin-top:10px; color:#991b1b;">
+                        <em>Ces éléments bloquent votre référencement par les IA génératives (ChatGPT, Gemini).<br>
+                        <strong>Le PACK AYO ci-dessous corrige automatiquement 100% de ces points techniques.</strong></em>
+                    </p>
+                </div>
+            `;
+
             //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
             console.log(`🔥 DEBUG: About to save analysis. SessionID: ${sessionAsrId}, Score: ${scoreResult.total}`);
-            console.log(`🔥 DEBUG: db object exists:`, typeof db, typeof db.saveAnalysis);
             try {
                 console.log(`🔥 DEBUG: Calling db.saveAnalysis...`);
                 await db.saveAnalysis(sessionAsrId, {
@@ -580,7 +616,8 @@ ${scanResult.text}
                     data: {
                         fields: extractJson.fields,
                         blocks: scoreResult.blocks,
-                        scan: scanResult
+                        scan: scanResult,
+                        audit_report: auditReportHtml // <--- NEW: Saved for Email
                     }
                 });
                 console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
