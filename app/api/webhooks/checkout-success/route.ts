@@ -610,7 +610,8 @@ export async function POST(req: Request) {
                 }
 
                 await resend.emails.send({
-                    from: 'AYO <hello@ai-visionary.com>',
+                    from: 'AI Visionary System <hello@ai-visionary.com>',
+                    replyTo: 'support@ai-visionary.com',
                     to: [customerEmail],
                     subject: emailSubject,
                     html: emailHtml
