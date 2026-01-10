@@ -583,7 +583,7 @@ export async function POST(req: Request) {
                             </div>
 
                             <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
-                                AI Visionary - L'Autorité de Visibilité IA.
+                                AI Visionary - Système de Visibilité IA.
                             </p>
                         </div>
                     </div>
