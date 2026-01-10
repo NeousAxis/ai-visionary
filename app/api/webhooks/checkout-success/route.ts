@@ -276,7 +276,7 @@ export async function POST(req: Request) {
 
 
         // 3. RETRIEVE ANALYSIS FROM FIREBASE BY EMAIL (NEW LOGIC)
-        let analysisData = { score: 0, details: {}, extract: {} as any, url: "", audit_report: undefined as string | undefined };
+        let analysisData = { score: 0, details: {}, extract: {} as any, url: "", audit_report: undefined as string | undefined, analysis_blocks: undefined as any };
         let companyInfo: { url?: string; name?: string } = {};
 
         if (customerEmail) {
@@ -292,7 +292,8 @@ export async function POST(req: Request) {
                         details: {},
                         extract: dbAnalysis.data?.fields || {},
                         url: dbAnalysis.url || "",
-                        audit_report: dbAnalysis.data?.audit_report // <--- Added mapping
+                        audit_report: dbAnalysis.data?.audit_report,
+                        analysis_blocks: dbAnalysis.data?.analysis_blocks // <--- Add
                     };
                     companyInfo.url = dbAnalysis.url;
                     console.log(`✅ Found analysis in DB by EMAIL with score: ${analysisData.score}, URL: ${dbAnalysis.url}`);
@@ -318,7 +319,8 @@ export async function POST(req: Request) {
                                 details: {},
                                 extract: dbAnalysis.data?.fields || {},
                                 url: dbAnalysis.url || constructedUrl,
-                                audit_report: dbAnalysis.data?.audit_report // <--- Added mapping
+                                audit_report: dbAnalysis.data?.audit_report,
+                                analysis_blocks: dbAnalysis.data?.analysis_blocks // <--- Add
                             };
                             companyInfo.url = dbAnalysis.url;
                             console.log(`✅ Found analysis via URL fallback with score: ${analysisData.score}`);
@@ -348,7 +350,8 @@ export async function POST(req: Request) {
                             identite: { name: { value: "Client AYO", q: 1 } },
                             offre: { services: { value: ["Service Numérique"], q: 1 } }
                         } as any,
-                        audit_report: undefined // Correct Type conformity
+                        audit_report: undefined,
+                        analysis_blocks: undefined // Satisfy type
                     };
                 }
             }
@@ -401,6 +404,52 @@ export async function POST(req: Request) {
                 let emailSubject = '';
                 let emailHtml = '';
 
+                // Helper to render Audit Table from Structured Data
+                const renderAuditTable = (blocks: any) => {
+                    if (!blocks) return null;
+
+                    const rows = Object.keys(blocks).map(key => {
+                        const item = blocks[key];
+                        // Safety check
+                        if (!item || !item.score) return '';
+
+                        const color = item.status === 'success' ? '#166534' : (item.status === 'warning' ? '#854d0e' : '#991b1b');
+                        const bg = item.status === 'success' ? '#dcfce7' : (item.status === 'warning' ? '#fef9c3' : '#fee2e2');
+                        const icon = item.status === 'success' ? '✅' : (item.status === 'warning' ? '⚠️' : '❌');
+
+                        return `
+                            <div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:10px; border-radius:4px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong style="color:${color}; font-size:14px;">${icon} ${item.label}</strong>
+                                    <span style="font-size:12px; background:#fff; padding:2px 6px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${item.score}/${item.max}</span>
+                                </div>
+                                <p style="margin:5px 0 0 0; font-size:13px; color:#333;">${item.observation}</p>
+                            </div>
+                        `;
+                    }).join('');
+
+                    return `
+                        <div style="margin:20px 0;">
+                            <h3 style="color:#333; margin-bottom:10px; font-size:16px;">🛑 Diagnostic des Manquements :</h3>
+                            ${rows}
+                        </div>
+                    `;
+                };
+
+                let auditHtml = "";
+                // Priority: Structured Blocks > Static Report > Fallback
+                if ((analysisData as any).analysis_blocks) {
+                    auditHtml = renderAuditTable((analysisData as any).analysis_blocks) || "";
+                } else if ((analysisData as any).audit_report) {
+                    auditHtml = (analysisData as any).audit_report; // Legacy fallback
+                } else {
+                    auditHtml = `
+                        <div style="background:#fff7ed; padding:15px; border-radius:4px; margin:20px 0; border:1px solid #fed7aa;">
+                            <p style="color:#c2410c; margin:0;"><strong>Analyse :</strong> Des lacunes structurelles (Identité, Sémantique, Technique) ont été détectées.</p>
+                        </div>
+                    `;
+                }
+
                 if (packType === "PRO") {
                     emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
                     emailHtml = `
@@ -419,6 +468,8 @@ export async function POST(req: Request) {
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
                                 <p>L'analyse temps réel a permis de générer votre stratégie complète ci-dessous.</p>
                             </div>
+
+                            ${auditHtml}
 
                             <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 
@@ -525,11 +576,7 @@ export async function POST(req: Request) {
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
                             </div>
 
-                            ${(analysisData as any).data?.audit_report || `
-                                <div style="background:#fff7ed; padding:15px; border-radius:4px; margin:20px 0; border:1px solid #fed7aa;">
-                                    <p style="color:#c2410c; margin:0;"><strong>Analyse :</strong> Des lacunes structurelles (Identité, Sémantique, Technique) ont été détectées, bloquant la lecture par les IA.</p>
-                                </div>
-                            `}
+                            ${auditHtml}
                             
                             <p>Votre Pack correctif complet est ci-dessous.</p>
                             

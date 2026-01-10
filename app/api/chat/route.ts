@@ -567,42 +567,57 @@ ${scanResult.text}
                 Object.keys(scoreResult.blocks).forEach(k => scoreResult.blocks[k as keyof typeof scoreResult.blocks] = 99); // Max display
             }
 
-            // 4b. GENERATE AUDIT FEEDBACK (HUMAN READABLE EXPLANATION)
-            const auditFeedback = [];
+            // 4b. GENERATE STRUCTURED ANALYSIS (CLEAN DB STORAGE)
+            const structuredAnalysis: any = {
+                identite: { score: scoreResult.blocks.identite, max: 10, label: "Identité & Ancrage" },
+                offre: { score: scoreResult.blocks.offre, max: 20, label: "Clarté de l'Offre" },
+                processus: { score: scoreResult.blocks.processus_methodes, max: 15, label: "Processus & Méthodes" },
+                confiance: { score: scoreResult.blocks.engagements_conformite, max: 15, label: "Confiance & Conformité" },
+                technique: { score: scoreResult.blocks.structure_technique, max: 10, label: "Socle Technique" }
+            };
 
-            // Analyze Identity
-            if (scoreResult.blocks.identite < 8) auditFeedback.push("❌ Identité Numérique incomplète (Manque Logo ou Description officielle).");
-            else auditFeedback.push("✅ Identité Numérique validée.");
+            // Add Observations logic
+            // 1. Identité
+            if (structuredAnalysis.identite.score < 8) {
+                structuredAnalysis.identite.status = "error";
+                structuredAnalysis.identite.observation = "Manque d'éléments d'ancrage (Logo, Siret ou Description officielle).";
+            } else {
+                structuredAnalysis.identite.status = "success";
+                structuredAnalysis.identite.observation = "Identité numérique validée.";
+            }
 
-            // Analyze Offer
-            if (scoreResult.blocks.offre < 10) auditFeedback.push("❌ Offre de services mal comprise par l'IA (Sémantique floue).");
-            else if (scoreResult.blocks.offre < 18) auditFeedback.push("⚠️ Offre détectée mais manque de précision technique pour le référencement.");
-            else auditFeedback.push("✅ Offre de services parfaitement structurée.");
+            // 2. Offre
+            if (structuredAnalysis.offre.score < 10) {
+                structuredAnalysis.offre.status = "error";
+                structuredAnalysis.offre.observation = "Sémantique floue. L'IA ne comprend pas clairement vos services.";
+            } else if (structuredAnalysis.offre.score < 18) {
+                structuredAnalysis.offre.status = "warning";
+                structuredAnalysis.offre.observation = "Offre détectée mais manque de précision technique (Mots-clés).";
+            } else {
+                structuredAnalysis.offre.status = "success";
+                structuredAnalysis.offre.observation = "Architecture de l'offre validée.";
+            }
 
-            // Analyze Tech
+            // 3. Technique (Critical)
             const techMisses = [];
-            if (!scanResult.hasJsonLd) techMisses.push("Données Structurées (JSON-LD)");
-            if (!scanResult.hasAsrFile) techMisses.push("Fichier ASR de certification");
-            if (!scanResult.metaDescription) techMisses.push("Méta-description");
+            if (!scanResult.hasJsonLd) techMisses.push("JSON-LD");
+            if (!scanResult.hasAsrFile) techMisses.push("Fichier ASR");
 
-            if (techMisses.length > 0) auditFeedback.push(`❌ Lacunes Techniques critiques : ${techMisses.join(', ')}.`);
-            else auditFeedback.push("✅ Infrastructure technique de base validée.");
+            if (techMisses.length > 0) {
+                structuredAnalysis.technique.status = "error";
+                structuredAnalysis.technique.observation = `Lacunes critiques : ${techMisses.join(', ')}.`;
+            } else {
+                structuredAnalysis.technique.status = "success";
+                structuredAnalysis.technique.observation = "Infrastructure compatible IA.";
+            }
 
-            // Analyze Credibility
-            if (scoreResult.blocks.engagements_conformite < 5) auditFeedback.push("⚠️ Aucun signal de confiance (Mentions légales, RSE, Certifications) détecté.");
+            // Default others
+            structuredAnalysis.processus.status = structuredAnalysis.processus.score < 8 ? "warning" : "success";
+            structuredAnalysis.processus.observation = structuredAnalysis.processus.score < 8 ? "Processus métier peu détaillés." : "Méthodologie claire.";
 
-            const auditReportHtml = `
-                <div style="background:#fff0f0; border-left:4px solid #dc2626; padding:15px; margin:20px 0; border-radius:4px;">
-                    <h3 style="color:#991b1b; margin-top:0;">🛑 Diagnostic des Manquements DETECTÉS :</h3>
-                    <ul style="color:#7f1d1d; margin-bottom:0;">
-                        ${auditFeedback.map(item => `<li style="margin-bottom:5px;">${item}</li>`).join('')}
-                    </ul>
-                    <p style="font-size:12px; margin-top:10px; color:#991b1b;">
-                        <em>Ces éléments bloquent votre référencement par les IA génératives (ChatGPT, Gemini).<br>
-                        <strong>Le PACK AYO ci-dessous corrige automatiquement 100% de ces points techniques.</strong></em>
-                    </p>
-                </div>
-            `;
+            structuredAnalysis.confiance.status = structuredAnalysis.confiance.score < 8 ? "warning" : "success";
+            structuredAnalysis.confiance.observation = structuredAnalysis.confiance.score < 8 ? "Signaux de réassurance (RSE, Mentions) faibles." : "Niveau de confiance élevé.";
+
 
             //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
             console.log(`🔥 DEBUG: About to save analysis. SessionID: ${sessionAsrId}, Score: ${scoreResult.total}`);
@@ -617,7 +632,7 @@ ${scanResult.text}
                         fields: extractJson.fields,
                         blocks: scoreResult.blocks,
                         scan: scanResult,
-                        audit_report: auditReportHtml // <--- NEW: Saved for Email
+                        analysis_blocks: structuredAnalysis // <--- NEW STRUCTURED DATA
                     }
                 });
                 console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
