@@ -609,6 +609,8 @@ Calcul du score en cours...
 |||
 📊 SCORE FINAL AIO : ${scoreResult.total} / 100
 
+ℹ️ *Note : L'analyse IA peut présenter de légères variations d'un scan à l'autre. Cette marge normale n'affecte pas la conformité technique du certificat ASR délivré.*
+
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
 (Les explications critiques et les correctifs ont été générés mais sont masqués).
 
