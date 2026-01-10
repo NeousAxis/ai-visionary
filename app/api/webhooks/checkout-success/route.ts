@@ -276,7 +276,7 @@ export async function POST(req: Request) {
 
 
         // 3. RETRIEVE ANALYSIS FROM FIREBASE BY EMAIL (NEW LOGIC)
-        let analysisData = { score: 0, details: {}, extract: {} as any, url: "" };
+        let analysisData = { score: 0, details: {}, extract: {} as any, url: "", audit_report: undefined as string | undefined };
         let companyInfo: { url?: string; name?: string } = {};
 
         if (customerEmail) {
@@ -291,7 +291,8 @@ export async function POST(req: Request) {
                         score: dbAnalysis.score || 0,
                         details: {},
                         extract: dbAnalysis.data?.fields || {},
-                        url: dbAnalysis.url || ""
+                        url: dbAnalysis.url || "",
+                        audit_report: dbAnalysis.data?.audit_report // <--- Added mapping
                     };
                     companyInfo.url = dbAnalysis.url;
                     console.log(`✅ Found analysis in DB by EMAIL with score: ${analysisData.score}, URL: ${dbAnalysis.url}`);
@@ -316,7 +317,8 @@ export async function POST(req: Request) {
                                 score: dbAnalysis.score || 0,
                                 details: {},
                                 extract: dbAnalysis.data?.fields || {},
-                                url: dbAnalysis.url || constructedUrl
+                                url: dbAnalysis.url || constructedUrl,
+                                audit_report: dbAnalysis.data?.audit_report // <--- Added mapping
                             };
                             companyInfo.url = dbAnalysis.url;
                             console.log(`✅ Found analysis via URL fallback with score: ${analysisData.score}`);
@@ -345,7 +347,8 @@ export async function POST(req: Request) {
                         extract: {
                             identite: { name: { value: "Client AYO", q: 1 } },
                             offre: { services: { value: ["Service Numérique"], q: 1 } }
-                        } as any
+                        } as any,
+                        audit_report: undefined // Correct Type conformity
                     };
                 }
             }
