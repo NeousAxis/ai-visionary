@@ -71,9 +71,20 @@ export async function GET(req: Request) {
 ${JSON.stringify(asrJson, null, 2)}
                     </pre>
                     
-                    <h3>⚠️ Installation</h3>
-                    <p>Ce code doit être sauvegardé dans un fichier <code>asr.json</code> et placé dans le dossier <code>/.ayo/</code>.</p>
-                    <p><code>https://${analysisData.url.replace('https://', '')}/.ayo/asr.json</code></p>
+                    <div style="background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 30px 0; border: 1px solid #bbdefb;">
+                        <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Pas à Pas)</h3>
+                        <p style="font-size: 14px; font-weight: bold;">Objectif : Rendre ce fichier accessible aux IA.</p>
+                        <ol style="font-size:13px; padding-left:20px; line-height: 1.6;">
+                            <li>Accédez à votre serveur (FTP) ou gestionnaire de fichiers.</li>
+                            <li>À la racine de votre site (au même niveau que <code>index.html</code>), créez un nouveau dossier nommé exactement : <br><code>.ayo</code> (avec le point devant).</li>
+                            <li>Dans ce dossier <code>.ayo</code>, créez le fichier <code>asr.json</code> et collez-y le code ci-dessus.</li>
+                            <li>Vérifiez l'accès en tapant dans votre navigateur : <br><code>https://votre-site.com/.ayo/asr.json</code></li>
+                        </ol>
+                        <p style="margin-top: 15px; font-size: 13px; font-style: italic;">
+                            <strong>Alternative WordPress/Wix :</strong> Si vous ne pouvez pas créer de dossier, copiez le contenu du <code>asr.json</code> et collez-le dans le <code>&lt;HEAD&gt;</code> de votre site, entouré des balises :<br>
+                            <code>&lt;script type="application/ld+json"&gt; ... CODE ICI ... &lt;/script&gt;</code>
+                        </p>
+                    </div>
 
                     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
                     
