@@ -97,31 +97,43 @@ async function performFullAnalysis(targetUrl: string): Promise<any> {
     };
 }
 
+
 export async function POST(req: Request) {
     // Lazy init Stripe inside handler
     const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     let stripe: Stripe | null = null;
 
     if (stripeKey) {
-        stripe = new Stripe(stripeKey); // Use default SDK version for safety
+        stripe = new Stripe(stripeKey);
     } else {
         console.warn("⚠️ STRIPE_SECRET_KEY is missing in Env!");
     }
 
     try {
-        const body = await req.json();
+        const rawBody = await req.text();
+        const signature = req.headers.get('stripe-signature');
 
-        // 🕵️‍♂️ MOUCHARD: SPY ON INCOMING TRAFFIC (DISABLED FOR PROD)
-        /* console.log("🕵️‍♂️ WEBHOOK HIT! Sending Spy Email...");
-        try {
-            const spyResend = new Resend(process.env.RESEND_API_KEY);
-            await spyResend.emails.send({
-                from: 'AYO DEBUG <hello@ai-visionary.com>',
-                to: ['cyrileger@gmail.com'],
-                subject: `🪲 Webhook HIT: ${body.type || 'Unknown'}`,
-                html: `<pre>${JSON.stringify(body, null, 2).substring(0, 1000)}</pre>`
-            });
-        } catch (spyErr) { console.error("Spy failed", spyErr); } */
+        let event: Stripe.Event;
+        let body: any;
+
+        // � SECURITY CHECK: Verify Signature if Secret is configured
+        if (webhookSecret && signature && stripe) {
+            try {
+                event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+                body = event; // Use the verified event as body
+                console.log("🔐 WEBHOOK SIGNATURE VERIFIED ✅");
+            } catch (err: any) {
+                console.error(`❌ Webhook signature verification failed: ${err.message}`);
+                return NextResponse.json({ error: 'Webhook Error: Invalid Signature' }, { status: 400 });
+            }
+        } else {
+            // Unsafe Fallback (if env var is missing during setup)
+            if (webhookSecret) console.warn("⚠️ Signature missing in header");
+            else console.warn("⚠️ STRIPE_WEBHOOK_SECRET missing. Skipping signature verification (UNSAFE).");
+
+            body = JSON.parse(rawBody); // Manual parse since we read text
+        }
 
         let session_id = body.session_id; // Frontend direct call support
         let force_email = body.force_email;
