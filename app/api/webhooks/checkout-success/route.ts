@@ -490,7 +490,7 @@ export async function POST(req: Request) {
                         
                         <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
                             <p>Bonjour,</p>
-                            <p>Votre Pack AIO PRO est activé. Voici l'intégralité de vos actifs numériques pour l'autorité IA.</p>
+                            <p>Votre Pack AIO PRO est activé. Vos actifs numériques considérés pour les IA.</p>
                             
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
                                 <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
@@ -631,7 +631,7 @@ export async function POST(req: Request) {
                             </div>
                             
                             <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
-                                AI Visionary - L'Autorité de Visibilité IA.
+                                AI Visionary - Système de Visibilité IA.
                             </p>
                         </div>
                     </div>
