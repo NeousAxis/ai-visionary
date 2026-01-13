@@ -1157,9 +1157,9 @@ Si l'utilisateur donne un email valide :
 💡 **OPPORTUNITÉ STRATÉGIQUE**
 
 Votre score actuel est un début.
-Mais pour garantir votre intégrité identitaire sur les IA (ChatGPT, Gemini), la Certification Cryptographique est indispensable.
+Mais pour que votre entreprise soit **correctement référencée et recommandée** par les IA (ChatGPT, Gemini), la Certification AIO est indispensable.
 
-Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
+Je peux valider immédiatement votre conformité avec la version Essential (99 CHF) ?
 
 👉 **[🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
  (Certification ASR Essential + Analyse détaillée & Envoi par email)
