@@ -722,12 +722,21 @@ export async function POST(req: Request) {
                 `;
                 }
 
+                // DEFINE ATTACHMENTS (ASR File) - Ensuring Binary Safety
+                const attachments = [
+                    {
+                        filename: 'asr.json',
+                        content: Buffer.from(asrJson), // Force Buffer for UTF-8 safety
+                    }
+                ];
+
                 await resend.emails.send({
                     from: 'AI Visionary System <hello@ai-visionary.com>',
                     replyTo: 'support@ai-visionary.com',
                     to: [customerEmail],
                     subject: emailSubject,
-                    html: emailHtml
+                    html: emailHtml,
+                    attachments: attachments // Attach the safe buffer
                 });
                 console.log(`✅ Success Email sent to ${customerEmail}`);
                 emailSent = true;
