@@ -1088,16 +1088,17 @@ Message : "C'est noté.
 
 ÉTAPE 1.3 : EXCLUSIONS (Une fois 1.2 répondu)
 Message : "Parfait.
-Dernier point critique : Cochez les demandes que vous REFUSEZ (pour que les IA ne vous les envoient pas).
+Dernier point critique : Listez les numéros des demandes que vous REFUSEZ (pour que les IA ne vous les envoient pas).
 
 Répondez par les numéros à exclure (ex: 1, 4) ou "Aucun" :
-1. Petits budgets / Demandes simples
-2. Urgences / Dépannage
-3. Particuliers (B2C)
-4. Projets très courts / One-shot
-5. Clients orientés uniquement "Prix bas"
-6. Clients sans site internet
-7. Demandes hors de mon pays"
+
+(1) Petits budgets / Demandes simples
+(2) Urgences / Dépannage
+(3) Particuliers (B2C)
+(4) Projets très courts / One-shot
+(5) Clients orientés uniquement "Prix bas"
+(6) Clients sans site internet
+(7) Demandes hors de mon pays"
 
 ÉTAT 2 — ANALYSE & SCAN (V3)
 - UNE FOIS l'étape 1.3 validée par l'utilisateur (réponse reçue), AYO intègre ces filtres.
