@@ -952,6 +952,40 @@ Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** e
         }
 
         // -----------------------------------------------------------------------
+        // GENERATE STRIPE PARAMS FOR PROMPT SALES LINKS
+        // -----------------------------------------------------------------------
+        let stripeSuffix = "";
+        let targetEmailPrompt = detectedEmail || "";
+
+        try {
+            const urlForLink = detectedUrl || "";
+            const emailForLink = detectedEmail || "";
+
+            if (urlForLink || emailForLink) {
+                const payload: any = {};
+                if (urlForLink) payload.u = urlForLink;
+                if (emailForLink) payload.e = emailForLink;
+
+                const jsonStr = JSON.stringify(payload);
+                const b64 = Buffer.from(jsonStr).toString('base64');
+
+                if (b64.length <= 250) {
+                    stripeSuffix = `?client_reference_id=${b64}`;
+                    if (emailForLink) {
+                        stripeSuffix += `&prefilled_email=${encodeURIComponent(emailForLink)}`;
+                    }
+                } else {
+                    // Fallback small
+                    if (urlForLink) {
+                        const smallPayload = JSON.stringify({ u: urlForLink });
+                        const smallB64 = Buffer.from(smallPayload).toString('base64');
+                        stripeSuffix = `?client_reference_id=${smallB64}`;
+                    }
+                }
+            }
+        } catch (e) { console.warn("Stripe Param Gen Error", e); }
+
+        // -----------------------------------------------------------------------
         // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
         // -----------------------------------------------------------------------
         const SYSTEM_PROMPT = `
@@ -1113,16 +1147,40 @@ Répondez par les numéros à exclure (ex: 1, 4) ou "Aucun" :
 
 ÉTAT 3 — VÉRIFICATION EMAIL & DÉLIVRANCE
 Si l'utilisateur donne un email valide :
-"✅ Email validé.
-📨 Envoi en cours vers [EMAIL]...
-(Vérifiez vos spams).
----
-💡 Option : Pour transformer ce diagnostic en autorité numérique, activez la version Essential (99 CHF).
-Voulez-vous l’activer ? (Oui/Non)"
+"✅ **Email validé.**
 
-ÉTAT 4 — UPGRADE
-Si Oui -> Lien Stripe.
-Si Non -> "C'est noté."
+📨 **Envoi en cours vers [EMAIL]...**
+(Vérifiez vos spams).
+
+---
+
+💡 **OPPORTUNITÉ STRATÉGIQUE**
+
+Votre score actuel est un début.
+Mais pour garantir votre intégrité identitaire sur les IA (ChatGPT, Gemini), la Certification Cryptographique est indispensable.
+
+Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential (99 CHF) ?
+
+👉 **[🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
+ (Certification ASR Essential + Analyse détaillée & Envoi par email)
+
+ 👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
+ (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
+
+ 👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmailPrompt)})** (Analyse détaillée + Certification ASR simple)"
+
+ÉTAT 4 — UPGRADE (Si l'utilisateur demande manuellement)
+Si OUI pour Essential :
+"Excellent choix.
+👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})"
+
+Si PACK PRO :
+"🏆 **Choix Visionnaire.**
+Vous passez au niveau Expert.
+👉 [🚀 **Activer le Pack PRO (499 CHF)**](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})"
+
+Si Non :
+"C'est noté. Je reste ici si besoin."
 
 ÉTAT 5 — FIN
 Confirmation.
