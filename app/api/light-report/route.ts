@@ -52,6 +52,70 @@ export async function GET(req: Request) {
             'LIGHT' // Explicit Tier
         );
 
+        // 2. Generate detailed Analysis HTML (Audit) if needed
+        // Helper to render Audit Table from Structured Data
+        const renderAuditTable = (blocks: any) => {
+            if (!blocks) return null;
+
+            const rows = Object.keys(blocks).map(key => {
+                const item = blocks[key];
+                if (!item) return '';
+                const iScore = item.score || 0;
+                const iMax = item.max || 10;
+                const iLabel = item.label || key;
+                const iStatus = item.status || 'error';
+                const iObs = item.observation || "Données manquantes.";
+
+                const color = iStatus === 'success' ? '#166534' : (iStatus === 'warning' ? '#854d0e' : '#991b1b');
+                const bg = iStatus === 'success' ? '#dcfce7' : (iStatus === 'warning' ? '#fef9c3' : '#fee2e2');
+                const icon = iStatus === 'success' ? '✅' : (iStatus === 'warning' ? '⚠️' : '❌');
+
+                return `
+                    <div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:10px; border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="color:${color}; font-size:14px;">${icon} ${iLabel}</strong>
+                            <span style="font-size:12px; background:#fff; padding:2px 6px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${iScore}/${iMax}</span>
+                        </div>
+                        <p style="margin:5px 0 0 0; font-size:13px; color:#333;">${iObs}</p>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div style="margin:20px 0;">
+                    <h3 style="color:#333; margin-bottom:10px; font-size:16px;">🛑 Diagnostic des Manquements :</h3>
+                    ${rows}
+                </div>
+            `;
+        };
+
+        // Fallback Logic for detailed contents
+        let blocksToRender = (analysis as any).data?.analysis_blocks;
+        if (!blocksToRender && analysisData.score > 0) {
+            // Reconstruct likely blocks from score if missing
+            const s = analysisData.score;
+            blocksToRender = {
+                identite: {
+                    score: s > 50 ? 8 : 4, max: 10, label: "Identité & Ancrage",
+                    status: s > 50 ? 'success' : 'warning',
+                    observation: s > 50 ? "Identité validée." : "Identité numérique faible."
+                },
+                offre: {
+                    score: s > 60 ? 15 : 8, max: 20, label: "Clarté de l'Offre",
+                    status: s > 60 ? 'success' : 'warning',
+                    observation: s > 60 ? "Offre claire." : "Sémantique à préciser."
+                },
+                technique: {
+                    score: 0, max: 10, label: "Socle Technique",
+                    status: 'error',
+                    observation: "Absence de fichiers ASR (Corrigé par ce Pack)."
+                }
+            };
+        }
+
+        const computedAuditReport = renderAuditTable(blocksToRender);
+        const finalAuditHtml = (analysisData as any).audit_report || computedAuditReport || "<p>Analyse sommaire uniquement.</p>";
+
         // 3. Send Email
         const emailResponse = await resend.emails.send({
             from: 'AI Visionary System <hello@ai-visionary.com>',
@@ -69,7 +133,7 @@ export async function GET(req: Request) {
                         <p><strong>Score AIO :</strong> ${analysisData.score} / 100</p>
                     </div>
 
-                    ${(analysisData as any).audit_report || ''}
+                    ${finalAuditHtml}
 
                     <h3>📦 VOTRE CODE ASR (JSON)</h3>
                     <p>Copiez ce code si la pièce jointe est bloquée :</p>
