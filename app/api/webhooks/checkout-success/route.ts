@@ -630,6 +630,12 @@ export async function POST(req: Request) {
                                 </p>
                             </div>
                             
+                            <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
+                                <h4 style="margin-top:0; color: #e65100;">🆘 Besoin d'aide pour l'installation ?</h4>
+                                <p style="font-size: 13px; margin-bottom: 0;">Si vous rencontrez des difficultés techniques pour installer ces fichiers, notre équipe est là pour vous aider.</p>
+                                <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">Contactez-nous : <a href="mailto:support@ai-visionary.com" style="color: #e65100;">support@ai-visionary.com</a></p>
+                            </div>
+
                             <p style="margin-top: 30px; font-size: 12px; color: #999; text-align: center;">
                                 AI Visionary - Optimise votre Visibilité IA.
                             </p>
