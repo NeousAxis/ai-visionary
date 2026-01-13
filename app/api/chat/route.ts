@@ -1079,11 +1079,12 @@ Première question de calibrage :
 ÉTAPE 1.2 : INTERACTION (Une fois 1.1 répondu)
 Message : "C'est noté.
 
-4️⃣ Vos clients viennent-ils :
+4️⃣ Vos clients accèdent à l'offre :
 
 (A) Sur place (Physique)
 (B) À distance (Visio/Tel)
-(C) Les deux"
+(C) 100% Digital (App, SaaS, E-shop)
+(D) Mixte"
 
 ÉTAPE 1.3 : EXCLUSIONS (Une fois 1.2 répondu)
 Message : "Parfait.
