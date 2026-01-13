@@ -65,7 +65,7 @@ export async function GET(req: Request) {
                     <p>Voici votre certification ASR standard (version Light) suite à l'analyse de <strong>${analysisData.url}</strong>.</p>
                     
                     <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                        <p><strong>Score AIO :</strong> ${Math.round(analysisData.score)} / 100</p>
+                        <p><strong>Score AIO :</strong> ${analysisData.score} / 100</p>
                     </div>
 
                     ${(analysisData as any).audit_report || ''}

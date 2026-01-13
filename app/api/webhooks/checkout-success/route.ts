@@ -486,7 +486,7 @@ export async function POST(req: Request) {
 
 
                 if (packType === "PRO") {
-                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${Math.round(analysisData.score)}/100`;
+                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
                     emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <head><meta charset="utf-8"></head>
@@ -499,7 +499,7 @@ export async function POST(req: Request) {
                             <p>Votre Pack AIO PRO est activé. Vos actifs numériques optimisés pour les IA.</p>
                             
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
-                                <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${Math.round(analysisData.score)}/100</h3>
+                                <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
                                 <p>L'analyse temps réel a permis de générer votre stratégie complète ci-dessous.</p>
                             </div>
@@ -601,7 +601,7 @@ export async function POST(req: Request) {
                     </div>
                 `;
                 } else {
-                    emailSubject = `Votre Certification ASR Essential - Score ${Math.round(analysisData.score)}/100`;
+                    emailSubject = `Votre Certification ASR Essential - Score ${analysisData.score}/100`;
                     emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
