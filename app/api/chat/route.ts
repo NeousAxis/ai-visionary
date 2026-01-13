@@ -447,14 +447,11 @@ export async function POST(req: Request) {
         const turnsSinceUrl = hasUrlHistory ? (messages.length - 1 - urlMsgIndex) : 0;
 
         // 3. TRIGGER CONDITION:
-        // We need 2 interactions AFTER the URL:
-        // URL (0) -> AI (1) -> UserQ1 (2) -> AI (3) -> UserQ2 (4) -> TRIGGER.
-        // So strict requirement: turnsSinceUrl >= 4.
+        // We need 3 interactions AFTER the URL (1 par 1):
+        // URL (0) -> AI (1) -> UserQ1 (2) -> AI (3) -> UserQ2 (4) -> AI (5) -> UserQ3 (6) -> TRIGGER.
+        // So strict requirement: turnsSinceUrl >= 6.
 
-        // Special Case: If user provides URL late (e.g. index 2), we still need +4 turns.
-        // This effectively pauses analysis until the interview is done.
-
-        const shouldRunAnalysis = (lastMessage.role === 'user') && hasUrlHistory && (turnsSinceUrl >= 4);
+        const shouldRunAnalysis = (lastMessage.role === 'user') && hasUrlHistory && (turnsSinceUrl >= 6);
 
         if (shouldRunAnalysis) {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
@@ -1062,30 +1059,35 @@ IX) SCRIPT CONVERSATIONNEL — ÉTATS (V3 CONTEXTUAL)
 ÉTAT 0 — ACCUEIL
 Message : "AYO analyse si votre entreprise est lisible par les IA (ChatGPT, Gemini...). Donnez-moi l'URL de votre site."
 
-ÉTAT 1 — COLLECTE CONTEXTUELLE (FORMULAIRE STRUCTURE)
-- Une fois l'URL reçue, AYO doit faire passer le "Formulaire de Calibrage" en 2 étapes OBLIGATOIRES.
+ÉTAT 1 — COLLECTE CONTEXTUELLE (FORMULAIRE STRUCTURE - 1 PAR 1)
+- Une fois l'URL reçue, AYO doit faire passer le "Formulaire de Calibrage" en 3 étapes DISTINCTES.
+- NE PAS REGROUPER LES QUESTIONS. UNE QUESTION PAR MESSAGE.
 - NE PAS LANCER L'ANALYSE (|||) TANT QUE CE FORMULAIRE N'EST PAS FINI.
 
-ÉTAPE 1.1 : IDENTITÉ & PORTÉE (Dès réception URL)
+ÉTAPE 1.1 : PORTÉE (Dès réception URL)
 Message : "Site identifié. Calibrons la pertinence IA.
 1️⃣ Nom : [NOM_INFÉRÉ_DE_URL]
 2️⃣ URL : [URL_FOURNIE]
 
-Répondez par les numéros pour ces 2 points :
-
+Première question de calibrage :
 3️⃣ Votre activité est plutôt :
+
 (1) Locale (Ville/Quartier)
 (2) Régionale
-(3) Internationale / Full Web
+(3) Internationale / Full Web"
 
-4️⃣ Vos clients viennent :
+ÉTAPE 1.2 : INTERACTION (Une fois 1.1 répondu)
+Message : "C'est noté.
+
+4️⃣ Vos clients viennent-ils :
+
 (A) Sur place (Physique)
 (B) À distance (Visio/Tel)
 (C) Les deux"
 
-ÉTAPE 1.2 : EXCLUSIONS (Une fois 1.1 répondu)
-Message : "Bien noté.
-Dernier point critique pour l'IA : Cochez les demandes que vous REFUSEZ (pour que les IA ne vous les envoient pas).
+ÉTAPE 1.3 : EXCLUSIONS (Une fois 1.2 répondu)
+Message : "Parfait.
+Dernier point critique : Cochez les demandes que vous REFUSEZ (pour que les IA ne vous les envoient pas).
 
 Répondez par les numéros à exclure (ex: 1, 4) ou "Aucun" :
 1. Petits budgets / Demandes simples
@@ -1097,7 +1099,7 @@ Répondez par les numéros à exclure (ex: 1, 4) ou "Aucun" :
 7. Demandes hors de mon pays"
 
 ÉTAT 2 — ANALYSE & SCAN (V3)
-- UNE FOIS l'étape 1.2 validée par l'utilisateur (réponse reçue), AYO intègre ces filtres.
+- UNE FOIS l'étape 1.3 validée par l'utilisateur (réponse reçue), AYO intègre ces filtres.
 - Utilise les réponses pour nourrir 'contextual_signals' et 'selection_conditions'.
 - Affiche ENFIN le résultat "|||" + Verrouillage.
 
