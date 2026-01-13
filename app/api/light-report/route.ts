@@ -108,7 +108,7 @@ ${JSON.stringify(asrJson, null, 2)}
             attachments: [
                 {
                     filename: 'asr.json',
-                    content: JSON.stringify(asrJson, null, 2),
+                    content: Buffer.from(JSON.stringify(asrJson, null, 2)),
                 },
             ],
         });
