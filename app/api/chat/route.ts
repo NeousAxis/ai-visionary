@@ -437,11 +437,35 @@ export async function POST(req: Request) {
         let finalResponseText = "";
         let isAnalysisRun = false;
 
-        // IF USER GIVES A URL -> TRIGGER DETERMINISTIC ANALYSIS ENGINE
-        if (lastMessage.role === 'user' && userUrlMatch) {
-            console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE...");
+        // SMART TRIGGER LOGIC (V3):
+        // 1. Detect URL in History (to allow "Context Answer" trigger)
+        const histUrlMatch = messages.slice(0, -1).find((m: any) => m.role === 'user' && m.content.match(urlRegex));
+
+        // 2. Identify "Context Answer": URL in history AND Current msg has NO URL.
+        const isCtxAnswer = histUrlMatch && !userUrlMatch;
+
+        // 3. TRIGGER CONDITION:
+        // - URL just given (Implicit) -> SKIP if we want explicit V3 context.
+        // - URL in history + Context Answer -> RUN.
+        // - Override: If user insists? (Simpler: Just wait for turn 4+)
+
+        // LOGIC: IF (URL and Turn > 3) OR (ContextAnswer)
+        // Wait, if it's the first message (Turn 1), we can't trigger. 
+        // User says: "Analyze google.com" (Turn 1). We should probably ASK context first? 
+        // YES. V3 Rule: Always ask "B2B/B2C?".
+        // So we NEVER trigger on pure URL match unless we have context?
+        // But how do we know we have context?
+        // Simple heuristic: If messages.length > 2 (Conversation implies Q&A).
+
+        const shouldRunAnalysis = (lastMessage.role === 'user') && (
+            (userUrlMatch && messages.length > 4) || // URL given late (maybe re-analysis or context included)
+            (isCtxAnswer && messages.length > 2) // URL known, user answers context
+        );
+
+        if (shouldRunAnalysis) {
+            console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
             isAnalysisRun = true;
-            let urlToScan = userUrlMatch[0];
+            let urlToScan = userUrlMatch ? userUrlMatch[0] : (histUrlMatch.content.match(urlRegex)[0]);
 
             // Normalize URL: Ensure https://
             if (!urlToScan.startsWith('http')) {
@@ -553,7 +577,10 @@ ${scanResult.text}
                 model: modelToUse, // Use the dynamically selected model (Gemini or OpenAI)
                 temperature: 0, // Zero temp for strict extraction
                 system: EXTRACTION_PROMPT,
-                messages: [{ role: 'user', content: "Extract JSON now." }]
+                messages: [
+                    { role: 'user', content: "Extract JSON now." },
+                    { role: 'user', content: `USER CONTEXT DECLARATION (To be prioritized for contextual_signals): "${lastMessage.content || ''}"` }
+                ]
             });
 
             let extractJson: AyoExtract;
@@ -892,25 +919,45 @@ Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** e
 
         let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
 
-        // 🚨 Injection de la RÉALITÉ TECHNIQUE et SÉMANTIQUE (SCAN AIO V2)
-        // Detect if the user message is a URL (Basic Heuristic for State 1/2)
-        const lastUserMsg = messages[messages.length - 1].content;
-        const urlMatch = lastUserMsg.match(/(https?:\/\/[^\s]+)/g);
+        // -----------------------------------------------------------------------
+        // SYSTEM PROMPT CONSTRUCTION (ALWAYS LOAD V3 PROMPT IF URL EXISTS)
+        // -----------------------------------------------------------------------
+        // If analysis NOT run yet, we still need the prompt to interview the user.
+        // We perform a light scan if needed to populate the prompt context.
 
-        // If we have "websiteData.text" (from previous scrape) OR we detect a URL now:
-        if (websiteData.text || (urlMatch && messages.length <= 4)) {
-            console.log("🚀 Lancement du SCAN AIO INTELLIGENT...");
+        // Define clean defaults for prompt context
+        let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false };
+        let promptUrlToScan = detectedUrl;
 
-            // Determine URL to scan (either from state or extraction)
-            let urlToScan = urlMatch ? urlMatch[0] : (messages[3]?.content || "");
+        // Run light scan if we are NOT running full analysis but have a URL
+        if (detectedUrl && !isAnalysisRun) {
+            try {
+                // Reuse scan logic to get Meta for Prompt
+                const lightScan = await scanUrlForAioSignals(detectedUrl);
+                promptScanResult = lightScan;
+            } catch (e) {
+                console.warn("Prompt Context Scan failed", e);
+            }
+        } else if (isAnalysisRun) {
+            // If Analysis RUN, we assume scanResult is available? 
+            // Wait, variable scope... 'scanResult' is inside the 441 block.
+            // We cannot access 'scanResult' here easily if block scoped.
+            // But we need it for SYSTEM_PROMPT. 
+            // Quick Fix: Re-scan or rely on LLM memory? 
+            // Better: scanUrl is cheap/cached usually. We scan again here or extract from above?
+            // Actually, if isAnalysisRun is true, we might as well populate promptScanResult from the same source?
+            // Since we are stateless, we can just re-run scanUrlForAioSignals below or define SYSTEM_PROMPT generic.
+            // Let's re-run scanUrlForAioSignals safely (heuristic: it's cached or fast).
+            if (promptUrlToScan) {
+                const lightScan = await scanUrlForAioSignals(promptUrlToScan);
+                promptScanResult = lightScan;
+            }
+        }
 
-            if (urlToScan) {
-                const scanResult = await scanUrlForAioSignals(urlToScan);
-
-                // -----------------------------------------------------------------------
-                // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
-                // -----------------------------------------------------------------------
-                const SYSTEM_PROMPT = `
+        // -----------------------------------------------------------------------
+        // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
+        // -----------------------------------------------------------------------
+        const SYSTEM_PROMPT = `
 AYO_PROMPT_V3 — CANONIQUE (AYO ONLY, AYA SUPPRIMÉ)
 Version: 3.0
 Statut: ACTIF
@@ -919,12 +966,12 @@ But: Stabiliser le prompt AYO, aligné sur la Bible et les règles "IA vs Humain
 ────────────────────────────────────────────────────────
 CONTEXTE TECHNIQUE (DONNÉES SCANNÉES)
 ────────────────────────────────────────────────────────
-L'utilisateur analyse l'URL : ${scanResult.url || 'Non fournie'}
-Titre détecté : "${scanResult.metaTitle || 'Non détecté'}"
-Description détectée : "${scanResult.metaDescription || 'Non détectée'}"
-Mots-clés (H1/H2) : "${scanResult.h1?.join(', ') || ''}"
-JSON-LD Détecté : ${scanResult.hasJsonLd ? 'OUI' : 'NON'}
-Fichier ASR Existant (/.ayo/asr.json) : ${scanResult.hasAsrFile ? 'OUI' : 'NON'}
+L'utilisateur analyse l'URL : ${promptScanResult.url || 'Non fournie'}
+Titre détecté : "${promptScanResult.metaTitle || 'Non détecté'}"
+Description détectée : "${promptScanResult.metaDescription || 'Non détectée'}"
+Mots-clés (H1/H2) : "${promptScanResult.h1?.join(', ') || ''}"
+JSON-LD Détecté : ${promptScanResult.hasJsonLd ? 'OUI' : 'NON'}
+Fichier ASR Existant (/.ayo/asr.json) : ${promptScanResult.hasAsrFile ? 'OUI' : 'NON'}
 
 ────────────────────────────────────────────────────────
 0) CHAMP D’APPLICATION
@@ -1016,19 +1063,24 @@ RÈGLE DE SCORING GÉOGRAPHIQUE (STRICTE) :
   * Si présent -> 1 point (Max).
 
 ────────────────────────────────────────────────────────
-IX) SCRIPT CONVERSATIONNEL — ÉTATS
+IX) SCRIPT CONVERSATIONNEL — ÉTATS (V3 CONTEXTUAL)
 ────────────────────────────────────────────────────────
 ÉTAT 0 — ACCUEIL
-Message : "AYO analyse si votre entreprise est lisible par les IA. Donnez-moi : 1) Nom de l'entreprise, 2) URL principale."
+Message : "AYO analyse si votre entreprise est lisible par les IA (ChatGPT, Gemini...). Donnez-moi l'URL de votre site."
 
-ÉTAT 1 — COLLECTE
-- Si l'utilisateur donne l'URL, DÉDUIS le Nom.
-- QUESTION OBLIGATOIRE (si info manquante) : "Pour l'ancrage juridique, où est situé le siège de l'entité ? Et quelle est votre zone opérationnelle (Locale, Globale ou 100% En ligne) ?"
-- Lance l'analyse UNIQUEMENT quand tu as : Nom + URL + Ancrage Juridique + Zone.
+ÉTAT 1 — COLLECTE CONTEXTUELLE (INTERVIEW)
+- Une fois l'URL reçue, AYO vérifie techniquement le site (silencieusement).
+- AVANT DE DONNER LE SCORE, AYO DOIT OBTENIR CES 3 INFOS CRITIQUES (si non présentes sur le site) :
+  1. CIBLE : (B2B, B2C ou Mixte ?)
+  2. GAMME : (Standard, Premium/Expert, ou Accessible ?)
+  3. OFFRE CLÉ : (Quel est le produit/service unique à pousser ?)
+- Message type : "Site identifié. Pour calibrer la recommandation IA (V3) et éviter un score générique, précisez : 1) Votre cible principale ? 2) Votre positionnement (Premium/Standard) ?"
+- TANT QUE l'utilisateur ne répond pas, ne lance pas le calcul du score.
 
-ÉTAT 2 — ANALYSE & SCAN
-Utilise les données scannées ci-dessus.
-Affiche le résultat "|||" + Verrouillage.
+ÉTAT 2 — ANALYSE & SCAN (V3)
+- UNE FOIS les réponses obtenues (ou si le site est très explicite), lance l'analyse.
+- Utilise les réponses contextuelles pour nourrir les champs 'contextual_signals' (pricing, audience).
+- Affiche le résultat "|||" + Verrouillage.
 
 ÉTAT 3 — VÉRIFICATION EMAIL & DÉLIVRANCE
 Si l'utilisateur donne un email valide :
@@ -1036,7 +1088,7 @@ Si l'utilisateur donne un email valide :
 📨 Envoi en cours vers [EMAIL]...
 (Vérifiez vos spams).
 ---
-💡 Option : Pour sceller une déclaration d’autorité, activez la version Essential (99 CHF).
+💡 Option : Pour transformer ce diagnostic en autorité numérique, activez la version Essential (99 CHF).
 Voulez-vous l’activer ? (Oui/Non)"
 
 ÉTAT 4 — UPGRADE
@@ -1048,20 +1100,16 @@ Confirmation.
 
 Utilise ce ton : Professionnel, froid, clinique, expert.
 `;
-                finalSystemPrompt = SYSTEM_PROMPT; // Overwrite with the new canonical prompt
-            }
+        finalSystemPrompt = SYSTEM_PROMPT;
 
-            console.log("Injecting real website content into AI context...");
+        console.log("Injecting real website content into AI context...");
 
-            // Keep the text injection for content analysis
+        // Keep the text injection for content analysis
+        if (websiteData.text) {
             finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
 """
 ${websiteData.text}
 """`;
-
-        } else if (messages.length === 6) {
-            // ... existing fallback
-            console.log("No website content could be fetched (or failed). AI will infer from name.");
         }
 
         // DEBUG MODE: NO STREAMING
