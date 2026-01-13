@@ -451,7 +451,14 @@ export async function POST(req: Request) {
         // URL (0) -> AI (1) -> UserQ1 (2) -> AI (3) -> UserQ2 (4) -> AI (5) -> UserQ3 (6) -> TRIGGER.
         // So strict requirement: turnsSinceUrl >= 6.
 
-        const shouldRunAnalysis = (lastMessage.role === 'user') && hasUrlHistory && (turnsSinceUrl >= 6);
+        // Check if analysis has ALREADY been run in this session (Avoid Double Trigger)
+        const hasAnalysisAlready = messages.some((m: any) => m.role === 'assistant' && (m.content.includes("SCORE FINAL AIO") || m.content.includes("|||")));
+
+        const shouldRunAnalysis = (lastMessage.role === 'user')
+            && hasUrlHistory
+            && (turnsSinceUrl >= 6)
+            && !isTriggerEmail
+            && !hasAnalysisAlready;
 
         if (shouldRunAnalysis) {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
