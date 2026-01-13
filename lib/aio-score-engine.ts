@@ -5,7 +5,7 @@ export type Quality = 0 | 0.5 | 1;
 type FieldNode<T> = { value: T; q: Quality; evidence: string[] };
 
 export type AyoExtract = {
-    version: "AYO-EXTRACT-1.0";
+    version: "AYO-EXTRACT-3.0";
     source: {
         url: string;
         scan: {
@@ -20,34 +20,71 @@ export type AyoExtract = {
     fields: {
         identite: {
             name: FieldNode<string>;
-            legal_country: FieldNode<string>;
+            legal_name: FieldNode<string>;
+            business_type: FieldNode<string>; // ex: FitnessCenter
+            city: FieldNode<string>;
+            country: FieldNode<string>;
+            contact_email: FieldNode<string>;
+            contact_phone: FieldNode<string>;
         };
         offre: {
             services: FieldNode<string[]>;
             products: FieldNode<string[]>;
+            use_cases: FieldNode<string[]>; // ex: "recherche salle sport"
             target_audience: FieldNode<string>;
+            pricing_indication: FieldNode<string>;
         };
         processus_methodes: {
             process_steps: FieldNode<string[]>;
             delivery_mode: FieldNode<string>;
-            geographies_served: FieldNode<string>;
+            geographies_served: FieldNode<string>; // areaServed
+            quality_assurance: FieldNode<string>;
         };
         engagements_conformite: {
             policies: FieldNode<string[]>;
             frameworks: FieldNode<string[]>;
             certifications: FieldNode<string[]>;
+            security_measures: FieldNode<string[]>;
         };
         indicateurs: {
             key_indicators: FieldNode<any[]>;
+            last_review_date: FieldNode<string>;
         };
         contenus_pedagogiques: {
             has_faq: FieldNode<boolean>;
             has_glossary: FieldNode<boolean>;
+            has_documentation: FieldNode<boolean>;
         };
         structure_technique: {
             has_asr: FieldNode<boolean>;
             has_jsonld: FieldNode<boolean>;
             has_sitemap: FieldNode<boolean | null>;
+            mobile_optimized: FieldNode<boolean>;
+        };
+        // NEW MODULE: CONTEXTUAL SIGNALS (V3 Requirement D) 
+        contextual_signals: {
+            pricing_level: FieldNode<string>; // "premium", "standard", "budget"
+            access_mode: FieldNode<string>;   // "public", "membersOnly", "subscription"
+            service_mode: FieldNode<string[]>; // "onSite", "online", "hybrid"
+            schedule_type: FieldNode<string[]>; // "24/7", "businessHours", "appointmentOnly"
+        };
+        // NEW MODULE: RECOMMENDATION CONTEXT (V3)
+        recommandation: {
+            contextual_relevance: FieldNode<{
+                userIntent: string;
+                queryExamples: string[];
+                decisionCriteria: string[];
+                status: "eligible" | "uncertain" | "excluded";
+            }[]>;
+            selection_conditions: FieldNode<{
+                required: string[];
+                exclusion: string[];
+            }>;
+            ai_simulation: FieldNode<{
+                query: string;
+                result: "✅" | "⚠️" | "❌";
+                reason: string;
+            }[]>;
         };
     };
 };
@@ -62,15 +99,15 @@ const WEIGHTS = {
     structure_technique: 10,
 } as const;
 
-// Champs attendus par bloc (dénominateur stable)
+// Champs attendus par bloc (dénominateur stable) - V2 STRICT
 const EXPECTED_FIELDS: Record<keyof typeof WEIGHTS, string[]> = {
-    identite: ["name", "legal_country"],
-    offre: ["services", "products", "target_audience"],
-    processus_methodes: ["process_steps", "delivery_mode", "geographies_served"],
-    engagements_conformite: ["policies", "frameworks", "certifications"],
-    indicateurs: ["key_indicators"],
-    contenus_pedagogiques: ["has_faq", "has_glossary"],
-    structure_technique: ["has_asr", "has_jsonld", "has_sitemap"],
+    identite: ["name", "legal_name", "business_type", "city", "country", "contact_email", "contact_phone"],
+    offre: ["services", "products", "target_audience", "use_cases", "pricing_indication"],
+    processus_methodes: ["process_steps", "delivery_mode", "geographies_served", "quality_assurance"],
+    engagements_conformite: ["policies", "frameworks", "certifications", "security_measures"],
+    indicateurs: ["key_indicators", "last_review_date"],
+    contenus_pedagogiques: ["has_faq", "has_glossary", "has_documentation"],
+    structure_technique: ["has_asr", "has_jsonld", "has_sitemap", "mobile_optimized"],
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -94,7 +131,7 @@ export function computeAioScore(extract: AyoExtract) {
         const expected = EXPECTED_FIELDS[block];
 
         const rawQs = expected.map((field) => {
-            const blockObj = extract.fields?.[block];
+            const blockObj = extract.fields?.[block as keyof typeof extract.fields];
             if (!blockObj) return 0;
 
             // @ts-expect-error index dynamic but safe by design
@@ -135,16 +172,59 @@ export function computeAioScore(extract: AyoExtract) {
 
     total = clamp(total, 0, 100);
 
+    // 4) CONTEXTUAL SCORES CALCULATION (Deterministic Logic)
+    // Definition: Contextual scores are derived from specific combinations of fields relevant to a context.
+
+    // Context A: Local Search (Target: 80+)
+    // Needs: City, Country, BusinessType, Phone, GeographiesServed, MobileOptimized
+    const rawLocal = (
+        (qOf(extract.fields.identite.city) * 2) + // Critical
+        (qOf(extract.fields.identite.country) * 1) +
+        (qOf(extract.fields.identite.business_type) * 2) + // Critical
+        (qOf(extract.fields.identite.contact_phone) * 1) +
+        (qOf(extract.fields.processus_methodes.geographies_served) * 2) +
+        (qOf(extract.fields.structure_technique.mobile_optimized) * 1)
+    ); // Max potential: 2+1+2+1+2+1 = 9
+    const scoreLocal = Math.min(100, (rawLocal / 9) * 100);
+
+    // Context B: Premium/Expert Recommendation (Target: 70+)
+    // Needs: Pricing, Certifications, QualityAssurance, UseCases, Frameworks
+    const rawPremium = (
+        (qOf(extract.fields.offre.pricing_indication) * 2) +
+        (qOf(extract.fields.engagements_conformite.certifications) * 2) +
+        (qOf(extract.fields.processus_methodes.quality_assurance) * 2) +
+        (qOf(extract.fields.offre.use_cases) * 1) +
+        (qOf(extract.fields.engagements_conformite.frameworks) * 1)
+    ); // Max potential: 2+2+2+1+1 = 8
+    const scorePremium = Math.min(100, (rawPremium / 8) * 100);
+
+    // Context C: Trust & Authority (Target: 90+)
+    // Needs: Name, Legal Name, Policies, Contact Email, Documentation
+    const rawAuthority = (
+        (qOf(extract.fields.identite.name) * 1) +
+        (qOf(extract.fields.identite.legal_name) * 2) + // Critical for authority
+        (qOf(extract.fields.engagements_conformite.policies) * 2) +
+        (qOf(extract.fields.identite.contact_email) * 1) +
+        (qOf(extract.fields.contenus_pedagogiques.has_documentation) * 1)
+    ); // Max potential: 1+2+2+1+1 = 7
+    const scoreAuthority = Math.min(100, (rawAuthority / 7) * 100);
+
     return {
         total: Math.round(total * 10) / 10, // 1 décimale stable
         blocks: Object.fromEntries(
             Object.entries(blockScores).map(([k, v]) => [k, Math.round(v.score * 10) / 10])
         ),
+        // NEW: Contextual Scores
+        contextual: {
+            local_search: Math.round(scoreLocal),
+            premium_expert: Math.round(scorePremium),
+            brand_authority: Math.round(scoreAuthority)
+        },
         meta: {
             has_jsonld: extract.source.scan.has_jsonld,
             has_asr: hasAsr,
             reachable: extract.source.scan.is_reachable,
         },
-        method: "AYO_V1_BIBLE_WEIGHTS_PURE",
+        method: "AYO_V3_CONTEXTUAL_BIBLE",
     };
 }

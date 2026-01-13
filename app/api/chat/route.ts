@@ -454,53 +454,84 @@ export async function POST(req: Request) {
             // 2. EXTRACTION (Semantic Perception via LLM)
             const EXTRACTION_PROMPT = `
 Tu es un moteur d'extraction de données AIO (Artificial Intelligence Optimization).
-TA MISSION : Extraire des champs structurés du contenu web fourni.
+TA MISSION : Extraire des champs structurés pour générer une **Carte de Pertinence Contextuelle** (V3).
 INTERDICTION FORMELLE DE CALCULER UN SCORE. Tu ne notes rien. Tu extrais seulement.
 
 RÈGLE DE QUALITÉ (q) :
-1 = Information explite, claire, structurée.
-0.5 = Information présente mais floue, ou explicitement déclarée "Non applicable" (ce qui est une info).
-0 = Information absente ou introuvable.
+1 = Information explicite, claire, structurée.
+0.5 = Information présente mais floue.
+0 = Absent.
 
-RÈGLE GÉOGRAPHIQUE :
-- 'legal_country' : Cherche le pays du siège juridique. "Non applicable" acceptée si DAO/Full Remote déclaré.
-- 'geographies_served' : Cherche la zone d'action (Local, National, Global, Online Only). "Online Only" est une valeur valide (q=1).
+RÈGLES V3 "CONTEXT & SIMULATION" :
+1. **Contextual Relevance** : Définis pour quels intents utilisateurs ce site est pertinent (ex: "Local Search", "B2B Query").
+2. **AI Simulation** : Simule 3 requêtes (Local, Expert, Specifique) et décide si une IA recommanderait ce site AUJOURD'HUI.
+3. **Selection Conditions** : Qu'est-ce qui manque pour être sélectionné ? (ex: address missing).
 
-FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-1.0") :
+FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-3.0") :
 {
-  "version": "AYO-EXTRACT-1.0",
+  "version": "AYO-EXTRACT-3.0",
   "source": { "url": "${urlToScan}", "scan": {} },
   "fields": {
     "identite": {
-      "name": { "value": "Nom Entreprise", "q": 0, "evidence": [] },
-      "legal_country": { "value": "Pays ou Non applicable", "q": 0, "evidence": [] }
+      "name": { "value": "Nom", "q": 0, "evidence": [] },
+      "legal_name": { "value": "", "q": 0, "evidence": [] },
+      "business_type": { "value": "Type Schema.org", "q": 0, "evidence": [] },
+      "city": { "value": "", "q": 0, "evidence": [] },
+      "country": { "value": "Pays", "q": 0, "evidence": [] },
+      "contact_email": { "value": "", "q": 0, "evidence": [] },
+      "contact_phone": { "value": "", "q": 0, "evidence": [] }
     },
     "offre": {
       "services": { "value": [], "q": 0, "evidence": [] },
       "products": { "value": [], "q": 0, "evidence": [] },
-      "target_audience": { "value": "", "q": 0, "evidence": [] }
+      "use_cases": { "value": [], "q": 0, "evidence": [] },
+      "target_audience": { "value": "", "q": 0, "evidence": [] },
+      "pricing_indication": { "value": "", "q": 0, "evidence": [] }
     },
     "processus_methodes": {
       "process_steps": { "value": [], "q": 0, "evidence": [] },
       "delivery_mode": { "value": "", "q": 0, "evidence": [] },
-      "geographies_served": { "value": "", "q": 0, "evidence": [] }
+      "geographies_served": { "value": "", "q": 0, "evidence": [] },
+      "quality_assurance": { "value": "", "q": 0, "evidence": [] }
     },
     "engagements_conformite": {
       "policies": { "value": [], "q": 0, "evidence": [] },
       "frameworks": { "value": [], "q": 0, "evidence": [] },
-      "certifications": { "value": [], "q": 0, "evidence": [] }
+      "certifications": { "value": [], "q": 0, "evidence": [] },
+      "security_measures": { "value": [], "q": 0, "evidence": [] }
     },
     "indicateurs": {
-      "key_indicators": { "value": [], "q": 0, "evidence": [] }
+      "key_indicators": { "value": [], "q": 0, "evidence": [] },
+      "last_review_date": { "value": "", "q": 0, "evidence": [] }
+    },
+    "contextual_signals": {
+      "pricing_level": { "value": "premium/standard/undisclosed", "q": 0, "evidence": [] },
+      "access_mode": { "value": "public/membersOnly", "q": 0, "evidence": [] },
+      "service_mode": { "value": ["onSite", "online"], "q": 0, "evidence": [] },
+      "schedule_type": { "value": ["businessHours"], "q": 0, "evidence": [] }
     },
     "contenus_pedagogiques": {
       "has_faq": { "value": false, "q": 0, "evidence": [] },
-      "has_glossary": { "value": false, "q": 0, "evidence": [] }
+      "has_glossary": { "value": false, "q": 0, "evidence": [] },
+      "has_documentation": { "value": false, "q": 0, "evidence": [] }
     },
     "structure_technique": {
       "has_asr": { "value": false, "q": 0, "evidence": [] },
       "has_jsonld": { "value": false, "q": 0, "evidence": [] },
-      "has_sitemap": { "value": null, "q": 0, "evidence": [] }
+      "has_sitemap": { "value": null, "q": 0, "evidence": [] },
+      "mobile_optimized": { "value": true, "q": 1, "evidence": ["Assumed"] }
+    },
+    "recommandation": {
+        "contextual_relevance": { "value": [
+            { "userIntent": "Ex: Recherche Salle Sport", "queryExamples": ["gym near me"], "decisionCriteria": ["proximity", "pricing"], "status": "eligible/uncertain" }
+        ], "q": 1, "evidence": [] },
+        "selection_conditions": { "value": {
+            "required": ["Ex: Pricing", "Location"],
+            "exclusion": ["Ex: No City Found"]
+        }, "q": 1, "evidence": [] },
+        "ai_simulation": { "value": [
+            { "query": "Ex: Centre en ville", "result": "✅/⚠️/❌", "reason": "Address found." }
+        ], "q": 1, "evidence": [] }
     }
   }
 }
@@ -534,9 +565,23 @@ ${scanResult.text}
                 console.error("JSON Parse Error (Fallback to Empty):", e);
                 // Fallback empty structure if LLM fails
                 extractJson = {
-                    version: "AYO-EXTRACT-1.0",
+                    version: "AYO-EXTRACT-3.0",
                     source: { url: urlToScan, scan: {} },
-                    fields: { identite: {}, offre: {}, processus_methodes: {}, engagements_conformite: {}, indicateurs: {}, contenus_pedagogiques: {}, structure_technique: {} }
+                    fields: {
+                        identite: { name: { value: "Fallback", q: 0 } },
+                        offre: {},
+                        processus_methodes: {},
+                        engagements_conformite: {},
+                        indicateurs: {},
+                        contextual_signals: {},
+                        contenus_pedagogiques: {},
+                        structure_technique: {},
+                        recommandation: {
+                            contextual_relevance: { value: [], q: 0 },
+                            selection_conditions: { value: { required: [], exclusion: [] }, q: 0 },
+                            ai_simulation: { value: [], q: 0 }
+                        }
+                    }
                 } as any;
             }
 

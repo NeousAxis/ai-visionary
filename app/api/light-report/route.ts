@@ -48,7 +48,8 @@ export async function GET(req: Request) {
             analysisData.extract,
             analysisData.score,
             analysisData.url,
-            'LIGHT'
+            null, // asrId
+            'LIGHT' // Explicit Tier
         );
 
         // 3. Send Email

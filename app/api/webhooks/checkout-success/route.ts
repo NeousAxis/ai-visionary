@@ -30,27 +30,71 @@ async function performFullAnalysis(targetUrl: string): Promise<any> {
 
     const EXTRACTION_PROMPT = `
     Tu es un moteur d'extraction de données AIO (Artificial Intelligence Optimization).
-    TA MISSION : Extraire des champs structurés du contexte pour générer un fichier ASR (Identity File for AI).
+    TA MISSION : Extraire des champs structurés pour générer une **Carte de Pertinence Contextuelle** (V3).
     
-    FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-1.0") :
+    RÈGLES V3 "CONTEXT & SIMULATION" :
+    1. **Contextual Relevance** : Définis pour quels intents utilisateurs ce site est pertinent (ex: "Local Search", "B2B Query").
+    2. **AI Simulation** : Simule 3 requêtes (Local, Expert, Specifique) et décide si une IA recommanderait ce site AUJOURD'HUI.
+    3. **Selection Conditions** : Qu'est-ce qui manque pour être sélectionné ? (ex: address missing).
+
+    FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-3.0") :
     {
-      "version": "AYO-EXTRACT-1.0",
+      "version": "AYO-EXTRACT-3.0",
       "source": { "url": "${targetUrl}", "scan": {} },
       "fields": {
         "identite": {
           "name": { "value": "Nom Entreprise", "q": 0 },
-          "legal_country": { "value": "Pays", "q": 0 }
+          "legal_name": { "value": "", "q": 0 },
+          "business_type": { "value": "", "q": 0 },
+          "city": { "value": "", "q": 0 },
+          "country": { "value": "Pays", "q": 0 },
+          "contact_email": { "value": "", "q": 0 },
+          "contact_phone": { "value": "", "q": 0 }
         },
         "offre": {
           "services": { "value": [], "q": 0 },
           "products": { "value": [], "q": 0 },
-          "target_audience": { "value": "", "q": 0 }
+          "use_cases": { "value": [], "q": 0 },
+          "target_audience": { "value": "", "q": 0 },
+          "pricing_indication": { "value": "", "q": 0 }
         },
         "processus_methodes": {
-          "delivery_mode": { "value": "", "q": 0 }
+          "delivery_mode": { "value": "", "q": 0 },
+          "process_steps": { "value": [], "q": 0 },
+          "geographies_served": { "value": "", "q": 0 },
+          "quality_assurance": { "value": "", "q": 0 }
+        },
+        "engagements_conformite": {
+             "policies": { "value": [], "q": 0 },
+             "frameworks": { "value": [], "q": 0 },
+             "certifications": { "value": [], "q": 0 },
+             "security_measures": { "value": [], "q": 0 }
+        },
+        "indicateurs": {
+            "key_indicators": { "value": [], "q": 0 },
+            "last_review_date": { "value": "", "q": 0 }
+        },
+        "contextual_signals": {
+            "pricing_level": { "value": "", "q": 0 },
+            "access_mode": { "value": "", "q": 0 },
+            "service_mode": { "value": [], "q": 0 },
+            "schedule_type": { "value": [], "q": 0 }
+        },
+        "contenus_pedagogiques": {
+             "has_faq": { "value": false, "q": 0 },
+             "has_glossary": { "value": false, "q": 0 },
+             "has_documentation": { "value": false, "q": 0 }
         },
         "structure_technique": {
-          "has_jsonld": { "value": false, "q": 0 }
+          "has_jsonld": { "value": false, "q": 0 },
+          "has_asr": { "value": false, "q": 0 },
+          "has_sitemap": { "value": false, "q": 0 },
+          "mobile_optimized": { "value": true, "q": 1 }
+        },
+        "recommandation": {
+            "contextual_relevance": { "value": [], "q": 1 },
+            "selection_conditions": { "value": { "required": [], "exclusion": [] }, "q": 1 },
+            "ai_simulation": { "value": [], "q": 1 }
         }
       }
     }
@@ -74,11 +118,20 @@ async function performFullAnalysis(targetUrl: string): Promise<any> {
         extractJson = JSON.parse(jsonText);
     } catch (e) {
         console.error("JSON Parse Error in Webhook", e);
-        // Fallback minimal
+        // Fallback minimal V3
         extractJson = {
-            version: "AYO-EXTRACT-1.0",
+            version: "AYO-EXTRACT-3.0",
             source: { url: targetUrl, scan: {} },
-            fields: { identite: { name: { value: "Votre Entreprise", q: 0.5 } }, offre: { services: { value: ["Services détectés automatiquement"], q: 0.5 } } }
+            fields: {
+                identite: { name: { value: "Votre Entreprise", q: 0.5 } },
+                offre: { services: { value: ["Services détectés automatiquement"], q: 0.5 } },
+                contextual_signals: { pricing_level: { value: "standard", q: 0.5 } },
+                recommandation: {
+                    contextual_relevance: { value: [], q: 0 },
+                    selection_conditions: { value: { required: [], exclusion: [] }, q: 0 },
+                    ai_simulation: { value: [], q: 0 }
+                }
+            }
         } as any;
     }
 
@@ -369,7 +422,15 @@ export async function POST(req: Request) {
         const sessionDate = new Date().toISOString();
         let asrJson = "{}";
         try {
-            const asrObject = await generateRealAsrJson(analysisData.extract, analysisData.score, sessionDate, session_id, packType === "PRO");
+            // Pass the Tier explicitly: "PRO" or "ESSENTIAL"
+            const tier = packType === "PRO" ? "PRO" : "ESSENTIAL";
+            const asrObject = await generateRealAsrJson(
+                analysisData.extract,
+                analysisData.score,
+                sessionDate,
+                session_id,
+                tier // Use new Tier string param
+            );
             asrJson = JSON.stringify(asrObject, null, 2);
         } catch (genErr) {
             console.error("❌ CRITICAL: Failed to generate ASR JSON. Using empty fallback.", genErr);
@@ -565,6 +626,11 @@ export async function POST(req: Request) {
   "permissions": {
     "allow_scraping": ["GoogleBot", "GPTBot", "CCBot"],
     "deny_scraping": ["MaliciousBot"]
+  },
+  "recommendationPolicy": {
+    "scope": "contextual",
+    "noSubjectiveClaims": true,
+    "signalsOnly": true
   },
   "api_access": {
     "status": "open",
