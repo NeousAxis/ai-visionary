@@ -411,19 +411,25 @@ export async function POST(req: Request) {
                     const rows = Object.keys(blocks).map(key => {
                         const item = blocks[key];
                         // Safety check
-                        if (!item || !item.score) return '';
+                        if (!item) return '';
+                        // Fallback defaults if properties missing
+                        const iScore = item.score || 0;
+                        const iMax = item.max || 10;
+                        const iLabel = item.label || key;
+                        const iStatus = item.status || 'error';
+                        const iObs = item.observation || "Données manquantes.";
 
-                        const color = item.status === 'success' ? '#166534' : (item.status === 'warning' ? '#854d0e' : '#991b1b');
-                        const bg = item.status === 'success' ? '#dcfce7' : (item.status === 'warning' ? '#fef9c3' : '#fee2e2');
-                        const icon = item.status === 'success' ? '✅' : (item.status === 'warning' ? '⚠️' : '❌');
+                        const color = iStatus === 'success' ? '#166534' : (iStatus === 'warning' ? '#854d0e' : '#991b1b');
+                        const bg = iStatus === 'success' ? '#dcfce7' : (iStatus === 'warning' ? '#fef9c3' : '#fee2e2');
+                        const icon = iStatus === 'success' ? '✅' : (iStatus === 'warning' ? '⚠️' : '❌');
 
                         return `
                             <div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:10px; border-radius:4px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <strong style="color:${color}; font-size:14px;">${icon} ${item.label}</strong>
-                                    <span style="font-size:12px; background:#fff; padding:2px 6px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${item.score}/${item.max}</span>
+                                    <strong style="color:${color}; font-size:14px;">${icon} ${iLabel}</strong>
+                                    <span style="font-size:12px; background:#fff; padding:2px 6px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${iScore}/${iMax}</span>
                                 </div>
-                                <p style="margin:5px 0 0 0; font-size:13px; color:#333;">${item.observation}</p>
+                                <p style="margin:5px 0 0 0; font-size:13px; color:#333;">${iObs}</p>
                             </div>
                         `;
                     }).join('');
@@ -480,7 +486,7 @@ export async function POST(req: Request) {
 
 
                 if (packType === "PRO") {
-                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
+                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${Math.round(analysisData.score)}/100`;
                     emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <head><meta charset="utf-8"></head>
@@ -493,7 +499,7 @@ export async function POST(req: Request) {
                             <p>Votre Pack AIO PRO est activé. Vos actifs numériques optimisés pour les IA.</p>
                             
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
-                                <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
+                                <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${Math.round(analysisData.score)}/100</h3>
                                 ${companyInfo.url ? `<p><strong>Site analysé :</strong> ${companyInfo.url}</p>` : ''}
                                 <p>L'analyse temps réel a permis de générer votre stratégie complète ci-dessous.</p>
                             </div>
@@ -595,7 +601,7 @@ export async function POST(req: Request) {
                     </div>
                 `;
                 } else {
-                    emailSubject = `Votre Certification ASR Essential - Score ${analysisData.score}/100`;
+                    emailSubject = `Votre Certification ASR Essential - Score ${Math.round(analysisData.score)}/100`;
                     emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">

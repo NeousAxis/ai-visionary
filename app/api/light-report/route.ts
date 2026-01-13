@@ -54,7 +54,7 @@ export async function GET(req: Request) {
         // 3. Send Email
         const emailResponse = await resend.emails.send({
             from: 'AI Visionary System <hello@ai-visionary.com>',
-            replyTo: 'support@ai-visionary.com',
+            replyTo: 'hello@ai-visionary.com',
             to: [email],
             subject: 'Votre Certification ASR Light (Gratuit) - AI Visionary',
             html: `
@@ -89,6 +89,12 @@ ${JSON.stringify(asrJson, null, 2)}
                             <strong>Alternative WordPress/Wix :</strong> Si vous ne pouvez pas créer de dossier, copiez le contenu du <code>asr.json</code> et collez-le dans le <code>&lt;HEAD&gt;</code> de votre site, entouré des balises :<br>
                             <code>&lt;script type="application/ld+json"&gt; ... CODE ICI ... &lt;/script&gt;</code>
                         </p>
+                    </div>
+
+                    <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
+                        <h4 style="margin-top:0; color: #e65100;">🆘 Besoin d'aide pour l'installation ?</h4>
+                        <p style="font-size: 13px; margin-bottom: 0;">Si vous rencontrez des difficultés techniques pour installer ces fichiers, notre équipe est là pour vous aider.</p>
+                        <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
                     </div>
 
                     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
