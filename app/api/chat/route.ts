@@ -457,7 +457,6 @@ export async function POST(req: Request) {
         const shouldRunAnalysis = (lastMessage.role === 'user')
             && hasUrlHistory
             && (turnsSinceUrl >= 6)
-            && !isTriggerEmail
             && !hasAnalysisAlready;
 
         if (shouldRunAnalysis) {
