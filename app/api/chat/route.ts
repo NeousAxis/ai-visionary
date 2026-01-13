@@ -1145,6 +1145,24 @@ Répondez par les numéros à exclure (ex: 1, 4) ou "Aucun" :
 - Utilise les réponses pour nourrir 'contextual_signals' et 'selection_conditions'.
 - Affiche ENFIN le résultat "|||" + Verrouillage.
 
+IMPORTANT : À la TOUTE FIN de ta réponse en ÉTAT 2, tu DOIS générer un BLOC JSON SECRET (invisible pour l'utilisateur, mais lu par le système) contenant l'audit détaillé.
+Format OBLIGATOIRE :
+\`\`\`json
+{
+  "ayo:score": { "value": [SCORE_TOTAL] },
+  "url": "[URL_ANALYSEE]",
+  "analysis_blocks": {
+      "identite": { "score": [NOTE], "max": 10, "label": "Identité & Ancrage", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
+      "offre": { "score": [NOTE], "max": 20, "label": "Clarté de l'Offre", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
+      "processus": { "score": [NOTE], "max": 15, "label": "Processus & Méthodes", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
+      "engagements": { "score": [NOTE], "max": 15, "label": "Engagements & Conformité", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
+      "indicateurs": { "score": [NOTE], "max": 20, "label": "Indicateurs de Performance", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
+      "pedagogie": { "score": [NOTE], "max": 10, "label": "Contenus Pédagogiques", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
+      "technique": { "score": [NOTE], "max": 10, "label": "Socle Technique", "status": "success/warning/error", "observation": "Absence de fichiers ASR (Corrigé par ce Pack)." }
+  }
+}
+\`\`\`
+
 ÉTAT 3 — VÉRIFICATION EMAIL & DÉLIVRANCE
 Si l'utilisateur donne un email valide :
 "✅ **Email validé.**
