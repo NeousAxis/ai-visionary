@@ -437,35 +437,29 @@ export async function POST(req: Request) {
         let finalResponseText = "";
         let isAnalysisRun = false;
 
-        // SMART TRIGGER LOGIC (V3):
-        // 1. Detect URL in History (to allow "Context Answer" trigger)
-        const histUrlMatch = messages.slice(0, -1).find((m: any) => m.role === 'user' && m.content.match(urlRegex));
+        // SMART TRIGGER LOGIC (V3 - 2 STEP FORM):
+        // 1. Find URL Message Index
+        const urlMsgIndex = messages.findIndex((m: any) => m.role === 'user' && m.content.match(urlRegex));
+        const hasUrlHistory = urlMsgIndex !== -1;
 
-        // 2. Identify "Context Answer": URL in history AND Current msg has NO URL.
-        const isCtxAnswer = histUrlMatch && !userUrlMatch;
+        // 2. Calculate Turns since URL was given
+        // Current message is at messages.length - 1
+        const turnsSinceUrl = hasUrlHistory ? (messages.length - 1 - urlMsgIndex) : 0;
 
         // 3. TRIGGER CONDITION:
-        // - URL just given (Implicit) -> SKIP if we want explicit V3 context.
-        // - URL in history + Context Answer -> RUN.
-        // - Override: If user insists? (Simpler: Just wait for turn 4+)
+        // We need 2 interactions AFTER the URL:
+        // URL (0) -> AI (1) -> UserQ1 (2) -> AI (3) -> UserQ2 (4) -> TRIGGER.
+        // So strict requirement: turnsSinceUrl >= 4.
 
-        // LOGIC: IF (URL and Turn > 3) OR (ContextAnswer)
-        // Wait, if it's the first message (Turn 1), we can't trigger. 
-        // User says: "Analyze google.com" (Turn 1). We should probably ASK context first? 
-        // YES. V3 Rule: Always ask "B2B/B2C?".
-        // So we NEVER trigger on pure URL match unless we have context?
-        // But how do we know we have context?
-        // Simple heuristic: If messages.length > 2 (Conversation implies Q&A).
+        // Special Case: If user provides URL late (e.g. index 2), we still need +4 turns.
+        // This effectively pauses analysis until the interview is done.
 
-        const shouldRunAnalysis = (lastMessage.role === 'user') && (
-            (userUrlMatch && messages.length > 4) || // URL given late (maybe re-analysis or context included)
-            (isCtxAnswer && messages.length > 2) // URL known, user answers context
-        );
+        const shouldRunAnalysis = (lastMessage.role === 'user') && hasUrlHistory && (turnsSinceUrl >= 4);
 
         if (shouldRunAnalysis) {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
             isAnalysisRun = true;
-            let urlToScan = userUrlMatch ? userUrlMatch[0] : (histUrlMatch.content.match(urlRegex)[0]);
+            let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
 
             // Normalize URL: Ensure https://
             if (!urlToScan.startsWith('http')) {
