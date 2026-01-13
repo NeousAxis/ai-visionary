@@ -1161,17 +1161,13 @@ Mais pour que votre entreprise soit **correctement référencée et recommandée
 
 Je peux valider immédiatement votre conformité avec la version Essential (99 CHF) ?
 
-👉 **[🛡 Activer la Certification Essential (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
- *Pour être "lu et compris" par les IA.*
- (Inclus : Fichier ASR Certifié + Indexation Garanti + Rapport de correction + Badge AIO)
+👉 **[🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
+ (Certification ASR Essential + Analyse détaillée & Envoi par email)
 
-👉 **[🚀 Passer au Pack PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
- *Le standard des leaders de marché.*
- (Inclus : Tout Essential + Glossaire Sémantique Complet + Optimisation GPT-4/Gemini + 3 Scénarios de Recommandation + Support Prioritaire)
+ 👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
+ (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
 
-👉 **[Voir le Rapport Light (Gratuit)](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmailPrompt)})**
- *Pour corriger vos erreurs techniques.*
- (Inclus : Audit technique simple + Liste des erreurs bloquantes)"
+ 👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmailPrompt)})** (Analyse détaillée + Certification ASR simple)"
 
 ÉTAT 4 — UPGRADE (Si l'utilisateur demande manuellement)
 Si OUI pour Essential :
