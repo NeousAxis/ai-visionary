@@ -51,7 +51,7 @@ export default function Home() {
               </p>
               <p style={{ fontSize: '1.1rem', color: 'var(--text-body)', lineHeight: '1.6' }}>
                 Elles ne montrent que les entreprises qu’elles peuvent identifier sans ambiguïté. <br />
-                <span style={{ fontWeight: '600' }}>AYO analyse et structure les données de votre site internet pour que votre entreprise reste visible dans ce nouveau monde.</span>
+                <span style={{ fontWeight: '600' }}>AYO permet à votre entreprise de rester visible dans ce nouveau monde.</span>
               </p>
             </div>
 
