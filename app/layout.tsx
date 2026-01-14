@@ -18,6 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+      </head>
       <body className={`${inter.variable} ${outfit.variable}`}>{children}</body>
     </html>
   );

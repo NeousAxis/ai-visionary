@@ -16,7 +16,7 @@ export default function Home() {
         <div className="container hero-content">
           <div className="logo-container" style={{ marginBottom: '40px', textAlign: 'center' }}>
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="AI VISIONARY"
               className="logo-tinted"
               style={{ height: '180px', width: 'auto', margin: '0 auto' }}
