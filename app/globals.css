@@ -358,9 +358,39 @@ ul {
 /* --- FOOTER: Deep Blue --- */
 .footer {
     background: var(--text-main);
-    color: rgba(255, 255, 255, 0.8);
+    color: white;
     padding: var(--spacing-lg) 0;
     text-align: center;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+.footer-copy {
+    color: white;
+    /* Explicitly White as requested */
+    font-size: 0.9rem;
+    opacity: 0.6;
 }
 
 /* --- DIAGNOSTIC PAGE & CHAT OVERRIDES --- */
