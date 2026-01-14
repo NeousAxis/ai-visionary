@@ -503,16 +503,13 @@ export async function POST(req: Request) {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
             console.log("Asking NEXT Block...");
 
-            // Logic to determine Next Question Name
-            const blockNames = ["PAYS", "STATUT", "CIBLE", "OFFRE", "TECHNIQUE"];
-            const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
-
             const CONTINUE_PROMPT = `
 Tu es AYO. Étape ${stepsCompleted + 1}/5 du Scan Profond.
 
 🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
 ✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
 ⚠️ UNE SEULE QUESTION PAR BLOC.
+⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true". (Même pour Oui/Non).
 
 ### TA MISSION
 1. Acquiesce brièvement à la réponse précédente.
@@ -529,14 +526,15 @@ Tu es AYO. Étape ${stepsCompleted + 1}/5 du Scan Profond.
       "id": "q_next_1",
       "text": "Votre question unique ici ?",
       "options": ["Option A", "Option B"],
-      "allowCustom": true
+      "allowCustom": true,
+      "customLabel": "Autre / Préciser..."
     }
   ]
 }
 \`\`\`
 
 **QUESTION UNIQUE POUR ${nextBlockName} :**
-(Génère la question la plus pertinente pour ce thème).
+(Ne fais JAMAIS de question fermée sans sortie de secours. L'utilisateur doit toujours pouvoir corriger).
 `;
 
             const continueResult = await generateText({
