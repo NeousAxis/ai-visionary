@@ -15,10 +15,7 @@ export default function DiagnosticPage() {
                         ← Retour à l'accueil
                     </Link>
 
-                    <img src="/logo.png" alt="AI Visionary" className="logo-tinted" style={{ height: '40px' }} />
-
-                    {/* Placeholder for balance */}
-                    <div style={{ width: '150px' }}></div>
+                    <img src="/logo.png" alt="AI Visionary" style={{ height: '70px', width: 'auto' }} />
                 </div>
             </header>
 
