@@ -8,6 +8,7 @@ import path from 'path';
 import { Resend } from 'resend';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
+import { AYO_BUSINESS_CATEGORIES, getScanSystemPrompt } from '@/lib/ayo-categories';
 import crypto from 'crypto';
 
 // Allow streaming responses up to 30 seconds
@@ -423,10 +424,11 @@ export async function POST(req: Request) {
 
         // 🔍 DETECT IF WE ARE IN ANALYSIS PHASE (State 1 -> 2)
         // Check if the User provided an URL in the last message or if we are prompting for it
-        // FIXED REGEX: Robust URL detection
-        const urlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+        // FIXED REGEX: Robust URL detection (V4.1 Permissive)
+        const urlRegex = /[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}/gi;
 
         const rawUrlMatch = lastMessage.content.match(urlRegex);
+        console.log("🔍 DEBUG V4.1: Parsed URL Match:", rawUrlMatch);
 
         // CHECK IF IT IS AN EMAIL (Priority: If Email -> It's NOT a URL for analysis)
         const triggerEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -437,29 +439,53 @@ export async function POST(req: Request) {
         let finalResponseText = "";
         let isAnalysisRun = false;
 
-        // SMART TRIGGER LOGIC (V3 - 2 STEP FORM):
-        // 1. Find URL Message Index
+        // SMART TRIGGER LOGIC (V4 - SCAN FIRST - ASCENSION FLOW):
         const urlMsgIndex = messages.findIndex((m: any) => m.role === 'user' && m.content.match(urlRegex));
         const hasUrlHistory = urlMsgIndex !== -1;
+        console.log(`DEBUG: Has URL History: ${hasUrlHistory}, Index: ${urlMsgIndex}, LastMsg: ${lastMessage.content}`);
 
-        // 2. Calculate Turns since URL was given
-        // Current message is at messages.length - 1
-        const turnsSinceUrl = hasUrlHistory ? (messages.length - 1 - urlMsgIndex) : 0;
+        const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
+        const hasScanResult = assistantMessages.some((m: any) => m.content.includes("Analyse Préliminaire Effectuée"));
+        const hasFinalScore = assistantMessages.some((m: any) => m.content.includes("SCORE FINAL AIO"));
 
-        // 3. TRIGGER CONDITION:
-        // We need 3 interactions AFTER the URL (1 par 1):
-        // URL (0) -> AI (1) -> UserQ1 (2) -> AI (3) -> UserQ2 (4) -> AI (5) -> UserQ3 (6) -> TRIGGER.
-        // So strict requirement: turnsSinceUrl >= 6.
+        let triggerMode = "CHAT";
+        if (hasUrlHistory && !hasScanResult && !hasFinalScore) {
+            triggerMode = "SCAN_AND_QUESTION";
+        } else if (hasScanResult && !hasFinalScore && lastMessage.role === 'user') {
+            triggerMode = "FINAL_ANALYSIS";
+        }
 
-        // Check if analysis has ALREADY been run in this session (Avoid Double Trigger)
-        const hasAnalysisAlready = messages.some((m: any) => m.role === 'assistant' && (m.content.includes("SCORE FINAL AIO") || m.content.includes("|||")));
+        if (triggerMode === "SCAN_AND_QUESTION") {
+            console.log("🚀 TRIGGERING PHASE 1: SCAN & CLASSIFY (V4.1 ACTIVE)...");
+            isAnalysisRun = true;
 
-        const shouldRunAnalysis = (lastMessage.role === 'user')
-            && hasUrlHistory
-            && (turnsSinceUrl >= 6)
-            && !hasAnalysisAlready;
+            // Extract URL
+            const urlMsg = messages[urlMsgIndex];
+            let urlToScan = urlMsg.content.match(urlRegex)[0];
+            if (!urlToScan.startsWith('http')) urlToScan = 'https://' + urlToScan;
 
-        if (shouldRunAnalysis) {
+            // 1. SCAN
+            const scanResult = await scanUrlForAioSignals(urlToScan);
+
+            // 2. GENERATE QUESTIONS (LLM)
+            const systemPrompt = getScanSystemPrompt();
+
+            console.log("... Generating Questions via LLM ...");
+            const classificationResult = await generateText({
+                model: modelToUse,
+                temperature: 0.1, // Low temp for structured adherence
+                system: systemPrompt,
+                messages: [
+                    { role: 'user', content: `SITE A ANALYSER : ${urlToScan}` },
+                    { role: 'user', content: `CONTENU SCANNE : \n${scanResult.text.substring(0, 10000)}` },
+                    { role: 'user', content: `LISTE DES CATEGORIES OFFICIELLES : \n${AYO_BUSINESS_CATEGORIES}` },
+                    { role: 'user', content: "Classe ce site et génère les questions maintenant." }
+                ]
+            });
+
+            finalResponseText = classificationResult.text;
+
+        } else if (triggerMode === "FINAL_ANALYSIS") {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
             isAnalysisRun = true;
             let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
@@ -471,6 +497,16 @@ export async function POST(req: Request) {
 
             // 1. SCANNING (Technical Truth)
             const scanResult = await scanUrlForAioSignals(urlToScan);
+
+            // 1b. GATHER USER CONTEXT (Answers)
+            const scanMsgIndex = messages.findIndex((m: any) => m.role === 'assistant' && m.content.includes("Analyse Préliminaire Effectuée"));
+            let userAnswersContext = "";
+            if (scanMsgIndex !== -1) {
+                const subsequentMessages = messages.slice(scanMsgIndex);
+                userAnswersContext = subsequentMessages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
+            } else {
+                userAnswersContext = lastMessage.content;
+            }
 
             // 2. EXTRACTION (Semantic Perception via LLM)
             const EXTRACTION_PROMPT = `
@@ -576,7 +612,7 @@ ${scanResult.text}
                 system: EXTRACTION_PROMPT,
                 messages: [
                     { role: 'user', content: "Extract JSON now." },
-                    { role: 'user', content: `USER CONTEXT DECLARATION (To be prioritized for contextual_signals): "${lastMessage.content || ''}"` }
+                    { role: 'user', content: `USER CONTEXT (ANSWERS TO QUESTIONNAIRE) - PRIORITIZE THIS INFO:\n"${userAnswersContext}"` }
                 ]
             });
 
@@ -989,10 +1025,10 @@ Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** e
         // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
         // -----------------------------------------------------------------------
         const SYSTEM_PROMPT = `
-AYO_PROMPT_V3 — CANONIQUE (AYO ONLY, AYA SUPPRIMÉ)
-Version: 3.0
+AYO_PROMPT_V4 — DYNAMIC ASCENSION (AYO ONLY)
+Version: 4.0
 Statut: ACTIF
-But: Stabiliser le prompt AYO, aligné sur la Bible et les règles "IA vs Humain Recherche".
+But: Adapter le questionnement au type de site détecté (Phase 1 Dynamic), tout en VERROUILLANT le tunnel de conclusion (Phase 2 & 3).
 
 ────────────────────────────────────────────────────────
 CONTEXTE TECHNIQUE (DONNÉES SCANNÉES)
@@ -1000,9 +1036,7 @@ CONTEXTE TECHNIQUE (DONNÉES SCANNÉES)
 L'utilisateur analyse l'URL : ${promptScanResult.url || 'Non fournie'}
 Titre détecté : "${promptScanResult.metaTitle || 'Non détecté'}"
 Description détectée : "${promptScanResult.metaDescription || 'Non détectée'}"
-Mots-clés (H1/H2) : "${promptScanResult.h1?.join(', ') || ''}"
 JSON-LD Détecté : ${promptScanResult.hasJsonLd ? 'OUI' : 'NON'}
-Fichier ASR Existant (/.ayo/asr.json) : ${promptScanResult.hasAsrFile ? 'OUI' : 'NON'}
 
 ────────────────────────────────────────────────────────
 0) CHAMP D’APPLICATION
@@ -1014,157 +1048,24 @@ AYO = structure de données.
 AYO ≠ SEO.
 
 ────────────────────────────────────────────────────────
-II) PRINCIPES NON NÉGOCIABLES
-────────────────────────────────────────────────────────
-Donnée > discours
-Structure > narration
-Lisibilité > visibilité
-Neutralité radicale.
-Zéro subjectivité. Zéro "bravo". Zéro "super site".
-Règle de sobriété : Toute info non trouvée explicitement = 0.
-
-────────────────────────────────────────────────────────
-V) SCORE AIO — FORMALISÉ (DÉTERMINISTE 7 BLOCS)
-────────────────────────────────────────────────────────
-Pondération fixe (Total 100) :
-1. Identité: 10
-2. Offre: 20
-3. Processus: 15
-4. Engagements: 15
-5. Indicateurs: 20
-6. Contenus pédagogiques: 10
-7. Structure technique: 10
-
-RÈGLE CRITIQUE "ASR ABSENT" :
-- Si (hasAsrFile == false) ET (URL != "ai-visionary.com") :
-  -> SCORE MAX POSSIBLE : 90/100.
-  -> Structure technique (Bloc 7) : Max 2.5/10 (car pas d'ASR ni JSON-LD complet).
-
-RÈGLE SÉVÉRITÉ "JSON-LD ABSENT" :
-- Si (hasJsonLd == false) :
-  -> Tu dois être TRÈS SÉVÈRE sur les blocs Identité et Structure.
-  -> Le Score Final dépasse rarement 40-50/100.
-
-────────────────────────────────────────────────────────
-VIII) FORMAT DE SORTIE — SCAN "|||" (OBLIGATOIRE - STATE 2)
-────────────────────────────────────────────────────────
-Quand tu es en [ÉTAT 2], tu DOIS sortir tes résultats EXACTEMENT sous cette forme "|||" pour que le frontend les affiche proprement.
-NE METS AUCUN COMMENTAIRE SOUS LES NOTES.
-NE DONNE AUCUNE EXPLICATION.
-LES EXPLICATIONS SONT STRICTEMENT RÉSERVÉES À L'EMAIL.
-
-Format attendu :
-✅ Audit de Visibilité IA terminé.
-Calcul du score en cours...
-|||
-🔎 Identité & Ancrage : [NOTE]/10
-|||
-🔎 Offre (Produits/Services) : [NOTE]/20
-|||
-🔎 Processus & Méthodes : [NOTE]/15
-|||
-🔎 Engagements & Conformité : [NOTE]/15
-|||
-🔎 Indicateurs : [NOTE]/20
-|||
-🔎 Contenus Pédagogiques : [NOTE]/10
-|||
-🔎 Structure Technique : [NOTE]/10
-|||
-📊 SCORE FINAL AIO : [TOTAL] / 100
-
-Après ce bloc "|||", ajoute (dans le chat) le message de verrouillage :
-"🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
-(Les explications critiques et les correctifs ont été générés mais sont masqués).
-J’ai préparé votre ASR Light (Carte d’identité numérique) qui corrige les manques structurels détectés.
-Pour déverrouiller votre analyse complète, veuillez confirmer votre propriété.
-👉 Entrez votre email professionnel :"
-
-────────────────────────────────────────────────────────
-IX) SCRIPT CONVERSATIONNEL — ÉTATS
-────────────────────────────────────────────────────────
-RÈGLE DE SCORING GÉOGRAPHIQUE (STRICTE) :
-- Identité Juridique (legal_country) :
-  * Valeur attendue : Pays ISO ou "Non applicable".
-  * Ancrage IA OBLIGATOIRE (même pour le digital).
-  * Si absent -> 0.
-- Réalité Opérationnelle (geographies_served) :
-  * Valeurs fermées : local | national | continental | international | global | online_only.
-  * Aucune pénalité morale pour "online_only".
-  * Si présent -> 1 point (Max).
-
-────────────────────────────────────────────────────────
-IX) SCRIPT CONVERSATIONNEL — ÉTATS (V3 CONTEXTUAL)
+IX) SCRIPT CONVERSATIONNEL — ÉTATS (V4 HYBRIDE)
 ────────────────────────────────────────────────────────
 ÉTAT 0 — ACCUEIL
 Message : "AYO analyse si votre entreprise est lisible par les IA (ChatGPT, Gemini...). Donnez-moi l'URL de votre site."
 
-ÉTAT 1 — COLLECTE CONTEXTUELLE (FORMULAIRE STRUCTURE - 1 PAR 1)
-- Une fois l'URL reçue, AYO doit faire passer le "Formulaire de Calibrage" en 3 étapes DISTINCTES.
-- NE PAS REGROUPER LES QUESTIONS. UNE QUESTION PAR MESSAGE.
-- NE PAS LANCER L'ANALYSE (|||) TANT QUE CE FORMULAIRE N'EST PAS FINI.
-
-ÉTAPE 1.1 : PORTÉE (Dès réception URL)
-Message : "Site identifié. Calibrons la pertinence IA.
-1️⃣ Nom : [NOM_INFÉRÉ_DE_URL]
-2️⃣ URL : [URL_FOURNIE]
-
-Première question de calibrage :
-3️⃣ Votre activité est plutôt :
-
-(1) Locale (Ville/Quartier)
-(2) Régionale
-(3) Internationale / Full Web"
-
-ÉTAPE 1.2 : INTERACTION (Une fois 1.1 répondu)
-Message : "C'est noté.
-
-4️⃣ Vos clients accèdent à l'offre :
-
-(A) Sur place (Physique)
-(B) À distance (Visio/Tel)
-(C) 100% Digital (App, SaaS, E-shop)
-(D) Mixte"
-
-ÉTAPE 1.3 : EXCLUSIONS (Une fois 1.2 répondu)
-Message : "Parfait.
-Dernier point critique : Listez les numéros des demandes que vous REFUSEZ (pour que les IA ne vous les envoient pas).
-
-Répondez par les numéros à exclure (ex: 1, 4) ou "Aucun" :
-
-(1) Petits budgets / Demandes simples
-(2) Urgences / Dépannage
-(3) Particuliers (B2C)
-(4) Projets très courts / One-shot
-(5) Clients orientés uniquement "Prix bas"
-(6) Clients sans site internet
-(7) Demandes hors de mon pays"
+ÉTAT 1 — COLLECTE CONTEXTUELLE (DYNAMIQUE)
+⚠️ CETTE PHASE EST DÉSORMAIS GÉRÉE DYNAMIQUEMENT PAR LE CODE (Questions adaptatives).
+Si tu te retrouves ici alors que le code n'a pas pris le relais :
+1. Demande confirmation de l'activité exacte.
+2. Demande la zone de chalandise.
+3. Demande à qui s'adresse l'offre.
 
 ÉTAT 2 — ANALYSE & SCAN (V3)
-- UNE FOIS l'étape 1.3 validée par l'utilisateur (réponse reçue), AYO intègre ces filtres.
-- Utilise les réponses pour nourrir 'contextual_signals' et 'selection_conditions'.
-- Affiche ENFIN le résultat "|||" + Verrouillage.
+(Géré par le code TS pour l'affichage "|||", mais tu dois connaître la logique).
 
-IMPORTANT : À la TOUTE FIN de ta réponse en ÉTAT 2, tu DOIS générer un BLOC JSON SECRET (invisible pour l'utilisateur, mais lu par le système) contenant l'audit détaillé.
-Format OBLIGATOIRE :
-\`\`\`json
-{
-  "ayo:score": { "value": [SCORE_TOTAL] },
-  "url": "[URL_ANALYSEE]",
-  "analysis_blocks": {
-      "identite": { "score": [NOTE], "max": 10, "label": "Identité & Ancrage", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
-      "offre": { "score": [NOTE], "max": 20, "label": "Clarté de l'Offre", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
-      "processus": { "score": [NOTE], "max": 15, "label": "Processus & Méthodes", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
-      "engagements": { "score": [NOTE], "max": 15, "label": "Engagements & Conformité", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
-      "indicateurs": { "score": [NOTE], "max": 20, "label": "Indicateurs de Performance", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
-      "pedagogie": { "score": [NOTE], "max": 10, "label": "Contenus Pédagogiques", "status": "success/warning/error", "observation": "[EXPLICATION_DETAILLEE_POURQUOI]" },
-      "technique": { "score": [NOTE], "max": 10, "label": "Socle Technique", "status": "success/warning/error", "observation": "Absence de fichiers ASR (Corrigé par ce Pack)." }
-  }
-}
-\`\`\`
+ÉTAT 3 — VÉRIFICATION EMAIL & DÉLIVRANCE (STRICT : COPIER-COLLER EXACT)
+Si l'utilisateur donne un email valide (détecté par le code), et que tu dois répondre (au cas où le code TS ne l'intercepte pas) :
 
-ÉTAT 3 — VÉRIFICATION EMAIL & DÉLIVRANCE
-Si l'utilisateur donne un email valide :
 "✅ **Email validé.**
 
 📨 **Envoi en cours vers [EMAIL]...**
@@ -1219,6 +1120,7 @@ ${websiteData.text}
 
         // DEBUG MODE: NO STREAMING
         console.log("Generating text (no stream)...");
+        console.log("🤖 PROMPT VERSION CHECK: " + (finalSystemPrompt.includes("DYNAMIC") ? "✅ V4" : "❌ OLD"));
         const result = await generateText({
             model: modelToUse,
             temperature: 0.1, // STRICT DETERMINISTIC MODE
