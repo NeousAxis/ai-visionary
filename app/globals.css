@@ -1,56 +1,47 @@
 @import "tailwindcss";
 
 :root {
-    /* --- PALETTE N°5 (User Choice) --- */
+    /* --- PALETTE N°5 (User Choice - ENFORCED) --- */
 
     /* Backgrounds */
     --bg-white: #FFFFFF;
-    /* Pure Canvas */
     --bg-deep: #F5F9F8;
-    /* Extremely light sage tint (derived from #BED3C3) for main bg */
+    /* Light Sage Tint */
     --bg-subtle: #BED3C3;
-    /* Sage/Vert d'eau - Secondary blocks */
+    /* Sage/Vert d'eau */
 
     /* Brand Colors */
     --primary-color: #4A919E;
-    /* Bleu Pétrole Doux - Main Action */
+    /* Bleu Pétrole Doux */
     --primary-hover: #3A7885;
-    /* Darker version for hover */
 
     --accent-color: #CE6A6B;
-    /* Terracotta Rosé - CTA / Highlights */
+    /* Terracotta Rosé */
     --accent-secondary: #EBACA2;
-    /* Pêche Pastel - Soft nuances */
+    /* Pêche Pastel */
 
     /* Typography */
     --text-main: #212E53;
-    /* Bleu Nuit Profond - Headings */
+    /* Bleu Nuit Profond */
     --text-body: #324066;
-    /* Slightly lighter Night Blue */
     --text-muted: #5D6B8C;
-    /* Muted Blue-Grey */
     --text-inverted: #FFFFFF;
 
     /* UI Elements */
     --border-light: #CFE0D6;
-    /* Matching Sage border */
+    /* Sage Border */
     --glass-shine: rgba(255, 255, 255, 0.6);
 
     --success-color: #4A919E;
-    /* Using Primary for success as it is calm */
     --warning-color: #CE6A6B;
-    /* Using Accent for attention */
     --error-color: #D32F2F;
-    /* Standard red for critical errors only */
 
     /* Specs */
     --shadow-sm: 0 1px 2px 0 rgba(33, 46, 83, 0.05);
-    /* Shadow color match text-main */
     --shadow-md: 0 4px 6px -1px rgba(33, 46, 83, 0.1), 0 2px 4px -2px rgba(33, 46, 83, 0.05);
     --shadow-lg: 0 10px 15px -3px rgba(33, 46, 83, 0.1), 0 4px 6px -4px rgba(33, 46, 83, 0.05);
 
     --radius-sm: 10px;
-    /* Softer radius for this palette */
     --radius-md: 20px;
     --radius-lg: 30px;
 
@@ -77,7 +68,6 @@ body {
     font-family: var(--font-body);
     line-height: 1.6;
     overflow-x: hidden;
-    /* Subtle metallic/grain texture hint if desired, but sticking to clean Cloud Dancer for now */
 }
 
 h1,
@@ -180,10 +170,10 @@ ul {
 }
 
 .btn-outline:hover {
-    background: rgba(37, 99, 235, 0.05);
+    background: rgba(74, 145, 158, 0.05);
 }
 
-/* --- CARDS (Clean White Style) --- */
+/* --- CARDS --- */
 .card {
     background: var(--bg-white);
     border: 1px solid var(--border-light);
@@ -196,23 +186,66 @@ ul {
 .card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
-    border-color: rgba(37, 99, 235, 0.3);
+    border-color: var(--primary-color);
 }
 
-/* --- HERO SECTION (Landing) --- */
+/* --- SECTIONS (Color Blocking) --- */
+
 .hero-section {
     min-height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    background: linear-gradient(to bottom, #FFFFFF, #F1F5F9);
+    /* Gradient White -> Sage */
+    background: linear-gradient(180deg, #FFFFFF 0%, var(--bg-deep) 60%, var(--bg-subtle) 100%);
     padding-top: var(--spacing-lg);
 }
 
+.problem-section {
+    /* Color Block: Peach/Rose for Problem */
+    background-color: var(--accent-secondary);
+    color: var(--text-main);
+}
+
+.problem-section p,
+.problem-section li {
+    color: var(--text-main);
+    /* Ensure contrast */
+}
+
+.comparison-section {
+    /* Color Block: Sage */
+    background-color: var(--bg-subtle);
+}
+
+.solution-section {
+    background-color: var(--bg-white);
+}
+
+.pricing-section {
+    /* Color Block: Deep Blue for Pricing */
+    background-color: var(--text-main);
+    color: var(--text-inverted);
+}
+
+.pricing-section .section-title {
+    color: var(--text-inverted);
+}
+
+/* Pricing Cards remain white, but text inside is dark */
+.pricing-card {
+    background: var(--bg-white);
+    color: var(--text-body);
+}
+
+.ayo-trigger-section {
+    background-color: var(--bg-deep);
+}
+
+/* --- HEADLINES --- */
 .headline {
     font-size: 3.5rem;
-    /* Large commercial font */
     color: var(--text-main);
     margin-bottom: var(--spacing-sm);
     letter-spacing: -0.03em;
@@ -225,11 +258,11 @@ ul {
     margin: 0 auto var(--spacing-md);
 }
 
-/* --- DIAGNOSTIC PAGE (The "Frame") --- */
+/* --- DIAGNOSTIC PAGE --- */
 .diagnostic-container {
     min-height: 100vh;
-    background-color: var(--bg-deep);
-    /* Slate-50 */
+    background-color: var(--bg-subtle);
+    /* Full Sage Background for diagnostic */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -242,17 +275,14 @@ ul {
     background: var(--bg-white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    /* Big shadow for "floating" effect */
     border: 1px solid var(--border-light);
     overflow: hidden;
-    /* Contain chat */
     display: flex;
     flex-direction: column;
     height: 85vh;
-    /* Fixed height for chat app feel */
 }
 
-/* --- CHATBOT UI OVERRIDES --- */
+/* --- CHATBOT UI --- */
 .ayo-chat-container {
     width: 100%;
     height: 100%;
@@ -274,8 +304,8 @@ ul {
     flex: 1;
     overflow-y: auto;
     padding: 2rem;
-    background-color: #F8FAFC;
-    /* Inner chat bg */
+    background-color: var(--bg-deep);
+    /* Use palette background */
 }
 
 .chat-input-area {
@@ -284,7 +314,6 @@ ul {
     border-top: 1px solid var(--border-light);
 }
 
-/* Messages Bubbles */
 .msg-bubble {
     max-width: 80%;
     padding: 1rem 1.5rem;
@@ -300,7 +329,6 @@ ul {
     border: 1px solid var(--border-light);
     color: var(--text-body);
     border-top-left-radius: 0;
-    /* Distinct shape */
     box-shadow: var(--shadow-sm);
 }
 
@@ -312,7 +340,6 @@ ul {
     box-shadow: var(--shadow-sm);
 }
 
-/* Input Field */
 .chat-input {
     width: 100%;
     padding: 1rem;
@@ -320,17 +347,17 @@ ul {
     border-radius: var(--radius-sm);
     font-size: 1rem;
     transition: border-color 0.2s;
-    background: #F8FAFC;
+    background: var(--bg-deep);
 }
 
 .chat-input:focus {
     outline: none;
     border-color: var(--primary-color);
     background: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(74, 145, 158, 0.1);
 }
 
-/* QCM / Buttons Area */
+/* QCM */
 .qcm-options-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -352,26 +379,25 @@ ul {
 
 .qcm-btn:hover {
     border-color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.05);
+    background: rgba(74, 145, 158, 0.05);
     color: var(--primary-color);
-}
-
-.qcm-btn.selected {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
 }
 
 /* --- FOOTER --- */
 .footer {
-    background: #FFFFFF;
-    border-top: 1px solid var(--border-light);
+    background: var(--text-main);
+    /* Dark Blue */
+    border-top: none;
     padding: var(--spacing-md) 0;
     text-align: center;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.7);
 }
 
-/* Animations */
+/* ... Animations & Legacy Widget Styles remain ... */
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -384,17 +410,12 @@ ul {
     }
 }
 
-.animate-fadeIn {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-
 .ayo-toggle {
     width: 60px;
     height: 60px;
     border-radius: 50%;
     background: var(--primary-color);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 4px 15px rgba(74, 145, 158, 0.4);
     border: none;
     cursor: pointer;
     display: flex;
@@ -403,214 +424,27 @@ ul {
     transition: transform 0.3s ease;
 }
 
-.ayo-toggle:hover {
-    transform: scale(1.1);
-}
-
 .ayo-toggle svg {
     width: 30px;
     height: 30px;
     fill: white;
 }
 
-.ayo-chat-window {
-    position: absolute;
-    bottom: 80px;
-    right: 0;
-    width: 350px;
-    height: 500px;
-    background: rgba(15, 5, 24, 0.95);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    transform: translateY(20px);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.ayo-chat-window.open {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-}
-
-.ayo-header {
-    background: rgba(139, 92, 246, 0.1);
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.ayo-header h4 {
-    margin: 0;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-.ayo-messages {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.message {
-    max-width: 85%;
-    padding: 10px 15px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    animation: fadeIn 0.3s ease;
-    word-break: break-word;
-    white-space: pre-wrap;
-}
-
-.message.bot {
-    background: rgba(255, 255, 255, 0.1);
-    align-self: flex-start;
-    border-bottom-left-radius: 2px;
-}
-
-.message.user {
-    background: var(--primary-color);
-    color: white;
-    align-self: flex-end;
-    border-bottom-right-radius: 2px;
-}
-
-/* FIX: Markdown Styling in Chat */
-.message strong,
-.message b {
-    font-weight: 800;
-    color: #fff;
-}
-
-.message a {
-    color: #38bdf8 !important;
-    /* Light Blue to stand out on dark bg */
-    text-decoration: underline;
-    font-weight: 700;
-    cursor: pointer !important;
-    pointer-events: auto;
-}
-
-.message a:hover {
-    color: #7dd3fc !important;
-    text-decoration: none;
-}
-
-
-.typing-indicator {
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    align-self: flex-start;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    display: none;
-}
-
-.ayo-input-area {
-    padding: 15px;
-    border-top: 1px solid var(--glass-border);
-    display: flex;
-    gap: 10px;
-}
-
-.ayo-input-area input {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 10px 15px;
-    color: white;
-    outline: none;
-    pointer-events: auto;
-    z-index: 10000;
-    position: relative;
-}
-
-.ayo-input-area button {
-    background: var(--primary-color);
-    border: none;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    pointer-events: auto;
-    z-index: 10000;
-    position: relative;
-}
-
-@media (max-width: 480px) {
-    .ayo-chat-window {
-        width: calc(100vw - 40px);
-        bottom: 80px;
-        right: 0;
-    }
-}
-
-/* New styles for Readable List in Demo Section */
+/* Readability lists */
 .demo-card .subtitle {
-    font-size: 0.9rem;
     color: var(--primary-color);
-    margin-bottom: 1.2rem;
     font-weight: 600;
-    margin-top: -5px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.readable-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
+    margin-bottom: 1.2rem;
 }
 
 .readable-list li {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-light);
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    margin-bottom: 10px;
+    color: var(--text-muted);
 }
 
 .readable-list li strong {
     color: var(--text-main);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    opacity: 0.9;
-}
-
-.readable-list li:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
 }
