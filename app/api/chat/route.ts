@@ -503,51 +503,40 @@ export async function POST(req: Request) {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
             console.log("Asking NEXT Block...");
 
-            // Logic to determine Next Block Name
-            const blockNames = ["IDENTITÉ", "RÔLE", "OFFRE", "RESPONSABILITÉ", "TECHNIQUE"];
-            // stepsCompleted = 1 means we finished Identité, so next is RÔLE (Index 1)
-            // But if user just answered Block 1, stepsCompleted IS 1 (because Assistant asked it).
-            // So we need to ask Index 1 (Rôle). Correct.
-
+            // Logic to determine Next Question Name
+            const blockNames = ["PAYS", "STATUT", "CIBLE", "OFFRE", "TECHNIQUE"];
             const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
 
             const CONTINUE_PROMPT = `
-Tu es AYO. Étape ${stepsCompleted}/5 du Scan Profond.
+Tu es AYO. Étape ${stepsCompleted + 1}/5 du Scan Profond.
 
 🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
 ✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
-⚠️ SI TU RÉPONDS EN ANGLAIS, C'EST UNE ERREUR CRITIQUE.
+⚠️ UNE SEULE QUESTION PAR BLOC.
 
 ### TA MISSION
-1. Acquiesce brièvement à la réponse précédente de l'utilisateur (dans 'intro').
-2. Pose les questions pour le **BLOC ${nextBlockName}**.
-3. Génère des options valides (A, B, C) + Custom.
+1. Acquiesce brièvement à la réponse précédente.
+2. Pose **UNE SEULE QUESTION** pour le thème : **${nextBlockName}**.
+3. Génère des options valides.
 
 ### FORMAT JSON ATTENDU (EXEMPLE)
 \`\`\`json
 {
   "type": "question_block",
-  "intro": "✅ C'est noté. Passons maintenant au bloc ${nextBlockName}.",
+  "intro": "✅ C'est noté. Au sujet de votre ${nextBlockName}...",
   "questions": [
     {
       "id": "q_next_1",
-      "text": "Quelle est votre cible principale ?",
-      "options": ["B2B", "B2C"],
-      "allowCustom": true
-    },
-    {
-      "id": "q_next_2",
-      "text": "Avez-vous une équipe technique ?",
-      "options": ["Oui", "Non"],
+      "text": "Votre question unique ici ?",
+      "options": ["Option A", "Option B"],
       "allowCustom": true
     }
   ]
 }
 \`\`\`
 
-**QUESTIONS DU BLOC ${nextBlockName} :**
-(Réfère-toi à la logique du Protocole V4 pour les questions pertinentes).
-Génère les questions en FRANÇAIS.
+**QUESTION UNIQUE POUR ${nextBlockName} :**
+(Génère la question la plus pertinente pour ce thème).
 `;
 
             const continueResult = await generateText({

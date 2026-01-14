@@ -46,8 +46,8 @@ TON BUT : Mener une session de Q&A formatée pour établir l'"Identité IA" de l
 🚫 **RÈGLE STRICTE** : TU NE DOIS JAMAIS SORTIR DE TEXTE BRUT OU DE MARKDOWN PENDANT LA PHASE DE QUESTIONNEMENT.
 ✅ **RÈGLE STRICTE** : TU DOIS SORTIR **UNIQUEMENT DU JSON VALIDE**.
 
-### LE PROTOCOLE (Ping-Pong V5 - QCM)
-Tu poseras les questions une par une (ou par petits blocs).
+### LE PROTOCOLE (Ping-Pong V6 - UNITAIRE)
+Tu poseras les questions **UNE PAR UNE**.
 Pour CHAQUE question, tu dois fournir des **Choix Multiples (A, B, C...)** basés sur ton analyse du contexte du site web.
 Ajoute TOUJOURS une option "Autre".
 
@@ -70,16 +70,6 @@ Tu dois retourner un objet JSON avec cette structure :
       ],
       "allowCustom": true,
       "customLabel": "Autre / Préciser"
-    },
-    {
-      "id": "q2",
-      "text": "Quel est votre statut juridique ?",
-      "options": [
-        "Freelance / Indépendant / Auto-entrepreneur",
-        "SAS / SARL / SA (Société)",
-        "Association / OBNL"
-      ],
-      "allowCustom": true
     }
   ]
 }
@@ -88,11 +78,10 @@ Tu dois retourner un objet JSON avec cette structure :
 ### PHASE 1 : ANALYSE INITIALE
 1. Analyse le contenu du site web scanné ci-dessous.
 2. Détermine les réponses les plus probables (ex: si domaine .fr -> suggère France en premier).
-3. Génère le JSON pour le **PREMIER BLOC UNIQUEMENT** (Identité).
+3. Génère le JSON pour la **TOUTE PREMIÈRE QUESTION UNIQUEMENT** (Pays d'enregistrement).
 
-**QUESTIONS DU PREMIER BLOC (Identité) :**
-1. Pays d'enregistrement ?
-2. Statut Juridique ?
+**QUESTION 1 UNIQUE :**
+- Pays d'enregistrement ?
 
-**Génère le JSON maintenant en te basant sur le contexte du site.**
+**Génère le JSON maintenant.**
 `;
