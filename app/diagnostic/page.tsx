@@ -15,7 +15,7 @@ export default function DiagnosticPage() {
                         ← Retour à l'accueil
                     </Link>
 
-                    <img src="/logo.svg" alt="AI Visionary" style={{ height: '70px', width: 'auto' }} />
+                    <img src="/logo.png" alt="AI Visionary" style={{ height: '70px', width: 'auto' }} />
                 </div>
             </header>
 
