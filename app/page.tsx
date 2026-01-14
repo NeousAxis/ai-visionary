@@ -154,7 +154,7 @@ export default function Home() {
       </section>
 
       {/* TARGET */}
-      <section id="target" className="section target-section">
+      <section id="target" className="section target-section" style={{ textAlign: "center" }}>
         <div className="container">
           <h2 className="section-title">Pour les entreprises, artisans et indépendants qui ne veulent pas être écartés par les IA.</h2>
           <div className="target-grid">
@@ -175,8 +175,8 @@ export default function Home() {
 
       {/* PRICING */}
       <section id="pricing" className="section pricing-section">
-        <div className="container">
-          <h2 className="section-title">Investissez dans votre infrastructure sémantique.</h2>
+        <div className="container" style={{ textAlign: "center" }}>
+          <h2 className="section-title" style={{ fontSize: "2.5rem" }}>Investissez dans votre infrastructure sémantique.</h2>
           <div className="grid-3 pricing-grid">
 
             <div className="card pricing-card">
@@ -218,10 +218,10 @@ export default function Home() {
 
 
       {/* CTA Final */}
-      <section id="cta-final" className="section cta-final-section">
+      <section id="cta-final" className="section cta-final-section" style={{ textAlign: "center" }}>
         <div className="container">
           <h2 className="section-title">Entrez dans la base de connaissance des IA.</h2>
-          <div className="cta-group">
+          <div className="cta-group" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
             <Link href="/diagnostic" className="btn btn-primary">
               → Optimiser mon entreprise
             </Link>
