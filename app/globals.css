@@ -64,16 +64,60 @@ body {
     overflow-x: hidden;
 }
 
+/* --- TYPOGRAPHY SCALE (Big & Bold) --- */
+
 h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+.headline {
     font-family: var(--font-heading);
     color: var(--text-main);
-    line-height: 1.25;
+    line-height: 1.1;
+    font-weight: 800;
+    /* Massive Desktop Title */
+    font-size: 4.5rem;
+    letter-spacing: -0.04em;
+    margin-bottom: var(--spacing-sm);
+}
+
+h2,
+.section-title {
+    font-family: var(--font-heading);
+    color: var(--text-main);
+    line-height: 1.2;
     font-weight: 700;
+    font-size: 3.2rem;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--spacing-sm);
+}
+
+h3 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Body Text */
+p,
+li {
+    font-size: 1.15rem;
+    /* ~18px base size */
+    color: var(--text-body);
+    line-height: 1.7;
+}
+
+/* Subheadlines / Leads */
+.subheadline,
+.lead {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    max-width: 800px;
+    /* Readability measure */
+    margin: 0 auto var(--spacing-md);
+    line-height: 1.5;
 }
 
 a {
@@ -84,6 +128,32 @@ a {
 
 ul {
     list-style: none;
+}
+
+
+/* --- RESPONSIVE TYPOGRAPHY --- */
+@media (max-width: 768px) {
+
+    h1,
+    .headline {
+        font-size: 3rem;
+        /* Still big on mobile */
+    }
+
+    h2,
+    .section-title {
+        font-size: 2.2rem;
+    }
+
+    .subheadline {
+        font-size: 1.2rem;
+    }
+
+    .btn {
+        width: 100%;
+        /* Full width buttons on mobile */
+        margin-bottom: 10px;
+    }
 }
 
 /* --- CONTAINERS & SPACING --- */
