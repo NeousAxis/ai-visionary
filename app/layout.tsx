@@ -20,6 +20,7 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <link rel="icon" href="/icon.png" sizes="any" />
+        <link rel="apple-touch-icon" href="/icon.png" />
       </head>
       <body className={`${inter.variable} ${outfit.variable}`}>{children}</body>
     </html>
