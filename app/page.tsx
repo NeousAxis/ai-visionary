@@ -41,19 +41,46 @@ export default function Home() {
       {/* SECTION 2 — Le problème */}
       <section id="problem" className="section problem-section">
         <div className="container">
-          <h2 className="section-title">Pourquoi votre site web ne suffit plus.</h2>
-          <div className="text-content">
-            <p style={{ fontSize: '1.15rem', marginBottom: '1.5rem', color: 'var(--text-body)' }}>
-              "Les IA cherchent de plus en plus des professionnels à la place des moteurs de recherche.<br />
-              Elles ne montrent que les entreprises qu’elles peuvent identifier sans ambiguïté.<br />
-              <strong style={{ color: 'var(--primary-color)' }}>AYO structure votre entreprise pour qu’elle reste visible dans ce nouveau monde.</strong>"
+          <div className="grid-2" style={{ alignItems: 'start' }}>
+
+            {/* Left Column: Context */}
+            <div className="problem-intro">
+              <h2 className="section-title" style={{ textAlign: 'left', marginBottom: '20px' }}>Pourquoi votre site web ne suffit plus.</h2>
+              <p style={{ fontSize: '1.25rem', color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.4' }}>
+                "Les IA cherchent des professionnels à la place des moteurs de recherche."
+              </p>
+              <p style={{ fontSize: '1.1rem', color: 'var(--text-body)', lineHeight: '1.6' }}>
+                Elles ne montrent que les entreprises qu’elles peuvent identifier sans ambiguïté. <br />
+                <span style={{ fontWeight: '600' }}>AYO structure votre entreprise pour qu’elle reste visible dans ce nouveau monde.</span>
+              </p>
+            </div>
+
+            {/* Right Column: Key Pain Points (Cards) */}
+            <div className="problem-cards" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="card" style={{ padding: '20px', borderLeft: '4px solid var(--accent-color)' }}>
+                <h4 style={{ color: 'var(--text-main)', marginBottom: '5px' }}>Information Incomplète</h4>
+                <p style={{ color: 'var(--text-muted)' }}>Si les informations de votre site sont dispersées, les IA évitent de vous recommander.</p>
+              </div>
+
+              <div className="card" style={{ padding: '20px', borderLeft: '4px solid var(--accent-secondary)' }}>
+                <h4 style={{ color: 'var(--text-main)', marginBottom: '5px' }}>Risque d'Hallucination</h4>
+                <p style={{ color: 'var(--text-muted)' }}>Mal documentés, vos services peuvent être mal interprétés par les modèles.</p>
+              </div>
+
+              <div className="card" style={{ padding: '20px', borderLeft: '4px solid var(--text-muted)' }}>
+                <h4 style={{ color: 'var(--text-main)', marginBottom: '5px' }}>Invisibilité Totale</h4>
+                <p style={{ color: 'var(--text-muted)' }}>La majorité des entreprises sont aujourd'hui invisibles pour les assistants conversationnels.</p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bottom Hook */}
+          <div style={{ marginTop: '50px', textAlign: 'center', maxWidth: '800px', margin: '50px auto 0' }}>
+            <p className="final-hook" style={{ fontSize: '1.2rem', fontWeight: '500' }}>
+              Pour être recommandé, vous ne devez plus seulement séduire les humains, vous devez convaincre les algorithmes. <br />
+              <strong style={{ color: 'var(--text-main)' }}>AYO crée les fichiers nécessaires pour que votre activité soit clairement identifiée par les IA.</strong>
             </p>
-            <ul className="problem-list">
-              <li>Si les informations de votre site sont incomplètes ou dispersées, les IA évitent de vous recommander.</li>
-              <li>Si elles sont mal documentées, elles peuvent se tromper sur vos services.</li>
-              <li>La majorité des entreprises sont aujourd'hui invisibles pour les assistants conversationnels.</li>
-            </ul>
-            <p className="final-hook">Pour être recommandé, vous ne devez plus seulement séduire les humains, vous devez convaincre les algorithmes. <br /><strong>AYO crée les fichiers nécessaires pour que votre activité soit clairement identifiée par les IA.</strong></p>
           </div>
         </div>
       </section>
