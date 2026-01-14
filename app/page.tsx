@@ -209,7 +209,7 @@ export default function Home() {
             <div className="card pricing-card">
               <h3>AYO Light <br /><span className="card-subtitle">Diagnostic de visibilité</span></h3>
               <div className="price">Gratuit</div>
-              <p className="price-details">Testez comment les IA vous voient aujourd'hui. Rapport immédiat via notre Chatbot.</p>
+              <p className="price-details">Analyse détaillée + Génération de votre ASR (Carte d'identité IA)</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic" className="btn btn-secondary w-full" style={{ width: '100%' }}>
                   Lancer l'audit
