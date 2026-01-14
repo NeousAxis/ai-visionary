@@ -249,6 +249,60 @@ ul {
     box-shadow: 0 6px 15px rgba(74, 145, 158, 0.4);
 }
 
+/* --- MODERN QCM --- */
+.ay-qcm-container {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.qcm-question-box {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.qcm-question-box p {
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.qcm-options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.qcm-btn {
+    background: white;
+    border: 1px solid var(--border-light);
+    color: var(--text-main);
+    padding: 10px 16px;
+    border-radius: 20px;
+    /* Fully rounded pills */
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.qcm-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 145, 158, 0.15);
+}
+
+.qcm-btn:active {
+    transform: translateY(0);
+}
+
 .btn-secondary {
     background: white;
     color: var(--text-main);
