@@ -1,56 +1,50 @@
 @import "tailwindcss";
 
 :root {
-    /* --- PALETTE N°5 (User Choice - ENFORCED) --- */
+    /* --- PALETTE N°5 (Elegant & Balanced) --- */
 
     /* Backgrounds */
     --bg-white: #FFFFFF;
-    --bg-deep: #F5F9F8;
-    /* Light Sage Tint */
-    --bg-subtle: #BED3C3;
-    /* Sage/Vert d'eau */
+    --bg-main: #F5F9F8;
+    /* Light Sage Tint (Page Background) */
+    --bg-accent: #E2EFE9;
+    /* Deeper Sage for cards/sections */
 
     /* Brand Colors */
     --primary-color: #4A919E;
-    /* Bleu Pétrole Doux */
-    --primary-hover: #3A7885;
+    /* Teal - Main Action */
+    --primary-hover: #356D76;
 
     --accent-color: #CE6A6B;
-    /* Terracotta Rosé */
+    /* Terracotta - Highlights */
     --accent-secondary: #EBACA2;
-    /* Pêche Pastel */
+    /* Peach - Soft decorations */
 
     /* Typography */
     --text-main: #212E53;
-    /* Bleu Nuit Profond */
+    /* Deep Blue - Headings */
     --text-body: #324066;
-    --text-muted: #5D6B8C;
+    /* Lighter Blue - Body */
+    --text-muted: #64748B;
+    /* Slate - Meta info */
     --text-inverted: #FFFFFF;
 
-    /* UI Elements */
-    --border-light: #CFE0D6;
+    /* UI Specs */
+    --border-light: #D4E0DC;
     /* Sage Border */
-    --glass-shine: rgba(255, 255, 255, 0.6);
+    --shadow-sm: 0 1px 3px rgba(33, 46, 83, 0.05);
+    --shadow-md: 0 4px 12px rgba(33, 46, 83, 0.08);
+    --shadow-lg: 0 10px 25px rgba(33, 46, 83, 0.12);
 
-    --success-color: #4A919E;
-    --warning-color: #CE6A6B;
-    --error-color: #D32F2F;
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
 
-    /* Specs */
-    --shadow-sm: 0 1px 2px 0 rgba(33, 46, 83, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(33, 46, 83, 0.1), 0 2px 4px -2px rgba(33, 46, 83, 0.05);
-    --shadow-lg: 0 10px 15px -3px rgba(33, 46, 83, 0.1), 0 4px 6px -4px rgba(33, 46, 83, 0.05);
-
-    --radius-sm: 10px;
-    --radius-md: 20px;
-    --radius-lg: 30px;
-
-    --max-width: 1200px;
+    --max-width: 1100px;
     --spacing-xs: 0.5rem;
-    --spacing-sm: 1rem;
-    --spacing-md: 2rem;
-    --spacing-lg: 4rem;
-    --spacing-xl: 6rem;
+    --spacing-sm: 1.5rem;
+    --spacing-md: 3rem;
+    --spacing-lg: 5rem;
 
     --font-heading: var(--font-outfit);
     --font-body: var(--font-inter);
@@ -63,7 +57,7 @@
 }
 
 body {
-    background-color: var(--bg-deep);
+    background-color: var(--bg-main);
     color: var(--text-body);
     font-family: var(--font-body);
     line-height: 1.6;
@@ -78,373 +72,238 @@ h5,
 h6 {
     font-family: var(--font-heading);
     color: var(--text-main);
-    line-height: 1.2;
+    line-height: 1.25;
     font-weight: 700;
 }
 
 a {
     text-decoration: none;
     color: inherit;
-    transition: color 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 
 ul {
     list-style: none;
 }
 
-/* --- UTILITIES --- */
+/* --- CONTAINERS & SPACING --- */
 .container {
     width: 90%;
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 0 var(--spacing-sm);
+    position: relative;
+    z-index: 10;
 }
 
 .section {
     padding: var(--spacing-lg) 0;
+    position: relative;
 }
 
-.text-center {
-    text-align: center;
-}
-
-.text-left {
-    text-align: left;
-}
-
-.mb-2 {
-    margin-bottom: 0.5rem;
-}
-
-.mb-4 {
-    margin-bottom: 1rem;
-}
-
-.mb-8 {
-    margin-bottom: 2rem;
-}
-
-/* --- BUTTONS --- */
+/* --- BUTTONS (Clean) --- */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.8rem 1.5rem;
-    border-radius: var(--radius-sm);
+    padding: 0.8rem 1.8rem;
+    border-radius: 50px;
+    /* Pill shape */
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: all 0.2s ease;
     gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 }
 
 .btn-primary {
     background: var(--primary-color);
-    color: var(--text-inverted);
-    border: 1px solid transparent;
-    box-shadow: var(--shadow-sm);
+    color: white;
+    box-shadow: 0 4px 10px rgba(74, 145, 158, 0.3);
+    border: none;
 }
 
 .btn-primary:hover {
     background: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(74, 145, 158, 0.4);
 }
 
 .btn-secondary {
-    background: var(--bg-white);
+    background: white;
     color: var(--text-main);
     border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .btn-secondary:hover {
     border-color: var(--primary-color);
     color: var(--primary-color);
+    transform: translateY(-2px);
 }
 
-.btn-outline {
-    background: transparent;
-    border: 1px solid var(--primary-color);
-    color: var(--primary-color);
-}
-
-.btn-outline:hover {
-    background: rgba(74, 145, 158, 0.05);
-}
-
-/* --- CARDS --- */
+/* --- CARDS (Elegant) --- */
 .card {
-    background: var(--bg-white);
-    border: 1px solid var(--border-light);
+    background: white;
     border-radius: var(--radius-md);
     padding: var(--spacing-md);
     box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     transition: all 0.3s ease;
 }
 
 .card:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-    border-color: var(--primary-color);
+    transform: translateY(-3px);
 }
 
-/* --- SECTIONS (Color Blocking) --- */
+/* --- SECTIONS (Refined) --- */
 
+/* HERO: Clean & Airy */
 .hero-section {
-    min-height: 80vh;
+    min-height: 85vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    /* Gradient White -> Sage */
-    background: linear-gradient(180deg, #FFFFFF 0%, var(--bg-deep) 60%, var(--bg-subtle) 100%);
+    /* Subtle gradient Sage to White */
+    background: linear-gradient(180deg, var(--bg-main) 0%, #FFFFFF 100%);
     padding-top: var(--spacing-lg);
 }
 
-.problem-section {
-    /* Color Block: Peach/Rose for Problem */
-    background-color: var(--accent-secondary);
-    color: var(--text-main);
-}
-
-.problem-section p,
-.problem-section li {
-    color: var(--text-main);
-    /* Ensure contrast */
-}
-
-.comparison-section {
-    /* Color Block: Sage */
-    background-color: var(--bg-subtle);
-}
-
-.solution-section {
-    background-color: var(--bg-white);
-}
-
-.pricing-section {
-    /* Color Block: Deep Blue for Pricing */
-    background-color: var(--text-main);
-    color: var(--text-inverted);
-}
-
-.pricing-section .section-title {
-    color: var(--text-inverted);
-}
-
-/* Pricing Cards remain white, but text inside is dark */
-.pricing-card {
-    background: var(--bg-white);
-    color: var(--text-body);
-}
-
-.ayo-trigger-section {
-    background-color: var(--bg-deep);
-}
-
-/* --- HEADLINES --- */
 .headline {
     font-size: 3.5rem;
     color: var(--text-main);
     margin-bottom: var(--spacing-sm);
-    letter-spacing: -0.03em;
+    letter-spacing: -1px;
 }
 
 .subheadline {
-    font-size: 1.25rem;
-    color: var(--text-muted);
-    max-width: 700px;
+    font-size: 1.35rem;
+    color: var(--text-body);
+    font-weight: 300;
+    max-width: 750px;
     margin: 0 auto var(--spacing-md);
 }
 
-/* --- DIAGNOSTIC PAGE --- */
-.diagnostic-container {
-    min-height: 100vh;
-    background-color: var(--bg-subtle);
-    /* Full Sage Background for diagnostic */
+/* PROBLEM: White with accents */
+.problem-section {
+    background: white;
+}
+
+.problem-list li {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 1.1rem;
+}
+
+/* COMPARISON: Light Sage */
+.comparison-section {
+    background: var(--bg-accent);
+}
+
+/* SOLUTION: White */
+.solution-section {
+    background: white;
+}
+
+/* PRICING: Clean Grid */
+.pricing-section {
+    background: linear-gradient(180deg, #FFFFFF 0%, var(--bg-main) 100%);
+}
+
+.pricing-card {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: var(--spacing-md);
+    text-align: center;
+    border: 1px solid var(--border-light);
+}
+
+.pricing-card.featured {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+    transform: scale(1.02);
+    position: relative;
+    z-index: 2;
+}
+
+.price {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 1rem 0;
+}
+
+/* --- FOOTER: Deep Blue --- */
+.footer {
+    background: var(--text-main);
+    color: rgba(255, 255, 255, 0.8);
+    padding: var(--spacing-lg) 0;
+    text-align: center;
+}
+
+/* --- DIAGNOSTIC PAGE & CHAT OVERRIDES --- */
+.diagnostic-container {
+    background: var(--bg-main);
 }
 
 .diagnostic-frame {
-    width: 100%;
-    max-width: 900px;
-    background: var(--bg-white);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border-light);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    height: 85vh;
+    background: white;
+    border: none;
+    box-shadow: 0 20px 50px rgba(33, 46, 83, 0.15);
 }
 
-/* --- CHATBOT UI --- */
-.ayo-chat-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg-white);
-}
-
-.chat-header {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #FFFFFF;
-}
-
+/* Chat Styling to match Page */
 .chat-messages-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 2rem;
-    background-color: var(--bg-deep);
-    /* Use palette background */
-}
-
-.chat-input-area {
-    padding: 1.5rem;
-    background: #FFFFFF;
-    border-top: 1px solid var(--border-light);
-}
-
-.msg-bubble {
-    max-width: 80%;
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius-md);
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    position: relative;
+    background: #F8FAFC !important;
+    /* Keep chat content clean/neutral grey for readability */
 }
 
 .msg-ai {
-    background: #FFFFFF;
-    border: 1px solid var(--border-light);
-    color: var(--text-body);
-    border-top-left-radius: 0;
-    box-shadow: var(--shadow-sm);
+    background: white;
+    border: 1px solid #E2E8F0;
+    color: var(--text-main);
 }
 
 .msg-user {
     background: var(--primary-color);
     color: white;
-    margin-left: auto;
-    border-top-right-radius: 0;
-    box-shadow: var(--shadow-sm);
 }
 
-.chat-input {
-    width: 100%;
-    padding: 1rem;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
-    transition: border-color 0.2s;
-    background: var(--bg-deep);
+.chat-header {
+    background: white;
+    border-bottom: 1px solid #E2E8F0;
 }
 
-.chat-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(74, 145, 158, 0.1);
-}
-
-/* QCM */
-.qcm-options-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-}
-
+/* QCM Buttons */
 .qcm-btn {
-    padding: 0.8rem 1rem;
-    background: #FFFFFF;
     border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    text-align: left;
-    transition: all 0.2s;
-    font-size: 0.9rem;
-    color: var(--text-body);
-    cursor: pointer;
+    color: var(--text-main);
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
 }
 
 .qcm-btn:hover {
     border-color: var(--primary-color);
-    background: rgba(74, 145, 158, 0.05);
     color: var(--primary-color);
+    background: var(--bg-main);
 }
 
-/* --- FOOTER --- */
-.footer {
-    background: var(--text-main);
-    /* Dark Blue */
-    border-top: none;
-    padding: var(--spacing-md) 0;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
+/* Specific Fixes */
+.logo-container img {
+    /* Ensure logo blends or pops */
 }
 
-/* ... Animations & Legacy Widget Styles remain ... */
-.animate-fadeIn {
-    animation: fadeIn 0.5s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.ayo-toggle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: var(--primary-color);
-    box-shadow: 0 4px 15px rgba(74, 145, 158, 0.4);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.3s ease;
-}
-
-.ayo-toggle svg {
-    width: 30px;
-    height: 30px;
-    fill: white;
-}
-
-/* Readability lists */
-.demo-card .subtitle {
-    color: var(--primary-color);
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 1.2rem;
-}
-
-.readable-list li {
-    border-bottom: 1px solid var(--border-light);
-    padding-bottom: 10px;
-    margin-bottom: 10px;
+.target-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    margin: 5px;
     color: var(--text-muted);
-}
-
-.readable-list li strong {
-    color: var(--text-main);
 }
