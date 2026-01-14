@@ -140,7 +140,7 @@ export default function Home() {
       {/* SECTION 3 — Solution */}
       <section id="solution" className="section solution-section">
         <div className="container">
-          <h2 className="section-title">AYO structure les informations essentielles de votre activité pour qu’elles soient exploitables par les IA.</h2>
+          <h2 className="section-title" style={{ textAlign: 'center', fontSize: '1.5rem', lineHeight: '1.4', maxWidth: '900px', margin: '0 auto 40px auto' }}>AYO structure les informations essentielles de votre activité pour qu’elles soient exploitables par les IA.</h2>
           <div className="grid-2" style={{ display: 'flex', justifyContent: 'center' }}>
             {/* Bloc AIO Unique */}
             <div className="card solution-card aio-card" style={{ maxWidth: '800px', width: '100%' }}>
