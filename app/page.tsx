@@ -144,10 +144,10 @@ export default function Home() {
             </div>
           </div>
           <div style={{ textAlign: "center", marginTop: "40px", maxWidth: "800px", margin: "40px auto 0" }}>
-            <p style={{ fontSize: "1.4rem", fontWeight: "bold", lineHeight: "1.4" }}>
+            <p style={{ fontSize: "1.4rem", fontWeight: "bold", lineHeight: "1.4", color: 'var(--text-main)' }}>
               "Si une IA ne dispose pas d’informations suffisantes sur votre activité, <br />
-              <span style={{ color: "#ef4444" }}>elle vous écarte sans vous comparer.</span> <br />
-              <span style={{ color: "#ef4444" }}>AYO corrige ça.</span>"
+              elle vous écarte sans vous comparer. <br />
+              AYO corrige ça."
             </p>
           </div>
         </div>
