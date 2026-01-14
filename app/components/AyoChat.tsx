@@ -150,19 +150,17 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [stepCount, setStepCount] = useState(1); // 1..5
 
-    // Progress Bar Component
+    // Progress Bar Component (10 Steps)
     const ProgressBar = () => {
-        const steps = ["Identité", "Rôle", "Offre", "Expertise", "Technique"];
+        const totalSteps = 10;
         return (
-            <div className="progress-steps-container">
-                {steps.map((label, idx) => {
-                    const stepNum = idx + 1;
+            <div className="progress-steps-container" style={{ overflowX: 'auto', paddingBottom: '5px' }}>
+                {Array.from({ length: totalSteps }, (_, i) => i + 1).map((stepNum) => {
                     const isActive = stepNum === stepCount;
                     const isCompleted = stepNum < stepCount;
                     return (
-                        <div key={label} className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
+                        <div key={stepNum} className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`} style={{ minWidth: '30px' }}>
                             <div className="step-dot">{isCompleted ? '✓' : stepNum}</div>
-                            <span className="step-label">{label}</span>
                         </div>
                     );
                 })}
@@ -318,9 +316,24 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 )}
 
                 {isAnalyzing && (
-                    <div className="msg-bubble msg-ai" style={{ borderLeft: '3px solid #CE6A6B' }}>
-                        ⚙️ <strong>Analyse en cours...</strong><br />
-                        AYO explore votre site, cela peut prendre quelques secondes.
+                    <div className="msg-bubble msg-ai" style={{ borderLeft: '3px solid #CE6A6B', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div className="loader" style={{
+                            width: '24px', height: '24px',
+                            border: '3px solid #f3f3f3',
+                            borderTop: '3px solid #CE6A6B',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }}></div>
+                        <div>
+                            <strong>Analyse AIO Finale en cours...</strong><br />
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>Traitement des données et simulation IA.<br />Cela peut prendre 30 secondes...</span>
+                        </div>
+                        <style jsx>{`
+                            @keyframes spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                        `}</style>
                     </div>
                 )}
 
