@@ -6,33 +6,31 @@ import AyoChat from '../components/AyoChat';
 
 export default function DiagnosticPage() {
     return (
-        <div className="diagnostic-container" style={{ flexDirection: 'column', padding: '20px' }}>
+        <div className="diagnostic-container">
 
-            {/* Nav Header */}
-            <div className="diagnostic-header" style={{
-                width: '100%',
-                maxWidth: '1200px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px'
-            }}>
-                <Link href="/" className="btn btn-secondary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
-                    ← Retour à l'accueil
-                </Link>
-                <img src="/logo.png" alt="AI Visionary" className="logo-tinted" style={{ height: '50px' }} />
-                <div style={{ width: '140px' }}></div> {/* Spacer for alignment */}
+            {/* Header */}
+            <header className="diagnostic-header">
+                <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Link href="/" className="btn btn-secondary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
+                        ← Retour à l'accueil
+                    </Link>
+
+                    <img src="/logo.png" alt="AI Visionary" className="logo-tinted" style={{ height: '40px' }} />
+
+                    {/* Placeholder for balance */}
+                    <div style={{ width: '150px' }}></div>
+                </div>
+            </header>
+
+            {/* Chat Content */}
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', padding: '0 20px' }}>
+                <div className="diagnostic-frame">
+                    <AyoChat mode="fullscreen" />
+                </div>
             </div>
 
-            {/* Chat Frame */}
-            <div className="diagnostic-frame" style={{
-                boxShadow: '0 20px 60px rgba(74, 145, 158, 0.15)',
-                border: '1px solid rgba(74, 145, 158, 0.2)'
-            }}>
-                <AyoChat mode="fullscreen" />
-            </div>
-
-            <div style={{ marginTop: '20px', color: '#64748B', fontSize: '0.8rem' }}>
+            {/* Footer Text */}
+            <div style={{ textAlign: 'center', paddingBottom: '20px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 © 2026 AI Visionary • Powered by AYO V4
             </div>
         </div>

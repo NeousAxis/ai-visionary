@@ -393,15 +393,38 @@ ul {
     opacity: 0.6;
 }
 
-/* --- DIAGNOSTIC PAGE & CHAT OVERRIDES --- */
+/* --- DIAGNOSTIC PAGE OVERRIDES --- */
 .diagnostic-container {
     background: var(--bg-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.diagnostic-header {
+    background: white;
+    border-bottom: 1px solid var(--border-light);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .diagnostic-frame {
     background: white;
-    border: none;
-    box-shadow: 0 20px 50px rgba(33, 46, 83, 0.15);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* Height constraint to look like a tool */
+    height: calc(100vh - 140px);
+    max-height: 800px;
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
 }
 
 /* Chat Styling to match Page */
