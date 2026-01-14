@@ -503,6 +503,10 @@ export async function POST(req: Request) {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
             console.log("Asking NEXT Block...");
 
+            // Logic to determine Next Question Name
+            const blockNames = ["PAYS", "STATUT", "CIBLE", "OFFRE", "TECHNIQUE"];
+            const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
+
             const CONTINUE_PROMPT = `
 Tu es AYO. Étape ${stepsCompleted + 1}/5 du Scan Profond.
 
