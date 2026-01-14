@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import Footer from './components/Footer';
-import AyoChat from './components/AyoChat';
+// AyoChat widget REMOVED from Home Page.
 import PaymentHandler from './components/PaymentHandler';
 
 export default function Home() {
@@ -11,7 +11,7 @@ export default function Home() {
       <Suspense fallback={null}>
         <PaymentHandler />
       </Suspense>
-      {/* SECTION 1 — Hero (AYO Only) */}
+      {/* SECTION 1 — Hero */}
       <section id="hero" className="hero-section">
         <div className="container hero-content">
           <div className="logo-container" style={{ marginBottom: '40px', textAlign: 'center' }}>
@@ -23,15 +23,9 @@ export default function Home() {
             <p className="tagline">Ne laissez pas les IA deviner à partir d’informations incomplètes. Optimisez votre site pour les IA.</p>
           </div>
           <div className="cta-group">
-            <button
-              onClick={() => {
-                const chatBtn = document.getElementById('ayo-toggle');
-                if (chatBtn) chatBtn.click();
-              }}
-              className="btn btn-primary"
-            >
+            <Link href="/diagnostic" className="btn btn-primary">
               → Vérifier si mon site est correctement documenté
-            </button>
+            </Link>
           </div>
         </div>
         <div className="hero-visual">
@@ -39,12 +33,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 2 — Le problème (Context IA) */}
+      {/* SECTION 2 — Le problème */}
       <section id="problem" className="section problem-section">
         <div className="container">
           <h2 className="section-title">Pourquoi votre site web ne suffit plus.</h2>
           <div className="text-content">
-            <p style={{ fontSize: '1.15rem', marginBottom: '1.5rem' }}>
+            <p style={{ fontSize: '1.15rem', marginBottom: '1.5rem', color: 'var(--text-body)' }}>
               "Les IA cherchent de plus en plus des professionnels à la place des moteurs de recherche.<br />
               Elles ne montrent que les entreprises qu’elles peuvent identifier sans ambiguïté.<br />
               <strong style={{ color: 'var(--primary-color)' }}>AYO structure votre entreprise pour qu’elle reste visible dans ce nouveau monde.</strong>"
@@ -59,8 +53,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 2.5 — Comparatif SEO vs IA */}
-      <section id="comparison" className="section comparison-section" style={{ background: 'rgba(255,255,255,0.02)' }}>
+      {/* SECTION 2.5 — Comparatif */}
+      <section id="comparison" className="section comparison-section" style={{ background: 'var(--bg-subtle)' }}>
         <div className="container">
           <h2 className="section-title" style={{ fontSize: '2rem' }}>CE QUI A CHANGÉ AVEC LES IA <br /><span style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>(ET QUE LE SEO NE COUVRE PAS)</span></h2>
 
@@ -72,8 +66,8 @@ export default function Home() {
             marginBottom: '3rem'
           }}>
             {/* Avant */}
-            <div className="col-avant" style={{ opacity: 0.7 }}>
-              <h3 style={{ borderBottom: '1px solid var(--text-muted)', paddingBottom: '10px', marginBottom: '20px' }}>AVANT <span style={{ fontSize: '0.8em', fontWeight: 'normal' }}>(Web Traditionnel)</span></h3>
+            <div className="col-avant" style={{ opacity: 0.8 }}>
+              <h3 style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '10px', marginBottom: '20px' }}>AVANT <span style={{ fontSize: '0.8em', fontWeight: 'normal' }}>(Web Traditionnel)</span></h3>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <li style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>Google indexe des pages <span style={{ color: 'var(--text-muted)' }}>→</span></li>
                 <li style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>Le texte suffisait <span style={{ color: 'var(--text-muted)' }}>→</span></li>
@@ -84,7 +78,7 @@ export default function Home() {
 
             {/* Maintenant */}
             <div className="col-maintenant">
-              <h3 style={{ borderBottom: '1px solid var(--primary-color)', paddingBottom: '10px', marginBottom: '20px', color: 'var(--primary-color)' }}>MAINTENANT <span style={{ fontSize: '0.8em', fontWeight: 'normal', color: 'white' }}>(Web IA)</span></h3>
+              <h3 style={{ borderBottom: '1px solid var(--primary-color)', paddingBottom: '10px', marginBottom: '20px', color: 'var(--primary-color)' }}>MAINTENANT <span style={{ fontSize: '0.8em', fontWeight: 'normal', color: 'var(--text-muted)' }}>(Web IA)</span></h3>
               <ul style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontWeight: 'bold' }}>
                 <li style={{ color: 'var(--text-main)' }}>Les IA sélectionnent des entités</li>
                 <li style={{ color: 'var(--text-main)' }}>La structure devient obligatoire</li>
@@ -100,7 +94,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 3 — Solution : AYO */}
+      {/* SECTION 3 — Solution */}
       <section id="solution" className="section solution-section">
         <div className="container">
           <h2 className="section-title">AYO structure les informations essentielles de votre activité pour qu’elles soient exploitables par les IA.</h2>
@@ -110,7 +104,7 @@ export default function Home() {
               <h3>AIO / ASR <span className="subtitle">L'infrastructure de visibilité</span></h3>
               <p>AYO n’ajoute pas du marketing. Il ajoute les informations manquantes pour que les IA puissent vous recommander.</p>
 
-              <div style={{ margin: '30px 0', padding: '20px', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+              <div style={{ margin: '30px 0', padding: '20px', background: 'rgba(37, 99, 235, 0.05)', borderRadius: '12px', border: '1px solid rgba(37, 99, 235, 0.1)' }}>
                 <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-main)' }}>
                   AIO (Artificial Intelligence Optimization) : L'art de structurer l'information.
                 </p>
@@ -128,7 +122,7 @@ export default function Home() {
                   <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Nous créons un "Fichier Signature" unique qui prouve à l'IA que vous êtes la source officielle et fiable de l'information.</p>
                 </div>
               </div>
-              <p className="highlight" style={{ textAlign: 'center', marginTop: '30px', borderTop: '1px solid var(--glass-border)', paddingTop: '20px' }}>
+              <p className="highlight" style={{ textAlign: 'center', marginTop: '30px', borderTop: '1px solid var(--border-light)', paddingTop: '20px' }}>
                 Résultat : votre activité peut être prise en compte et recommandée par les IA.
               </p>
             </div>
@@ -143,16 +137,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ... (How it works stays same) ... */}
-
-      {/* ... (Sustainability stays same) ... */}
-
-      {/* SECTION 6 — Pour qui ? */}
+      {/* TARGET */}
       <section id="target" className="section target-section">
         <div className="container">
           <h2 className="section-title">Pour les entreprises, artisans et indépendants qui ne veulent pas être écartés par les IA.</h2>
           <div className="target-grid">
-            {/* ... (Badges stay same) ... */}
             <span className="target-badge">Artisans & commerces locaux</span>
             <span className="target-badge">PME de services</span>
             <span className="target-badge">Indépendants & consultants</span>
@@ -168,25 +157,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRICING - AYO Only */}
+      {/* PRICING */}
       <section id="pricing" className="section pricing-section">
         <div className="container">
           <h2 className="section-title">Investissez dans votre infrastructure sémantique.</h2>
-          <div className="grid-3 pricing-grid" style={{}}>
+          <div className="grid-3 pricing-grid">
 
             <div className="card pricing-card">
               <h3>AYO Light <br /><span className="card-subtitle">Diagnostic de visibilité</span></h3>
               <div className="price">Gratuit</div>
               <p className="price-details">Testez comment les IA vous voient aujourd'hui. Rapport immédiat via notre Chatbot.</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <button
-                  onClick={() => {
-                    const chatBtn = document.getElementById('ayo-toggle');
-                    if (chatBtn) chatBtn.click();
-                  }}
-                  className="btn btn-secondary"
-                  style={{ width: '100%' }}
-                >Lancer l'audit</button>
+                <Link href="/diagnostic" className="btn btn-secondary w-full" style={{ width: '100%' }}>
+                  Lancer l'audit
+                </Link>
               </div>
             </div>
 
@@ -195,14 +179,9 @@ export default function Home() {
               <div className="price">99 CHF</div>
               <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. <br />Signature cryptographique incluse.</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <button
-                  onClick={() => {
-                    const chatBtn = document.getElementById('ayo-toggle');
-                    if (chatBtn) chatBtn.click();
-                  }}
-                  className="btn btn-primary"
-                  style={{ width: '100%' }}
-                >Analyser mon site</button>
+                <Link href="/diagnostic" className="btn btn-primary w-full" style={{ width: '100%' }}>
+                  Analyser mon site
+                </Link>
               </div>
             </div>
 
@@ -211,14 +190,9 @@ export default function Home() {
               <div className="price">499 CHF</div>
               <p className="price-details">La couche de confiance totale pour les IA. Glossaire, FAQ Structurée, Architecture & Manifest.</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <button
-                  onClick={() => {
-                    const chatBtn = document.getElementById('ayo-toggle');
-                    if (chatBtn) chatBtn.click();
-                  }}
-                  className="btn btn-secondary"
-                  style={{ width: '100%' }}
-                >Analyser mon site</button>
+                <Link href="/diagnostic" className="btn btn-secondary w-full" style={{ width: '100%' }}>
+                  Analyser mon site
+                </Link>
               </div>
             </div>
           </div>
@@ -226,66 +200,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AYO TRIGGER */}
+      {/* TRIGGER */}
       <section id="ayo-trigger" className="section ayo-trigger-section" style={{ textAlign: "center", padding: "60px 20px" }}>
         <div className="container">
           <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
           <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
-          <button
-            id="open-ayo-chat-central"
-            onClick={() => {
-              const chatBtn = document.getElementById('ayo-toggle');
-              if (chatBtn) chatBtn.click();
-            }}
-            className="btn btn-primary"
-            style={{ fontSize: "1.2rem", padding: "15px 30px" }}
-          >
+          <Link href="/diagnostic" className="btn btn-primary" style={{ fontSize: "1.2rem", padding: "15px 30px" }}>
             → Démarrer l'audit AYO
-          </button>
-        </div>
-      </section>
-
-      {/* DEMO - Modified slightly to reflect "Business Ready for AI" */}
-      <section id="demo" className="section demo-section">
-        <div className="container">
-          <h2 className="section-title"> Exemple : Ce que l'IA verra de vous après AYO</h2>
-          <div className="grid-3">
-            {/* Boulangerie */}
-            <div className="card demo-card">
-              <h4>🍞 Commerce Local</h4>
-              <div className="subtitle">La boulangerie de demain</div>
-              <ul className="readable-list">
-                <li><strong>Avant</strong> "Notre baguette tradition est la meilleure..." (Promesse subjective)</li>
-                <li><strong>Après AYO</strong> award: "Médaille d'Or", material: "Blé Local", process: "Levain Naturel"</li>
-                <li><strong>Résultat</strong> L'IA valide vos preuves et vous cite pour la requête "Où trouver la meilleure baguette ?"</li>
-              </ul>
-            </div>
-            {/* Consultant */}
-            <div className="card demo-card">
-              <h4>🧭 Consultant</h4>
-              <div className="subtitle">L'expert identifiable</div>
-              <ul className="readable-list">
-                <li><strong>Avant</strong> "J'aide les entreprises à changer..." (Vague)</li>
-                <li><strong>Après AYO</strong> serviceType: "ChangeManagement", areaServed: "Remote"</li>
-                <li><strong>Résultat</strong> ChatGPT cite votre nom pour "Expert conduite du changement à distance"</li>
-              </ul>
-            </div>
-            {/* Industrie */}
-            <div className="card demo-card">
-              <h4>🏭 Industrie</h4>
-              <div className="subtitle">La technicité précise</div>
-              <ul className="readable-list">
-                <li><strong>Avant</strong> PDF techniques illisibles par les bots.</li>
-                <li><strong>Après AYO</strong> TechSpec en JSON-LD, Certifications validées.</li>
-                <li><strong>Résultat</strong> Les IA d'ingénierie intègrent vos produits dans leurs recommandations.</li>
-              </ul>
-            </div>
-          </div>
-          <div style={{ textAlign: "center", marginTop: "40px" }}>
-            <p style={{ color: "var(--text-muted)", maxWidth: "700px", margin: "0 auto", fontStyle: "italic" }}>
-              "Une entreprise lisible expose des données structurées, interconnectées et vérifiables. C'est la seule façon d'être recommandé par une IA."
-            </p>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -294,20 +216,15 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Entrez dans la base de connaissance des IA.</h2>
           <div className="cta-group">
-            <button
-              onClick={() => {
-                const chatBtn = document.getElementById('ayo-toggle');
-                if (chatBtn) chatBtn.click();
-              }}
-              className="btn btn-primary"
-            >→ Optimiser mon entreprise</button>
+            <Link href="/diagnostic" className="btn btn-primary">
+              → Optimiser mon entreprise
+            </Link>
           </div>
           <p className="final-phrase">Ne soyez plus une simple URL. Devenez visible par les IA.</p>
         </div>
       </section>
 
       <Footer />
-      <AyoChat />
     </main >
   );
 }

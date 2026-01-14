@@ -3,14 +3,20 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-export default function AyoChat() {
-    // UI State
+interface AyoChatProps {
+    mode?: 'widget' | 'fullscreen';
+}
 
+export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
+    // UI State
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [isOpen, setIsOpen] = useState(false);
+
+    // Widget Specific State
+    const [isOpen, setIsOpen] = useState(mode === 'fullscreen');
+
     const [hasGreeted, setHasGreeted] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -27,10 +33,10 @@ export default function AyoChat() {
 
     // Initial greeting
     useEffect(() => {
-        if (isOpen && !hasGreeted && messages.length === 0) {
+        if ((isOpen || mode === 'fullscreen') && !hasGreeted && messages.length === 0) {
             setHasGreeted(true);
         }
-    }, [isOpen, hasGreeted, messages.length]);
+    }, [isOpen, hasGreeted, messages.length, mode]);
 
     // MANUAL FETCH implementation (Bypassing SDK hook to guarantee sending works)
     const handleSubmit = async (e?: React.FormEvent) => {
@@ -125,90 +131,110 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         }
     };
 
+    // If Fullscreen, we render the "App Frame". If Widget, we render the floating logic.
+    const isFullscreen = mode === 'fullscreen';
+
     return (
-        <div id="ayo-widget" className={`ayo-widget ${isOpen ? 'open' : ''}`}>
+        <div className={isFullscreen ? 'ayo-chat-container' : `ayo-widget ${isOpen ? 'open' : ''}`}>
 
-            <div className={`ayo-chat-window ${isOpen ? 'open' : ''}`}>
-                <div className="ayo-header">
-                    <h4><span className="status-dot"></span> AYO Bot</h4>
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2rem' }}
-                    >✕</button>
+            {/* Header only for Widget or Fullscreen Title */}
+            <div className="chat-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }}></div>
+                    <h4 style={{ margin: 0 }}>AYO Assistant IA</h4>
+                </div>
+                {!isFullscreen && (
+                    <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                )}
+            </div>
+
+            <div className="chat-messages-area">
+                <div className="msg-bubble msg-ai">
+                    👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.<br /><br />
+                    Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
+                    Pour cela, indiquez-moi simplement l'URL principale de votre site web.<br /><br />
+                    <strong>1. Quelle est votre URL ?</strong>
                 </div>
 
-                <div className="ayo-messages">
-                    <div className="message bot-message" style={{ background: 'rgba(255, 255, 255, 0.1)', alignSelf: 'flex-start', borderBottomLeftRadius: '2px' }}>
-                        👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.<br /><br />
-                        Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
-                        Pour cela, indiquez-moi simplement l'URL principale de votre site web.<br /><br />
-                        <strong>1. Quelle est votre URL ?</strong>
+                {messages.map((m) => (
+                    <div
+                        key={m.id}
+                        className={`msg-bubble ${m.role === 'user' ? 'msg-user' : 'msg-ai'}`}
+                    >
+                        <div className="markdown-content">
+                            <ReactMarkdown
+                                components={{
+                                    a: ({ node, ...props }) => (
+                                        <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: m.role === 'user' ? 'white' : 'blue', textDecoration: 'underline' }} />
+                                    )
+                                }}
+                            >
+                                {m.content}
+                            </ReactMarkdown>
+                        </div>
                     </div>
+                ))}
 
-                    {messages.map((m) => (
-                        <div
-                            key={m.id}
-                            className={`message ${m.role === 'user' ? 'user-message' : 'bot-message'}`}
-                        >
-                            <div className="markdown-content">
-                                <ReactMarkdown
-                                    components={{
-                                        a: ({ node, ...props }) => (
-                                            <a {...props} target="_blank" rel="noopener noreferrer" />
-                                        )
-                                    }}
-                                >
-                                    {m.content}
-                                </ReactMarkdown>
-                            </div>
-                        </div>
-                    ))}
+                {isLoading && (
+                    <div className="msg-bubble msg-ai" style={{ opacity: 0.7 }}>
+                        <div className="loader" style={{ borderColor: '#2563EB', borderTopColor: 'transparent', width: '15px', height: '15px', marginRight: '10px' }}></div>
+                        AYO réfléchit...
+                    </div>
+                )}
 
-                    {isLoading && (
-                        <div className="typing-indicator" style={{ display: 'block' }}>AYO réfléchit...</div>
-                    )}
+                {isAnalyzing && (
+                    <div className="msg-bubble msg-ai" style={{ borderLeft: '3px solid #F59E0B' }}>
+                        ⚙️ <strong>Analyse en cours...</strong><br />
+                        AYO explore votre site, cela peut prendre quelques secondes.
+                    </div>
+                )}
 
-                    {/* NEW: Explicit Analysis Indicator */}
-                    {isAnalyzing && (
-                        <div className="typing-indicator" style={{ display: 'block', color: '#00f7ff' }}>
-                            ⚙️ AYO analyse vos données (Traitement profond)...
-                        </div>
-                    )}
+                {error && (
+                    <div style={{ color: '#ef4444', padding: '10px', fontSize: '0.8rem', background: '#FEF2F2', marginTop: '5px', borderRadius: '4px', textAlign: 'center', border: '1px solid #FECACA' }}>
+                        ⚠️ {error}
+                    </div>
+                )}
 
-                    {error && (
-                        <div style={{ color: '#ef4444', padding: '10px', fontSize: '0.8rem', background: 'rgba(0,0,0,0.5)', marginTop: '5px', borderRadius: '4px' }}>
-                            ⚠️ {error}
-                        </div>
-                    )}
+                <div ref={messagesEndRef} />
+            </div>
 
-                    <div ref={messagesEndRef} />
-                </div>
+            <div className="chat-input-area">
+                {/* QCM Placeholder (Will be dynamically activated later) */}
+                {/* 
+                 <div className="qcm-options-grid mb-4">
+                     <button className="qcm-btn">Option A (Exemple)</button>
+                     <button className="qcm-btn">Option B (Exemple)</button>
+                 </div> 
+                 */}
 
-                <form className="ayo-input-area" onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px' }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px' }}>
                     <input
-                        className="ayo-input"
+                        className="chat-input"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Écrivez ici..."
+                        placeholder="Écrivez votre réponse ici..."
                         disabled={isLoading}
                         autoFocus
                     />
-                    <button type="submit" disabled={isLoading || !input.trim()}>
-                        ➤
+                    <button type="submit" className="btn btn-primary" disabled={isLoading || !input.trim()}>
+                        Envoyer ➤
                     </button>
                 </form>
             </div>
 
-            <button
-                id="ayo-toggle"
-                className="ayo-toggle"
-                onClick={() => setIsOpen(true)}
-                style={{ display: isOpen ? 'none' : 'flex' }}
-            >
-                <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-                </svg>
-            </button>
+            {/* Widget Toggle Button (Only in Widget Mode) */}
+            {!isFullscreen && (
+                <button
+                    id="ayo-toggle"
+                    className="ayo-toggle"
+                    onClick={() => setIsOpen(true)}
+                    style={{ display: isOpen ? 'none' : 'flex' }}
+                >
+                    <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
+                    </svg>
+                </button>
+            )}
         </div>
     );
 }
