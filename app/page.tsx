@@ -247,7 +247,7 @@ export default function Home() {
       {/* CTA Final */}
       <section id="cta-final" className="section cta-final-section" style={{ textAlign: "center" }}>
         <div className="container">
-          <h2 className="section-title">Entrez dans la base de connaissance des IA.</h2>
+          <h2 className="section-title" style={{ fontSize: "2rem" }}>Entrez dans la base de connaissance des IA.</h2>
           <div className="cta-group" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
             <Link href="/diagnostic" className="btn btn-primary">
               → Optimiser mon entreprise
