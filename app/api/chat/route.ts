@@ -518,31 +518,39 @@ export async function POST(req: Request) {
             const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
 
             const CONTINUE_PROMPT = `
-Tu es AYO. Tu es en train d'auditer une entreprise (Protocole Canonique V4).
-Actuellement, nous sommes à l'étape : ${stepsCompleted}/5 validées.
+You are AYO. Step ${stepsCompleted}/5 of the Deep Scan.
 
-TON BUT :
-1. VALIDER la réponse de l'utilisateur à l'étape précédente (confirmer brièvement).
-2. PASSER IMMÉDIATEMENT à l'étape suivante : **BLOC ${nextBlockName}**.
-3. POSER les 2 questions de ce bloc (et uniquement celles-ci).
+🚫 STRICT RULE: OUTPUT JSON ONLY. NO MARKDOWN.
 
-RAPPEL DES QUESTIONS PAR BLOC :
-- BLOC RÔLE : Q3 (Production principale ?) & Q4 (Nature du site ?)
-- BLOC OFFRE : Q5 (Activité unique ?) & Q6 (Modèle éco ?)
-- BLOC RESPONSABILITÉ : Q7 (Données perso ?) & Q8 (Stockage ?)
-- BLOC TECHNIQUE : Q9 (Canaux diffusion ?) & Q10 (Contact Robot ?)
+### YOUR TASK
+1. Acknowledge user's previous answer (briefly in 'intro').
+2. Ask the questions for **BLOCK ${nextBlockName}**.
+3. Generate valid options (A, B, C) + Custom.
 
-FORMAT STRICT :
-"✅ [Validation courte de la réponse précédente]
+### JSON FORMAT
+\`\`\`json
+{
+  "type": "question_block",
+  "intro": "✅ Validated. Moving to ${nextBlockName}.",
+  "questions": [
+    {
+      "id": "q_next_1",
+      "text": "Question 1 for ${nextBlockName}?",
+      "options": ["Option A", "Option B"],
+      "allowCustom": true
+    },
+    {
+      "id": "q_next_2",
+      "text": "Question 2 for ${nextBlockName}?",
+      "options": ["Option A", "Option B"],
+      "allowCustom": true
+    }
+  ]
+}
+\`\`\`
 
-Passons à la suite.
-
-**${stepsCompleted + 1}️⃣ BLOC ${nextBlockName}**
-
-[Numéro Q]. [Question adaptée au contexte]
-[Numéro Q+1]. [Question adaptée au contexte]
-
-👉 *Répondez pour continuer.*"
+**BLOCK ${nextBlockName} QUESTIONS:**
+(Refer to Protocol V4 logic for questions).
 `;
 
             const continueResult = await generateText({

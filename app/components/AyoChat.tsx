@@ -7,6 +7,18 @@ interface AyoChatProps {
     mode?: 'widget' | 'fullscreen';
 }
 
+interface QuestionBlock {
+    type: 'question_block';
+    intro?: string;
+    questions: {
+        id: string;
+        text: string;
+        options: string[];
+        allowCustom?: boolean;
+        customLabel?: string;
+    }[];
+}
+
 export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     // UI State
     const [messages, setMessages] = useState<any[]>([]);
@@ -39,11 +51,13 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     }, [isOpen, hasGreeted, messages.length, mode]);
 
     // MANUAL FETCH implementation (Bypassing SDK hook to guarantee sending works)
-    const handleSubmit = async (e?: React.FormEvent) => {
+    const handleSubmit = async (e?: React.FormEvent, overrideInput?: string) => {
         if (e) e.preventDefault();
-        if (!input.trim() || isLoading) return;
 
-        const userMessage = { role: 'user', content: input };
+        const textToSend = overrideInput || input;
+        if (!textToSend.trim() || isLoading) return;
+
+        const userMessage = { role: 'user', content: textToSend };
 
         // 1. Optimistic update
         setMessages(prev => [...prev, { ...userMessage, id: Date.now().toString() }]);
@@ -117,7 +131,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 setIsAnalyzing(false);
 
             } else {
-                // NORMAL FAST RESPONSE
+                // NORMAL FAST RESPONSE (Might be JSON QCM or Text)
                 const botMessageId = (Date.now() + 1).toString();
                 setMessages(prev => [...prev, { role: 'assistant', content: data.text, id: botMessageId }]);
                 setIsLoading(false);
@@ -131,6 +145,76 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         }
     };
 
+    // Helper to render message content (Text or QCM JSON)
+    const renderMessageContent = (msg: any) => {
+        // Try to parse JSON if it looks like JSON
+        let qcmData: QuestionBlock | null = null;
+        if (msg.role === 'assistant' && (msg.content.trim().startsWith('{') || msg.content.includes('```json'))) {
+            try {
+                const cleanJson = msg.content.replace(/```json/g, '').replace(/```/g, '').trim();
+                const parsed = JSON.parse(cleanJson);
+                if (parsed.type === 'question_block') {
+                    qcmData = parsed;
+                }
+            } catch (e) {
+                // Not valid JSON, treat as text
+            }
+        }
+
+        if (qcmData) {
+            return (
+                <div className="ay-qcm-container">
+                    {qcmData.intro && (
+                        <p className="mb-4 font-semibold text-teal-800">{qcmData.intro}</p>
+                    )}
+
+                    <div className="flex flex-col gap-6">
+                        {qcmData.questions.map((q, idx) => (
+                            <div key={q.id || idx} className="qcm-question-box p-4 bg-white/50 rounded-lg border border-slate-200">
+                                <p className="mb-3 font-bold text-slate-800">{q.text}</p>
+                                <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {q.options.map((opt, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
+                                            className="qcm-btn hover:bg-teal-50 text-left px-4 py-3 rounded border border-slate-300 transition-colors text-sm font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700"
+                                            disabled={isLoading}
+                                        >
+                                            {opt}
+                                        </button>
+                                    ))}
+                                    {q.allowCustom && (
+                                        <button
+                                            onClick={() => setInput(`${q.text} : `)} // Prefill input for custom
+                                            className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-slate-400 transition-colors text-sm text-slate-600 italic"
+                                        >
+                                            ✏️ {q.customLabel || "Autre / Préciser..."}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Default Markdown Render
+        return (
+            <div className="markdown-content">
+                <ReactMarkdown
+                    components={{
+                        a: ({ node, ...props }) => (
+                            <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: msg.role === 'user' ? 'white' : 'blue', textDecoration: 'underline' }} />
+                        )
+                    }}
+                >
+                    {msg.content}
+                </ReactMarkdown>
+            </div>
+        );
+    };
+
     // If Fullscreen, we render the "App Frame". If Widget, we render the floating logic.
     const isFullscreen = mode === 'fullscreen';
 
@@ -140,11 +224,11 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             {/* Header only for Widget or Fullscreen Title */}
             <div className="chat-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10B981' }}></div>
-                    <h4 style={{ margin: 0 }}>AYO Assistant IA</h4>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#4A919E' }}></div>
+                    <h4 style={{ margin: 0, color: 'var(--text-main)' }}>AYO Assistant IA</h4>
                 </div>
                 {!isFullscreen && (
-                    <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                    <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: 'var(--text-main)' }}>✕</button>
                 )}
             </div>
 
@@ -161,29 +245,19 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                         key={m.id}
                         className={`msg-bubble ${m.role === 'user' ? 'msg-user' : 'msg-ai'}`}
                     >
-                        <div className="markdown-content">
-                            <ReactMarkdown
-                                components={{
-                                    a: ({ node, ...props }) => (
-                                        <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: m.role === 'user' ? 'white' : 'blue', textDecoration: 'underline' }} />
-                                    )
-                                }}
-                            >
-                                {m.content}
-                            </ReactMarkdown>
-                        </div>
+                        {renderMessageContent(m)}
                     </div>
                 ))}
 
                 {isLoading && (
                     <div className="msg-bubble msg-ai" style={{ opacity: 0.7 }}>
-                        <div className="loader" style={{ borderColor: '#2563EB', borderTopColor: 'transparent', width: '15px', height: '15px', marginRight: '10px' }}></div>
+                        <div className="loader" style={{ borderColor: '#4A919E', borderTopColor: 'transparent', width: '15px', height: '15px', marginRight: '10px' }}></div>
                         AYO réfléchit...
                     </div>
                 )}
 
                 {isAnalyzing && (
-                    <div className="msg-bubble msg-ai" style={{ borderLeft: '3px solid #F59E0B' }}>
+                    <div className="msg-bubble msg-ai" style={{ borderLeft: '3px solid #CE6A6B' }}>
                         ⚙️ <strong>Analyse en cours...</strong><br />
                         AYO explore votre site, cela peut prendre quelques secondes.
                     </div>
@@ -199,15 +273,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             </div>
 
             <div className="chat-input-area">
-                {/* QCM Placeholder (Will be dynamically activated later) */}
-                {/* 
-                 <div className="qcm-options-grid mb-4">
-                     <button className="qcm-btn">Option A (Exemple)</button>
-                     <button className="qcm-btn">Option B (Exemple)</button>
-                 </div> 
-                 */}
-
-                <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px' }}>
+                <form onSubmit={(e) => handleSubmit(e)} style={{ display: 'flex', gap: '10px' }}>
                     <input
                         className="chat-input"
                         value={input}
@@ -228,7 +294,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     id="ayo-toggle"
                     className="ayo-toggle"
                     onClick={() => setIsOpen(true)}
-                    style={{ display: isOpen ? 'none' : 'flex' }}
+                    style={{ display: isOpen ? 'none' : 'flex', background: 'var(--primary-color)' }}
                 >
                     <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
                         <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
