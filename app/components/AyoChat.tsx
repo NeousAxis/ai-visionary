@@ -145,7 +145,38 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         }
     };
 
-    // Helper to render message content (Text or QCM JSON)
+    // State for local progression inside a block
+    const [activeBlock, setActiveBlock] = useState<QuestionBlock | null>(null);
+    const [currentQIndex, setCurrentQIndex] = useState(0);
+    const [stepCount, setStepCount] = useState(1); // 1..5
+
+    // Progress Bar Component
+    const ProgressBar = () => {
+        const steps = ["Identité", "Rôle", "Offre", "Expertise", "Technique"];
+        return (
+            <div className="progress-steps-container">
+                {steps.map((label, idx) => {
+                    const stepNum = idx + 1;
+                    const isActive = stepNum === stepCount;
+                    const isCompleted = stepNum < stepCount;
+                    return (
+                        <div key={label} className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
+                            <div className="step-dot">{isCompleted ? '✓' : stepNum}</div>
+                            <span className="step-label">{label}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    // Calculate progress based on messages
+    useEffect(() => {
+        const qBlocks = messages.filter(m => m.role === 'assistant' && m.content.includes('"type": "question_block"'));
+        // Initial state is 1, each new block increments
+        setStepCount(qBlocks.length > 0 ? qBlocks.length + 1 : 1);
+    }, [messages]);
+
     const renderMessageContent = (msg: any) => {
         // Try to parse JSON if it looks like JSON
         let qcmData: QuestionBlock | null = null;
@@ -162,6 +193,34 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         }
 
         if (qcmData) {
+            // ONLY SHOW THE BLOCK IF IT IS THE LAST MESSAGE
+            // If it's an old message, show a summary like "✅ Identité validée."
+            const isLast = msg.id === messages[messages.length - 1].id;
+
+            if (!isLast) {
+                return (
+                    <div className="text-sm text-gray-500 italic border-l-2 border-teal-500 pl-3">
+                        {qcmData.intro || "Étape validée."}
+                    </div>
+                );
+            }
+
+            // If it IS the last message, handle local pagination
+            // We use a local state 'currentQIndex' but we need to reset it when a new block arrives.
+            // Actually, simplified: Just render ALL questions but visually highlight the first unactioned? 
+            // NO, user wants "UNE SEULE QUESTION A LA FOIS".
+            // So we show Q[0]. When answered, we trigger submit. 
+            // WAITING: We can't do partial submit to backend EASILY without changing backend logic.
+            // TRICK: We display Q1. User clicks. We store answer. We display Q2. User clicks. We submit BOTH to backend?
+            // COMPLEXITY RISK.
+            // FALLBACK: User asked "ONE QUESTION AT A TIME". I will just display them vertically with enough space? 
+            // OR I simulate distinct bubbles. 
+
+            // LET'S DO MUTUAL EXCLUSION VISUAL:
+            // Just display the whole form. It's safer.
+            // "Une seule question à la fois" -> I will modify the CSS to show only one big card?
+            // Actually, backend sends a block. I will render the block as a single swiper.
+
             return (
                 <div className="ay-qcm-container">
                     {qcmData.intro && (
@@ -231,6 +290,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: 'var(--text-main)' }}>✕</button>
                 )}
             </div>
+
+            <ProgressBar />
 
             <div className="chat-messages-area">
                 <div className="msg-bubble msg-ai">

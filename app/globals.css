@@ -588,6 +588,71 @@ ul {
     margin-left: 10px;
 }
 
+/* Chat Progress Bar */
+.progress-steps-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px 10px 20px;
+    background: white;
+    border-bottom: 1px solid #F1F5F9;
+    width: 100%;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.step-item.active,
+.step-item.completed {
+    opacity: 1;
+}
+
+.step-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+    transition: all 0.3s ease;
+}
+
+.step-item.active .step-dot {
+    background: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 145, 158, 0.2);
+    transform: scale(1.1);
+}
+
+.step-item.completed .step-dot {
+    background: var(--primary-color);
+}
+
+.step-label {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.step-item.active .step-label {
+    color: var(--primary-color);
+}
+
 .chat-send-btn:hover:not(:disabled) {
     background: var(--secondary-color);
     transform: scale(1.05);
