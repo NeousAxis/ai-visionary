@@ -1,56 +1,58 @@
 @import "tailwindcss";
 
 :root {
-    /* --- COMMERCIAL 2026 PALETTE --- */
+    /* --- PALETTE N°5 (User Choice) --- */
 
-    /* Base - Cloud Dancer */
-    --bg-deep: #F3F5F4;
-    /* Soothing Off-White */
+    /* Backgrounds */
     --bg-white: #FFFFFF;
     /* Pure Canvas */
-    --bg-subtle: #EBECEB;
-    /* Texture nuance */
+    --bg-deep: #F5F9F8;
+    /* Extremely light sage tint (derived from #BED3C3) for main bg */
+    --bg-subtle: #BED3C3;
+    /* Sage/Vert d'eau - Secondary blocks */
 
-    /* Primary - Transformative Teal (Balance & Regenerative) */
-    --primary-color: #0F766E;
-    /* Deep Teal - Trust & Future */
-    --primary-hover: #115E59;
-    /* Forest feel */
+    /* Brand Colors */
+    --primary-color: #4A919E;
+    /* Bleu Pétrole Doux - Main Action */
+    --primary-hover: #3A7885;
+    /* Darker version for hover */
 
-    /* Energy - Electric Fuchsia (CTA & Interaction) */
-    --accent-color: #D946EF;
-    /* Fuchsia for Buttons */
-    --accent-secondary: #EAB308;
-    /* Vivid Yellow touches */
+    --accent-color: #CE6A6B;
+    /* Terracotta Rosé - CTA / Highlights */
+    --accent-secondary: #EBACA2;
+    /* Pêche Pastel - Soft nuances */
 
-    /* Luxury & Contrast - Deep Earth tones */
-    --text-main: #3F2E27;
-    /* Rich Chocolate Brown (Reads as warm black) */
-    --text-body: #57534E;
-    /* Stone Grey */
-    --text-muted: #78716C;
-    /* Warm Taupe */
+    /* Typography */
+    --text-main: #212E53;
+    /* Bleu Nuit Profond - Headings */
+    --text-body: #324066;
+    /* Slightly lighter Night Blue */
+    --text-muted: #5D6B8C;
+    /* Muted Blue-Grey */
     --text-inverted: #FFFFFF;
 
-    /* Metallic / Retro-Futurism touches */
+    /* UI Elements */
+    --border-light: #CFE0D6;
+    /* Matching Sage border */
     --glass-shine: rgba(255, 255, 255, 0.6);
-    --border-light: #E7E5E4;
 
-    /* Success/Error */
-    --success-color: #059669;
-    /* Natural Green */
-    --warning-color: #D97706;
-    /* Amber */
-    --error-color: #BE123C;
+    --success-color: #4A919E;
+    /* Using Primary for success as it is calm */
+    --warning-color: #CE6A6B;
+    /* Using Accent for attention */
+    --error-color: #D32F2F;
+    /* Standard red for critical errors only */
 
     /* Specs */
-    --shadow-sm: 0 1px 2px 0 rgb(63 46 39 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(15 118 110 / 0.1), 0 2px 4px -2px rgb(15 118 110 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(15 118 110 / 0.15), 0 4px 6px -4px rgb(15 118 110 / 0.1);
+    --shadow-sm: 0 1px 2px 0 rgba(33, 46, 83, 0.05);
+    /* Shadow color match text-main */
+    --shadow-md: 0 4px 6px -1px rgba(33, 46, 83, 0.1), 0 2px 4px -2px rgba(33, 46, 83, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(33, 46, 83, 0.1), 0 4px 6px -4px rgba(33, 46, 83, 0.05);
 
-    --radius-sm: 8px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
+    --radius-sm: 10px;
+    /* Softer radius for this palette */
+    --radius-md: 20px;
+    --radius-lg: 30px;
 
     --max-width: 1200px;
     --spacing-xs: 0.5rem;
