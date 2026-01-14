@@ -439,20 +439,40 @@ export async function POST(req: Request) {
         let finalResponseText = "";
         let isAnalysisRun = false;
 
-        // SMART TRIGGER LOGIC (V4 - SCAN FIRST - ASCENSION FLOW):
+        // SMART TRIGGER LOGIC (V4.2 - PING PONG PROTOCOL):
         const urlMsgIndex = messages.findIndex((m: any) => m.role === 'user' && m.content.match(urlRegex));
         const hasUrlHistory = urlMsgIndex !== -1;
-        console.log(`DEBUG: Has URL History: ${hasUrlHistory}, Index: ${urlMsgIndex}, LastMsg: ${lastMessage.content}`);
+
+        console.log(`DEBUG: Has URL History: ${hasUrlHistory}, checking step count...`);
 
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
         const hasScanResult = assistantMessages.some((m: any) => m.content.includes("Analyse Préliminaire Effectuée"));
         const hasFinalScore = assistantMessages.some((m: any) => m.content.includes("SCORE FINAL AIO"));
 
+        // Count how many "Question Rounds" happened (Look for Block Headers in Assistant msg)
+        // BLOC IDENTITÉ / BLOC RÔLE / BLOC OFFRE / BLOC RESPONSABILITÉ / BLOC TECHNIQUE
+        const stepsCompleted = assistantMessages.filter((m: any) =>
+            m.content.includes("BLOC IDENTITÉ") ||
+            m.content.includes("BLOC RÔLE") ||
+            m.content.includes("BLOC OFFRE") ||
+            m.content.includes("BLOC RESPONSABILITÉ") ||
+            m.content.includes("BLOC TECHNIQUE")
+        ).length;
+
+        console.log(`DEBUG: Protocol Steps Completed: ${stepsCompleted}/5`);
+
         let triggerMode = "CHAT";
+
         if (hasUrlHistory && !hasScanResult && !hasFinalScore) {
+            // STEP 0 -> 1: First Scan
             triggerMode = "SCAN_AND_QUESTION";
         } else if (hasScanResult && !hasFinalScore && lastMessage.role === 'user') {
-            triggerMode = "FINAL_ANALYSIS";
+            // STEP 1 -> 2 -> 3... : Ongoing Protocol
+            if (stepsCompleted < 5) { // 5 Blocks total. If we have less than 5 question sets, we continue.
+                triggerMode = "CONTINUE_QUESTIONING";
+            } else {
+                triggerMode = "FINAL_ANALYSIS";
+            }
         }
 
         if (triggerMode === "SCAN_AND_QUESTION") {
@@ -484,6 +504,55 @@ export async function POST(req: Request) {
             });
 
             finalResponseText = classificationResult.text;
+
+        } else if (triggerMode === "CONTINUE_QUESTIONING") {
+            console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
+            console.log("Asking NEXT Block...");
+
+            // Logic to determine Next Block Name
+            const blockNames = ["IDENTITÉ", "RÔLE", "OFFRE", "RESPONSABILITÉ", "TECHNIQUE"];
+            // stepsCompleted = 1 means we finished Identité, so next is RÔLE (Index 1)
+            // But if user just answered Block 1, stepsCompleted IS 1 (because Assistant asked it).
+            // So we need to ask Index 1 (Rôle). Correct.
+
+            const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
+
+            const CONTINUE_PROMPT = `
+Tu es AYO. Tu es en train d'auditer une entreprise (Protocole Canonique V4).
+Actuellement, nous sommes à l'étape : ${stepsCompleted}/5 validées.
+
+TON BUT :
+1. VALIDER la réponse de l'utilisateur à l'étape précédente (confirmer brièvement).
+2. PASSER IMMÉDIATEMENT à l'étape suivante : **BLOC ${nextBlockName}**.
+3. POSER les 2 questions de ce bloc (et uniquement celles-ci).
+
+RAPPEL DES QUESTIONS PAR BLOC :
+- BLOC RÔLE : Q3 (Production principale ?) & Q4 (Nature du site ?)
+- BLOC OFFRE : Q5 (Activité unique ?) & Q6 (Modèle éco ?)
+- BLOC RESPONSABILITÉ : Q7 (Données perso ?) & Q8 (Stockage ?)
+- BLOC TECHNIQUE : Q9 (Canaux diffusion ?) & Q10 (Contact Robot ?)
+
+FORMAT STRICT :
+"✅ [Validation courte de la réponse précédente]
+
+Passons à la suite.
+
+**${stepsCompleted + 1}️⃣ BLOC ${nextBlockName}**
+
+[Numéro Q]. [Question adaptée au contexte]
+[Numéro Q+1]. [Question adaptée au contexte]
+
+👉 *Répondez pour continuer.*"
+`;
+
+            const continueResult = await generateText({
+                model: modelToUse,
+                temperature: 0.1,
+                system: CONTINUE_PROMPT,
+                messages: messages // Pass full history so LLM knows what user just answered
+            });
+
+            finalResponseText = continueResult.text;
 
         } else if (triggerMode === "FINAL_ANALYSIS") {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
