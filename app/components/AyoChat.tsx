@@ -273,18 +273,23 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             </div>
 
             <div className="chat-input-area">
-                <form onSubmit={(e) => handleSubmit(e)} style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                        className="chat-input"
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Écrivez votre réponse ici..."
-                        disabled={isLoading}
-                        autoFocus
-                    />
-                    <button type="submit" className="btn btn-primary" disabled={isLoading || !input.trim()}>
-                        Envoyer ➤
-                    </button>
+                <form onSubmit={(e) => handleSubmit(e)}>
+                    <div className="chat-input-wrapper">
+                        <input
+                            className="chat-input"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Écrivez votre réponse ici..."
+                            disabled={isLoading}
+                            autoFocus
+                        />
+                        <button type="submit" className="chat-send-btn" disabled={isLoading || !input.trim()}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
                 </form>
             </div>
 
