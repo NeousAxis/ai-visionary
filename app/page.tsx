@@ -88,7 +88,7 @@ export default function Home() {
       {/* SECTION 2.5 — Comparatif */}
       <section id="comparison" className="section comparison-section" style={{ background: 'var(--bg-subtle)' }}>
         <div className="container">
-          <h2 className="section-title" style={{ fontSize: '2rem' }}>CE QUI A CHANGÉ AVEC LES IA <br /><span style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>(ET QUE LE SEO NE COUVRE PAS)</span></h2>
+          <h2 className="section-title" style={{ textAlign: 'center' }}>CE QUI A CHANGÉ AVEC LES IA <br /><span style={{ display: 'block', fontSize: '1.5rem', color: 'var(--text-muted)', fontWeight: '400', marginTop: '10px' }}>(ET QUE LE SEO NE COUVRE PAS)</span></h2>
 
           <div className="comparison-grid" style={{
             display: 'grid',
