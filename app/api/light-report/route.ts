@@ -121,13 +121,13 @@ export async function GET(req: Request) {
             from: 'AI Visionary System <hello@ai-visionary.com>',
             replyTo: 'hello@ai-visionary.com',
             to: [email],
-            subject: 'Votre Certification ASR Light (Gratuit) - AI Visionary',
+            subject: 'Votre Pack AIO Light (Gratuit) - AI Visionary',
             html: `
                 <div style="font-family: sans-serif; color: #333;">
                     <head><meta charset="utf-8"></head>
-                    <h1>Votre Pack AYO Light est prêt &#128274;&#127464;&#127469;</h1>
+                    <h1>Votre Pack AIO Light est prêt &#128274;&#127464;&#127469;</h1>
                     <p>Bonjour,</p>
-                    <p>Voici votre certification ASR standard (version Light) suite à l'analyse de <strong>${analysisData.url}</strong>.</p>
+                    <p>Voici votre Pack AIO Light suite à l'analyse de <strong>${analysisData.url}</strong>.</p>
                     
                     <div style="background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
                         <p><strong>Score AIO :</strong> ${analysisData.score} / 100</p>
