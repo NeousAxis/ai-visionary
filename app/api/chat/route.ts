@@ -439,36 +439,30 @@ export async function POST(req: Request) {
         let finalResponseText = "";
         let isAnalysisRun = false;
 
-        // SMART TRIGGER LOGIC (V4.2 - PING PONG PROTOCOL):
+        // SMART TRIGGER LOGIC (V5 - ROBUST):
         const urlMsgIndex = messages.findIndex((m: any) => m.role === 'user' && m.content.match(urlRegex));
         const hasUrlHistory = urlMsgIndex !== -1;
 
-        console.log(`DEBUG: Has URL History: ${hasUrlHistory}, checking step count...`);
-
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
-        const hasScanResult = assistantMessages.some((m: any) => m.content.includes("Analyse Préliminaire Effectuée"));
         const hasFinalScore = assistantMessages.some((m: any) => m.content.includes("SCORE FINAL AIO"));
 
-        // Count how many "Question Rounds" happened (Look for Block Headers in Assistant msg)
-        // BLOC IDENTITÉ / BLOC RÔLE / BLOC OFFRE / BLOC RESPONSABILITÉ / BLOC TECHNIQUE
+        // Count how many "Question Rounds" happened by looking for the JSON Signature
         const stepsCompleted = assistantMessages.filter((m: any) =>
-            m.content.includes("BLOC IDENTITÉ") ||
-            m.content.includes("BLOC RÔLE") ||
-            m.content.includes("BLOC OFFRE") ||
-            m.content.includes("BLOC RESPONSABILITÉ") ||
-            m.content.includes("BLOC TECHNIQUE")
+            m.content.includes('"type": "question_block"') || m.content.includes("'type': 'question_block'")
         ).length;
+
+        const hasQuestionBlock = stepsCompleted > 0;
 
         console.log(`DEBUG: Protocol Steps Completed: ${stepsCompleted}/5`);
 
         let triggerMode = "CHAT";
 
-        if (hasUrlHistory && !hasScanResult && !hasFinalScore) {
-            // STEP 0 -> 1: First Scan
+        if (hasUrlHistory && !hasQuestionBlock && !hasFinalScore) {
+            // STEP 0 -> 1: First Scan (Never asked questions yet)
             triggerMode = "SCAN_AND_QUESTION";
-        } else if (hasScanResult && !hasFinalScore && lastMessage.role === 'user') {
+        } else if (hasQuestionBlock && !hasFinalScore) {
             // STEP 1 -> 2 -> 3... : Ongoing Protocol
-            if (stepsCompleted < 5) { // 5 Blocks total. If we have less than 5 question sets, we continue.
+            if (stepsCompleted < 5) {
                 triggerMode = "CONTINUE_QUESTIONING";
             } else {
                 triggerMode = "FINAL_ANALYSIS";
@@ -518,39 +512,42 @@ export async function POST(req: Request) {
             const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
 
             const CONTINUE_PROMPT = `
-You are AYO. Step ${stepsCompleted}/5 of the Deep Scan.
+Tu es AYO. Étape ${stepsCompleted}/5 du Scan Profond.
 
-🚫 STRICT RULE: OUTPUT JSON ONLY. NO MARKDOWN.
+🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
+✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
+⚠️ SI TU RÉPONDS EN ANGLAIS, C'EST UNE ERREUR CRITIQUE.
 
-### YOUR TASK
-1. Acknowledge user's previous answer (briefly in 'intro').
-2. Ask the questions for **BLOCK ${nextBlockName}**.
-3. Generate valid options (A, B, C) + Custom.
+### TA MISSION
+1. Acquiesce brièvement à la réponse précédente de l'utilisateur (dans 'intro').
+2. Pose les questions pour le **BLOC ${nextBlockName}**.
+3. Génère des options valides (A, B, C) + Custom.
 
-### JSON FORMAT
+### FORMAT JSON ATTENDU (EXEMPLE)
 \`\`\`json
 {
   "type": "question_block",
-  "intro": "✅ Validated. Moving to ${nextBlockName}.",
+  "intro": "✅ C'est noté. Passons maintenant au bloc ${nextBlockName}.",
   "questions": [
     {
       "id": "q_next_1",
-      "text": "Question 1 for ${nextBlockName}?",
-      "options": ["Option A", "Option B"],
+      "text": "Quelle est votre cible principale ?",
+      "options": ["B2B", "B2C"],
       "allowCustom": true
     },
     {
       "id": "q_next_2",
-      "text": "Question 2 for ${nextBlockName}?",
-      "options": ["Option A", "Option B"],
+      "text": "Avez-vous une équipe technique ?",
+      "options": ["Oui", "Non"],
       "allowCustom": true
     }
   ]
 }
 \`\`\`
 
-**BLOCK ${nextBlockName} QUESTIONS:**
-(Refer to Protocol V4 logic for questions).
+**QUESTIONS DU BLOC ${nextBlockName} :**
+(Réfère-toi à la logique du Protocole V4 pour les questions pertinentes).
+Génère les questions en FRANÇAIS.
 `;
 
             const continueResult = await generateText({
