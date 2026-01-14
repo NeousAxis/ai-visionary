@@ -78,7 +78,7 @@ export default function Home() {
           {/* Bottom Hook */}
           <div style={{ marginTop: '50px', textAlign: 'center', maxWidth: '800px', margin: '50px auto 0' }}>
             <p className="final-hook" style={{ fontSize: '1.2rem', fontWeight: '500' }}>
-              Pour être recommandé, vous ne devez plus seulement séduire les humains, vous devez convaincre les algorithmes. <br />
+              Pour être recommandé, vous ne devez plus seulement séduire les humains, <br /> vous devez convaincre les algorithmes. <br />
               <strong style={{ color: 'var(--text-main)' }}>AYO crée les fichiers nécessaires pour que votre activité soit clairement identifiée par les IA.</strong>
             </p>
           </div>
