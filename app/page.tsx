@@ -231,7 +231,7 @@ export default function Home() {
             <div className="card pricing-card">
               <h3>Pack AIO Pro <br /><span className="card-subtitle">Expertise & Sémantique</span></h3>
               <div className="price">499 CHF</div>
-              <p className="price-details">La couche de confiance totale pour les IA. Glossaire, FAQ Structurée, Architecture & Manifest.</p>
+              <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. Signature cryptographique incluse. <br /><br /><strong>+ La couche de confiance totale pour les IA. Glossaire, FAQ Structurée, Architecture & Manifest.</strong></p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic" className="btn btn-secondary w-full" style={{ width: '100%' }}>
                   Analyser mon site
