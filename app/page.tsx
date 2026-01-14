@@ -15,7 +15,12 @@ export default function Home() {
       <section id="hero" className="hero-section">
         <div className="container hero-content">
           <div className="logo-container" style={{ marginBottom: '40px', textAlign: 'center' }}>
-            <img src="/logo.png" alt="AI VISIONARY" style={{ height: '180px', width: 'auto', margin: '0 auto' }} />
+            <img
+              src="/logo.png"
+              alt="AI VISIONARY"
+              className="logo-tinted"
+              style={{ height: '180px', width: 'auto', margin: '0 auto' }}
+            />
           </div>
           <h1 className="headline">Aujourd’hui, vos clients passent par des IA pour chercher des professionnels.</h1>
           <div className="subheadline">
@@ -91,6 +96,17 @@ export default function Home() {
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
             <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-main)' }}>👉 Les mots clés ne vous rendront pas plus visible, désormais c'est la structure de vos informations qui vous rend "appréciable" pour les IA.</p>
           </div>
+        </div>
+      </section>
+
+      {/* TRIGGER (Moved Up) */}
+      <section id="ayo-trigger" className="section ayo-trigger-section" style={{ textAlign: "center", padding: "60px 20px" }}>
+        <div className="container">
+          <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
+          <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
+          <Link href="/diagnostic" className="btn btn-primary" style={{ fontSize: "1.2rem", padding: "15px 30px" }}>
+            → Démarrer l'audit AYO
+          </Link>
         </div>
       </section>
 
@@ -200,16 +216,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TRIGGER */}
-      <section id="ayo-trigger" className="section ayo-trigger-section" style={{ textAlign: "center", padding: "60px 20px" }}>
-        <div className="container">
-          <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
-          <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
-          <Link href="/diagnostic" className="btn btn-primary" style={{ fontSize: "1.2rem", padding: "15px 30px" }}>
-            → Démarrer l'audit AYO
-          </Link>
-        </div>
-      </section>
 
       {/* CTA Final */}
       <section id="cta-final" className="section cta-final-section">

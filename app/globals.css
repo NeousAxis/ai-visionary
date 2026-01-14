@@ -346,6 +346,17 @@ ul {
     /* Ensure logo blends or pops */
 }
 
+/* Logo Tinting (Black -> Primary Teal #4A919E) */
+.logo-tinted {
+    filter: invert(53%) sepia(31%) saturate(762%) hue-rotate(136deg) brightness(91%) contrast(88%);
+    transition: all 0.3s ease;
+}
+
+.logo-tinted:hover {
+    filter: invert(53%) sepia(31%) saturate(762%) hue-rotate(136deg) brightness(100%) contrast(100%);
+    opacity: 0.8;
+}
+
 .target-badge {
     display: inline-block;
     padding: 6px 14px;
