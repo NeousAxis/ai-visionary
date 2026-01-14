@@ -218,7 +218,7 @@ export default function Home() {
             </div>
 
             <div className="card pricing-card featured">
-              <h3>Pack Essential <br /><span className="card-subtitle">Mise aux normes IA</span></h3>
+              <h3>Pack AIO Essential <br /><span className="card-subtitle">Mise aux normes IA</span></h3>
               <div className="price">99 CHF</div>
               <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. <br />Signature cryptographique incluse.</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
@@ -229,7 +229,7 @@ export default function Home() {
             </div>
 
             <div className="card pricing-card">
-              <h3>Pack Pro <br /><span className="card-subtitle">Expertise & Sémantique</span></h3>
+              <h3>Pack AIO Pro <br /><span className="card-subtitle">Expertise & Sémantique</span></h3>
 
               <div className="price">499 CHF</div>
               <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. Signature cryptographique incluse. <br /><br /><strong>+ La couche de confiance totale pour les IA. Glossaire, FAQ Structurée, Architecture & Manifest.</strong></p>

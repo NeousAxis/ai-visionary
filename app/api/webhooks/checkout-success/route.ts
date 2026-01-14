@@ -667,16 +667,16 @@ export async function POST(req: Request) {
                     </div>
                 `;
                 } else {
-                    emailSubject = `Votre Certification ASR Essential - Score ${analysisData.score}/100`;
+                    emailSubject = `Votre Pack AIO Essential - Score ${analysisData.score}/100`;
                     emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-                            <h1 style="margin:0;">AYO / Essential &#128274;&#127464;&#127469;</h1>
+                            <h1 style="margin:0;">AYO / Pack AIO Essential &#128274;&#127464;&#127469;</h1>
                         </div>
                         
                         <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
                             <p>Bonjour,</p>
-                            <p>Merci pour votre confiance. Votre Certification ASR Essential est prête.</p>
+                            <p>Merci pour votre confiance. Votre Pack AIO Essential est prêt.</p>
                             
                             <div style="background: #f0f9ff; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #0284c7;">
                                 <h3 style="margin-top:0; color: #0284c7;">📊 Score Calculé : ${analysisData.score}/100</h3>
