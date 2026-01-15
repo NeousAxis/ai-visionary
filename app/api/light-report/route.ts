@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const email = searchParams.get('email');
+    const url = searchParams.get('url');
 
     if (!email) {
         return new Response('<h1>❌ Email manquant</h1><p>Veuillez utiliser le lien fourni dans le chat.</p>', {
@@ -21,10 +22,17 @@ export async function GET(req: Request) {
     const resend = new Resend(resendKey);
 
     try {
-        console.log(`🚀 Sending LIGHT report to ${email}...`);
+        console.log(`🚀 Sending LIGHT report to ${email}${url ? ` for ${url}` : ''}...`);
 
-        // 1. Retrieve Analysis
-        const analysis = await db.getLatestAnalysisByEmail(email);
+        // 1. Retrieve Analysis (prioritize URL if provided)
+        let analysis;
+        if (url) {
+            analysis = await db.getLatestAnalysisByUrl(url);
+            console.log(`🔍 Found analysis by URL: ${!!analysis}`);
+        } else {
+            analysis = await db.getLatestAnalysisByEmail(email);
+            console.log(`🔍 Found analysis by Email: ${!!analysis}`);
+        }
 
         let analysisData;
         if (analysis) {
@@ -35,9 +43,6 @@ export async function GET(req: Request) {
                 audit_report: analysis.data?.audit_report
             };
         } else {
-            // Fallback: try by domain? Or just fail gently?
-            // For LIGHT report, maybe we can accept just knowing the email and if no data, send a "Please analyze first" email?
-            // But usually, chat has already analyzed it.
             return new Response('<h1>⚠️ Analyse non trouvée</h1><p>Veuillez d\'abord lancer une analyse de votre site dans le chat.</p>', {
                 headers: { 'Content-Type': 'text/html; charset=utf-8' },
             });

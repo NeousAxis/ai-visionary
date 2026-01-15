@@ -1185,7 +1185,7 @@ Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** e
 👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
 (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
 
-👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)})** (Analyse détaillée + Certification ASR simple)`;
+👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl)})** (Analyse détaillée + Certification ASR simple)`;
                 }
 
             }
