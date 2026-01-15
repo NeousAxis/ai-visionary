@@ -117,6 +117,24 @@ export const database = {
     },
 
     /**
+     * Normalize URL for consistent matching
+     */
+    normalizeUrl: (url: string): string => {
+        try {
+            let normalized = url.toLowerCase().trim();
+            // Remove protocol
+            normalized = normalized.replace(/^https?:\/\//, '');
+            // Remove www
+            normalized = normalized.replace(/^www\./, '');
+            // Remove trailing slash
+            normalized = normalized.replace(/\/$/, '');
+            return normalized;
+        } catch (e) {
+            return url.toLowerCase().trim();
+        }
+    },
+
+    /**
      * Retrieve the latest analysis for a given URL
      */
     getLatestAnalysisByUrl: async (url: string): Promise<AnalysisRecord | null> => {
@@ -124,20 +142,35 @@ export const database = {
         if (!dbInstance) return null;
 
         try {
-            // SIMPLIFIED: Removed orderBy to avoid "Index Link" error
-            const snapshot = await dbInstance.collection('analyses')
+            // First try exact match
+            let snapshot = await dbInstance.collection('analyses')
                 .where('url', '==', url)
                 .limit(1)
                 .get();
 
-            if (snapshot.empty) {
-                console.log(`⚠️ [Firestore] No analysis found for URL: ${url}`);
-                return null;
+            if (!snapshot.empty) {
+                const data = snapshot.docs[0].data() as AnalysisRecord;
+                console.log(`✅ [Firestore] Analysis retrieved for URL (exact): ${url}`);
+                return data;
             }
 
-            const data = snapshot.docs[0].data() as AnalysisRecord;
-            console.log(`✅ [Firestore] Analysis retrieved for URL: ${url}`);
-            return data;
+            // If exact match fails, try normalized search
+            const normalizedSearch = database.normalizeUrl(url);
+            console.log(`🔍 Trying normalized search: ${normalizedSearch}`);
+
+            // Get all analyses and filter manually (since we can't query on normalized field)
+            const allDocs = await dbInstance.collection('analyses').get();
+
+            for (const doc of allDocs.docs) {
+                const data = doc.data() as AnalysisRecord;
+                if (data.url && database.normalizeUrl(data.url) === normalizedSearch) {
+                    console.log(`✅ [Firestore] Analysis found via normalization: ${data.url} → ${normalizedSearch}`);
+                    return data;
+                }
+            }
+
+            console.log(`⚠️ [Firestore] No analysis found for URL: ${url} (tried normalized too)`);
+            return null;
         } catch (error) {
             console.error('❌ [Firestore] Query By URL Error:', error);
             return null;
