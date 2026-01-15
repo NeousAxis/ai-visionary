@@ -1372,17 +1372,12 @@ Si l'utilisateur donne un email valide (détecté par le code), et que tu dois r
 
 "✅ **Email validé.**
 
-📨 **Envoi en cours vers [EMAIL]...**
-(Vérifiez vos spams).
-
----
-
 💡 **OPPORTUNITÉ STRATÉGIQUE**
 
 Votre score actuel est un début.
 Mais pour que votre entreprise soit **correctement référencée et recommandée** par les IA (ChatGPT, Gemini), la Certification AIO est indispensable.
 
-Je peux valider immédiatement votre conformité avec la version Essential (99 CHF) ?
+Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** et les documents techniques :
 
 👉 **[🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
  (Certification ASR Essential + Analyse détaillée & Envoi par email)
@@ -1390,7 +1385,9 @@ Je peux valider immédiatement votre conformité avec la version Essential (99 C
  👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
  (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
 
- 👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmailPrompt)})** (Analyse détaillée + Certification ASR simple)"
+ 👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmailPrompt)})** (Analyse détaillée + Certification ASR simple)
+
+📧 Votre rapport vous sera envoyé quelques minutes après validation de votre choix."
 
 ÉTAT 4 — UPGRADE (Si l'utilisateur demande manuellement)
 Si OUI pour Essential :
