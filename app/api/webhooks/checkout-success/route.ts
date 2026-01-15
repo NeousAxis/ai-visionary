@@ -12,6 +12,7 @@ import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
 import { db } from '@/lib/db';
 import { generateRealAsrJson } from '@/lib/ayo-crypto'; // This import is already present and correct
+import { generateExternalContextJson } from '@/lib/external-context';
 
 // --- LOGIQUE D'ANALYSE (DUPLIQUÉE DEPUIS CHAT ROUTE POUR AUTONOMIE WEBHOOK) ---
 
@@ -437,6 +438,24 @@ export async function POST(req: Request) {
             asrJson = JSON.stringify({ error: "Generation Failed", contact: "support@ai-visionary.com" }, null, 2);
         }
 
+        // Generate External Context (New Layer)
+        let externalContextJson = "{}";
+        try {
+            const extData = (analysisData.extract as any).external_context || {};
+            const extObject = generateExternalContextJson({
+                ecosystem_presence: extData.ecosystem_presence?.value || [],
+                reputation_signals: extData.reputation_signals?.value || false,
+                keywords: extData.keywords?.value || [],
+                intents: extData.intents?.value || [],
+                channels: extData.channels?.value || [],
+                permissions: extData.permissions?.value || []
+            });
+            externalContextJson = JSON.stringify(extObject, null, 2);
+        } catch (extErr) {
+            console.error("❌ Failed to generate External Context JSON", extErr);
+            externalContextJson = JSON.stringify({ note: "No external context data available." }, null, 2);
+        }
+
         // 🔐 VALIDATION EMAIL
         const VALIDATION_DISABLED = false; // PROD MODE: STRICT
         let emailValidated = false;
@@ -612,8 +631,28 @@ export async function POST(req: Request) {
     },
     {
       "@type": "DefinedTerm",
-      "name": "Terme 2",
-      "description": "Définition précise..."
+      "name": "External Context",
+      "description": "Couche de données transitoires permettant d'aligner l'entité avec les signaux externes existants."
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Reputation Signal",
+      "description": "Métrique agrégée de réputation (avis) utilisée comme signal de confiance temporaire."
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Intent Keyword",
+      "description": "Mot-clé capturant une intention utilisateur spécifique (achat, comparaison, etc.)."
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Transitional Data",
+      "description": "Données autorisées temporairement en complément de la vérité structurelle (ASR)."
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Canonical Source",
+      "description": "La source de vérité officielle et signée (ASR) qui prévaut sur tout signal externe."
     }
   ]
 }</pre>
@@ -627,6 +666,10 @@ export async function POST(req: Request) {
     "allow_scraping": ["GoogleBot", "GPTBot", "CCBot"],
     "deny_scraping": ["MaliciousBot"]
   },
+  "sources": {
+      "asr": { "url": "/.ayo/asr.json", "canonical": true },
+      "external_context": { "url": "/.ayo/external_context.json", "canonical": false, "interpretable": true }
+  },
   "recommendationPolicy": {
     "scope": "contextual",
     "noSubjectiveClaims": true,
@@ -638,14 +681,18 @@ export async function POST(req: Request) {
   }
 }</pre>
 
+                            <h3 style="margin-top:25px; color: #006064;">5. External Context Layer : external_context.json</h3>
+                            <p style="font-size:13px;">Généré à partir de vos réponses (Présence Externe). Copiez dans <code>external_context.json</code>.</p>
+                            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px;">${externalContextJson}</pre>
+
                             <div style="background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 30px 0; border: 1px solid #bbdefb;">
                                 <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Pas à Pas)</h3>
                                 <p style="font-size: 14px; font-weight: bold;">Objectif : Rendre ces 4 fichiers accessibles aux IA.</p>
                                 <ol style="font-size:13px; padding-left:20px; line-height: 1.6;">
                                     <li>Accédez à votre serveur (FTP) ou gestionnaire de fichiers.</li>
                                     <li>À la racine de votre site (au même niveau que <code>index.html</code>), créez un nouveau dossier nommé exactement : <br><code>.ayo</code> (avec le point devant).</li>
-                                    <li>Dans ce dossier <code>.ayo</code>, créez les 4 fichiers (<code>asr.json</code>, <code>faq.json</code>, <code>glossary.json</code>, <code>manifest.json</code>) et collez-y les codes ci-dessus.</li>
-                                    <li>Vérifiez l'accès en tapant dans votre navigateur : <br><code>https://votre-site.com/.ayo/asr.json</code></li>
+                                    <li>Dans ce dossier <code>.ayo</code>, créez les 5 fichiers (<code>asr.json</code>, <code>faq.json</code>, <code>glossary.json</code>, <code>manifest.json</code>, <code>external_context.json</code>) et collez-y les codes ci-dessus.</li>
+                                    <li>Vérifiez l'accès en tapant dans votre navigateur : <br><code>https://votre-site.com/.ayo/external_context.json</code></li>
                                 </ol>
                                 <p style="margin-top: 15px; font-size: 13px; font-style: italic;">
                                     <strong>Alternative WordPress/Wix :</strong> Si vous ne pouvez pas créer de dossier, copiez le contenu du <code>asr.json</code> et collez-le dans le <code>&lt;HEAD&gt;</code> de votre site, entouré des balises :<br>
@@ -723,10 +770,14 @@ export async function POST(req: Request) {
                 }
 
                 // DEFINE ATTACHMENTS (ASR File) - Ensuring Binary Safety
-                const attachments = [
+                const attachments: any[] = [
                     {
                         filename: 'asr.json',
-                        content: Buffer.from(asrJson), // Force Buffer for UTF-8 safety
+                        content: Buffer.from(asrJson)
+                    },
+                    {
+                        filename: 'external_context.json',
+                        content: Buffer.from(externalContextJson)
                     }
                 ];
 

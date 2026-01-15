@@ -462,7 +462,7 @@ export async function POST(req: Request) {
             triggerMode = "SCAN_AND_QUESTION";
         } else if (hasQuestionBlock && !hasFinalScore) {
             // STEP 1 -> 2 -> 3... : Ongoing Protocol
-            if (stepsCompleted < 10) {
+            if (stepsCompleted < 16) {
                 triggerMode = "CONTINUE_QUESTIONING";
             } else {
                 triggerMode = "FINAL_ANALYSIS";
@@ -477,18 +477,22 @@ export async function POST(req: Request) {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
             console.log("Asking NEXT Block...");
 
-            // Logic to determine Next Question Name (10 Steps)
+            // Logic to determine Next Question Name (16 Steps)
             const blockNames = [
                 "PAYS", "STATUT",
                 "SECTEUR", "CIBLE",
                 "OFFRE", "MODÈLE",
                 "ÉQUIPE", "AMBITION/VISION",
-                "TECHNIQUE/CMS", "DONNÉES/IA"
+                "TECHNIQUE/CMS", "DONNÉES/IA",
+                // New External Context Layer
+                "EXTERNAL_PRESENCE", "REPUTATION_SIGNALS",
+                "KEYWORDS", "INTENTS",
+                "ACCESS_CHANNELS", "USAGE_PERMISSIONS"
             ];
             const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
 
             const CONTINUE_PROMPT = `
-Tu es AYO. Étape ${stepsCompleted + 1}/10 du Scan Profond.
+Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
 
 🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
 ✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
@@ -634,6 +638,14 @@ FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-3.0") :
         "ai_simulation": { "value": [
             { "query": "Ex: Centre en ville", "result": "✅/⚠️/❌", "reason": "Address found." }
         ], "q": 1, "evidence": [] }
+    },
+    "external_context": {
+        "ecosystem_presence": { "value": [], "q": 0, "evidence": [] },
+        "reputation_signals": { "value": false, "q": 0, "evidence": [] },
+        "keywords": { "value": [], "q": 0, "evidence": [] },
+        "intents": { "value": [], "q": 0, "evidence": [] },
+        "channels": { "value": [], "q": 0, "evidence": [] },
+        "permissions": { "value": [], "q": 0, "evidence": [] }
     }
   }
 }

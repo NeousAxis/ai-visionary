@@ -150,9 +150,9 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [stepCount, setStepCount] = useState(1); // 1..5
 
-    // Progress Bar Component (10 Steps)
+    // Progress Bar Component (16 Steps)
     const ProgressBar = () => {
-        const totalSteps = 10;
+        const totalSteps = 16;
         return (
             <div className="progress-steps-container" style={{ overflowX: 'auto', paddingBottom: '5px' }}>
                 {Array.from({ length: totalSteps }, (_, i) => i + 1).map((stepNum) => {
