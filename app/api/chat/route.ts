@@ -588,13 +588,34 @@ GÉNÈRE CE JSON MAINTENANT :
                 unknown: extractedAnswers.filter(a => a.confidence === 'unknown').length
             });
 
-            // 3. Identify questions that need USER input (low or unknown confidence)
+            // 3. BUILD TRANSPARENCY SUMMARY
+            const detectedInfos = extractedAnswers.filter(a => a.confidence === 'high');
+            const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
+
+            let transparencySummary = `📡 **SCAN TERMINÉ** : ${urlToScan}\n\n`;
+
+            if (detectedInfos.length > 0) {
+                transparencySummary += `✅ **INFORMATIONS DÉTECTÉES AUTOMATIQUEMENT** (${detectedInfos.length}):\n`;
+                detectedInfos.slice(0, 5).forEach((info, i) => {
+                    transparencySummary += `${i + 1}. ${info.answer || 'Information capturée'}\n`;
+                });
+                transparencySummary += `\n`;
+            }
+
+            if (missingInfos.length > 0) {
+                transparencySummary += `❓ **INFORMATIONS MANQUANTES** (${missingInfos.length} clarifications nécessaires):\n`;
+                transparencySummary += `Je vais vous poser ${missingInfos.length} questions pour compléter l'analyse.\n\n`;
+            }
+
+            // 4. Identify questions that need USER input (low or unknown confidence)
             const questionsToAsk = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
             if (questionsToAsk.length === 0) {
                 // RARE CASE: All questions answered with high confidence
                 // FORCE TRIGGER FINAL_ANALYSIS immediately instead of asking questions
                 console.log("🎯 All questions auto-answered! Triggering FINAL_ANALYSIS immediately...");
+                transparencySummary += `✅ **ANALYSE COMPLÈTE !**\nToutes les informations nécessaires ont été détectées automatiquement.\n\nGénération de votre diagnostic...`;
+                finalResponseText = transparencySummary;
                 triggerMode = "FINAL_ANALYSIS";
                 // Don't set finalResponseText here, let FINAL_ANALYSIS handle it
                 // Fall through to FINAL_ANALYSIS block below
@@ -633,10 +654,11 @@ FORMAT :
 
                 const clarificationMatch = clarificationResult.text.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
                 if (clarificationMatch) {
-                    finalResponseText = clarificationMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
+                    // Combine transparency summary with the question
+                    finalResponseText = transparencySummary + "\n\n" + clarificationMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
                 } else {
                     // Fallback
-                    finalResponseText = JSON.stringify({
+                    finalResponseText = transparencySummary + "\n\n" + JSON.stringify({
                         type: "question_block",
                         intro: `✅ Scan effectué. ${questionsToAsk.length} informations manquantes...`,
                         questions: [{
