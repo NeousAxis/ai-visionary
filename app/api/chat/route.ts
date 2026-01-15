@@ -497,6 +497,8 @@ export async function POST(req: Request) {
             console.log(`⚠️ TRIGGER MODE: ${triggerMode} (FALLBACK - LLM will handle)`);
         }
 
+        console.log(`🎯 TRIGGER MODE CALCULATED: "${triggerMode}" (stepsCompleted: ${stepsCompleted}, hasUrlHistory: ${hasUrlHistory}, hasFinalScore: ${hasFinalScore})`);
+
         if (triggerMode === "SCAN_AND_QUESTION") {
             console.log("🚀 TRIGGERING PHASE 1: INTELLIGENT EXTRACTION (V8)...");
 
@@ -773,6 +775,7 @@ POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
 
         if (triggerMode === "FINAL_ANALYSIS") {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
+            console.log(`🔍 DEBUG: triggerMode = "${triggerMode}", isAnalysisRun will be set to true`);
             isAnalysisRun = true;
             let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
 
