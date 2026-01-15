@@ -18,14 +18,11 @@ export default function MentionsPage() {
                             AI Visionary<br />
                             Société spécialisée en solutions d'optimisation pour l'IA.</p>
 
-                        <p style={{ marginTop: '20px' }}><strong>Hébergement :</strong><br />
-                            Ce site est hébergé par Firebase (Google Cloud Platform).</p>
-
                         <p style={{ marginTop: '20px' }}><strong>Contact :</strong><br />
                             hello@ai-visionary.com</p>
 
                         <p style={{ marginTop: '20px' }}><strong>Propriété intellectuelle :</strong><br />
-                            L'ensemble de ce site relève de la législation française et internationale sur le droit d'auteur et la propriété intellectuelle. Tous les droits de reproduction sont réservés.</p>
+                            L'ensemble de ce site relève de la législation suisse et internationale sur le droit d'auteur et la propriété intellectuelle. Tous les droits de reproduction sont réservés.</p>
                     </div>
                 </div>
             </section>
