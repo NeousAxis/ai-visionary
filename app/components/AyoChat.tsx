@@ -25,7 +25,6 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedMultiple, setSelectedMultiple] = useState<Record<string, string[]>>({});
     const [error, setError] = useState<string | null>(null);
 
     // Widget Specific State
