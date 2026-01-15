@@ -676,6 +676,15 @@ FORMAT :
 
         }
 
+        // 🛑 EARLY RETURN for SCAN_AND_QUESTION (prevent email check)
+        if (triggerMode === "SCAN_AND_QUESTION" && finalResponseText) {
+            console.log("✅ Returning SCAN_AND_QUESTION result (skipping email logic)");
+            return new Response(JSON.stringify({ text: finalResponseText }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         if (triggerMode === "CONTINUE_QUESTIONING") {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V5 Context-Aware)...");
             console.log("Asking NEXT Block...");
