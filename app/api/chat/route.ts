@@ -739,20 +739,16 @@ ${contextScanResult ? `
 - Description : "${contextScanResult.metaDescription || 'Non détectée'}"
 - H1 : ${contextScanResult.h1?.join(', ') || 'Aucun'}
 - JSON-LD présent : ${contextScanResult.hasJsonLd ? 'OUI' : 'NON'}
-- FAQ détectée : ${contextScanResult.hasFaqContent ? 'OUI' : 'NON'}
-- Texte extrait (100 premiers chars) : "${contextScanResult.text?.substring(0, 100) || 'Vide'}"
-` : 'Aucun scan disponible'}
+⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true".
 
-⚠️ RÈGLE CRITIQUE : NE POSE PAS DE QUESTIONS SUR CE QUI EST DÉJÀ VISIBLE DANS LE SCAN !
-Si le scan montre "blog" dans le titre ou la description, NE DEMANDE PAS "avez-vous un blog?".
-Si le scan montre "témoignages" dans le texte, NE DEMANDE PAS "avez-vous des témoignages?".
+**IMPORTANT** :
+- Si allowCustom est TRUE, NE METS PAS "Autre" dans les options ! Le système l'ajoute automatiquement.
+- Si la question peut avoir PLUSIEURS réponses, ajoute "allowMultiple: true"
 
-POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
-
-### TA MISSION
-1. Analyse le scan technique ci-dessus
-2. Identifie ce qui est DÉJÀ connu
-3. Pose UNE SEULE QUESTION pour le thème **${nextBlockName}** qui demande l'information MANQUANTE
+CONTEXTE (Scan détecté) :
+Titre: ${contextScanResult?.metaTitle || "Non détecté"}
+Description: ${contextScanResult?.metaDescription || "Non détectée"}
+H1: ${contextScanResult?.h1?.join(', ') || "Aucun"}
 
 ### FORMAT JSON ATTENDU (EXEMPLE)
 \`\`\`json
@@ -762,16 +758,18 @@ POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
   "questions": [
     {
       "id": "q_next_1",
-      "text": "Votre question COMPLÉMENTAIRE ici ?",
-      "options": ["Option A", "Option B"],
+      "text": "Votre question unique ici ?",
+      "options": ["Option A", "Option B", "Option C"],
       "allowCustom": true,
+      "allowMultiple": false,
       "customLabel": "Autre / Préciser..."
     }
   ]
 }
 \`\`\`
 
-**QUESTION UNIQUE POUR ${nextBlockName} (basée sur ce qui MANQUE dans le scan) :**
+**QUESTION UNIQUE POUR ${nextBlockName} :**
+(Ne fais JAMAIS de question fermée sans sortie de secours. L'utilisateur doit toujours pouvoir corriger).
 `;
 
             const continueResult = await generateText({
