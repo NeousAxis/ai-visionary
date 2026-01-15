@@ -449,6 +449,11 @@ export async function POST(req: Request) {
         const urlMsgIndex = messages.findIndex((m: any) => m.role === 'user' && m.content.match(urlRegex));
         const hasUrlHistory = urlMsgIndex !== -1;
 
+        console.log(`🔍 DEBUG TRIGGER: hasUrlHistory=${hasUrlHistory}, urlMsgIndex=${urlMsgIndex}`);
+        if (hasUrlHistory) {
+            console.log(`🔍 URL Message found: "${messages[urlMsgIndex].content}"`);
+        }
+
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
         const hasFinalScore = assistantMessages.some((m: any) => m.content.includes("SCORE FINAL AIO"));
 
@@ -462,12 +467,14 @@ export async function POST(req: Request) {
         const hasQuestionBlock = stepsCompleted > 0; // Virtual indicator
 
         console.log(`DEBUG: Protocol Steps Completed (User Turns): ${stepsCompleted}/16`);
+        console.log(`DEBUG: hasFinalScore=${hasFinalScore}`);
 
         let triggerMode = "CHAT";
 
         if (hasUrlHistory && stepsCompleted === 0 && !hasFinalScore) {
             // STEP 0 -> 1: First Scan (User gave URL, 0 replies yet)
             triggerMode = "SCAN_AND_QUESTION";
+            console.log(`✅ TRIGGER MODE: ${triggerMode}`);
         } else if (hasUrlHistory && stepsCompleted > 0 && !hasFinalScore) {
             // STEP 1 -> 2 -> 3... : Ongoing Protocol
             if (stepsCompleted < 16) {
@@ -475,6 +482,9 @@ export async function POST(req: Request) {
             } else {
                 triggerMode = "FINAL_ANALYSIS";
             }
+            console.log(`✅ TRIGGER MODE: ${triggerMode}`);
+        } else {
+            console.log(`⚠️ TRIGGER MODE: ${triggerMode} (FALLBACK - LLM will handle)`);
         }
 
         if (triggerMode === "SCAN_AND_QUESTION") {
