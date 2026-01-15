@@ -1171,21 +1171,117 @@ Ces fichiers contiennent des informations sensibles de votre organisation.
 
 
                     // 6. RESPOND WITH PAYMENT OPTIONS (No Email Sent)
-                    // v2.1 Strict No-Email Flow
+                    // v3.0 - Complete Sales Funnel
                     finalResponseText = `✅ **Email enregistré.**
 
-(Votre dossier est en cours de préparation, il vous sera envoyé quelques minutes après le paiement).
+💡 **OPPORTUNITÉ STRATÉGIQUE**
 
-Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** et les documents techniques :
+Votre entreprise est déjà visible.  
+Mais est-elle **lisible et recommandable** par les IA ?
 
+Votre score actuel montre que votre site existe et fonctionne.  
+Mais les IA ne se contentent plus de lire des pages :  
+**elles doivent comprendre, qualifier et décider.**
 
-👉 **[🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
-(Certification ASR Essential + Analyse détaillée & Envoi par email)
+👉 Sans structure claire, elles hésitent.  
+👉 Quand elles hésitent, elles évitent de vous recommander.
+
+La **Certification AIO / ASR** transforme votre site en source exploitable par les IA, aujourd'hui et demain.
+
+---
+
+## 🧭 COMMENT FONCTIONNE AI-VISIONARY
+
+AYO analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, **sans modifier votre contenu, sans SEO artificiel.**
+
+Selon le niveau choisi, vous obtenez :
+- une analyse claire
+- une certification officielle ASR
+- des fichiers AI-Native exploitables
+- et un avantage durable dans un internet en mutation
+
+---
+
+## 🔹 PACK LIGHT — DÉMARRER (gratuit / accès direct)
+
+👉 **[Cliquer sur "LIGHT"](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl)})**
+
+**Ce que vous obtenez :**
+✅ Analyse détaillée de votre site par AYO  
+✅ Score AIO (lisibilité actuelle pour les IA)  
+✅ Certification ASR simple (niveau LIGHT)
+
+**Bénéfices concrets :**
+- Comprendre comment les IA perçoivent votre site aujourd'hui
+- Identifier ce qui bloque la compréhension
+- Poser une première existence lisible pour les IA
+- Sans engagement, sans modification de votre site
+
+👉 *Idéal pour explorer, tester et comprendre.*
+
+---
+
+## 🛡 PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)
+
+👉 **[🛡 Obtenir mon ID ASR — Essential (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
+
+**Documents fournis :**
+📄 **asr.json** (Essential)  
+→ Identité, offre, signaux techniques, conformité minimale
+
+📄 **manifest.json**  
+→ Règles claires pour les robots et IA
+
+📄 **faq.json**  
+→ Réponses structurées directement exploitables par les moteurs IA
+
+📊 **Analyse AYO détaillée** (PDF ou email)
+
+**Bénéfices concrets :**
+- Votre entreprise devient une entité identifiable sans ambiguïté
+- Les IA savent qui vous êtes, ce que vous faites, dans quel contexte vous citer
+- Réduction du risque d'erreur, d'approximation ou de silence IA
+- Base stable et durable, indépendante du SEO
+
+👉 *Recommandé pour toute entreprise souhaitant rester visible à moyen terme.*
+
+---
+
+## 🚀 PACK PRO — DEVENIR UNE RÉFÉRENCE (499 CHF)
 
 👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
-(Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
 
-👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl)})** (Analyse détaillée + Certification ASR simple)`;
+**Documents fournis (complet) :**
+📄 **asr.json** (PRO, signé cryptographiquement)  
+→ Contexte, critères de sélection, pertinence IA avancée
+
+📄 **manifest.json** (PRO)  
+→ Politique de recommandation stricte et contrôlée
+
+📄 **faq.json enrichi**  
+→ Réponses contextuelles pour moteurs de réponse (ChatGPT, Gemini, Perplexity)
+
+📄 **glossary.json** (DefinedTermSet)  
+→ Vocabulaire métier précis, zéro hallucination IA
+
+📄 **external_context.json** (couche transitoire)  
+→ Avis, mots-clés et signaux actuels encapsulés et supprimables
+
+📊 **Analyse AYO complète & stratégique**
+
+**Bénéfices concrets :**
+- Votre site devient une **source de référence fiable** pour les IA
+- Compatibilité avec le web actuel (avis, intentions, comparaisons)
+- Préparation au monde post-SEO sans refonte future
+- **Avantage concurrentiel durable** :  
+  quand les autres optimisent encore le bruit, vous structurez l'essentiel
+- Tous les fichiers sont AI-Native, exploitables immédiatement
+
+👉 *Destiné aux entreprises et plateformes qui prennent une longueur d'avance dans un internet façonné par les IA.*
+
+---
+
+📧 Votre rapport vous sera envoyé quelques minutes après validation de votre choix.`;
                 }
 
             }
