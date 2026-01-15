@@ -601,16 +601,16 @@ GÉNÈRE CE JSON MAINTENANT :
             const detectedInfos = extractedAnswers.filter(a => a.confidence === 'high');
             const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
-            let transparencySummary = `**📡 SCAN TERMINÉ**\n\n`;
+            let transparencySummary = `📡 SCAN TERMINÉ\n\n`;
 
             if (detectedInfos.length > 0) {
-                transparencySummary += `**✅ ${detectedInfos.length} INFORMATIONS COLLECTÉES :**\n`;
+                transparencySummary += `✅ ${detectedInfos.length} INFORMATIONS COLLECTÉES :\n\n`;
                 detectedInfos.slice(0, 8).forEach((info) => {
                     const label = questionLabels[info.question_id - 1] || `Info ${info.question_id}`;
                     const value = info.answer && info.answer !== 'null' && info.answer.length < 60
                         ? info.answer
                         : 'Détecté';
-                    transparencySummary += `• **${label}** : ${value}\n`;
+                    transparencySummary += `• ${label} : ${value}\n`;
                 });
                 if (detectedInfos.length > 8) {
                     transparencySummary += `• ... et ${detectedInfos.length - 8} autres informations\n`;
@@ -618,9 +618,9 @@ GÉNÈRE CE JSON MAINTENANT :
                 transparencySummary += `\n`;
             }
 
-            transparencySummary += `**❓ ${missingInfos.length} INFORMATIONS À CLARIFIER**\n`;
+            transparencySummary += `❓ ${missingInfos.length} INFORMATIONS À CLARIFIER\n`;
             transparencySummary += `Je vais vous poser ${missingInfos.length} questions rapides.\n\n`;
-            transparencySummary += `➡️ **Mais avant tout...**`;
+            transparencySummary += `➡️ Mais avant tout...`;
 
             // 4. First question: Ownership validation
             const questionsToAsk = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
