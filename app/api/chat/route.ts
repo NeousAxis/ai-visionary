@@ -457,6 +457,11 @@ export async function POST(req: Request) {
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
         const hasFinalScore = assistantMessages.some((m: any) => m.content.includes("SCORE FINAL AIO"));
 
+        // NEW: Check if we already sent a question_block (JSON format)
+        const hasQuestionBlockSent = assistantMessages.some((m: any) =>
+            m.content.includes('"type": "question_block"') || m.content.includes('question_block')
+        );
+
         // ROBUST STEP COUNTING (V6): Count User Replies AFTER URL
         let stepsCompleted = 0;
         if (hasUrlHistory) {
@@ -468,10 +473,15 @@ export async function POST(req: Request) {
 
         console.log(`DEBUG: Protocol Steps Completed (User Turns): ${stepsCompleted}/16`);
         console.log(`DEBUG: hasFinalScore=${hasFinalScore}`);
+        console.log(`DEBUG: hasQuestionBlockSent=${hasQuestionBlockSent}`);
 
         let triggerMode = "CHAT";
 
-        if (hasUrlHistory && stepsCompleted === 0 && !hasFinalScore) {
+        // CRITICAL FIX: If last user message contains URL and NO question_block was sent yet, FORCE SCAN_AND_QUESTION
+        if (userUrlMatch && !hasQuestionBlockSent && !hasFinalScore) {
+            triggerMode = "SCAN_AND_QUESTION";
+            console.log(`✅ TRIGGER MODE: ${triggerMode} (FORCED - URL detected, no question_block sent yet)`);
+        } else if (hasUrlHistory && stepsCompleted === 0 && !hasFinalScore) {
             // STEP 0 -> 1: First Scan (User gave URL, 0 replies yet)
             triggerMode = "SCAN_AND_QUESTION";
             console.log(`✅ TRIGGER MODE: ${triggerMode}`);
