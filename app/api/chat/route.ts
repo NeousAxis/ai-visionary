@@ -727,49 +727,29 @@ GÉNÈRE CE JSON MAINTENANT :
             const CONTINUE_PROMPT = `
 Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
 
-🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
-✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
-⚠️ UNE SEULE QUESTION PAR BLOC.
-⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true". (Même pour Oui/Non).
+RÈGLE : JSON UNIQUEMENT.
+LANGUE : FRANÇAIS.
 
-📡 DONNÉES DU SCAN TECHNIQUE DISPONIBLES :
-${contextScanResult ? `
-- URL analysée : ${contextScanResult.url}
-- Titre : "${contextScanResult.metaTitle || 'Non détecté'}"
-- Description : "${contextScanResult.metaDescription || 'Non détectée'}"
-- H1 : ${contextScanResult.h1?.join(', ') || 'Aucun'}
-- JSON-LD présent : ${contextScanResult.hasJsonLd ? 'OUI' : 'NON'}
-⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true".
+CONTEXTE DU SCAN:
+Titre: ${contextScanResult?.metaTitle || "N/A"}
+Description: ${contextScanResult?.metaDescription || "N/A"}
 
-**IMPORTANT** :
-- Si allowCustom est TRUE, NE METS PAS "Autre" dans les options ! Le système l'ajoute automatiquement.
-- Si la question peut avoir PLUSIEURS réponses, ajoute "allowMultiple: true"
-
-CONTEXTE (Scan détecté) :
-Titre: ${contextScanResult?.metaTitle || "Non détecté"}
-Description: ${contextScanResult?.metaDescription || "Non détectée"}
-H1: ${contextScanResult?.h1?.join(', ') || "Aucun"}
-
-### FORMAT JSON ATTENDU (EXEMPLE)
-\`\`\`json
+FORMAT ATTENDU:
 {
   "type": "question_block",
-  "intro": "✅ C'est noté. Au sujet de votre ${nextBlockName}...",
+  "intro": "Transition...",
   "questions": [
     {
-      "id": "q_next_1",
-      "text": "Votre question unique ici ?",
-      "options": ["Option A", "Option B", "Option C"],
+      "id": "q1",
+      "text": "Question ?",
+      "options": ["A", "B"],
       "allowCustom": true,
-      "allowMultiple": false,
-      "customLabel": "Autre / Préciser..."
+      "allowMultiple": false
     }
   ]
 }
-\`\`\`
 
-**QUESTION UNIQUE POUR ${nextBlockName} :**
-(Ne fais JAMAIS de question fermée sans sortie de secours. L'utilisateur doit toujours pouvoir corriger).
+SUJET : ${nextBlockName}
 `;
 
             const continueResult = await generateText({
