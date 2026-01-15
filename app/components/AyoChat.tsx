@@ -232,7 +232,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             return (
                 <div className="ay-qcm-container">
                     {qcmData.intro && (
-                        <p className="mb-4 font-semibold text-teal-800">{qcmData.intro}</p>
+                        <p className="mb-4 font-semibold text-teal-800 whitespace-pre-line">{qcmData.intro}</p>
                     )}
 
                     <div className="flex flex-col gap-6">
