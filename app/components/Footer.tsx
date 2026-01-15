@@ -10,7 +10,7 @@ export default function Footer() {
                 <div className="footer-links">
                     <Link href="/">Accueil</Link>
                     <Link href="/ai-et-votre-entreprise">IA & votre entreprise</Link>
-                    <Link href="/concept-complet">Vision</Link>
+
                     <a href="mailto:hello@ai-visionary.com">Contact</a>
                     <Link href="/mentions">Mentions</Link>
                     <Link href="/confidentialite">Confidentialité</Link>
