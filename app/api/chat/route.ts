@@ -575,8 +575,28 @@ FORMAT ATTENDU :
             }
 
         } else if (triggerMode === "CONTINUE_QUESTIONING") {
-            console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
+            console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V5 Context-Aware)...");
             console.log("Asking NEXT Block...");
+
+            // Get URL from history to scan
+            let contextScanResult: any = null;
+            const historyUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+            const historyUrlMatch = messages.find((m: any) => m.role === 'user' && m.content.match(historyUrlRegex));
+
+            if (historyUrlMatch) {
+                let urlToScan = historyUrlMatch.content.match(historyUrlRegex)?.[0] || "";
+                if (urlToScan && !urlToScan.startsWith('http')) {
+                    urlToScan = 'https://' + urlToScan;
+                }
+
+                // Re-scan to get context (cached by browser/CDN usually)
+                console.log(`📡 Re-scanning ${urlToScan} for question context...`);
+                try {
+                    contextScanResult = await scanUrlForAioSignals(urlToScan);
+                } catch (e) {
+                    console.warn("Context scan failed:", e);
+                }
+            }
 
             // Logic to determine Next Question Name (16 Steps)
             const blockNames = [
@@ -600,10 +620,27 @@ Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
 ⚠️ UNE SEULE QUESTION PAR BLOC.
 ⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true". (Même pour Oui/Non).
 
+📡 DONNÉES DU SCAN TECHNIQUE DISPONIBLES :
+${contextScanResult ? `
+- URL analysée : ${contextScanResult.url}
+- Titre : "${contextScanResult.metaTitle || 'Non détecté'}"
+- Description : "${contextScanResult.metaDescription || 'Non détectée'}"
+- H1 : ${contextScanResult.h1?.join(', ') || 'Aucun'}
+- JSON-LD présent : ${contextScanResult.hasJsonLd ? 'OUI' : 'NON'}
+- FAQ détectée : ${contextScanResult.hasFaqContent ? 'OUI' : 'NON'}
+- Texte extrait (100 premiers chars) : "${contextScanResult.text?.substring(0, 100) || 'Vide'}"
+` : 'Aucun scan disponible'}
+
+⚠️ RÈGLE CRITIQUE : NE POSE PAS DE QUESTIONS SUR CE QUI EST DÉJÀ VISIBLE DANS LE SCAN !
+Si le scan montre "blog" dans le titre ou la description, NE DEMANDE PAS "avez-vous un blog?".
+Si le scan montre "témoignages" dans le texte, NE DEMANDE PAS "avez-vous des témoignages?".
+
+POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
+
 ### TA MISSION
-1. Acquiesce brièvement à la réponse précédente.
-2. Pose **UNE SEULE QUESTION** pour le thème : **${nextBlockName}**.
-3. Génère des options valides.
+1. Analyse le scan technique ci-dessus
+2. Identifie ce qui est DÉJÀ connu
+3. Pose UNE SEULE QUESTION pour le thème **${nextBlockName}** qui demande l'information MANQUANTE
 
 ### FORMAT JSON ATTENDU (EXEMPLE)
 \`\`\`json
@@ -613,7 +650,7 @@ Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
   "questions": [
     {
       "id": "q_next_1",
-      "text": "Votre question unique ici ?",
+      "text": "Votre question COMPLÉMENTAIRE ici ?",
       "options": ["Option A", "Option B"],
       "allowCustom": true,
       "customLabel": "Autre / Préciser..."
@@ -622,8 +659,7 @@ Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
 }
 \`\`\`
 
-**QUESTION UNIQUE POUR ${nextBlockName} :**
-(Ne fais JAMAIS de question fermée sans sortie de secours. L'utilisateur doit toujours pouvoir corriger).
+**QUESTION UNIQUE POUR ${nextBlockName} (basée sur ce qui MANQUE dans le scan) :**
 `;
 
             const continueResult = await generateText({
