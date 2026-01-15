@@ -590,88 +590,66 @@ GÉNÈRE CE JSON MAINTENANT :
                 unknown: extractedAnswers.filter(a => a.confidence === 'unknown').length
             });
 
-            // 3. BUILD TRANSPARENCY SUMMARY
+            // 3. BUILD TRANSPARENCY SUMMARY with explicit labels
+            const questionLabels = [
+                "Nom", "Pays", "Statut juridique", "Secteur",
+                "Audience", "Offre", "Modèle économique", "Équipe",
+                "Mission", "Technologies", "IA", "Réseau",
+                "Certifications", "Mots-clés", "Intentions", "Contact"
+            ];
+
             const detectedInfos = extractedAnswers.filter(a => a.confidence === 'high');
             const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
-            let transparencySummary = `📡 **SCAN TERMINÉ** : ${urlToScan}\n\n`;
+            let transparencySummary = `**📡 SCAN TERMINÉ**\n\n`;
 
             if (detectedInfos.length > 0) {
-                transparencySummary += `✅ **INFORMATIONS DÉTECTÉES AUTOMATIQUEMENT** (${detectedInfos.length}):\n`;
-                detectedInfos.slice(0, 5).forEach((info, i) => {
-                    transparencySummary += `${i + 1}. ${info.answer || 'Information capturée'}\n`;
+                transparencySummary += `**✅ ${detectedInfos.length} INFORMATIONS COLLECTÉES :**\n`;
+                detectedInfos.slice(0, 8).forEach((info) => {
+                    const label = questionLabels[info.question_id - 1] || `Info ${info.question_id}`;
+                    const value = info.answer && info.answer !== 'null' && info.answer.length < 60
+                        ? info.answer
+                        : 'Détecté';
+                    transparencySummary += `• **${label}** : ${value}\n`;
                 });
+                if (detectedInfos.length > 8) {
+                    transparencySummary += `• ... et ${detectedInfos.length - 8} autres informations\n`;
+                }
                 transparencySummary += `\n`;
             }
 
-            if (missingInfos.length > 0) {
-                transparencySummary += `❓ **INFORMATIONS MANQUANTES** (${missingInfos.length} clarifications nécessaires):\n`;
-                transparencySummary += `Je vais vous poser ${missingInfos.length} questions pour compléter l'analyse.\n\n`;
-            }
+            transparencySummary += `**❓ ${missingInfos.length} INFORMATIONS À CLARIFIER**\n`;
+            transparencySummary += `Je vais vous poser ${missingInfos.length} questions rapides.\n\n`;
+            transparencySummary += `➡️ **Mais avant tout...**`;
 
-            // 4. Identify questions that need USER input (low or unknown confidence)
+            // 4. First question: Ownership validation
             const questionsToAsk = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
             if (questionsToAsk.length === 0) {
-                // RARE CASE: All questions answered with high confidence
-                // FORCE TRIGGER FINAL_ANALYSIS immediately instead of asking questions
-                console.log("🎯 All questions auto-answered! Triggering FINAL_ANALYSIS immediately...");
-                transparencySummary += `✅ **ANALYSE COMPLÈTE !**\nToutes les informations nécessaires ont été détectées automatiquement.\n\nGénération de votre diagnostic...`;
-                finalResponseText = transparencySummary;
-                triggerMode = "FINAL_ANALYSIS";
-                // Don't set finalResponseText here, let FINAL_ANALYSIS handle it
-                // Fall through to FINAL_ANALYSIS block below
-            } else {
-                // Generate FIRST clarification question
-                const firstUncertain = questionsToAsk[0];
-                const CLARIFICATION_PROMPT = `
-Génère UNE question JSON pour clarifier cette information :
-
-Question ID ${firstUncertain.question_id}
-Estimation actuelle : "${firstUncertain.answer || 'Inconnue'}"
-Niveau de certitude : ${firstUncertain.confidence}
-
-La question doit être COURTE, DIRECTE, et avoir des OPTIONS pertinentes.
-
-FORMAT :
-{
-  "type": "question_block",
-  "intro": "✅ Scan effectué. ${questionsToAsk.length} informations à préciser...",
-  "questions": [{
-    "id": "clarif_${firstUncertain.question_id}",
-    "text": "VOTRE QUESTION ICI ?",
-    "options": ["Option 1", "Option 2", "Option 3"],
-    "allowCustom": true,
-    "customLabel": "Autre..."
-  }]
-}
-`;
-
-                const clarificationResult = await generateText({
-                    model: modelToUse,
-                    temperature: 0.2,
-                    system: CLARIFICATION_PROMPT,
-                    messages: [{ role: 'user', content: 'Génère la question' }]
+                // RARE: All auto-answered
+                console.log("🎯 All questions auto-answered! Triggering FINAL_ANALYSIS...");
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: transparencySummary + "\n\n✅ **Toutes les informations ont été collectées !**",
+                    questions: [{
+                        id: "ownership_confirm",
+                        text: "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
+                        options: ["Oui, c'est mon site", "Non"],
+                        allowCustom: false
+                    }]
                 });
-
-                const clarificationMatch = clarificationResult.text.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
-                if (clarificationMatch) {
-                    // Combine transparency summary with the question
-                    finalResponseText = transparencySummary + "\n\n" + clarificationMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
-                } else {
-                    // Fallback
-                    finalResponseText = transparencySummary + "\n\n" + JSON.stringify({
-                        type: "question_block",
-                        intro: `✅ Scan effectué. ${questionsToAsk.length} informations manquantes...`,
-                        questions: [{
-                            id: "clarif_fallback",
-                            text: "Pour compléter l'analyse, confirmez votre pays d'établissement ?",
-                            options: ["France", "Suisse", "Belgique", "Canada"],
-                            allowCustom: true,
-                            customLabel: "Autre pays..."
-                        }]
-                    });
-                }
+            } else {
+                // Ask ownership first, then continue
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: transparencySummary,
+                    questions: [{
+                        id: "ownership_confirm",
+                        text: "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
+                        options: ["Oui, c'est mon site", "Non"],
+                        allowCustom: false
+                    }]
+                });
             }
 
         }
@@ -688,6 +666,29 @@ FORMAT :
         if (triggerMode === "CONTINUE_QUESTIONING") {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V5 Context-Aware)...");
             console.log("Asking NEXT Block...");
+
+            // Check if this is a response to ownership confirmation
+            const isOwnershipResponse = messages.some((m: any) =>
+                m.role === 'assistant' && m.content.includes('ownership_confirm')
+            );
+
+            if (isOwnershipResponse && stepsCompleted === 1) {
+                const lastUserMsg = lastMessage.content.toLowerCase();
+
+                // If user said NO
+                if (lastUserMsg.includes('non') || lastUserMsg === 'non') {
+                    finalResponseText = `❌ **Analyse interrompue**\n\nJe ne peux pas continuer cette analyse.\n\n**Règle de conformité** : Seules les personnes responsables ou autorisées de l'entreprise analysée peuvent réaliser un diagnostic AYO.\n\nSi vous pensez qu'il s'agit d'une erreur, veuillez relancer une nouvelle analyse avec la bonne URL.`;
+
+                    // Return immediately, stop the flow
+                    return new Response(JSON.stringify({ text: finalResponseText }), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
+
+                // If user said YES, continue with real questions
+                console.log("✅ Ownership confirmed. Starting real clarification questions...");
+            }
 
             // Get URL from history to scan
             let contextScanResult: any = null;
