@@ -470,8 +470,41 @@ export async function POST(req: Request) {
         }
 
         if (triggerMode === "SCAN_AND_QUESTION") {
-            // ... (Phase 1 code remains mostly same, usually asks Question 1)
-            // ...
+            console.log("🚀 TRIGGERING PHASE 1: SCAN & FIRST QUESTION...");
+
+            let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
+            if (!urlToScan.startsWith('http')) urlToScan = 'https://' + urlToScan;
+
+            // 1. Fetch Content
+            const scanResult = await fetchWebsiteContent(urlToScan);
+
+            // 2. Prepare Prompt
+            const scanSystemPrompt = getScanSystemPrompt();
+
+            const analysisInput = `
+CONTEXTE :
+L'utilisateur lance un scan sur : ${urlToScan}
+
+CONTENU DU SITE (EXTRAIT) :
+"""
+${scanResult.text}
+"""
+
+TÂCHE PRIORITAIRE :
+1. Analyse ce contenu.
+2. Génère le JSON pour la question 1 (PAYS/LOCATION).
+3. JSON UNIQUEMENT.
+`;
+
+            // 3. Generate (Force JSON)
+            const scanGen = await generateText({
+                model: modelToUse,
+                temperature: 0,
+                system: scanSystemPrompt,
+                messages: [{ role: 'user', content: analysisInput }]
+            });
+
+            finalResponseText = scanGen.text;
 
         } else if (triggerMode === "CONTINUE_QUESTIONING") {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
