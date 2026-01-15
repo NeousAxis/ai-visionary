@@ -492,10 +492,30 @@ CONTENU DU SITE (EXTRAIT) :
 ${scanResult.text}
 """
 
-TÂCHE PRIORITAIRE :
-1. Analyse ce contenu.
-2. Génère le JSON pour la question 1 (PAYS/LOCATION).
-3. JSON UNIQUEMENT.
+🚫 INTERDICTIONS FORMELLES (SI TU LES VIOLES, LE SYSTÈME CRASH) :
+1. NE DEMANDE PAS L'ACTIVITÉ.
+2. NE DEMANDE PAS LA CIBLE.
+3. NE FAIS PAS DE LISTE À PUCES.
+4. NE DIS PAS "Afin d'affiner l'analyse".
+
+✅ TÂCHE UNIQUE :
+Génère le JSON pour la **Question 1 : PAYS D'ÉTABLISSEMENT**.
+Si tu l'as trouvé dans le texte, mets-le en option A. Sinon demande-le.
+
+FORMAT JSON STRICT (Exemple) :
+{
+  "type": "question_block",
+  "intro": "J'ai analysé votre site. Commençons par l'ancrage géographique.",
+  "questions": [
+    {
+      "id": "q1",
+      "text": "Dans quel pays votre entreprise est-elle domiciliée ?",
+      "options": ["France", "Suisse", "Belgique"],
+      "allowCustom": true,
+      "customLabel": "Autre pays"
+    }
+  ]
+}
 `;
 
             // 3. Generate (Force JSON)
@@ -513,7 +533,19 @@ TÂCHE PRIORITAIRE :
             if (jsonMatch) {
                 finalResponseText = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
             } else {
-                finalResponseText = originalText;
+                // FALLBACK: If LLM fails strict JSON, we force a hardcoded JSON to unblock the user.
+                console.warn("⚠️ LLM Failed to output JSON in Phase 1. Forcing Hardcoded Request.");
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: "Analyse préliminaire terminée. Procédons au calibrage étape par étape.",
+                    questions: [{
+                        id: "q1",
+                        text: "Pour commencer, dans quel pays votre structure est-elle établie ?",
+                        options: ["France", "Suisse", "Belgique", "Canada"],
+                        allowCustom: true,
+                        customLabel: "Autre..."
+                    }]
+                });
             }
 
         } else if (triggerMode === "CONTINUE_QUESTIONING") {
