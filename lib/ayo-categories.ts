@@ -75,13 +75,15 @@ Tu dois retourner un objet JSON avec cette structure :
 }
 \`\`\`
 
-### PHASE 1 : ANALYSE INITIALE
-1. Analyse le contenu du site web scanné ci-dessous.
-2. Détermine les réponses les plus probables (ex: si domaine .fr -> suggère France en premier).
-3. Génère le JSON pour la **TOUTE PREMIÈRE QUESTION UNIQUEMENT** (Pays d'enregistrement).
+### RÈGLES D'OR DU QUESTIONNEMENT :
+1. ⛔️ NE POSE JAMAIS PLUSIEURS QUESTIONS À LA FOIS.
+2. ⛔️ NE FAIS JAMAIS DE LISTE À PUCES DE QUESTIONS.
+3. ✅ UNE SEULE QUESTION (id: "q1") SUR : LE PAYS / LA LOCALISATION.
+4. SI LE PAYS EST CONNU (Scan), PROPOSE-LE EN OPTION A.
+5. SI INCONNU, DEMANDE-LE.
 
 **QUESTION 1 UNIQUE :**
-- Pays d'enregistrement ?
+- "Dans quel pays votre entité est-elle établie ?"
 
 **Génère le JSON maintenant.**
 `;

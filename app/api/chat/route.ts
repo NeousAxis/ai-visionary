@@ -504,7 +504,15 @@ TÂCHE PRIORITAIRE :
                 messages: [{ role: 'user', content: analysisInput }]
             });
 
-            finalResponseText = scanGen.text;
+            const originalText = scanGen.text;
+            // ATTEMPT TO EXTRACT JSON BLOCK IF LLM IS CHATTY
+            const jsonMatch = originalText.match(/```json([\s\S]*?)```/) || originalText.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
+
+            if (jsonMatch) {
+                finalResponseText = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
+            } else {
+                finalResponseText = originalText;
+            }
 
         } else if (triggerMode === "CONTINUE_QUESTIONING") {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
