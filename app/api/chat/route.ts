@@ -498,22 +498,81 @@ export async function POST(req: Request) {
         }
 
         if (triggerMode === "SCAN_AND_QUESTION") {
-            console.log("🚀 TRIGGERING PHASE 1: SCAN & FIRST QUESTION (Deterministic V6)...");
+            console.log("🚀 TRIGGERING PHASE 1: SCAN & FIRST QUESTION (Dynamic V7)...");
 
-            // BYPASS LLM FOR PHASE 1 TO PREVENT HALLUCINATIONS (e.g. "Dernière question")
-            // We force a clean start. The Deep Scan will happen at the end or during context accumulation.
+            // CRITICAL: Extract URL from last user message
+            let urlToScan = userUrlMatch ? userUrlMatch[0] : "";
+            if (!urlToScan.startsWith('http')) {
+                urlToScan = 'https://' + urlToScan;
+            }
 
-            finalResponseText = JSON.stringify({
-                type: "question_block",
-                intro: "✅ Domaine identifié. Initialisation du protocole de calibrage AIO.",
-                questions: [{
-                    id: "q1",
-                    text: "Pour commencer, dans quel pays votre structure est-elle établie ?",
-                    options: ["France", "Suisse", "Belgique", "Canada"],
-                    allowCustom: true,
-                    customLabel: "Autre pays..."
-                }]
+            // 1. IMMEDIATE SCAN to get context
+            console.log(`📡 Scanning ${urlToScan} for context...`);
+            const initialScanResult = await scanUrlForAioSignals(urlToScan);
+
+            // 2. Generate CONTEXTUAL first question using LLM with scan data
+            const INITIAL_QUESTION_PROMPT = `
+Tu es AYO. L'utilisateur vient de donner l'URL : ${urlToScan}
+
+DONNÉES DU SCAN TECHNIQUE :
+- Titre détecté : "${initialScanResult.metaTitle || 'Non détecté'}"
+- Description : "${initialScanResult.metaDescription || 'Non détectée'}"
+- JSON-LD présent : ${initialScanResult.hasJsonLd ? 'OUI' : 'NON'}
+- H1 trouvés : ${initialScanResult.h1?.join(', ') || 'Aucun'}
+
+TA MISSION :
+1. Analyse ces données techniques
+2. Génère LA PREMIÈRE QUESTION la plus pertinente pour démarrer le questionnaire de 16 questions
+3. La question doit être adaptée au contexte détecté (secteur, type d'activité visible)
+
+RÈGLES STRICTES :
+- Format JSON question_block UNIQUEMENT
+- UNE SEULE question
+- Options pertinentes basées sur ce que tu vois
+- TOUJOURS allowCustom: true
+
+FORMAT ATTENDU :
+{
+  "type": "question_block",
+  "intro": "✅ Analyse en cours de ${urlToScan}. Pour affiner le diagnostic...",
+  "questions": [{
+    "id": "q1_contextual",
+    "text": "VOTRE QUESTION CONTEXTUELLE ICI ?",
+    "options": ["Option basée sur le scan", "Autre option", "Etc"],
+    "allowCustom": true,
+    "customLabel": "Autre / Préciser..."
+  }]
+}
+`;
+
+            const initialQuestionResult = await generateText({
+                model: modelToUse,
+                temperature: 0.2,
+                system: INITIAL_QUESTION_PROMPT,
+                messages: [{ role: 'user', content: `Génère la première question contextuelle pour ${urlToScan}` }]
             });
+
+            // Extract JSON from response
+            const rawResponse = initialQuestionResult.text;
+            const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/) || rawResponse.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
+
+            if (jsonMatch) {
+                finalResponseText = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
+            } else {
+                // Fallback to generic question if LLM fails
+                console.warn("⚠️ LLM failed to generate contextual question, using fallback");
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: `✅ Analyse en cours de ${urlToScan}. Pour affiner le diagnostic...`,
+                    questions: [{
+                        id: "q1_fallback",
+                        text: "Dans quel pays votre structure est-elle principalement établie ?",
+                        options: ["France", "Suisse", "Belgique", "Canada"],
+                        allowCustom: true,
+                        customLabel: "Autre pays..."
+                    }]
+                });
+            }
 
         } else if (triggerMode === "CONTINUE_QUESTIONING") {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
