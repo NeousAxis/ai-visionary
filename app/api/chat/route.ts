@@ -446,21 +446,23 @@ export async function POST(req: Request) {
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
         const hasFinalScore = assistantMessages.some((m: any) => m.content.includes("SCORE FINAL AIO"));
 
-        // Count how many "Question Rounds" happened by looking for the JSON Signature
-        const stepsCompleted = assistantMessages.filter((m: any) =>
-            m.content.includes('"type": "question_block"') || m.content.includes("'type': 'question_block'")
-        ).length;
+        // ROBUST STEP COUNTING (V6): Count User Replies AFTER URL
+        let stepsCompleted = 0;
+        if (hasUrlHistory) {
+            const msgsAfterUrl = messages.slice(urlMsgIndex + 1);
+            stepsCompleted = msgsAfterUrl.filter((m: any) => m.role === 'user').length;
+        }
 
-        const hasQuestionBlock = stepsCompleted > 0;
+        const hasQuestionBlock = stepsCompleted > 0; // Virtual indicator
 
-        console.log(`DEBUG: Protocol Steps Completed: ${stepsCompleted}/5`);
+        console.log(`DEBUG: Protocol Steps Completed (User Turns): ${stepsCompleted}/16`);
 
         let triggerMode = "CHAT";
 
-        if (hasUrlHistory && !hasQuestionBlock && !hasFinalScore) {
-            // STEP 0 -> 1: First Scan (Never asked questions yet)
+        if (hasUrlHistory && stepsCompleted === 0 && !hasFinalScore) {
+            // STEP 0 -> 1: First Scan (User gave URL, 0 replies yet)
             triggerMode = "SCAN_AND_QUESTION";
-        } else if (hasQuestionBlock && !hasFinalScore) {
+        } else if (hasUrlHistory && stepsCompleted > 0 && !hasFinalScore) {
             // STEP 1 -> 2 -> 3... : Ongoing Protocol
             if (stepsCompleted < 16) {
                 triggerMode = "CONTINUE_QUESTIONING";
