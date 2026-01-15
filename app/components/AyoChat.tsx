@@ -150,17 +150,27 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [stepCount, setStepCount] = useState(1); // 1..5
 
-    // Progress Bar Component (16 Steps)
+    // Progress Bar Component (Dynamic - based on actual questions asked)
     const ProgressBar = () => {
-        const totalSteps = 16;
+        // Count only questions actually asked (assistant messages with question_block)
+        const questionMessages = messages.filter(m =>
+            m.role === 'assistant' &&
+            (m.content.includes('"type": "question_block"') || m.content.includes('question_block'))
+        );
+
+        const totalAsked = questionMessages.length;
+        const currentStep = stepCount;
+
+        if (totalAsked === 0) return null; // Don't show progress until first question
+
         return (
             <div className="progress-steps-container" style={{ overflowX: 'auto', paddingBottom: '5px' }}>
-                {Array.from({ length: totalSteps }, (_, i) => i + 1).map((stepNum) => {
-                    const isActive = stepNum === stepCount;
-                    const isCompleted = stepNum < stepCount;
+                {Array.from({ length: totalAsked + 1 }, (_, i) => i + 1).map((stepNum) => {
+                    const isActive = stepNum === currentStep;
+                    const isCompleted = stepNum < currentStep;
                     return (
                         <div key={stepNum} className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`} style={{ minWidth: '30px' }}>
-                            <div className="step-dot">{isCompleted ? '✓' : stepNum}</div>
+                            <div className="step-dot">{isCompleted ? '✓' : (isActive ? '?' : stepNum)}</div>
                         </div>
                     );
                 })}
