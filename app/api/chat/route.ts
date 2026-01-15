@@ -498,7 +498,7 @@ export async function POST(req: Request) {
         }
 
         if (triggerMode === "SCAN_AND_QUESTION") {
-            console.log("🚀 TRIGGERING PHASE 1: SCAN & FIRST QUESTION (Dynamic V7)...");
+            console.log("🚀 TRIGGERING PHASE 1: INTELLIGENT EXTRACTION (V8)...");
 
             // CRITICAL: Extract URL from last user message
             let urlToScan = userUrlMatch ? userUrlMatch[0] : "";
@@ -506,72 +506,145 @@ export async function POST(req: Request) {
                 urlToScan = 'https://' + urlToScan;
             }
 
-            // 1. IMMEDIATE SCAN to get context
-            console.log(`📡 Scanning ${urlToScan} for context...`);
-            const initialScanResult = await scanUrlForAioSignals(urlToScan);
+            // 1. DEEP SCAN to get ALL possible data
+            console.log(`📡 Deep scanning ${urlToScan}...`);
+            const deepScanResult = await scanUrlForAioSignals(urlToScan);
 
-            // 2. Generate CONTEXTUAL first question using LLM with scan data
-            const INITIAL_QUESTION_PROMPT = `
-Tu es AYO. L'utilisateur vient de donner l'URL : ${urlToScan}
+            // 2. ATTEMPT TO ANSWER the 16 critical questions via LLM extraction
+            const EXTRACTION_ATTEMPT_PROMPT = `
+Tu es AYO. Tu viens de scanner le site : ${urlToScan}
 
-DONNÉES DU SCAN TECHNIQUE :
-- Titre détecté : "${initialScanResult.metaTitle || 'Non détecté'}"
-- Description : "${initialScanResult.metaDescription || 'Non détectée'}"
-- JSON-LD présent : ${initialScanResult.hasJsonLd ? 'OUI' : 'NON'}
-- H1 trouvés : ${initialScanResult.h1?.join(', ') || 'Aucun'}
+DONNÉES DU SCAN :
+- Titre : "${deepScanResult.metaTitle || 'Non détecté'}"
+- Description : "${deepScanResult.metaDescription || 'Non détectée'}"
+- H1 : ${deepScanResult.h1?.join(', ') || 'Aucun'}
+- JSON-LD : ${deepScanResult.hasJsonLd ? 'OUI' : 'NON'}
+- Texte extrait (500 premiers caractères) : "${deepScanResult.text?.substring(0, 500) || 'Vide'}"
 
 TA MISSION :
-1. Analyse ces données techniques
-2. Génère LA PREMIÈRE QUESTION la plus pertinente pour démarrer le questionnaire de 16 questions
-3. La question doit être adaptée au contexte détecté (secteur, type d'activité visible)
+Essaie de répondre aux 16 questions critiques pour construire un ASR (AYO Singular Record).
 
-RÈGLES STRICTES :
-- Format JSON question_block UNIQUEMENT
-- UNE SEULE question
-- Options pertinentes basées sur ce que tu vois
-- TOUJOURS allowCustom: true
+Pour CHAQUE question, tu dois :
+1. Analyser les données du scan
+2. Si tu peux répondre avec CERTITUDE → Donner la réponse + confidence: "high"
+3. Si tu DOUTES → Marquer confidence: "low" + ta meilleure estimation
+4. Si tu NE SAIS PAS → Marquer confidence: "unknown"
 
-FORMAT ATTENDU :
+LES 16 QUESTIONS CRITIQUES :
+1. Nom exact de l'entreprise/organisation
+2. Pays d'établissement principal
+3. Statut juridique (SARL, SAS, Association, etc.)
+4. Secteur d'activité principal
+5. Public cible (B2B, B2C, B2G, etc.)
+6. Offre principale (produits/services en 1 phrase)
+7. Modèle économique (vente directe, abonnement, freemium, etc.)
+8. Taille équipe (estimation : 1-10, 11-50, 51-200, 200+, ou "unknown")
+9. Mission/Vision (si explicite sur le site)
+10. Technologies utilisées (CMS, framework visible)
+11. Utilisation de données/IA (si mentionné)
+12. Présence externe (réseaux sociaux mentionnés, partenaires)
+13. Signaux de réputation (certifications, labels OFFICIELS uniquement)
+14. Mots-clés principaux détectés
+15. Intentions utilisateur visibles (acheter, s'informer, contacter, etc.)
+16. Canaux d'accès (formulaire contact, email, téléphone détectés)
+
+FORMAT JSON ATTENDU :
+{
+  "answers": [
+    {"question_id": 1, "answer": "Ta réponse ou null", "confidence": "high|low|unknown"},
+    {"question_id": 2, "answer": "...", "confidence": "..."},
+    ...
+  ]
+}
+
+GÉNÈRE CE JSON MAINTENANT :
+`;
+
+            const extractionResult = await generateText({
+                model: modelToUse,
+                temperature: 0.1,
+                system: EXTRACTION_ATTEMPT_PROMPT,
+                messages: [{ role: 'user', content: `Extrait les réponses du scan de ${urlToScan}` }]
+            });
+
+            // Parse extraction result
+            let extractedAnswers: any[] = [];
+            try {
+                const jsonMatch = extractionResult.text.match(/{[\s\S]*"answers"[\s\S]*}/);
+                if (jsonMatch) {
+                    const parsed = JSON.parse(jsonMatch[0]);
+                    extractedAnswers = parsed.answers || [];
+                }
+            } catch (e) {
+                console.warn("Failed to parse extraction:", e);
+            }
+
+            console.log(`✅ Extracted ${extractedAnswers.length} answers from scan`);
+            console.log(`📊 Confidence breakdown:`, {
+                high: extractedAnswers.filter(a => a.confidence === 'high').length,
+                low: extractedAnswers.filter(a => a.confidence === 'low').length,
+                unknown: extractedAnswers.filter(a => a.confidence === 'unknown').length
+            });
+
+            // 3. Identify questions that need USER input (low or unknown confidence)
+            const questionsToAsk = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
+
+            if (questionsToAsk.length === 0) {
+                // RARE CASE: All questions answered with high confidence
+                finalResponseText = `✅ Analyse complète effectuée automatiquement !
+                
+Toutes les informations nécessaires ont été extraites du site. Génération de votre diagnostic...`;
+                // Skip to final analysis
+            } else {
+                // Generate FIRST clarification question
+                const firstUncertain = questionsToAsk[0];
+                const CLARIFICATION_PROMPT = `
+Génère UNE question JSON pour clarifier cette information :
+
+Question ID ${firstUncertain.question_id}
+Estimation actuelle : "${firstUncertain.answer || 'Inconnue'}"
+Niveau de certitude : ${firstUncertain.confidence}
+
+La question doit être COURTE, DIRECTE, et avoir des OPTIONS pertinentes.
+
+FORMAT :
 {
   "type": "question_block",
-  "intro": "✅ Analyse en cours de ${urlToScan}. Pour affiner le diagnostic...",
+  "intro": "✅ Scan effectué. ${questionsToAsk.length} informations à préciser...",
   "questions": [{
-    "id": "q1_contextual",
-    "text": "VOTRE QUESTION CONTEXTUELLE ICI ?",
-    "options": ["Option basée sur le scan", "Autre option", "Etc"],
+    "id": "clarif_${firstUncertain.question_id}",
+    "text": "VOTRE QUESTION ICI ?",
+    "options": ["Option 1", "Option 2", "Option 3"],
     "allowCustom": true,
-    "customLabel": "Autre / Préciser..."
+    "customLabel": "Autre..."
   }]
 }
 `;
 
-            const initialQuestionResult = await generateText({
-                model: modelToUse,
-                temperature: 0.2,
-                system: INITIAL_QUESTION_PROMPT,
-                messages: [{ role: 'user', content: `Génère la première question contextuelle pour ${urlToScan}` }]
-            });
-
-            // Extract JSON from response
-            const rawResponse = initialQuestionResult.text;
-            const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/) || rawResponse.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
-
-            if (jsonMatch) {
-                finalResponseText = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
-            } else {
-                // Fallback to generic question if LLM fails
-                console.warn("⚠️ LLM failed to generate contextual question, using fallback");
-                finalResponseText = JSON.stringify({
-                    type: "question_block",
-                    intro: `✅ Analyse en cours de ${urlToScan}. Pour affiner le diagnostic...`,
-                    questions: [{
-                        id: "q1_fallback",
-                        text: "Dans quel pays votre structure est-elle principalement établie ?",
-                        options: ["France", "Suisse", "Belgique", "Canada"],
-                        allowCustom: true,
-                        customLabel: "Autre pays..."
-                    }]
+                const clarificationResult = await generateText({
+                    model: modelToUse,
+                    temperature: 0.2,
+                    system: CLARIFICATION_PROMPT,
+                    messages: [{ role: 'user', content: 'Génère la question' }]
                 });
+
+                const clarificationMatch = clarificationResult.text.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
+                if (clarificationMatch) {
+                    finalResponseText = clarificationMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
+                } else {
+                    // Fallback
+                    finalResponseText = JSON.stringify({
+                        type: "question_block",
+                        intro: `✅ Scan effectué. ${questionsToAsk.length} informations manquantes...`,
+                        questions: [{
+                            id: "clarif_fallback",
+                            text: "Pour compléter l'analyse, confirmez votre pays d'établissement ?",
+                            options: ["France", "Suisse", "Belgique", "Canada"],
+                            allowCustom: true,
+                            customLabel: "Autre pays..."
+                        }]
+                    });
+                }
             }
 
         } else if (triggerMode === "CONTINUE_QUESTIONING") {
