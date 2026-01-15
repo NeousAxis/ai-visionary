@@ -591,10 +591,11 @@ GÉNÈRE CE JSON MAINTENANT :
 
             if (questionsToAsk.length === 0) {
                 // RARE CASE: All questions answered with high confidence
-                finalResponseText = `✅ Analyse complète effectuée automatiquement !
-                
-Toutes les informations nécessaires ont été extraites du site. Génération de votre diagnostic...`;
-                // Skip to final analysis
+                // FORCE TRIGGER FINAL_ANALYSIS immediately instead of asking questions
+                console.log("🎯 All questions auto-answered! Triggering FINAL_ANALYSIS immediately...");
+                triggerMode = "FINAL_ANALYSIS";
+                // Don't set finalResponseText here, let FINAL_ANALYSIS handle it
+                // Fall through to FINAL_ANALYSIS block below
             } else {
                 // Generate FIRST clarification question
                 const firstUncertain = questionsToAsk[0];
@@ -647,7 +648,9 @@ FORMAT :
                 }
             }
 
-        } else if (triggerMode === "CONTINUE_QUESTIONING") {
+        }
+
+        if (triggerMode === "CONTINUE_QUESTIONING") {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V5 Context-Aware)...");
             console.log("Asking NEXT Block...");
 
@@ -766,7 +769,9 @@ POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
                 });
             }
 
-        } else if (triggerMode === "FINAL_ANALYSIS") {
+        }
+
+        if (triggerMode === "FINAL_ANALYSIS") {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
             isAnalysisRun = true;
             let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
