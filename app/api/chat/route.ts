@@ -390,16 +390,15 @@ export async function POST(req: Request) {
                     // "flash mais pas le 1.5"
                     const bestModel = modelsData.models.find((m: any) =>
                         m.supportedGenerationMethods.includes('generateContent') &&
-                        m.name.includes('flash') &&
-                        m.name.includes('2.0') // Priority to 2.0 Flash
+                        m.name.includes('pro') &&
+                        m.name.includes('1.5') // Priority 1: Gemini 1.5 Pro (Intelligence)
                     ) || modelsData.models.find((m: any) =>
                         m.supportedGenerationMethods.includes('generateContent') &&
                         m.name.includes('flash') &&
-                        !m.name.includes('1.5') // Avoid 1.5 Flash if possible
+                        m.name.includes('2.0') // Priority 2: Gemini 2.0 Flash (Speed/New)
                     ) || modelsData.models.find((m: any) =>
-                        // Ultimate fallback if no 2.0 exists yet, we take any flash
                         m.supportedGenerationMethods.includes('generateContent') &&
-                        m.name.includes('flash')
+                        m.name.includes('flash') // Priority 3: Any Flash
                     );
 
                     if (bestModel) {
@@ -479,81 +478,22 @@ export async function POST(req: Request) {
         }
 
         if (triggerMode === "SCAN_AND_QUESTION") {
-            console.log("🚀 TRIGGERING PHASE 1: SCAN & FIRST QUESTION...");
+            console.log("🚀 TRIGGERING PHASE 1: SCAN & FIRST QUESTION (Deterministic V6)...");
 
-            let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
-            if (!urlToScan.startsWith('http')) urlToScan = 'https://' + urlToScan;
+            // BYPASS LLM FOR PHASE 1 TO PREVENT HALLUCINATIONS (e.g. "Dernière question")
+            // We force a clean start. The Deep Scan will happen at the end or during context accumulation.
 
-            // 1. Fetch Content
-            const scanResult = await fetchWebsiteContent(urlToScan);
-
-            // 2. Prepare Prompt
-            const scanSystemPrompt = getScanSystemPrompt();
-
-            const analysisInput = `
-CONTEXTE :
-L'utilisateur lance un scan sur : ${urlToScan}
-
-CONTENU DU SITE (EXTRAIT) :
-"""
-${scanResult.text}
-"""
-
-🚫 INTERDICTIONS FORMELLES (SI TU LES VIOLES, LE SYSTÈME CRASH) :
-1. NE DEMANDE PAS L'ACTIVITÉ.
-2. NE DEMANDE PAS LA CIBLE.
-3. NE FAIS PAS DE LISTE À PUCES.
-4. NE DIS PAS "Afin d'affiner l'analyse".
-
-✅ TÂCHE UNIQUE :
-Génère le JSON pour la **Question 1 : PAYS D'ÉTABLISSEMENT**.
-Si tu l'as trouvé dans le texte, mets-le en option A. Sinon demande-le.
-
-FORMAT JSON STRICT (Exemple) :
-{
-  "type": "question_block",
-  "intro": "J'ai analysé votre site. Commençons par l'ancrage géographique.",
-  "questions": [
-    {
-      "id": "q1",
-      "text": "Dans quel pays votre entreprise est-elle domiciliée ?",
-      "options": ["France", "Suisse", "Belgique"],
-      "allowCustom": true,
-      "customLabel": "Autre pays"
-    }
-  ]
-}
-`;
-
-            // 3. Generate (Force JSON)
-            const scanGen = await generateText({
-                model: modelToUse,
-                temperature: 0,
-                system: scanSystemPrompt,
-                messages: [{ role: 'user', content: analysisInput }]
+            finalResponseText = JSON.stringify({
+                type: "question_block",
+                intro: "✅ Domaine identifié. Initialisation du protocole de calibrage AIO.",
+                questions: [{
+                    id: "q1",
+                    text: "Pour commencer, dans quel pays votre structure est-elle établie ?",
+                    options: ["France", "Suisse", "Belgique", "Canada"],
+                    allowCustom: true,
+                    customLabel: "Autre pays..."
+                }]
             });
-
-            const originalText = scanGen.text;
-            // ATTEMPT TO EXTRACT JSON BLOCK IF LLM IS CHATTY
-            const jsonMatch = originalText.match(/```json([\s\S]*?)```/) || originalText.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
-
-            if (jsonMatch) {
-                finalResponseText = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
-            } else {
-                // FALLBACK: If LLM fails strict JSON, we force a hardcoded JSON to unblock the user.
-                console.warn("⚠️ LLM Failed to output JSON in Phase 1. Forcing Hardcoded Request.");
-                finalResponseText = JSON.stringify({
-                    type: "question_block",
-                    intro: "Analyse préliminaire terminée. Procédons au calibrage étape par étape.",
-                    questions: [{
-                        id: "q1",
-                        text: "Pour commencer, dans quel pays votre structure est-elle établie ?",
-                        options: ["France", "Suisse", "Belgique", "Canada"],
-                        allowCustom: true,
-                        customLabel: "Autre..."
-                    }]
-                });
-            }
 
         } else if (triggerMode === "CONTINUE_QUESTIONING") {
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V4.2)...");
