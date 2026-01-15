@@ -253,8 +253,7 @@ export default function Home() {
             <Footer />
 
 
-            {/* THE CHATBOT WIDGET */}
-            <AyoChat />
+
 
         </main >
     );
