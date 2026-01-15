@@ -614,7 +614,29 @@ Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
                 messages: messages // Pass full history so LLM knows what user just answered
             });
 
-            finalResponseText = continueResult.text;
+            const rawResponse = continueResult.text;
+            // ATTEMPT TO EXTRACT JSON BLOCK (Robust V6)
+            const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/) || rawResponse.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
+
+            if (jsonMatch) {
+                finalResponseText = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
+            } else {
+                console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Forcing Text into JSON.`);
+                // If LLM talks instead of JSON, we wrap its answer in a simple message block or force next q
+                // Better: Force a retry or a generic question block. 
+                // Let's assume the text contains the question and wrap it.
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: "Continuons l'analyse...",
+                    questions: [{
+                        id: `q_fallback_${stepsCompleted}`,
+                        text: `Concernant ${nextBlockName}, pourriez-vous préciser ?`,
+                        options: ["Oui", "Non", "Je ne sais pas"],
+                        allowCustom: true,
+                        customLabel: "Préciser..."
+                    }]
+                });
+            }
 
         } else if (triggerMode === "FINAL_ANALYSIS") {
             console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
