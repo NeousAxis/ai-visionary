@@ -477,22 +477,24 @@ export async function POST(req: Request) {
 
         let triggerMode = "CHAT";
 
-        // CRITICAL FIX: If last user message contains URL and NO question_block was sent yet, FORCE SCAN_AND_QUESTION
-        if (userUrlMatch && !hasQuestionBlockSent && !hasFinalScore) {
+        // PRIORITY 1: User has given URL, no answers yet → SCAN_AND_QUESTION
+        if (hasUrlHistory && stepsCompleted === 0 && !hasFinalScore) {
             triggerMode = "SCAN_AND_QUESTION";
-            console.log(`✅ TRIGGER MODE: ${triggerMode} (FORCED - URL detected, no question_block sent yet)`);
-        } else if (hasUrlHistory && stepsCompleted === 0 && !hasFinalScore) {
-            // STEP 0 -> 1: First Scan (User gave URL, 0 replies yet)
+            console.log(`✅ TRIGGER MODE: ${triggerMode} (URL in history, 0 responses)`);
+        }
+        // PRIORITY 2: User gave URL in CURRENT message and no question sent yet → FORCE SCAN_AND_QUESTION
+        else if (userUrlMatch && !hasQuestionBlockSent && !hasFinalScore) {
             triggerMode = "SCAN_AND_QUESTION";
-            console.log(`✅ TRIGGER MODE: ${triggerMode}`);
-        } else if (hasUrlHistory && stepsCompleted > 0 && !hasFinalScore) {
-            // STEP 1 -> 2 -> 3... : Ongoing Protocol
+            console.log(`✅ TRIGGER MODE: ${triggerMode} (FORCED - URL in current message)`);
+        }
+        // PRIORITY 3: User has answered questions → CONTINUE or FINAL
+        else if (hasUrlHistory && stepsCompleted > 0 && !hasFinalScore) {
             if (stepsCompleted < 16) {
                 triggerMode = "CONTINUE_QUESTIONING";
             } else {
                 triggerMode = "FINAL_ANALYSIS";
             }
-            console.log(`✅ TRIGGER MODE: ${triggerMode}`);
+            console.log(`✅ TRIGGER MODE: ${triggerMode} (stepsCompleted: ${stepsCompleted})`);
         } else {
             console.log(`⚠️ TRIGGER MODE: ${triggerMode} (FALLBACK - LLM will handle)`);
         }
