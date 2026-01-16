@@ -639,10 +639,10 @@ GÉNÈRE CE JSON MAINTENANT :
 
             if (detectedInfos.length > 0) {
                 transparencySummary += `✅ ${detectedInfos.length} INFORMATIONS DÉTECTÉES :\n\n`;
-                detectedInfos.slice(0, 8).forEach((info) => {
+                detectedInfos.forEach((info) => {
                     const label = questionLabels[info.question_id - 1] || `Info ${info.question_id}`;
-                    let value = info.answer && info.answer !== 'null' && info.answer.length < 60
-                        ? info.answer
+                    let value = info.answer && info.answer !== 'null'
+                        ? (info.answer.length > 50 ? info.answer.substring(0, 50) + '...' : info.answer)
                         : 'Détecté';
 
                     // Add nuance for low confidence
@@ -652,9 +652,6 @@ GÉNÈRE CE JSON MAINTENANT :
 
                     transparencySummary += `• ${label} : ${value}\n`;
                 });
-                if (detectedInfos.length > 8) {
-                    transparencySummary += `• ... et ${detectedInfos.length - 8} autres informations\n`;
-                }
                 transparencySummary += `\n`;
             }
 
