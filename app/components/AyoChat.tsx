@@ -313,24 +313,62 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         </label>
                                                     );
                                                 })}
-                                                {/* TOUJOURS AFFICHER l'option "Autre" pour permettre de personnaliser/compléter */}
-                                                <button
-                                                    onClick={() => setInput(`${q.text} : `)}
-                                                    className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-amber-400 transition-colors text-sm text-amber-700 italic col-span-full"
+
+                                                {/* OPTION "AUTRE" COCHABLE */}
+                                                <label
+                                                    className={`flex items-center gap-3 px-4 py-3 rounded border cursor-pointer transition-colors text-sm font-medium col-span-full ${currentSelections.includes('__AUTRE__')
+                                                            ? 'bg-amber-100 border-amber-500 text-amber-800'
+                                                            : 'bg-white border-dashed border-amber-400 text-amber-700 hover:bg-amber-50'
+                                                        }`}
                                                 >
-                                                    ✏️ {q.customLabel || "Autre réponse / Compléter ma sélection..."}
-                                                </button>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={currentSelections.includes('__AUTRE__')}
+                                                        onChange={() => toggleMultipleSelection(questionId, '__AUTRE__')}
+                                                        disabled={isLoading}
+                                                        className="w-4 h-4 accent-amber-600"
+                                                    />
+                                                    ✏️ Autre / Préciser...
+                                                </label>
                                             </div>
+
+                                            {/* CHAMP DE TEXTE POUR "AUTRE" (apparaît quand coché) */}
+                                            {currentSelections.includes('__AUTRE__') && (
+                                                <input
+                                                    type="text"
+                                                    placeholder="Précisez votre réponse..."
+                                                    value={input}
+                                                    onChange={(e) => setInput(e.target.value)}
+                                                    className="px-4 py-3 rounded border border-amber-400 bg-amber-50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                />
+                                            )}
+
                                             {/* Validate Button */}
                                             <button
-                                                onClick={() => submitMultipleSelection(questionId, q.text)}
-                                                disabled={isLoading || currentSelections.length === 0}
-                                                className={`mt-2 px-6 py-3 rounded-lg font-semibold text-white transition-all ${currentSelections.length > 0
-                                                    ? 'bg-teal-600 hover:bg-teal-700 shadow-md'
-                                                    : 'bg-slate-300 cursor-not-allowed'
+                                                onClick={() => {
+                                                    // Build answer: selected options + custom text if "Autre" is checked
+                                                    let selections = currentSelections.filter(s => s !== '__AUTRE__');
+                                                    if (currentSelections.includes('__AUTRE__') && input.trim()) {
+                                                        selections.push(input.trim());
+                                                    }
+                                                    if (selections.length === 0) return;
+
+                                                    const formattedAnswer = `${q.text} : ${selections.join(', ')}`;
+                                                    setSelectedMultiple(prev => {
+                                                        const newState = { ...prev };
+                                                        delete newState[questionId];
+                                                        return newState;
+                                                    });
+                                                    setInput('');
+                                                    handleSubmit(undefined, formattedAnswer);
+                                                }}
+                                                disabled={isLoading || (currentSelections.filter(s => s !== '__AUTRE__').length === 0 && !(currentSelections.includes('__AUTRE__') && input.trim()))}
+                                                className={`mt-2 px-6 py-3 rounded-lg font-semibold text-white transition-all ${(currentSelections.filter(s => s !== '__AUTRE__').length > 0 || (currentSelections.includes('__AUTRE__') && input.trim()))
+                                                        ? 'bg-teal-600 hover:bg-teal-700 shadow-md'
+                                                        : 'bg-slate-300 cursor-not-allowed'
                                                     }`}
                                             >
-                                                ✓ Valider ({currentSelections.length} sélectionnée{currentSelections.length > 1 ? 's' : ''})
+                                                ✓ Valider ({currentSelections.filter(s => s !== '__AUTRE__').length + (currentSelections.includes('__AUTRE__') && input.trim() ? 1 : 0)} sélectionnée{(currentSelections.filter(s => s !== '__AUTRE__').length + (currentSelections.includes('__AUTRE__') && input.trim() ? 1 : 0)) > 1 ? 's' : ''})
                                             </button>
                                         </div>
                                     ) : (
