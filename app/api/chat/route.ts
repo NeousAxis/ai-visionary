@@ -569,7 +569,7 @@ LES 16 QUESTIONS CRITIQUES :
 5. Public cible (B2B, B2C, B2G, etc.)
 6. Offre principale (produits/services en 1 phrase)
 7. Modèle économique (vente directe, abonnement, freemium, etc.)
-8. Taille équipe (estimation : 1-10, 11-50, 51-200, 200+, ou "unknown")
+8. Taille équipe (STRICT : Si non mentionné/visible -> "unknown". NE PAS INVENTER OU ESTIMER "1-10" PAR DÉFAUT)
 9. Mission/Vision (si explicite sur le site)
 10. Technologies utilisées (CMS, framework visible)
 11. Utilisation de données/IA (si mentionné)
@@ -800,6 +800,7 @@ Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
 🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
 ✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
 ⚠️ UNE SEULE QUESTION PAR BLOC.
+⚠️ RISQUE CRITIQUE : N'ÉCRIS AUCUN TEXTE AVANT LE JSON ! COMMENCE DIRECTEMENT PAR '{'.
 ⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true". (Même pour Oui/Non).
 
 📡 DONNÉES DU SCAN TECHNIQUE DISPONIBLES :
@@ -863,11 +864,17 @@ Exemple : "Public cible ?" → Une entreprise peut cibler à la fois B2B ET B2C 
             });
 
             const rawResponse = continueResult.text;
-            // ATTEMPT TO EXTRACT JSON BLOCK (Robust V6)
-            const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/) || rawResponse.match(/{[\s\S]*"type":\s*"question_block"[\s\S]*}/);
+            // ATTEMPT TO EXTRACT JSON BLOCK (Brute Force V7)
+            const jsonStart = rawResponse.indexOf('{');
+            const jsonEnd = rawResponse.lastIndexOf('}');
 
-            if (jsonMatch) {
-                finalResponseText = jsonMatch[0].replace(/```json/g, '').replace(/```/g, '').trim();
+            if (jsonStart !== -1 && jsonEnd !== -1) {
+                finalResponseText = rawResponse.substring(jsonStart, jsonEnd + 1);
+                // Optional: Validate JSON validity here if needed
+            } else if (rawResponse.match(/```json/)) {
+                // Fallback for markdown blocks if indices failed for some reason
+                const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
+                if (jsonMatch) finalResponseText = jsonMatch[1];
             } else {
                 console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Forcing Text into JSON.`);
                 // If LLM talks instead of JSON, we wrap its answer in a simple message block or force next q
