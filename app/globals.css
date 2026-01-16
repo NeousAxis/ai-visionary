@@ -615,6 +615,44 @@ ul {
     opacity: 1;
 }
 
+/* UI BUTTONS OVERRIDE - FORCE LARGE BUBBLE STYLE */
+/* FORCE DEPLOY VERCEL NOW */
+.qcm-btn {
+    width: 100%;
+    text-align: left;
+    padding: 18px 24px !important;
+    border-radius: 16px !important;
+    /* rounded-2xl */
+    background-color: white;
+    border: 1px solid #E2E8F0;
+    /* slate-200 */
+    color: #1E293B;
+    /* slate-800 */
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    /* shadow-sm */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.qcm-btn:hover {
+    background-color: #4A919E !important;
+    /* Teal */
+    color: white !important;
+    border-color: #4A919E !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(74, 145, 158, 0.2);
+}
+
+.qcm-btn:active,
+.qcm-btn.active {
+    background-color: #3b7580 !important;
+    transform: translateY(0);
+}
+
 .step-dot {
     width: 20px;
     height: 20px;

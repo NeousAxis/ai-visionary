@@ -343,35 +343,35 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                         )}
                                     </p>
 
-                                    {/* CHECKBOX MODE - MODERN DESIGN */}
+                                    {/* CHECKBOX MODE - LARGE BUBBLE DESIGN */}
                                     {forceMultiple ? (
                                         <div className="flex flex-col gap-4">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {filteredOptions.map((opt, i) => {
                                                     const isSelected = currentSelections.includes(opt);
                                                     return (
                                                         <div
                                                             key={i}
                                                             onClick={() => !isLoading && toggleMultipleSelection(questionId, opt)}
-                                                            className={`flex items-center w-full px-5 py-4 rounded-xl cursor-pointer transition-all duration-200 border shadow-sm select-none group ${isSelected
+                                                            className={`flex items-center w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border shadow-sm select-none group ${isSelected
                                                                 ? 'bg-[#4A919E] border-[#4A919E] transform scale-[1.01]'
                                                                 : 'bg-white border-slate-200 hover:border-[#4A919E]/50 hover:bg-slate-50'
                                                                 }`}
                                                         >
-                                                            {/* Checkbox Visual - Square, clean, spaced out */}
-                                                            <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center mr-4 border transition-all ${isSelected
+                                                            {/* Checkbox Visual - LARGE & SPACED */}
+                                                            <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-5 border-2 transition-all ${isSelected
                                                                 ? 'bg-white/20 border-white/50'
                                                                 : 'bg-white border-slate-300 group-hover:border-[#4A919E]'
                                                                 }`}>
                                                                 {isSelected && (
-                                                                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                                     </svg>
                                                                 )}
                                                             </div>
 
-                                                            {/* Text Label */}
-                                                            <span className={`text-[15px] font-medium leading-relaxed flex-1 ${isSelected ? 'text-white' : 'text-[#212E53]'}`}>
+                                                            {/* Text Label - LARGER */}
+                                                            <span className={`text-[16px] font-medium leading-relaxed flex-1 ${isSelected ? 'text-white' : 'text-[#212E53]'}`}>
                                                                 {opt}
                                                             </span>
 
@@ -386,30 +386,30 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     );
                                                 })}
 
-                                                {/* OPTION "AUTRE" - Design Bulle Unifié */}
+                                                {/* OPTION "AUTRE" - Large Bubble */}
                                                 <div
                                                     onClick={() => !isLoading && toggleMultipleSelection(questionId, '__AUTRE__')}
-                                                    className={`flex items-center w-full px-5 py-4 rounded-xl cursor-pointer transition-all duration-200 border col-span-full select-none shadow-sm group ${currentSelections.includes('__AUTRE__')
+                                                    className={`flex items-center w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border col-span-full select-none shadow-sm group ${currentSelections.includes('__AUTRE__')
                                                         ? 'bg-[#4A919E] border-[#4A919E] transform scale-[1.01]'
                                                         : 'bg-white border-dashed border-slate-300 hover:border-[#4A919E]/50 hover:bg-slate-50'
                                                         }`}
                                                 >
-                                                    <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center mr-4 border transition-all ${currentSelections.includes('__AUTRE__')
+                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-5 border-2 transition-all ${currentSelections.includes('__AUTRE__')
                                                         ? 'bg-white/20 border-white/50'
                                                         : 'bg-white border-slate-300 group-hover:border-[#4A919E]'
                                                         }`}>
                                                         {currentSelections.includes('__AUTRE__') ? (
-                                                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                             </svg>
                                                         ) : (
-                                                            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                                                             </svg>
                                                         )}
                                                     </div>
 
-                                                    <span className={`text-[15px] font-medium leading-relaxed flex-1 ${currentSelections.includes('__AUTRE__') ? 'text-white' : 'text-[#212E53] italic'}`}>
+                                                    <span className={`text-[16px] font-medium leading-relaxed flex-1 ${currentSelections.includes('__AUTRE__') ? 'text-white' : 'text-[#212E53] italic'}`}>
                                                         Autre...
                                                     </span>
 
@@ -422,7 +422,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 </div>
                                             </div>
 
-                                            {/* CHAMP DE TEXTE POUR "AUTRE" - Style Input Conversationnel */}
+                                            {/* CHAMP DE TEXTE POUR "AUTRE" */}
                                             {currentSelections.includes('__AUTRE__') && (
                                                 <div className="pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                                     <input
@@ -431,7 +431,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         autoFocus
                                                         value={input}
                                                         onChange={(e) => setInput(e.target.value)}
-                                                        className="w-full px-5 py-3 rounded-xl border border-slate-300 bg-white text-[#212E53] text-[15px] focus:outline-none focus:ring-2 focus:ring-[#4A919E]/20 focus:border-[#4A919E] transition-all shadow-sm placeholder:text-slate-400"
+                                                        className="w-full !px-6 !py-4 !rounded-2xl border border-slate-300 bg-white text-[#212E53] text-[16px] focus:outline-none focus:ring-2 focus:ring-[#4A919E]/20 focus:border-[#4A919E] transition-all shadow-sm placeholder:text-slate-400"
                                                     />
                                                 </div>
                                             )}
@@ -455,8 +455,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     handleSubmit(undefined, formattedAnswer);
                                                 }}
                                                 disabled={isLoading || (currentSelections.filter(s => s !== '__AUTRE__').length === 0 && !(currentSelections.includes('__AUTRE__') && input.trim()))}
-                                                className={`mt-2 px-6 py-3 rounded-lg font-semibold text-white transition-all ${(currentSelections.filter(s => s !== '__AUTRE__').length > 0 || (currentSelections.includes('__AUTRE__') && input.trim()))
-                                                    ? 'bg-teal-600 hover:bg-teal-700 shadow-md'
+                                                className={`mt-2 !px-8 !py-4 !rounded-xl font-bold text-[16px] text-white transition-all ${(currentSelections.filter(s => s !== '__AUTRE__').length > 0 || (currentSelections.includes('__AUTRE__') && input.trim()))
+                                                    ? 'bg-teal-600 hover:bg-teal-700 shadow-md transform hover:-translate-y-0.5'
                                                     : 'bg-slate-300 cursor-not-allowed'
                                                     }`}
                                             >
@@ -464,47 +464,42 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                             </button>
                                         </div>
                                     ) : (
-                                        /* BUTTON MODE (Normal single select) - Bubble Style Applied */
-                                        <div className="flex flex-col gap-3">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        /* BUTTON MODE (Single Select) - LARGE BUBBLE STYLE FORCED */
+                                        <div className="flex flex-col gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {filteredOptions.map((opt, i) => (
                                                     <button
                                                         key={i}
                                                         onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
                                                         disabled={isLoading}
-                                                        className="group flex items-center w-full px-5 py-4 rounded-xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
+                                                        className="group flex items-center w-full !px-6 !py-5 !rounded-2xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
                                                     >
-                                                        <span className="text-[15px] font-medium text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors">
+                                                        <span className="text-[16px] font-medium text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors leading-relaxed">
                                                             {opt}
                                                         </span>
-                                                        <div className="w-5 h-5 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center ml-3 relative z-10 transition-colors">
-                                                            <svg className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                        <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center ml-4 relative z-10 transition-colors flex-shrink-0">
+                                                            <svg className="w-3.5 h-3.5 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                                             </svg>
                                                         </div>
                                                     </button>
                                                 ))}
 
-                                                {/* AFFICHER "Autre" SAUF pour la question de propriété */}
+                                                {/* OPTION "AUTRE" SINGLE SELECT */}
                                                 {!isOwnershipQuestion && (
                                                     <button
                                                         onClick={() => setInput(`${q.text} : `)}
-                                                        className="group flex items-center justify-between w-full px-5 py-4 rounded-xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
+                                                        className="group flex items-center justify-between w-full !px-6 !py-5 !rounded-2xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
                                                     >
-                                                        <span className="text-[15px] font-medium text-slate-500 italic group-hover:text-amber-700 transition-colors">
+                                                        <span className="text-[16px] font-medium text-slate-500 italic group-hover:text-amber-700 transition-colors">
                                                             Autre réponse / Préciser...
                                                         </span>
-                                                        <svg className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <svg className="w-5 h-5 text-slate-300 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                         </svg>
                                                     </button>
                                                 )}
                                             </div>
-
-                                            {/* Show Input if User clicked Autre (Input state handling for Quick Select is tricky, usually we just focus the main input... 
-                                                Actually, for single select "Autre", the UI logic above onClick setInput just puts text in the main chat input. 
-                                                I'll leave it as is to avoid breaking logic, but styled cleanly.) 
-                                            */}
                                         </div>
                                     )}
                                 </div>
