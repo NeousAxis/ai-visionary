@@ -710,6 +710,36 @@ GÉNÈRE CE JSON MAINTENANT :
                 }
             }
 
+            // EXTRACT ALREADY DETECTED DATA FROM "SCAN TERMINÉ" MESSAGE
+            const scanTermineMsg = messages.find((m: any) =>
+                m.role === 'assistant' && m.content.includes('SCAN TERMINÉ')
+            );
+            let alreadyDetectedData = "";
+            if (scanTermineMsg) {
+                // Parse the key data points from the scan message
+                const content = scanTermineMsg.content;
+                const audienceMatch = content.match(/Audience\s*:\s*([^•\n]+)/i);
+                const secteurMatch = content.match(/Secteur\s*:\s*([^•\n]+)/i);
+                const offreMatch = content.match(/Offre\s*:\s*([^•\n]+)/i);
+                const iaMatch = content.match(/IA\s*:\s*([^•\n]+)/i);
+                const motsMatch = content.match(/Mots-clés\s*:\s*([^•\n]+)/i);
+                const intentionsMatch = content.match(/Intentions\s*:\s*([^•\n]+)/i);
+
+                alreadyDetectedData = `
+🔍 DONNÉES DÉJÀ DÉTECTÉES (NE PAS REDEMANDER) :
+${audienceMatch ? `- AUDIENCE/CIBLE : ${audienceMatch[1].trim()} ← DÉJÀ CONNU, NE PAS POSER DE QUESTION SUR LA CIBLE !` : ''}
+${secteurMatch ? `- SECTEUR : ${secteurMatch[1].trim()} ← DÉJÀ CONNU` : ''}
+${offreMatch ? `- OFFRE : ${offreMatch[1].trim()} ← DÉJÀ CONNU` : ''}
+${iaMatch ? `- IA : ${iaMatch[1].trim()} ← DÉJÀ CONNU` : ''}
+${motsMatch ? `- MOTS-CLÉS : ${motsMatch[1].trim()}` : ''}
+${intentionsMatch ? `- INTENTIONS : ${intentionsMatch[1].trim()}` : ''}
+
+⛔ RÈGLE ABSOLUE : Si une information ci-dessus est "Détecté" ou a une valeur, 
+NE POSE PAS de question sur ce thème ! Passe au suivant !
+`;
+                console.log("📊 Already detected data:", alreadyDetectedData);
+            }
+
             // Logic to determine Next Question Name (16 Steps)
             const blockNames = [
                 "PAYS", "STATUT",
@@ -747,17 +777,19 @@ ${contextScanResult ? `
 Si le scan montre "blog" dans le titre ou la description, NE DEMANDE PAS "avez-vous un blog?".
 Si le scan montre "témoignages" dans le texte, NE DEMANDE PAS "avez-vous des témoignages?".
 
+${alreadyDetectedData}
+
 POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
 
 ### TA MISSION
-1. Analyse le scan technique ci-dessus
-2. Identifie ce qui est DÉJÀ connu
-3. Pose UNE SEULE QUESTION pour le thème **${nextBlockName}** qui demande l'information MANQUANTE
+1. Lis attentivement les DONNÉES DÉJÀ DÉTECTÉES ci-dessus
+2. Si le thème **${nextBlockName}** est déjà connu → Réponds avec un JSON qui CONFIRME la donnée et dit "C'est noté" puis génère la question pour le PROCHAIN thème manquant
+3. Si le thème **${nextBlockName}** n'est PAS connu → Pose UNE SEULE QUESTION pour l'obtenir
 
 ⚠️ RÈGLES CRITIQUES :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
 2. Utilise "allowMultiple: true" pour ces thèmes : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
-3. Utilise "allowMultiple: false" pour ces thèmes : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS
+3. Utilise "allowMultiple: false" pour ces thèmes : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS, USAGE_PERMISSIONS
 
 **LOGIQUE** : Si l'utilisateur peut logiquement avoir PLUSIEURS réponses → allowMultiple: true
 Exemple : "Public cible ?" → Une entreprise peut cibler à la fois B2B ET B2C → allowMultiple: true
