@@ -361,13 +361,13 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         <div
                                                             key={i}
                                                             onClick={() => !isLoading && toggleMultipleSelection(questionId, opt)}
-                                                            className={`flex items-center w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border shadow-sm select-none group ${isSelected
+                                                            className={`flex items-center !gap-6 w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border shadow-sm select-none group ${isSelected
                                                                 ? 'bg-[#4A919E] border-[#4A919E] transform scale-[1.01]'
                                                                 : 'bg-white border-slate-200 hover:border-[#4A919E]/50 hover:bg-slate-50'
                                                                 }`}
                                                         >
                                                             {/* Checkbox Visual - LARGE & SPACED */}
-                                                            <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-8 border-2 transition-all ${isSelected
+                                                            <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all ${isSelected
                                                                 ? 'bg-white/20 border-white/50'
                                                                 : 'bg-white border-slate-300 group-hover:border-[#4A919E]'
                                                                 }`}>
@@ -397,12 +397,12 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {/* OPTION "AUTRE" - Large Bubble */}
                                                 <div
                                                     onClick={() => !isLoading && toggleMultipleSelection(questionId, '__AUTRE__')}
-                                                    className={`flex items-center w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border col-span-full select-none shadow-sm group ${currentSelections.includes('__AUTRE__')
+                                                    className={`flex items-center !gap-6 w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border col-span-full select-none shadow-sm group ${currentSelections.includes('__AUTRE__')
                                                         ? 'bg-[#4A919E] border-[#4A919E] transform scale-[1.01]'
                                                         : 'bg-white border-dashed border-slate-300 hover:border-[#4A919E]/50 hover:bg-slate-50'
                                                         }`}
                                                 >
-                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-8 border-2 transition-all ${currentSelections.includes('__AUTRE__')
+                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all ${currentSelections.includes('__AUTRE__')
                                                         ? 'bg-white/20 border-white/50'
                                                         : 'bg-white border-slate-300 group-hover:border-[#4A919E]'
                                                         }`}>
@@ -480,12 +480,12 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         key={i}
                                                         onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
                                                         disabled={isLoading}
-                                                        className="group flex items-center w-full !px-6 !py-5 !rounded-2xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
+                                                        className="group flex items-center !gap-6 w-full !px-6 !py-5 !rounded-2xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
                                                     >
                                                         <span className="text-[16px] font-medium text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors leading-relaxed">
                                                             {opt}
                                                         </span>
-                                                        <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center ml-8 relative z-10 transition-colors flex-shrink-0">
+                                                        <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center relative z-10 transition-colors flex-shrink-0">
                                                             <svg className="w-3.5 h-3.5 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                                             </svg>
@@ -497,7 +497,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {!isOwnershipQuestion && (
                                                     <button
                                                         onClick={() => setInput(`${q.text} : `)}
-                                                        className="group flex items-center justify-between w-full !px-6 !py-5 !rounded-2xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
+                                                        className="group flex items-center justify-between !gap-6 w-full !px-6 !py-5 !rounded-2xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
                                                     >
                                                         <span className="text-[16px] font-medium text-slate-500 italic group-hover:text-amber-700 transition-colors">
                                                             Autre réponse / Préciser...
