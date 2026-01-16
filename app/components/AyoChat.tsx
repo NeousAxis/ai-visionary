@@ -439,7 +439,6 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                             {/* Validate Button */}
                                             <button
                                                 onClick={() => {
-                                                    // Build answer: selected options + custom text if "Autre" is checked
                                                     let selections = currentSelections.filter(s => s !== '__AUTRE__');
                                                     if (currentSelections.includes('__AUTRE__') && input.trim()) {
                                                         selections.push(input.trim());
@@ -461,31 +460,51 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     : 'bg-slate-300 cursor-not-allowed'
                                                     }`}
                                             >
-                                                ✓ Valider ({currentSelections.filter(s => s !== '__AUTRE__').length + (currentSelections.includes('__AUTRE__') && input.trim() ? 1 : 0)} sélectionnée{(currentSelections.filter(s => s !== '__AUTRE__').length + (currentSelections.includes('__AUTRE__') && input.trim() ? 1 : 0)) > 1 ? 's' : ''})
+                                                ✓ Valider
                                             </button>
                                         </div>
                                     ) : (
-                                        /* BUTTON MODE (Normal single select) */
-                                        <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            {filteredOptions.map((opt, i) => (
-                                                <button
-                                                    key={i}
-                                                    onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
-                                                    className="qcm-btn hover:bg-teal-50 text-left px-4 py-3 rounded border border-slate-300 transition-colors text-sm font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700"
-                                                    disabled={isLoading}
-                                                >
-                                                    {opt}
-                                                </button>
-                                            ))}
-                                            {/* AFFICHER "Autre" SAUF pour la question de propriété */}
-                                            {!isOwnershipQuestion && (
-                                                <button
-                                                    onClick={() => setInput(`${q.text} : `)}
-                                                    className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-amber-400 transition-colors text-sm text-amber-700 italic col-span-full"
-                                                >
-                                                    ✏️ {q.customLabel || "Autre réponse / Préciser..."}
-                                                </button>
-                                            )}
+                                        /* BUTTON MODE (Normal single select) - Bubble Style Applied */
+                                        <div className="flex flex-col gap-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {filteredOptions.map((opt, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
+                                                        disabled={isLoading}
+                                                        className="group flex items-center w-full px-5 py-4 rounded-xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
+                                                    >
+                                                        <span className="text-[15px] font-medium text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors">
+                                                            {opt}
+                                                        </span>
+                                                        <div className="w-5 h-5 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center ml-3 relative z-10 transition-colors">
+                                                            <svg className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </div>
+                                                    </button>
+                                                ))}
+
+                                                {/* AFFICHER "Autre" SAUF pour la question de propriété */}
+                                                {!isOwnershipQuestion && (
+                                                    <button
+                                                        onClick={() => setInput(`${q.text} : `)}
+                                                        className="group flex items-center justify-between w-full px-5 py-4 rounded-xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
+                                                    >
+                                                        <span className="text-[15px] font-medium text-slate-500 italic group-hover:text-amber-700 transition-colors">
+                                                            Autre réponse / Préciser...
+                                                        </span>
+                                                        <svg className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                        </svg>
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {/* Show Input if User clicked Autre (Input state handling for Quick Select is tricky, usually we just focus the main input... 
+                                                Actually, for single select "Autre", the UI logic above onClick setInput just puts text in the main chat input. 
+                                                I'll leave it as is to avoid breaking logic, but styled cleanly.) 
+                                            */}
                                         </div>
                                     )}
                                 </div>
