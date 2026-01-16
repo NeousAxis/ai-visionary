@@ -550,7 +550,7 @@ DONNÉES DU SCAN :
 - Description : "${deepScanResult.metaDescription || 'Non détectée'}"
 - H1 : ${deepScanResult.h1?.join(', ') || 'Aucun'}
 - JSON-LD : ${deepScanResult.hasJsonLd ? 'OUI' : 'NON'}
-- Texte extrait (500 premiers caractères) : "${deepScanResult.text?.substring(0, 500) || 'Vide'}"
+- Texte extrait (20000 premiers caractères) : "${deepScanResult.text?.substring(0, 20000) || 'Vide'}"
 
 TA MISSION :
 Essaie de répondre aux 16 questions critiques pour construire un ASR (AYO Singular Record).
@@ -810,7 +810,7 @@ ${contextScanResult ? `
 - H1 : ${contextScanResult.h1?.join(', ') || 'Aucun'}
 - JSON-LD présent : ${contextScanResult.hasJsonLd ? 'OUI' : 'NON'}
 - FAQ détectée : ${contextScanResult.hasFaqContent ? 'OUI' : 'NON'}
-- Texte extrait (100 premiers chars) : "${contextScanResult.text?.substring(0, 100) || 'Vide'}"
+- Texte extrait (5000 premiers chars) : "${contextScanResult.text?.substring(0, 5000) || 'Vide'}"
 ` : 'Aucun scan disponible'}
 
 🔍 CONTEXTE DÉJÀ DÉTECTÉ (INTELLIGENCE) :
