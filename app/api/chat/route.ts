@@ -634,7 +634,7 @@ GÉNÈRE CE JSON MAINTENANT :
             // Keep 'missing' for purely unknown things, or strictly low if we want to emphasize clarity
             const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
-            let transparencySummary = `📡 SCAN TERMINÉ\n\n`;
+            let transparencySummary = `🛰️ SCAN TERMINÉ\n\n`;
 
             if (detectedInfos.length > 0) {
                 transparencySummary += `✅ ${detectedInfos.length} INFORMATIONS DÉTECTÉES :\n\n`;
