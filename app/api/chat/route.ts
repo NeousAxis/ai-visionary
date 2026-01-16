@@ -570,10 +570,10 @@ LES 16 QUESTIONS CRITIQUES :
 6. Offre principale (produits/services en 1 phrase)
 7. Modèle économique (vente directe, abonnement, freemium, etc.)
 8. Taille équipe (STRICT : Si non mentionné/visible -> "unknown". NE PAS INVENTER OU ESTIMER "1-10" PAR DÉFAUT)
-9. Mission/Vision (si explicite sur le site)
+9. Mission/Vision (Slogan, proposition de valeur ou "About" = HIGH CONFIDENCE)
 10. Technologies utilisées (CMS, framework visible)
 11. Utilisation de données/IA (si mentionné)
-12. Présence externe (réseaux sociaux mentionnés, partenaires)
+12. Présence externe (Réseaux sociaux, APP STORES, Google Play, Partenaires = HIGH CONFIDENCE)
 13. Signaux de réputation (certifications, labels OFFICIELS uniquement)
 14. Mots-clés principaux détectés
 15. Intentions utilisateur visibles (acheter, s'informer, contacter, etc.)
