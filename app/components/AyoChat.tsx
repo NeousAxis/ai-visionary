@@ -151,6 +151,9 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
     const [currentQIndex, setCurrentQIndex] = useState(0);
     const [stepCount, setStepCount] = useState(1); // 1..5
 
+    // State for multiple selection (checkboxes)
+    const [selectedMultiple, setSelectedMultiple] = useState<Record<string, string[]>>({});
+
     // Progress Bar Component (Dynamic - based on actual questions asked)
     const ProgressBar = () => {
         // Count only questions actually asked (assistant messages with question_block)
@@ -230,6 +233,33 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             // "Une seule question à la fois" -> I will modify the CSS to show only one big card?
             // Actually, backend sends a block. I will render the block as a single swiper.
 
+            // Helper function to toggle checkbox selection
+            const toggleMultipleSelection = (questionId: string, option: string) => {
+                setSelectedMultiple(prev => {
+                    const current = prev[questionId] || [];
+                    if (current.includes(option)) {
+                        return { ...prev, [questionId]: current.filter(o => o !== option) };
+                    } else {
+                        return { ...prev, [questionId]: [...current, option] };
+                    }
+                });
+            };
+
+            // Helper function to submit multiple selections
+            const submitMultipleSelection = (questionId: string, questionText: string) => {
+                const selections = selectedMultiple[questionId] || [];
+                if (selections.length === 0) return;
+
+                const formattedAnswer = `${questionText} : ${selections.join(', ')}`;
+                // Clear the selection after submit
+                setSelectedMultiple(prev => {
+                    const newState = { ...prev };
+                    delete newState[questionId];
+                    return newState;
+                });
+                handleSubmit(undefined, formattedAnswer);
+            };
+
             return (
                 <div className="ay-qcm-container">
                     {qcmData.intro && (
@@ -237,31 +267,91 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     )}
 
                     <div className="flex flex-col gap-6">
-                        {qcmData.questions.map((q, idx) => (
-                            <div key={q.id || idx} className="qcm-question-box p-4 bg-white/50 rounded-lg border border-slate-200">
-                                <p className="mb-3 font-bold text-slate-800">{q.text}</p>
-                                <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    {q.options.map((opt, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
-                                            className="qcm-btn hover:bg-teal-50 text-left px-4 py-3 rounded border border-slate-300 transition-colors text-sm font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700"
-                                            disabled={isLoading}
-                                        >
-                                            {opt}
-                                        </button>
-                                    ))}
-                                    {q.allowCustom && (
-                                        <button
-                                            onClick={() => setInput(`${q.text} : `)} // Prefill input for custom
-                                            className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-slate-400 transition-colors text-sm text-slate-600 italic"
-                                        >
-                                            ✏️ {q.customLabel || "Autre / Préciser..."}
-                                        </button>
+                        {qcmData.questions.map((q, idx) => {
+                            const questionId = q.id || `q_${idx}`;
+                            const currentSelections = selectedMultiple[questionId] || [];
+
+                            return (
+                                <div key={questionId} className="qcm-question-box p-4 bg-white/50 rounded-lg border border-slate-200">
+                                    <p className="mb-3 font-bold text-slate-800">
+                                        {q.text}
+                                        {q.allowMultiple && (
+                                            <span className="ml-2 text-xs font-normal text-teal-600 bg-teal-50 px-2 py-1 rounded">
+                                                Plusieurs choix possibles
+                                            </span>
+                                        )}
+                                    </p>
+
+                                    {/* CHECKBOX MODE (allowMultiple = true) */}
+                                    {q.allowMultiple ? (
+                                        <div className="flex flex-col gap-3">
+                                            <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                {q.options.map((opt, i) => {
+                                                    const isSelected = currentSelections.includes(opt);
+                                                    return (
+                                                        <label
+                                                            key={i}
+                                                            className={`flex items-center gap-3 px-4 py-3 rounded border cursor-pointer transition-colors text-sm font-medium ${isSelected
+                                                                ? 'bg-teal-100 border-teal-500 text-teal-800'
+                                                                : 'bg-white border-slate-300 text-slate-700 hover:bg-teal-50 hover:border-teal-400'
+                                                                }`}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={() => toggleMultipleSelection(questionId, opt)}
+                                                                disabled={isLoading}
+                                                                className="w-4 h-4 accent-teal-600"
+                                                            />
+                                                            {opt}
+                                                        </label>
+                                                    );
+                                                })}
+                                                {/* TOUJOURS AFFICHER l'option "Autre" pour permettre de personnaliser/compléter */}
+                                                <button
+                                                    onClick={() => setInput(`${q.text} : `)}
+                                                    className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-amber-400 transition-colors text-sm text-amber-700 italic col-span-full"
+                                                >
+                                                    ✏️ {q.customLabel || "Autre réponse / Compléter ma sélection..."}
+                                                </button>
+                                            </div>
+                                            {/* Validate Button */}
+                                            <button
+                                                onClick={() => submitMultipleSelection(questionId, q.text)}
+                                                disabled={isLoading || currentSelections.length === 0}
+                                                className={`mt-2 px-6 py-3 rounded-lg font-semibold text-white transition-all ${currentSelections.length > 0
+                                                    ? 'bg-teal-600 hover:bg-teal-700 shadow-md'
+                                                    : 'bg-slate-300 cursor-not-allowed'
+                                                    }`}
+                                            >
+                                                ✓ Valider ({currentSelections.length} sélectionnée{currentSelections.length > 1 ? 's' : ''})
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        /* BUTTON MODE (Normal single select) */
+                                        <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {q.options.map((opt, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
+                                                    className="qcm-btn hover:bg-teal-50 text-left px-4 py-3 rounded border border-slate-300 transition-colors text-sm font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700"
+                                                    disabled={isLoading}
+                                                >
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                            {/* TOUJOURS AFFICHER l'option "Autre" pour permettre de personnaliser */}
+                                            <button
+                                                onClick={() => setInput(`${q.text} : `)}
+                                                className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-amber-400 transition-colors text-sm text-amber-700 italic col-span-full"
+                                            >
+                                                ✏️ {q.customLabel || "Autre réponse / Préciser..."}
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             );

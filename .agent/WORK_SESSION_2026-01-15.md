@@ -1,7 +1,11 @@
-# 📋 SESSION DE TRAVAIL - 15 JANVIER 2026
+# 📋 SESSION DE TRAVAIL - 15/16 JANVIER 2026
 
-## 🎯 OBJECTIF PRINCIPAL
+## 🎯 OBJECTIF PRINCIPAL (15 Jan)
 Corriger le lien LIGHT report et améliorer la transparence du flux AYO.
+
+## 🎯 OBJECTIF PRINCIPAL (16 Jan)
+1. Implémenter le rendu des choix multiples (checkboxes)
+2. Débugger le tunnel de vente v3.0
 
 ---
 
@@ -96,11 +100,11 @@ Corriger le lien LIGHT report et améliorer la transparence du flux AYO.
 
 ---
 
-### 6. **WIP : Support Choix Multiple (allowMultiple)**
-**État** : Type ajouté, state créé, rendering PAS encore implémenté.
+### 6. **WIP : Support Choix Multiple (allowMultiple)** ✅ TERMINÉ (16 Jan)
+**État** : ~~Type ajouté, state créé, rendering PAS encore implémenté.~~ **IMPLÉMENTÉ**
 
 **Fichiers modifiés** :
-- `app/components/AyoChat.tsx` (lignes 18, 26)
+- `app/components/AyoChat.tsx` (lignes 18, 26, 154, 236-334)
 - `app/api/chat/route.ts` (prompt CONTINUE_PROMPT ligne 741-746)
 
 **Commits** :
@@ -109,9 +113,21 @@ Corriger le lien LIGHT report et améliorer la transparence du flux AYO.
 
 ---
 
+### 7. **FIX : Tunnel de Vente v3.0 Non Affiché** ✅ TERMINÉ (16 Jan)
+**Problème** : Le tunnel de vente v3.0 (après validation email) était écrasé par l'appel `generateText()` qui continuait à s'exécuter.
+
+**Cause** : Le early return était conditionné par `isAnalysisRun && finalResponseText`, mais `isAnalysisRun` était `false` après l'étape email.
+
+**Solution** : Ajouté un second early return qui détecte si `finalResponseText` contient le tunnel de vente (via les markers "PACK LIGHT", "Email enregistré", "Email Refusé").
+
+**Fichiers modifiés** :
+- `app/api/chat/route.ts` (lignes 1348-1357)
+
+---
+
 ## 🚧 TRAVAUX À TERMINER
 
-### 1. **PRIORITÉ HAUTE : Implémenter Rendering Choix Multiple**
+### ~~1. **PRIORITÉ HAUTE : Implémenter Rendering Choix Multiple**~~ ✅ FAIT
 **Fichier** : `app/components/AyoChat.tsx`
 **Lignes** : ~240-265 (bloc rendering questions)
 
@@ -388,6 +404,24 @@ Stripe OR direct LIGHT link
 ### Récapitulatif tout sur une ligne
 **Cause probable** : `whitespace-pre-line` retiré
 **Solution** : Vérifier `AyoChat.tsx` ligne 235
+
+
+---
+
+## 🚨 INCIDENTS CRITIQUES & RÉSOLUTIONS
+
+### 1. **Prompt Template String Error (15 Jan 2026)**
+**Incident** : Le déploiement a échoué car le prompt `CONTINUE_PROMPT` contenait des backticks imbriqués non échappés ou mal gérés par l'outil de remplacement, causant une erreur de syntaxe JS/TS lors du build.
+
+**Cause** : Utilisation de ` \`\`\` ` (backticks) à l'intérieur d'un template string JS (` `...` `) sans précaution suffisante lors de l'édition automatique.
+
+**RÉSOLUTION** :
+- Suppression des backticks imbriqués problématiques dans le format JSON d'exemple.
+- Utilisation de `{ ... }` simples au lieu de ` \`\`\`json { ... } \`\`\` `.
+
+**RÈGLE ABSOLUE** :
+⚠️ **NE JAMAIS** imbriquer de backticks multiples dans un `replace_file_content` sur un fichier TypeScript/JS si cela crée une structure de template string complexe.
+✅ Privilégier des prompts simples ou utiliser des concaténations de chaînes si le prompt doit contenir des backticks.
 
 ---
 

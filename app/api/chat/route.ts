@@ -1346,6 +1346,16 @@ Selon le niveau choisi, vous obtenez :
             });
         }
 
+        // 🛑 CRITICAL FIX: Return immediately if sales tunnel was generated (after email validation)
+        // The sales tunnel v3.0 contains "PACK LIGHT" or "Email enregistré" - if present, don't override with LLM
+        if (finalResponseText && (finalResponseText.includes("PACK LIGHT") || finalResponseText.includes("Email enregistré") || finalResponseText.includes("Email Refusé"))) {
+            console.log("✅ Returning Sales Tunnel Response (Skipping LLM override).");
+            return new Response(JSON.stringify({ text: finalResponseText }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
         let websiteData = { text: "", hasJsonLd: false };
 
