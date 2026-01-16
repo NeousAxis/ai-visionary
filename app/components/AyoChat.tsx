@@ -352,38 +352,24 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     return (
                                                         <label
                                                             key={i}
-                                                            className={`relative flex items-center gap-4 px-5 py-5 rounded-2xl cursor-pointer transition-all duration-300 text-[15px] font-medium group overflow-visible ${isSelected
-                                                                ? 'bg-white border-2 border-cyan-400 shadow-[0_4px_20px_-4px_rgba(34,211,238,0.4)] transform scale-[1.01] z-10'
-                                                                : 'bg-white border-2 border-slate-100 text-slate-600 hover:border-slate-200 hover:shadow-lg hover:shadow-slate-200/50'
+                                                            className={`relative flex items-center gap-4 px-5 py-4 rounded-xl cursor-pointer transition-all duration-200 border-2 ${isSelected
+                                                                ? 'bg-white border-cyan-400'
+                                                                : 'bg-white border-slate-200 hover:border-cyan-200'
                                                                 }`}
                                                         >
-                                                            {/* Custom Checkbox Icon */}
-                                                            <div className={`relative flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all duration-300 ${isSelected
-                                                                ? 'scale-110'
-                                                                : 'bg-slate-50 border-2 border-slate-200 group-hover:border-cyan-300'
+                                                            {/* Checkbox Square */}
+                                                            <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center border-2 transition-colors ${isSelected
+                                                                ? 'bg-white border-cyan-400'
+                                                                : 'bg-white border-slate-300 group-hover:border-cyan-300'
                                                                 }`}>
                                                                 {isSelected && (
-                                                                    <>
-                                                                        {/* Gradient Checkmark Icon */}
-                                                                        <svg className="w-6 h-6 text-cyan-500 filter drop-shadow-sm animate-in zoom-in duration-300"
-                                                                            fill="none"
-                                                                            viewBox="0 0 24 24"
-                                                                            stroke="url(#gradient-check)"
-                                                                            strokeWidth={3}
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round">
-                                                                            <defs>
-                                                                                <linearGradient id="gradient-check" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                                                    <stop offset="0%" stopColor="#2dd4bf" /> {/* teal-400 */}
-                                                                                    <stop offset="100%" stopColor="#06b6d4" /> {/* cyan-500 */}
-                                                                                </linearGradient>
-                                                                            </defs>
-                                                                            <path d="M5 13l4 4L19 7" />
-                                                                        </svg>
-                                                                    </>
+                                                                    <svg className="w-3.5 h-3.5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
                                                                 )}
                                                             </div>
-                                                            <span className={`transition-colors duration-300 ${isSelected ? 'text-slate-800 font-semibold' : 'text-slate-500'}`}>
+                                                            {/* Text */}
+                                                            <span className={`flex-1 text-[15px] font-medium ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>
                                                                 {opt}
                                                             </span>
                                                             <input
@@ -397,40 +383,28 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     );
                                                 })}
 
-                                                {/* OPTION "AUTRE" COCHABLE - MODERN DESIGN */}
+                                                {/* OPTION "AUTRE" - Design identique mais avec distinction subtile */}
                                                 <label
-                                                    className={`relative flex items-center gap-4 px-5 py-5 rounded-2xl cursor-pointer transition-all duration-300 text-[15px] font-medium col-span-full group overflow-visible ${currentSelections.includes('__AUTRE__')
-                                                        ? 'bg-white border-2 border-amber-400 shadow-[0_4px_20px_-4px_rgba(251,191,36,0.4)] transform scale-[1.01] z-10'
-                                                        : 'bg-white border-2 border-dashed border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50/10 hover:shadow-lg'
+                                                    className={`relative flex items-center gap-4 px-5 py-4 rounded-xl cursor-pointer transition-all duration-200 border-2 col-span-full ${currentSelections.includes('__AUTRE__')
+                                                        ? 'bg-white border-amber-400'
+                                                        : 'bg-white border-dashed border-slate-300 hover:border-amber-300'
                                                         }`}
                                                 >
-                                                    <div className={`relative flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all duration-300 ${currentSelections.includes('__AUTRE__')
-                                                        ? 'scale-110'
-                                                        : 'bg-slate-50 border-2 border-slate-200 group-hover:border-amber-300'
+                                                    <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center border-2 transition-colors ${currentSelections.includes('__AUTRE__')
+                                                        ? 'bg-white border-amber-400'
+                                                        : 'bg-white border-slate-300 group-hover:border-amber-300'
                                                         }`}>
                                                         {currentSelections.includes('__AUTRE__') ? (
-                                                            <svg className="w-6 h-6 text-amber-500 filter drop-shadow-sm animate-in zoom-in duration-300"
-                                                                fill="none"
-                                                                viewBox="0 0 24 24"
-                                                                stroke="url(#gradient-check-amber)"
-                                                                strokeWidth={3}
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round">
-                                                                <defs>
-                                                                    <linearGradient id="gradient-check-amber" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                                        <stop offset="0%" stopColor="#fbbf24" /> {/* amber-400 */}
-                                                                        <stop offset="100%" stopColor="#f59e0b" /> {/* amber-500 */}
-                                                                    </linearGradient>
-                                                                </defs>
-                                                                <path d="M5 13l4 4L19 7" />
+                                                            <svg className="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                             </svg>
                                                         ) : (
-                                                            <svg className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <svg className="w-3.5 h-3.5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                             </svg>
                                                         )}
                                                     </div>
-                                                    <span className={`transition-colors duration-300 flex-1 ${currentSelections.includes('__AUTRE__') ? 'text-slate-800 font-semibold' : 'text-slate-500'}`}>
+                                                    <span className={`flex-1 text-[15px] font-medium ${currentSelections.includes('__AUTRE__') ? 'text-slate-900' : 'text-slate-500'}`}>
                                                         Autre / Préciser...
                                                     </span>
                                                     <input
@@ -443,16 +417,16 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 </label>
                                             </div>
 
-                                            {/* CHAMP DE TEXTE POUR "AUTRE" (apparaît avec animation) */}
+                                            {/* CHAMP DE TEXTE POUR "AUTRE" */}
                                             {currentSelections.includes('__AUTRE__') && (
-                                                <div className="animate-in slide-in-from-top-2 fade-in duration-300 pt-2">
+                                                <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-200">
                                                     <input
                                                         type="text"
-                                                        placeholder="Veuillez préciser votre réponse..."
+                                                        placeholder="Veuillez préciser..."
                                                         autoFocus
                                                         value={input}
                                                         onChange={(e) => setInput(e.target.value)}
-                                                        className="w-full px-5 py-4 rounded-xl border-2 border-amber-200 bg-white shadow-inner text-base focus:outline-none focus:ring-0 focus:border-amber-400 transition-all placeholder:text-slate-400 text-slate-700"
+                                                        className="w-full px-4 py-3 rounded-lg border-2 border-amber-200 bg-white text-slate-900 focus:outline-none focus:border-amber-400 transition-colors placeholder:text-slate-400"
                                                     />
                                                 </div>
                                             )}
