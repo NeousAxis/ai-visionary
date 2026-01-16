@@ -296,10 +296,14 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             const questionId = q.id || `q_${idx}`;
                             const currentSelections = selectedMultiple[questionId] || [];
 
-                            // FILTER OUT "Autre" variants from LLM options (we add it manually)
+                            // FILTER OUT "Autre" variants AND redundant "Les deux" options
                             const filteredOptions = q.options.filter(opt => {
                                 const lower = opt.toLowerCase().trim();
-                                return !['autre', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower);
+                                // Remove "Autre" variants
+                                if (['autre', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower)) return false;
+                                // Remove "Les deux" / combined options (redundant with checkboxes)
+                                if (lower.includes('les deux') || lower.includes('both') || lower.includes('tous') || lower.includes('toutes') || lower.includes('all')) return false;
+                                return true;
                             });
 
                             // DETECT OWNERSHIP QUESTION (must stay Yes/No without "Autre")
@@ -329,57 +333,84 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             );
 
                             return (
-                                <div key={questionId} className="qcm-question-box p-4 bg-white/50 rounded-lg border border-slate-200">
-                                    <p className="mb-3 font-bold text-slate-800">
+                                <div key={questionId} className="qcm-question-box p-4 bg-white/50 rounded-xl border border-slate-200 shadow-sm">
+                                    <p className="mb-4 font-bold text-slate-800 text-base">
                                         {q.text}
                                         {forceMultiple && (
-                                            <span className="ml-2 text-xs font-normal text-teal-600 bg-teal-50 px-2 py-1 rounded">
-                                                Plusieurs choix possibles
+                                            <span className="ml-2 text-xs font-medium text-teal-600 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1 rounded-full border border-teal-200">
+                                                ✓ Plusieurs choix possibles
                                             </span>
                                         )}
                                     </p>
 
-                                    {/* CHECKBOX MODE (allowMultiple = true OR forceMultiple) */}
+                                    {/* CHECKBOX MODE - MODERN DESIGN */}
                                     {forceMultiple ? (
-                                        <div className="flex flex-col gap-3">
-                                            <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <div className="flex flex-col gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 {filteredOptions.map((opt, i) => {
                                                     const isSelected = currentSelections.includes(opt);
                                                     return (
                                                         <label
                                                             key={i}
-                                                            className={`flex items-center gap-3 px-4 py-3 rounded border cursor-pointer transition-colors text-sm font-medium ${isSelected
-                                                                ? 'bg-teal-100 border-teal-500 text-teal-800'
-                                                                : 'bg-white border-slate-300 text-slate-700 hover:bg-teal-50 hover:border-teal-400'
+                                                            className={`relative flex items-center gap-4 px-4 py-4 rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium group ${isSelected
+                                                                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/25 scale-[1.02]'
+                                                                : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-teal-300 hover:shadow-md'
                                                                 }`}
                                                         >
+                                                            {/* Custom Checkbox Icon */}
+                                                            <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${isSelected
+                                                                ? 'bg-white/20 backdrop-blur'
+                                                                : 'bg-slate-100 group-hover:bg-teal-100'
+                                                                }`}>
+                                                                {isSelected ? (
+                                                                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                ) : (
+                                                                    <div className="w-3 h-3 rounded bg-slate-300 group-hover:bg-teal-300 transition-colors"></div>
+                                                                )}
+                                                            </div>
+                                                            <span className="flex-1">{opt}</span>
                                                             <input
                                                                 type="checkbox"
                                                                 checked={isSelected}
                                                                 onChange={() => toggleMultipleSelection(questionId, opt)}
                                                                 disabled={isLoading}
-                                                                className="w-4 h-4 accent-teal-600"
+                                                                className="sr-only"
                                                             />
-                                                            {opt}
                                                         </label>
                                                     );
                                                 })}
 
-                                                {/* OPTION "AUTRE" COCHABLE */}
+                                                {/* OPTION "AUTRE" COCHABLE - MODERN DESIGN */}
                                                 <label
-                                                    className={`flex items-center gap-3 px-4 py-3 rounded border cursor-pointer transition-colors text-sm font-medium col-span-full ${currentSelections.includes('__AUTRE__')
-                                                        ? 'bg-amber-100 border-amber-500 text-amber-800'
-                                                        : 'bg-white border-dashed border-amber-400 text-amber-700 hover:bg-amber-50'
+                                                    className={`relative flex items-center gap-4 px-4 py-4 rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium col-span-full group ${currentSelections.includes('__AUTRE__')
+                                                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 scale-[1.02]'
+                                                            : 'bg-white border-2 border-dashed border-amber-300 text-amber-700 hover:border-amber-400 hover:shadow-md'
                                                         }`}
                                                 >
+                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${currentSelections.includes('__AUTRE__')
+                                                            ? 'bg-white/20 backdrop-blur'
+                                                            : 'bg-amber-100 group-hover:bg-amber-200'
+                                                        }`}>
+                                                        {currentSelections.includes('__AUTRE__') ? (
+                                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                            </svg>
+                                                        )}
+                                                    </div>
+                                                    <span className="flex-1">✏️ Autre / Préciser...</span>
                                                     <input
                                                         type="checkbox"
                                                         checked={currentSelections.includes('__AUTRE__')}
                                                         onChange={() => toggleMultipleSelection(questionId, '__AUTRE__')}
                                                         disabled={isLoading}
-                                                        className="w-4 h-4 accent-amber-600"
+                                                        className="sr-only"
                                                     />
-                                                    ✏️ Autre / Préciser...
                                                 </label>
                                             </div>
 
