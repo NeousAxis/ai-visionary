@@ -510,6 +510,33 @@ export async function POST(req: Request) {
                 urlToScan = 'https://' + urlToScan;
             }
 
+            // 🔒 VALIDATION: Check if URL exists before scanning
+            console.log(`🔍 Validating URL accessibility: ${urlToScan}...`);
+            try {
+                const urlCheck = await fetch(urlToScan, {
+                    method: 'HEAD',
+                    redirect: 'follow',
+                    signal: AbortSignal.timeout(10000) // 10 second timeout
+                });
+
+                if (!urlCheck.ok && urlCheck.status !== 405) {
+                    console.warn(`❌ URL not accessible: ${urlToScan} (status: ${urlCheck.status})`);
+                    finalResponseText = `❌ **URL Inaccessible**\n\nLe site **${urlToScan}** n'est pas accessible (erreur ${urlCheck.status}).\n\n**Vérifiez que :**\n- L'URL est correctement orthographiée\n- Le site est en ligne\n- Le domaine existe\n\nVeuillez réessayer avec une URL valide.`;
+                    return new Response(JSON.stringify({ text: finalResponseText }), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
+            } catch (urlError: any) {
+                console.warn(`❌ URL validation failed: ${urlToScan}`, urlError.message);
+                finalResponseText = `❌ **Site Introuvable**\n\nImpossible d'accéder à **${urlToScan}**.\n\n**Causes possibles :**\n- Le domaine n'existe pas\n- Le site est hors ligne\n- L'URL est mal formatée\n\nVeuillez vérifier l'URL et réessayer.`;
+                return new Response(JSON.stringify({ text: finalResponseText }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+            console.log(`✅ URL validated: ${urlToScan}`);
+
             // 1. DEEP SCAN to get ALL possible data
             console.log(`📡 Deep scanning ${urlToScan}...`);
             const deepScanResult = await scanUrlForAioSignals(urlToScan);
