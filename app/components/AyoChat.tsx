@@ -154,6 +154,20 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
     // State for multiple selection (checkboxes)
     const [selectedMultiple, setSelectedMultiple] = useState<Record<string, string[]>>({});
 
+    // GO BACK function - removes last 2 messages (user answer + AI response)
+    const goBack = () => {
+        if (messages.length < 2) return; // Can't go back if less than 2 messages
+
+        // Remove the last 2 messages (user's answer + AI's next question)
+        setMessages(prev => prev.slice(0, -2));
+        setStepCount(prev => Math.max(1, prev - 1));
+        setSelectedMultiple({}); // Reset selections
+        setInput('');
+    };
+
+    // Check if we can go back (at least one user answer exists after URL)
+    const canGoBack = messages.filter(m => m.role === 'user').length > 1;
+
     // Progress Bar Component (Dynamic - based on actual questions asked)
     const ProgressBar = () => {
         // Count only questions actually asked (assistant messages with question_block)
@@ -262,6 +276,17 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
 
             return (
                 <div className="ay-qcm-container">
+                    {/* BOUTON RETOUR - visible si au moins une réponse donnée */}
+                    {canGoBack && (
+                        <button
+                            onClick={goBack}
+                            disabled={isLoading}
+                            className="mb-3 px-4 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            ← Retour à la question précédente
+                        </button>
+                    )}
+
                     {qcmData.intro && (
                         <p className="mb-4 font-semibold text-teal-800 whitespace-pre-line">{qcmData.intro}</p>
                     )}
@@ -277,19 +302,35 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                 return !['autre', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower);
                             });
 
+                            // FORCE allowMultiple based on question keywords (LLM often forgets)
+                            const questionLower = q.text.toLowerCase();
+                            const forceMultiple = q.allowMultiple ||
+                                questionLower.includes('public') ||
+                                questionLower.includes('cible') ||
+                                questionLower.includes('secteur') ||
+                                questionLower.includes('activité') ||
+                                questionLower.includes('service') ||
+                                questionLower.includes('produit') ||
+                                questionLower.includes('offre') ||
+                                questionLower.includes('canal') ||
+                                questionLower.includes('réseau') ||
+                                questionLower.includes('certification') ||
+                                questionLower.includes('technologie') ||
+                                (filteredOptions.length >= 4); // If 4+ options, likely needs multi-select
+
                             return (
                                 <div key={questionId} className="qcm-question-box p-4 bg-white/50 rounded-lg border border-slate-200">
                                     <p className="mb-3 font-bold text-slate-800">
                                         {q.text}
-                                        {q.allowMultiple && (
+                                        {forceMultiple && (
                                             <span className="ml-2 text-xs font-normal text-teal-600 bg-teal-50 px-2 py-1 rounded">
                                                 Plusieurs choix possibles
                                             </span>
                                         )}
                                     </p>
 
-                                    {/* CHECKBOX MODE (allowMultiple = true) */}
-                                    {q.allowMultiple ? (
+                                    {/* CHECKBOX MODE (allowMultiple = true OR forceMultiple) */}
+                                    {forceMultiple ? (
                                         <div className="flex flex-col gap-3">
                                             <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 {filteredOptions.map((opt, i) => {
@@ -317,8 +358,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {/* OPTION "AUTRE" COCHABLE */}
                                                 <label
                                                     className={`flex items-center gap-3 px-4 py-3 rounded border cursor-pointer transition-colors text-sm font-medium col-span-full ${currentSelections.includes('__AUTRE__')
-                                                            ? 'bg-amber-100 border-amber-500 text-amber-800'
-                                                            : 'bg-white border-dashed border-amber-400 text-amber-700 hover:bg-amber-50'
+                                                        ? 'bg-amber-100 border-amber-500 text-amber-800'
+                                                        : 'bg-white border-dashed border-amber-400 text-amber-700 hover:bg-amber-50'
                                                         }`}
                                                 >
                                                     <input
@@ -364,8 +405,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 }}
                                                 disabled={isLoading || (currentSelections.filter(s => s !== '__AUTRE__').length === 0 && !(currentSelections.includes('__AUTRE__') && input.trim()))}
                                                 className={`mt-2 px-6 py-3 rounded-lg font-semibold text-white transition-all ${(currentSelections.filter(s => s !== '__AUTRE__').length > 0 || (currentSelections.includes('__AUTRE__') && input.trim()))
-                                                        ? 'bg-teal-600 hover:bg-teal-700 shadow-md'
-                                                        : 'bg-slate-300 cursor-not-allowed'
+                                                    ? 'bg-teal-600 hover:bg-teal-700 shadow-md'
+                                                    : 'bg-slate-300 cursor-not-allowed'
                                                     }`}
                                             >
                                                 ✓ Valider ({currentSelections.filter(s => s !== '__AUTRE__').length + (currentSelections.includes('__AUTRE__') && input.trim() ? 1 : 0)} sélectionnée{(currentSelections.filter(s => s !== '__AUTRE__').length + (currentSelections.includes('__AUTRE__') && input.trim() ? 1 : 0)) > 1 ? 's' : ''})
