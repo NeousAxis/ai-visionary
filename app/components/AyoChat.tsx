@@ -302,9 +302,18 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                 return !['autre', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower);
                             });
 
-                            // FORCE allowMultiple based on question keywords (LLM often forgets)
+                            // DETECT OWNERSHIP QUESTION (must stay Yes/No without "Autre")
                             const questionLower = q.text.toLowerCase();
-                            const forceMultiple = q.allowMultiple ||
+                            const isOwnershipQuestion =
+                                questionLower.includes('appartient') ||
+                                questionLower.includes('autorisé') ||
+                                questionLower.includes('propriétaire') ||
+                                q.id === 'ownership_confirm';
+
+                            // FORCE allowMultiple based on question keywords (LLM often forgets)
+                            // BUT NOT for ownership question
+                            const forceMultiple = !isOwnershipQuestion && (
+                                q.allowMultiple ||
                                 questionLower.includes('public') ||
                                 questionLower.includes('cible') ||
                                 questionLower.includes('secteur') ||
@@ -316,7 +325,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                 questionLower.includes('réseau') ||
                                 questionLower.includes('certification') ||
                                 questionLower.includes('technologie') ||
-                                (filteredOptions.length >= 4); // If 4+ options, likely needs multi-select
+                                (filteredOptions.length >= 4) // If 4+ options, likely needs multi-select
+                            );
 
                             return (
                                 <div key={questionId} className="qcm-question-box p-4 bg-white/50 rounded-lg border border-slate-200">
@@ -425,13 +435,15 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     {opt}
                                                 </button>
                                             ))}
-                                            {/* TOUJOURS AFFICHER l'option "Autre" pour permettre de personnaliser */}
-                                            <button
-                                                onClick={() => setInput(`${q.text} : `)}
-                                                className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-amber-400 transition-colors text-sm text-amber-700 italic col-span-full"
-                                            >
-                                                ✏️ {q.customLabel || "Autre réponse / Préciser..."}
-                                            </button>
+                                            {/* AFFICHER "Autre" SAUF pour la question de propriété */}
+                                            {!isOwnershipQuestion && (
+                                                <button
+                                                    onClick={() => setInput(`${q.text} : `)}
+                                                    className="qcm-btn hover:bg-amber-50 text-left px-4 py-3 rounded border border-dashed border-amber-400 transition-colors text-sm text-amber-700 italic col-span-full"
+                                                >
+                                                    ✏️ {q.customLabel || "Autre réponse / Préciser..."}
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>
