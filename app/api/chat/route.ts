@@ -747,7 +747,8 @@ GÉNÈRE CE JSON MAINTENANT :
             }
 
             // EXTRACT ALREADY DETECTED DATA FROM "SCAN TERMINÉ" MESSAGE
-            const scanTermineMsg = messages.find((m: any) =>
+            // PARSE THE *LATEST* SCAN MESSAGE (Important: Reverse to get the most recent one)
+            const scanTermineMsg = [...messages].reverse().find((m: any) =>
                 m.role === 'assistant' && m.content.includes('SCAN TERMINÉ')
             );
             let alreadyDetectedData = "";
