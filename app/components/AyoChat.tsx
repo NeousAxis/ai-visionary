@@ -334,14 +334,22 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
 
                             return (
                                 <div key={questionId} className="qcm-question-box p-4 bg-white/50 rounded-xl border border-slate-200 shadow-sm">
-                                    <p className="mb-4 font-bold text-slate-800 text-base">
-                                        {q.text}
+                                    {/* Question Header & Badge */}
+                                    <div className="mb-5">
+                                        <p className="font-bold text-slate-800 text-lg leading-snug mb-2">
+                                            {q.text}
+                                        </p>
                                         {forceMultiple && (
-                                            <span className="ml-2 text-xs font-medium text-teal-600 bg-gradient-to-r from-teal-50 to-cyan-50 px-3 py-1 rounded-full border border-teal-200">
-                                                ✓ Plusieurs choix possibles
-                                            </span>
+                                            <div className="flex">
+                                                <span className="text-xs font-semibold text-teal-700 bg-teal-50/80 px-3 py-1.5 rounded-full border border-teal-200/60 inline-flex items-center gap-1.5">
+                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Plusieurs choix possibles
+                                                </span>
+                                            </div>
                                         )}
-                                    </p>
+                                    </div>
 
                                     {/* CHECKBOX MODE - LARGE BUBBLE DESIGN */}
                                     {forceMultiple ? (
@@ -359,7 +367,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                                 }`}
                                                         >
                                                             {/* Checkbox Visual - LARGE & SPACED */}
-                                                            <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-5 border-2 transition-all ${isSelected
+                                                            <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-8 border-2 transition-all ${isSelected
                                                                 ? 'bg-white/20 border-white/50'
                                                                 : 'bg-white border-slate-300 group-hover:border-[#4A919E]'
                                                                 }`}>
@@ -394,7 +402,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         : 'bg-white border-dashed border-slate-300 hover:border-[#4A919E]/50 hover:bg-slate-50'
                                                         }`}
                                                 >
-                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-5 border-2 transition-all ${currentSelections.includes('__AUTRE__')
+                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center mr-8 border-2 transition-all ${currentSelections.includes('__AUTRE__')
                                                         ? 'bg-white/20 border-white/50'
                                                         : 'bg-white border-slate-300 group-hover:border-[#4A919E]'
                                                         }`}>
@@ -477,7 +485,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         <span className="text-[16px] font-medium text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors leading-relaxed">
                                                             {opt}
                                                         </span>
-                                                        <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center ml-4 relative z-10 transition-colors flex-shrink-0">
+                                                        <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center ml-8 relative z-10 transition-colors flex-shrink-0">
                                                             <svg className="w-3.5 h-3.5 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                                             </svg>

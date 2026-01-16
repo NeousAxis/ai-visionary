@@ -635,7 +635,8 @@ ul {
     /* shadow-sm */
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 20px;
+    /* INCREASED GAP FROM 12px TO 20px */
 }
 
 .qcm-btn:hover {

@@ -800,18 +800,20 @@ ${contextScanResult ? `
 - Texte extrait (100 premiers chars) : "${contextScanResult.text?.substring(0, 100) || 'Vide'}"
 ` : 'Aucun scan disponible'}
 
-⚠️ RÈGLE CRITIQUE : NE POSE PAS DE QUESTIONS SUR CE QUI EST DÉJÀ VISIBLE DANS LE SCAN !
-Si le scan montre "blog" dans le titre ou la description, NE DEMANDE PAS "avez-vous un blog?".
-Si le scan montre "témoignages" dans le texte, NE DEMANDE PAS "avez-vous des témoignages?".
-
+🔍 CONTEXTE DÉJÀ DÉTECTÉ (INTELLIGENCE) :
 ${alreadyDetectedData}
 
-POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
+### TA MISSION (RÈGLE D'OR : NE SOIS PAS STUPIDE)
+Tu dois obtenir l'information pour le thème : **${nextBlockName}**.
 
-### TA MISSION
-1. Lis attentivement les DONNÉES DÉJÀ DÉTECTÉES ci-dessus
-2. Si le thème **${nextBlockName}** est déjà connu → Réponds avec un JSON qui CONFIRME la donnée et dit "C'est noté" puis génère la question pour le PROCHAIN thème manquant
-3. Si le thème **${nextBlockName}** n'est PAS connu → Pose UNE SEULE QUESTION pour l'obtenir
+SCÉNARIO A : L'INFORMATION EST DÉJÀ CONNUE (voir CONTEXTE DÉJÀ DÉTECTÉ)
+-> NE POSE PAS la question standard ("Quelle est votre cible ?"). C'EST INTERDIT.
+-> Pose une question de VALIDATION : "J'ai détecté que votre cible est [X]. Est-ce correct ?"
+-> Options : ["Oui, c'est exact", "Non, modifier"]
+-> Si l'utilisateur répond "Oui", tu considéreras l'info comme acquise.
+
+SCÉNARIO B : L'INFORMATION EST INCONNUE
+-> Pose la question standard pour obtenir l'information.
 
 ⚠️ RÈGLES CRITIQUES :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
