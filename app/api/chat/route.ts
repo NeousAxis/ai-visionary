@@ -751,47 +751,73 @@ GÉNÈRE CE JSON MAINTENANT :
                 m.role === 'assistant' && m.content.includes('SCAN TERMINÉ')
             );
             let alreadyDetectedData = "";
+            const detectedSet = new Set<string>();
+
             if (scanTermineMsg) {
                 // Parse the key data points from the scan message
                 const content = scanTermineMsg.content;
-                const audienceMatch = content.match(/Audience\s*:\s*([^•\n]+)/i);
-                const secteurMatch = content.match(/Secteur\s*:\s*([^•\n]+)/i);
-                const offreMatch = content.match(/Offre\s*:\s*([^•\n]+)/i);
-                const iaMatch = content.match(/IA\s*:\s*([^•\n]+)/i);
-                const motsMatch = content.match(/Mots-clés\s*:\s*([^•\n]+)/i);
-                const intentionsMatch = content.match(/Intentions\s*:\s*([^•\n]+)/i);
+                // PARSE ALL 16 FIELDS TO DETERMINE WHAT TO SKIP
+                // Label Mapping matches 'questionLabels' in Step 1
+                const regexMap: Record<string, string> = {
+                    "Pays": "PAYS",
+                    "Statut juridique": "STATUT",
+                    "Secteur": "SECTEUR",
+                    "Audience": "CIBLE",
+                    "Offre": "OFFRE",
+                    "Modèle économique": "MODÈLE",
+                    "Équipe": "ÉQUIPE",
+                    "Mission": "AMBITION/VISION",
+                    "Technologies": "TECHNIQUE/CMS",
+                    "IA": "DONNÉES/IA",
+                    "Réseau": "EXTERNAL_PRESENCE",
+                    "Certifications": "REPUTATION_SIGNALS",
+                    "Mots-clés": "KEYWORDS",
+                    "Intentions": "INTENTS",
+                    "Contact": "ACCESS_CHANNELS"
+                };
 
-                alreadyDetectedData = `
-🔍 DONNÉES DÉJÀ DÉTECTÉES (NE PAS REDEMANDER) :
-${audienceMatch ? `- AUDIENCE/CIBLE : ${audienceMatch[1].trim()} ← DÉJÀ CONNU, NE PAS POSER DE QUESTION SUR LA CIBLE !` : ''}
-${secteurMatch ? `- SECTEUR : ${secteurMatch[1].trim()} ← DÉJÀ CONNU` : ''}
-${offreMatch ? `- OFFRE : ${offreMatch[1].trim()} ← DÉJÀ CONNU` : ''}
-${iaMatch ? `- IA : ${iaMatch[1].trim()} ← DÉJÀ CONNU` : ''}
-${motsMatch ? `- MOTS-CLÉS : ${motsMatch[1].trim()}` : ''}
-${intentionsMatch ? `- INTENTIONS : ${intentionsMatch[1].trim()}` : ''}
+                Object.entries(regexMap).forEach(([label, blockName]) => {
+                    const regex = new RegExp(`${label}\\s*:\\s*([^•\\n]+)`, "i");
+                    const match = content.match(regex);
+                    if (match) {
+                        const value = match[1].trim();
+                        // ONLY SKIP IF CONFIDENCE IS HIGH (No 'À valider')
+                        if (!value.includes("(À valider)") && !value.includes("unknown")) {
+                            detectedSet.add(blockName);
+                            // Add to context string
+                            alreadyDetectedData += `- ${blockName} : ${value} (DÉJÀ VALIDÉ)\n`;
+                        }
+                    }
+                });
 
-⛔ RÈGLE ABSOLUE : Si une information ci-dessus est "Détecté" ou a une valeur, 
-NE POSE PAS de question sur ce thème ! Passe au suivant !
-`;
-                console.log("📊 Already detected data:", alreadyDetectedData);
+                console.log("🙈 SKIPPING BLOCKS (Already Known):", Array.from(detectedSet));
+            } else {
+                console.warn("⚠️ No SCAN message found in history. Assuming nothing detected.");
             }
 
-            // Logic to determine Next Question Name (16 Steps)
-            const blockNames = [
+            // FULL LIST OF 16 BLOCKS
+            const allBlockNames = [
                 "PAYS", "STATUT",
                 "SECTEUR", "CIBLE",
                 "OFFRE", "MODÈLE",
                 "ÉQUIPE", "AMBITION/VISION",
                 "TECHNIQUE/CMS", "DONNÉES/IA",
-                // New External Context Layer
+                // Extended Context
                 "EXTERNAL_PRESENCE", "REPUTATION_SIGNALS",
                 "KEYWORDS", "INTENTS",
                 "ACCESS_CHANNELS", "USAGE_PERMISSIONS"
             ];
-            const nextBlockName = blockNames[stepsCompleted] || "FINALISATION";
+
+            // DYNAMIC FILTERING: Only ask about blocks NOT in detectedSet
+            const questionsToAsk = allBlockNames.filter(b => !detectedSet.has(b));
+
+            // Select Next Block based on User Progress (stepsCompleted)
+            // If user answered 0 questions, we take index 0 of questionsToAsk.
+            // If user answered 1 question, we take index 1, etc.
+            const nextBlockName = questionsToAsk[stepsCompleted] || "FINALISATION";
 
             const CONTINUE_PROMPT = `
-Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
+Tu es AYO. Phase de Scan Complémentaire.
 
 🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
 ✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
@@ -799,32 +825,25 @@ Tu es AYO. Étape ${stepsCompleted + 1}/16 du Scan Profond.
 ⚠️ RISQUE CRITIQUE : N'ÉCRIS AUCUN TEXTE AVANT LE JSON ! COMMENCE DIRECTEMENT PAR '{'.
 ⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true". (Même pour Oui/Non).
 
-📡 DONNÉES DU SCAN TECHNIQUE DISPONIBLES :
-${contextScanResult ? `
-- URL analysée : ${contextScanResult.url}
-- Titre : "${contextScanResult.metaTitle || 'Non détecté'}"
-- Description : "${contextScanResult.metaDescription || 'Non détectée'}"
-- H1 : ${contextScanResult.h1?.join(', ') || 'Aucun'}
-- JSON-LD présent : ${contextScanResult.hasJsonLd ? 'OUI' : 'NON'}
-- FAQ détectée : ${contextScanResult.hasFaqContent ? 'OUI' : 'NON'}
-- Texte extrait (5000 premiers chars) : "${contextScanResult.text?.substring(0, 5000) || 'Vide'}"
-` : 'Aucun scan disponible'}
+📡 DONNÉES TECHNIQUES :
+${contextScanResult ? `- URL: ${contextScanResult.url}` : 'N/A'}
 
-🔍 CONTEXTE DÉJÀ DÉTECTÉ (INTELLIGENCE) :
+🔍 CONTEXTE ACQUIS (VOICI CE QUE TU SAIS DÉJÀ) :
 ${alreadyDetectedData}
 
-### TA MISSION (RÈGLE D'OR : NE SOIS PAS STUPIDE)
-Tu dois obtenir l'information pour le thème : **${nextBlockName}**.
+### TA MISSION
+Tu dois obtenir l'information manquante pour le thème : **${nextBlockName}**.
 
-SCÉNARIO A : L'INFORMATION EST DÉJÀ CONNUE (voir CONTEXTE DÉJÀ DÉTECTÉ)
--> NE POSE PAS la question standard ("Quelle est votre cible ?"). C'EST INTERDIT.
--> Pose une question de VALIDATION : "J'ai détecté que votre cible est [X]. Est-ce correct ?"
--> Options : ["Oui, c'est exact", "Non, modifier"]
--> Force "allowMultiple: false" (Car c'est une question Oui/Non, même pour la Cible).
--> Si l'utilisateur répond "Oui", tu considéreras l'info comme acquise.
+SCÉNARIO UNIQUE : L'INFORMATION EST MANQUANTE (sinon je ne te demanderais pas).
+-> Pose la question standard pour obtenir cette information.
+-> Sois direct, professionnel et concis.
 
-SCÉNARIO B : L'INFORMATION EST INCONNUE
--> Pose la question standard pour obtenir l'information.
+⚠️ RÈGLES DES QUESTIONS :
+1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
+2. Utilise "allowMultiple: true" pour : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
+3. Utilise "allowMultiple: false" pour : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS, USAGE_PERMISSIONS
+
+**LOGIQUE** : Si l'utilisateur peut logiquement avoir PLUSIEURS réponses → allowMultiple: true
 
 ⚠️ RÈGLES CRITIQUES :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
