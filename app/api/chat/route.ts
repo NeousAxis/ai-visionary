@@ -387,15 +387,14 @@ export async function POST(req: Request) {
 
                 if (modelsData.models) {
                     // Find best model: Prioritize GEMINI 2.0 FLASH (User Request)
-                    // "flash mais pas le 1.5"
                     const bestModel = modelsData.models.find((m: any) =>
                         m.supportedGenerationMethods.includes('generateContent') &&
-                        m.name.includes('pro') &&
-                        m.name.includes('1.5') // Priority 1: Gemini 1.5 Pro (Intelligence)
+                        m.name.includes('flash') &&
+                        m.name.includes('2.0') // Priority 1: Gemini 2.0 Flash (Speed/Smart)
                     ) || modelsData.models.find((m: any) =>
                         m.supportedGenerationMethods.includes('generateContent') &&
-                        m.name.includes('flash') &&
-                        m.name.includes('2.0') // Priority 2: Gemini 2.0 Flash (Speed/New)
+                        m.name.includes('pro') &&
+                        m.name.includes('1.5') // Priority 2: Gemini 1.5 Pro (Fallback)
                     ) || modelsData.models.find((m: any) =>
                         m.supportedGenerationMethods.includes('generateContent') &&
                         m.name.includes('flash') // Priority 3: Any Flash
