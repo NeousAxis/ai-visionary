@@ -271,6 +271,12 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             const questionId = q.id || `q_${idx}`;
                             const currentSelections = selectedMultiple[questionId] || [];
 
+                            // FILTER OUT "Autre" variants from LLM options (we add it manually)
+                            const filteredOptions = q.options.filter(opt => {
+                                const lower = opt.toLowerCase().trim();
+                                return !['autre', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower);
+                            });
+
                             return (
                                 <div key={questionId} className="qcm-question-box p-4 bg-white/50 rounded-lg border border-slate-200">
                                     <p className="mb-3 font-bold text-slate-800">
@@ -286,7 +292,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                     {q.allowMultiple ? (
                                         <div className="flex flex-col gap-3">
                                             <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                {q.options.map((opt, i) => {
+                                                {filteredOptions.map((opt, i) => {
                                                     const isSelected = currentSelections.includes(opt);
                                                     return (
                                                         <label
@@ -330,7 +336,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                     ) : (
                                         /* BUTTON MODE (Normal single select) */
                                         <div className="qcm-options-grid grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            {q.options.map((opt, i) => (
+                                            {filteredOptions.map((opt, i) => (
                                                 <button
                                                     key={i}
                                                     onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}

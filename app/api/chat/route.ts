@@ -754,11 +754,13 @@ POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
 2. Identifie ce qui est DÉJÀ connu
 3. Pose UNE SEULE QUESTION pour le thème **${nextBlockName}** qui demande l'information MANQUANTE
 
-⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true".
+⚠️ RÈGLES CRITIQUES :
+1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
+2. Utilise "allowMultiple: true" pour ces thèmes : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
+3. Utilise "allowMultiple: false" pour ces thèmes : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS
 
-**IMPORTANT** :
-- Si allowCustom est TRUE, NE METS PAS "Autre" dans les options ! Le système l'ajoute automatiquement.
-- Si la question peut avoir PLUSIEURS réponses, ajoute "allowMultiple: true"
+**LOGIQUE** : Si l'utilisateur peut logiquement avoir PLUSIEURS réponses → allowMultiple: true
+Exemple : "Public cible ?" → Une entreprise peut cibler à la fois B2B ET B2C → allowMultiple: true
 
 ### FORMAT JSON ATTENDU (EXEMPLE)
 {
@@ -770,8 +772,7 @@ POSE DES QUESTIONS QUI COMPLÈTENT L'INFORMATION, PAS QUI LA RÉPÈTENT !
       "text": "Votre question unique ici ?",
       "options": ["Option A", "Option B", "Option C"],
       "allowCustom": true,
-      "allowMultiple": false,
-      "customLabel": "Autre / Préciser..."
+      "allowMultiple": ${['SECTEUR', 'CIBLE', 'OFFRE', 'DONNÉES/IA', 'EXTERNAL_PRESENCE', 'KEYWORDS', 'INTENTS', 'ACCESS_CHANNELS'].includes(nextBlockName) ? 'true' : 'false'}
     }
   ]
 }
