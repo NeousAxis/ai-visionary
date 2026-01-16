@@ -820,6 +820,7 @@ SCÉNARIO A : L'INFORMATION EST DÉJÀ CONNUE (voir CONTEXTE DÉJÀ DÉTECTÉ)
 -> NE POSE PAS la question standard ("Quelle est votre cible ?"). C'EST INTERDIT.
 -> Pose une question de VALIDATION : "J'ai détecté que votre cible est [X]. Est-ce correct ?"
 -> Options : ["Oui, c'est exact", "Non, modifier"]
+-> Force "allowMultiple: false" (Car c'est une question Oui/Non, même pour la Cible).
 -> Si l'utilisateur répond "Oui", tu considéreras l'info comme acquise.
 
 SCÉNARIO B : L'INFORMATION EST INCONNUE
@@ -827,10 +828,11 @@ SCÉNARIO B : L'INFORMATION EST INCONNUE
 
 ⚠️ RÈGLES CRITIQUES :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
-2. Utilise "allowMultiple: true" pour ces thèmes : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
+2. Utilise "allowMultiple: true" pour ces thèmes (SAUF SI VALIDATION OUI/NON) : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
 3. Utilise "allowMultiple: false" pour ces thèmes : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS, USAGE_PERMISSIONS
 
 **LOGIQUE** : Si l'utilisateur peut logiquement avoir PLUSIEURS réponses → allowMultiple: true
+(Exception : Si tu poses une question de validation type "Oui/Non", allowMultiple est toujours FALSE).
 Exemple : "Public cible ?" → Une entreprise peut cibler à la fois B2B ET B2C → allowMultiple: true
 
 ### FORMAT JSON ATTENDU (EXEMPLE)
