@@ -778,7 +778,8 @@ GÉNÈRE CE JSON MAINTENANT :
                 };
 
                 Object.entries(regexMap).forEach(([label, blockName]) => {
-                    const regex = new RegExp(`${label}\\s*:\\s*([^•\\n]+)`, "i");
+                    // ROBUST REGEX: Lazy match until bullet, newline, or end of string
+                    const regex = new RegExp(`${label}\\s*[:=]\\s*(.*?)(?=\\s*[•\\n]|$)`, "i");
                     const match = content.match(regex);
                     if (match) {
                         const value = match[1].trim();
@@ -815,7 +816,9 @@ GÉNÈRE CE JSON MAINTENANT :
             // Select Next Block based on User Progress (stepsCompleted)
             // If user answered 0 questions, we take index 0 of questionsToAsk.
             // If user answered 1 question, we take index 1, etc.
-            const nextBlockName = questionsToAsk[stepsCompleted] || "FINALISATION";
+            // CORRECT INDEX FIX: Since Step 1 is "Ownership Yes", the first real question is at index 0.
+            const questionIndex = Math.max(0, stepsCompleted - 1);
+            const nextBlockName = questionsToAsk[questionIndex] || "FINALISATION";
 
             const CONTINUE_PROMPT = `
 Tu es AYO. Phase de Scan Complémentaire.
