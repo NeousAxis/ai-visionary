@@ -352,25 +352,28 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     return (
                                                         <label
                                                             key={i}
-                                                            className={`relative flex items-center gap-4 px-4 py-4 rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium group ${isSelected
-                                                                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/25 scale-[1.02]'
-                                                                : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-teal-300 hover:shadow-md'
+                                                            className={`relative flex items-center gap-4 px-5 py-4 rounded-xl cursor-pointer transition-all duration-300 text-sm font-medium group overflow-hidden ${isSelected
+                                                                ? 'bg-slate-900 border border-teal-500/50 text-white shadow-[0_0_20px_rgba(20,184,166,0.15)] transform scale-[1.01]'
+                                                                : 'bg-white border border-slate-200 text-slate-600 hover:border-teal-400/50 hover:shadow-md hover:bg-slate-50'
                                                                 }`}
                                                         >
+                                                            {/* Background Glow Effect for Selected */}
+                                                            {isSelected && (
+                                                                <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-blue-500/10 opacity-100 pointer-events-none" />
+                                                            )}
+
                                                             {/* Custom Checkbox Icon */}
-                                                            <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${isSelected
-                                                                ? 'bg-white/20 backdrop-blur'
-                                                                : 'bg-slate-100 group-hover:bg-teal-100'
+                                                            <div className={`relative z-10 flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all duration-300 ${isSelected
+                                                                ? 'bg-gradient-to-br from-teal-400 to-cyan-500 shadow-sm scale-110'
+                                                                : 'bg-slate-100 border border-slate-300 group-hover:border-teal-400'
                                                                 }`}>
-                                                                {isSelected ? (
-                                                                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                {isSelected && (
+                                                                    <svg className="w-3.5 h-3.5 text-white animate-in zoom-in duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                                     </svg>
-                                                                ) : (
-                                                                    <div className="w-3 h-3 rounded bg-slate-300 group-hover:bg-teal-300 transition-colors"></div>
                                                                 )}
                                                             </div>
-                                                            <span className="flex-1">{opt}</span>
+                                                            <span className="relative z-10 flex-1 text-base">{opt}</span>
                                                             <input
                                                                 type="checkbox"
                                                                 checked={isSelected}
@@ -383,27 +386,33 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 })}
 
                                                 {/* OPTION "AUTRE" COCHABLE - MODERN DESIGN */}
+                                                {/* OPTION "AUTRE" COCHABLE - MODERN DESIGN */}
                                                 <label
-                                                    className={`relative flex items-center gap-4 px-4 py-4 rounded-xl cursor-pointer transition-all duration-200 text-sm font-medium col-span-full group ${currentSelections.includes('__AUTRE__')
-                                                            ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25 scale-[1.02]'
-                                                            : 'bg-white border-2 border-dashed border-amber-300 text-amber-700 hover:border-amber-400 hover:shadow-md'
+                                                    className={`relative flex items-center gap-4 px-5 py-4 rounded-xl cursor-pointer transition-all duration-300 text-sm font-medium col-span-full group overflow-hidden ${currentSelections.includes('__AUTRE__')
+                                                        ? 'bg-slate-900 border border-amber-500/50 text-white shadow-[0_0_20px_rgba(245,158,11,0.15)] transform scale-[1.01]'
+                                                        : 'bg-white border-2 border-dashed border-slate-200 text-slate-500 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50/50'
                                                         }`}
                                                 >
-                                                    <div className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 ${currentSelections.includes('__AUTRE__')
-                                                            ? 'bg-white/20 backdrop-blur'
-                                                            : 'bg-amber-100 group-hover:bg-amber-200'
+                                                    {/* Background Glow Effect for Selected */}
+                                                    {currentSelections.includes('__AUTRE__') && (
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-orange-500/10 opacity-100 pointer-events-none" />
+                                                    )}
+
+                                                    <div className={`relative z-10 flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center transition-all duration-300 ${currentSelections.includes('__AUTRE__')
+                                                        ? 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-sm scale-110'
+                                                        : 'bg-slate-100 group-hover:bg-amber-100'
                                                         }`}>
                                                         {currentSelections.includes('__AUTRE__') ? (
-                                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                            <svg className="w-3.5 h-3.5 text-white animate-in zoom-in duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                             </svg>
                                                         ) : (
-                                                            <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <svg className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                             </svg>
                                                         )}
                                                     </div>
-                                                    <span className="flex-1">✏️ Autre / Préciser...</span>
+                                                    <span className="relative z-10 flex-1 text-base">Autre / Préciser...</span>
                                                     <input
                                                         type="checkbox"
                                                         checked={currentSelections.includes('__AUTRE__')}
@@ -414,15 +423,18 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 </label>
                                             </div>
 
-                                            {/* CHAMP DE TEXTE POUR "AUTRE" (apparaît quand coché) */}
+                                            {/* CHAMP DE TEXTE POUR "AUTRE" (apparaît avec animation) */}
                                             {currentSelections.includes('__AUTRE__') && (
-                                                <input
-                                                    type="text"
-                                                    placeholder="Précisez votre réponse..."
-                                                    value={input}
-                                                    onChange={(e) => setInput(e.target.value)}
-                                                    className="px-4 py-3 rounded border border-amber-400 bg-amber-50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                                                />
+                                                <div className="animate-in slide-in-from-top-2 fade-in duration-300">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Veuillez préciser votre réponse..."
+                                                        autoFocus
+                                                        value={input}
+                                                        onChange={(e) => setInput(e.target.value)}
+                                                        className="w-full px-5 py-4 rounded-xl border border-amber-300 bg-white shadow-inner text-base focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all placeholder:text-slate-400"
+                                                    />
+                                                </div>
                                             )}
 
                                             {/* Validate Button */}
