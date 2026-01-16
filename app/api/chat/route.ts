@@ -777,22 +777,34 @@ GÉNÈRE CE JSON MAINTENANT :
                     "Contact": "ACCESS_CHANNELS"
                 };
 
+                // BRUTE FORCE PARSING STRATEGY (Split by bullets)
+                const chunks = content.split(/•|\n/);
+                console.log(`🔍 DEBUG: Found ${chunks.length} chunks`);
+
                 Object.entries(regexMap).forEach(([label, blockName]) => {
-                    // ROBUST REGEX: Lazy match until bullet, newline, or end of string
-                    const regex = new RegExp(`${label}\\s*[:=]\\s*(.*?)(?=\\s*[•\\n]|$)`, "i");
-                    const match = content.match(regex);
-                    if (match) {
-                        const value = match[1].trim();
-                        // ONLY SKIP IF CONFIDENCE IS HIGH (No 'À valider')
-                        if (!value.includes("(À valider)") && !value.includes("unknown")) {
-                            detectedSet.add(blockName);
-                            // Add to context string
-                            alreadyDetectedData += `- ${blockName} : ${value} (DÉJÀ VALIDÉ)\n`;
+                    // Find chunk starting with Label
+                    const chunk = chunks.find((c: string) => c.trim().toLowerCase().startsWith(label.toLowerCase()));
+                    if (chunk) {
+                        // Extract Value part after colon
+                        const parts = chunk.split(/[:=]/);
+                        if (parts.length >= 2) {
+                            const value = parts.slice(1).join(':').trim(); // Rejoin in case value has colon
+
+                            // FILTER
+                            if (value && !value.includes("(À valider)") && !value.includes("unknown")) {
+                                detectedSet.add(blockName);
+                                alreadyDetectedData += `- ${blockName} : ${value} (DÉJÀ VALIDÉ)\n`;
+                            }
                         }
                     }
                 });
 
-                console.log("🙈 SKIPPING BLOCKS (Already Known):", Array.from(detectedSet));
+                const detectedListDebug = Array.from(detectedSet).join(', ');
+                console.log("🙈 SKIPPING BLOCKS (Already Known):", detectedListDebug);
+
+                // INJECT DEBUG INTO CONTEXT SO AI CAN REPEAT IT IF NEEDED (OR WE SEE IT IN CONSOLE)
+                alreadyDetectedData += `\n[DEBUG SYSTEM: DETECTED_BLOCKS_COUNT=${detectedSet.size} LIST=${detectedListDebug}]`;
+
             } else {
                 console.warn("⚠️ No SCAN message found in history. Assuming nothing detected.");
             }
