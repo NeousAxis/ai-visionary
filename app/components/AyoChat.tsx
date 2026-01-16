@@ -353,15 +353,15 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         <div
                                                             key={i}
                                                             onClick={() => !isLoading && toggleMultipleSelection(questionId, opt)}
-                                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 border select-none ${isSelected
-                                                                ? 'bg-teal-50 border-teal-500 shadow-sm'
-                                                                : 'bg-white border-slate-200 hover:border-teal-300'
+                                                            className={`flex items-center gap-3 px-4 py-3.5 rounded-lg cursor-pointer transition-all duration-200 border select-none group ${isSelected
+                                                                ? 'bg-teal-50/40 border-teal-500 shadow-sm'
+                                                                : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
                                                                 }`}
                                                         >
-                                                            {/* Custom Visual Checkbox (DIV) */}
-                                                            <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center border transition-all ${isSelected
-                                                                ? 'bg-teal-500 border-teal-500'
-                                                                : 'bg-white border-slate-300'
+                                                            {/* Custom Visual Checkbox (Square & Clean) */}
+                                                            <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center border transition-all duration-200 ${isSelected
+                                                                ? 'bg-teal-500 border-teal-500' // Fond plein pour l'état actif, c'est le standard pro
+                                                                : 'bg-white border-slate-300 group-hover:border-slate-400'
                                                                 }`}>
                                                                 {isSelected && (
                                                                     <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -371,7 +371,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                             </div>
 
                                                             {/* Text Label */}
-                                                            <span className={`flex-1 text-[14px] ${isSelected ? 'text-slate-900 font-medium' : 'text-slate-600'}`}>
+                                                            <span className={`flex-1 text-[15px] leading-relaxed transition-colors ${isSelected ? 'text-slate-900 font-medium' : 'text-slate-700 font-normal'}`}>
                                                                 {opt}
                                                             </span>
 
@@ -380,7 +380,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                                 type="checkbox"
                                                                 checked={isSelected}
                                                                 readOnly
-                                                                className="hidden" // FORCE HIDE
+                                                                className="hidden"
                                                             />
                                                         </div>
                                                     );
@@ -389,47 +389,47 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {/* OPTION "AUTRE" */}
                                                 <div
                                                     onClick={() => !isLoading && toggleMultipleSelection(questionId, '__AUTRE__')}
-                                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 border col-span-full select-none ${currentSelections.includes('__AUTRE__')
-                                                        ? 'bg-amber-50 border-amber-500 shadow-sm'
-                                                        : 'bg-white border-dashed border-slate-300 hover:border-amber-400'
+                                                    className={`flex items-center gap-3 px-4 py-3.5 rounded-lg cursor-pointer transition-all duration-200 border col-span-full select-none group ${currentSelections.includes('__AUTRE__')
+                                                        ? 'bg-amber-50/40 border-amber-500 shadow-sm'
+                                                        : 'bg-white border-dashed border-slate-300 hover:border-slate-400 hover:bg-slate-50'
                                                         }`}
                                                 >
-                                                    <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center border transition-all ${currentSelections.includes('__AUTRE__')
+                                                    <div className={`flex-shrink-0 w-5 h-5 rounded flex items-center justify-center border transition-all duration-200 ${currentSelections.includes('__AUTRE__')
                                                         ? 'bg-amber-500 border-amber-500'
-                                                        : 'bg-white border-slate-300'
+                                                        : 'bg-white border-slate-300 group-hover:border-slate-400'
                                                         }`}>
                                                         {currentSelections.includes('__AUTRE__') ? (
                                                             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                             </svg>
                                                         ) : (
-                                                            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                            <svg className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                                                             </svg>
                                                         )}
                                                     </div>
-                                                    <span className={`flex-1 text-[14px] ${currentSelections.includes('__AUTRE__') ? 'text-slate-900 font-medium' : 'text-slate-500 italic'}`}>
-                                                        Autre...
+                                                    <span className={`flex-1 text-[15px] leading-relaxed ${currentSelections.includes('__AUTRE__') ? 'text-slate-900 font-medium' : 'text-slate-600 italic'}`}>
+                                                        Autre choix...
                                                     </span>
                                                     <input
                                                         type="checkbox"
                                                         checked={currentSelections.includes('__AUTRE__')}
                                                         readOnly
-                                                        className="hidden" // FORCE HIDE
+                                                        className="hidden"
                                                     />
                                                 </div>
                                             </div>
 
                                             {/* CHAMP DE TEXTE POUR "AUTRE" */}
                                             {currentSelections.includes('__AUTRE__') && (
-                                                <div className="pt-2 animate-in fade-in slide-in-from-top-1">
+                                                <div className="pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                                     <input
                                                         type="text"
                                                         placeholder="Veuillez préciser..."
                                                         autoFocus
                                                         value={input}
                                                         onChange={(e) => setInput(e.target.value)}
-                                                        className="w-full px-4 py-2.5 rounded-lg border border-amber-300 bg-white text-slate-900 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                                        className="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 text-[15px] focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all shadow-sm placeholder:text-slate-400"
                                                     />
                                                 </div>
                                             )}
