@@ -625,18 +625,31 @@ GÉNÈRE CE JSON MAINTENANT :
                 "Certifications", "Mots-clés", "Intentions", "Contact"
             ];
 
-            const detectedInfos = extractedAnswers.filter(a => a.confidence === 'high');
+            // FIX: Include 'low' confidence in detected context so AI knows about it
+            const detectedInfos = extractedAnswers.filter(a =>
+                a.answer &&
+                a.answer !== 'null' &&
+                a.confidence !== 'unknown'
+            );
+
+            // Keep 'missing' for purely unknown things, or strictly low if we want to emphasize clarity
             const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
             let transparencySummary = `📡 SCAN TERMINÉ\n\n`;
 
             if (detectedInfos.length > 0) {
-                transparencySummary += `✅ ${detectedInfos.length} INFORMATIONS COLLECTÉES :\n\n`;
+                transparencySummary += `✅ ${detectedInfos.length} INFORMATIONS DÉTECTÉES :\n\n`;
                 detectedInfos.slice(0, 8).forEach((info) => {
                     const label = questionLabels[info.question_id - 1] || `Info ${info.question_id}`;
-                    const value = info.answer && info.answer !== 'null' && info.answer.length < 60
+                    let value = info.answer && info.answer !== 'null' && info.answer.length < 60
                         ? info.answer
                         : 'Détecté';
+
+                    // Add nuance for low confidence
+                    if (info.confidence === 'low') {
+                        value += ' (À valider)';
+                    }
+
                     transparencySummary += `• ${label} : ${value}\n`;
                 });
                 if (detectedInfos.length > 8) {
@@ -645,8 +658,8 @@ GÉNÈRE CE JSON MAINTENANT :
                 transparencySummary += `\n`;
             }
 
-            transparencySummary += `❓ ${missingInfos.length} INFORMATIONS À CLARIFIER\n`;
-            transparencySummary += `Je vais vous poser ${missingInfos.length} questions rapides.\n\n`;
+            transparencySummary += `❓ ${missingInfos.length} POINTS À VÉRIFIER/VALIDER\n`;
+            transparencySummary += `Je vais valider avec vous ces ${missingInfos.length} points.\n\n`;
             transparencySummary += `➡️ Mais avant tout...`;
 
             // 4. First question: Ownership validation
