@@ -839,54 +839,59 @@ Tu es AYO. Phase de Scan Complémentaire.
 ✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
 ⚠️ UNE SEULE QUESTION PAR BLOC.
 ⚠️ RISQUE CRITIQUE : N'ÉCRIS AUCUN TEXTE AVANT LE JSON ! COMMENCE DIRECTEMENT PAR '{'.
-⚠️ OBLIGATOIRE : AJOUTE TOUJOURS L'OPTION "allowCustom: true". (Même pour Oui/Non).
 
 📡 DONNÉES TECHNIQUES :
 ${contextScanResult ? `- URL: ${contextScanResult.url}` : 'N/A'}
 
-🔍 CONTEXTE ACQUIS (VOICI CE QUE TU SAIS DÉJÀ) :
+🔍 CONTEXTE ACQUIS (CE QUE TU SAIS DÉJÀ - NE POSE PAS DE QUESTIONS SUR CES DONNÉES) :
 ${alreadyDetectedData}
 
-### TA MISSION
-Tu dois obtenir l'information manquante pour le thème : **${nextBlockName}**.
+🚨🚨🚨 RÈGLE ABSOLUE - INTERDICTION DE DEMANDER CONFIRMATION 🚨🚨🚨
+SI une information apparaît dans le "CONTEXTE ACQUIS" ci-dessus :
+❌ TU NE DEMANDES PAS "Est-ce correct ?"
+❌ TU NE DEMANDES PAS "Confirmez-vous que X ?"  
+❌ TU NE POSES AUCUNE QUESTION DE VALIDATION
+✅ TU PASSES DIRECTEMENT AU THÈME SUIVANT QUI EST VRAIMENT MANQUANT
 
-SCÉNARIO UNIQUE : L'INFORMATION EST MANQUANTE (sinon je ne te demanderais pas).
--> Pose la question standard pour obtenir cette information.
--> Sois direct, professionnel et concis.
+EXEMPLE DE CE QUI EST INTERDIT :
+- "Votre audience cible est-elle correctement définie comme B2B et B2C ?" → INTERDIT si déjà dans CONTEXTE
+- "Confirmez-vous que votre pays est la Suisse ?" → INTERDIT si déjà dans CONTEXTE
+- "Est-ce bien votre secteur d'activité ?" → INTERDIT si déjà dans CONTEXTE
+
+Les données du CONTEXTE ACQUIS sont VALIDÉES. On ne les revalide PAS.
+
+### TA MISSION
+Tu dois obtenir l'information pour le thème : **${nextBlockName}**.
+
+SI ${nextBlockName} est déjà dans le CONTEXTE ACQUIS → Réponds avec ce JSON spécial :
+{
+  "type": "question_block",
+  "intro": "✅ Information déjà connue pour ${nextBlockName}.",
+  "questions": [],
+  "skip": true
+}
+
+SI ${nextBlockName} est VRAIMENT MANQUANT → Pose la question standard pour l'obtenir.
 
 ⚠️ RÈGLES DES QUESTIONS :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
 2. Utilise "allowMultiple: true" pour : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
 3. Utilise "allowMultiple: false" pour : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS, USAGE_PERMISSIONS
 
-**LOGIQUE** : Si l'utilisateur peut logiquement avoir PLUSIEURS réponses → allowMultiple: true
-
-⚠️ RÈGLES CRITIQUES :
-1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
-2. Utilise "allowMultiple: true" pour ces thèmes (SAUF SI VALIDATION OUI/NON) : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
-3. Utilise "allowMultiple: false" pour ces thèmes : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS, USAGE_PERMISSIONS
-
-**LOGIQUE** : Si l'utilisateur peut logiquement avoir PLUSIEURS réponses → allowMultiple: true
-(Exception : Si tu poses une question de validation type "Oui/Non", allowMultiple est toujours FALSE).
-Exemple : "Public cible ?" → Une entreprise peut cibler à la fois B2B ET B2C → allowMultiple: true
-
-### FORMAT JSON ATTENDU (EXEMPLE)
+### FORMAT JSON ATTENDU
 {
   "type": "question_block",
-  "intro": "✅ C'est noté. Au sujet de votre ${nextBlockName}...",
+  "intro": "Au sujet de votre ${nextBlockName}...",
   "questions": [
     {
       "id": "q_next_1",
-      "text": "Votre question unique ici ?",
+      "text": "Votre question NOUVELLE ici ? (PAS de validation d'info existante !)",
       "options": ["Option A", "Option B", "Option C"],
       "allowCustom": true,
       "allowMultiple": ${['SECTEUR', 'CIBLE', 'OFFRE', 'DONNÉES/IA', 'EXTERNAL_PRESENCE', 'KEYWORDS', 'INTENTS', 'ACCESS_CHANNELS'].includes(nextBlockName) ? 'true' : 'false'}
     }
   ]
 }
-
-**QUESTION UNIQUE POUR ${nextBlockName} :**
-(Ne fais JAMAIS de question fermée sans sortie de secours. L'utilisateur doit toujours pouvoir corriger).
 `;
 
             const continueResult = await generateText({
@@ -903,7 +908,40 @@ Exemple : "Public cible ?" → Une entreprise peut cibler à la fois B2B ET B2C 
 
             if (jsonStart !== -1 && jsonEnd !== -1) {
                 finalResponseText = rawResponse.substring(jsonStart, jsonEnd + 1);
-                // Optional: Validate JSON validity here if needed
+
+                // 🚀 HANDLE SKIP RESPONSE: If LLM says "skip: true", silently advance to next block
+                try {
+                    const parsedResponse = JSON.parse(finalResponseText);
+                    if (parsedResponse.skip === true || (parsedResponse.questions && parsedResponse.questions.length === 0)) {
+                        console.log(`⏭️ SKIPPING ${nextBlockName} - Already known. Advancing to next block...`);
+
+                        // Calculate the NEXT block to ask about
+                        const nextQuestionIndex = questionIndex + 1;
+                        const nextNextBlockName = questionsToAsk[nextQuestionIndex] || "FINALISATION";
+
+                        if (nextNextBlockName === "FINALISATION" || nextQuestionIndex >= questionsToAsk.length) {
+                            // All blocks covered - trigger final analysis
+                            console.log("✅ All questions covered. Triggering FINAL_ANALYSIS...");
+                            triggerMode = "FINAL_ANALYSIS";
+                        } else {
+                            // Generate simple acknowledgment and proceed
+                            finalResponseText = JSON.stringify({
+                                type: "question_block",
+                                intro: `✅ ${nextBlockName} déjà détecté. Passons au point suivant...`,
+                                questions: [{
+                                    id: `q_${nextNextBlockName.toLowerCase()}_1`,
+                                    text: `Concernant ${nextNextBlockName}, pourriez-vous préciser ?`,
+                                    options: ["Oui", "Non", "Autre"],
+                                    allowCustom: true,
+                                    allowMultiple: ['SECTEUR', 'CIBLE', 'OFFRE', 'DONNÉES/IA', 'EXTERNAL_PRESENCE', 'KEYWORDS', 'INTENTS', 'ACCESS_CHANNELS'].includes(nextNextBlockName)
+                                }]
+                            });
+                        }
+                    }
+                } catch (e) {
+                    // JSON parse error - continue with raw response
+                    console.warn("Skip detection parse error:", e);
+                }
             } else if (rawResponse.match(/```json/)) {
                 // Fallback for markdown blocks if indices failed for some reason
                 const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
