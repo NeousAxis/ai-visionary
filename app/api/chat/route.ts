@@ -775,7 +775,22 @@ GÉNÈRE CE JSON MAINTENANT :
             const detectedValues: Record<string, string> = {};
 
             if (scanTermineMsg) {
-                const content = scanTermineMsg.content;
+                let content = scanTermineMsg.content;
+
+                // 🔧 CRITICAL FIX: The message might be JSON stringified!
+                // Try to parse it and extract the 'intro' field
+                try {
+                    const parsed = JSON.parse(content);
+                    if (parsed.intro) {
+                        content = parsed.intro;
+                        console.log("✅ Extracted 'intro' from JSON message");
+                    }
+                } catch (e) {
+                    // Not JSON, use as-is (might be raw text)
+                    console.log("ℹ️ Message is not JSON, using as-is");
+                }
+
+                console.log("📋 Content to parse (first 300 chars):", content.substring(0, 300));
 
                 // Label Mapping: Display Label -> Block Name
                 const regexMap: Record<string, string> = {
