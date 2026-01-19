@@ -600,7 +600,7 @@ GÉNÈRE CE JSON MAINTENANT :
             // Parse extraction result
             let extractedAnswers: any[] = [];
             try {
-                const jsonMatch = extractionResult.text.match(/{[\s\S]*"answers"[\s\S]*}/);
+                const jsonMatch = extractionResult.text.match(/\{[\s\S]*"answers"[\s\S]*\}/);
                 if (jsonMatch) {
                     const parsed = JSON.parse(jsonMatch[0]);
                     extractedAnswers = parsed.answers || [];
@@ -616,7 +616,15 @@ GÉNÈRE CE JSON MAINTENANT :
                 unknown: extractedAnswers.filter(a => a.confidence === 'unknown').length
             });
 
-            // 3. BUILD TRANSPARENCY SUMMARY with explicit labels
+            // 🔧 ARCHITECTURAL FIX: Build scan_state JSON (never parse text again)
+            const blockKeys = [
+                "identite.name", "identite.juridical_country", "identite.legal_form", "identite.sector",
+                "offre.audience", "offre.offer_summary", "offre.business_model", "identite.team",
+                "offre.value_proposition", "structure_technique.technologies", "structure_technique.ai_usage",
+                "external_context.presence", "engagements_conformite.certifications",
+                "external_context.keywords", "external_context.intents", "external_context.contact"
+            ];
+
             const questionLabels = [
                 "Nom", "Pays", "Statut juridique", "Secteur",
                 "Audience", "Offre", "Modèle économique", "Équipe",
@@ -624,14 +632,60 @@ GÉNÈRE CE JSON MAINTENANT :
                 "Certifications", "Mots-clés", "Intentions", "Contact"
             ];
 
-            // FIX: Include 'low' confidence in detected context so AI knows about it
+            // Build scan_state object (SINGLE SOURCE OF TRUTH)
+            const scanState: {
+                version: string;
+                url: string;
+                detected: Record<string, any>;
+                confidence: Record<string, number>;
+                high_confidence_keys: string[];
+                low_confidence_keys: string[];
+                unknown_keys: string[];
+                next_block_key: string;
+            } = {
+                version: "1.0",
+                url: urlToScan,
+                detected: {},
+                confidence: {},
+                high_confidence_keys: [],
+                low_confidence_keys: [],
+                unknown_keys: [],
+                next_block_key: ""
+            };
+
+            extractedAnswers.forEach((answer, index) => {
+                const key = blockKeys[index] || `block_${index}`;
+                const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 50 : 0);
+
+                if (answer.answer && answer.answer !== 'null') {
+                    scanState.detected[key] = answer.answer;
+                    scanState.confidence[key] = conf;
+
+                    if (conf >= 75) {
+                        scanState.high_confidence_keys.push(key);
+                    } else if (conf >= 40) {
+                        scanState.low_confidence_keys.push(key);
+                    } else {
+                        scanState.unknown_keys.push(key);
+                    }
+                } else {
+                    scanState.unknown_keys.push(key);
+                    scanState.confidence[key] = 0;
+                }
+            });
+
+            // Determine next block to ask (first unknown, then first low confidence)
+            scanState.next_block_key = scanState.unknown_keys[0] || scanState.low_confidence_keys[0] || "";
+
+            console.log("📦 SCAN_STATE CREATED:", JSON.stringify(scanState, null, 2));
+
+            // 3. BUILD TRANSPARENCY SUMMARY with explicit labels (for UI display only)
             const detectedInfos = extractedAnswers.filter(a =>
                 a.answer &&
                 a.answer !== 'null' &&
                 a.confidence !== 'unknown'
             );
 
-            // Keep 'missing' for purely unknown things, or strictly low if we want to emphasize clarity
             const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
             let transparencySummary = `🛰️ SCAN TERMINÉ\n\n`;
@@ -644,7 +698,6 @@ GÉNÈRE CE JSON MAINTENANT :
                         ? (info.answer.length > 50 ? info.answer.substring(0, 50) + '...' : info.answer)
                         : 'Détecté';
 
-                    // Add nuance for low confidence
                     if (info.confidence === 'low') {
                         value += ' (À valider)';
                     }
@@ -659,14 +712,13 @@ GÉNÈRE CE JSON MAINTENANT :
             transparencySummary += `➡️ Mais avant tout...`;
 
             // 4. First question: Ownership validation
-            const questionsToAsk = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
-
-            if (questionsToAsk.length === 0) {
-                // RARE: All auto-answered
+            // Include scan_state in the response for CONTINUE_QUESTIONING to use
+            if (missingInfos.length === 0) {
                 console.log("🎯 All questions auto-answered! Triggering FINAL_ANALYSIS...");
                 finalResponseText = JSON.stringify({
                     type: "question_block",
                     intro: transparencySummary + "\n\n✅ **Toutes les informations ont été collectées !**",
+                    scan_state: scanState, // 🔧 INCLUDE SCAN_STATE
                     questions: [{
                         id: "ownership_confirm",
                         text: "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
@@ -675,10 +727,10 @@ GÉNÈRE CE JSON MAINTENANT :
                     }]
                 });
             } else {
-                // Ask ownership first, then continue
                 finalResponseText = JSON.stringify({
                     type: "question_block",
                     intro: transparencySummary,
+                    scan_state: scanState, // 🔧 INCLUDE SCAN_STATE
                     questions: [{
                         id: "ownership_confirm",
                         text: "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
@@ -746,141 +798,70 @@ GÉNÈRE CE JSON MAINTENANT :
                 }
             }
 
-            // EXTRACT ALREADY DETECTED DATA FROM "SCAN TERMINÉ" MESSAGE
-            // PARSE THE *LATEST* SCAN MESSAGE (Important: Reverse to get the most recent one)
-            const scanTermineMsg = [...messages].reverse().find((m: any) =>
-                m.role === 'assistant' && m.content.includes('SCAN TERMINÉ')
-            );
+            // 🔧 ARCHITECTURAL FIX: Read scan_state JSON directly (NO TEXT PARSING)
+            const scanStateMsg = [...messages].reverse().find((m: any) => {
+                if (m.role !== 'assistant') return false;
+                try {
+                    const parsed = JSON.parse(m.content);
+                    return parsed.scan_state !== undefined;
+                } catch (e) {
+                    return false;
+                }
+            });
 
-            // 🔍 DEBUG: Log raw scan message to understand parsing
-            if (scanTermineMsg) {
-                console.log("📋 SCAN MESSAGE FOUND:");
-                console.log("   Content length:", scanTermineMsg.content.length);
-                console.log("   First 500 chars:", scanTermineMsg.content.substring(0, 500));
+            let scanState: any = null;
+
+            if (scanStateMsg) {
+                try {
+                    const parsed = JSON.parse(scanStateMsg.content);
+                    scanState = parsed.scan_state;
+                    console.log("✅ SCAN_STATE LOADED FROM JSON:", JSON.stringify(scanState, null, 2));
+                } catch (e) {
+                    console.error("❌ Failed to parse scan_state from message:", e);
+                }
             } else {
-                console.log("❌ NO SCAN MESSAGE FOUND IN HISTORY");
-                console.log("   Messages count:", messages.length);
-                console.log("   Assistant messages:", messages.filter((m: any) => m.role === 'assistant').length);
+                console.warn("⚠️ No scan_state found in history. Falling back to empty state.");
             }
 
-            // 🧮 MATHEMATICAL APPROACH: 3 distinct sets
-            const highConfidenceSet = new Set<string>();  // SKIP - don't ask anything
-            const lowConfidenceSet = new Set<string>();   // VALIDATE - ask "Is this correct?"
-            const unknownSet = new Set<string>();         // ASK - full question needed
+            // Use scan_state directly (deterministic, no parsing)
+            const highConfidenceKeys = scanState?.high_confidence_keys || [];
+            const lowConfidenceKeys = scanState?.low_confidence_keys || [];
+            const unknownKeys = scanState?.unknown_keys || [];
+            const detectedValues = scanState?.detected || {};
 
+            // Build display data from scan_state
             let highConfidenceData = "";
             let lowConfidenceData = "";
 
-            // Store detected values for smart validation questions
-            const detectedValues: Record<string, string> = {};
+            highConfidenceKeys.forEach((key: string) => {
+                const value = detectedValues[key] || "Détecté";
+                highConfidenceData += `- ${key} : "${value}" (HAUTE CONFIANCE - NE PAS REDEMANDER)\n`;
+            });
 
-            if (scanTermineMsg) {
-                let content = scanTermineMsg.content;
+            lowConfidenceKeys.forEach((key: string) => {
+                const value = detectedValues[key] || "Détecté";
+                lowConfidenceData += `- ${key} : "${value}" (BASSE CONFIANCE - À VALIDER)\n`;
+            });
 
-                // 🔧 CRITICAL FIX: The message might be JSON stringified!
-                // Try to parse it and extract the 'intro' field
-                try {
-                    const parsed = JSON.parse(content);
-                    if (parsed.intro) {
-                        content = parsed.intro;
-                        console.log("✅ Extracted 'intro' from JSON message");
-                    }
-                } catch (e) {
-                    // Not JSON, use as-is (might be raw text)
-                    console.log("ℹ️ Message is not JSON, using as-is");
-                }
+            console.log("🧮 DETERMINISTIC STATE:");
+            console.log(`   HIGH CONFIDENCE (SKIP): ${highConfidenceKeys.length} → ${highConfidenceKeys.join(', ')}`);
+            console.log(`   LOW CONFIDENCE (VALIDATE): ${lowConfidenceKeys.length} → ${lowConfidenceKeys.join(', ')}`);
+            console.log(`   UNKNOWN (ASK FULL): ${unknownKeys.length} → ${unknownKeys.join(', ')}`);
 
-                console.log("📋 Content to parse (first 300 chars):", content.substring(0, 300));
 
-                // Label Mapping: Display Label -> Block Name
-                const regexMap: Record<string, string> = {
-                    "Nom": "NOM",
-                    "Pays": "PAYS",
-                    "Statut juridique": "STATUT",
-                    "Secteur": "SECTEUR",
-                    "Audience": "CIBLE",
-                    "Offre": "OFFRE",
-                    "Modèle économique": "MODÈLE",
-                    "Équipe": "ÉQUIPE",
-                    "Mission": "AMBITION/VISION",
-                    "Technologies": "TECHNIQUE/CMS",
-                    "IA": "DONNÉES/IA",
-                    "Réseau": "EXTERNAL_PRESENCE",
-                    "Certifications": "REPUTATION_SIGNALS",
-                    "Mots-clés": "KEYWORDS",
-                    "Intentions": "INTENTS",
-                    "Contact": "ACCESS_CHANNELS"
-                };
-
-                // Parse by bullets
-                const chunks = content.split(/•|\n/);
-                console.log(`🔍 DEBUG: Found ${chunks.length} chunks in SCAN message`);
-
-                Object.entries(regexMap).forEach(([label, blockName]) => {
-                    const chunk = chunks.find((c: string) => c.trim().toLowerCase().startsWith(label.toLowerCase()));
-                    if (chunk) {
-                        const parts = chunk.split(/[:=]/);
-                        if (parts.length >= 2) {
-                            const value = parts.slice(1).join(':').trim();
-
-                            // 🔍 DEBUG: Log each field parsing
-                            console.log(`   📌 ${label} → ${blockName}: "${value.substring(0, 50)}${value.length > 50 ? '...' : ''}"`);
-
-                            if (value && value !== 'null' && !value.includes('unknown')) {
-                                // Store the detected value for smart validation
-                                detectedValues[blockName] = value.replace("(À valider)", "").trim();
-
-                                // 🧮 MATHEMATICAL DISTINCTION
-                                if (value.includes("(À valider)")) {
-                                    // LOW CONFIDENCE → Need validation question
-                                    lowConfidenceSet.add(blockName);
-                                    const cleanValue = value.replace("(À valider)", "").trim();
-                                    lowConfidenceData += `- ${blockName} : "${cleanValue}" (BASSE CONFIANCE - À VALIDER)\n`;
-                                    console.log(`      → LOW CONFIDENCE`);
-                                } else {
-                                    // HIGH CONFIDENCE → Skip entirely
-                                    highConfidenceSet.add(blockName);
-                                    highConfidenceData += `- ${blockName} : "${value}" (HAUTE CONFIANCE - NE PAS REDEMANDER)\n`;
-                                    console.log(`      → HIGH CONFIDENCE (SKIP)`);
-                                }
-                            } else {
-                                // UNKNOWN → Need full question
-                                unknownSet.add(blockName);
-                                console.log(`      → UNKNOWN (value empty/null)`);
-                            }
-                        }
-                    } else {
-                        // Not found in scan → UNKNOWN
-                        unknownSet.add(blockName);
-                        console.log(`   ❓ ${label} → ${blockName}: NOT FOUND in scan`);
-                    }
-                });
-
-                console.log("🧮 MATHEMATICAL BREAKDOWN:");
-                console.log(`   HIGH CONFIDENCE (SKIP): ${highConfidenceSet.size} → ${Array.from(highConfidenceSet).join(', ')}`);
-                console.log(`   LOW CONFIDENCE (VALIDATE): ${lowConfidenceSet.size} → ${Array.from(lowConfidenceSet).join(', ')}`);
-                console.log(`   UNKNOWN (ASK FULL): ${unknownSet.size} → ${Array.from(unknownSet).join(', ')}`);
-
-            } else {
-                console.warn("⚠️ No SCAN message found in history. All 16 blocks are UNKNOWN.");
-            }
-
-            // FULL LIST OF 16 BLOCKS
+            // FULL LIST OF 16 BLOCKS (aligned with scan_state keys)
             const allBlockNames = [
-                "NOM", "PAYS", "STATUT",
-                "SECTEUR", "CIBLE",
-                "OFFRE", "MODÈLE",
-                "ÉQUIPE", "AMBITION/VISION",
-                "TECHNIQUE/CMS", "DONNÉES/IA",
-                "EXTERNAL_PRESENCE", "REPUTATION_SIGNALS",
-                "KEYWORDS", "INTENTS",
-                "ACCESS_CHANNELS"
+                "identite.name", "identite.juridical_country", "identite.legal_form", "identite.sector",
+                "offre.audience", "offre.offer_summary", "offre.business_model", "identite.team",
+                "offre.value_proposition", "structure_technique.technologies", "structure_technique.ai_usage",
+                "external_context.presence", "engagements_conformite.certifications",
+                "external_context.keywords", "external_context.intents", "external_context.contact"
             ];
 
             // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
             // HIGH confidence blocks are completely excluded
-            const validationQueue = allBlockNames.filter(b => lowConfidenceSet.has(b));
-            const questionQueue = allBlockNames.filter(b => unknownSet.has(b) && !lowConfidenceSet.has(b));
+            const validationQueue = allBlockNames.filter(b => lowConfidenceKeys.includes(b));
+            const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
             const combinedQueue = [...validationQueue, ...questionQueue];
 
             console.log(`📋 QUEUE: ${combinedQueue.length} items to process (${validationQueue.length} validations + ${questionQueue.length} questions)`);
@@ -888,7 +869,7 @@ GÉNÈRE CE JSON MAINTENANT :
             // Select Next Block based on User Progress
             const questionIndex = Math.max(0, stepsCompleted - 1);
             const nextBlockName = combinedQueue[questionIndex] || "FINALISATION";
-            const isValidationQuestion = lowConfidenceSet.has(nextBlockName);
+            const isValidationQuestion = lowConfidenceKeys.includes(nextBlockName);
 
             // Get the detected value for validation questions
             let detectedValueForValidation = "";
@@ -912,7 +893,7 @@ Tu es AYO. Phase de Scan Complémentaire.
 📡 DONNÉES TECHNIQUES :
 ${contextScanResult ? `- URL: ${contextScanResult.url}` : 'N/A'}
 
-🧮 APPROCHE MATHÉMATIQUE - 3 CATÉGORIES :
+🧮 ÉTAT DÉTERMINISTE (pas de parsing texte) :
 
 ✅ HAUTE CONFIANCE (NE PAS REDEMANDER - DÉJÀ VALIDÉ) :
 ${highConfidenceData || '(Aucune)'}
@@ -924,27 +905,27 @@ ${lowConfidenceData || '(Aucune)'}
 
 ${isValidationQuestion ?
                     `🔍 MODE VALIDATION : La valeur détectée est "${detectedValueForValidation}"
-Pose UNE question de confirmation simple : "Nous avons détecté X. Est-ce correct ?"
-Options : Oui / Non / Préciser autrement` :
+Pose UNE question de confirmation simple : "Nous avons détecté ${detectedValueForValidation}. Est-ce correct ?"
+Options : Oui, c'est correct / Non, je précise` :
                     `🔍 MODE QUESTION COMPLÈTE : Cette information est INCONNUE.
 Pose la question standard pour obtenir cette information.`}
 
 ⚠️ RÈGLES DES QUESTIONS :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
-2. Utilise "allowMultiple: true" pour : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
-3. Utilise "allowMultiple: false" pour : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS
+2. Utilise "allowMultiple: true" pour : offre.audience, identite.sector, external_context.keywords, external_context.intents
+3. Utilise "allowMultiple: false" pour les autres blocs
 
 ### FORMAT JSON ATTENDU
 {
   "type": "question_block",
-  "intro": "${isValidationQuestion ? `Vérification rapide pour ${nextBlockName}...` : `Au sujet de votre ${nextBlockName}...`}",
+  "intro": "${isValidationQuestion ? `Vérification rapide...` : `Au sujet de ${nextBlockName}...`}",
   "questions": [
     {
-      "id": "q_next_1",
-      "text": "Votre question NOUVELLE ici ? (PAS de validation d'info existante !)",
+      "id": "q_${nextBlockName.replace('.', '_')}",
+      "text": "Votre question ici ?",
       "options": ["Option A", "Option B", "Option C"],
       "allowCustom": true,
-      "allowMultiple": ${['SECTEUR', 'CIBLE', 'OFFRE', 'DONNÉES/IA', 'EXTERNAL_PRESENCE', 'KEYWORDS', 'INTENTS', 'ACCESS_CHANNELS'].includes(nextBlockName) ? 'true' : 'false'}
+      "allowMultiple": ${['offre.audience', 'identite.sector', 'external_context.keywords', 'external_context.intents'].includes(nextBlockName) ? 'true' : 'false'}
     }
   ]
 }
