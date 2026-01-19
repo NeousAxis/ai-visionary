@@ -752,6 +752,17 @@ GÉNÈRE CE JSON MAINTENANT :
                 m.role === 'assistant' && m.content.includes('SCAN TERMINÉ')
             );
 
+            // 🔍 DEBUG: Log raw scan message to understand parsing
+            if (scanTermineMsg) {
+                console.log("📋 SCAN MESSAGE FOUND:");
+                console.log("   Content length:", scanTermineMsg.content.length);
+                console.log("   First 500 chars:", scanTermineMsg.content.substring(0, 500));
+            } else {
+                console.log("❌ NO SCAN MESSAGE FOUND IN HISTORY");
+                console.log("   Messages count:", messages.length);
+                console.log("   Assistant messages:", messages.filter((m: any) => m.role === 'assistant').length);
+            }
+
             // 🧮 MATHEMATICAL APPROACH: 3 distinct sets
             const highConfidenceSet = new Set<string>();  // SKIP - don't ask anything
             const lowConfidenceSet = new Set<string>();   // VALIDATE - ask "Is this correct?"
@@ -759,6 +770,9 @@ GÉNÈRE CE JSON MAINTENANT :
 
             let highConfidenceData = "";
             let lowConfidenceData = "";
+
+            // Store detected values for smart validation questions
+            const detectedValues: Record<string, string> = {};
 
             if (scanTermineMsg) {
                 const content = scanTermineMsg.content;
@@ -794,26 +808,36 @@ GÉNÈRE CE JSON MAINTENANT :
                         if (parts.length >= 2) {
                             const value = parts.slice(1).join(':').trim();
 
+                            // 🔍 DEBUG: Log each field parsing
+                            console.log(`   📌 ${label} → ${blockName}: "${value.substring(0, 50)}${value.length > 50 ? '...' : ''}"`);
+
                             if (value && value !== 'null' && !value.includes('unknown')) {
+                                // Store the detected value for smart validation
+                                detectedValues[blockName] = value.replace("(À valider)", "").trim();
+
                                 // 🧮 MATHEMATICAL DISTINCTION
                                 if (value.includes("(À valider)")) {
                                     // LOW CONFIDENCE → Need validation question
                                     lowConfidenceSet.add(blockName);
                                     const cleanValue = value.replace("(À valider)", "").trim();
                                     lowConfidenceData += `- ${blockName} : "${cleanValue}" (BASSE CONFIANCE - À VALIDER)\n`;
+                                    console.log(`      → LOW CONFIDENCE`);
                                 } else {
                                     // HIGH CONFIDENCE → Skip entirely
                                     highConfidenceSet.add(blockName);
                                     highConfidenceData += `- ${blockName} : "${value}" (HAUTE CONFIANCE - NE PAS REDEMANDER)\n`;
+                                    console.log(`      → HIGH CONFIDENCE (SKIP)`);
                                 }
                             } else {
                                 // UNKNOWN → Need full question
                                 unknownSet.add(blockName);
+                                console.log(`      → UNKNOWN (value empty/null)`);
                             }
                         }
                     } else {
                         // Not found in scan → UNKNOWN
                         unknownSet.add(blockName);
+                        console.log(`   ❓ ${label} → ${blockName}: NOT FOUND in scan`);
                     }
                 });
 
@@ -853,23 +877,9 @@ GÉNÈRE CE JSON MAINTENANT :
 
             // Get the detected value for validation questions
             let detectedValueForValidation = "";
-            if (isValidationQuestion && scanTermineMsg) {
-                const chunks = scanTermineMsg.content.split(/•|\n/);
-                const labelMap: Record<string, string> = {
-                    "NOM": "Nom", "PAYS": "Pays", "STATUT": "Statut juridique", "SECTEUR": "Secteur",
-                    "CIBLE": "Audience", "OFFRE": "Offre", "MODÈLE": "Modèle économique", "ÉQUIPE": "Équipe",
-                    "AMBITION/VISION": "Mission", "TECHNIQUE/CMS": "Technologies", "DONNÉES/IA": "IA",
-                    "EXTERNAL_PRESENCE": "Réseau", "REPUTATION_SIGNALS": "Certifications",
-                    "KEYWORDS": "Mots-clés", "INTENTS": "Intentions", "ACCESS_CHANNELS": "Contact"
-                };
-                const displayLabel = labelMap[nextBlockName] || nextBlockName;
-                const chunk = chunks.find((c: string) => c.trim().toLowerCase().startsWith(displayLabel.toLowerCase()));
-                if (chunk) {
-                    const parts = chunk.split(/[:=]/);
-                    if (parts.length >= 2) {
-                        detectedValueForValidation = parts.slice(1).join(':').trim().replace("(À valider)", "").trim();
-                    }
-                }
+            // Use stored detected value for validation questions (much simpler!)
+            if (isValidationQuestion && detectedValues[nextBlockName]) {
+                detectedValueForValidation = detectedValues[nextBlockName];
             }
 
             console.log(`➡️ NEXT: ${nextBlockName} (${isValidationQuestion ? 'VALIDATION' : 'FULL QUESTION'})`);
