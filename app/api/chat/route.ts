@@ -751,15 +751,21 @@ GÉNÈRE CE JSON MAINTENANT :
             const scanTermineMsg = [...messages].reverse().find((m: any) =>
                 m.role === 'assistant' && m.content.includes('SCAN TERMINÉ')
             );
-            let alreadyDetectedData = "";
-            const detectedSet = new Set<string>();
+
+            // 🧮 MATHEMATICAL APPROACH: 3 distinct sets
+            const highConfidenceSet = new Set<string>();  // SKIP - don't ask anything
+            const lowConfidenceSet = new Set<string>();   // VALIDATE - ask "Is this correct?"
+            const unknownSet = new Set<string>();         // ASK - full question needed
+
+            let highConfidenceData = "";
+            let lowConfidenceData = "";
 
             if (scanTermineMsg) {
-                // Parse the key data points from the scan message
                 const content = scanTermineMsg.content;
-                // PARSE ALL 16 FIELDS TO DETERMINE WHAT TO SKIP
-                // Label Mapping matches 'questionLabels' in Step 1
+
+                // Label Mapping: Display Label -> Block Name
                 const regexMap: Record<string, string> = {
+                    "Nom": "NOM",
                     "Pays": "PAYS",
                     "Statut juridique": "STATUT",
                     "Secteur": "SECTEUR",
@@ -777,60 +783,98 @@ GÉNÈRE CE JSON MAINTENANT :
                     "Contact": "ACCESS_CHANNELS"
                 };
 
-                // BRUTE FORCE PARSING STRATEGY (Split by bullets)
+                // Parse by bullets
                 const chunks = content.split(/•|\n/);
-                console.log(`🔍 DEBUG: Found ${chunks.length} chunks`);
+                console.log(`🔍 DEBUG: Found ${chunks.length} chunks in SCAN message`);
 
                 Object.entries(regexMap).forEach(([label, blockName]) => {
-                    // Find chunk starting with Label
                     const chunk = chunks.find((c: string) => c.trim().toLowerCase().startsWith(label.toLowerCase()));
                     if (chunk) {
-                        // Extract Value part after colon
                         const parts = chunk.split(/[:=]/);
                         if (parts.length >= 2) {
-                            const value = parts.slice(1).join(':').trim(); // Rejoin in case value has colon
+                            const value = parts.slice(1).join(':').trim();
 
-                            // FILTER
-                            if (value && !value.includes("(À valider)") && !value.includes("unknown")) {
-                                detectedSet.add(blockName);
-                                alreadyDetectedData += `- ${blockName} : ${value} (DÉJÀ VALIDÉ)\n`;
+                            if (value && value !== 'null' && !value.includes('unknown')) {
+                                // 🧮 MATHEMATICAL DISTINCTION
+                                if (value.includes("(À valider)")) {
+                                    // LOW CONFIDENCE → Need validation question
+                                    lowConfidenceSet.add(blockName);
+                                    const cleanValue = value.replace("(À valider)", "").trim();
+                                    lowConfidenceData += `- ${blockName} : "${cleanValue}" (BASSE CONFIANCE - À VALIDER)\n`;
+                                } else {
+                                    // HIGH CONFIDENCE → Skip entirely
+                                    highConfidenceSet.add(blockName);
+                                    highConfidenceData += `- ${blockName} : "${value}" (HAUTE CONFIANCE - NE PAS REDEMANDER)\n`;
+                                }
+                            } else {
+                                // UNKNOWN → Need full question
+                                unknownSet.add(blockName);
                             }
                         }
+                    } else {
+                        // Not found in scan → UNKNOWN
+                        unknownSet.add(blockName);
                     }
                 });
 
-                const detectedListDebug = Array.from(detectedSet).join(', ');
-                console.log("🙈 SKIPPING BLOCKS (Already Known):", detectedListDebug);
-
-                // INJECT DEBUG INTO CONTEXT SO AI CAN REPEAT IT IF NEEDED (OR WE SEE IT IN CONSOLE)
-                alreadyDetectedData += `\n[DEBUG SYSTEM: DETECTED_BLOCKS_COUNT=${detectedSet.size} LIST=${detectedListDebug}]`;
+                console.log("🧮 MATHEMATICAL BREAKDOWN:");
+                console.log(`   HIGH CONFIDENCE (SKIP): ${highConfidenceSet.size} → ${Array.from(highConfidenceSet).join(', ')}`);
+                console.log(`   LOW CONFIDENCE (VALIDATE): ${lowConfidenceSet.size} → ${Array.from(lowConfidenceSet).join(', ')}`);
+                console.log(`   UNKNOWN (ASK FULL): ${unknownSet.size} → ${Array.from(unknownSet).join(', ')}`);
 
             } else {
-                console.warn("⚠️ No SCAN message found in history. Assuming nothing detected.");
+                console.warn("⚠️ No SCAN message found in history. All 16 blocks are UNKNOWN.");
             }
 
             // FULL LIST OF 16 BLOCKS
             const allBlockNames = [
-                "PAYS", "STATUT",
+                "NOM", "PAYS", "STATUT",
                 "SECTEUR", "CIBLE",
                 "OFFRE", "MODÈLE",
                 "ÉQUIPE", "AMBITION/VISION",
                 "TECHNIQUE/CMS", "DONNÉES/IA",
-                // Extended Context
                 "EXTERNAL_PRESENCE", "REPUTATION_SIGNALS",
                 "KEYWORDS", "INTENTS",
-                "ACCESS_CHANNELS", "USAGE_PERMISSIONS"
+                "ACCESS_CHANNELS"
             ];
 
-            // DYNAMIC FILTERING: Only ask about blocks NOT in detectedSet
-            const questionsToAsk = allBlockNames.filter(b => !detectedSet.has(b));
+            // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
+            // HIGH confidence blocks are completely excluded
+            const validationQueue = allBlockNames.filter(b => lowConfidenceSet.has(b));
+            const questionQueue = allBlockNames.filter(b => unknownSet.has(b) && !lowConfidenceSet.has(b));
+            const combinedQueue = [...validationQueue, ...questionQueue];
 
-            // Select Next Block based on User Progress (stepsCompleted)
-            // If user answered 0 questions, we take index 0 of questionsToAsk.
-            // If user answered 1 question, we take index 1, etc.
-            // CORRECT INDEX FIX: Since Step 1 is "Ownership Yes", the first real question is at index 0.
+            console.log(`📋 QUEUE: ${combinedQueue.length} items to process (${validationQueue.length} validations + ${questionQueue.length} questions)`);
+
+            // Select Next Block based on User Progress
             const questionIndex = Math.max(0, stepsCompleted - 1);
-            const nextBlockName = questionsToAsk[questionIndex] || "FINALISATION";
+            const nextBlockName = combinedQueue[questionIndex] || "FINALISATION";
+            const isValidationQuestion = lowConfidenceSet.has(nextBlockName);
+
+            // Get the detected value for validation questions
+            let detectedValueForValidation = "";
+            if (isValidationQuestion && scanTermineMsg) {
+                const chunks = scanTermineMsg.content.split(/•|\n/);
+                const labelMap: Record<string, string> = {
+                    "NOM": "Nom", "PAYS": "Pays", "STATUT": "Statut juridique", "SECTEUR": "Secteur",
+                    "CIBLE": "Audience", "OFFRE": "Offre", "MODÈLE": "Modèle économique", "ÉQUIPE": "Équipe",
+                    "AMBITION/VISION": "Mission", "TECHNIQUE/CMS": "Technologies", "DONNÉES/IA": "IA",
+                    "EXTERNAL_PRESENCE": "Réseau", "REPUTATION_SIGNALS": "Certifications",
+                    "KEYWORDS": "Mots-clés", "INTENTS": "Intentions", "ACCESS_CHANNELS": "Contact"
+                };
+                const displayLabel = labelMap[nextBlockName] || nextBlockName;
+                const chunk = chunks.find((c: string) => c.trim().toLowerCase().startsWith(displayLabel.toLowerCase()));
+                if (chunk) {
+                    const parts = chunk.split(/[:=]/);
+                    if (parts.length >= 2) {
+                        detectedValueForValidation = parts.slice(1).join(':').trim().replace("(À valider)", "").trim();
+                    }
+                }
+            }
+
+            console.log(`➡️ NEXT: ${nextBlockName} (${isValidationQuestion ? 'VALIDATION' : 'FULL QUESTION'})`);
+            if (isValidationQuestion) console.log(`   Detected value: "${detectedValueForValidation}"`);
+
 
             const CONTINUE_PROMPT = `
 Tu es AYO. Phase de Scan Complémentaire.
@@ -843,45 +887,32 @@ Tu es AYO. Phase de Scan Complémentaire.
 📡 DONNÉES TECHNIQUES :
 ${contextScanResult ? `- URL: ${contextScanResult.url}` : 'N/A'}
 
-🔍 CONTEXTE ACQUIS (CE QUE TU SAIS DÉJÀ - NE POSE PAS DE QUESTIONS SUR CES DONNÉES) :
-${alreadyDetectedData}
+🧮 APPROCHE MATHÉMATIQUE - 3 CATÉGORIES :
 
-🚨🚨🚨 RÈGLE ABSOLUE - INTERDICTION DE DEMANDER CONFIRMATION 🚨🚨🚨
-SI une information apparaît dans le "CONTEXTE ACQUIS" ci-dessus :
-❌ TU NE DEMANDES PAS "Est-ce correct ?"
-❌ TU NE DEMANDES PAS "Confirmez-vous que X ?"  
-❌ TU NE POSES AUCUNE QUESTION DE VALIDATION
-✅ TU PASSES DIRECTEMENT AU THÈME SUIVANT QUI EST VRAIMENT MANQUANT
+✅ HAUTE CONFIANCE (NE PAS REDEMANDER - DÉJÀ VALIDÉ) :
+${highConfidenceData || '(Aucune)'}
 
-EXEMPLE DE CE QUI EST INTERDIT :
-- "Votre audience cible est-elle correctement définie comme B2B et B2C ?" → INTERDIT si déjà dans CONTEXTE
-- "Confirmez-vous que votre pays est la Suisse ?" → INTERDIT si déjà dans CONTEXTE
-- "Est-ce bien votre secteur d'activité ?" → INTERDIT si déjà dans CONTEXTE
+⚠️ BASSE CONFIANCE (DEMANDER VALIDATION "Est-ce correct ?") :
+${lowConfidenceData || '(Aucune)'}
 
-Les données du CONTEXTE ACQUIS sont VALIDÉES. On ne les revalide PAS.
+### TA MISSION POUR : **${nextBlockName}**
 
-### TA MISSION
-Tu dois obtenir l'information pour le thème : **${nextBlockName}**.
-
-SI ${nextBlockName} est déjà dans le CONTEXTE ACQUIS → Réponds avec ce JSON spécial :
-{
-  "type": "question_block",
-  "intro": "✅ Information déjà connue pour ${nextBlockName}.",
-  "questions": [],
-  "skip": true
-}
-
-SI ${nextBlockName} est VRAIMENT MANQUANT → Pose la question standard pour l'obtenir.
+${isValidationQuestion ?
+                    `🔍 MODE VALIDATION : La valeur détectée est "${detectedValueForValidation}"
+Pose UNE question de confirmation simple : "Nous avons détecté X. Est-ce correct ?"
+Options : Oui / Non / Préciser autrement` :
+                    `🔍 MODE QUESTION COMPLÈTE : Cette information est INCONNUE.
+Pose la question standard pour obtenir cette information.`}
 
 ⚠️ RÈGLES DES QUESTIONS :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
 2. Utilise "allowMultiple: true" pour : SECTEUR, CIBLE, OFFRE, DONNÉES/IA, EXTERNAL_PRESENCE, KEYWORDS, INTENTS, ACCESS_CHANNELS
-3. Utilise "allowMultiple: false" pour : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS, USAGE_PERMISSIONS
+3. Utilise "allowMultiple: false" pour : PAYS, STATUT, MODÈLE, ÉQUIPE, AMBITION/VISION, TECHNIQUE/CMS, REPUTATION_SIGNALS
 
 ### FORMAT JSON ATTENDU
 {
   "type": "question_block",
-  "intro": "Au sujet de votre ${nextBlockName}...",
+  "intro": "${isValidationQuestion ? `Vérification rapide pour ${nextBlockName}...` : `Au sujet de votre ${nextBlockName}...`}",
   "questions": [
     {
       "id": "q_next_1",
@@ -917,9 +948,9 @@ SI ${nextBlockName} est VRAIMENT MANQUANT → Pose la question standard pour l'o
 
                         // Calculate the NEXT block to ask about
                         const nextQuestionIndex = questionIndex + 1;
-                        const nextNextBlockName = questionsToAsk[nextQuestionIndex] || "FINALISATION";
+                        const nextNextBlockName = combinedQueue[nextQuestionIndex] || "FINALISATION";
 
-                        if (nextNextBlockName === "FINALISATION" || nextQuestionIndex >= questionsToAsk.length) {
+                        if (nextNextBlockName === "FINALISATION" || nextQuestionIndex >= combinedQueue.length) {
                             // All blocks covered - trigger final analysis
                             console.log("✅ All questions covered. Triggering FINAL_ANALYSIS...");
                             triggerMode = "FINAL_ANALYSIS";
