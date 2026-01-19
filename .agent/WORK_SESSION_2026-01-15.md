@@ -125,64 +125,50 @@ Corriger le lien LIGHT report et améliorer la transparence du flux AYO.
 
 ---
 
-## 🚧 TRAVAUX À TERMINER
+## ✅ TRAVAUX TERMINÉS (Vérifié le 19 Jan 2026)
 
-### ~~1. **PRIORITÉ HAUTE : Implémenter Rendering Choix Multiple**~~ ✅ FAIT
+### 1. **PRIORITÉ HAUTE : Implémenter Rendering Choix Multiple** ✅ COMPLET
 **Fichier** : `app/components/AyoChat.tsx`
-**Lignes** : ~240-265 (bloc rendering questions)
+**Lignes** : 354-473
 
-**Ce qui doit être fait** :
-```tsx
-{q.allowMultiple ? (
-    // Afficher CHECKBOXES avec state selectedMultiple
-    // + Bouton "Valider" pour envoyer la sélection
-) : (
-    // Afficher BOUTONS (comportement actuel)
-)}
-```
-
-**Guidelines** :
-- Utiliser le state `selectedMultiple` déjà créé (ligne 26)
-- Format réponse : "Option1, Option2, Option3" (comma-separated)
-- Ne PAS casser le rendering actuel des boutons
+**Implémentation** :
+- Checkboxes avec design "Large Bubble" moderne
+- State `selectedMultiple` fonctionnel (ligne 155)
+- Badge "Plusieurs choix possibles" affiché
+- Option "Autre" avec champ texte dynamique
+- Bouton "✓ Valider" pour soumettre les sélections
+- Format réponse : "Question : Option1, Option2, Option3"
 
 ---
 
-### 2. **PRIORITÉ MOYENNE : Tunnel de Vente Détaillé**
-**Problème** : Le nouveau tunnel v3.0 n'est toujours PAS affiché dans l'UI.
-
+### 2. **PRIORITÉ MOYENNE : Tunnel de Vente Détaillé** ✅ CORRIGÉ
 **Fichier** : `app/api/chat/route.ts`
-**Ligne** : 1180-1285
+**Lignes** : 1464-1472
 
-**Debug nécessaire** :
-- Vérifier si le code TypeScript est exécuté ou si c'est le LLM qui répond
-- Ajouter logs pour tracer quel bloc génère la réponse
-- Le tunnel DEVRAIT s'afficher après validation email
-
-**Texte attendu** (doit s'afficher) :
-```
-📡 COMMENT FONCTIONNE AI-VISIONARY
-...
-## 🔹 PACK LIGHT — DÉMARRER
-...
-## 🔹 PACK ESSENTIAL
-...
-## 🔹 PACK PRO
+**Solution** : Early return ajouté pour détecter et retourner immédiatement le tunnel de vente v3.0 :
+```typescript
+if (finalResponseText && (finalResponseText.includes("PACK LIGHT") || finalResponseText.includes("Email enregistré") || finalResponseText.includes("Email Refusé"))) {
+    console.log("✅ Returning Sales Tunnel Response (Skipping LLM override).");
+    return new Response(JSON.stringify({ text: finalResponseText }), ...);
+}
 ```
 
 ---
 
-### 3. **PRIORITÉ BASSE : Éviter "Autre" en double**
-**Fichier** : `app/api/chat/route.ts`
-**Ligne** : 741-746
+### 3. **PRIORITÉ BASSE : Éviter "Autre" en double** ✅ RÉSOLU
+**Fichier** : `app/components/AyoChat.tsx`
+**Lignes** : 299-307
 
-**Instruction LLM ajoutée** :
+**Solution** : Filtrage frontend automatique des options "Autre" :
+```typescript
+const filteredOptions = q.options.filter(opt => {
+    const lower = opt.toLowerCase().trim();
+    if (['autre', 'other', 'préciser', ...].includes(lower)) return false;
+    if (lower.includes('les deux') || lower.includes('both') || ...) return false;
+    return true;
+});
 ```
-Si allowCustom est TRUE, NE METS PAS "Autre" dans les options !
-Le système l'ajoute automatiquement.
-```
-
-**À vérifier** : Que le LLM respecte bien cette instruction.
+L'UI ajoute toujours son propre bouton "Autre..." uniforme.
 
 ---
 
@@ -368,22 +354,28 @@ Stripe OR direct LIGHT link
 
 ---
 
-## 🎯 PROCHAINES SESSIONS
+## 🎯 PROCHAINES SESSIONS (Mis à jour 19 Jan 2026)
 
-### Session 1 : Finaliser Choix Multiple
-- Implémenter rendering checkboxes
-- Gérer sélection multiple + état
-- Tester avec question type "Secteur" (peut cocher plusieurs)
+### ✅ Session 1 : Finaliser Choix Multiple — **TERMINÉ**
+- Checkboxes implémentées (L354-473 AyoChat.tsx)
+- State `selectedMultiple` fonctionnel
+- Design "Large Bubble" avec badge "Plusieurs choix possibles"
 
-### Session 2 : Debug Tunnel de Vente
-- Tracer pourquoi le nouveau texte ne s'affiche pas
-- Vérifier si c'est le LLM ou le code TypeScript qui répond
-- Corriger pour que le tunnel v3.0 s'affiche
+### ✅ Session 2 : Debug Tunnel de Vente — **TERMINÉ**
+- Early return ajouté (L1464-1472 route.ts)
+- Tunnel v3.0 s'affiche correctement après validation email
 
-### Session 3 : Finaliser Pipeline Complet
-- Tester email LIGHT/Essential/PRO
-- Vérifier tous les documents envoyés
-- S'assurer que l'ASR est correct
+### 🚀 Session 3 : Finaliser Pipeline Complet — **À TESTER**
+- [ ] Tester flux scan → questions → score → email
+- [ ] Vérifier emails LIGHT/Essential/PRO reçus
+- [ ] S'assurer que l'ASR est correct dans les pièces jointes
+- [ ] Test de paiement Stripe (mode test)
+
+### 📋 Session 4 : Améliorations Futures (Backlog)
+- [ ] Ajouter analytics sur les conversions
+- [ ] Optimiser temps de réponse LLM
+- [ ] Améliorer détection sectorielle (AYA_SECTOR_DETECTOR)
+- [ ] Implémenter caching Redis pour scans répétés
 
 ---
 
