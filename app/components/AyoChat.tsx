@@ -214,7 +214,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         ];
 
         return (
-            <div className="w-full bg-slate-50 border-b border-slate-200 relative z-20" style={{ padding: '30px 60px 60px 60px', marginTop: '80px', marginBottom: '20px' }}>
+            <div className="w-full bg-slate-50 border-b border-slate-200 relative z-20" style={{ padding: '30px 60px 60px 60px', marginTop: '20px', marginBottom: '20px' }}>
                 <div className="flex justify-between items-center w-full relative">
                     {/* Connecting Line */}
                     <div className="absolute top-3 left-0 w-full h-0.5 bg-slate-200 -z-0"></div>

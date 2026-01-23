@@ -256,6 +256,25 @@ export async function POST(req: Request) {
                     }
                 }
 
+                // ULTIMATE FALLBACK: Client Reference ID Rescue
+                // If Stripe didn't give us the email (e.g. user didn't fill it or test mode quirk),
+                // we recover it from the 'client_reference_id' we encoded ourselves.
+                if (!customerEmail && session.client_reference_id) {
+                    try {
+                        console.log("⚠️ No Customer Email found yet. Attempting Client Reference Rescue...");
+                        const b64 = session.client_reference_id;
+                        const jsonStr = Buffer.from(b64, 'base64').toString('utf-8');
+                        const payload = JSON.parse(jsonStr); // Expect { u: url, e: email }
+
+                        if (payload.e && payload.e.includes('@')) {
+                            customerEmail = payload.e;
+                            console.log("✅ RESCUE SUCCESS: Email extracted from client_reference_id:", customerEmail);
+                        }
+                    } catch (rescueErr) {
+                        console.error("❌ Client Reference Rescue Failed:", rescueErr);
+                    }
+                }
+
             } catch (stripeErr) {
                 console.error("❌ Stripe Retrieval Error:", stripeErr);
             }
