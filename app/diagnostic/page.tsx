@@ -28,7 +28,7 @@ export default function DiagnosticPage() {
 
             {/* Footer Text */}
             <div style={{ textAlign: 'center', paddingBottom: '20px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                © 2026 AI Visionary • Powered by AYO V6
+                © 2026 AI Visionary
             </div>
         </div>
     );
