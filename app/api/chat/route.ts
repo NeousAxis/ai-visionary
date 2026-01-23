@@ -1702,64 +1702,69 @@ Bienvenue dans l'élite des entreprises AI-Ready.
             // ---------------------------------------------------------
 
             // SCENARIO 2 : User provides Email (Update DB & Offer Payment/Report)
-            else if (lastMessage.role === 'user' && emailMatch) {
-                const userEmail = emailMatch[0];
-                console.log(`📧 DETECTED EMAIL: ${userEmail}. Updating Analysis Record...`);
+        } else if (lastMessage.role === 'user' && emailMatch) {
+            const userEmail = emailMatch[0];
+            console.log(`📧 DETECTED EMAIL: ${userEmail}. Updating Analysis Record...`);
 
-                // 1. Find the URL created in previous steps from history
-                const historyUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+            // CRITICAL: Save email for PaymentHandler recovery (Post-Payment Redirect)
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('ayo_customer_email', userEmail);
+            }
 
-                // Find the user message that contained the URL (and was NOT an email)
-                const historyUrlMatchMsg = messages.find((m: any) => {
-                    const isMsgEmail = m.content.trim().match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/);
-                    return m.role === 'user' && m.content.match(historyUrlRegex) && !isMsgEmail;
-                });
+            // 1. Find the URL created in previous steps from history
+            const historyUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
 
-                let detectedUrl = "";
-                if (historyUrlMatchMsg) {
-                    const match = historyUrlMatchMsg.content.match(historyUrlRegex);
-                    if (match) detectedUrl = match[0];
-                    if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
-                }
+            // Find the user message that contained the URL (and was NOT an email)
+            const historyUrlMatchMsg = messages.find((m: any) => {
+                const isMsgEmail = m.content.trim().match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/);
+                return m.role === 'user' && m.content.match(historyUrlRegex) && !isMsgEmail;
+            });
 
-                if (detectedUrl) {
-                    // Update DB with Email
-                    try {
-                        const existingAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
-                        if (existingAnalysis) {
-                            await db.saveAnalysis(existingAnalysis.id, { email: userEmail });
-                            console.log(`✅ DB UPDATED: ${userEmail} linked to Analysis ${existingAnalysis.id}`);
-                        }
-                    } catch (dbErr) { console.error("❌ Failed to link email:", dbErr); }
-                }
+            let detectedUrl = "";
+            if (historyUrlMatchMsg) {
+                const match = historyUrlMatchMsg.content.match(historyUrlRegex);
+                if (match) detectedUrl = match[0];
+                if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
+            }
 
-                // 2. IDENTIFY CHOSEN PACK FROM ASSISTANT HISTORY
-                // We look at the LAST assistant message (before the user's email) to see what Pack was confirmed
-                const lastAssistantMsg = messages[messages.length - 2]?.content || ""; // -1 is user email, -2 is assistant prompt
-
-                let selectedPlan = "light"; // Default
-                if (lastAssistantMsg.includes("PACK ESSENTIAL")) selectedPlan = "essential";
-                else if (lastAssistantMsg.includes("PACK PRO")) selectedPlan = "pro";
-
-                console.log(`🎯 DETECTED PLAN FROM CONTEXT: ${selectedPlan}`);
-
-                // 3. GENERATE LINK
-                let actionLink = "";
-                let stripeSuffix = "";
-
+            if (detectedUrl) {
+                // Update DB with Email
                 try {
-                    const payload = { u: detectedUrl || "unknown", e: userEmail };
-                    const jsonStr = JSON.stringify(payload);
-                    const b64 = Buffer.from(jsonStr).toString('base64');
-                    // Ensure < 255 chars for Stripe client_reference_id
-                    if (b64.length <= 200) {
-                        stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
+                    const existingAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
+                    if (existingAnalysis) {
+                        await db.saveAnalysis(existingAnalysis.id, { email: userEmail });
+                        console.log(`✅ DB UPDATED: ${userEmail} linked to Analysis ${existingAnalysis.id}`);
                     }
-                } catch (e) { console.error("Stripe Param Error", e); }
+                } catch (dbErr) { console.error("❌ Failed to link email:", dbErr); }
+            }
 
-                if (selectedPlan === "essential") {
-                    actionLink = `https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix}`;
-                    finalResponseText = `✅ **Email enregistré.**
+            // 2. IDENTIFY CHOSEN PACK FROM ASSISTANT HISTORY
+            // We look at the LAST assistant message (before the user's email) to see what Pack was confirmed
+            const lastAssistantMsg = messages[messages.length - 2]?.content || ""; // -1 is user email, -2 is assistant prompt
+
+            let selectedPlan = "light"; // Default
+            if (lastAssistantMsg.includes("PACK ESSENTIAL")) selectedPlan = "essential";
+            else if (lastAssistantMsg.includes("PACK PRO")) selectedPlan = "pro";
+
+            console.log(`🎯 DETECTED PLAN FROM CONTEXT: ${selectedPlan}`);
+
+            // 3. GENERATE LINK
+            let actionLink = "";
+            let stripeSuffix = "";
+
+            try {
+                const payload = { u: detectedUrl || "unknown", e: userEmail };
+                const jsonStr = JSON.stringify(payload);
+                const b64 = Buffer.from(jsonStr).toString('base64');
+                // Ensure < 255 chars for Stripe client_reference_id
+                if (b64.length <= 200) {
+                    stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
+                }
+            } catch (e) { console.error("Stripe Param Error", e); }
+
+            if (selectedPlan === "essential") {
+                actionLink = `https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix}`;
+                finalResponseText = `✅ **Email enregistré.**
 
 🛡 **Finaliser ma commande PACK ESSENTIAL (99 CHF)**
 
@@ -1773,9 +1778,9 @@ Bienvenue dans l'élite des entreprises AI-Ready.
 
 *Vous recevrez votre reçu et vos fichiers instantanément après validation.*`;
 
-                } else if (selectedPlan === "pro") {
-                    actionLink = `https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix}`;
-                    finalResponseText = `✅ **Email enregistré.**
+            } else if (selectedPlan === "pro") {
+                actionLink = `https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix}`;
+                finalResponseText = `✅ **Email enregistré.**
 
 🚀 **Finaliser ma commande PACK PRO (499 CHF)**
 
@@ -1790,153 +1795,153 @@ Bienvenue dans l'élite des entreprises AI-Ready.
 
 *Vous recevrez votre reçu et vos fichiers instantanément après validation.*`;
 
-                } else {
-                    // LIGHT (Default)
-                    actionLink = `https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl || "")}`;
-                    finalResponseText = `✅ **Email enregistré.**
+            } else {
+                // LIGHT (Default)
+                actionLink = `https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl || "")}`;
+                finalResponseText = `✅ **Email enregistré.**
 
 🔹 **Activer mon PACK LIGHT (Gratuit)**
 
 👉 **[Recevoir mon rapport AIO maintenant](${actionLink})**
 
 *Votre rapport détaillé est en cours de génération et arrivera dans votre boîte mail d'ici quelques minutes.*`;
-                }
-            }
-        } // END OF ELSE BLOCK (Email Logic)
-
-        // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
-        // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
-        // This prevents the code from running a SECOND scan and a SECOND LLM call (Hallucination/Timeout).
-        if (isAnalysisRun && finalResponseText) {
-            console.log("✅ Returning Deterministic Analysis Result (Skipping secondary LLM call).");
-            return new Response(JSON.stringify({ text: finalResponseText }), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        // 🛑 CRITICAL FIX: Return immediately if a response was generated (Sales Tunnel, Analysis, or Questioning)
-        // This prevents the code from falling through to the generic LLM which would overwrite the specific response.
-        if (finalResponseText) {
-            console.log("✅ Returning Generated Response (Skipping fallback LLM call). Content start: " + finalResponseText.substring(0, 50));
-            return new Response(JSON.stringify({ text: finalResponseText }), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
-        let websiteData = { text: "", hasJsonLd: false };
-
-        // This part of websiteData fetching is now less critical for the main analysis flow
-        // as the deterministic engine handles it, but might be used for other LLM prompts.
-        if (messages.length === 6 && !isAnalysisRun) { // Only fetch if not already in analysis run
-            const urlMessage = messages[3];
-            if (urlMessage && urlMessage.role === 'user') {
-                websiteData = await fetchWebsiteContent(urlMessage.content);
             }
         }
+    } // END OF ELSE BLOCK (Email Logic)
 
-        // 💾 DATABASE PERSISTENCE (Simulation Log)
-        if (messages.length > 2) {
-            console.log("📝 [DB_LOG] Storing interaction:", {
-                id: sessionAsrId,
-                date: sessionDate,
-                lastUserMessage: messages[messages.length - 1].content
-            });
+// 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
+// If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
+// This prevents the code from running a SECOND scan and a SECOND LLM call (Hallucination/Timeout).
+if (isAnalysisRun && finalResponseText) {
+        console.log("✅ Returning Deterministic Analysis Result (Skipping secondary LLM call).");
+        return new Response(JSON.stringify({ text: finalResponseText }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    // 🛑 CRITICAL FIX: Return immediately if a response was generated (Sales Tunnel, Analysis, or Questioning)
+    // This prevents the code from falling through to the generic LLM which would overwrite the specific response.
+    if (finalResponseText) {
+        console.log("✅ Returning Generated Response (Skipping fallback LLM call). Content start: " + finalResponseText.substring(0, 50));
+        return new Response(JSON.stringify({ text: finalResponseText }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
+    let websiteData = { text: "", hasJsonLd: false };
+
+    // This part of websiteData fetching is now less critical for the main analysis flow
+    // as the deterministic engine handles it, but might be used for other LLM prompts.
+    if (messages.length === 6 && !isAnalysisRun) { // Only fetch if not already in analysis run
+        const urlMessage = messages[3];
+        if (urlMessage && urlMessage.role === 'user') {
+            websiteData = await fetchWebsiteContent(urlMessage.content);
         }
+    }
+
+    // 💾 DATABASE PERSISTENCE (Simulation Log)
+    if (messages.length > 2) {
+        console.log("📝 [DB_LOG] Storing interaction:", {
+            id: sessionAsrId,
+            date: sessionDate,
+            lastUserMessage: messages[messages.length - 1].content
+        });
+    }
 
 
 
-        // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-        // Find URL in history to pass to Stripe (Robust Regex)
-        const robustHistoryUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-        const historyUrlMatch = messages.find((m: any) => m.content.match(robustHistoryUrlRegex));
-        let detectedUrl = historyUrlMatch ? historyUrlMatch.content.match(robustHistoryUrlRegex)[0] : "";
+    // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
+    // Find URL in history to pass to Stripe (Robust Regex)
+    const robustHistoryUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
+    const historyUrlMatch = messages.find((m: any) => m.content.match(robustHistoryUrlRegex));
+    let detectedUrl = historyUrlMatch ? historyUrlMatch.content.match(robustHistoryUrlRegex)[0] : "";
 
-        // Normalize
-        if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
+    // Normalize
+    if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
 
-        // Find Email in history to pass to Stripe (Robust Backup)
-        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
-        const historyEmailMatch = messages.slice().reverse().find((m: any) => m.role === 'user' && m.content.match(emailRegex));
-        const detectedEmail = historyEmailMatch ? historyEmailMatch.content.match(emailRegex)[0] : "";
+    // Find Email in history to pass to Stripe (Robust Backup)
+    const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
+    const historyEmailMatch = messages.slice().reverse().find((m: any) => m.role === 'user' && m.content.match(emailRegex));
+    const detectedEmail = historyEmailMatch ? historyEmailMatch.content.match(emailRegex)[0] : "";
 
-        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
+    let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
 
-        // -----------------------------------------------------------------------
-        // SYSTEM PROMPT CONSTRUCTION (ALWAYS LOAD V3 PROMPT IF URL EXISTS)
-        // -----------------------------------------------------------------------
-        // If analysis NOT run yet, we still need the prompt to interview the user.
-        // We perform a light scan if needed to populate the prompt context.
+    // -----------------------------------------------------------------------
+    // SYSTEM PROMPT CONSTRUCTION (ALWAYS LOAD V3 PROMPT IF URL EXISTS)
+    // -----------------------------------------------------------------------
+    // If analysis NOT run yet, we still need the prompt to interview the user.
+    // We perform a light scan if needed to populate the prompt context.
 
-        // Define clean defaults for prompt context
-        let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false };
-        let promptUrlToScan = detectedUrl;
+    // Define clean defaults for prompt context
+    let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false };
+    let promptUrlToScan = detectedUrl;
 
-        // Run light scan if we are NOT running full analysis but have a URL
-        if (detectedUrl && !isAnalysisRun) {
-            try {
-                // Reuse scan logic to get Meta for Prompt
-                const lightScan = await scanUrlForAioSignals(detectedUrl);
-                promptScanResult = lightScan;
-            } catch (e) {
-                console.warn("Prompt Context Scan failed", e);
-            }
-        } else if (isAnalysisRun) {
-            // If Analysis RUN, we assume scanResult is available? 
-            // Wait, variable scope... 'scanResult' is inside the 441 block.
-            // We cannot access 'scanResult' here easily if block scoped.
-            // But we need it for SYSTEM_PROMPT. 
-            // Quick Fix: Re-scan or rely on LLM memory? 
-            // Better: scanUrl is cheap/cached usually. We scan again here or extract from above?
-            // Actually, if isAnalysisRun is true, we might as well populate promptScanResult from the same source?
-            // Since we are stateless, we can just re-run scanUrlForAioSignals below or define SYSTEM_PROMPT generic.
-            // Let's re-run scanUrlForAioSignals safely (heuristic: it's cached or fast).
-            if (promptUrlToScan) {
-                const lightScan = await scanUrlForAioSignals(promptUrlToScan);
-                promptScanResult = lightScan;
-            }
-        }
-
-        // -----------------------------------------------------------------------
-        // GENERATE STRIPE PARAMS FOR PROMPT SALES LINKS
-        // -----------------------------------------------------------------------
-        let stripeSuffix = "";
-        let targetEmailPrompt = detectedEmail || "";
-
+    // Run light scan if we are NOT running full analysis but have a URL
+    if (detectedUrl && !isAnalysisRun) {
         try {
-            const urlForLink = detectedUrl || "";
-            const emailForLink = detectedEmail || "";
+            // Reuse scan logic to get Meta for Prompt
+            const lightScan = await scanUrlForAioSignals(detectedUrl);
+            promptScanResult = lightScan;
+        } catch (e) {
+            console.warn("Prompt Context Scan failed", e);
+        }
+    } else if (isAnalysisRun) {
+        // If Analysis RUN, we assume scanResult is available? 
+        // Wait, variable scope... 'scanResult' is inside the 441 block.
+        // We cannot access 'scanResult' here easily if block scoped.
+        // But we need it for SYSTEM_PROMPT. 
+        // Quick Fix: Re-scan or rely on LLM memory? 
+        // Better: scanUrl is cheap/cached usually. We scan again here or extract from above?
+        // Actually, if isAnalysisRun is true, we might as well populate promptScanResult from the same source?
+        // Since we are stateless, we can just re-run scanUrlForAioSignals below or define SYSTEM_PROMPT generic.
+        // Let's re-run scanUrlForAioSignals safely (heuristic: it's cached or fast).
+        if (promptUrlToScan) {
+            const lightScan = await scanUrlForAioSignals(promptUrlToScan);
+            promptScanResult = lightScan;
+        }
+    }
 
-            if (urlForLink || emailForLink) {
-                const payload: any = {};
-                if (urlForLink) payload.u = urlForLink;
-                if (emailForLink) payload.e = emailForLink;
+    // -----------------------------------------------------------------------
+    // GENERATE STRIPE PARAMS FOR PROMPT SALES LINKS
+    // -----------------------------------------------------------------------
+    let stripeSuffix = "";
+    let targetEmailPrompt = detectedEmail || "";
 
-                const jsonStr = JSON.stringify(payload);
-                const b64 = Buffer.from(jsonStr).toString('base64');
+    try {
+        const urlForLink = detectedUrl || "";
+        const emailForLink = detectedEmail || "";
 
-                if (b64.length <= 250) {
-                    stripeSuffix = `? client_reference_id = ${b64} `;
-                    if (emailForLink) {
-                        stripeSuffix += `& prefilled_email=${encodeURIComponent(emailForLink)} `;
-                    }
-                } else {
-                    // Fallback small
-                    if (urlForLink) {
-                        const smallPayload = JSON.stringify({ u: urlForLink });
-                        const smallB64 = Buffer.from(smallPayload).toString('base64');
-                        stripeSuffix = `? client_reference_id = ${smallB64} `;
-                    }
+        if (urlForLink || emailForLink) {
+            const payload: any = {};
+            if (urlForLink) payload.u = urlForLink;
+            if (emailForLink) payload.e = emailForLink;
+
+            const jsonStr = JSON.stringify(payload);
+            const b64 = Buffer.from(jsonStr).toString('base64');
+
+            if (b64.length <= 250) {
+                stripeSuffix = `? client_reference_id = ${b64} `;
+                if (emailForLink) {
+                    stripeSuffix += `& prefilled_email=${encodeURIComponent(emailForLink)} `;
+                }
+            } else {
+                // Fallback small
+                if (urlForLink) {
+                    const smallPayload = JSON.stringify({ u: urlForLink });
+                    const smallB64 = Buffer.from(smallPayload).toString('base64');
+                    stripeSuffix = `? client_reference_id = ${smallB64} `;
                 }
             }
-        } catch (e) { console.warn("Stripe Param Gen Error", e); }
+        }
+    } catch (e) { console.warn("Stripe Param Gen Error", e); }
 
-        // -----------------------------------------------------------------------
-        // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
-        // -----------------------------------------------------------------------
-        const SYSTEM_PROMPT = `
+    // -----------------------------------------------------------------------
+    // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
+    // -----------------------------------------------------------------------
+    const SYSTEM_PROMPT = `
                 AYO_PROMPT_V4 — DYNAMIC ASCENSION(AYO ONLY)
                 Version: 4.0
                 Statut: ACTIF
@@ -2005,79 +2010,79 @@ Ton rôle s'arrête strictement à la collecte d'informations contextuelles.
 
 Utilise ce ton : Professionnel, froid, clinique, expert.
 `;
-        finalSystemPrompt = SYSTEM_PROMPT;
+    finalSystemPrompt = SYSTEM_PROMPT;
 
-        console.log("Injecting real website content into AI context...");
+    console.log("Injecting real website content into AI context...");
 
-        // Keep the text injection for content analysis
-        if (websiteData.text) {
-            finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
+    // Keep the text injection for content analysis
+    if (websiteData.text) {
+        finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
                                                     """
 ${websiteData.text}
 """`;
-        }
-
-        // DEBUG MODE: NO STREAMING
-        console.log("Generating text (no stream)...");
-        console.log("🤖 PROMPT VERSION CHECK: " + (finalSystemPrompt.includes("DYNAMIC") ? "✅ V4" : "❌ OLD"));
-        const result = await generateText({
-            model: modelToUse,
-            temperature: 0.1, // STRICT DETERMINISTIC MODE
-            system: finalSystemPrompt,
-            messages,
-        });
-
-        // INTERCEPT & PROCESS RESPONSE
-        finalResponseText = result.text;
-
-        // Check for generated JSON in the response (Hidden ASR Pro)
-        const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
-
-        // NEW: CRITICAL SAVE TO DB FOR SOURCE OF TRUTH
-        if (jsonMatch) {
-            const extractedJson = jsonMatch[1].trim();
-            try {
-                const parsed = JSON.parse(extractedJson);
-                // Extract score if available
-                let score = 0;
-                if (parsed['ayo:score'] && parsed['ayo:score'].value) {
-                    if (typeof parsed['ayo:score'].value === 'string') {
-                        score = parseInt(parsed['ayo:score'].value) || 0;
-                    } else {
-                        score = parsed['ayo:score'].value;
-                    }
-                }
-
-                // SAVE EXACT ANALYSIS TO DB (Source of Truth)
-                await db.saveAnalysis(sessionAsrId, {
-                    id: sessionAsrId,
-                    url: parsed.url,
-                    email: null,
-                    score: score,
-                    data: parsed
-                });
-                console.log(`💾 ANALYSIS SOURCE OF TRUTH SAVED: ${sessionAsrId}`);
-            } catch (e) {
-                console.error("❌ Failed to save source of truth to DB:", e);
-            }
-        }
-
-
-
-        // REMOVED: "Fait" logic - Payment confirmation is now handled ONLY by Stripe Webhook
-        // This prevents users from bypassing payment by simply typing "Fait" in the chat
-
-        return new Response(JSON.stringify({ text: finalResponseText }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-
-    } catch (error: any) {
-        console.error("Detailed API Error:", error);
-        return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
     }
+
+    // DEBUG MODE: NO STREAMING
+    console.log("Generating text (no stream)...");
+    console.log("🤖 PROMPT VERSION CHECK: " + (finalSystemPrompt.includes("DYNAMIC") ? "✅ V4" : "❌ OLD"));
+    const result = await generateText({
+        model: modelToUse,
+        temperature: 0.1, // STRICT DETERMINISTIC MODE
+        system: finalSystemPrompt,
+        messages,
+    });
+
+    // INTERCEPT & PROCESS RESPONSE
+    finalResponseText = result.text;
+
+    // Check for generated JSON in the response (Hidden ASR Pro)
+    const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
+
+    // NEW: CRITICAL SAVE TO DB FOR SOURCE OF TRUTH
+    if (jsonMatch) {
+        const extractedJson = jsonMatch[1].trim();
+        try {
+            const parsed = JSON.parse(extractedJson);
+            // Extract score if available
+            let score = 0;
+            if (parsed['ayo:score'] && parsed['ayo:score'].value) {
+                if (typeof parsed['ayo:score'].value === 'string') {
+                    score = parseInt(parsed['ayo:score'].value) || 0;
+                } else {
+                    score = parsed['ayo:score'].value;
+                }
+            }
+
+            // SAVE EXACT ANALYSIS TO DB (Source of Truth)
+            await db.saveAnalysis(sessionAsrId, {
+                id: sessionAsrId,
+                url: parsed.url,
+                email: null,
+                score: score,
+                data: parsed
+            });
+            console.log(`💾 ANALYSIS SOURCE OF TRUTH SAVED: ${sessionAsrId}`);
+        } catch (e) {
+            console.error("❌ Failed to save source of truth to DB:", e);
+        }
+    }
+
+
+
+    // REMOVED: "Fait" logic - Payment confirmation is now handled ONLY by Stripe Webhook
+    // This prevents users from bypassing payment by simply typing "Fait" in the chat
+
+    return new Response(JSON.stringify({ text: finalResponseText }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+
+} catch (error: any) {
+    console.error("Detailed API Error:", error);
+    return new Response(JSON.stringify({ error: `Server Error: ${error.message}` }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+    });
+}
 }
