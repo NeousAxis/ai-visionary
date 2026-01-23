@@ -226,39 +226,41 @@ export async function POST(req: Request) {
                     console.warn("⚠️ Payment not paid:", paymentStatus);
                 }
 
-                // 2. Extract Email (Deep Search)
-                // Priority:
-                // 1. Force Email (Manual)
-                // 2. Customer Details (User typed in Checkout)
-                // 3. Customer Object (Stripe ID)
-                // 4. Client Reference ID (Our Backup)
-                // 5. Payment Method Billing Details (The "Impossible" to miss)
+                // 2. EXTRACT EMAIL - NEW STRATEGY: TRUST OUR DATA FIRST (Client Ref)
+                // "Code Autrement": We prioritized the data we passed (Client Reference) because we know it's correct from the Chat.
 
-                if (force_email) {
-                    customerEmail = force_email;
-                    console.log("✅ Email MANUALLY provided:", customerEmail);
+                // A. Try Client Reference ID (High Reliability)
+                if (session.client_reference_id) {
+                    try {
+                        const b64 = session.client_reference_id;
+                        const jsonStr = Buffer.from(b64, 'base64').toString('utf-8');
+                        const payload = JSON.parse(jsonStr);
+
+                        // Supports { e: "email" } or { u: "url", e: "email" }
+                        if (payload.e && payload.e.includes('@')) {
+                            customerEmail = payload.e;
+                            console.log("✅ PRIORITY 1: Email recovered from Client Reference ID (Chat Context):", customerEmail);
+                        }
+                    } catch (e) {
+                        console.warn("⚠️ Client Reference Decode Failed, falling back to Stripe data.");
+                    }
                 }
-                else if (session.customer_details?.email) {
-                    customerEmail = session.customer_details.email;
-                    console.log("✅ Email form Customer Details:", customerEmail);
-                }
-                else if (session.customer_email) {
-                    customerEmail = session.customer_email;
-                    console.log("✅ Email form Customer Field:", customerEmail);
-                }
-                else if (session.customer && typeof session.customer === 'object' && (session.customer as Stripe.Customer).email) {
-                    customerEmail = (session.customer as Stripe.Customer).email!;
-                    console.log("✅ Email form Customer Object:", customerEmail);
-                }
-                // DEEP SEARCH: Payment Method (The user's JSON case)
-                else if ((session.payment_intent as any)?.payment_method?.billing_details?.email) {
-                    customerEmail = (session.payment_intent as any).payment_method.billing_details.email;
-                    console.log("✅ Email form PaymentMethod Billing:", customerEmail);
-                }
-                // DEEP SEARCH: Receipt Email
-                else if ((session.payment_intent as any)?.receipt_email) {
-                    customerEmail = (session.payment_intent as any).receipt_email;
-                    console.log("✅ Email form PaymentIntent Receipt:", customerEmail);
+
+                // B. Fallback to Stripe Data (Standard)
+                if (!customerEmail) {
+                    if (session.customer_details?.email) {
+                        customerEmail = session.customer_details.email;
+                        console.log("✅ PRIORITY 2: Email from Stripe Customer Details:", customerEmail);
+                    }
+                    else if (session.customer_email) {
+                        customerEmail = session.customer_email;
+                        console.log("✅ PRIORITY 3: Email from Stripe Session Field:", customerEmail);
+                    }
+                    // DEEP SEARCH: Payment Method (The user's JSON case - Last Resort)
+                    else if ((session.payment_intent as any)?.payment_method?.billing_details?.email) {
+                        customerEmail = (session.payment_intent as any).payment_method.billing_details.email;
+                        console.log("✅ PRIORITY 4: Email from PaymentMethod Billing:", customerEmail);
+                    }
                 }
 
                 // Nuclear Fetch (Existing)
@@ -274,24 +276,7 @@ export async function POST(req: Request) {
                     }
                 }
 
-                // ULTIMATE FALLBACK: Client Reference ID Rescue
-                // If Stripe didn't give us the email (e.g. user didn't fill it or test mode quirk),
-                // we recover it from the 'client_reference_id' we encoded ourselves.
-                if (!customerEmail && session.client_reference_id) {
-                    try {
-                        console.log("⚠️ No Customer Email found yet. Attempting Client Reference Rescue...");
-                        const b64 = session.client_reference_id;
-                        const jsonStr = Buffer.from(b64, 'base64').toString('utf-8');
-                        const payload = JSON.parse(jsonStr); // Expect { u: url, e: email }
-
-                        if (payload.e && payload.e.includes('@')) {
-                            customerEmail = payload.e;
-                            console.log("✅ RESCUE SUCCESS: Email extracted from client_reference_id:", customerEmail);
-                        }
-                    } catch (rescueErr) {
-                        console.error("❌ Client Reference Rescue Failed:", rescueErr);
-                    }
-                }
+                // (Old Fallback Block Removed - Logic Moved Upstream)
 
             } catch (stripeErr) {
                 console.error("❌ Stripe Retrieval Error:", stripeErr);
