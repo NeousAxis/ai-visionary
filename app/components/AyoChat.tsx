@@ -41,8 +41,26 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages, isLoading, isOpen]);
+        if (!isOpen && mode === 'widget') return;
+
+        // Handling scroll behavior
+        const lastMsg = messages[messages.length - 1];
+
+        // If it's an AI message, we want to see the START of the message (for long proposals)
+        if (lastMsg && lastMsg.role === 'assistant' && !isLoading) {
+            setTimeout(() => {
+                const bubble = document.getElementById(`msg-${lastMsg.id}`);
+                if (bubble) {
+                    bubble.scrollIntoView({ behavior: "smooth", block: "start" });
+                } else {
+                    scrollToBottom();
+                }
+            }, 100);
+        } else {
+            // Default behavior (user message, loading, etc.) -> Scroll to bottom
+            scrollToBottom();
+        }
+    }, [messages, isLoading, isOpen, isAnalyzing, mode]);
 
     // Initial greeting
     useEffect(() => {
@@ -122,10 +140,10 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     });
                 };
 
-                // Display all chunks sequentially with 9s delay each
+                // Display all chunks sequentially with 0.9s delay each
                 for (const chunk of chunks) {
                     if (chunk && chunk.trim()) {
-                        await addChunk(chunk, 9000);
+                        await addChunk(chunk, 900);
                     }
                 }
 
@@ -165,43 +183,77 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         setInput('');
     };
 
-    // Check if we can go back (at least one user answer exists after URL)
-    const canGoBack = messages.filter(m => m.role === 'user').length > 1;
+    // Check if we can go back (at least one user answer exists)
+    const canGoBack = messages.filter(m => m.role === 'user').length >= 1;
 
-    // Progress Bar Component (Dynamic - based on actual questions asked)
+    // Progress Bar Component (Workflow Steps)
     const ProgressBar = () => {
-        // Count only questions actually asked (assistant messages with question_block)
-        const questionMessages = messages.filter(m =>
-            m.role === 'assistant' &&
-            (m.content.includes('"type": "question_block"') || m.content.includes('question_block'))
-        );
+        // Determine current workflow step based on conversation history
+        let currentStep = 1; // Default: Questionnaire
 
-        const totalAsked = questionMessages.length;
-        const currentStep = stepCount;
+        const lastAiMsg = messages.filter(m => m.role === 'assistant').pop()?.content || "";
+        const allContent = messages.map(m => m.content).join(" ");
 
-        if (totalAsked === 0) return null; // Don't show progress until first question
+        if (allContent.includes("Envoi en cours") || allContent.includes("dossier est prêt")) {
+            currentStep = 5; // Livraison
+        } else if (lastAiMsg.includes("email professionnel") || lastAiMsg.includes("Adresse email")) {
+            currentStep = 4; // Finalisation (Email/Payment)
+        } else if (lastAiMsg.includes("PACK LIGHT") || lastAiMsg.includes("PACK ESSENTIAL") || lastAiMsg.includes("PACK PRO") || lastAiMsg.includes("Score AIO")) {
+            currentStep = 3; // Choix ASR
+        } else if (lastAiMsg.includes("Analyse AIO Finale") || lastAiMsg.includes("SCAN TERMINÉ")) {
+            currentStep = 2; // Analyse
+        }
+
+        const steps = [
+            { num: 1, label: "Questionnaire" },
+            { num: 2, label: "Analyse" },
+            { num: 3, label: "Choix ASR" },
+            { num: 4, label: "Finalisation" },
+            { num: 5, label: "Livraison" }
+        ];
 
         return (
-            <div className="progress-steps-container" style={{ overflowX: 'auto', paddingBottom: '5px' }}>
-                {Array.from({ length: totalAsked + 1 }, (_, i) => i + 1).map((stepNum) => {
-                    const isActive = stepNum === currentStep;
-                    const isCompleted = stepNum < currentStep;
-                    return (
-                        <div key={stepNum} className={`step-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`} style={{ minWidth: '30px' }}>
-                            <div className="step-dot">{isCompleted ? '✓' : (isActive ? '?' : stepNum)}</div>
-                        </div>
-                    );
-                })}
+            <div className="w-full bg-slate-50 border-b border-slate-200 relative z-20" style={{ padding: '30px 60px 60px 60px', marginTop: '80px', marginBottom: '20px' }}>
+                <div className="flex justify-between items-center w-full relative">
+                    {/* Connecting Line */}
+                    <div className="absolute top-3 left-0 w-full h-0.5 bg-slate-200 -z-0"></div>
+
+                    {steps.map((step, index) => {
+                        const isActive = currentStep === step.num;
+                        const isCompleted = currentStep > step.num;
+
+                        // Force alignment with inline styles to override any CSS issues
+                        const alignStyle = index === 0 ? { alignItems: 'flex-start' } : index === steps.length - 1 ? { alignItems: 'flex-end' } : { alignItems: 'center' };
+
+                        return (
+                            <div
+                                key={step.num}
+                                className="flex flex-col gap-2 z-10 relative"
+                                style={alignStyle}
+                            >
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all duration-300
+                                    ${isActive ? 'bg-[#4A919E] border-[#4A919E] text-white scale-110 shadow-sm' :
+                                        isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' :
+                                            'bg-white border-slate-300 text-slate-400'}`}>
+                                    {isCompleted ? '✓' : step.num}
+                                </div>
+                                <span
+                                    className={`text-[9px] uppercase tracking-wider font-semibold transition-colors duration-300 whitespace-nowrap
+                                    ${isActive ? 'text-[#4A919E]' :
+                                            isCompleted ? 'text-emerald-600' :
+                                                'text-slate-400'}`}>
+                                    {step.label}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         );
+
     };
 
-    // Calculate progress based on messages
-    useEffect(() => {
-        const qBlocks = messages.filter(m => m.role === 'assistant' && m.content.includes('"type": "question_block"'));
-        // Initial state is 1, each new block increments
-        setStepCount(qBlocks.length > 0 ? qBlocks.length + 1 : 1);
-    }, [messages]);
+    // (Effect removed as stepCount logic is replaced by content detection)
 
     const renderMessageContent = (msg: any) => {
         // Try to parse JSON if it looks like JSON
@@ -251,7 +303,25 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             const toggleMultipleSelection = (questionId: string, option: string) => {
                 setSelectedMultiple(prev => {
                     const current = prev[questionId] || [];
-                    if (current.includes(option)) {
+                    const isSelecting = !current.includes(option);
+
+                    // UX HANDLING FOR "AUTRE" OPTION
+                    if (option === '__AUTRE__') {
+                        if (isSelecting) {
+                            // If selecting "Autre", pre-fill the main input and focus it
+                            setInput((prevInput) => prevInput ? prevInput : "Autre : ");
+                            // Try to focus main input (dirty but effective)
+                            setTimeout(() => {
+                                const mainInput = document.querySelector('textarea, input[type="text"].chat-input') as HTMLElement;
+                                if (mainInput) mainInput.focus();
+                            }, 50);
+                        } else {
+                            // If deselecting "Autre", clear input only if it looks like the default label
+                            setInput((prevInput) => prevInput.startsWith("Autre :") ? "" : prevInput);
+                        }
+                    }
+
+                    if (!isSelecting) {
                         return { ...prev, [questionId]: current.filter(o => o !== option) };
                     } else {
                         return { ...prev, [questionId]: [...current, option] };
@@ -430,19 +500,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 </div>
                                             </div>
 
-                                            {/* CHAMP DE TEXTE POUR "AUTRE" */}
-                                            {currentSelections.includes('__AUTRE__') && (
-                                                <div className="pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Veuillez préciser..."
-                                                        autoFocus
-                                                        value={input}
-                                                        onChange={(e) => setInput(e.target.value)}
-                                                        className="w-full !px-6 !py-4 !rounded-2xl border border-slate-300 bg-white text-[#212E53] text-[16px] focus:outline-none focus:ring-2 focus:ring-[#4A919E]/20 focus:border-[#4A919E] transition-all shadow-sm placeholder:text-slate-400"
-                                                    />
-                                                </div>
-                                            )}
+
 
                                             {/* Validate Button */}
                                             <button
@@ -494,9 +552,15 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 ))}
 
                                                 {/* OPTION "AUTRE" SINGLE SELECT */}
-                                                {!isOwnershipQuestion && (
+                                                {!isOwnershipQuestion && q.allowCustom !== false && (
                                                     <button
-                                                        onClick={() => setInput(`${q.text} : `)}
+                                                        onClick={() => {
+                                                            setInput("Autre : ");
+                                                            setTimeout(() => {
+                                                                const mainInput = document.querySelector('.chat-input') as HTMLElement;
+                                                                if (mainInput) mainInput.focus();
+                                                            }, 50);
+                                                        }}
                                                         className="group flex items-center justify-between !gap-6 w-full !px-6 !py-5 !rounded-2xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
                                                     >
                                                         <span className="text-[16px] font-medium text-slate-500 italic group-hover:text-amber-700 transition-colors">
@@ -564,6 +628,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 {messages.map((m) => (
                     <div
                         key={m.id}
+                        id={`msg-${m.id}`}
                         className={`msg-bubble ${m.role === 'user' ? 'msg-user' : 'msg-ai'}`}
                     >
                         {renderMessageContent(m)}

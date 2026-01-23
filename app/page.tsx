@@ -211,7 +211,7 @@ export default function Home() {
               <div className="price">Gratuit</div>
               <p className="price-details">Analyse détaillée + Génération de votre ASR (Carte d'identité IA)</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic" className="btn btn-secondary w-full" style={{ width: '100%' }}>
+                <Link href="/diagnostic?pack=light" className="btn btn-secondary w-full" style={{ width: '100%' }}>
                   Lancer l'audit
                 </Link>
               </div>
@@ -222,7 +222,7 @@ export default function Home() {
               <div className="price">99 CHF</div>
               <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. <br />Signature cryptographique incluse.</p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic" className="btn btn-primary w-full" style={{ width: '100%' }}>
+                <Link href="/diagnostic?pack=essential" className="btn btn-primary w-full" style={{ width: '100%' }}>
                   Analyser mon site
                 </Link>
               </div>
@@ -234,7 +234,7 @@ export default function Home() {
               <div className="price">499 CHF</div>
               <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. Signature cryptographique incluse. <br /><br /><strong>+ La couche de confiance totale pour les IA. Glossaire, FAQ Structurée, Architecture & Manifest.</strong></p>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic" className="btn btn-secondary w-full" style={{ width: '100%' }}>
+                <Link href="/diagnostic?pack=pro" className="btn btn-secondary w-full" style={{ width: '100%' }}>
                   Analyser mon site
                 </Link>
               </div>

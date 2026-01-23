@@ -500,6 +500,16 @@ export async function POST(req: Request) {
 
         console.log(`🎯 TRIGGER MODE CALCULATED: "${triggerMode}" (stepsCompleted: ${stepsCompleted}, hasUrlHistory: ${hasUrlHistory}, hasFinalScore: ${hasFinalScore})`);
 
+        // 🚀 OVERRIDE: SALES FUNNEL DETECTION (Prevent Infinite Loop)
+        const lowerContent = lastMessage.content.toLowerCase();
+        if (lowerContent.includes("pack light") || lowerContent.includes("pack essential") ||
+            lowerContent.includes("pack pro") || lowerContent.includes("confirmer") ||
+            lowerContent.includes("valider") || lowerContent.includes("je reste") ||
+            lowerContent.includes("passer en") || lowerContent.includes("upgrader")) {
+            console.log("💰 SALES FUNNEL INTERACTION DETECTED. Forcing mode to SALES_FUNNEL.");
+            triggerMode = "SALES_FUNNEL";
+        }
+
         if (triggerMode === "SCAN_AND_QUESTION") {
             console.log("🚀 TRIGGERING PHASE 1: INTELLIGENT EXTRACTION (V8)...");
 
@@ -881,14 +891,31 @@ GÉNÈRE CE JSON MAINTENANT :
             console.log(`➡️ NEXT: ${nextBlockName} (${isValidationQuestion ? 'VALIDATION' : 'FULL QUESTION'})`);
             if (isValidationQuestion) console.log(`   Detected value: "${detectedValueForValidation}"`);
 
+            // 🛑 CRITICAL FIX: IF QUEUE IS FINISHED, TRIGGER ANALYSIS IMMEDIATELY
+            if (nextBlockName === "FINALISATION") {
+                console.log("🏁 Queue exhausted (Natural End). Triggering FINAL_ANALYSIS...");
+                triggerMode = "FINAL_ANALYSIS";
+            }
 
-            const CONTINUE_PROMPT = `
+            // ONLY GENERATE A NEW QUESTION IF WE ARE STILL IN QUESTIONING MODE
+            if (triggerMode === "CONTINUE_QUESTIONING") {
+
+                const CONTINUE_PROMPT = `
 Tu es AYO. Phase de Scan Complémentaire.
 
 🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
 ✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
 ⚠️ UNE SEULE QUESTION PAR BLOC.
 ⚠️ RISQUE CRITIQUE : N'ÉCRIS AUCUN TEXTE AVANT LE JSON ! COMMENCE DIRECTEMENT PAR '{'.
+
+🚨 GESTION DES INTERRUPTIONS UTILISATEUR :
+Si le dernier message de l'utilisateur est une QUESTION (contient "?" ou demande une info) ou une remarque hors-sujet :
+1. NE RÉPONDS PAS à sa question.
+2. DANS LE CHAMP "intro", ÉCRIS EXACTEMENT ET UNIQUEMENT CECI : "Durant la phase d'analyse je ne peux pas répondre à votre question. Merci de seulement répondre à la question pour obtenir votre ASR et les documents relatifs. Pour toute question vous pouvez aussi contacter notre support : hello@ai-visionary.com"
+3. REPOSE LA MÊME QUESTION que tu posais juste avant (celle du bloc en cours : **${nextBlockName}**).
+
+🚫 RÈGLES DE CONTENU INTERDIT :
+- NE JAMAIS DEMANDER LE CHIFFRE D'AFFAIRES (CA), LE REVENU, OU LE TURNOVER. Si le bloc est "business_model", demande plutôt "Quel est votre modèle de vente (Abonnement, Vente unique...) ?".
 
 📡 DONNÉES TECHNIQUES :
 ${contextScanResult ? `- URL: ${contextScanResult.url}` : 'N/A'}
@@ -901,14 +928,15 @@ ${highConfidenceData || '(Aucune)'}
 ⚠️ BASSE CONFIANCE (DEMANDER VALIDATION "Est-ce correct ?") :
 ${lowConfidenceData || '(Aucune)'}
 
-### TA MISSION POUR : **${nextBlockName}**
+### TA MISSION POUR LE BLOC : **${nextBlockName}**
 
 ${isValidationQuestion ?
-                    `🔍 MODE VALIDATION : La valeur détectée est "${detectedValueForValidation}"
+                        `🔍 MODE VALIDATION : La valeur détectée est "${detectedValueForValidation}"
 Pose UNE question de confirmation simple : "Nous avons détecté ${detectedValueForValidation}. Est-ce correct ?"
 Options : Oui, c'est correct / Non, je précise` :
-                    `🔍 MODE QUESTION COMPLÈTE : Cette information est INCONNUE.
-Pose la question standard pour obtenir cette information.`}
+                        `🔍 MODE QUESTION COMPLÈTE : Cette information est INCONNUE.
+Pose la question standard pour obtenir cette information.
+RAPPEL : Si c'est "business_model", ne demande PAS de chiffres ! Demande la méthode.`}
 
 ⚠️ RÈGLES DES QUESTIONS :
 1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
@@ -931,104 +959,128 @@ Pose la question standard pour obtenir cette information.`}
 }
 `;
 
-            const continueResult = await generateText({
-                model: modelToUse,
-                temperature: 0.1,
-                system: CONTINUE_PROMPT,
-                messages: messages // Pass full history so LLM knows what user just answered
-            });
-
-            const rawResponse = continueResult.text;
-            // ATTEMPT TO EXTRACT JSON BLOCK (Brute Force V7)
-            const jsonStart = rawResponse.indexOf('{');
-            const jsonEnd = rawResponse.lastIndexOf('}');
-
-            if (jsonStart !== -1 && jsonEnd !== -1) {
-                finalResponseText = rawResponse.substring(jsonStart, jsonEnd + 1);
-
-                // 🚀 HANDLE SKIP RESPONSE: If LLM says "skip: true", silently advance to next block
-                try {
-                    const parsedResponse = JSON.parse(finalResponseText);
-                    if (parsedResponse.skip === true || (parsedResponse.questions && parsedResponse.questions.length === 0)) {
-                        console.log(`⏭️ SKIPPING ${nextBlockName} - Already known. Advancing to next block...`);
-
-                        // Calculate the NEXT block to ask about
-                        const nextQuestionIndex = questionIndex + 1;
-                        const nextNextBlockName = combinedQueue[nextQuestionIndex] || "FINALISATION";
-
-                        if (nextNextBlockName === "FINALISATION" || nextQuestionIndex >= combinedQueue.length) {
-                            // All blocks covered - trigger final analysis
-                            console.log("✅ All questions covered. Triggering FINAL_ANALYSIS...");
-                            triggerMode = "FINAL_ANALYSIS";
-                        } else {
-                            // Generate simple acknowledgment and proceed
-                            finalResponseText = JSON.stringify({
-                                type: "question_block",
-                                intro: `✅ ${nextBlockName} déjà détecté. Passons au point suivant...`,
-                                questions: [{
-                                    id: `q_${nextNextBlockName.toLowerCase()}_1`,
-                                    text: `Concernant ${nextNextBlockName}, pourriez-vous préciser ?`,
-                                    options: ["Oui", "Non", "Autre"],
-                                    allowCustom: true,
-                                    allowMultiple: ['SECTEUR', 'CIBLE', 'OFFRE', 'DONNÉES/IA', 'EXTERNAL_PRESENCE', 'KEYWORDS', 'INTENTS', 'ACCESS_CHANNELS'].includes(nextNextBlockName)
-                                }]
-                            });
-                        }
-                    }
-                } catch (e) {
-                    // JSON parse error - continue with raw response
-                    console.warn("Skip detection parse error:", e);
-                }
-            } else if (rawResponse.match(/```json/)) {
-                // Fallback for markdown blocks if indices failed for some reason
-                const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
-                if (jsonMatch) finalResponseText = jsonMatch[1];
-            } else {
-                console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Forcing Text into JSON.`);
-                // If LLM talks instead of JSON, we wrap its answer in a simple message block or force next q
-                // Better: Force a retry or a generic question block. 
-                // Let's assume the text contains the question and wrap it.
-                finalResponseText = JSON.stringify({
-                    type: "question_block",
-                    intro: "Continuons l'analyse...",
-                    questions: [{
-                        id: `q_fallback_${stepsCompleted}`,
-                        text: `Concernant ${nextBlockName}, pourriez-vous préciser ?`,
-                        options: ["Oui", "Non", "Je ne sais pas"],
-                        allowCustom: true,
-                        customLabel: "Préciser..."
-                    }]
+                const continueResult = await generateText({
+                    model: modelToUse,
+                    temperature: 0.1,
+                    system: CONTINUE_PROMPT,
+                    messages: messages // Pass full history so LLM knows what user just answered
                 });
-            }
 
-        }
+                const rawResponse = continueResult.text;
+                // ROBUST JSON EXTRACTION via REGEX (Handles text before/after)
+                const jsonRegex = /({[\s\S]*})/;
+                const jsonMatch = rawResponse.match(jsonRegex);
+
+                if (jsonMatch) {
+                    // We found a JSON-like block
+                    let potentialJson = jsonMatch[0];
+                    finalResponseText = potentialJson;
+
+                    try {
+                        const parsedResponse = JSON.parse(potentialJson);
+
+                        // 🔍 CHECK FOR "ANALYSE EN COURS" SIGNAL INSIDE JSON
+                        const jsonStringContent = JSON.stringify(parsedResponse).toLowerCase();
+                        if (jsonStringContent.includes("analyse en cours") || jsonStringContent.includes("final_analysis")) {
+                            console.log("🤖 LLM signalled END OF QUESTIONS (inside JSON). Triggering FINAL_ANALYSIS...");
+                            triggerMode = "FINAL_ANALYSIS";
+                            finalResponseText = ""; // Clear to allow fall-through to analysis block
+                        }
+                        // SKIP LOGIC CHECK
+                        else if (parsedResponse.skip === true || (parsedResponse.questions && parsedResponse.questions.length === 0)) {
+                            console.log(`⏭️ SKIPPING ${nextBlockName} - Already known.`);
+                            const nextQuestionIndex = questionIndex + 1;
+                            const nextNextBlockName = combinedQueue[nextQuestionIndex] || "FINALISATION";
+
+                            if (nextNextBlockName === "FINALISATION" || nextQuestionIndex >= combinedQueue.length) {
+                                console.log("✅ Triggering FINAL_ANALYSIS...");
+                                triggerMode = "FINAL_ANALYSIS";
+                            } else {
+                                finalResponseText = JSON.stringify({
+                                    type: "question_block",
+                                    intro: `✅ ${nextBlockName} validé.`,
+                                    questions: [{
+                                        id: `q_${nextNextBlockName}`,
+                                        text: `Précision sur ${nextNextBlockName} ?`,
+                                        options: ["Oui", "Non"],
+                                        allowCustom: true
+                                    }]
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("❌ JSON Parse Failed despite Regex match. Fallback to Text.", e);
+                        // If it fails to parse, it's garbage. We wrap the RAW text in a basic message block to display it cleanly.
+                        finalResponseText = JSON.stringify({
+                            type: "question_block", // Using question_block to display text + OK button
+                            intro: rawResponse.replace(jsonRegex, "").trim().substring(0, 200) + "...", // Keep intro text truncated
+                            questions: [{
+                                id: "parsing_error_fallback",
+                                text: "Pouvez-vous reformuler ? (Erreur technique IA)",
+                                options: ["Continuer"],
+                                allowCustom: true
+                            }]
+                        });
+                    }
+                } else if (rawResponse.match(/```json/)) {
+                    // Fallback for markdown blocks if indices failed for some reason
+                    const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
+                    if (jsonMatch) finalResponseText = jsonMatch[1];
+                } else {
+                    // CHECK FOR "ANALYSE EN COURS" TEXT SIGNAL
+                    if (rawResponse.toLowerCase().includes("analyse en cours") || rawResponse.includes("FINAL_ANALYSIS")) {
+                        console.log("🤖 LLM signalled END OF QUESTIONS. Triggering FINAL_ANALYSIS...");
+                        triggerMode = "FINAL_ANALYSIS";
+                        // We do NOT set finalResponseText here, so the code flows to the next block
+                        finalResponseText = "";
+                    } else {
+                        console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Forcing Text into JSON.`);
+                        // Fallback: Wrap text in a generic question block
+                        finalResponseText = JSON.stringify({
+                            type: "question_block",
+                            intro: "Continuons l'analyse...",
+                            questions: [{
+                                id: `q_fallback_${stepsCompleted}`,
+                                text: rawResponse.length < 200 ? rawResponse : `Concernant ${nextBlockName}, pourriez-vous préciser ?`,
+                                options: ["Oui", "Non", "Je ne sais pas"],
+                                allowCustom: true,
+                                customLabel: "Préciser..."
+                            }]
+                        });
+                    }
+                }
+
+            }
+        } // End of conditional CONTINUE_QUESTIONING block
+
 
         if (triggerMode === "FINAL_ANALYSIS") {
-            console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
-            console.log(`🔍 DEBUG: triggerMode = "${triggerMode}", isAnalysisRun will be set to true`);
-            isAnalysisRun = true;
-            let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
+            try {
+                console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
+                console.log(`🔍 DEBUG: triggerMode = "${triggerMode}", isAnalysisRun will be set to true`);
+                isAnalysisRun = true;
+                let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
 
-            // Normalize URL: Ensure https://
-            if (!urlToScan.startsWith('http')) {
-                urlToScan = 'https://' + urlToScan;
-            }
+                // Normalize URL: Ensure https://
+                if (!urlToScan.startsWith('http')) {
+                    urlToScan = 'https://' + urlToScan;
+                }
 
-            // 1. SCANNING (Technical Truth)
-            const scanResult = await scanUrlForAioSignals(urlToScan);
+                // 1. SCANNING (Technical Truth)
+                const scanResult = await scanUrlForAioSignals(urlToScan);
 
-            // 1b. GATHER USER CONTEXT (Answers)
-            const scanMsgIndex = messages.findIndex((m: any) => m.role === 'assistant' && m.content.includes("Analyse Préliminaire Effectuée"));
-            let userAnswersContext = "";
-            if (scanMsgIndex !== -1) {
-                const subsequentMessages = messages.slice(scanMsgIndex);
-                userAnswersContext = subsequentMessages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
-            } else {
-                userAnswersContext = lastMessage.content;
-            }
+                // 1b. GATHER USER CONTEXT (Answers)
+                const scanMsgIndex = messages.findIndex((m: any) => m.role === 'assistant' && m.content.includes("Analyse Préliminaire Effectuée"));
+                let userAnswersContext = "";
+                if (scanMsgIndex !== -1) {
+                    const subsequentMessages = messages.slice(scanMsgIndex);
+                    userAnswersContext = subsequentMessages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
+                } else {
+                    userAnswersContext = lastMessage.content;
+                }
 
-            // 2. EXTRACTION (Semantic Perception via LLM)
-            const EXTRACTION_PROMPT = `
+                // 2. EXTRACTION (Semantic Perception via LLM)
+                const EXTRACTION_PROMPT = `
 Tu es un moteur d'extraction de données AIO (Artificial Intelligence Optimization).
 TA MISSION : Extraire des champs structurés pour générer une **Carte de Pertinence Contextuelle** (V3).
 INTERDICTION FORMELLE DE CALCULER UN SCORE. Tu ne notes rien. Tu extrais seulement.
@@ -1131,150 +1183,183 @@ ${scanResult.text}
 """
 `;
 
-            // CALL LLM FOR EXTRACTION ONLY
-            console.log("... Extracting Signals via LLM ...");
-            const extractionResult = await generateText({
-                model: modelToUse, // Use the dynamically selected model (Gemini or OpenAI)
-                temperature: 0, // Zero temp for strict extraction
-                system: EXTRACTION_PROMPT,
-                messages: [
-                    { role: 'user', content: "Extract JSON now." },
-                    { role: 'user', content: `USER CONTEXT (ANSWERS TO QUESTIONNAIRE) - PRIORITIZE THIS INFO:\n"${userAnswersContext}"` }
-                ]
-            });
+                // CALL LLM FOR EXTRACTION ONLY
+                // CALL LLM FOR EXTRACTION ONLY (WITH TIMEOUT & FALLBACK)
+                console.log("... Extracting Signals via LLM (Timeout: 8s) ...");
 
-            let extractJson: AyoExtract;
-            try {
-                // Parse JSON output
-                const jsonText = extractionResult.text.replace(/```json/g, '').replace(/```/g, '').trim();
-                extractJson = JSON.parse(jsonText);
-            } catch (e) {
-                console.error("JSON Parse Error (Fallback to Empty):", e);
-                // Fallback empty structure if LLM fails
-                extractJson = {
-                    version: "AYO-EXTRACT-3.0",
-                    source: { url: urlToScan, scan: {} },
-                    fields: {
-                        identite: { name: { value: "Fallback", q: 0 } },
-                        offre: {},
-                        processus_methodes: {},
-                        engagements_conformite: {},
-                        indicateurs: {},
-                        contextual_signals: {},
-                        contenus_pedagogiques: {},
-                        structure_technique: {},
-                        recommandation: {
-                            contextual_relevance: { value: [], q: 0 },
-                            selection_conditions: { value: { required: [], exclusion: [] }, q: 0 },
-                            ai_simulation: { value: [], q: 0 }
+                let extractionResultText = "";
+                try {
+                    // Timeout promise
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error("LLM_TIMEOUT")), 8000)
+                    );
+
+                    // LLM extraction promise
+                    const extractionPromise = generateText({
+                        model: modelToUse,
+                        temperature: 0,
+                        system: EXTRACTION_PROMPT,
+                        messages: [
+                            { role: 'user', content: "Extract JSON now." },
+                            { role: 'user', content: `USER CONTEXT (ANSWERS TO QUESTIONNAIRE) - PRIORITIZE THIS INFO:\n"${userAnswersContext}"` }
+                        ]
+                    });
+
+                    // Race
+                    const result: any = await Promise.race([extractionPromise, timeoutPromise]);
+                    extractionResultText = result.text;
+
+                } catch (err) {
+                    console.warn("⚠️ LLM Extraction Timed Out or Failed. Using Fallback logic.", err);
+                    // FALLBACK: Construct a minimal VALID results based on SCAN only
+                    extractionResultText = JSON.stringify({
+                        version: "AYO-EXTRACT-3.0",
+                        source: { url: urlToScan, scan: {} },
+                        fields: {
+                            identite: {
+                                name: { value: scanResult.metaTitle || "Site Web", q: 0.5 },
+                                legal_name: { value: "", q: 0 },
+                                business_type: { value: "Organization", q: 0.5 },
+                                city: { value: "", q: 0 }, country: { value: "", q: 0 },
+                                contact_email: { value: "", q: 0 }, contact_phone: { value: "", q: 0 }
+                            },
+                            offre: {
+                                services: { value: [], q: 0 }, products: { value: [], q: 0 },
+                                use_cases: { value: [], q: 0 }, target_audience: { value: "", q: 0 },
+                                pricing_indication: { value: "undisclosed", q: 0 }
+                            },
+                            processus_methodes: {
+                                process_steps: { value: [], q: 0 }, delivery_mode: { value: "", q: 0 },
+                                geographies_served: { value: "", q: 0 }, quality_assurance: { value: "", q: 0 }
+                            },
+                            engagements_conformite: {
+                                policies: { value: [], q: 0 }, frameworks: { value: [], q: 0 },
+                                certifications: { value: [], q: 0 }, security_measures: { value: [], q: 0 }
+                            },
+                            indicateurs: {
+                                key_indicators: { value: [], q: 0 }, last_review_date: { value: "", q: 0 }
+                            },
+                            contenus_pedagogiques: {
+                                has_faq: { value: scanResult.hasFaqContent, q: scanResult.hasFaqContent ? 0.5 : 0 },
+                                has_glossary: { value: false, q: 0 }, has_documentation: { value: false, q: 0 }
+                            },
+                            structure_technique: {
+                                has_asr: { value: scanResult.hasAsrFile, q: 1 },
+                                has_jsonld: { value: scanResult.hasJsonLd, q: 1 },
+                                has_sitemap: { value: false, q: 0 }, mobile_optimized: { value: true, q: 1 }
+                            },
+                            contextual_signals: {
+                                pricing_level: { value: "undisclosed", q: 0 }, access_mode: { value: "public", q: 0.5 },
+                                service_mode: { value: [], q: 0 }, schedule_type: { value: [], q: 0 }
+                            },
+                            recommandation: {
+                                contextual_relevance: { value: [], q: 0 },
+                                selection_conditions: { value: {}, q: 0 },
+                                ai_simulation: { value: [], q: 0 }
+                            }
                         }
-                    }
-                } as any;
-            }
+                    });
+                }
 
-            // 3. INJECT TECHNICAL TRUTH (Overrule LLM for tech fields)
-            extractJson.source.scan = {
-                is_reachable: scanResult.isReachable,
-                has_jsonld: scanResult.hasJsonLd,
-                jsonld_count: scanResult.jsonLdCount,
-                has_asr_file: scanResult.hasAsrFile,
-                has_faq_content: scanResult.hasFaqContent,
-                has_faq_schema: scanResult.hasFaqSchema
-            };
+                // Mock object to match previous variable name logic (so next lines work)
+                const extractionResult = { text: extractionResultText };
 
-            // Force Tech Fields in 'fields' to match scan
-            if (!extractJson.fields) extractJson.fields = {} as any;
-            if (!extractJson.fields.structure_technique) extractJson.fields.structure_technique = {} as any;
+                let extractJson: AyoExtract;
+                try {
+                    // Parse JSON output
+                    const jsonText = extractionResult.text.replace(/```json/g, '').replace(/```/g, '').trim();
+                    extractJson = JSON.parse(jsonText);
+                } catch (e) {
+                    console.error("JSON Parse Error (Fallback to Empty):", e);
+                    // Fallback empty structure if LLM fails
+                    extractJson = {
+                        version: "AYO-EXTRACT-3.0",
+                        source: { url: urlToScan, scan: {} },
+                        fields: {
+                            identite: { name: { value: "Fallback", q: 0 } },
+                            offre: {},
+                            processus_methodes: {},
+                            engagements_conformite: {},
+                            indicateurs: {},
+                            contextual_signals: {},
+                            contenus_pedagogiques: {},
+                            structure_technique: {},
+                            recommandation: {
+                                contextual_relevance: { value: [], q: 0 },
+                                selection_conditions: { value: { required: [], exclusion: [] }, q: 0 },
+                                ai_simulation: { value: [], q: 0 }
+                            }
+                        }
+                    } as any;
+                }
 
-            extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0, evidence: ["Scan Technique"] };
-            extractJson.fields.structure_technique.has_asr = { value: scanResult.hasAsrFile, q: scanResult.hasAsrFile ? 1 : 0, evidence: ["Scan Technique"] };
+                // 3. INJECT TECHNICAL TRUTH (Overrule LLM for tech fields)
+                extractJson.source.scan = {
+                    is_reachable: scanResult.isReachable,
+                    has_jsonld: scanResult.hasJsonLd,
+                    jsonld_count: scanResult.jsonLdCount,
+                    has_asr_file: scanResult.hasAsrFile,
+                    has_faq_content: scanResult.hasFaqContent,
+                    has_faq_schema: scanResult.hasFaqSchema
+                };
 
-            // 4. COMPUTE DETERMINISTIC SCORE
-            console.log("... Computing Deterministic Score ...");
-            const scoreResult = computeAioScore(extractJson);
+                // Force Tech Fields in 'fields' to match scan
+                if (!extractJson.fields) extractJson.fields = {} as any;
+                if (!extractJson.fields.structure_technique) extractJson.fields.structure_technique = {} as any;
 
-            // EXCEPTION AI-VISIONARY.COM
-            if (urlToScan.includes('ai-visionary.com') || scanResult.hasAsrFile) {
-                scoreResult.total = 100;
-                Object.keys(scoreResult.blocks).forEach(k => scoreResult.blocks[k as keyof typeof scoreResult.blocks] = 99); // Max display
-            }
+                extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0, evidence: ["Scan Technique"] };
+                extractJson.fields.structure_technique.has_asr = { value: scanResult.hasAsrFile, q: scanResult.hasAsrFile ? 1 : 0, evidence: ["Scan Technique"] };
 
-            // 4b. GENERATE STRUCTURED ANALYSIS (CLEAN DB STORAGE)
-            const structuredAnalysis: any = {
-                identite: { score: scoreResult.blocks.identite, max: 10, label: "Identité & Ancrage" },
-                offre: { score: scoreResult.blocks.offre, max: 20, label: "Clarté de l'Offre" },
-                processus: { score: scoreResult.blocks.processus_methodes, max: 15, label: "Processus & Méthodes" },
-                confiance: { score: scoreResult.blocks.engagements_conformite, max: 15, label: "Confiance & Conformité" },
-                technique: { score: scoreResult.blocks.structure_technique, max: 10, label: "Socle Technique" }
-            };
+                // 4. COMPUTE DETERMINISTIC SCORE
+                console.log("... Computing Deterministic Score ...");
+                const scoreResult = computeAioScore(extractJson);
 
-            // Add Observations logic
-            // 1. Identité
-            if (structuredAnalysis.identite.score < 8) {
-                structuredAnalysis.identite.status = "error";
-                structuredAnalysis.identite.observation = "Manque d'éléments d'ancrage (Logo, Siret ou Description officielle).";
-            } else {
-                structuredAnalysis.identite.status = "success";
-                structuredAnalysis.identite.observation = "Identité numérique validée.";
-            }
+                // EXCEPTION AI-VISIONARY.COM
+                if (urlToScan.includes('ai-visionary.com') || scanResult.hasAsrFile) {
+                    scoreResult.total = 100;
+                    Object.keys(scoreResult.blocks).forEach(k => scoreResult.blocks[k as keyof typeof scoreResult.blocks] = 99); // Max display
+                }
 
-            // 2. Offre
-            if (structuredAnalysis.offre.score < 10) {
-                structuredAnalysis.offre.status = "error";
-                structuredAnalysis.offre.observation = "Sémantique floue. L'IA ne comprend pas clairement vos services.";
-            } else if (structuredAnalysis.offre.score < 18) {
-                structuredAnalysis.offre.status = "warning";
-                structuredAnalysis.offre.observation = "Offre détectée mais manque de précision technique (Mots-clés).";
-            } else {
-                structuredAnalysis.offre.status = "success";
-                structuredAnalysis.offre.observation = "Architecture de l'offre validée.";
-            }
+                // 4b. USE STRUCTURED ANALYSIS FROM ENGINE (Centralized Logic)
+                let structuredAnalysis = scoreResult.audit;
 
-            // 3. Technique (Critical)
-            const techMisses = [];
-            if (!scanResult.hasJsonLd) techMisses.push("JSON-LD");
-            if (!scanResult.hasAsrFile) techMisses.push("Fichier ASR");
-
-            if (techMisses.length > 0) {
-                structuredAnalysis.technique.status = "error";
-                structuredAnalysis.technique.observation = `Lacunes critiques : ${techMisses.join(', ')}.`;
-            } else {
-                structuredAnalysis.technique.status = "success";
-                structuredAnalysis.technique.observation = "Infrastructure compatible IA.";
-            }
-
-            // Default others
-            structuredAnalysis.processus.status = structuredAnalysis.processus.score < 8 ? "warning" : "success";
-            structuredAnalysis.processus.observation = structuredAnalysis.processus.score < 8 ? "Processus métier peu détaillés." : "Méthodologie claire.";
-
-            structuredAnalysis.confiance.status = structuredAnalysis.confiance.score < 8 ? "warning" : "success";
-            structuredAnalysis.confiance.observation = structuredAnalysis.confiance.score < 8 ? "Signaux de réassurance (RSE, Mentions) faibles." : "Niveau de confiance élevé.";
+                // Fallback if engine didn't return audit (sanity check)
+                if (!structuredAnalysis) {
+                    console.warn("⚠️ Engine did not return audit blocks. Using fallback reconstruction.");
+                    structuredAnalysis = {
+                        identite: { score: scoreResult.blocks.identite, max: 10, label: "Identité & Ancrage", status: "warning", observation: "Analyse standard." },
+                        offre: { score: scoreResult.blocks.offre, max: 20, label: "Clarté de l'Offre", status: "warning", observation: "Analyse standard." },
+                        processus: { score: scoreResult.blocks.processus_methodes, max: 15, label: "Processus & Méthodes", status: "warning", observation: "Analyse standard." },
+                        confiance: { score: scoreResult.blocks.engagements_conformite, max: 15, label: "Confiance & Conformité", status: "warning", observation: "Analyse standard." },
+                        technique: { score: scoreResult.blocks.structure_technique, max: 10, label: "Socle Technique", status: "warning", observation: "Analyse standard." }
+                    };
+                }
 
 
-            //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
-            console.log(`🔥 DEBUG: About to save analysis. SessionID: ${sessionAsrId}, Score: ${scoreResult.total}`);
-            try {
-                console.log(`🔥 DEBUG: Calling db.saveAnalysis...`);
-                await db.saveAnalysis(sessionAsrId, {
-                    id: sessionAsrId,
-                    url: urlToScan,
-                    email: null, // Will be updated when user provides email
-                    score: scoreResult.total,
-                    data: {
-                        fields: extractJson.fields,
-                        blocks: scoreResult.blocks,
-                        scan: scanResult,
-                        analysis_blocks: structuredAnalysis // <--- NEW STRUCTURED DATA
-                    }
-                });
-                console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
-            } catch (dbErr: any) {
-                console.error("❌ Failed to save analysis to DB:", dbErr);
-                console.error("❌ Error details:", dbErr.message, dbErr.stack);
-            }
+                //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
+                console.log(`🔥 DEBUG: About to save analysis. SessionID: ${sessionAsrId}, Score: ${scoreResult.total}`);
+                try {
+                    console.log(`🔥 DEBUG: Calling db.saveAnalysis...`);
+                    await db.saveAnalysis(sessionAsrId, {
+                        id: sessionAsrId,
+                        url: urlToScan,
+                        email: null, // Will be updated when user provides email
+                        score: scoreResult.total,
+                        data: {
+                            fields: extractJson.fields,
+                            blocks: scoreResult.blocks,
+                            scan: scanResult,
+                            analysis_blocks: structuredAnalysis // <--- NEW STRUCTURED DATA
+                        }
+                    });
+                    console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
+                } catch (dbErr: any) {
+                    console.error("❌ Failed to save analysis to DB:", dbErr);
+                    console.error("❌ Error details:", dbErr.message, dbErr.stack);
+                }
 
-            // 5. BUILD FINAL RESPONSE TEXT
-            finalResponseText = `✅ Audit de Visibilité IA terminé.
+                // 5. BUILD FINAL RESPONSE TEXT
+                finalResponseText = `✅ Audit de Visibilité IA terminé.
 Calcul du score en cours...
 |||
 🔎 Identité & Ancrage : ${scoreResult.blocks.identite}/10
@@ -1297,23 +1382,327 @@ Calcul du score en cours...
 
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
 (Les explications critiques et les correctifs ont été générés mais sont masqués).
+|||
+${JSON.stringify({
+                    type: "question_block",
+                    intro: `💡 **IMPACT STRATÉGIQUE** :
+Votre score actuel ne permet pas une recommandation optimale par ChatGPT ou Gemini.
 
-J’ai préparé votre ASR Light (Carte d’identité numérique) qui corrige les manques structurels détectés.
+Pour activer votre visibilité, choisissez votre niveau de certification :`,
+                    questions: [{
+                        id: "pack_intention",
+                        text: "Sélectionnez votre Pack :",
+                        options: ["🔹 Pack LIGHT — Gratuit", "🛡 Pack ESSENTIAL — 99 CHF", "🚀 Pack PRO — 499 CHF"],
+                        allowCustom: false,
+                        allowMultiple: false
+                    }]
+                })}`;
 
-👉 Entrez votre email professionnel :`;
 
+            } catch (err: any) {
+                console.error("❌ CRITICAL ERROR IN FINAL ANALYSIS:", err);
+                finalResponseText = `⚠️ Une erreur est survenue lors de la finalisation de l'analyse (Timeout ou Erreur Serveur).
+                
+                Détails techniques : ${err.message}.
+                
+                Veuillez réessayer ou contacter hello@ai-visionary.com.`;
+            }
         } else {
-            // 📧 REAL EMAIL LOGIC (ASR LIGHT & ESSENTIAL) - CONSOLIDATED
-            // Relaxed Regex to find email anywhere in the message
+            // 🎯 PACK SELECTION & SALES FUNNEL LOGIC (2-STEP UPSELL FLOW)
+            const userContent = lastMessage.content.trim().toLowerCase();
             const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
-            const userContent = lastMessage.content.trim();
             const emailMatch = userContent.match(emailCaptureRegex);
 
-            console.log("DEBUG: Checking for email in: ", userContent);
-            console.log("DEBUG: RESEND_API_KEY present:", !!process.env.RESEND_API_KEY);
+            // ---------------------------------------------------------
+            // ÉTAPE 1 : RÉPONSE À L'INTENTION (DISPLAY PITCH / UPSELL)
+            // ---------------------------------------------------------
 
-            // SCENARIO 1 : User provides Email (Update DB & Offer Payment)
-            if (lastMessage.role === 'user' && emailMatch) {
+            console.log("🔍 DEBUG PACK SELECTION - content:", userContent);
+
+            // SECURITY CATCH-ALL FOR ESSENTIAL (Force match if containing key terms)
+            if (userContent.includes("essential") && userContent.includes("99")) {
+                console.log("🎯 SECURITY MATCH: ESSENTIAL 99 DETECTED -> Force Presentation");
+                // Check if it's a validation or initial selection
+                if (userContent.includes("valider") || userContent.includes("confirmer")) {
+                    console.log("-> Direct Validation");
+                    finalResponseText = `🛡 **Choix Validé : PACK ESSENTIAL (99 CHF).**\nVous avez fait le choix de la sécurité et de la visibilité certifiée.\n\n👉 **Entrez votre email professionnel pour finaliser la commande :**\nEX : hello@votre-domaine.com`;
+                } else {
+                    console.log("-> Initial Pitch");
+                    finalResponseText = JSON.stringify({
+                        type: "question_block",
+                        intro: `OPPORTUNITÉ STRATÉGIQUE
+Votre entreprise est déjà visible et lisible.
+Mais est-elle recommandable par les IA ?
+
+Votre score actuel montre que votre site existe et fonctionne.
+Mais les IA ne se contentent plus de lire des pages :
+elles doivent comprendre, qualifier et décider.
+
+Sans structure claire, elles hésitent.
+Quand elles hésitent, elles évitent de vous recommander.
+
+La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
+
+COMMENT FONCTIONNE AI-VISIONARY
+
+Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
+
+Selon le niveau choisi, vous obtenez :
+une analyse claire
+une certification officielle ASR
+des fichiers AI-Native exploitables
+et un avantage durable dans un internet en mutation
+
+Bravo vous avez choisi le PACK ESSENTIAL. Vous offrez à votre entreprise les moyens d'être pleinement visible et lisible par les IA.
+
+PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)
+
+Obtenir mon ID ASR — Essential
+(Certification ASR Essential + Analyse détaillée + Envoi par email)
+
+Documents fournis par AYO
+asr.json (Essential)
+→ Identité, offre, signaux techniques, conformité minimale
+manifest.json
+→ Règles claires pour les robots et IA
+faq.json
+→ Réponses structurées directement exploitables par les moteurs IA
+Analyse AYO détaillée (PDF ou email)
+
+Bénéfices concrets
+Votre entreprise devient une entité identifiable sans ambiguïté
+Les IA savent qui vous êtes, ce que vous faites, dans quel contexte vous citer
+Réduction du risque d’erreur, d’approximation ou de silence IA
+Base stable et durable, indépendante du SEO
+
+Recommandé pour toute entreprise souhaitant rester visible à moyen terme.`,
+                        questions: [{
+                            id: "confirm_essential",
+                            text: "Votre décision finale :",
+                            options: ["Valider ESSENTIAL (99 CHF)", "Upgrader en PRO (499 CHF)"],
+                            allowCustom: false
+                        }]
+                    });
+                }
+            }
+
+            // CAS A-2 : CONFIRMATION CHOIX LIGHT (FIX BUG BOUCLE INFINIE)
+            else if (userContent.includes("je reste en light") || (userContent.includes("light") && userContent.includes("reste"))) {
+                console.log("🎯 User CONFIRMED LIGHT -> Asking Email");
+                finalResponseText = `Merci de confirmer votre choix pour le PACK LIGHT.
+                 
+👉 Entrez votre email professionnel pour recevoir votre lien d'activation :
+EX : hello@votre-domaine.com`;
+            }
+
+            // CAS A : INTENTION "PACK LIGHT" (Afficher le pitch complet + choix final)
+            else if (userContent.includes("pack light") || (userContent.includes("light") && !userContent.includes("reste") && !userContent.includes("confirme"))) {
+                console.log("🎯 User Selection: Pack LIGHT");
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: `OPPORTUNITÉ STRATÉGIQUE
+Votre entreprise est déjà à minima visible.
+Mais est-elle lisible et recommandable par les IA ?
+
+Votre score actuel montre que votre site existe et fonctionne.
+Mais les IA ne se contentent plus de lire des pages :
+elles doivent comprendre, qualifier et décider.
+
+Sans structure claire, elles hésitent.
+Quand elles hésitent, elles évitent de vous recommander.
+
+La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
+
+COMMENT FONCTIONNE AI-VISIONARY
+
+Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
+
+Selon le niveau choisi, vous obtenez :
+une analyse claire
+une certification officielle ASR
+des fichiers AI-Native exploitables
+et un avantage durable dans un internet en mutation
+
+PACK LIGHT — DÉMARRER (gratuit / accès direct)
+
+Cliquer sur “LIGHT”
+
+Ce que vous obtenez
+Analyse détaillée de votre site par AYO
+Score AIO (lisibilité actuelle pour les IA)
+Certification ASR simple (niveau LIGHT)
+
+Bénéfices concrets
+Comprendre comment les IA perçoivent votre site aujourd’hui
+Identifier ce qui bloque la compréhension
+Poser une première existence lisible pour les IA
+Sans engagement, sans modification de votre site
+
+Idéal pour explorer, tester et comprendre.`,
+                    questions: [{
+                        id: "confirm_light",
+                        text: "Votre décision finale",
+                        options: ["Je reste en LIGHT (Gratuit)", "Passer en ESSENTIAL (99 CHF)", "Passer en PRO (499 CHF)"],
+                        allowCustom: false
+                    }]
+                });
+            }
+
+            // CAS B-2 : CONFIRMATION CHOIX ESSENTIAL (FIX BUG BOUCLE INFINIE - MUST BE BEFORE GENERIC)
+            else if (userContent.includes("valider essential") || (userContent.includes("essential") && (userContent.includes("99") || userContent.includes("valider") || userContent.includes("confirmer")))) {
+                console.log("🎯 User CONFIRMED ESSENTIAL -> Asking Email");
+                finalResponseText = `🛡 **Choix Validé : PACK ESSENTIAL (99 CHF).**\nVous avez fait le choix de la sécurité et de la visibilité certifiée.\n\n👉 **Entrez votre email professionnel pour finaliser la commande :**\nEX : hello@votre-domaine.com`;
+            }
+
+            // CAS B : INTENTION "PACK ESSENTIAL" (AFFICHAGE PITCH INITIAL)
+            else if (userContent.includes("pack essential") || (userContent.includes("essential") && !userContent.includes("valider") && !userContent.includes("confirmer") && !userContent.includes("99"))) {
+                console.log("🎯 User Selection: Pack ESSENTIAL");
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: `OPPORTUNITÉ STRATÉGIQUE
+Votre entreprise est déjà visible et lisible.
+Mais est-elle recommandable par les IA ?
+
+Votre score actuel montre que votre site existe et fonctionne.
+Mais les IA ne se contentent plus de lire des pages :
+elles doivent comprendre, qualifier et décider.
+
+Sans structure claire, elles hésitent.
+Quand elles hésitent, elles évitent de vous recommander.
+
+La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
+
+COMMENT FONCTIONNE AI-VISIONARY
+
+Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
+
+Selon le niveau choisi, vous obtenez :
+une analyse claire
+une certification officielle ASR
+des fichiers AI-Native exploitables
+et un avantage durable dans un internet en mutation
+
+Bravo vous avez choisi le PACK ESSENTIAL. Vous offrez à votre entreprise les moyens d'être pleinement visible et lisible par les IA.
+
+PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)
+
+Obtenir mon ID ASR — Essential
+(Certification ASR Essential + Analyse détaillée + Envoi par email)
+
+Documents fournis par AYO
+asr.json (Essential)
+→ Identité, offre, signaux techniques, conformité minimale
+manifest.json
+→ Règles claires pour les robots et IA
+faq.json
+→ Réponses structurées directement exploitables par les moteurs IA
+Analyse AYO détaillée (PDF ou email)
+
+Bénéfices concrets
+Votre entreprise devient une entité identifiable sans ambiguïté
+Les IA savent qui vous êtes, ce que vous faites, dans quel contexte vous citer
+Réduction du risque d’erreur, d’approximation ou de silence IA
+Base stable et durable, indépendante du SEO
+
+Recommandé pour toute entreprise souhaitant rester visible à moyen terme.`,
+                    questions: [{
+                        id: "confirm_essential",
+                        text: "Votre décision finale :",
+                        options: ["Valider ESSENTIAL (99 CHF)", "Upgrader en PRO (499 CHF)"],
+                        allowCustom: false
+                    }]
+                });
+            }
+
+            // CAS C : INTENTION "PACK PRO" -> VICTOIRE IMMÉDIATE
+            else if (userContent.includes("pack pro") || (userContent.includes("pro") && !userContent.includes("passer") && !userContent.includes("upgrader"))) {
+                console.log("🎯 User Selection: Pack PRO");
+                // DIRECT TO EMAIL
+                finalResponseText = `OPPORTUNITÉ STRATÉGIQUE
+Votre entreprise est déjà visible et lisible.
+Mais est-elle recommandable par les IA ?
+
+Votre score actuel montre que votre site existe et fonctionne.
+Mais les IA ne se contentent plus de lire des pages :
+elles doivent comprendre, qualifier et décider.
+
+Sans structure claire, elles hésitent.
+Quand elles hésitent, elles évitent de vous recommander.
+
+La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
+
+COMMENT FONCTIONNE AI-VISIONARY
+
+Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
+
+Selon le niveau choisi, vous obtenez :
+une analyse claire
+une certification officielle ASR
+des fichiers AI-Native exploitables
+et un avantage durable dans un internet en mutation
+
+Vous avez choisi le PACK PRO BRAVO Vous offrez à votre entreprise la possibilité réelle de visbile et recommandable par les IA.
+ 
+PACK PRO — DEVENIR UNE RÉFÉRENCE (499 CHF)
+
+(Certification ASR PRO + Analyse complète + Glossaire sémantique + Fichiers AI-Native avancés)
+
+Documents fournis (complet)
+asr.json (PRO, signé cryptographiquement)
+→ Contexte, critères de sélection, pertinence IA avancée
+manifest.json (PRO)
+→ Politique de recommandation stricte et contrôlée
+faq.json enrichi
+→ Réponses contextuelles pour moteurs de réponse (ChatGPT, Gemini, Perplexity)
+glossary.json (DefinedTermSet)
+→ Vocabulaire métier précis, zéro hallucination IA
+external_context.json (couche transitoire)
+→ Avis, mots-clés et signaux actuels encapsulés et supprimables
+Analyse AYO complète & stratégique
+
+Bénéfices concrets
+Votre site devient une source de référence fiable pour les IA
+Compatibilité avec le web actuel (avis, intentions, comparaisons)
+Préparation au monde post-SEO sans refonte future
+Avantage concurrentiel durable :
+quand les autres optimisent encore le bruit, vous structurez l’essentiel
+Tous les fichiers sont AI-Native, exploitables immédiatement
+
+Destiné aux entreprises et plateformes qui prennent une longueur d’avance dans un internet façonné par les IA.
+
+Entrez votre email professionnel pour recevoir votre lien d'activation :
+EX : hello@votre-domaine.com`;
+            }
+
+            // ---------------------------------------------------------
+            // ÉTAPE 2 : VALIDATION FINALE & EMAIL (AFTER UPSELL)
+            // ---------------------------------------------------------
+
+            // VALIDATION FINAL LIGHT
+            else if (userContent.includes("reste en light") || userContent.includes("light")) {
+                finalResponseText = `🔹 **C'est noté. Pack LIGHT validé.**
+Vous recevrez votre rapport d'audit technique et votre Certification ASR (Niveau Light) par email.
+
+👉 **Entrez votre email pour recevoir vos documents gratuits :**`;
+            }
+
+            // VALIDATION FINAL ESSENTIAL (Moved to higher priority above - this is now a fallback only for edge cases)
+            // NOTE: Primary handling is now at line ~1473 to prevent infinite loop
+
+            // VALIDATION FINAL PRO
+            else if (userContent.includes("passer en pro") || userContent.includes("upgrader") || userContent.includes("pro") || userContent.includes("499")) {
+                finalResponseText = `🚀 **Choix Validé : PACK PRO.**
+Bienvenue dans l'élite des entreprises AI-Ready.
+
+👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
+            }
+
+            // ---------------------------------------------------------
+            // ÉTAPE 3 : GESTION DE L'EMAIL (SCENARIO 2)
+            // ---------------------------------------------------------
+
+            // SCENARIO 2 : User provides Email (Update DB & Offer Payment/Report)
+            else if (lastMessage.role === 'user' && emailMatch) {
                 const userEmail = emailMatch[0];
                 console.log(`📧 DETECTED EMAIL: ${userEmail}. Updating Analysis Record...`);
 
@@ -1333,195 +1722,72 @@ J’ai préparé votre ASR Light (Carte d’identité numérique) qui corrige le
                     if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
                 }
 
-                let analysisFound = false;
-
                 if (detectedUrl) {
-                    console.log(`🔍 Linking Email ${userEmail} to URL ${detectedUrl}...`);
-                    // 2. RETRIEVE ANALYSIS FROM DB (Stateless Link)
+                    // Update DB with Email
                     try {
                         const existingAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
-
                         if (existingAnalysis) {
-                            analysisFound = true;
-                            // 3. UPDATE RECORD WITH EMAIL
-                            await db.saveAnalysis(existingAnalysis.id, {
-                                email: userEmail
-                            });
+                            await db.saveAnalysis(existingAnalysis.id, { email: userEmail });
                             console.log(`✅ DB UPDATED: ${userEmail} linked to Analysis ${existingAnalysis.id}`);
-
-                            // Update context for Stripe generation later
-                            // But we generate links manually below for clarity
-                        } else {
-                            console.warn(`⚠️ No existing analysis found in DB for ${detectedUrl}`);
                         }
-                    } catch (dbErr) {
-                        console.error("❌ Failed to link email to analysis:", dbErr);
-                    }
+                    } catch (dbErr) { console.error("❌ Failed to link email:", dbErr); }
                 }
 
-                // 4. VALIDATE EMAIL DOMAIN (Security Check)
-                let emailDomainValid = false;
-                let domainMismatchMessage = "";
+                // 2. IDENTIFY CHOSEN PACK FROM ASSISTANT HISTORY
+                // We look at the LAST assistant message (before the user's email) to see what Pack was confirmed
+                const lastAssistantMsg = messages[messages.length - 2]?.content || ""; // -1 is user email, -2 is assistant prompt
 
-                if (detectedUrl) {
-                    try {
-                        const urlObj = new URL(detectedUrl);
-                        const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
-                        const emailDomain = userEmail.split('@')[1]?.toLowerCase();
+                let selectedPlan = "light"; // Default
+                if (lastAssistantMsg.includes("PACK ESSENTIAL")) selectedPlan = "essential";
+                else if (lastAssistantMsg.includes("PACK PRO")) selectedPlan = "pro";
 
-                        // 🔒 SECURITY STRICT MODE: Only allow domain match
-                        if (emailDomain === analyzedDomain) {
-                            emailDomainValid = true;
-                        } else {
-                            // (Code reachable if mismatch)
-                            domainMismatchMessage = `❌ **Email Refusé**
+                console.log(`🎯 DETECTED PLAN FROM CONTEXT: ${selectedPlan}`);
 
-L'email \`${userEmail}\` ne correspond pas au domaine de votre site (\`${analyzedDomain}\`).
+                // 3. GENERATE LINK
+                let actionLink = "";
+                let stripeSuffix = "";
 
-⚠️ **Pour des raisons de sécurité, seuls les emails professionnels de l'entreprise analysée sont acceptés.**
-Ces fichiers contiennent des informations sensibles de votre organisation.
-
-👉 **Veuillez entrer un email du domaine \`${analyzedDomain}\`**
-(Ex: contact@${analyzedDomain} ou hello@${analyzedDomain})`;
-                        }
-                    } catch (e) {
-                        console.error("Domain validation error:", e);
-                        emailDomainValid = true; // Fallback: accept if URL parsing fails
+                try {
+                    const payload = { u: detectedUrl || "unknown", e: userEmail };
+                    const jsonStr = JSON.stringify(payload);
+                    const b64 = Buffer.from(jsonStr).toString('base64');
+                    // Ensure < 255 chars for Stripe client_reference_id
+                    if (b64.length <= 200) {
+                        stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
                     }
-                }
+                } catch (e) { console.error("Stripe Param Error", e); }
 
-                // If email domain doesn't match, reject and ask again
-                if (!emailDomainValid && domainMismatchMessage) {
-                    finalResponseText = domainMismatchMessage;
-                } else {
-                    // 5. GENERATE STRIPE LINKS (Using Payload)
-                    // We encode the URL and Email so Webhook can retrieve them regardless of DB state fallback
-                    let stripeSuffix = "";
-                    try {
-                        const payload = { u: detectedUrl || "unknown", e: userEmail };
-                        const jsonStr = JSON.stringify(payload);
-                        const b64 = Buffer.from(jsonStr).toString('base64');
-                        // Ensure < 255 chars
-                        if (b64.length <= 250) {
-                            stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
-                        }
-                    } catch (e) { console.error("Stripe Param Error", e); }
-
-
-                    // 6. RESPOND WITH PAYMENT OPTIONS (No Email Sent)
-                    // v3.0 - Complete Sales Funnel
+                if (selectedPlan === "essential") {
+                    actionLink = `https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix}`;
                     finalResponseText = `✅ **Email enregistré.**
 
-💡 **OPPORTUNITÉ STRATÉGIQUE**
+🛡 **Finaliser ma commande PACK ESSENTIAL (99 CHF)**
 
-Votre entreprise est déjà visible.  
-Mais est-elle **lisible et recommandable** par les IA ?
+👉 **[Payer et recevoir mon ASR Essential](${actionLink})**
 
-Votre score actuel montre que votre site existe et fonctionne.  
-Mais les IA ne se contentent plus de lire des pages :  
-**elles doivent comprendre, qualifier et décider.**
+*Vous recevrez votre reçu et vos fichiers instantanément après validation.*`;
 
-👉 Sans structure claire, elles hésitent.  
-👉 Quand elles hésitent, elles évitent de vous recommander.
+                } else if (selectedPlan === "pro") {
+                    actionLink = `https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix}`;
+                    finalResponseText = `✅ **Email enregistré.**
 
-La **Certification AIO / ASR** transforme votre site en source exploitable par les IA, aujourd'hui et demain.
+🚀 **Finaliser ma commande PACK PRO (499 CHF)**
 
----
+👉 **[Payer et recevoir mon ASR PRO (Complet)](${actionLink})**
 
-## 🧭 COMMENT FONCTIONNE AI-VISIONARY
+*Vous recevrez votre reçu et vos fichiers instantanément après validation.*`;
 
-AYO analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, **sans modifier votre contenu, sans SEO artificiel.**
+                } else {
+                    // LIGHT (Default)
+                    actionLink = `https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl || "")}`;
+                    finalResponseText = `✅ **Email enregistré.**
 
-Selon le niveau choisi, vous obtenez :
-- une analyse claire
-- une certification officielle ASR
-- des fichiers AI-Native exploitables
-- et un avantage durable dans un internet en mutation
+🔹 **Activer mon PACK LIGHT (Gratuit)**
 
----
+👉 **[Recevoir mon rapport AIO maintenant](${actionLink})**
 
-## 🔹 PACK LIGHT — DÉMARRER (gratuit / accès direct)
-
-👉 **[Cliquer sur "LIGHT"](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl)})**
-
-**Ce que vous obtenez :**
-✅ Analyse détaillée de votre site par AYO  
-✅ Score AIO (lisibilité actuelle pour les IA)  
-✅ Certification ASR simple (niveau LIGHT)
-
-**Bénéfices concrets :**
-- Comprendre comment les IA perçoivent votre site aujourd'hui
-- Identifier ce qui bloque la compréhension
-- Poser une première existence lisible pour les IA
-- Sans engagement, sans modification de votre site
-
-👉 *Idéal pour explorer, tester et comprendre.*
-
----
-
-## 🛡 PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)
-
-👉 **[🛡 Obtenir mon ID ASR — Essential (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
-
-**Documents fournis :**
-📄 **asr.json** (Essential)  
-→ Identité, offre, signaux techniques, conformité minimale
-
-📄 **manifest.json**  
-→ Règles claires pour les robots et IA
-
-📄 **faq.json**  
-→ Réponses structurées directement exploitables par les moteurs IA
-
-📊 **Analyse AYO détaillée** (PDF ou email)
-
-**Bénéfices concrets :**
-- Votre entreprise devient une entité identifiable sans ambiguïté
-- Les IA savent qui vous êtes, ce que vous faites, dans quel contexte vous citer
-- Réduction du risque d'erreur, d'approximation ou de silence IA
-- Base stable et durable, indépendante du SEO
-
-👉 *Recommandé pour toute entreprise souhaitant rester visible à moyen terme.*
-
----
-
-## 🚀 PACK PRO — DEVENIR UNE RÉFÉRENCE (499 CHF)
-
-👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
-
-**Documents fournis (complet) :**
-📄 **asr.json** (PRO, signé cryptographiquement)  
-→ Contexte, critères de sélection, pertinence IA avancée
-
-📄 **manifest.json** (PRO)  
-→ Politique de recommandation stricte et contrôlée
-
-📄 **faq.json enrichi**  
-→ Réponses contextuelles pour moteurs de réponse (ChatGPT, Gemini, Perplexity)
-
-📄 **glossary.json** (DefinedTermSet)  
-→ Vocabulaire métier précis, zéro hallucination IA
-
-📄 **external_context.json** (couche transitoire)  
-→ Avis, mots-clés et signaux actuels encapsulés et supprimables
-
-📊 **Analyse AYO complète & stratégique**
-
-**Bénéfices concrets :**
-- Votre site devient une **source de référence fiable** pour les IA
-- Compatibilité avec le web actuel (avis, intentions, comparaisons)
-- Préparation au monde post-SEO sans refonte future
-- **Avantage concurrentiel durable** :  
-  quand les autres optimisent encore le bruit, vous structurez l'essentiel
-- Tous les fichiers sont AI-Native, exploitables immédiatement
-
-👉 *Destiné aux entreprises et plateformes qui prennent une longueur d'avance dans un internet façonné par les IA.*
-
----
-
-📧 Votre rapport vous sera envoyé quelques minutes après validation de votre choix.`;
+*Votre rapport détaillé est en cours de génération et arrivera dans votre boîte mail d'ici quelques minutes.*`;
                 }
-
             }
         } // END OF ELSE BLOCK (Email Logic)
 
@@ -1536,10 +1802,10 @@ Selon le niveau choisi, vous obtenez :
             });
         }
 
-        // 🛑 CRITICAL FIX: Return immediately if sales tunnel was generated (after email validation)
-        // The sales tunnel v3.0 contains "PACK LIGHT" or "Email enregistré" - if present, don't override with LLM
-        if (finalResponseText && (finalResponseText.includes("PACK LIGHT") || finalResponseText.includes("Email enregistré") || finalResponseText.includes("Email Refusé"))) {
-            console.log("✅ Returning Sales Tunnel Response (Skipping LLM override).");
+        // 🛑 CRITICAL FIX: Return immediately if a response was generated (Sales Tunnel, Analysis, or Questioning)
+        // This prevents the code from falling through to the generic LLM which would overwrite the specific response.
+        if (finalResponseText) {
+            console.log("✅ Returning Generated Response (Skipping fallback LLM call). Content start: " + finalResponseText.substring(0, 50));
             return new Response(JSON.stringify({ text: finalResponseText }), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
@@ -1639,16 +1905,16 @@ Selon le niveau choisi, vous obtenez :
                 const b64 = Buffer.from(jsonStr).toString('base64');
 
                 if (b64.length <= 250) {
-                    stripeSuffix = `?client_reference_id=${b64}`;
+                    stripeSuffix = `? client_reference_id = ${b64} `;
                     if (emailForLink) {
-                        stripeSuffix += `&prefilled_email=${encodeURIComponent(emailForLink)}`;
+                        stripeSuffix += `& prefilled_email=${encodeURIComponent(emailForLink)} `;
                     }
                 } else {
                     // Fallback small
                     if (urlForLink) {
                         const smallPayload = JSON.stringify({ u: urlForLink });
                         const smallB64 = Buffer.from(smallPayload).toString('base64');
-                        stripeSuffix = `?client_reference_id=${smallB64}`;
+                        stripeSuffix = `? client_reference_id = ${smallB64} `;
                     }
                 }
             }
@@ -1658,96 +1924,71 @@ Selon le niveau choisi, vous obtenez :
         // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
         // -----------------------------------------------------------------------
         const SYSTEM_PROMPT = `
-AYO_PROMPT_V4 — DYNAMIC ASCENSION (AYO ONLY)
-Version: 4.0
-Statut: ACTIF
-But: Adapter le questionnement au type de site détecté (Phase 1 Dynamic), tout en VERROUILLANT le tunnel de conclusion (Phase 2 & 3).
+                AYO_PROMPT_V4 — DYNAMIC ASCENSION(AYO ONLY)
+                Version: 4.0
+                Statut: ACTIF
+                But: Adapter le questionnement au type de site détecté(Phase 1 Dynamic), tout en VERROUILLANT le tunnel de conclusion(Phase 2 & 3).
 
 ────────────────────────────────────────────────────────
-CONTEXTE TECHNIQUE (DONNÉES SCANNÉES)
+CONTEXTE TECHNIQUE(DONNÉES SCANNÉES)
 ────────────────────────────────────────────────────────
-L'utilisateur analyse l'URL : ${promptScanResult.url || 'Non fournie'}
-Titre détecté : "${promptScanResult.metaTitle || 'Non détecté'}"
-Description détectée : "${promptScanResult.metaDescription || 'Non détectée'}"
-JSON-LD Détecté : ${promptScanResult.hasJsonLd ? 'OUI' : 'NON'}
+L'utilisateur analyse l'URL: ${promptScanResult.url || 'Non fournie'}
+Titre détecté: "${promptScanResult.metaTitle || 'Non détecté'}"
+Description détectée: "${promptScanResult.metaDescription || 'Non détectée'}"
+                JSON - LD Détecté: ${promptScanResult.hasJsonLd ? 'OUI' : 'NON'}
 
 ────────────────────────────────────────────────────────
-0) CHAMP D’APPLICATION
+                0) CHAMP D’APPLICATION
 ────────────────────────────────────────────────────────
 Tu es AYO, l'assistant IA de AI-VISIONARY.
-Ton but : diagnostiquer la lisibilité AIO d'un site.
+Ton but: diagnostiquer la lisibilité AIO d'un site.
 Tu es un AUDITEUR TECHNIQUE IMPLACABLE.
-AYO = structure de données.
-AYO ≠ SEO.
+                    AYO = structure de données.
+                        AYO ≠ SEO.
 
 ────────────────────────────────────────────────────────
-IX) SCRIPT CONVERSATIONNEL — ÉTATS (V4 HYBRIDE)
+IX) SCRIPT CONVERSATIONNEL — ÉTATS(V4 HYBRIDE)
 ────────────────────────────────────────────────────────
 ÉTAT 0 — ACCUEIL
-Message : "AYO analyse si votre entreprise est lisible par les IA (ChatGPT, Gemini...). Donnez-moi l'URL de votre site."
+                Message: "AYO analyse si votre entreprise est lisible par les IA (ChatGPT, Gemini...). Donnez-moi l'URL de votre site."
 
-ÉTAT 1 — COLLECTE CONTEXTUELLE (PROTOCOLE STRICT JSON)
-⚠️ RÈGLE ABSOLUE : CETTE PHASE EST GÉRÉE DYNAMIQUEMENT PAR LE CODE.
+ÉTAT 1 — COLLECTE CONTEXTUELLE(PROTOCOLE STRICT JSON)
+⚠️ RÈGLE ABSOLUE: CETTE PHASE EST GÉRÉE DYNAMIQUEMENT PAR LE CODE.
 ⚠️ TU NE DOIS JAMAIS POSER DE QUESTIONS EN TEXTE LIBRE PENDANT LE QUESTIONNAIRE.
 ⚠️ SI LE CODE TE DEMANDE DE GÉNÉRER UNE QUESTION, TU DOIS OBLIGATOIREMENT UTILISER LE FORMAT JSON question_block.
 
 POURQUOI C'EST CRITIQUE :
-- Les réponses JSON sont stockées en base de données
-- Elles servent à générer l'analyse détaillée (LIGHT/Essential/PRO)
-- Elles alimentent les fichiers ASR  
-- Le texte libre CASSE tout ce système
+                    - Les réponses JSON sont stockées en base de données
+                        - Elles servent à générer l'analyse détaillée (LIGHT/Essential/PRO)
+                            - Elles alimentent les fichiers ASR
+                                - Le texte libre CASSE tout ce système
 
-SI TU TE RETROUVES ICI (le code n'a pas pris le relais) :
+SI TU TE RETROUVES ICI(le code n'a pas pris le relais) :
 🚫 INTERDIT : "Afin d'affiner l'analyse, pourriez-vous confirmer : ..."
-✅ OBLIGATOIRE : Générer un JSON question_block avec UNE SEULE question au format exact ci-dessous
+✅ OBLIGATOIRE : Générer un JSON question_block avec UNE SEULE question au format exact ci - dessous
 
-FORMAT OBLIGATOIRE (SANS MARKDOWN, JUSTE LE JSON) :
-{ "type": "question_block", "intro": "Merci. Question suivante...", "questions": [{ "id": "q_X", "text": "UNE SEULE QUESTION ICI ?", "options": ["Option 1", "Option 2"], "allowCustom": true, "customLabel": "Autre" }] }
+FORMAT OBLIGATOIRE(SANS MARKDOWN, JUSTE LE JSON) :
+                                    { "type": "question_block", "intro": "Merci. Question suivante...", "questions": [{ "id": "q_X", "text": "UNE SEULE QUESTION ICI ?", "options": ["Option 1", "Option 2"], "allowCustom": true, "customLabel": "Autre" }] }
 
-SI L'UTILISATEUR POSE UNE QUESTION HORS SUJET (ex: "C'est quoi AYO?") :
+SI L'UTILISATEUR POSE UNE QUESTION HORS SUJET (ex: "C'est quoi AYO ? ") :
 → Tu peux répondre normalement en texte
 → PUIS tu renvoies vers le questionnaire avec un JSON question_block
 
-ÉTAT 2 — ANALYSE & SCAN (V3)
-(Géré par le code TS pour l'affichage "|||", mais tu dois connaître la logique).
+ÉTAT 2 — ANALYSE & SCAN(V3)
+                                    (Géré par le code TS pour l'affichage "|||", mais tu dois connaître la logique).
 
-ÉTAT 3 — VÉRIFICATION EMAIL & DÉLIVRANCE (STRICT : COPIER-COLLER EXACT)
-Si l'utilisateur donne un email valide (détecté par le code), et que tu dois répondre (au cas où le code TS ne l'intercepte pas) :
+ÉTAT 3 — FIN DU QUESTIONNAIRE (SILENCE & ANALYSE)
+Si tu as posé toutes les questions (ou si le contexte est suffisant) :
+✅ OBLIGATOIRE : Tu ne dois PLUS RIEN ÉCRIRE.
+✅ Tu dois générer un JSON spécial de fin : { "type": "final_analysis" }
+OU simplement dire : "Analyse en cours..." et laisser le système prendre le relais.
 
-"✅ **Email validé.**
+❌ INTERDIT DE GÉNÉRER LE RAPPORT TOI-MÊME.
+❌ INTERDIT D'AFFICHER DES PRIX OU DES LIENS.
+❌ INTERDIT DE DEMANDER L'EMAIL EN TEXTE LIBRE.
 
-💡 **OPPORTUNITÉ STRATÉGIQUE**
-
-Votre score actuel est un début.
-Mais pour que votre entreprise soit **correctement référencée et recommandée** par les IA (ChatGPT, Gemini), la Certification AIO est indispensable.
-
-Choisissez votre niveau d'activation pour recevoir votre **Certification ASR** et les documents techniques :
-
-👉 **[🛡 Obtenir mon ID ASR (Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
- (Certification ASR Essential + Analyse détaillée & Envoi par email)
-
- 👉 **[🚀 Obtenir mon ASR PRO (499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
- (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI-Native)
-
- 👉 **[Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmailPrompt)})** (Analyse détaillée + Certification ASR simple)
-
-📧 Votre rapport vous sera envoyé quelques minutes après validation de votre choix."
-
-ÉTAT 4 — UPGRADE (Si l'utilisateur demande manuellement)
-Si OUI pour Essential :
-"Excellent choix.
-👉 [🛡 Activer la Certification (99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})"
-
-Si PACK PRO :
-"🏆 **Choix Visionnaire.**
-Vous passez au niveau Expert.
-👉 [🚀 **Activer le Pack PRO (499 CHF)**](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})"
-
-Si Non :
-"C'est noté. Je reste ici si besoin."
-
-ÉTAT 5 — FIN
-Confirmation.
+Tout l'affichage du SCORE, des OFFRES, et du PAIEMENT est géré par l'interface graphique.
+Ton rôle s'arrête strictement à la collecte d'informations contextuelles.
 
 Utilise ce ton : Professionnel, froid, clinique, expert.
 `;
@@ -1758,7 +1999,7 @@ Utilise ce ton : Professionnel, froid, clinique, expert.
         // Keep the text injection for content analysis
         if (websiteData.text) {
             finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
-"""
+                                                    """
 ${websiteData.text}
 """`;
         }

@@ -209,12 +209,85 @@ export function computeAioScore(extract: AyoExtract) {
     ); // Max potential: 1+2+2+1+1 = 7
     const scoreAuthority = Math.min(100, (rawAuthority / 7) * 100);
 
+    // 5) AUDIT BLOCKS GENERATION (RICH TEXT)
+    // We generate specific observations based on what pulled the score down.
+    const auditBlocks: Record<string, any> = {};
+
+    (Object.keys(WEIGHTS) as (keyof typeof WEIGHTS)[]).forEach((block) => {
+        const { score, raw } = blockScores[block];
+        const max = WEIGHTS[block];
+        const ratio = score / max; // 0..1
+
+        let status = 'success';
+        if (ratio < 0.5) status = 'error';
+        else if (ratio < 0.8) status = 'warning';
+
+        // Generate Observation
+        const issues: string[] = [];
+        const expected = EXPECTED_FIELDS[block];
+
+        expected.forEach(field => {
+            const blockObj = extract.fields?.[block];
+            // @ts-expect-error dynamic access
+            const node = blockObj?.[field];
+            if (!node || node.q === 0) {
+                // Human readable field names
+                const fieldLabels: Record<string, string> = {
+                    name: "Nom commercial", legal_name: "Nom légal (Kbis)", business_type: "Type d'activité",
+                    city: "Ville", country: "Pays", contact_email: "Email public", contact_phone: "Téléphone",
+                    services: "Liste des services", products: "Liste des produits", use_cases: "Cas d'usage",
+                    target_audience: "Public cible", pricing_indication: "Indikation tarifaire",
+                    process_steps: "Étapes du processus", delivery_mode: "Mode de livraison",
+                    geographies_served: "Zone d'intervention", quality_assurance: "Garanties qualité",
+                    policies: "Politiques (CGV/Confidentialité)", frameworks: "Cadres de travail",
+                    certifications: "Certifications", security_measures: "Mesures de sécurité",
+                    key_indicators: "Chiffres clés", last_review_date: "Date de mise à jour",
+                    has_faq: "FAQ structurée", has_glossary: "Glossaire sémantique",
+                    has_documentation: "Documentation technique",
+                    has_asr: "Fichiers ASR", has_jsonld: "Balisage Schema.org",
+                    has_sitemap: "Plan du site (Sitemap)", mobile_optimized: "Optimisation Mobile"
+                };
+                issues.push(fieldLabels[field] || field);
+            }
+        });
+
+        let observation = "";
+        if (ratio >= 0.9) {
+            observation = "✅ Section parfaitement optimisée pour les IA.";
+        } else if (issues.length > 0) {
+            const missingStr = issues.slice(0, 3).join(", "); // List max 3
+            const count = issues.length;
+            observation = `Manque : ${missingStr}${count > 3 ? ` et ${count - 3} autres` : ''}. Ces éléments sont critiques pour la compréhension par les LLM.`;
+        } else {
+            observation = "⚠️ Les données sont présentes mais jugées de faible qualité sémantique par l'IA.";
+        }
+
+        // Labels
+        const blockLabels: Record<string, string> = {
+            identite: "Identité & Ancrage",
+            offre: "Clarté de l'Offre",
+            processus_methodes: "Processus & Méthodes",
+            engagements_conformite: "Confiance & Conformité",
+            indicateurs: "Preuve Sociale & Métriques",
+            contenus_pedagogiques: "Pédagogie & Supports",
+            structure_technique: "Socle Technique AIO"
+        };
+
+        auditBlocks[block] = {
+            score: Math.round(score * 10) / 10,
+            max: max,
+            label: blockLabels[block] || block,
+            status: status,
+            observation: observation
+        };
+    });
+
     return {
-        total: Math.round(total * 10) / 10, // 1 décimale stable
+        total: Math.round(total * 10) / 10,
         blocks: Object.fromEntries(
             Object.entries(blockScores).map(([k, v]) => [k, Math.round(v.score * 10) / 10])
         ),
-        // NEW: Contextual Scores
+        audit: auditBlocks, // <--- EXPORT RICH AUDIT
         contextual: {
             local_search: Math.round(scoreLocal),
             premium_expert: Math.round(scorePremium),

@@ -147,18 +147,29 @@ ${JSON.stringify(asrJson, null, 2)}
                     </pre>
                     
                     <div style="background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 30px 0; border: 1px solid #bbdefb;">
-                        <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Pas à Pas)</h3>
-                        <p style="font-size: 14px; font-weight: bold;">Objectif : Rendre ce fichier accessible aux IA.</p>
-                        <ol style="font-size:13px; padding-left:20px; line-height: 1.6;">
-                            <li>Accédez à votre serveur (FTP) ou gestionnaire de fichiers.</li>
-                            <li>À la racine de votre site (au même niveau que <code>index.html</code>), créez un nouveau dossier nommé exactement : <br><code>.ayo</code> (avec le point devant).</li>
-                            <li>Dans ce dossier <code>.ayo</code>, créez le fichier <code>asr.json</code> et collez-y le code ci-dessus.</li>
-                            <li>Vérifiez l'accès en tapant dans votre navigateur : <br><code>https://votre-site.com/.ayo/asr.json</code></li>
-                        </ol>
-                        <p style="margin-top: 15px; font-size: 13px; font-style: italic;">
-                            <strong>Alternative WordPress/Wix :</strong> Si vous ne pouvez pas créer de dossier, copiez le contenu du <code>asr.json</code> et collez-le dans le <code>&lt;HEAD&gt;</code> de votre site, entouré des balises :<br>
-                            <code>&lt;script type="application/ld+json"&gt; ... CODE ICI ... &lt;/script&gt;</code>
-                        </p>
+                        <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION SIMPLIFIÉ</h3>
+                        <p style="font-size: 14px; font-weight: bold;">Comment installer votre fichier ASR ?</p>
+                        
+                        <div style="background: #fff; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #bbdefb;">
+                            <h4 style="margin: 0 0 10px 0; color: #0277bd;">METHODE 1 : LA PLUS SIMPLE (Recommandée)</h4>
+                            <p style="margin: 0 0 10px 0; font-size: 13px;">Idéal pour WordPress, Wix, Shopify, Squarespace...</p>
+                            <p style="margin: 0; font-size: 13px;">Copiez le code JSON ci-dessus et collez-le dans l'en-tête <code>&lt;HEAD&gt;</code> de votre site web, entre des balises script.</p>
+                            <div style="background: #f5f5f5; padding: 10px; margin-top: 10px; font-family: monospace; font-size: 11px; border: 1px dashed #ccc; color: #555;">
+                                &lt;script type="application/ld+json"&gt;<br>
+                                ... COLLEZ LE CODE JSON ICI ...<br>
+                                &lt;/script&gt;
+                            </div>
+                        </div>
+
+                        <div style="background: #fff; padding: 15px; border-radius: 5px; border: 1px solid #bbdefb;">
+                            <h4 style="margin: 0 0 10px 0; color: #0277bd;">METHODE 2 : EXPERT / DEVELOPPEUR</h4>
+                            <p style="margin: 0 0 5px 0; font-size: 13px;">Si vous avez un accès technique :</p>
+                            <ul style="font-size:13px; padding-left:20px; margin: 0; line-height: 1.5;">
+                                <li>Créez un dossier nommé <code>.ayo</code> à la racine du site.</li>
+                                <li>Placez-y le fichier <code>asr.json</code>.</li>
+                                <li>C'est la méthode la plus propre techniquement.</li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">

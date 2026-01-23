@@ -685,21 +685,32 @@ export async function POST(req: Request) {
                             <p style="font-size:13px;">Généré à partir de vos réponses (Présence Externe). Copiez dans <code>external_context.json</code>.</p>
                             <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; overflow-x: auto; font-size: 11px; border-radius: 5px;">${externalContextJson}</pre>
 
-                            <div style="background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 30px 0; border: 1px solid #bbdefb;">
-                                <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION (Tuto Pas à Pas)</h3>
-                                <p style="font-size: 14px; font-weight: bold;">Objectif : Rendre ces 4 fichiers accessibles aux IA.</p>
-                                <ol style="font-size:13px; padding-left:20px; line-height: 1.6;">
-                                    <li>Accédez à votre serveur (FTP) ou gestionnaire de fichiers.</li>
-                                    <li>À la racine de votre site (au même niveau que <code>index.html</code>), créez un nouveau dossier nommé exactement : <br><code>.ayo</code> (avec le point devant).</li>
-                                    <li>Dans ce dossier <code>.ayo</code>, créez les 5 fichiers (<code>asr.json</code>, <code>faq.json</code>, <code>glossary.json</code>, <code>manifest.json</code>, <code>external_context.json</code>) et collez-y les codes ci-dessus.</li>
-                                    <li>Vérifiez l'accès en tapant dans votre navigateur : <br><code>https://votre-site.com/.ayo/external_context.json</code></li>
-                                </ol>
-                                <p style="margin-top: 15px; font-size: 13px; font-style: italic;">
-                                    <strong>Alternative WordPress/Wix :</strong> Si vous ne pouvez pas créer de dossier, copiez le contenu du <code>asr.json</code> et collez-le dans le <code>&lt;HEAD&gt;</code> de votre site, entouré des balises :<br>
-                                    <code>&lt;script type="application/ld+json"&gt; ... CODE ICI ... &lt;/script&gt;</code>
-                                    <br>(Note: FAQ et Glossaire peuvent aussi être injectés de la même façon dans des balises script séparées).
-                                </p>
-                            </div>
+                                <div style="background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 30px 0; border: 1px solid #bbdefb;">
+                                    <h3 style="margin-top:0; color: #0d47a1;">🛠 GUIDE D'INSTALLATION SIMPLIFIÉ</h3>
+                                    <p style="font-size: 14px; font-weight: bold;">Comment installer vos fichiers ? (Choisissez votre méthode)</p>
+                                    
+                                    <div style="background: #fff; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #bbdefb;">
+                                        <h4 style="margin: 0 0 10px 0; color: #0277bd;">METHODE 1 : LA PLUS SIMPLE (Recommandée)</h4>
+                                        <p style="margin: 0 0 10px 0; font-size: 13px;">Idéal pour WordPress, Wix, Shopify, Squarespace...</p>
+                                        <p style="margin: 0; font-size: 13px;">Copiez simplement le contenu des codes (ASR, FAQ, Glossaire) et collez-les dans l'en-tête <code>&lt;HEAD&gt;</code> de votre site web, entre des balises script.</p>
+                                        <div style="background: #f5f5f5; padding: 10px; margin-top: 10px; font-family: monospace; font-size: 11px; border: 1px dashed #ccc; color: #555;">
+                                            &lt;script type="application/ld+json"&gt;<br>
+                                            ... COLLEZ LE CODE JSON ICI ...<br>
+                                            &lt;/script&gt;
+                                        </div>
+                                    </div>
+
+                                    <div style="background: #fff; padding: 15px; border-radius: 5px; border: 1px solid #bbdefb;">
+                                        <h4 style="margin: 0 0 10px 0; color: #0277bd;">METHODE 2 : EXPERT / DEVELOPPEUR</h4>
+                                        <p style="margin: 0 0 5px 0; font-size: 13px;">Pour une installation complète (incluant le Manifeste) :</p>
+                                        <ol style="font-size:13px; padding-left:20px; margin: 0; line-height: 1.5;">
+                                            <li>Connectez-vous à votre hébergement (Gestionnaire de fichiers).</li>
+                                            <li>À la racine du site, créez un dossier nommé <code>.ayo</code></li>
+                                            <li>Placez-y les 5 fichiers (<code>asr.json</code>, etc.) générés.</li>
+                                            <li>C'est la méthode idéale pour une conformité à 100%.</li>
+                                        </ol>
+                                    </div>
+                                </div>
 
                             <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
                                 <h4 style="margin-top:0; color: #e65100;">🆘 Besoin d'aide pour l'installation ?</h4>
