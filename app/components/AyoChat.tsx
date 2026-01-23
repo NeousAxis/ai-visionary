@@ -43,21 +43,22 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     useEffect(() => {
         if (!isOpen && mode === 'widget') return;
 
-        // Handling scroll behavior
         const lastMsg = messages[messages.length - 1];
 
-        // If it's an AI message, we want to see the START of the message (for long proposals)
+        // LOGIC: If it's an AI message, we want to ensure the user sees the START of it.
+        // Especially for long marketing pitches.
         if (lastMsg && lastMsg.role === 'assistant' && !isLoading) {
+            // Slight delay to allow DOM render
             setTimeout(() => {
                 const bubble = document.getElementById(`msg-${lastMsg.id}`);
                 if (bubble) {
+                    // "start" aligns the top of the element to the top of the visible area
+                    // ensuring we read from the top.
                     bubble.scrollIntoView({ behavior: "smooth", block: "start" });
-                } else {
-                    scrollToBottom();
                 }
             }, 100);
         } else {
-            // Default behavior (user message, loading, etc.) -> Scroll to bottom
+            // For user messages or while loading, stick to bottom to show progress
             scrollToBottom();
         }
     }, [messages, isLoading, isOpen, isAnalyzing, mode]);

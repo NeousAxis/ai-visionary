@@ -1763,6 +1763,12 @@ Bienvenue dans l'élite des entreprises AI-Ready.
 
 🛡 **Finaliser ma commande PACK ESSENTIAL (99 CHF)**
 
+**Inclus dans votre Pack :**
+📄 **asr.json** (Certification Essential)
+📑 **manifest.json** (Règles d'indexation)
+❓ **faq.json** (Réponses structurées IA)
+🛡 **Certificat ASR** (PDF)
+
 👉 **[Payer et recevoir mon ASR Essential](${actionLink})**
 
 *Vous recevrez votre reçu et vos fichiers instantanément après validation.*`;
@@ -1772,6 +1778,13 @@ Bienvenue dans l'élite des entreprises AI-Ready.
                     finalResponseText = `✅ **Email enregistré.**
 
 🚀 **Finaliser ma commande PACK PRO (499 CHF)**
+
+**Inclus dans votre Pack :**
+👑 **asr.json** (Certification PRO Signée)
+📑 **manifest.json** (Protocoles avancés)
+🧠 **glossary.json** (Sémantique métier)
+❓ **faq.json** (Enrichie)
+➕ **external_context.json** (Gestion de réputation)
 
 👉 **[Payer et recevoir mon ASR PRO (Complet)](${actionLink})**
 

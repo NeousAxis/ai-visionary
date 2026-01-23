@@ -457,7 +457,7 @@ export async function POST(req: Request) {
         }
 
         // 🔐 VALIDATION EMAIL
-        const VALIDATION_DISABLED = false; // PROD MODE: STRICT
+        const VALIDATION_DISABLED = true; // PROD FIX: Allow gmail/etc. for artisans
         let emailValidated = false;
         if (!emailMissing && customerEmail && companyInfo.url) {
             const urlObj = new URL(companyInfo.url);
@@ -467,8 +467,8 @@ export async function POST(req: Request) {
             if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
                 emailValidated = true;
             } else {
-                console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain}`);
-                emailMissing = true;
+                console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain} (IGNORED by VALIDATION_DISABLED)`);
+                emailValidated = true; // Force validate
             }
         }
 
