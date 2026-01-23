@@ -213,9 +213,9 @@ export async function POST(req: Request) {
         if (stripe) {
             try {
                 console.log("Retrieving Stripe Session...");
-                // Expand customer details to ensure we get the email
+                // Expand customer details AND payment_method to ensure we get the email
                 const session = await stripe.checkout.sessions.retrieve(session_id, {
-                    expand: ['payment_intent', 'customer']
+                    expand: ['payment_intent.payment_method', 'customer']
                 });
                 stripeSession = session;
                 console.log("Stripe Session Retrieved. Customer Details:", session.customer_details);
@@ -226,24 +226,42 @@ export async function POST(req: Request) {
                     console.warn("⚠️ Payment not paid:", paymentStatus);
                 }
 
-                // 2. Extract Email (Priority: Force > Customer Details > Customer Email > Customer Object)
+                // 2. Extract Email (Deep Search)
+                // Priority:
+                // 1. Force Email (Manual)
+                // 2. Customer Details (User typed in Checkout)
+                // 3. Customer Object (Stripe ID)
+                // 4. Client Reference ID (Our Backup)
+                // 5. Payment Method Billing Details (The "Impossible" to miss)
+
                 if (force_email) {
                     customerEmail = force_email;
-                    console.log("✅ Email MANUALLY provided by user:", customerEmail);
+                    console.log("✅ Email MANUALLY provided:", customerEmail);
                 }
                 else if (session.customer_details?.email) {
                     customerEmail = session.customer_details.email;
-                    console.log("✅ Email extracted from Stripe (customer_details):", customerEmail);
+                    console.log("✅ Email form Customer Details:", customerEmail);
                 }
                 else if (session.customer_email) {
                     customerEmail = session.customer_email;
-                    console.log("✅ Email extracted from Stripe (customer_email):", customerEmail);
+                    console.log("✅ Email form Customer Field:", customerEmail);
                 }
                 else if (session.customer && typeof session.customer === 'object' && (session.customer as Stripe.Customer).email) {
                     customerEmail = (session.customer as Stripe.Customer).email!;
-                    console.log("✅ Email extracted from Stripe (customer object):", customerEmail);
+                    console.log("✅ Email form Customer Object:", customerEmail);
                 }
-                // Nuclear Fetch
+                // DEEP SEARCH: Payment Method (The user's JSON case)
+                else if ((session.payment_intent as any)?.payment_method?.billing_details?.email) {
+                    customerEmail = (session.payment_intent as any).payment_method.billing_details.email;
+                    console.log("✅ Email form PaymentMethod Billing:", customerEmail);
+                }
+                // DEEP SEARCH: Receipt Email
+                else if ((session.payment_intent as any)?.receipt_email) {
+                    customerEmail = (session.payment_intent as any).receipt_email;
+                    console.log("✅ Email form PaymentIntent Receipt:", customerEmail);
+                }
+
+                // Nuclear Fetch (Existing)
                 if (!customerEmail && session.customer && typeof session.customer === 'string') {
                     try {
                         const customer = await stripe.customers.retrieve(session.customer);
