@@ -1917,9 +1917,9 @@ Bienvenue dans l'élite des entreprises AI-Ready.
                 const b64 = Buffer.from(jsonStr).toString('base64');
 
                 if (b64.length <= 250) {
-                    stripeSuffix = `? client_reference_id = ${b64} `;
+                    stripeSuffix = `?client_reference_id=${b64}`;
                     if (emailForLink) {
-                        stripeSuffix += `& prefilled_email=${encodeURIComponent(emailForLink)} `;
+                        stripeSuffix += `&prefilled_email=${encodeURIComponent(emailForLink)}`;
                     }
                 } else {
                     // Fallback small: PRIORITIZE EMAIL (Critical for delivery)
