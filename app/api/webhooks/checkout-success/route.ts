@@ -223,7 +223,9 @@ export async function POST(req: Request) {
                 // 1. Verify Payment
                 paymentStatus = session.payment_status;
                 if (paymentStatus !== 'paid') {
-                    console.warn("⚠️ Payment not paid:", paymentStatus);
+                    console.error("❌ CRITICAL: Payment not paid. Status:", paymentStatus);
+                    // We return 200 to acknowledge the event but stop processing (don't deliver files)
+                    return NextResponse.json({ received: true, status: `ignored_status_${paymentStatus}` }, { status: 200 });
                 }
 
                 // 2. EXTRACT EMAIL - NEW STRATEGY: TRUST OUR DATA FIRST (Client Ref)
