@@ -18,11 +18,16 @@ function SuccessContent() {
             return;
         }
 
+        // ⏱️ CLIENT-SIDE SAFETY TIMEOUT (25s)
+        const timeout = setTimeout(() => {
+            if (status === 'loading') {
+                console.warn("Client-side timeout reached");
+                setStatus('error');
+            }
+        }, 25000);
+
         const fetchOrder = async () => {
             try {
-                // 🚀 ARCHITECTURE ZERO-ECHEC :
-                // On appelle l'API de génération DÉDIÉE (Client-Side Trigger)
-                // Cela évite le timeout de Stripe. C'est le navigateur qui attend la réponse.
                 const res = await fetch('/api/generate-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -34,28 +39,29 @@ function SuccessContent() {
                     if (data.files) {
                         setFiles(data.files);
                         setStatus('success');
-                        if (data.amount && data.amount >= 499) setPackType('PRO');
+                        if (data.amount && data.amount >= 450) setPackType('PRO'); // Consistent with API
                     } else {
-                        // Cas rare : Succès mais pas de fichiers (bizarre)
-                        console.warn("API returned success but no files.", data);
                         setStatus('error');
                     }
                 } else {
-                    const errorData = await res.json();
-                    console.error("API Generation Error:", errorData);
+                    // Even if API returns 500/504, the email might have been sent
                     setStatus('error');
                 }
             } catch (e) {
                 console.error("Fetch Error:", e);
                 setStatus('error');
+            } finally {
+                clearTimeout(timeout);
             }
         };
 
-        // Only fetch once.
         if (status === 'loading') {
             fetchOrder();
         }
-    }, [sessionId]); // Remove 'status' dependency to avoid loops
+
+        return () => clearTimeout(timeout);
+    }, [sessionId]);
+
 
     const downloadFile = (filename: string, content: string) => {
         if (!content) return;
@@ -78,43 +84,45 @@ function SuccessContent() {
 
             <main className="flex-1 container mx-auto px-4 py-12 max-w-2xl">
                 {status === 'loading' && (
-                    <div className="text-center py-20">
-                        <div className="w-16 h-16 border-4 border-[#4A919E] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-                        <h1 className="text-2xl font-bold mb-2 text-[#212E53]">Finalisation de votre commande...</h1>
-                        <p className="text-[#64748B]">Nous générons vos certificats ASR sécurisés. Cela peut prendre quelques secondes.</p>
+                    <div className="text-center py-20 bg-white border border-[#D4E0DC] rounded-3xl shadow-xl">
+                        <div className="w-12 h-12 border-4 border-[#4A919E] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                        <h1 className="text-2xl font-bold mb-2 text-[#212E53]">Génération de vos fichiers...</h1>
+                        <p className="text-[#64748B] px-6">L'intelligence artificielle prépare vos certificats personnalisés. Ne fermez pas cette page.</p>
                     </div>
                 )}
 
                 {status === 'error' && (
                     <div className="flex-1 flex flex-col justify-center items-center w-full">
                         <div className="bg-white border border-[#D4E0DC] rounded-[2rem] p-12 shadow-2xl text-center max-w-2xl w-full mx-auto relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
+                            <div className="absolute top-0 left-0 w-full h-2 bg-amber-400"></div>
 
-                            <div className="mb-8 text-6xl">⏳</div>
+                            <div className="mb-6 text-6xl">📬</div>
 
-                            <h1 className="text-3xl font-extrabold text-[#212E53] mb-6">
-                                Finalisation en cours...
+                            <h1 className="text-3xl font-extrabold text-[#212E53] mb-4">
+                                Vérifiez vos emails !
                             </h1>
 
                             <p className="text-[#64748B] text-lg mb-8 leading-relaxed">
-                                Le serveur est un peu lent à générer vos fichiers personnalisés.
-                                <br />Veuillez patienter encore 15 secondes puis cliquez sur le bouton ci-dessous.
+                                La génération a pris un peu de temps sur cette page, mais <b>votre pack a probablement déjà été envoyé par email</b> (vérifiez aussi vos spams).
                             </p>
 
                             <div className="flex flex-col gap-6 items-center w-full">
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="px-12 py-4 bg-[#4A919E] text-white font-bold rounded-full hover:bg-[#356D76] transition-all shadow-lg w-full sm:w-auto"
+                                    className="px-10 py-4 bg-[#4A919E] text-white font-bold rounded-full hover:bg-[#356D76] transition-all shadow-lg flex items-center justify-center gap-2"
                                 >
-                                    🔄 Récupérer mes fichiers
+                                    <span>🔄</span> Réessayer d'afficher ici
                                 </button>
 
                                 <div className="pt-8 border-t border-slate-100 w-full">
-                                    <p className="text-xs text-[#94A3B8] font-bold mb-2">RÉFÉRENCE DE COMMANDE</p>
-                                    <code className="text-xs bg-slate-50 p-2 rounded block mb-4">{sessionId}</code>
-                                    <a href={`mailto:hello@ai-visionary.com?subject=Support ${sessionId}`} className="text-[#4A919E] font-bold text-sm">
-                                        Contacter le support
-                                    </a>
+                                    <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-widest mb-2">Référence de Commande</p>
+                                    <code className="text-xs bg-slate-50 p-3 rounded-lg block mb-4 border border-slate-100 select-all font-mono">{sessionId}</code>
+                                    <p className="text-sm text-slate-500">
+                                        Un problème ? Contactez-nous : <br />
+                                        <a href={`mailto:hello@ai-visionary.com?subject=Support ${sessionId}`} className="text-[#4A919E] font-bold underline decoration-2 underline-offset-4">
+                                            hello@ai-visionary.com
+                                        </a>
+                                    </p>
                                 </div>
                             </div>
                         </div>
