@@ -82,30 +82,43 @@ function SuccessContent() {
                 )}
 
                 {status === 'error' && (
-                    <div className="text-center py-20 bg-amber-50 border border-amber-200 rounded-2xl">
-                        <h1 className="text-2xl font-bold text-amber-700 mb-2">Génération des fichiers en cours...</h1>
-                        <p className="text-[#64748B] mb-6 max-w-md mx-auto">
-                            Merci de patienter environ <strong>30 secondes</strong> pour permettre à l'IA de finaliser vos documents.
-                            <br /><br />
-                            Si les fichiers n'apparaissent pas automatiquement, cliquez sur le bouton ci-dessous.
+                    <div className="bg-white border border-[#D4E0DC] rounded-3xl p-10 shadow-xl text-center max-w-xl mx-auto">
+
+                        {/* 1. SPINNER (Restored) */}
+                        <div className="w-20 h-20 border-4 border-[#4A919E]/20 border-t-[#4A919E] rounded-full animate-spin mx-auto mb-8"></div>
+
+                        <h1 className="text-3xl font-extrabold text-[#212E53] mb-4">
+                            Génération en cours...
+                        </h1>
+
+                        <p className="text-[#64748B] text-lg mb-8 leading-relaxed">
+                            L'IA finalise la création de vos certificats sécurisés.
+                            <br />
+                            <span className="text-sm opacity-80">(Attente estimée : ~30 secondes)</span>
                         </p>
 
-                        <div className="flex flex-col gap-4 items-center">
+                        <div className="flex flex-col gap-6 items-center">
                             <button
                                 onClick={() => window.location.reload()}
-                                className="px-6 py-3 bg-amber-600 text-white font-bold rounded-full hover:bg-amber-700 transition-colors shadow-md flex items-center gap-2"
+                                className="group relative px-8 py-4 bg-[#4A919E] text-white font-bold rounded-full hover:bg-[#356D76] transition-all shadow-lg hover:shadow-[#4A919E]/30 hover:-translate-y-1"
                             >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                Vérifier la disponibilité
+                                <span className="flex items-center gap-3 text-lg">
+                                    <svg className="w-6 h-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                    Vérifier la disponibilité
+                                </span>
                             </button>
 
-                            <div className="bg-white p-4 max-w-sm w-full rounded-lg border border-amber-200 mt-4 text-left shadow-sm">
-                                <p className="font-bold text-[#212E53] mb-1 text-sm">Besoin d'aide ?</p>
-                                <p className="text-xs text-[#64748B] mb-2">Si les fichiers n'apparaissent toujours pas, envoyez-nous cet ID par email :</p>
-                                <code className="block bg-[#F1F5F9] p-2 rounded text-xs break-all text-slate-600 mb-3 select-all font-mono border border-slate-200">{sessionId}</code>
-                                <a href={`mailto:hello@ai-visionary.com?subject=Probleme Commande ${sessionId}`} className="text-[#4A919E] font-bold text-sm underline flex items-center gap-1 hover:text-[#356D76]">
-                                    ✉️ Contacter le support
-                                </a>
+                            {/* Discrete Support Section */}
+                            <div className="mt-4 pt-6 border-t border-slate-100 w-full text-center">
+                                <p className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider mb-3">Si le délai dépasse 1 minute</p>
+                                <div className="flex flex-col items-center gap-2">
+                                    <code className="text-xs bg-[#F8FAFC] text-slate-500 px-3 py-1 rounded-full border border-slate-200 select-all tracking-tight">
+                                        Ref: {sessionId?.slice(0, 20)}...
+                                    </code>
+                                    <a href={`mailto:hello@ai-visionary.com?subject=Support Commande ${sessionId}`} className="text-[#4A919E] text-sm font-semibold hover:underline flex items-center gap-1 mt-1">
+                                        ✉️ Contacter le support technique
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
