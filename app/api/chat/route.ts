@@ -1400,7 +1400,7 @@ Pour activer votre visibilité, choisissez votre niveau de certification :`,
                     questions: [{
                         id: "pack_intention",
                         text: "Sélectionnez votre Pack :",
-                        options: ["🔹 Pack LIGHT — Gratuit", "🛡 Pack ESSENTIAL — 99 CHF", "🚀 Pack PRO — 499 CHF"],
+                        options: ["🚀 Pack PRO — 499 CHF", "🛡 Pack ESSENTIAL — 99 CHF", "🔹 Pack LIGHT — Gratuit"],
                         allowCustom: false,
                         allowMultiple: false
                     }]

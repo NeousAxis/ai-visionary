@@ -425,7 +425,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                     {/* CHECKBOX MODE - LARGE BUBBLE DESIGN */}
                                     {forceMultiple ? (
                                         <div className="flex flex-col gap-4">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 {filteredOptions.map((opt, i) => {
                                                     const isSelected = currentSelections.includes(opt);
                                                     return (
@@ -533,7 +533,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                     ) : (
                                         /* BUTTON MODE (Single Select) - LARGE BUBBLE STYLE FORCED */
                                         <div className="flex flex-col gap-4">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 {filteredOptions.map((opt, i) => (
                                                     <button
                                                         key={i}
