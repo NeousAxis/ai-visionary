@@ -3,15 +3,14 @@ import { Resend } from 'resend';
 import Stripe from 'stripe';
 
 // Initialize Services (Resend is safe to init outside)
-// Initialize Services (Resend is safe to init outside)
-const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
-
+// Initialize Services
+// Resend will be initialized inside the handler to ensure Env Vars are ready
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
 import { db } from '@/lib/db';
-import { generateRealAsrJson } from '@/lib/ayo-crypto'; // This import is already present and correct
+import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { generateExternalContextJson } from '@/lib/external-context';
 
 // --- LOGIQUE D'ANALYSE (DUPLIQUÉE DEPUIS CHAT ROUTE POUR AUTONOMIE WEBHOOK) ---
@@ -156,6 +155,12 @@ export async function POST(req: Request) {
     // Lazy init Stripe inside handler
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    // Lazy init Resend (Fix for "It worked before")
+    const resendKey = process.env.RESEND_API_KEY;
+    if (!resendKey) console.error("❌ CRITICAL: RESEND_API_KEY is missing in Checkout Webhook!");
+    const resend = new Resend(resendKey);
+
     let stripe: Stripe | null = null;
 
     if (stripeKey) {
