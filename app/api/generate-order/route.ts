@@ -227,9 +227,9 @@ export async function POST(req: Request) {
         // "Code Autrement": We prioritized the data we passed (Client Reference) because we know it's correct from the Chat.
 
         // A. Try Client Reference ID (High Reliability)
-        if (session.client_reference_id) {
+        if (stripeSession.client_reference_id) {
             try {
-                const b64 = session.client_reference_id;
+                const b64 = stripeSession.client_reference_id;
                 const jsonStr = Buffer.from(b64, 'base64').toString('utf-8');
                 const payload = JSON.parse(jsonStr);
 
@@ -245,25 +245,25 @@ export async function POST(req: Request) {
 
         // B. Fallback to Stripe Data (Standard)
         if (!customerEmail) {
-            if (session.customer_details?.email) {
-                customerEmail = session.customer_details.email;
+            if (stripeSession.customer_details?.email) {
+                customerEmail = stripeSession.customer_details.email;
                 console.log("✅ PRIORITY 2: Email from Stripe Customer Details:", customerEmail);
             }
-            else if (session.customer_email) {
-                customerEmail = session.customer_email;
+            else if (stripeSession.customer_email) {
+                customerEmail = stripeSession.customer_email;
                 console.log("✅ PRIORITY 3: Email from Stripe Session Field:", customerEmail);
             }
             // DEEP SEARCH: Payment Method (The user's JSON case - Last Resort)
-            else if ((session.payment_intent as any)?.payment_method?.billing_details?.email) {
-                customerEmail = (session.payment_intent as any).payment_method.billing_details.email;
+            else if ((stripeSession.payment_intent as any)?.payment_method?.billing_details?.email) {
+                customerEmail = (stripeSession.payment_intent as any).payment_method.billing_details.email;
                 console.log("✅ PRIORITY 4: Email from PaymentMethod Billing:", customerEmail);
             }
         }
 
         // Nuclear Fetch (Existing)
-        if (!customerEmail && session.customer && typeof session.customer === 'string') {
+        if (!customerEmail && stripeSession.customer && typeof stripeSession.customer === 'string') {
             try {
-                const customer = await stripe.customers.retrieve(session.customer);
+                const customer = await stripe.customers.retrieve(stripeSession.customer);
                 if ((customer as Stripe.Customer).email) {
                     customerEmail = (customer as Stripe.Customer).email!;
                     console.log("✅ Email extracted via explicit Customer Fetch:", customerEmail);
@@ -274,9 +274,6 @@ export async function POST(req: Request) {
         }
 
         // (Old Fallback Block Removed - Logic Moved Upstream)
-
-    } catch (stripeErr) {
-        console.error("❌ Stripe Retrieval Error:", stripeErr);
 
         // 🎯 PRIORITY METHOD: Search directly by email
         let dbAnalysis = null;
@@ -351,101 +348,118 @@ export async function POST(req: Request) {
                 };
             }
         }
-    }
 
 
-    // 4. LOGIC & CHECKS  
-    let emailMissing = false;
-    if (!customerEmail) {
-        console.warn("⚠️ Valid Payment but No Email found.");
-        emailMissing = true;
-    }
-
-    // Generate REAL Files (SAFE WRAPPER)
-    const sessionDate = new Date().toISOString();
-    let asrJson = "{}";
-    try {
-        // Pass the Tier explicitly: "PRO" or "ESSENTIAL"
-        const tier = packType === "PRO" ? "PRO" : "ESSENTIAL";
-        const asrObject = await generateRealAsrJson(
-            analysisData.extract,
-            analysisData.score,
-            sessionDate,
-            session_id,
-            tier // Use new Tier string param
-        );
-        asrJson = JSON.stringify(asrObject, null, 2);
-    } catch (genErr) {
-        console.error("❌ CRITICAL: Failed to generate ASR JSON. Using empty fallback.", genErr);
-        asrJson = JSON.stringify({ error: "Generation Failed", contact: "support@ai-visionary.com" }, null, 2);
-    }
-
-    // Generate External Context (New Layer)
-    let externalContextJson = "{}";
-    try {
-        const extData = (analysisData.extract as any).external_context || {};
-        const extObject = generateExternalContextJson({
-            ecosystem_presence: extData.ecosystem_presence?.value || [],
-            reputation_signals: extData.reputation_signals?.value || false,
-            keywords: extData.keywords?.value || [],
-            intents: extData.intents?.value || [],
-            channels: extData.channels?.value || [],
-            permissions: extData.permissions?.value || []
-        });
-        externalContextJson = JSON.stringify(extObject, null, 2);
-    } catch (extErr) {
-        console.error("❌ Failed to generate External Context JSON", extErr);
-        externalContextJson = JSON.stringify({ note: "No external context data available." }, null, 2);
-    }
-
-    // 🔐 VALIDATION EMAIL
-    const VALIDATION_DISABLED = true; // PROD FIX: Allow gmail/etc. for artisans
-    let emailValidated = false;
-    if (!emailMissing && customerEmail && companyInfo.url) {
-        const urlObj = new URL(companyInfo.url);
-        const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
-        const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
-
-        if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
-            emailValidated = true;
-        } else {
-            console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain} (IGNORED by VALIDATION_DISABLED)`);
-            emailValidated = true; // Force validate
+        // 4. LOGIC & CHECKS  
+        let emailMissing = false;
+        if (!customerEmail) {
+            console.warn("⚠️ Valid Payment but No Email found.");
+            emailMissing = true;
         }
-    }
 
-    // Send Email via Resend
-    // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
-    // This stops "Silent Failures" (200 OK but no email).
-    let emailSent = false;
-    let emailError = null;
+        // 5. Detect Payment Amount and Pack Type from Metadata
+        let amountPaid = 0;
+        let packType = "ESSENTIAL"; // Default
 
-    if (!emailMissing) {
+        // Priority 1: Use Stripe metadata if available
+        let payloadSession = stripeSession; // Adapter variable
+        if (payloadSession?.metadata?.pack_type) {
+            packType = payloadSession.metadata.pack_type;
+            console.log(`✅ Pack Type from metadata: ${packType}`);
+        } else if (payloadSession && payloadSession.amount_total) {
+            // Fallback: Detect from amount
+            amountPaid = payloadSession.amount_total / 100;
+            console.log(`💰 Amount Paid (from payload): ${amountPaid} CHF`);
+            if (amountPaid >= 450) {
+                packType = "PRO";
+            }
+        }
+
+        // Generate REAL Files (SAFE WRAPPER)
+        const sessionDate = new Date().toISOString();
+        let asrJson = "{}";
         try {
-            // Email content varies by pack type
-            let emailSubject = '';
-            let emailHtml = '';
+            // Pass the Tier explicitly: "PRO" or "ESSENTIAL"
+            const tier = packType === "PRO" ? "PRO" : "ESSENTIAL";
+            const asrObject = await generateRealAsrJson(
+                analysisData.extract,
+                analysisData.score,
+                sessionDate,
+                session_id,
+                tier // Use new Tier string param
+            );
+            asrJson = JSON.stringify(asrObject, null, 2);
+        } catch (genErr) {
+            console.error("❌ CRITICAL: Failed to generate ASR JSON. Using empty fallback.", genErr);
+            asrJson = JSON.stringify({ error: "Generation Failed", contact: "support@ai-visionary.com" }, null, 2);
+        }
 
-            // Helper to render Audit Table from Structured Data
-            const renderAuditTable = (blocks: any) => {
-                if (!blocks) return null;
+        // Generate External Context (New Layer)
+        let externalContextJson = "{}";
+        try {
+            const extData = (analysisData.extract as any).external_context || {};
+            const extObject = generateExternalContextJson({
+                ecosystem_presence: extData.ecosystem_presence?.value || [],
+                reputation_signals: extData.reputation_signals?.value || false,
+                keywords: extData.keywords?.value || [],
+                intents: extData.intents?.value || [],
+                channels: extData.channels?.value || [],
+                permissions: extData.permissions?.value || []
+            });
+            externalContextJson = JSON.stringify(extObject, null, 2);
+        } catch (extErr) {
+            console.error("❌ Failed to generate External Context JSON", extErr);
+            externalContextJson = JSON.stringify({ note: "No external context data available." }, null, 2);
+        }
 
-                const rows = Object.keys(blocks).map(key => {
-                    const item = blocks[key];
-                    // Safety check
-                    if (!item) return '';
-                    // Fallback defaults if properties missing
-                    const iScore = item.score || 0;
-                    const iMax = item.max || 10;
-                    const iLabel = item.label || key;
-                    const iStatus = item.status || 'error';
-                    const iObs = item.observation || "Données manquantes.";
+        // 🔐 VALIDATION EMAIL
+        const VALIDATION_DISABLED = true; // PROD FIX: Allow gmail/etc. for artisans
+        let emailValidated = false;
+        if (!emailMissing && customerEmail && companyInfo.url) {
+            const urlObj = new URL(companyInfo.url);
+            const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
+            const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
 
-                    const color = iStatus === 'success' ? '#166534' : (iStatus === 'warning' ? '#854d0e' : '#991b1b');
-                    const bg = iStatus === 'success' ? '#dcfce7' : (iStatus === 'warning' ? '#fef9c3' : '#fee2e2');
-                    const icon = iStatus === 'success' ? '✅' : (iStatus === 'warning' ? '⚠️' : '❌');
+            if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
+                emailValidated = true;
+            } else {
+                console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain} (IGNORED by VALIDATION_DISABLED)`);
+                emailValidated = true; // Force validate
+            }
+        }
 
-                    return `
+        // Send Email via Resend
+        // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
+        // This stops "Silent Failures" (200 OK but no email).
+        let emailSent = false;
+        let emailError = null;
+
+        if (!emailMissing) {
+            try {
+                // Email content varies by pack type
+                let emailSubject = '';
+                let emailHtml = '';
+
+                // Helper to render Audit Table from Structured Data
+                const renderAuditTable = (blocks: any) => {
+                    if (!blocks) return null;
+
+                    const rows = Object.keys(blocks).map(key => {
+                        const item = blocks[key];
+                        // Safety check
+                        if (!item) return '';
+                        // Fallback defaults if properties missing
+                        const iScore = item.score || 0;
+                        const iMax = item.max || 10;
+                        const iLabel = item.label || key;
+                        const iStatus = item.status || 'error';
+                        const iObs = item.observation || "Données manquantes.";
+
+                        const color = iStatus === 'success' ? '#166534' : (iStatus === 'warning' ? '#854d0e' : '#991b1b');
+                        const bg = iStatus === 'success' ? '#dcfce7' : (iStatus === 'warning' ? '#fef9c3' : '#fee2e2');
+                        const icon = iStatus === 'success' ? '✅' : (iStatus === 'warning' ? '⚠️' : '❌');
+
+                        return `
                             <div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:10px; border-radius:4px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <strong style="color:${color}; font-size:14px;">${icon} ${iLabel}</strong>
@@ -454,62 +468,62 @@ export async function POST(req: Request) {
                                 <p style="margin:5px 0 0 0; font-size:13px; color:#333;">${iObs}</p>
                             </div>
                         `;
-                }).join('');
+                    }).join('');
 
-                return `
+                    return `
                         <div style="margin:20px 0;">
                             <h3 style="color:#333; margin-bottom:10px; font-size:16px;">🛑 Diagnostic des Manquements :</h3>
                             ${rows}
                         </div>
                     `;
-            };
-
-            let auditHtml = "";
-
-            // DATA RECOVERY STRATEGY
-            // 1. Try to use Real Structured Data from DB
-            let blocksToRender = (analysisData as any).analysis_blocks;
-
-            // 2. If missing (Old Analysis), simulate blocks from Global Score to avoid "Shameful Text"
-            if (!blocksToRender) {
-                const s = analysisData.score || 0;
-                // Reverse-engineer plausibles statuses based on low score (typical case)
-                blocksToRender = {
-                    identite: {
-                        score: s > 50 ? 8 : 4, max: 10, label: "Identité & Ancrage",
-                        status: s > 50 ? 'success' : 'warning',
-                        observation: s > 50 ? "Identité validée." : "Identité numérique faible (Action requise)."
-                    },
-                    offre: {
-                        score: s > 60 ? 15 : 8, max: 20, label: "Clarté de l'Offre",
-                        status: s > 60 ? 'success' : 'warning',
-                        observation: s > 60 ? "Offre claire." : "Sémantique à préciser pour l'IA."
-                    },
-                    processus: {
-                        score: s > 70 ? 12 : 5, max: 15, label: "Processus & Méthodes",
-                        status: s > 70 ? 'success' : 'warning',
-                        observation: "Méthodologie non détectée clairement."
-                    },
-                    confiance: {
-                        score: s > 40 ? 10 : 3, max: 15, label: "Confiance & Conformité",
-                        status: s > 40 ? 'success' : 'error',
-                        observation: "Signaux de confiance insuffisants."
-                    },
-                    technique: {
-                        score: 0, max: 10, label: "Socle Technique",
-                        status: 'error',
-                        observation: "Absence de fichiers ASR (Corrigé par ce Pack)."
-                    }
                 };
-            }
 
-            // Render the table (Always)
-            auditHtml = renderAuditTable(blocksToRender) || "";
+                let auditHtml = "";
+
+                // DATA RECOVERY STRATEGY
+                // 1. Try to use Real Structured Data from DB
+                let blocksToRender = (analysisData as any).analysis_blocks;
+
+                // 2. If missing (Old Analysis), simulate blocks from Global Score to avoid "Shameful Text"
+                if (!blocksToRender) {
+                    const s = analysisData.score || 0;
+                    // Reverse-engineer plausibles statuses based on low score (typical case)
+                    blocksToRender = {
+                        identite: {
+                            score: s > 50 ? 8 : 4, max: 10, label: "Identité & Ancrage",
+                            status: s > 50 ? 'success' : 'warning',
+                            observation: s > 50 ? "Identité validée." : "Identité numérique faible (Action requise)."
+                        },
+                        offre: {
+                            score: s > 60 ? 15 : 8, max: 20, label: "Clarté de l'Offre",
+                            status: s > 60 ? 'success' : 'warning',
+                            observation: s > 60 ? "Offre claire." : "Sémantique à préciser pour l'IA."
+                        },
+                        processus: {
+                            score: s > 70 ? 12 : 5, max: 15, label: "Processus & Méthodes",
+                            status: s > 70 ? 'success' : 'warning',
+                            observation: "Méthodologie non détectée clairement."
+                        },
+                        confiance: {
+                            score: s > 40 ? 10 : 3, max: 15, label: "Confiance & Conformité",
+                            status: s > 40 ? 'success' : 'error',
+                            observation: "Signaux de confiance insuffisants."
+                        },
+                        technique: {
+                            score: 0, max: 10, label: "Socle Technique",
+                            status: 'error',
+                            observation: "Absence de fichiers ASR (Corrigé par ce Pack)."
+                        }
+                    };
+                }
+
+                // Render the table (Always)
+                auditHtml = renderAuditTable(blocksToRender) || "";
 
 
-            if (packType === "PRO") {
-                emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
-                emailHtml = `
+                if (packType === "PRO") {
+                    emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
+                    emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <head><meta charset="utf-8"></head>
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -666,9 +680,9 @@ export async function POST(req: Request) {
                         </div>
                     </div>
                 `;
-            } else {
-                emailSubject = `Votre Pack AIO Essential - Score ${analysisData.score}/100`;
-                emailHtml = `
+                } else {
+                    emailSubject = `Votre Pack AIO Essential - Score ${analysisData.score}/100`;
+                    emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="margin:0;">AYO / Pack AIO Essential &#128274;&#127464;&#127469;</h1>
@@ -720,86 +734,86 @@ export async function POST(req: Request) {
                         </div>
                     </div>
                 `;
-            }
-
-            // DEFINE ATTACHMENTS (ASR File) - Ensuring Binary Safety
-            const attachments: any[] = [
-                {
-                    filename: 'asr.json',
-                    content: Buffer.from(asrJson)
-                },
-                {
-                    filename: 'external_context.json',
-                    content: Buffer.from(externalContextJson)
                 }
-            ];
 
-            console.log(`📨 Sending Email via Resend to ${customerEmail}... Key Present: ${!!process.env.RESEND_API_KEY}`);
+                // DEFINE ATTACHMENTS (ASR File) - Ensuring Binary Safety
+                const attachments: any[] = [
+                    {
+                        filename: 'asr.json',
+                        content: Buffer.from(asrJson)
+                    },
+                    {
+                        filename: 'external_context.json',
+                        content: Buffer.from(externalContextJson)
+                    }
+                ];
 
-            // Safety check for attachments
-            const safeAttachments = attachments.map(att => ({
-                filename: att.filename,
-                content: att.content // already buffer
-            }));
+                console.log(`📨 Sending Email via Resend to ${customerEmail}... Key Present: ${!!process.env.RESEND_API_KEY}`);
 
-            await resend.emails.send({
-                from: 'AI Visionary System <hello@ai-visionary.com>',
-                replyTo: 'support@ai-visionary.com',
-                to: [customerEmail],
-                bcc: ['hello@ai-visionary.com'], // ADMIN BACKUP COPY
-                subject: emailSubject,
-                html: emailHtml,
-                attachments: safeAttachments
-            });
-            console.log(`✅ Success Email sent to ${customerEmail}`);
-            emailSent = true;
-        } catch (err: any) {
-            console.error("❌ RESEND SENDING FAILED:", err);
-            emailError = err.message;
-            // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
-            throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
+                // Safety check for attachments
+                const safeAttachments = attachments.map(att => ({
+                    filename: att.filename,
+                    content: att.content // already buffer
+                }));
+
+                await resend.emails.send({
+                    from: 'AI Visionary System <hello@ai-visionary.com>',
+                    replyTo: 'support@ai-visionary.com',
+                    to: [customerEmail],
+                    bcc: ['hello@ai-visionary.com'], // ADMIN BACKUP COPY
+                    subject: emailSubject,
+                    html: emailHtml,
+                    attachments: safeAttachments
+                });
+                console.log(`✅ Success Email sent to ${customerEmail}`);
+                emailSent = true;
+            } catch (err: any) {
+                console.error("❌ RESEND SENDING FAILED:", err);
+                emailError = err.message;
+                // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
+                throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
+            }
         }
-    }
 
-    if (!emailSent) {
-        console.error("❌ Email NOT sent (Logic skipped or previously failed).");
+        if (!emailSent) {
+            console.error("❌ Email NOT sent (Logic skipped or previously failed).");
+            return NextResponse.json({
+                success: false,
+                error: "Email Logic Skipped or Failed (Check Logs)",
+                debug_trace: {
+                    payment_found: !!payloadSession,
+                    pack_detected: packType,
+                    email_target: customerEmail,
+                    email_valid: !emailMissing,
+                    email_error: emailError,
+                }
+            }, { status: 500 });
+        }
+
         return NextResponse.json({
-            success: false,
-            error: "Email Logic Skipped or Failed (Check Logs)",
+            success: true,
+            email_sent: emailSent,
+            // RETURN FILES FOR DIRECT DOWNLOAD (Backup Plan)
+            files: {
+                asr: asrJson,
+                external_context: externalContextJson
+            },
             debug_trace: {
                 payment_found: !!payloadSession,
                 pack_detected: packType,
                 email_target: customerEmail,
                 email_valid: !emailMissing,
                 email_error: emailError,
+                resend_key_configured: !!process.env.RESEND_API_KEY,
+                analyzed_url: companyInfo.url
             }
+        });
+
+    } catch (error: any) {
+        console.error("Webhook Error", error);
+        return NextResponse.json({
+            error: error.message,
+            stack: "Detailed error in webhook logs"
         }, { status: 500 });
     }
-
-    return NextResponse.json({
-        success: true,
-        email_sent: emailSent,
-        // RETURN FILES FOR DIRECT DOWNLOAD (Backup Plan)
-        files: {
-            asr: asrJson,
-            external_context: externalContextJson
-        },
-        debug_trace: {
-            payment_found: !!payloadSession,
-            pack_detected: packType,
-            email_target: customerEmail,
-            email_valid: !emailMissing,
-            email_error: emailError,
-            resend_key_configured: !!process.env.RESEND_API_KEY,
-            analyzed_url: companyInfo.url
-        }
-    });
-
-} catch (error: any) {
-    console.error("Webhook Error", error);
-    return NextResponse.json({
-        error: error.message,
-        stack: "Detailed error in webhook logs"
-    }, { status: 500 });
-}
 }
