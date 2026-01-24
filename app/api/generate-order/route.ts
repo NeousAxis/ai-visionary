@@ -178,6 +178,10 @@ export async function POST(req: Request) {
         let customerEmail = "";
         let paymentStatus = "unknown";
 
+        // GLOBAL SCOPE VARIABLES FOR ANALYSIS
+        let analysisData = { score: 0, details: {}, extract: {} as any, url: "", audit_report: undefined as string | undefined, analysis_blocks: undefined as any };
+        let companyInfo: { url?: string; name?: string } = {};
+
         // 1. VERIFY SESSION WITH STRIPE (Security)
         try {
             stripeSession = await stripe.checkout.sessions.retrieve(session_id, {
