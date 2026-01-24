@@ -88,46 +88,33 @@ function SuccessContent() {
                 {status === 'error' && (
                     <div className="flex-1 flex flex-col justify-center items-center w-full">
                         <div className="bg-white border border-[#D4E0DC] rounded-[2rem] p-12 shadow-2xl text-center max-w-2xl w-full mx-auto relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
 
-                            {/* Decoratif Background Blur */}
-                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#4A919E] to-[#212E53]"></div>
+                            <div className="mb-8 text-6xl">⏳</div>
 
-
-
-                            <h1 className="text-4xl font-extrabold text-[#212E53] mb-6 tracking-tight">
-                                Génération en cours...
+                            <h1 className="text-3xl font-extrabold text-[#212E53] mb-6">
+                                Finalisation en cours...
                             </h1>
 
-                            <p className="text-[#64748B] text-xl mb-10 leading-relaxed max-w-lg mx-auto">
-                                L'IA finalise la création de vos certificats sécurisés.
-                                <br />
-                                <span className="inline-block mt-3 px-4 py-1 bg-slate-100 text-slate-600 rounded-full text-sm font-medium border border-slate-200">
-                                    ⏳ Attente estimée : ~30 secondes
-                                </span>
+                            <p className="text-[#64748B] text-lg mb-8 leading-relaxed">
+                                Le serveur est un peu lent à générer vos fichiers personnalisés.
+                                <br />Veuillez patienter encore 15 secondes puis cliquez sur le bouton ci-dessous.
                             </p>
 
-                            <div className="flex flex-col gap-8 items-center w-full">
+                            <div className="flex flex-col gap-6 items-center w-full">
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="group relative px-12 py-5 bg-[#4A919E] text-white font-bold rounded-full hover:bg-[#356D76] transition-all shadow-xl hover:shadow-[#4A919E]/40 hover:-translate-y-1 w-full sm:w-auto min-w-[320px]"
+                                    className="px-12 py-4 bg-[#4A919E] text-white font-bold rounded-full hover:bg-[#356D76] transition-all shadow-lg w-full sm:w-auto"
                                 >
-                                    <span className="flex items-center justify-center gap-3 text-xl whitespace-nowrap">
-                                        <svg className="w-7 h-7 animate-[spin_3s_linear_infinite]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                        Vérifier la disponibilité
-                                    </span>
+                                    🔄 Récupérer mes fichiers
                                 </button>
 
-                                {/* Discrete Support Section */}
-                                <div className="pt-8 border-t border-slate-100 w-full text-center">
-                                    <p className="text-xs text-[#94A3B8] uppercase font-bold tracking-wider mb-4">Si le délai dépasse 1 minute</p>
-                                    <div className="flex flex-col items-center gap-3">
-                                        <code className="text-xs bg-[#F1F5F9] text-[#475569] px-4 py-2 rounded-lg border border-[#E2E8F0] select-all tracking-tight font-mono">
-                                            Ref: {sessionId}
-                                        </code>
-                                        <a href={`mailto:hello@ai-visionary.com?subject=Support Commande ${sessionId}`} className="text-[#4A919E] text-sm font-bold hover:text-[#356D76] hover:underline flex items-center gap-2 mt-2 transition-colors">
-                                            <span>📩</span> Contacter le support technique
-                                        </a>
-                                    </div>
+                                <div className="pt-8 border-t border-slate-100 w-full">
+                                    <p className="text-xs text-[#94A3B8] font-bold mb-2">RÉFÉRENCE DE COMMANDE</p>
+                                    <code className="text-xs bg-slate-50 p-2 rounded block mb-4">{sessionId}</code>
+                                    <a href={`mailto:hello@ai-visionary.com?subject=Support ${sessionId}`} className="text-[#4A919E] font-bold text-sm">
+                                        Contacter le support
+                                    </a>
                                 </div>
                             </div>
                         </div>
