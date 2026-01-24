@@ -292,7 +292,9 @@ export async function POST(req: Request) {
         if (!payloadSession) {
             try {
                 // BUGFIX: body is ALREADY a JSON object from req.json(), NOT a string.
-                const jsonBody = body;
+                // However, depending on middleware, it might be.
+                const jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
+
                 if (jsonBody.data?.object) {
                     console.warn("⚠️ STRIPE API FAILED but using RAW JSON payload directly (Unsafe Mode active)");
                     payloadSession = jsonBody.data.object as any;
@@ -828,13 +830,21 @@ export async function POST(req: Request) {
                     }
                 ];
 
+                console.log(`📨 Sending Email via Resend to ${customerEmail}... Key Present: ${!!process.env.RESEND_API_KEY}`);
+
+                // Safety check for attachments
+                const safeAttachments = attachments.map(att => ({
+                    filename: att.filename,
+                    content: att.content // already buffer
+                }));
+
                 await resend.emails.send({
                     from: 'AI Visionary System <hello@ai-visionary.com>',
                     replyTo: 'support@ai-visionary.com',
                     to: [customerEmail],
                     subject: emailSubject,
                     html: emailHtml,
-                    attachments: attachments // Attach the safe buffer
+                    attachments: safeAttachments
                 });
                 console.log(`✅ Success Email sent to ${customerEmail}`);
                 emailSent = true;

@@ -917,6 +917,14 @@ Si le dernier message de l'utilisateur est une QUESTION (contient "?" ou demande
 🚫 RÈGLES DE CONTENU INTERDIT :
 - NE JAMAIS DEMANDER LE CHIFFRE D'AFFAIRES (CA), LE REVENU, OU LE TURNOVER. Si le bloc est "business_model", demande plutôt "Quel est votre modèle de vente (Abonnement, Vente unique...) ?".
 
+${nextBlockName === 'identite.legal_form' ? `⚠️ CRITIQUE - ADAPTATION PAYS :
+Le pays détecté pour cette entreprise est : "${detectedValues['identite.juridical_country'] || detectedValues['identite.country'] || 'Inconnu'}".
+VOUS NE DEVEZ PROPOSER QUE DES FORMES JURIDIQUES EXISTANTES ET VALIDES POUR CE PAYS.
+- Si Suisse : SA, Sàrl, Raison Individuelle, Association, Fondation...
+- Si France : SAS, SARL, EURL, Auto-entrepreneur...
+- Si Autre : Adaptez localement.
+NE MELANGEZ PAS LES STATUTS (Pas de SAS en Suisse).` : ''}
+
 📡 DONNÉES TECHNIQUES :
 ${contextScanResult ? `- URL: ${contextScanResult.url}` : 'N/A'}
 
