@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Footer from '../../../components/Footer';
+import Footer from '../../components/Footer';
 
 function SuccessContent() {
     const searchParams = useSearchParams();
