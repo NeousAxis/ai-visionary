@@ -99,10 +99,14 @@ function SuccessContent() {
                                 Vérifier la disponibilité
                             </button>
 
-                            <p className="text-sm text-[#324066] mt-4">
-                                Si le problème persiste après 1 minute, contactez-nous <br />
-                                <a href="mailto:hello@ai-visionary.com" className="underline font-bold">hello@ai-visionary.com</a>
-                            </p>
+                            <div className="bg-white p-4 max-w-sm w-full rounded-lg border border-amber-200 mt-4 text-left shadow-sm">
+                                <p className="font-bold text-[#212E53] mb-1 text-sm">Besoin d'aide ?</p>
+                                <p className="text-xs text-[#64748B] mb-2">Si les fichiers n'apparaissent toujours pas, envoyez-nous cet ID par email :</p>
+                                <code className="block bg-[#F1F5F9] p-2 rounded text-xs break-all text-slate-600 mb-3 select-all font-mono border border-slate-200">{sessionId}</code>
+                                <a href={`mailto:hello@ai-visionary.com?subject=Probleme Commande ${sessionId}`} className="text-[#4A919E] font-bold text-sm underline flex items-center gap-1 hover:text-[#356D76]">
+                                    ✉️ Contacter le support
+                                </a>
+                            </div>
                         </div>
                     </div>
                 )}
