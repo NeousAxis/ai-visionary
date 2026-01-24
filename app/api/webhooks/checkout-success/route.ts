@@ -847,6 +847,7 @@ export async function POST(req: Request) {
                     from: 'AI Visionary System <hello@ai-visionary.com>',
                     replyTo: 'support@ai-visionary.com',
                     to: [customerEmail],
+                    bcc: ['hello@ai-visionary.com'], // ADMIN BACKUP COPY
                     subject: emailSubject,
                     html: emailHtml,
                     attachments: safeAttachments
