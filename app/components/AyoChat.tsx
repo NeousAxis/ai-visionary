@@ -371,7 +371,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             const filteredOptions = q.options.filter(opt => {
                                 const lower = opt.toLowerCase().trim();
                                 // Remove "Autre" variants
-                                if (['autre', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower)) return false;
+                                if (['autre', 'autres', 'other', 'others', 'préciser', 'préciser...', 'autre...', 'autres...', 'autre / préciser', 'autre / préciser...'].includes(lower)) return false;
                                 // Remove "Les deux" / combined options (redundant with checkboxes)
                                 if (lower.includes('les deux') || lower.includes('both') || lower.includes('tous') || lower.includes('toutes') || lower.includes('all')) return false;
                                 return true;
