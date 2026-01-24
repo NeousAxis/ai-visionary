@@ -561,35 +561,45 @@ DONNÉES DU SCAN :
 - JSON-LD : ${deepScanResult.hasJsonLd ? 'OUI' : 'NON'}
 - Texte extrait (20000 premiers caractères) : "${deepScanResult.text?.substring(0, 20000) || 'Vide'}"
 
+TU ES UN EXPERT EN EXTRACTION DE DONNÉES WEB.
+
+RÈGLE D'OR - CONFIANCE ABSOLUE :
+Tout ce qui est écrit dans le TITRE, la META DESCRIPTION et le JSON-LD est considéré comme VRAI et CERTAIN à 100%.
+-> Confidence OBLIGATOIRE : "high".
+
+Exemple : Si le titre est "Plombier à Paris", alors :
+- Nom : "Plombier..." (High)
+- Secteur : "Plomberie" (High)
+- Ville : "Paris" (High)
+NE METS JAMAIS "LOW" POUR DES INFOS VISIBLES DANS CES BALISES.
+
 TA MISSION :
-Essaie de répondre aux 16 questions critiques pour construire un ASR (AYO Singular Record). 
-SOIS INTELLIGENT : Si l'information est présente, même de manière implicite mais claire (ex: "Nous sommes basés à Genève" = Pays Suisse), utilise "high".
+Essaie de répondre aux 16 questions critiques pour construire un ASR.
 
-Pour CHAQUE question, tu dois :
-1. Analyser les données du scan.
-2. Si tu peux répondre avec CERTITUDE ou DÉDUCTION FORTE → Donner la réponse + confidence: "high".
-3. Si l'information est présente mais RÉELLEMENT AMBIGUË → Donner ta meilleure estimation + confidence: "low".
-4. Si l'information est TOTALEMENT ABSENTE → answer: null + confidence: "unknown".
-
-RAPPEL : Moins tu poses de questions inutiles, plus l'utilisateur est satisfait. Ne mets "low" que si tu as vraiment un doute bloquant.
+Pour CHAQUE question :
+1. Regarde d'abord le TITRE et la DESCRIPTION. Si l'info y est -> "high".
+2. Regarde le JSON-LD. Si l'info y est -> "high".
+3. Regarde le texte. Si c'est déductible (ex: "Nos services...") -> "high".
+4. Ne mets "low" QUE si l'information est totalement implicite et floue.
+5. Si absent -> "unknown".
 
 LES 16 QUESTIONS CRITIQUES :
-1. Nom exact de l'entreprise/organisation
-2. Pays d'établissement principal
-3. Statut juridique (SARL, SAS, Association, etc.)
-4. Secteur d'activité principal
-5. Public cible (B2B, B2C, B2G, etc.)
-6. Offre principale (produits/services en 1 phrase)
-7. Modèle économique (vente directe, abonnement, freemium, etc.)
-8. Taille équipe (STRICT : Si non mentionné/visible -> "unknown". NE PAS INVENTER OU ESTIMER "1-10" PAR DÉFAUT)
-9. Mission/Vision (Slogan, proposition de valeur ou "About" = HIGH CONFIDENCE)
-10. Technologies utilisées (CMS, framework visible)
-11. Utilisation de données/IA (si mentionné)
-12. Présence externe (Réseaux sociaux, APP STORES, Google Play, Partenaires = HIGH CONFIDENCE)
-13. Signaux de réputation (certifications, labels OFFICIELS uniquement)
-14. Mots-clés principaux détectés
-15. Intentions utilisateur visibles (acheter, s'informer, contacter, etc.)
-16. Canaux d'accès (formulaire contact, email, téléphone détectés)
+1. Nom exact (Priorité au JSON-LD "name" ou au Titre)
+2. Pays d'établissement (Cherche "Paris", "Suisse", "+33", noms de villes...)
+3. Statut juridique (Cherche "SARL", "SAS", "Inc", "Limited" dans le footer)
+4. Secteur d'activité (Mots clés du Titre)
+5. Public cible (B2B si mention de "Entreprises", "Pro", "Solutions". B2C sinon)
+6. Offre principale (Résumé du Titre)
+7. Modèle économique (Prix affichés ? "Devis" ? "Abonnement" ?)
+8. Taille équipe (Strict : Visible ou Unknown)
+9. Mission/Vision (Le "H1" ou la première phrase)
+10. Technologies utilisées (Wordpress ? Shopify ?)
+11. Utilisation de données/IA (Mentionné ?)
+12. Présence externe (Liens réseaux sociaux ?)
+13. Signaux de réputation
+14. Mots-clés principaux (Ceux du Titre et H1)
+15. Intentions utilisateur
+16. Canaux d'accès (Email ? Tel ?)
 
 FORMAT JSON ATTENDU :
 {
