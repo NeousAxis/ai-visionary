@@ -9,6 +9,8 @@ export default function PaymentSuccessModal() {
     const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
     const [packType, setPackType] = useState<'essential' | 'pro'>('essential');
 
+    const [files, setFiles] = useState<{ asr: string, external_context: string } | null>(null);
+
     useEffect(() => {
         const paymentSuccess = searchParams.get('payment_success');
         const sessionId = searchParams.get('session_id');
@@ -31,6 +33,12 @@ export default function PaymentSuccessModal() {
                         if (data.amount && data.amount >= 499) {
                             setPackType('pro');
                         }
+
+                        // STORE FILES FOR DIRECT DOWNLOAD
+                        if (data.files) {
+                            setFiles(data.files);
+                        }
+
                         setStatus('success');
                     } else {
                         setStatus('error');
@@ -49,6 +57,19 @@ export default function PaymentSuccessModal() {
         setShowModal(false);
         // Clean URL
         window.history.replaceState({}, '', '/');
+    };
+
+    const downloadFile = (filename: string, content: string) => {
+        if (!content) return;
+        const blob = new Blob([content], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     if (!showModal) return null;
@@ -114,8 +135,33 @@ export default function PaymentSuccessModal() {
                                     Votre Pack <span className="font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{packType === 'pro' ? 'PRO' : 'Essential'}</span> est activé
                                 </p>
 
-                                {/* Info Box */}
+                                {/* FILE DOWNLOAD / EMAIL INFO */}
                                 <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8 text-left">
+
+                                    {/* DOWNLOAD OPTION */}
+                                    {files && (
+                                        <div className="mb-6 pb-6 border-b border-white/10">
+                                            <h3 className="text-white font-bold mb-3 text-lg flex items-center gap-2">
+                                                <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                                Téléchargement Immédiat
+                                            </h3>
+                                            <button
+                                                onClick={() => downloadFile('asr.json', files.asr)}
+                                                className="w-full mb-3 flex items-center justify-center gap-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 font-bold py-3 px-4 rounded-xl transition-all"
+                                            >
+                                                📥 Télécharger ASR (asr.json)
+                                            </button>
+                                            <button
+                                                onClick={() => downloadFile('external_context.json', files.external_context)}
+                                                className="w-full flex items-center justify-center gap-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/50 text-blue-300 font-bold py-3 px-4 rounded-xl transition-all"
+                                            >
+                                                📥 Télécharger External Context
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <div className="flex items-start gap-4">
                                         <div className="mt-1 bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-xl shadow-lg">
                                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,12 +169,9 @@ export default function PaymentSuccessModal() {
                                             </svg>
                                         </div>
                                         <div className="flex-1">
-                                            <h3 className="text-white font-bold mb-2 text-lg">📧 Fichiers envoyés</h3>
+                                            <h3 className="text-white font-bold mb-2 text-lg">📧 Copie par Email</h3>
                                             <p className="text-gray-300 text-sm leading-relaxed">
-                                                Vos fichiers {packType === 'pro' ? <strong className="text-purple-400">PRO (ASR + JSON-LD + Glossaire + FAQ)</strong> : <strong className="text-purple-400">Essential (ASR + JSON-LD)</strong>} ont été envoyés à votre adresse email.
-                                            </p>
-                                            <p className="text-purple-300 text-sm mt-2">
-                                                💡 Pensez à vérifier vos spams
+                                                Une copie a également été envoyée par email.
                                             </p>
                                         </div>
                                     </div>

@@ -879,6 +879,11 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             email_sent: emailSent,
+            // RETURN FILES FOR DIRECT DOWNLOAD (Backup Plan)
+            files: {
+                asr: asrJson,
+                external_context: externalContextJson
+            },
             debug_trace: {
                 payment_found: !!payloadSession,
                 pack_detected: packType,
