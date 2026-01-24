@@ -562,13 +562,16 @@ DONNÉES DU SCAN :
 - Texte extrait (20000 premiers caractères) : "${deepScanResult.text?.substring(0, 20000) || 'Vide'}"
 
 TA MISSION :
-Essaie de répondre aux 16 questions critiques pour construire un ASR (AYO Singular Record).
+Essaie de répondre aux 16 questions critiques pour construire un ASR (AYO Singular Record). 
+SOIS INTELLIGENT : Si l'information est présente, même de manière implicite mais claire (ex: "Nous sommes basés à Genève" = Pays Suisse), utilise "high".
 
 Pour CHAQUE question, tu dois :
-1. Analyser les données du scan
-2. Si tu peux répondre avec CERTITUDE → Donner la réponse + confidence: "high"
-3. Si tu DOUTES → Marquer confidence: "low" + ta meilleure estimation
-4. Si tu NE SAIS PAS → Marquer confidence: "unknown"
+1. Analyser les données du scan.
+2. Si tu peux répondre avec CERTITUDE ou DÉDUCTION FORTE → Donner la réponse + confidence: "high".
+3. Si l'information est présente mais RÉELLEMENT AMBIGUË → Donner ta meilleure estimation + confidence: "low".
+4. Si l'information est TOTALEMENT ABSENTE → answer: null + confidence: "unknown".
+
+RAPPEL : Moins tu poses de questions inutiles, plus l'utilisateur est satisfait. Ne mets "low" que si tu as vraiment un doute bloquant.
 
 LES 16 QUESTIONS CRITIQUES :
 1. Nom exact de l'entreprise/organisation
@@ -665,15 +668,18 @@ GÉNÈRE CE JSON MAINTENANT :
 
             extractedAnswers.forEach((answer, index) => {
                 const key = blockKeys[index] || `block_${index}`;
-                const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 50 : 0);
+                // NEW: 90 for high, 70 for low. We skip validation if >= 50.
+                const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 70 : 0);
 
                 if (answer.answer && answer.answer !== 'null') {
                     scanState.detected[key] = answer.answer;
                     scanState.confidence[key] = conf;
 
-                    if (conf >= 75) {
+                    // 🎯 SMART SKIP: If confidence is 50 or more, we skip the "Is this correct?" question.
+                    // We only validate if it's explicitly marked as very low or unknown.
+                    if (conf >= 50) {
                         scanState.high_confidence_keys.push(key);
-                    } else if (conf >= 40) {
+                    } else if (conf > 0) {
                         scanState.low_confidence_keys.push(key);
                     } else {
                         scanState.unknown_keys.push(key);
@@ -684,8 +690,8 @@ GÉNÈRE CE JSON MAINTENANT :
                 }
             });
 
-            // Determine next block to ask (first unknown, then first low confidence)
-            scanState.next_block_key = scanState.unknown_keys[0] || scanState.low_confidence_keys[0] || "";
+            // Determine next block to ask (first unknown)
+            scanState.next_block_key = scanState.unknown_keys[0] || "";
 
             console.log("📦 SCAN_STATE CREATED:", JSON.stringify(scanState, null, 2));
 
@@ -696,7 +702,7 @@ GÉNÈRE CE JSON MAINTENANT :
                 a.confidence !== 'unknown'
             );
 
-            const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
+            const missingInfos = extractedAnswers.filter(a => a.confidence === 'unknown');
 
             let transparencySummary = `🛰️ SCAN TERMINÉ\n\n`;
 
@@ -708,17 +714,17 @@ GÉNÈRE CE JSON MAINTENANT :
                         ? (info.answer.length > 50 ? info.answer.substring(0, 50) + '...' : info.answer)
                         : 'Détecté';
 
-                    if (info.confidence === 'low') {
-                        value += ' (À valider)';
-                    }
-
                     transparencySummary += `• ${label} : ${value}\n`;
                 });
                 transparencySummary += `\n`;
             }
 
-            transparencySummary += `❓ ${missingInfos.length} POINTS À VÉRIFIER/VALIDER\n`;
-            transparencySummary += `Je vais valider avec vous ces ${missingInfos.length} points.\n\n`;
+            if (missingInfos.length > 0) {
+                transparencySummary += `❓ ${missingInfos.length} POINTS À PRÉCISER\n`;
+                transparencySummary += `J'ai besoin de quelques précisions sur ces ${missingInfos.length} points.\n\n`;
+            } else {
+                transparencySummary += `✅ **DONNÉES COMPLÈTES DÉTECTÉES**\nPrêt pour la génération.\n\n`;
+            }
             transparencySummary += `➡️ Mais avant tout...`;
 
             // 4. First question: Ownership validation

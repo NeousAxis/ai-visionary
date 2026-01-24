@@ -41,7 +41,14 @@ export async function POST(req: Request) {
                 packType
             );
 
-            const extObject = generateExternalContextJson({}); // Version légère pour rapidité
+            const extObject = generateExternalContextJson({
+                ecosystem_presence: [],
+                reputation_signals: false,
+                keywords: [],
+                intents: [],
+                channels: [],
+                permissions: []
+            }); // Version légère pour rapidité
 
             // ⚡️ ENVOI IMMÉDIAT
             await resend.emails.send({
