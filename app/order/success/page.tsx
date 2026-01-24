@@ -20,8 +20,10 @@ function SuccessContent() {
 
         const fetchOrder = async () => {
             try {
-                // On appelle l'API pour récupérer/générer les fichiers basés sur la session
-                const res = await fetch('/api/webhooks/checkout-success', {
+                // 🚀 ARCHITECTURE ZERO-ECHEC :
+                // On appelle l'API de génération DÉDIÉE (Client-Side Trigger)
+                // Cela évite le timeout de Stripe. C'est le navigateur qui attend la réponse.
+                const res = await fetch('/api/generate-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ session_id: sessionId })
@@ -34,15 +36,17 @@ function SuccessContent() {
                         setStatus('success');
                         if (data.amount && data.amount >= 499) setPackType('PRO');
                     } else {
-                        setStatus('error'); // Paiement ok mais fichiers non générés
+                        // Cas rare : Succès mais pas de fichiers (bizarre)
+                        console.warn("API returned success but no files.", data);
+                        setStatus('error');
                     }
                 } else {
-                    // STOP RETRY LOOP. Show error and let user retry manually.
-                    console.warn("Webhook returned success but no files.", data);
+                    const errorData = await res.json();
+                    console.error("API Generation Error:", errorData);
                     setStatus('error');
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Fetch Error:", e);
                 setStatus('error');
             }
         };

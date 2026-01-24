@@ -151,363 +151,297 @@ async function performFullAnalysis(targetUrl: string): Promise<any> {
 }
 
 
-// --- WEBHOOK: LIGHTWEIGHT & FAST ---
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
 export async function POST(req: Request) {
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    // 🚀 CLIENT-TRIGGERED GENERATION ENDPOINT (Long Running)
 
-    if (!stripeKey || !webhookSecret) {
-        return new Response("Stripe Config Missing", { status: 500 });
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const resendKey = process.env.RESEND_API_KEY;
+
+    if (!stripeKey || !resendKey) {
+        return NextResponse.json({ error: "Server Misconfiguration (Missing Keys)" }, { status: 500 });
     }
 
     const stripe = new Stripe(stripeKey);
+    const resend = new Resend(resendKey);
 
     try {
-        const rawBody = await req.text();
-        const signature = req.headers.get('stripe-signature');
+        const body = await req.json();
+        const { session_id } = body;
 
-        let event: Stripe.Event;
+        if (!session_id) {
+            return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
+        }
 
+        console.log(`⚙️ GENERATING ORDER FOR SESSION: ${session_id}`);
+
+        let stripeSession: Stripe.Checkout.Session | null = null;
+        let customerEmail = "";
+        let paymentStatus = "unknown";
+
+        // 1. VERIFY SESSION WITH STRIPE (Security)
         try {
-            event = stripe.webhooks.constructEvent(rawBody, signature!, webhookSecret);
-        } catch (err: any) {
-            console.error(`❌ Webhook Signature Error: ${err.message}`);
-            return NextResponse.json({ error: 'Invalid Signature' }, { status: 400 });
+            stripeSession = await stripe.checkout.sessions.retrieve(session_id, {
+                expand: ['payment_intent.payment_method', 'customer']
+            });
+
+            // Check Payment Status
+            if (stripeSession.payment_status !== 'paid') {
+                return NextResponse.json({ error: "Payment not completed or pending" }, { status: 402 });
+            }
+
+            console.log("✅ Stripe Session Verified & Paid.");
+
+        } catch (e: any) {
+            console.error("Stripe Retrieval Error:", e);
+            return NextResponse.json({ error: "Invalid Session ID" }, { status: 404 });
         }
 
-        if (event.type === 'checkout.session.completed') {
-            const session = event.data.object as Stripe.Checkout.Session;
-            console.log(`✅ PAYMENT SUCCESS (Webhook): ${session.id}`);
-            // TODO: Here we could save "status: pending_generation" to DB if we had a comprehensive Order DB.
-            // For now, we prefer to let the Client trigger the generation to avoid timeouts.
-        }
+        // 2. EXTRACT EMAIL (From Stripe Session Data)
+        // (Reusing your robust logic)
 
-        // ALWAYS return 200 OK fast to Stripe.
-        return NextResponse.json({ received: true }, { status: 200 });
-
-    } catch (error: any) {
-        console.error("Webhook Error", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-}
-
-// 2. EXTRACT EMAIL - NEW STRATEGY: TRUST OUR DATA FIRST (Client Ref)
-// "Code Autrement": We prioritized the data we passed (Client Reference) because we know it's correct from the Chat.
-
-// A. Try Client Reference ID (High Reliability)
-if (session.client_reference_id) {
-    try {
-        const b64 = session.client_reference_id;
-        const jsonStr = Buffer.from(b64, 'base64').toString('utf-8');
-        const payload = JSON.parse(jsonStr);
-
-        // Supports { e: "email" } or { u: "url", e: "email" }
-        if (payload.e && payload.e.includes('@')) {
-            customerEmail = payload.e;
-            console.log("✅ PRIORITY 1: Email recovered from Client Reference ID (Chat Context):", customerEmail);
-        }
-    } catch (e) {
-        console.warn("⚠️ Client Reference Decode Failed, falling back to Stripe data.");
-    }
-}
-
-// B. Fallback to Stripe Data (Standard)
-if (!customerEmail) {
-    if (session.customer_details?.email) {
-        customerEmail = session.customer_details.email;
-        console.log("✅ PRIORITY 2: Email from Stripe Customer Details:", customerEmail);
-    }
-    else if (session.customer_email) {
-        customerEmail = session.customer_email;
-        console.log("✅ PRIORITY 3: Email from Stripe Session Field:", customerEmail);
-    }
-    // DEEP SEARCH: Payment Method (The user's JSON case - Last Resort)
-    else if ((session.payment_intent as any)?.payment_method?.billing_details?.email) {
-        customerEmail = (session.payment_intent as any).payment_method.billing_details.email;
-        console.log("✅ PRIORITY 4: Email from PaymentMethod Billing:", customerEmail);
-    }
-}
-
-// Nuclear Fetch (Existing)
-if (!customerEmail && session.customer && typeof session.customer === 'string') {
-    try {
-        const customer = await stripe.customers.retrieve(session.customer);
-        if ((customer as Stripe.Customer).email) {
-            customerEmail = (customer as Stripe.Customer).email!;
-            console.log("✅ Email extracted via explicit Customer Fetch:", customerEmail);
-        }
-    } catch (fetchErr) {
-        console.error("❌ Failed to fetch customer details:", fetchErr);
-    }
-}
-
-                // (Old Fallback Block Removed - Logic Moved Upstream)
-
-            } catch (stripeErr) {
-    console.error("❌ Stripe Retrieval Error:", stripeErr);
-}
-        }
-
-// 🚨 FALLBACK: USE PAYLOAD DATA DIRECTLY IF STRIPE API FAILED
-// This is critical if STRIPE_SECRET_KEY is missing/invalid but webhook signature passed (or skipped in dev)
-let payloadSession = stripeSession;
-
-if (!payloadSession) {
-    try {
-        // BUGFIX: body is ALREADY a JSON object from req.json(), NOT a string.
-        // However, depending on middleware, it might be.
-        const jsonBody = typeof body === 'string' ? JSON.parse(body) : body;
-
-        if (jsonBody.data?.object) {
-            console.warn("⚠️ STRIPE API FAILED but using RAW JSON payload directly (Unsafe Mode active)");
-            payloadSession = jsonBody.data.object as any;
-
-            // Manually extract session ID since we bypassed Stripe object construction
-            if (!session_id && (payloadSession as any).id) session_id = (payloadSession as any).id;
-        }
-    } catch (parseErr) {
-        console.error("❌ Failed to parse body as JSON for fallback", parseErr);
-    }
-}
-
-// Validate Payment Status from Payload if needed
-if (payloadSession && (payloadSession as any).payment_status) {
-    paymentStatus = (payloadSession as any).payment_status;
-}
-
-if (paymentStatus !== 'paid') {
-    // Note: 'checkout.session.completed' usually means success, but explicit check is safer.
-    console.warn(`⚠️ Payment Status is '${paymentStatus}'. Analyzing anyway but keeping note.`);
-}
-
-// Fallback Email Extraction from Payload
-// PRIORITY: 1. Force Email (Manual) 2. Stripe API 3. Payload
-// Cast payloadSession to any to avoid TS errors
-const safePayload = payloadSession as any;
-
-if (!customerEmail && force_email) {
-    customerEmail = force_email;
-    console.log("✅ Email MANUALLY provided by user:", customerEmail);
-}
-
-if (!customerEmail && safePayload) {
-    if (safePayload.customer_details?.email) {
-        customerEmail = safePayload.customer_details.email;
-        console.log("✅ Email extracted from RAW PAYLOAD (customer_details):", customerEmail);
-    } else if (safePayload.customer_email) {
-        customerEmail = safePayload.customer_email;
-        console.log("✅ Email extracted from RAW PAYLOAD (customer_email):", customerEmail);
-    }
-}
-
-// 🚨 ULTRA SAFEGUARD FOR TEST MODE:
-// If we are in test mode (deduced from stripe key or logs) and email is still missing,
-// use the one from the log provided by user as a hardcoded safety net for this specific troubleshooting session.
-if (!customerEmail && (stripeKey?.startsWith('sk_test') || true)) {
-    // Check if we can find it in the raw body string recursively or just hardcode for your test
-    // For now, let's trust the logic above. But if you are testing with 'hello@globalworkflow.xyz', let's whitelist it if found in text.
-    if (rawBody.includes('hello@globalworkflow.xyz')) {
-        customerEmail = 'hello@globalworkflow.xyz';
-        console.log("✅ ULTRA RESCUE: Found 'hello@globalworkflow.xyz' in raw body!");
-    }
-}
-
-// 5. Detect Payment Amount and Pack Type from Metadata
-let amountPaid = 0;
-let packType = "ESSENTIAL"; // Default
-
-// Priority 1: Use Stripe metadata if available
-if (payloadSession?.metadata?.pack_type) {
-    packType = payloadSession.metadata.pack_type;
-    console.log(`✅ Pack Type from metadata: ${packType}`);
-} else if (payloadSession && payloadSession.amount_total) {
-    // Fallback: Detect from amount
-    amountPaid = payloadSession.amount_total / 100;
-    console.log(`💰 Amount Paid (from payload): ${amountPaid} CHF`);
-    if (amountPaid >= 450) {
-        packType = "PRO";
-    }
-}
-
-
-// 3. RETRIEVE ANALYSIS FROM FIREBASE BY EMAIL (NEW LOGIC)
-let analysisData = { score: 0, details: {}, extract: {} as any, url: "", audit_report: undefined as string | undefined, analysis_blocks: undefined as any };
-let companyInfo: { url?: string; name?: string } = {};
-
-if (customerEmail) {
-    console.log(`💾 RETRIEVING ANALYSIS FROM DB by EMAIL: ${customerEmail}...`);
-
-    // 🎯 PRIORITY METHOD: Search directly by email
-    let dbAnalysis = null;
-    try {
-        dbAnalysis = await db.getLatestAnalysisByEmail(customerEmail);
-        if (dbAnalysis) {
-            analysisData = {
-                score: dbAnalysis.score || 0,
-                details: {},
-                extract: dbAnalysis.data?.fields || {},
-                url: dbAnalysis.url || "",
-                audit_report: dbAnalysis.data?.audit_report,
-                analysis_blocks: dbAnalysis.data?.analysis_blocks // <--- Add
-            };
-            companyInfo.url = dbAnalysis.url;
-            console.log(`✅ Found analysis in DB by EMAIL with score: ${analysisData.score}, URL: ${dbAnalysis.url}`);
-        } else {
-            console.warn(`⚠️ No analysis found in DB for email: ${customerEmail}`);
-        }
-    } catch (dbErr) {
-        console.error("❌ DB EMAIL Lookup Error:", dbErr);
-    }
-
-    // FALLBACK: Try to construct URL from email domain
-    if (!dbAnalysis) {
-        const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
-        if (emailDomain) {
-            const constructedUrl = `https://${emailDomain}`;
-            console.log(`🔍 FALLBACK: Trying constructed URL from domain: ${constructedUrl}`);
-
+        // A. Try Client Reference ID
+        if (stripeSession.client_reference_id) {
             try {
-                dbAnalysis = await db.getLatestAnalysisByUrl(constructedUrl);
-                if (dbAnalysis) {
-                    analysisData = {
-                        score: dbAnalysis.score || 0,
-                        details: {},
-                        extract: dbAnalysis.data?.fields || {},
-                        url: dbAnalysis.url || constructedUrl,
-                        audit_report: dbAnalysis.data?.audit_report,
-                        analysis_blocks: dbAnalysis.data?.analysis_blocks // <--- Add
-                    };
-                    companyInfo.url = dbAnalysis.url;
-                    console.log(`✅ Found analysis via URL fallback with score: ${analysisData.score}`);
+                const b64 = stripeSession.client_reference_id;
+                const jsonStr = Buffer.from(b64, 'base64').toString('utf-8');
+                const payload = JSON.parse(jsonStr);
+                if (payload.e && payload.e.includes('@')) customerEmail = payload.e;
+            } catch (e) { }
+        }
+
+        // B. Fallback to Customer Details
+        if (!customerEmail && stripeSession.customer_details?.email) {
+            customerEmail = stripeSession.customer_details.email;
+        } else if (!customerEmail && stripeSession.customer_email) {
+            customerEmail = stripeSession.customer_email;
+        }
+
+        console.log(`👤 Customer Email: ${customerEmail}`);
+
+
+        // 2. EXTRACT EMAIL - NEW STRATEGY: TRUST OUR DATA FIRST (Client Ref)
+        // "Code Autrement": We prioritized the data we passed (Client Reference) because we know it's correct from the Chat.
+
+        // A. Try Client Reference ID (High Reliability)
+        if (session.client_reference_id) {
+            try {
+                const b64 = session.client_reference_id;
+                const jsonStr = Buffer.from(b64, 'base64').toString('utf-8');
+                const payload = JSON.parse(jsonStr);
+
+                // Supports { e: "email" } or { u: "url", e: "email" }
+                if (payload.e && payload.e.includes('@')) {
+                    customerEmail = payload.e;
+                    console.log("✅ PRIORITY 1: Email recovered from Client Reference ID (Chat Context):", customerEmail);
                 }
             } catch (e) {
-                console.error("URL Fallback lookup failed:", e);
+                console.warn("⚠️ Client Reference Decode Failed, falling back to Stripe data.");
+            }
+        }
+
+        // B. Fallback to Stripe Data (Standard)
+        if (!customerEmail) {
+            if (session.customer_details?.email) {
+                customerEmail = session.customer_details.email;
+                console.log("✅ PRIORITY 2: Email from Stripe Customer Details:", customerEmail);
+            }
+            else if (session.customer_email) {
+                customerEmail = session.customer_email;
+                console.log("✅ PRIORITY 3: Email from Stripe Session Field:", customerEmail);
+            }
+            // DEEP SEARCH: Payment Method (The user's JSON case - Last Resort)
+            else if ((session.payment_intent as any)?.payment_method?.billing_details?.email) {
+                customerEmail = (session.payment_intent as any).payment_method.billing_details.email;
+                console.log("✅ PRIORITY 4: Email from PaymentMethod Billing:", customerEmail);
+            }
+        }
+
+        // Nuclear Fetch (Existing)
+        if (!customerEmail && session.customer && typeof session.customer === 'string') {
+            try {
+                const customer = await stripe.customers.retrieve(session.customer);
+                if ((customer as Stripe.Customer).email) {
+                    customerEmail = (customer as Stripe.Customer).email!;
+                    console.log("✅ Email extracted via explicit Customer Fetch:", customerEmail);
+                }
+            } catch (fetchErr) {
+                console.error("❌ Failed to fetch customer details:", fetchErr);
+            }
+        }
+
+        // (Old Fallback Block Removed - Logic Moved Upstream)
+
+    } catch (stripeErr) {
+        console.error("❌ Stripe Retrieval Error:", stripeErr);
+
+        // 🎯 PRIORITY METHOD: Search directly by email
+        let dbAnalysis = null;
+        try {
+            dbAnalysis = await db.getLatestAnalysisByEmail(customerEmail);
+            if (dbAnalysis) {
+                analysisData = {
+                    score: dbAnalysis.score || 0,
+                    details: {},
+                    extract: dbAnalysis.data?.fields || {},
+                    url: dbAnalysis.url || "",
+                    audit_report: dbAnalysis.data?.audit_report,
+                    analysis_blocks: dbAnalysis.data?.analysis_blocks // <--- Add
+                };
+                companyInfo.url = dbAnalysis.url;
+                console.log(`✅ Found analysis in DB by EMAIL with score: ${analysisData.score}, URL: ${dbAnalysis.url}`);
+            } else {
+                console.warn(`⚠️ No analysis found in DB for email: ${customerEmail}`);
+            }
+        } catch (dbErr) {
+            console.error("❌ DB EMAIL Lookup Error:", dbErr);
+        }
+
+        // FALLBACK: Try to construct URL from email domain
+        if (!dbAnalysis) {
+            const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+            if (emailDomain) {
+                const constructedUrl = `https://${emailDomain}`;
+                console.log(`🔍 FALLBACK: Trying constructed URL from domain: ${constructedUrl}`);
+
+                try {
+                    dbAnalysis = await db.getLatestAnalysisByUrl(constructedUrl);
+                    if (dbAnalysis) {
+                        analysisData = {
+                            score: dbAnalysis.score || 0,
+                            details: {},
+                            extract: dbAnalysis.data?.fields || {},
+                            url: dbAnalysis.url || constructedUrl,
+                            audit_report: dbAnalysis.data?.audit_report,
+                            analysis_blocks: dbAnalysis.data?.analysis_blocks // <--- Add
+                        };
+                        companyInfo.url = dbAnalysis.url;
+                        console.log(`✅ Found analysis via URL fallback with score: ${analysisData.score}`);
+                    }
+                } catch (e) {
+                    console.error("URL Fallback lookup failed:", e);
+                }
+            }
+        }
+
+        // ULTIMATE FALLBACK: Perform live analysis if nothing in DB
+        if (!dbAnalysis) {
+            const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+            // 🚀 SPEED OPTIMIZATION: DO NOT RUN URL ANALYSIS IN WEBHOOK (TIMEOUT RISK > 10s)
+            // If we don't have analysis in DB, we use a "Fast Fallback" profile.
+            if (!analysisData.score || analysisData.score === 0) {
+                console.log("⚠️ No DB Analysis found. Using FAST FALLBACK to avoid Vercel Timeout.");
+
+                analysisData = {
+                    score: 75, // Default Commercial Grade
+                    url: companyInfo.url || "https://votre-site.com",
+                    details: {
+                        "Structure": { score: 80, comment: "Structure technique validée (Standard)." },
+                        "Sémantique": { score: 70, comment: "En attente d'optimisation sémantique profonde." }
+                    },
+                    extract: {
+                        identite: { name: { value: "Client AYO", q: 1 } },
+                        offre: { services: { value: ["Service Numérique"], q: 1 } }
+                    } as any,
+                    audit_report: undefined,
+                    analysis_blocks: undefined // Satisfy type
+                };
             }
         }
     }
 
-    // ULTIMATE FALLBACK: Perform live analysis if nothing in DB
-    if (!dbAnalysis) {
-        const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
-        // 🚀 SPEED OPTIMIZATION: DO NOT RUN URL ANALYSIS IN WEBHOOK (TIMEOUT RISK > 10s)
-        // If we don't have analysis in DB, we use a "Fast Fallback" profile.
-        if (!analysisData.score || analysisData.score === 0) {
-            console.log("⚠️ No DB Analysis found. Using FAST FALLBACK to avoid Vercel Timeout.");
 
-            analysisData = {
-                score: 75, // Default Commercial Grade
-                url: companyInfo.url || "https://votre-site.com",
-                details: {
-                    "Structure": { score: 80, comment: "Structure technique validée (Standard)." },
-                    "Sémantique": { score: 70, comment: "En attente d'optimisation sémantique profonde." }
-                },
-                extract: {
-                    identite: { name: { value: "Client AYO", q: 1 } },
-                    offre: { services: { value: ["Service Numérique"], q: 1 } }
-                } as any,
-                audit_report: undefined,
-                analysis_blocks: undefined // Satisfy type
-            };
+    // 4. LOGIC & CHECKS  
+    let emailMissing = false;
+    if (!customerEmail) {
+        console.warn("⚠️ Valid Payment but No Email found.");
+        emailMissing = true;
+    }
+
+    // Generate REAL Files (SAFE WRAPPER)
+    const sessionDate = new Date().toISOString();
+    let asrJson = "{}";
+    try {
+        // Pass the Tier explicitly: "PRO" or "ESSENTIAL"
+        const tier = packType === "PRO" ? "PRO" : "ESSENTIAL";
+        const asrObject = await generateRealAsrJson(
+            analysisData.extract,
+            analysisData.score,
+            sessionDate,
+            session_id,
+            tier // Use new Tier string param
+        );
+        asrJson = JSON.stringify(asrObject, null, 2);
+    } catch (genErr) {
+        console.error("❌ CRITICAL: Failed to generate ASR JSON. Using empty fallback.", genErr);
+        asrJson = JSON.stringify({ error: "Generation Failed", contact: "support@ai-visionary.com" }, null, 2);
+    }
+
+    // Generate External Context (New Layer)
+    let externalContextJson = "{}";
+    try {
+        const extData = (analysisData.extract as any).external_context || {};
+        const extObject = generateExternalContextJson({
+            ecosystem_presence: extData.ecosystem_presence?.value || [],
+            reputation_signals: extData.reputation_signals?.value || false,
+            keywords: extData.keywords?.value || [],
+            intents: extData.intents?.value || [],
+            channels: extData.channels?.value || [],
+            permissions: extData.permissions?.value || []
+        });
+        externalContextJson = JSON.stringify(extObject, null, 2);
+    } catch (extErr) {
+        console.error("❌ Failed to generate External Context JSON", extErr);
+        externalContextJson = JSON.stringify({ note: "No external context data available." }, null, 2);
+    }
+
+    // 🔐 VALIDATION EMAIL
+    const VALIDATION_DISABLED = true; // PROD FIX: Allow gmail/etc. for artisans
+    let emailValidated = false;
+    if (!emailMissing && customerEmail && companyInfo.url) {
+        const urlObj = new URL(companyInfo.url);
+        const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
+        const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+
+        if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
+            emailValidated = true;
+        } else {
+            console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain} (IGNORED by VALIDATION_DISABLED)`);
+            emailValidated = true; // Force validate
         }
     }
-}
 
+    // Send Email via Resend
+    // ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
+    // This stops "Silent Failures" (200 OK but no email).
+    let emailSent = false;
+    let emailError = null;
 
-// 4. LOGIC & CHECKS  
-let emailMissing = false;
-if (!customerEmail) {
-    console.warn("⚠️ Valid Payment but No Email found.");
-    emailMissing = true;
-}
+    if (!emailMissing) {
+        try {
+            // Email content varies by pack type
+            let emailSubject = '';
+            let emailHtml = '';
 
-// Generate REAL Files (SAFE WRAPPER)
-const sessionDate = new Date().toISOString();
-let asrJson = "{}";
-try {
-    // Pass the Tier explicitly: "PRO" or "ESSENTIAL"
-    const tier = packType === "PRO" ? "PRO" : "ESSENTIAL";
-    const asrObject = await generateRealAsrJson(
-        analysisData.extract,
-        analysisData.score,
-        sessionDate,
-        session_id,
-        tier // Use new Tier string param
-    );
-    asrJson = JSON.stringify(asrObject, null, 2);
-} catch (genErr) {
-    console.error("❌ CRITICAL: Failed to generate ASR JSON. Using empty fallback.", genErr);
-    asrJson = JSON.stringify({ error: "Generation Failed", contact: "support@ai-visionary.com" }, null, 2);
-}
+            // Helper to render Audit Table from Structured Data
+            const renderAuditTable = (blocks: any) => {
+                if (!blocks) return null;
 
-// Generate External Context (New Layer)
-let externalContextJson = "{}";
-try {
-    const extData = (analysisData.extract as any).external_context || {};
-    const extObject = generateExternalContextJson({
-        ecosystem_presence: extData.ecosystem_presence?.value || [],
-        reputation_signals: extData.reputation_signals?.value || false,
-        keywords: extData.keywords?.value || [],
-        intents: extData.intents?.value || [],
-        channels: extData.channels?.value || [],
-        permissions: extData.permissions?.value || []
-    });
-    externalContextJson = JSON.stringify(extObject, null, 2);
-} catch (extErr) {
-    console.error("❌ Failed to generate External Context JSON", extErr);
-    externalContextJson = JSON.stringify({ note: "No external context data available." }, null, 2);
-}
+                const rows = Object.keys(blocks).map(key => {
+                    const item = blocks[key];
+                    // Safety check
+                    if (!item) return '';
+                    // Fallback defaults if properties missing
+                    const iScore = item.score || 0;
+                    const iMax = item.max || 10;
+                    const iLabel = item.label || key;
+                    const iStatus = item.status || 'error';
+                    const iObs = item.observation || "Données manquantes.";
 
-// 🔐 VALIDATION EMAIL
-const VALIDATION_DISABLED = true; // PROD FIX: Allow gmail/etc. for artisans
-let emailValidated = false;
-if (!emailMissing && customerEmail && companyInfo.url) {
-    const urlObj = new URL(companyInfo.url);
-    const analyzedDomain = urlObj.hostname.replace(/^www\./, '');
-    const emailDomain = customerEmail.split('@')[1]?.toLowerCase();
+                    const color = iStatus === 'success' ? '#166534' : (iStatus === 'warning' ? '#854d0e' : '#991b1b');
+                    const bg = iStatus === 'success' ? '#dcfce7' : (iStatus === 'warning' ? '#fef9c3' : '#fee2e2');
+                    const icon = iStatus === 'success' ? '✅' : (iStatus === 'warning' ? '⚠️' : '❌');
 
-    if (VALIDATION_DISABLED || (emailDomain === analyzedDomain)) {
-        emailValidated = true;
-    } else {
-        console.warn(`❌ SECURITY REJECTION: ${customerEmail} vs ${analyzedDomain} (IGNORED by VALIDATION_DISABLED)`);
-        emailValidated = true; // Force validate
-    }
-}
-
-// Send Email via Resend
-// ⚡️ FORCE ATTEMPT: We remove the '&& process.env.RESEND_API_KEY' check to force an error (500) if key is missing.
-// This stops "Silent Failures" (200 OK but no email).
-let emailSent = false;
-let emailError = null;
-
-if (!emailMissing) {
-    try {
-        // Email content varies by pack type
-        let emailSubject = '';
-        let emailHtml = '';
-
-        // Helper to render Audit Table from Structured Data
-        const renderAuditTable = (blocks: any) => {
-            if (!blocks) return null;
-
-            const rows = Object.keys(blocks).map(key => {
-                const item = blocks[key];
-                // Safety check
-                if (!item) return '';
-                // Fallback defaults if properties missing
-                const iScore = item.score || 0;
-                const iMax = item.max || 10;
-                const iLabel = item.label || key;
-                const iStatus = item.status || 'error';
-                const iObs = item.observation || "Données manquantes.";
-
-                const color = iStatus === 'success' ? '#166534' : (iStatus === 'warning' ? '#854d0e' : '#991b1b');
-                const bg = iStatus === 'success' ? '#dcfce7' : (iStatus === 'warning' ? '#fef9c3' : '#fee2e2');
-                const icon = iStatus === 'success' ? '✅' : (iStatus === 'warning' ? '⚠️' : '❌');
-
-                return `
+                    return `
                             <div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:10px; border-radius:4px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <strong style="color:${color}; font-size:14px;">${icon} ${iLabel}</strong>
@@ -516,62 +450,62 @@ if (!emailMissing) {
                                 <p style="margin:5px 0 0 0; font-size:13px; color:#333;">${iObs}</p>
                             </div>
                         `;
-            }).join('');
+                }).join('');
 
-            return `
+                return `
                         <div style="margin:20px 0;">
                             <h3 style="color:#333; margin-bottom:10px; font-size:16px;">🛑 Diagnostic des Manquements :</h3>
                             ${rows}
                         </div>
                     `;
-        };
-
-        let auditHtml = "";
-
-        // DATA RECOVERY STRATEGY
-        // 1. Try to use Real Structured Data from DB
-        let blocksToRender = (analysisData as any).analysis_blocks;
-
-        // 2. If missing (Old Analysis), simulate blocks from Global Score to avoid "Shameful Text"
-        if (!blocksToRender) {
-            const s = analysisData.score || 0;
-            // Reverse-engineer plausibles statuses based on low score (typical case)
-            blocksToRender = {
-                identite: {
-                    score: s > 50 ? 8 : 4, max: 10, label: "Identité & Ancrage",
-                    status: s > 50 ? 'success' : 'warning',
-                    observation: s > 50 ? "Identité validée." : "Identité numérique faible (Action requise)."
-                },
-                offre: {
-                    score: s > 60 ? 15 : 8, max: 20, label: "Clarté de l'Offre",
-                    status: s > 60 ? 'success' : 'warning',
-                    observation: s > 60 ? "Offre claire." : "Sémantique à préciser pour l'IA."
-                },
-                processus: {
-                    score: s > 70 ? 12 : 5, max: 15, label: "Processus & Méthodes",
-                    status: s > 70 ? 'success' : 'warning',
-                    observation: "Méthodologie non détectée clairement."
-                },
-                confiance: {
-                    score: s > 40 ? 10 : 3, max: 15, label: "Confiance & Conformité",
-                    status: s > 40 ? 'success' : 'error',
-                    observation: "Signaux de confiance insuffisants."
-                },
-                technique: {
-                    score: 0, max: 10, label: "Socle Technique",
-                    status: 'error',
-                    observation: "Absence de fichiers ASR (Corrigé par ce Pack)."
-                }
             };
-        }
 
-        // Render the table (Always)
-        auditHtml = renderAuditTable(blocksToRender) || "";
+            let auditHtml = "";
+
+            // DATA RECOVERY STRATEGY
+            // 1. Try to use Real Structured Data from DB
+            let blocksToRender = (analysisData as any).analysis_blocks;
+
+            // 2. If missing (Old Analysis), simulate blocks from Global Score to avoid "Shameful Text"
+            if (!blocksToRender) {
+                const s = analysisData.score || 0;
+                // Reverse-engineer plausibles statuses based on low score (typical case)
+                blocksToRender = {
+                    identite: {
+                        score: s > 50 ? 8 : 4, max: 10, label: "Identité & Ancrage",
+                        status: s > 50 ? 'success' : 'warning',
+                        observation: s > 50 ? "Identité validée." : "Identité numérique faible (Action requise)."
+                    },
+                    offre: {
+                        score: s > 60 ? 15 : 8, max: 20, label: "Clarté de l'Offre",
+                        status: s > 60 ? 'success' : 'warning',
+                        observation: s > 60 ? "Offre claire." : "Sémantique à préciser pour l'IA."
+                    },
+                    processus: {
+                        score: s > 70 ? 12 : 5, max: 15, label: "Processus & Méthodes",
+                        status: s > 70 ? 'success' : 'warning',
+                        observation: "Méthodologie non détectée clairement."
+                    },
+                    confiance: {
+                        score: s > 40 ? 10 : 3, max: 15, label: "Confiance & Conformité",
+                        status: s > 40 ? 'success' : 'error',
+                        observation: "Signaux de confiance insuffisants."
+                    },
+                    technique: {
+                        score: 0, max: 10, label: "Socle Technique",
+                        status: 'error',
+                        observation: "Absence de fichiers ASR (Corrigé par ce Pack)."
+                    }
+                };
+            }
+
+            // Render the table (Always)
+            auditHtml = renderAuditTable(blocksToRender) || "";
 
 
-        if (packType === "PRO") {
-            emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
-            emailHtml = `
+            if (packType === "PRO") {
+                emailSubject = `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100`;
+                emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <head><meta charset="utf-8"></head>
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -728,9 +662,9 @@ if (!emailMissing) {
                         </div>
                     </div>
                 `;
-        } else {
-            emailSubject = `Votre Pack AIO Essential - Score ${analysisData.score}/100`;
-            emailHtml = `
+            } else {
+                emailSubject = `Votre Pack AIO Essential - Score ${analysisData.score}/100`;
+                emailHtml = `
                     <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
                         <div style="background: #000; color: #fff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="margin:0;">AYO / Pack AIO Essential &#128274;&#127464;&#127469;</h1>
@@ -782,82 +716,82 @@ if (!emailMissing) {
                         </div>
                     </div>
                 `;
-        }
-
-        // DEFINE ATTACHMENTS (ASR File) - Ensuring Binary Safety
-        const attachments: any[] = [
-            {
-                filename: 'asr.json',
-                content: Buffer.from(asrJson)
-            },
-            {
-                filename: 'external_context.json',
-                content: Buffer.from(externalContextJson)
             }
-        ];
 
-        console.log(`📨 Sending Email via Resend to ${customerEmail}... Key Present: ${!!process.env.RESEND_API_KEY}`);
+            // DEFINE ATTACHMENTS (ASR File) - Ensuring Binary Safety
+            const attachments: any[] = [
+                {
+                    filename: 'asr.json',
+                    content: Buffer.from(asrJson)
+                },
+                {
+                    filename: 'external_context.json',
+                    content: Buffer.from(externalContextJson)
+                }
+            ];
 
-        // Safety check for attachments
-        const safeAttachments = attachments.map(att => ({
-            filename: att.filename,
-            content: att.content // already buffer
-        }));
+            console.log(`📨 Sending Email via Resend to ${customerEmail}... Key Present: ${!!process.env.RESEND_API_KEY}`);
 
-        await resend.emails.send({
-            from: 'AI Visionary System <hello@ai-visionary.com>',
-            replyTo: 'support@ai-visionary.com',
-            to: [customerEmail],
-            bcc: ['hello@ai-visionary.com'], // ADMIN BACKUP COPY
-            subject: emailSubject,
-            html: emailHtml,
-            attachments: safeAttachments
-        });
-        console.log(`✅ Success Email sent to ${customerEmail}`);
-        emailSent = true;
-    } catch (err: any) {
-        console.error("❌ RESEND SENDING FAILED:", err);
-        emailError = err.message;
-        // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
-        throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
+            // Safety check for attachments
+            const safeAttachments = attachments.map(att => ({
+                filename: att.filename,
+                content: att.content // already buffer
+            }));
+
+            await resend.emails.send({
+                from: 'AI Visionary System <hello@ai-visionary.com>',
+                replyTo: 'support@ai-visionary.com',
+                to: [customerEmail],
+                bcc: ['hello@ai-visionary.com'], // ADMIN BACKUP COPY
+                subject: emailSubject,
+                html: emailHtml,
+                attachments: safeAttachments
+            });
+            console.log(`✅ Success Email sent to ${customerEmail}`);
+            emailSent = true;
+        } catch (err: any) {
+            console.error("❌ RESEND SENDING FAILED:", err);
+            emailError = err.message;
+            // THROW FOR ALL EMAIL ERRORS to ensure Stripe alerts the user
+            throw new Error(`CRITICAL EMAIL FAILURE: ${err.message}`);
+        }
     }
-}
 
-if (!emailSent) {
-    console.error("❌ Email NOT sent (Logic skipped or previously failed).");
+    if (!emailSent) {
+        console.error("❌ Email NOT sent (Logic skipped or previously failed).");
+        return NextResponse.json({
+            success: false,
+            error: "Email Logic Skipped or Failed (Check Logs)",
+            debug_trace: {
+                payment_found: !!payloadSession,
+                pack_detected: packType,
+                email_target: customerEmail,
+                email_valid: !emailMissing,
+                email_error: emailError,
+            }
+        }, { status: 500 });
+    }
+
     return NextResponse.json({
-        success: false,
-        error: "Email Logic Skipped or Failed (Check Logs)",
+        success: true,
+        email_sent: emailSent,
+        // RETURN FILES FOR DIRECT DOWNLOAD (Backup Plan)
+        files: {
+            asr: asrJson,
+            external_context: externalContextJson
+        },
         debug_trace: {
             payment_found: !!payloadSession,
             pack_detected: packType,
             email_target: customerEmail,
             email_valid: !emailMissing,
             email_error: emailError,
+            resend_key_configured: !!process.env.RESEND_API_KEY,
+            analyzed_url: companyInfo.url
         }
-    }, { status: 500 });
-}
+    });
 
-return NextResponse.json({
-    success: true,
-    email_sent: emailSent,
-    // RETURN FILES FOR DIRECT DOWNLOAD (Backup Plan)
-    files: {
-        asr: asrJson,
-        external_context: externalContextJson
-    },
-    debug_trace: {
-        payment_found: !!payloadSession,
-        pack_detected: packType,
-        email_target: customerEmail,
-        email_valid: !emailMissing,
-        email_error: emailError,
-        resend_key_configured: !!process.env.RESEND_API_KEY,
-        analyzed_url: companyInfo.url
-    }
-});
-
-    } catch (error: any) {
+} catch (error: any) {
     console.error("Webhook Error", error);
     return NextResponse.json({
         error: error.message,
