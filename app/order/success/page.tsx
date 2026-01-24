@@ -83,8 +83,12 @@ function SuccessContent() {
 
                 {status === 'error' && (
                     <div className="text-center py-20 bg-amber-50 border border-amber-200 rounded-2xl">
-                        <h1 className="text-2xl font-bold text-amber-700 mb-2">Finalisation en cours...</h1>
-                        <p className="text-[#64748B] mb-6">Vos fichiers sont en train d'être générés (cela peut prendre jusqu'à 20 secondes).</p>
+                        <h1 className="text-2xl font-bold text-amber-700 mb-2">Génération des fichiers en cours...</h1>
+                        <p className="text-[#64748B] mb-6 max-w-md mx-auto">
+                            Merci de patienter environ <strong>30 secondes</strong> pour permettre à l'IA de finaliser vos documents.
+                            <br /><br />
+                            Si les fichiers n'apparaissent pas automatiquement, cliquez sur le bouton ci-dessous.
+                        </p>
 
                         <div className="flex flex-col gap-4 items-center">
                             <button
@@ -92,7 +96,7 @@ function SuccessContent() {
                                 className="px-6 py-3 bg-amber-600 text-white font-bold rounded-full hover:bg-amber-700 transition-colors shadow-md flex items-center gap-2"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                Vérifier la disponibilité (Actualiser)
+                                Vérifier la disponibilité
                             </button>
 
                             <p className="text-sm text-[#324066] mt-4">
