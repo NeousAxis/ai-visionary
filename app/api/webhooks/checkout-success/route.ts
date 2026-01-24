@@ -11,7 +11,6 @@ export async function POST(req: Request) {
     const resendKey = process.env.RESEND_API_KEY;
 
     if (!stripeKey || !webhookSecret || !resendKey) {
-        console.error("❌ CONFIG MISSING: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET or RESEND_API_KEY");
         return new Response("Missing Configuration", { status: 500 });
     }
 
@@ -21,102 +20,72 @@ export async function POST(req: Request) {
     try {
         const rawBody = await req.text();
         const signature = req.headers.get('stripe-signature') || "";
-
-        let event: Stripe.Event;
-        try {
-            event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-            console.log(`📡 WEBHOOK EVENT RECEIVED: ${event.type}`);
-        } catch (err: any) {
-            console.error(`❌ SIGNATURE ERROR: ${err.message}`);
-            return NextResponse.json({ error: "Invalid Signature" }, { status: 400 });
-        }
+        let event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
 
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object as Stripe.Checkout.Session;
-            console.log(`✅ PAYMENT COMPLETED: ${session.id}`);
 
-            // 1. Recover Email
-            let email = session.customer_details?.email || session.customer_email || "";
-            let url = session.metadata?.analyzed_url || "votre-site.com";
+            // 1. EXTRACTION EMAIL ULTRA-AGRESSIVE
+            let email = session.customer_details?.email ||
+                session.customer_email ||
+                session.metadata?.customer_email ||
+                "";
 
-            if (session.client_reference_id) {
+            // Fallback sur le client_reference_id
+            if (!email && session.client_reference_id) {
                 try {
                     const decoded = JSON.parse(Buffer.from(session.client_reference_id, 'base64').toString());
-                    if (decoded.e && !email) email = decoded.e;
-                    if (decoded.u) url = decoded.u;
-                    console.log(`📡 Decoded Reference: ${email} for ${url}`);
-                } catch (e) {
-                    console.warn("⚠️ Client Reference Decode Failed");
-                }
+                    email = decoded.e;
+                } catch (e) { }
             }
 
-            if (!email) {
-                console.error("❌ CRITICAL: No email found for session", session.id);
-                return NextResponse.json({ error: "No email" }, { status: 200 }); // Still 200 to acknowledge Stripe
+            console.log(`📡 WEBHOOK: Processing for email [${email}]`);
+
+            if (!email || !email.includes('@')) {
+                console.error("❌ NO VALID EMAIL FOUND");
+                return NextResponse.json({ received: true });
             }
 
-            // 2. Data Retrieval
-            let analysisData = {
-                score: 75,
-                extract: { identite: { name: { value: "Client AI Visionary" } } },
+            // 2. DATA
+            const url = session.metadata?.analyzed_url || "votre-site.com";
+            const dbAnalysis = await db.getLatestAnalysisByEmail(email);
+            const analysisData = {
+                score: dbAnalysis?.score || 75,
+                extract: dbAnalysis?.data?.fields || { identite: { name: { value: "Client AI Visionary" } } },
                 url: url
             };
 
-            try {
-                const dbAnalysis = await db.getLatestAnalysisByEmail(email);
-                if (dbAnalysis) {
-                    console.log("✅ Analysis found in database");
-                    analysisData = {
-                        score: dbAnalysis.score || 75,
-                        extract: dbAnalysis.data?.fields || analysisData.extract,
-                        url: dbAnalysis.url || url
-                    };
-                }
-            } catch (dbErr) {
-                console.warn("⚠️ Database lookup failed, using fallback");
-            }
+            // 3. GÉNÉRATION
+            const packType = session.metadata?.pack_type === 'PRO' ? 'PRO' : 'ESSENTIAL';
+            const asrObject = await generateRealAsrJson(analysisData.extract, analysisData.score, new Date().toISOString(), session.id, packType);
+            const asrJson = JSON.stringify(asrObject, null, 2);
 
-            // 3. Generate Content
-            const packType: 'ESSENTIAL' | 'PRO' = session.metadata?.pack_type === 'PRO' ? 'PRO' : 'ESSENTIAL';
-            console.log(`🛠 Mode: ${packType}`);
+            const extData = (analysisData.extract as any)?.external_context || {};
+            const extObject = generateExternalContextJson({
+                ecosystem_presence: extData.ecosystem_presence?.value || [],
+                reputation_signals: extData.reputation_signals?.value || false,
+                keywords: extData.keywords?.value || [],
+                intents: extData.intents?.value || [],
+                channels: extData.channels?.value || [],
+                permissions: extData.permissions?.value || []
+            });
+            const externalContextJson = JSON.stringify(extObject, null, 2);
 
-            let asrJson = "";
-            let externalContextJson = "";
-
-            try {
-                const asrObject = await generateRealAsrJson(analysisData.extract, analysisData.score, new Date().toISOString(), session.id, packType);
-                asrJson = JSON.stringify(asrObject, null, 2);
-
-                const extData = (analysisData.extract as any)?.external_context || {};
-                const extObject = generateExternalContextJson({
-                    ecosystem_presence: extData.ecosystem_presence?.value || [],
-                    reputation_signals: extData.reputation_signals?.value || false,
-                    keywords: extData.keywords?.value || [],
-                    intents: extData.intents?.value || [],
-                    channels: extData.channels?.value || [],
-                    permissions: extData.permissions?.value || []
-                });
-                externalContextJson = JSON.stringify(extObject, null, 2);
-            } catch (genErr: any) {
-                console.error("❌ Content generation error:", genErr.message);
-            }
-
-            // 4. Send Email
-            console.log(`📧 Attempting to send email to ${email}`);
-
-            const { data, error } = await resend.emails.send({
+            // 4. ENVOI EMAIL
+            // Note: on utilise des Buffers pour les pièces jointes, c'est ce que Resend préfère.
+            const { error } = await resend.emails.send({
                 from: 'AI Visionary <hello@ai-visionary.com>',
-                to: [email],
+                to: email,
                 bcc: ['hello@ai-visionary.com'],
                 subject: `Votre Pack AIO ${packType} est prêt !`,
                 html: `
-                    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                    <div style="font-family: sans-serif; padding: 20px;">
                         <h2>Merci pour votre commande !</h2>
-                        <p>Nous avons finalisé l'analyse pour : <b>${analysisData.url}</b></p>
-                        <p>Votre score de visibilité IA est de <b>${analysisData.score}/100</b>.</p>
-                        <p>Vos fichiers certifiés sont disponibles en pièces jointes de cet e-mail.</p>
-                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-                        <p style="font-size: 11px; color: #999;">Commande ID : ${session.id}</p>
+                        <p>Votre analyse pour <b>${analysisData.url}</b> est terminée.</p>
+                        <p>Score : <b>${analysisData.score}/100</b></p>
+                        <p>Les fichiers <b>asr.json</b> et <b>external_context.json</b> sont en pièces jointes.</p>
+                        <hr/>
+                        <p style="font-size: 10px; color: #999;">Commande: ${session.id}</p>
                     </div>
                 `,
                 attachments: [
@@ -125,17 +94,14 @@ export async function POST(req: Request) {
                 ]
             });
 
-            if (error) {
-                console.error("❌ RESEND ERROR:", error);
-            } else {
-                console.log(`✅ SUCCESS: Email sent to ${email}. ID: ${data?.id}`);
-            }
+            if (error) console.error("❌ RESEND ERROR:", error);
+            else console.log("✅ EMAIL DELIVERED TO RESEND QUEUE");
         }
 
         return NextResponse.json({ received: true });
 
-    } catch (globalErr: any) {
-        console.error("❌ WEBHOOK GLOBAL ERROR:", globalErr.message);
-        return NextResponse.json({ error: globalErr.message }, { status: 500 });
+    } catch (err: any) {
+        console.error("❌ WEBHOOK CRITICAL ERROR:", err.message);
+        return NextResponse.json({ received: true }); // Toujours 200 pour Stripe
     }
 }
