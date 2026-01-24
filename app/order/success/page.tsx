@@ -92,11 +92,7 @@ function SuccessContent() {
                             {/* Decoratif Background Blur */}
                             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#4A919E] to-[#212E53]"></div>
 
-                            {/* 1. SPINNER */}
-                            <div className="relative w-24 h-24 mx-auto mb-8">
-                                <div className="absolute inset-0 border-4 border-[#4A919E]/10 rounded-full"></div>
-                                <div className="absolute inset-0 border-4 border-[#4A919E] border-t-transparent rounded-full animate-spin"></div>
-                            </div>
+
 
                             <h1 className="text-4xl font-extrabold text-[#212E53] mb-6 tracking-tight">
                                 Génération en cours...
