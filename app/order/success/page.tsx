@@ -37,8 +37,9 @@ function SuccessContent() {
                         setStatus('error'); // Paiement ok mais fichiers non générés
                     }
                 } else {
-                    // Retry logic simple (si le webhook backend est lent)
-                    setTimeout(fetchOrder, 2000);
+                    // STOP RETRY LOOP. Show error and let user retry manually.
+                    console.warn("Webhook returned success but no files.", data);
+                    setStatus('error');
                 }
             } catch (e) {
                 console.error(e);
@@ -46,8 +47,11 @@ function SuccessContent() {
             }
         };
 
-        fetchOrder();
-    }, [sessionId]);
+        // Only fetch once.
+        if (status === 'loading') {
+            fetchOrder();
+        }
+    }, [sessionId]); // Remove 'status' dependency to avoid loops
 
     const downloadFile = (filename: string, content: string) => {
         if (!content) return;
