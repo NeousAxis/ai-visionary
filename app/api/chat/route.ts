@@ -563,41 +563,39 @@ DONNÉES DU SCAN :
 
 TU ES UN EXPERT EN EXTRACTION DE DONNÉES WEB.
 
-RÈGLE D'OR - CONFIANCE ABSOLUE :
-Tout ce qui est écrit dans le TITRE, la META DESCRIPTION et le JSON-LD est considéré comme VRAI et CERTAIN à 100%.
--> Confidence OBLIGATOIRE : "high".
+STRATÉGIE HYBRIDE (COPIER vs DÉDUIRE) :
+1. **LES FAITS (Nom, Secteur, Offre, Pays)** : Ne réfléchis pas trop. Si c'est écrit dans le TITRE, la DESCRIPTION ou le JSON-LD, c'est VRAI (Confidence: "high"). Recopie simplement.
+2. **L'ABSTRAIT (Intentions, Mission, Audience)** : Là, tu dois utiliser ton intelligence pour déduire et synthétiser.
 
-Exemple : Si le titre est "Plombier à Paris", alors :
-- Nom : "Plombier..." (High)
-- Secteur : "Plomberie" (High)
-- Ville : "Paris" (High)
-NE METS JAMAIS "LOW" POUR DES INFOS VISIBLES DANS CES BALISES.
+RÈGLE D'OR : 
+Si tu vois "Agence SEO" dans le titre, le secteur est "Agence SEO" (HIGH). Ne mets pas "low" par prudence. Fais confiance à ce qui est écrit.
 
 TA MISSION :
 Essaie de répondre aux 16 questions critiques pour construire un ASR.
 
 Pour CHAQUE question :
-1. Regarde d'abord le TITRE et la DESCRIPTION. Si l'info y est -> "high".
-2. Regarde le JSON-LD. Si l'info y est -> "high".
-3. Regarde le texte. Si c'est déductible (ex: "Nos services...") -> "high".
-4. Ne mets "low" QUE si l'information est totalement implicite et floue.
-5. Si absent -> "unknown".
+1. Regarde d'abord le TITRE et la DESCRIPTION. Si l'info y est → Recopie + "high".
+2. Regarde le JSON-LD. Si l'info y est → Recopie + "high".
+3. Regarde le texte. Si c'est déductible clairement (ex: "Nos services...") → Synthétise + "high".
+4. Ne mets "low" QUE si l'information est vraiment floue ou absente.
 
 LES 16 QUESTIONS CRITIQUES :
 1. Nom exact (Priorité au JSON-LD "name" ou au Titre)
 2. Pays d'établissement (Cherche "Paris", "Suisse", "+33", noms de villes...)
-3. Statut juridique (Cherche "SARL", "SAS", "Inc", "Limited" dans le footer)
-4. Secteur d'activité (Mots clés du Titre)
+3. Statut juridique (Cherche "SARL", "SAS", "Inc", "Limited" dans le footer - Sinon "unknown")
+4. Secteur d'activité (Mots clés du Titre - SOIS PRÉCIS ET DIRECT)
 5. Public cible (B2B si mention de "Entreprises", "Pro", "Solutions". B2C sinon)
-6. Offre principale (Résumé du Titre)
+6. Offre principale (Résumé du Titre en 1 phrase simple)
 7. Modèle économique (Prix affichés ? "Devis" ? "Abonnement" ?)
 8. Taille équipe (Strict : Visible ou Unknown)
 9. Mission/Vision (Le "H1" ou la première phrase)
 10. Technologies utilisées (Wordpress ? Shopify ?)
 11. Utilisation de données/IA (Mentionné ?)
 12. Présence externe (Liens réseaux sociaux ?)
-13. Signaux de réputation
+13. Signaux de réputation (Certifications ?)
 14. Mots-clés principaux (Ceux du Titre et H1)
+15. Intentions utilisateur (Pour quoi vient-on sur ce site ?)
+16. Canaux d'accès (Email ? Tel ?)
 15. Intentions utilisateur
 16. Canaux d'accès (Email ? Tel ?)
 
