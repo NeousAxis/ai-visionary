@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import Stripe from 'stripe';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
-import { scanUrlForAioSignals } from '@/lib/aio-scanner';
-import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
 import { db } from '@/lib/db';
 import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { generateExternalContextJson } from '@/lib/external-context';
@@ -14,7 +10,6 @@ export async function POST(req: Request) {
     const resendKey = process.env.RESEND_API_KEY;
 
     if (!stripeKey || !resendKey) {
-        console.error("❌ CONFIG ERROR: Missing Stripe or Resend Key");
         return NextResponse.json({ error: "Server Misconfiguration" }, { status: 500 });
     }
 
@@ -25,95 +20,43 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { session_id } = body;
 
-        if (!session_id) {
-            return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
+        if (!session_id) return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
+
+        console.log(`⚙️ GENERATING RICH ORDER: ${session_id}`);
+
+        // 1. RETRIEVE SESSION
+        const stripeSession = await stripe.checkout.sessions.retrieve(session_id, {
+            expand: ['payment_intent.payment_method', 'customer']
+        });
+
+        if (stripeSession.payment_status !== 'paid') {
+            return NextResponse.json({ error: "Not paid" }, { status: 402 });
         }
 
-        console.log(`⚙️ PROCESSING ORDER: ${session_id}`);
-
-        // 1. RETRIEVE STRIPE SESSION
-        let stripeSession: Stripe.Checkout.Session;
-        try {
-            stripeSession = await stripe.checkout.sessions.retrieve(session_id, {
-                expand: ['payment_intent.payment_method', 'customer']
-            });
-            if (stripeSession.payment_status !== 'paid') {
-                return NextResponse.json({ error: "Payment not completed" }, { status: 402 });
-            }
-        } catch (e: any) {
-            console.error("❌ Stripe Retrieval Failed:", e.message);
-            return NextResponse.json({ error: "Invalid Session" }, { status: 404 });
-        }
-
-        // 2. EXTRACT CUSTOMER EMAIL (Robust Logic)
+        // 2. EXTRACT EMAIL
         let customerEmail = "";
-
-        // Priority A: Client Reference ID (Our Base64 payload from Chat)
         if (stripeSession.client_reference_id) {
             try {
                 const jsonStr = Buffer.from(stripeSession.client_reference_id, 'base64').toString('utf-8');
                 const payload = JSON.parse(jsonStr);
-                if (payload.e && payload.e.includes('@')) customerEmail = payload.e;
+                if (payload.e) customerEmail = payload.e;
             } catch (e) { }
         }
-
-        // Priority B: Stripe Standard Fields
         if (!customerEmail) customerEmail = stripeSession.customer_details?.email || stripeSession.customer_email || "";
 
-        // Priority C: Deep Fetch if needed
-        if (!customerEmail && typeof stripeSession.customer === 'string') {
-            const customer = await stripe.customers.retrieve(stripeSession.customer);
-            customerEmail = (customer as Stripe.Customer).email || "";
-        }
-
-        console.log(`📧 Detected Email: ${customerEmail || "NOT FOUND"}`);
-
-        if (!customerEmail) {
-            console.error("❌ CRITICAL: No email found for session", session_id);
-            // We proceed to analysis but will fail at email step
-        }
-
-        // 3. RETRIEVE OR PERFORM ANALYSIS
-        let analysisData: any = null;
-        let targetUrl = "";
-
-        // Try to get from DB first
-        if (customerEmail) {
-            const dbAnalysis = await db.getLatestAnalysisByEmail(customerEmail);
-            if (dbAnalysis) {
-                console.log("✅ Analysis found in DB");
-                analysisData = {
-                    score: dbAnalysis.score,
-                    extract: dbAnalysis.data?.fields || {},
-                    url: dbAnalysis.url,
-                    analysis_blocks: dbAnalysis.data?.analysis_blocks
-                };
-                targetUrl = dbAnalysis.url;
-            }
-        }
-
-        // If not in DB, we MUST have a URL (from payload or domain)
-        if (!analysisData) {
-            console.log("⚠️ No DB Analysis. Using fallback logic.");
-            targetUrl = customerEmail ? `https://${customerEmail.split('@')[1]}` : "https://votre-site.com";
-            analysisData = {
-                score: 75,
-                extract: { identite: { name: { value: "Client AYO" } } },
-                url: targetUrl
-            };
-        }
+        // 3. RETRIEVE ANALYSIS
+        const dbAnalysis = await db.getLatestAnalysisByEmail(customerEmail);
+        const analysisData = {
+            score: dbAnalysis?.score || 75,
+            extract: dbAnalysis?.data?.fields || { identite: { name: { value: "Client AYO" } } },
+            url: dbAnalysis?.url || "votre-site.com",
+            analysis_blocks: dbAnalysis?.data?.analysis_blocks
+        };
 
         // 4. GENERATE FILES
         const packType = stripeSession.metadata?.pack_type === "PRO" || (stripeSession.amount_total! / 100) >= 450 ? "PRO" : "ESSENTIAL";
         const sessionDate = new Date().toISOString();
-
-        const asrObject = await generateRealAsrJson(
-            analysisData.extract,
-            analysisData.score,
-            sessionDate,
-            session_id,
-            packType
-        );
+        const asrObject = await generateRealAsrJson(analysisData.extract, analysisData.score, sessionDate, session_id, packType);
         const asrJson = JSON.stringify(asrObject, null, 2);
 
         const extData = analysisData.extract?.external_context || {};
@@ -127,46 +70,59 @@ export async function POST(req: Request) {
         });
         const externalContextJson = JSON.stringify(extObject, null, 2);
 
-        // 5. SEND EMAIL
-        let emailSent = false;
-        let emailError = null;
+        // 5. SEND RICH EMAIL (Anti-Spam Strategy)
+        const subject = packType === "PRO" ? `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100` : `Votre Pack AIO Essential - Score ${analysisData.score}/100`;
 
-        if (customerEmail && customerEmail.includes('@')) {
-            try {
-                const subject = packType === "PRO" ? `Votre Pack AIO PRO (Activé) - Score ${analysisData.score}/100` : `Votre Pack AIO Essential - Score ${analysisData.score}/100`;
+        const emailHtml = `
+            <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+                <div style="background: #000; color: #fff; padding: 30px; text-align: center;">
+                    <h1 style="margin:0; font-size: 24px;">AI VISIONARY</h1>
+                    <p style="margin:10px 0 0 0; opacity: 0.8;">Optimisation de Visibilité IA</p>
+                </div>
+                <div style="padding: 30px;">
+                    <p>Bonjour,</p>
+                    <p>Merci pour votre commande. Votre Pack <b>${packType}</b> est prêt pour le site <b>${analysisData.url}</b>.</p>
+                    
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4a919e;">
+                        <h3 style="margin:0; color: #4a919e;">📊 Score AI Vision : ${analysisData.score}/100</h3>
+                    </div>
 
-                await resend.emails.send({
-                    from: 'AI Visionary <hello@ai-visionary.com>',
-                    to: [customerEmail],
-                    bcc: ['hello@ai-visionary.com'],
-                    subject: subject,
-                    html: `<p>Félicitations, votre pack <b>${packType}</b> est prêt.</p><p>Trouvez vos fichiers ASR en pièces jointes.</p><p>ID Commande: ${session_id}</p>`,
-                    attachments: [
-                        { filename: 'asr.json', content: Buffer.from(asrJson) },
-                        { filename: 'external_context.json', content: Buffer.from(externalContextJson) }
-                    ]
-                });
-                emailSent = true;
-                console.log(`✅ Email sent to ${customerEmail}`);
-            } catch (err: any) {
-                console.error("❌ Resend Error:", err.message);
-                emailError = err.message;
-            }
-        }
+                    <h3>📦 Vos fichiers sont prêts</h3>
+                    <p>Nous avons joint vos certificats <b>asr.json</b> et <b>external_context.json</b> à cet email.</p>
+                    
+                    <h3>🛠 Comment les installer ?</h3>
+                    <ol>
+                        <li>Extrayez les fichiers joints.</li>
+                        <li>Uploadez-les à la racine de votre site via FTP (ex: <code>votre-site.com/asr.json</code>).</li>
+                        <li><b>Recommandé :</b> Placez-les dans un dossier nommé <code>.ayo</code> à la racine.</li>
+                    </ol>
 
-        // 6. RESPONSE
-        return NextResponse.json({
-            success: true,
-            email_sent: emailSent,
-            email_error: emailError,
-            files: {
-                asr: asrJson,
-                external_context: externalContextJson
-            }
+                    <hr style="border:0; border-top:1px solid #eee; margin: 30px 0;" />
+                    <p style="font-size: 12px; color: #94A3B8;">Réf commande : ${session_id}</p>
+                    <p style="font-size: 12px; color: #94A3B8;">Besoin d'aide ? Contactez-nous sur hello@ai-visionary.com</p>
+                </div>
+            </div>
+        `;
+
+        await resend.emails.send({
+            from: 'AI Visionary <hello@ai-visionary.com>',
+            to: [customerEmail],
+            bcc: ['hello@ai-visionary.com'],
+            subject: subject,
+            html: emailHtml,
+            attachments: [
+                { filename: 'asr.json', content: Buffer.from(asrJson) },
+                { filename: 'external_context.json', content: Buffer.from(externalContextJson) }
+            ]
         });
 
-    } catch (globalErr: any) {
-        console.error("❌ GLOBAL GENERATION ERROR:", globalErr);
-        return NextResponse.json({ error: globalErr.message }, { status: 500 });
+        return NextResponse.json({
+            success: true,
+            files: { asr: asrJson, external_context: externalContextJson }
+        });
+
+    } catch (err: any) {
+        console.error("❌ API ERROR:", err.message);
+        return NextResponse.json({ error: err.message }, { status: 500 });
     }
 }
