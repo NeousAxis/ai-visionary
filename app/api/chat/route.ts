@@ -596,8 +596,6 @@ LES 16 QUESTIONS CRITIQUES :
 14. Mots-clés principaux (Ceux du Titre et H1)
 15. Intentions utilisateur (Pour quoi vient-on sur ce site ?)
 16. Canaux d'accès (Email ? Tel ?)
-15. Intentions utilisateur
-16. Canaux d'accès (Email ? Tel ?)
 
 FORMAT JSON ATTENDU :
 {

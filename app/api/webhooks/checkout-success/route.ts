@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object as Stripe.Checkout.Session;
 
-            // ⚡️ RÉCUPÉRATION ULTRA-RAPIDE (Depuis Metadata)
+            // ⚡️ RÉCUPÉRATION ULTRA-RAPIDE
             const email = session.customer_details?.email || session.metadata?.customer_email || "";
             const url = session.metadata?.analyzed_url || "votre-site.com";
             const packType = session.metadata?.pack_type === 'PRO' ? 'PRO' : 'ESSENTIAL';
@@ -32,23 +32,34 @@ export async function POST(req: Request) {
                 return NextResponse.json({ received: true });
             }
 
-            // ⚡️ GÉNÉRATION SANS ATTENTE DB (Données de base sécurisées)
-            const asrObject = await generateRealAsrJson(
-                { identite: { name: { value: "Propriétaire de " + url } } },
-                75,
-                new Date().toISOString(),
-                session.id,
-                packType
-            );
+            let asrJson = "{}";
+            let externalContextJson = "{}";
 
-            const extObject = generateExternalContextJson({
-                ecosystem_presence: [],
-                reputation_signals: false,
-                keywords: [],
-                intents: [],
-                channels: [],
-                permissions: []
-            }); // Version légère pour rapidité
+            try {
+                // ⚡️ GÉNÉRATION SÉCURISÉE (Fail-Safe)
+                const asrObject = await generateRealAsrJson(
+                    { identite: { name: { value: "Propriétaire de " + url } } },
+                    75,
+                    new Date().toISOString(),
+                    session.id,
+                    packType
+                );
+                asrJson = JSON.stringify(asrObject, null, 2);
+
+                const extObject = generateExternalContextJson({
+                    ecosystem_presence: [],
+                    reputation_signals: false,
+                    keywords: [],
+                    intents: [],
+                    channels: [],
+                    permissions: []
+                });
+                externalContextJson = JSON.stringify(extObject, null, 2);
+            } catch (e: any) {
+                console.error("⚠️ GENERATION FAILED (Sending text email only):", e.message);
+                asrJson = JSON.stringify({ error: "Generation failed, contact support." });
+                externalContextJson = JSON.stringify({ error: "Generation failed." });
+            }
 
             // ⚡️ ENVOI IMMÉDIAT
             await resend.emails.send({
@@ -67,8 +78,8 @@ export async function POST(req: Request) {
                     </div>
                 `,
                 attachments: [
-                    { filename: 'asr.json', content: Buffer.from(JSON.stringify(asrObject, null, 2)) },
-                    { filename: 'external_context.json', content: Buffer.from(JSON.stringify(extObject, null, 2)) }
+                    { filename: 'asr.json', content: Buffer.from(asrJson) },
+                    { filename: 'external_context.json', content: Buffer.from(externalContextJson) }
                 ]
             });
 
@@ -79,6 +90,6 @@ export async function POST(req: Request) {
 
     } catch (err: any) {
         console.error("❌ Erreur Webhook:", err.message);
-        return NextResponse.json({ received: true }); // Toujours 200 pour Stripe
+        return NextResponse.json({ received: true });
     }
 }
