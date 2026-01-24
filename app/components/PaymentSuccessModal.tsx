@@ -15,7 +15,7 @@ export default function PaymentSuccessModal() {
         const paymentSuccess = searchParams.get('payment_success');
         const sessionId = searchParams.get('session_id');
 
-        if (paymentSuccess === 'true' && sessionId) {
+        if (sessionId) {
             setShowModal(true);
 
             // Trigger file generation in background

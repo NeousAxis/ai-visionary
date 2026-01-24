@@ -42,7 +42,7 @@ export async function POST(req: Request) {
                     quantity: 1,
                 },
             ],
-            success_url: `https://ai-visionary.com?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `https://ai-visionary-gl96adesh-neous-axis-projects.vercel.app/?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: 'https://ai-visionary.com',
             client_reference_id: clientReferenceId,
             customer_email: email,
