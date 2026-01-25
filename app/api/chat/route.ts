@@ -877,7 +877,7 @@ GÉNÈRE CE JSON MAINTENANT :
             const allBlockNames = [
                 "identite.name", "identite.juridical_country", "identite.legal_form", "identite.sector",
                 "offre.audience", "offre.offer_summary", "offre.business_model", "identite.team",
-                "offre.value_proposition", "structure_technique.technologies", "structure_technique.ai_usage",
+                "offre.value_proposition", "structure_technique.ai_usage",
                 "external_context.presence", "engagements_conformite.certifications",
                 "external_context.keywords", "external_context.intents", "external_context.contact"
             ];
@@ -891,8 +891,18 @@ GÉNÈRE CE JSON MAINTENANT :
             console.log(`📋 QUEUE: ${combinedQueue.length} items to process (${validationQueue.length} validations + ${questionQueue.length} questions)`);
 
             // Select Next Block based on User Progress
-            const questionIndex = Math.max(0, stepsCompleted - 1);
-            const nextBlockName = combinedQueue[questionIndex] || "FINALISATION";
+            let questionIndex = 0;
+            let nextBlockName = "";
+
+            // 🆕 STEP 2: ACTIVITY CALIBRATION (Inserted Flow)
+            if (stepsCompleted === 1) {
+                nextBlockName = "activity_calibration";
+                triggerMode = "CALIBRATION_STEP"; // Override trigger to handle separately
+            } else {
+                // Normal Queue (Shifted by 1)
+                questionIndex = Math.max(0, stepsCompleted - 2);
+                nextBlockName = combinedQueue[questionIndex] || "FINALISATION";
+            }
             const isValidationQuestion = lowConfidenceKeys.includes(nextBlockName);
 
             // Get the detected value for validation questions
@@ -909,6 +919,23 @@ GÉNÈRE CE JSON MAINTENANT :
             if (nextBlockName === "FINALISATION") {
                 console.log("🏁 Queue exhausted (Natural End). Triggering FINAL_ANALYSIS...");
                 triggerMode = "FINAL_ANALYSIS";
+            }
+
+            // 🆕 HANDLER FOR CALIBRATION STEP
+            if (triggerMode === "CALIBRATION_STEP") {
+                console.log("🛠️ SENDING CALIBRATION QUESTION (Static)");
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: "Une dernière précision importante...",
+                    questions: [{
+                        id: "activity_calibration",
+                        text: "Pourriez-vous décrire votre activité en quelques phrases (500 caractères max) ?\nCela m'aidera à mieux calibrer les questions suivantes.",
+                        options: [],
+                        allowCustom: true,
+                        allowMultiple: false,
+                        customLabel: "Activité..."
+                    }]
+                });
             }
 
             // ONLY GENERATE A NEW QUESTION IF WE ARE STILL IN QUESTIONING MODE
@@ -968,7 +995,7 @@ RAPPEL : Si c'est "business_model", ne demande PAS de chiffres ! Demande la mét
 ### FORMAT JSON ATTENDU
 {
   "type": "question_block",
-  "intro": "${isValidationQuestion ? `Vérification rapide...` : `Au sujet de ${nextBlockName}...`}",
+  "intro": "Phrase d'introduction courte et naturelle (Ex: Parlons de votre offre...)",
   "questions": [
     {
       "id": "q_${nextBlockName.replace('.', '_')}",
@@ -1429,7 +1456,7 @@ Pour activer votre visibilité, choisissez votre niveau de certification :`,
                 
                 Veuillez réessayer ou contacter hello@ai-visionary.com.`;
             }
-        } else {
+        } else if (!finalResponseText) {
             // 🎯 PACK SELECTION & SALES FUNNEL LOGIC (2-STEP UPSELL FLOW)
             const userContent = lastMessage.content.trim().toLowerCase();
             const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
@@ -1636,7 +1663,7 @@ Obtenir mon ID ASR — Essential
             }
 
             // CAS C : INTENTION "PACK PRO" -> VICTOIRE IMMÉDIATE
-            else if (userContent.includes("pack pro") || (userContent.includes("pro") && !userContent.includes("passer") && !userContent.includes("upgrader"))) {
+            else if (userContent.includes("pack pro") || (userContent.match(/\bpro\b/) && !userContent.includes("passer") && !userContent.includes("upgrader"))) {
                 console.log("🎯 User Selection: Pack PRO");
                 // DIRECT TO EMAIL
                 finalResponseText = `**OPPORTUNITÉ STRATÉGIQUE**

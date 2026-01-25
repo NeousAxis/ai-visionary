@@ -1,0 +1,22 @@
+# 🛡️ JOURNAL DES VERSIONS & PROCÉDURE DE ROLLBACK
+
+Ce fichier unique liste toutes les versions déployées de votre application.
+Il sert de référence pour revenir en arrière en cas de problème.
+
+## 🚨 RÈGLE D'OR : COMMENT REVENIR EN ARRIÈRE ?
+
+Si la version actuelle est cassée, choisissez un **TAG** dans la liste ci-dessous et lancez cette commande dans le terminal :
+
+```bash
+./restore.sh LE_NOM_DU_TAG
+```
+
+*Exemple : `./restore.sh deploy-202601251430`*
+
+---
+
+## 📜 HISTORIQUE DES DÉPLOIEMENTS
+
+| TAG (Version) | DATE | MESSAGE / DESCRIPTION |
+| :--- | :--- | :--- |
+| `deploy-202601251433` | 25/01/2026 14:33 | Initialisation Rollback System + Fix Kbis & Questions |

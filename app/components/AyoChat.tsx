@@ -301,7 +301,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             // Actually, backend sends a block. I will render the block as a single swiper.
 
             // Helper function to toggle checkbox selection
-            const toggleMultipleSelection = (questionId: string, option: string) => {
+            const toggleMultipleSelection = (questionId: string, option: string, customLabel?: string) => {
                 setSelectedMultiple(prev => {
                     const current = prev[questionId] || [];
                     const isSelecting = !current.includes(option);
@@ -310,7 +310,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     if (option === '__AUTRE__') {
                         if (isSelecting) {
                             // If selecting "Autre", pre-fill the main input and focus it
-                            setInput((prevInput) => prevInput ? prevInput : "Autre : ");
+                            const prefix = customLabel ? "" : "Autre : ";
+                            setInput((prevInput) => prevInput ? prevInput : prefix);
                             // Try to focus main input (dirty but effective)
                             setTimeout(() => {
                                 const mainInput = document.querySelector('textarea, input[type="text"].chat-input') as HTMLElement;
@@ -431,7 +432,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     return (
                                                         <div
                                                             key={i}
-                                                            onClick={() => !isLoading && toggleMultipleSelection(questionId, opt)}
+                                                            onClick={() => !isLoading && toggleMultipleSelection(questionId, opt, q.customLabel)}
                                                             className={`flex items-center !gap-6 w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border shadow-sm select-none group ${isSelected
                                                                 ? 'bg-[#4A919E] border-[#4A919E] transform scale-[1.01]'
                                                                 : 'bg-white border-slate-200 hover:border-[#4A919E]/50 hover:bg-slate-50'
@@ -467,7 +468,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
 
                                                 {/* OPTION "AUTRE" - Large Bubble */}
                                                 <div
-                                                    onClick={() => !isLoading && toggleMultipleSelection(questionId, '__AUTRE__')}
+                                                    onClick={() => !isLoading && toggleMultipleSelection(questionId, '__AUTRE__', q.customLabel)}
                                                     className={`flex items-center !gap-6 w-full !px-6 !py-5 !rounded-2xl cursor-pointer transition-all duration-200 border col-span-full select-none shadow-sm group ${currentSelections.includes('__AUTRE__')
                                                         ? 'bg-[#4A919E] border-[#4A919E] transform scale-[1.01]'
                                                         : 'bg-white border-dashed border-slate-300 hover:border-[#4A919E]/50 hover:bg-slate-50'
@@ -489,7 +490,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     </div>
 
                                                     <span className={`text-[16px] font-medium leading-relaxed flex-1 ${currentSelections.includes('__AUTRE__') ? 'text-white' : 'text-[#212E53] italic'}`}>
-                                                        Autre...
+                                                        {q.customLabel || "Autre..."}
                                                     </span>
 
                                                     <input
@@ -556,7 +557,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {!isOwnershipQuestion && q.allowCustom !== false && (
                                                     <button
                                                         onClick={() => {
-                                                            setInput("Autre : ");
+                                                            setInput(q.customLabel ? "" : "Autre : ");
                                                             setTimeout(() => {
                                                                 const mainInput = document.querySelector('.chat-input') as HTMLElement;
                                                                 if (mainInput) mainInput.focus();
@@ -565,7 +566,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         className="group flex items-center justify-between !gap-6 w-full !px-6 !py-5 !rounded-2xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
                                                     >
                                                         <span className="text-[16px] font-medium text-slate-500 italic group-hover:text-amber-700 transition-colors">
-                                                            Autre réponse / Préciser...
+                                                            {q.customLabel || "Autre réponse / Préciser..."}
                                                         </span>
                                                         <svg className="w-5 h-5 text-slate-300 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />

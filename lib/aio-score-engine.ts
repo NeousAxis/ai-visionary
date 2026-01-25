@@ -231,9 +231,16 @@ export function computeAioScore(extract: AyoExtract) {
             // @ts-expect-error dynamic access
             const node = blockObj?.[field];
             if (!node || node.q === 0) {
+                // Determine Legal Name Label based on Country
+                const detectedCountry = (extract.fields?.identite?.country?.value || "").toLowerCase();
+                let legalLabel = "Nom légal (Registre Officiel)";
+                if (detectedCountry.includes('france')) legalLabel = "Nom légal (Kbis)";
+                else if (detectedCountry.includes('suisse') || detectedCountry.includes('switzerland')) legalLabel = "Nom légal (IDE / RC)";
+                else if (detectedCountry.includes('belgique') || detectedCountry.includes('belgium')) legalLabel = "Nom légal (BCE)";
+
                 // Human readable field names
                 const fieldLabels: Record<string, string> = {
-                    name: "Nom commercial", legal_name: "Nom légal (Kbis)", business_type: "Type d'activité",
+                    name: "Nom commercial", legal_name: legalLabel, business_type: "Type d'activité",
                     city: "Ville", country: "Pays", contact_email: "Email public", contact_phone: "Téléphone",
                     services: "Liste des services", products: "Liste des produits", use_cases: "Cas d'usage",
                     target_audience: "Public cible", pricing_indication: "Indikation tarifaire",
