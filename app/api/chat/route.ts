@@ -561,32 +561,45 @@ DONNÉES DU SCAN :
 - JSON-LD : ${deepScanResult.hasJsonLd ? 'OUI' : 'NON'}
 - Texte extrait (20000 premiers caractères) : "${deepScanResult.text?.substring(0, 20000) || 'Vide'}"
 
-TA MISSION :
-Essaie de répondre aux 16 questions critiques pour construire un ASR (AYO Singular Record).
+TU ES UN EXPERT EN EXTRACTION DE DONNÉES WEB.
 
-Pour CHAQUE question, tu dois :
-1. Analyser les données du scan
-2. Si tu peux répondre avec CERTITUDE → Donner la réponse + confidence: "high"
-3. Si tu DOUTES → Marquer confidence: "low" + ta meilleure estimation
-4. Si tu NE SAIS PAS → Marquer confidence: "unknown"
+STRATÉGIE DE CONFIANCE (FILTRE ANTI-BULLSHIT) :
+
+1. **HIGH CONFIDENCE (Certitude) = FAITS TECHNIQUES & LÉGAUX**
+   Tu fais confiance à 100% (confidence: "high") SI ET SEULEMENT SI l'information est de nature FACTUELLE, TECHNIQUE ou LÉGALE, même si elle est dans le texte brut.
+   - Exemples : "Licence Creative Commons", "SIRET...", "Prix : 0€", "Gratuit", "Robots.txt", "Tél : 01...", "Adresse : Paris".
+   - Exemples : "Association loi 1901", "SAS au capital de...", "Copyright 2024".
+   - POURQUOI : Ce sont des engagements opposables, pas du blabla.
+
+2. **LOW CONFIDENCE (Doute) = PROMESSES MARKETING & FLOU**
+   Tu doutes systématiquement (confidence: "low") si l'information est une REVENDICATION SUBJECTIVE, une PROMESSE ou un MOT-CLÉ SEO générique.
+   - Exemples : "Leader mondial", "Solution innovante", "Meilleur service", "Expertise unique".
+   - Exemples : Une liste de mots-clés sans contexte ("IA, Blockchain, Crypto...").
+   - POURQUOI : C'est souvent du "bruit" SEO qu'il faut faire valider par l'humain ("Confirmez-vous être expert en Blockchain ?").
+
+3. **UNKNOWN (unknown)** :
+   - Information totalement introuvable.
+
+TA MISSION :
+Essaie de répondre aux 16 questions critiques pour construire un ASR.
 
 LES 16 QUESTIONS CRITIQUES :
-1. Nom exact de l'entreprise/organisation
-2. Pays d'établissement principal
-3. Statut juridique (SARL, SAS, Association, etc.)
-4. Secteur d'activité principal
-5. Public cible (B2B, B2C, B2G, etc.)
-6. Offre principale (produits/services en 1 phrase)
-7. Modèle économique (vente directe, abonnement, freemium, etc.)
-8. Taille équipe (STRICT : Si non mentionné/visible -> "unknown". NE PAS INVENTER OU ESTIMER "1-10" PAR DÉFAUT)
-9. Mission/Vision (Slogan, proposition de valeur ou "About" = HIGH CONFIDENCE)
-10. Technologies utilisées (CMS, framework visible)
-11. Utilisation de données/IA (si mentionné)
-12. Présence externe (Réseaux sociaux, APP STORES, Google Play, Partenaires = HIGH CONFIDENCE)
-13. Signaux de réputation (certifications, labels OFFICIELS uniquement)
-14. Mots-clés principaux détectés
-15. Intentions utilisateur visibles (acheter, s'informer, contacter, etc.)
-16. Canaux d'accès (formulaire contact, email, téléphone détectés)
+1. Nom exact (Priorité au JSON-LD "name" ou au Titre)
+2. Pays d'établissement (Cherche "Paris", "Suisse", "+33", noms de villes...)
+3. Statut juridique (Cherche "SARL", "SAS", "Inc", "Limited" dans le footer - Sinon "unknown")
+4. Secteur d'activité (Mots clés du Titre - SOIS PRÉCIS ET DIRECT)
+5. Public cible (B2B si mention de "Entreprises", "Pro", "Solutions". B2C sinon)
+6. Offre principale (Résumé du Titre en 1 phrase simple)
+7. Modèle économique (Prix affichés ? "Devis" ? "Abonnement" ? "Gratuit" ?)
+8. Taille équipe (Strict : Visible ou Unknown)
+9. Mission/Vision (Le "H1" ou la première phrase)
+10. Technologies utilisées (Wordpress ? Shopify ?)
+11. Utilisation de données/IA (Mentionné ?)
+12. Présence externe (Liens réseaux sociaux ?)
+13. Signaux de réputation (Certifications ?)
+14. Mots-clés principaux (Ceux du Titre et H1)
+15. Intentions utilisateur (Pour quoi vient-on sur ce site ?)
+16. Canaux d'accès (Email ? Tel ?)
 
 FORMAT JSON ATTENDU :
 {
@@ -665,15 +678,16 @@ GÉNÈRE CE JSON MAINTENANT :
 
             extractedAnswers.forEach((answer, index) => {
                 const key = blockKeys[index] || `block_${index}`;
-                const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 50 : 0);
+                const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 70 : 0);
 
                 if (answer.answer && answer.answer !== 'null') {
                     scanState.detected[key] = answer.answer;
                     scanState.confidence[key] = conf;
 
-                    if (conf >= 75) {
+                    // 🎯 SMART SKIP: If confidence is 50 or more, we skip the "Is this correct?" question.
+                    if (conf >= 50) {
                         scanState.high_confidence_keys.push(key);
-                    } else if (conf >= 40) {
+                    } else if (conf > 0) {
                         scanState.low_confidence_keys.push(key);
                     } else {
                         scanState.unknown_keys.push(key);
