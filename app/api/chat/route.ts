@@ -1549,46 +1549,46 @@ EX : hello@votre-domaine.com`;
                 console.log("🎯 User Selection: Pack LIGHT");
                 finalResponseText = JSON.stringify({
                     type: "question_block",
-                    intro: `**OPPORTUNITÉ STRATÉGIQUE**
-
+                    intro: `OPPORTUNITÉ STRATÉGIQUE
+ 
 Votre entreprise est déjà à minima visible.
 Mais est-elle lisible et recommandable par les IA ?
-
+ 
 Votre score actuel montre que votre site existe et fonctionne.
 Mais les IA ne se contentent plus de lire des pages :
 elles doivent comprendre, qualifier et décider.
-
+ 
 Sans structure claire, elles hésitent.
 Quand elles hésitent, elles évitent de vous recommander.
-
+ 
 La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
-
-**COMMENT FONCTIONNE AI-VISIONARY**
-
+ 
+COMMENT FONCTIONNE AI-VISIONARY
+ 
 Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
-
+ 
 Selon le niveau choisi, vous obtenez :
-- une analyse claire
-- une certification officielle ASR
-- des fichiers AI-Native exploitables
-- et un avantage durable dans un internet en mutation
-
-**PACK LIGHT — DÉMARRER (gratuit / accès direct)**
-
+une analyse claire
+une certification officielle ASR
+des fichiers AI-Native exploitables
+et un avantage durable dans un internet en mutation
+ 
+PACK LIGHT — DÉMARRER (gratuit / accès direct)
+ 
 Cliquer sur “LIGHT”
-
-**Ce que vous obtenez**
-- Analyse détaillée de votre site par AYO
-- Score AIO (lisibilité actuelle pour les IA)
-- Certification ASR simple (niveau LIGHT)
-
-**Bénéfices concrets**
-- Comprendre comment les IA perçoivent votre site aujourd’hui
-- Identifier ce qui bloque la compréhension
-- Poser une première existence lisible pour les IA
-- Sans engagement, sans modification de votre site
-
-*Idéal pour explorer, tester et comprendre.*`,
+ 
+Ce que vous obtenez
+Analyse détaillée de votre site par AYO
+Score AIO (lisibilité actuelle pour les IA)
+Certification ASR simple (niveau LIGHT)
+ 
+Bénéfices concrets
+Comprendre comment les IA perçoivent votre site aujourd’hui
+Identifier ce qui bloque la compréhension
+Poser une première existence lisible pour les IA
+Sans engagement, sans modification de votre site
+ 
+Idéal pour explorer, tester et comprendre.`,
                     questions: [{
                         id: "confirm_light",
                         text: "Votre décision finale",
@@ -1609,50 +1609,50 @@ Cliquer sur “LIGHT”
                 console.log("🎯 User Selection: Pack ESSENTIAL");
                 finalResponseText = JSON.stringify({
                     type: "question_block",
-                    intro: `**OPPORTUNITÉ STRATÉGIQUE**
-
+                    intro: `OPPORTUNITÉ STRATÉGIQUE
+ 
 Votre entreprise est déjà visible et lisible.
 Mais est-elle recommandable par les IA ?
-
+ 
 Votre score actuel montre que votre site existe et fonctionne.
 Mais les IA ne se contentent plus de lire des pages :
 elles doivent comprendre, qualifier et décider.
-
+ 
 Sans structure claire, elles hésitent.
 Quand elles hésitent, elles évitent de vous recommander.
-
+ 
 La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
-
-**COMMENT FONCTIONNE AI-VISIONARY**
-
+ 
+COMMENT FONCTIONNE AI-VISIONARY
+ 
 Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
-
+ 
 Selon le niveau choisi, vous obtenez :
-- une analyse claire
-- une certification officielle ASR
-- des fichiers AI-Native exploitables
-- et un avantage durable dans un internet en mutation
-
-Bravo vous avez choisi le **PACK ESSENTIAL**. Vous offrez à votre entreprise les moyens d'être pleinement visible et lisible par les IA.
-
-**PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)**
-
+une analyse claire
+une certification officielle ASR
+des fichiers AI-Native exploitables
+et un avantage durable dans un internet en mutation
+ 
+Bravo vous avez choisi le PACK ESSENTIAL. Vous offrez à votre entreprise les moyens d'être pleinement visible et lisible par les IA.
+ 
+PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)
+ 
 Obtenir mon ID ASR — Essential
 (Certification ASR Essential + Analyse détaillée + Envoi par email)
-
-**Documents fournis par AYO**
-- asr.json (Essential) → Identité, offre, signaux techniques
-- manifest.json → Règles claires pour les robots
-- faq.json → Réponses structurées IA
-- Analyse AYO détaillée
-
-**Bénéfices concrets**
-- Votre entreprise devient une entité identifiable sans ambiguïté
-- Les IA savent qui vous êtes et dans quel contexte vous citer
-- Réduction du risque d’erreur ou de silence IA
-- Base stable et durable, indépendante du SEO
-
-*Recommandé pour toute entreprise souhaitant rester visible à moyen terme.*`,
+ 
+Documents fournis par AYO
+asr.json (Essential) → Identité, offre, signaux techniques
+manifest.json → Règles claires pour les robots
+faq.json → Réponses structurées IA
+Analyse AYO détaillée
+ 
+Bénéfices concrets
+Votre entreprise devient une entité identifiable sans ambiguïté
+Les IA savent qui vous êtes et dans quel contexte vous citer
+Réduction du risque d’erreur ou de silence IA
+Base stable et durable, indépendante du SEO
+ 
+Recommandé pour toute entreprise souhaitant rester visible à moyen terme.`,
                     questions: [{
                         id: "confirm_essential",
                         text: "Votre décision finale :",
@@ -1666,53 +1666,53 @@ Obtenir mon ID ASR — Essential
             else if (userContent.includes("pack pro") || (userContent.match(/\bpro\b/) && !userContent.includes("passer") && !userContent.includes("upgrader"))) {
                 console.log("🎯 User Selection: Pack PRO");
                 // DIRECT TO EMAIL
-                finalResponseText = `**OPPORTUNITÉ STRATÉGIQUE**
-
+                finalResponseText = `OPPORTUNITÉ STRATÉGIQUE
+ 
 Votre entreprise est déjà visible et lisible.
 Mais est-elle recommandable par les IA ?
-
+ 
 Votre score actuel montre que votre site existe et fonctionne.
 Mais les IA ne se contentent plus de lire des pages :
 elles doivent comprendre, qualifier et décider.
-
+ 
 Sans structure claire, elles hésitent.
 Quand elles hésitent, elles évitent de vous recommander.
-
+ 
 La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
-
-**COMMENT FONCTIONNE AI-VISIONARY**
-
+ 
+COMMENT FONCTIONNE AI-VISIONARY
+ 
 Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
-
+ 
 Selon le niveau choisi, vous obtenez :
-- une analyse claire
-- une certification officielle ASR
-- des fichiers AI-Native exploitables
-- et un avantage durable dans un internet en mutation
+une analyse claire
+une certification officielle ASR
+des fichiers AI-Native exploitables
+et un avantage durable dans un internet en mutation
 
-Vous avez choisi le **PACK PRO BRAVO**. Vous offrez à votre entreprise la possibilité réelle d'être visible et recommandable par les IA.
+Vous avez choisi le PACK PRO BRAVO. Vous offrez à votre entreprise la possibilité réelle d'être visible et recommandable par les IA.
 
-**PACK PRO — DEVENIR UNE RÉFÉRENCE (499 CHF)**
+PACK PRO — DEVENIR UNE RÉFÉRENCE (499 CHF)
 
 (Certification ASR PRO + Analyse complète + Glossaire + Fichiers AI-Native avancés)
 
-**Documents fournis (complet)**
-- asr.json (PRO, signé) → Contexte & critères IA avancés
-- manifest.json (PRO) → Politique de recommandation stricte
-- faq.json enrichi → Réponses contextuelles pour LLMs
-- glossary.json → Vocabulaire métier précis, zéro hallucination
-- external_context.json → Avis et signaux encapsulés
-- Analyse AYO complète & stratégique
+Documents fournis (complet)
+asr.json (PRO, signé) → Contexte & critères IA avancés
+manifest.json (PRO) → Politique de recommandation stricte
+faq.json enrichi → Réponses contextuelles pour LLMs
+glossary.json → Vocabulaire métier précis, zéro hallucination
+external_context.json → Avis et signaux encapsulés
+Analyse AYO complète & stratégique
 
-**Bénéfices concrets**
-- Votre site devient une source de référence fiable pour les IA
-- Compatibilité avec le web actuel (avis, intentions)
-- Préparation au monde post-SEO sans refonte future
-- Avantage concurrentiel durable : structurer l’essentiel
+Bénéfices concrets
+Votre site devient une source de référence fiable pour les IA
+Compatibilité avec le web actuel (avis, intentions)
+Préparation au monde post-SEO sans refonte future
+Avantage concurrentiel durable : structurer l’essentiel
 
-*Destiné aux entreprises qui prennent une longueur d’avance.*
+Destiné aux entreprises qui prennent une longueur d’avance.
 
-👉 **Entrez votre email professionnel pour recevoir votre lien d'activation :**
+👉 Entrez votre email professionnel pour recevoir votre lien d'activation :
 EX : hello@votre-domaine.com`;
             }
 
