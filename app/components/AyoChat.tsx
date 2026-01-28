@@ -196,10 +196,11 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         const allContent = messages.map(m => m.content).join(" ");
 
         // PRIORITY ORDER FOR DETECTION (Step 5 -> 1)
+        // CRITICAL: Step 4 MUST be detected before Step 3 for ambiguous messages like "Finaliser PACK PRO".
         if (allContent.includes("Paiement confirmé") || allContent.includes("Dossier Final Envoyé") || allContent.includes("Envoi en cours")) {
             currentStep = 5; // Livraison
         }
-        else if (lastAiMsg.includes("Entrez votre email professionnel pour finaliser") || lastAiMsg.includes("Lien sécurisé") || lastAiMsg.includes("Activer la Certification")) {
+        else if (lastAiMsg.includes("Finaliser ma commande") || lastAiMsg.includes("Payer et recevoir") || lastAiMsg.includes("Entrez votre email professionnel pour finaliser") || lastAiMsg.includes("Lien sécurisé") || lastAiMsg.includes("Activer la Certification") || lastAiMsg.includes("Email enregistré")) {
             currentStep = 4; // Finalisation (Email / Paiement)
         }
         else if (lastAiMsg.includes("OPPORTUNITÉ STRATÉGIQUE") || lastAiMsg.includes("Votre décision finale") || lastAiMsg.includes("PACK ESSENTIAL") || lastAiMsg.includes("PACK PRO")) {
@@ -364,14 +365,14 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     )}
 
                     {qcmData.intro && (
-                        <div className="mb-4 text-teal-800 markdown-intro">
+                        <div className="mb-4 text-teal-800 markdown-intro prose prose-teal max-w-none">
                             <ReactMarkdown components={{
-                                strong: ({ node, ...props }) => <span className="font-bold text-teal-900 block mt-4 mb-2 text-lg" {...props} />,
+                                strong: ({ node, ...props }) => <span className="font-bold text-teal-900 block mt-4 mb-2 text-lg uppercase" {...props} />,
                                 h1: ({ node, ...props }) => <h1 className="font-bold text-xl text-teal-900 mt-6 mb-3 uppercase tracking-wide" {...props} />,
                                 h2: ({ node, ...props }) => <h2 className="font-bold text-lg text-teal-900 mt-5 mb-2" {...props} />,
                                 h3: ({ node, ...props }) => <h3 className="font-bold text-base text-teal-900 mt-4 mb-2" {...props} />,
-                                ul: ({ node, ...props }) => <ul className="list-disc pl-5 my-2 space-y-1" {...props} />,
-                                li: ({ node, ...props }) => <li className="text-slate-700" {...props} />,
+                                ul: ({ node, ...props }) => <ul className="list-disc pl-5 my-2 space-y-1 text-slate-700" {...props} />,
+                                li: ({ node, ...props }) => <li className="pl-1 marker:text-teal-500" {...props} />,
                                 p: ({ node, ...props }) => <p className="mb-2 leading-relaxed text-slate-700" {...props} />
                             }}>
                                 {qcmData.intro}
