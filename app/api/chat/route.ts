@@ -461,11 +461,25 @@ export async function POST(req: Request) {
             m.content.includes('"type": "question_block"') || m.content.includes('question_block')
         );
 
-        // ROBUST STEP COUNTING (V6): Count User Replies AFTER URL
+        // ROBUST STEP COUNTING (V7 - SMART INTERRUPTIONS):
+        // We filter out "Pedagogical Requests" (Why? How?) so they don't count as steps.
+        // This prevents skipping questions when the user asks for clarification.
         let stepsCompleted = 0;
         if (hasUrlHistory) {
             const msgsAfterUrl = messages.slice(urlMsgIndex + 1);
-            stepsCompleted = msgsAfterUrl.filter((m: any) => m.role === 'user').length;
+
+            const isPedagogicalRequest = (content: string) => {
+                const lower = content.toLowerCase().trim();
+                // EXCLUSION: Refusals ARE answers (should increment step/index)
+                if (lower.match(/(débile|inutile|concerne pas|pas envie|sert a rien|non pertinent|stupide|pfff|n'importe quoi|ca me regarde pas)/)) return false;
+
+                // DETECTION: Why/How/Explain
+                if (lower.match(/^(pourquoi|comment|expli|quel est l'interet|a quoi ca sert|c'est quoi|non je veux dire|attends)/)) return true;
+                if (lower.includes('?') && lower.length < 60 && !lower.includes('non') && !lower.includes('oui')) return true;
+                return false;
+            };
+
+            stepsCompleted = msgsAfterUrl.filter((m: any) => m.role === 'user' && !isPedagogicalRequest(m.content)).length;
         }
 
         const hasQuestionBlock = stepsCompleted > 0; // Virtual indicator
@@ -949,11 +963,22 @@ Tu es AYO. Phase de Scan Complémentaire.
 ⚠️ UNE SEULE QUESTION PAR BLOC.
 ⚠️ RISQUE CRITIQUE : N'ÉCRIS AUCUN TEXTE AVANT LE JSON ! COMMENCE DIRECTEMENT PAR '{'.
 
-🚨 GESTION DES INTERRUPTIONS UTILISATEUR :
-Si le dernier message de l'utilisateur est une QUESTION (contient "?" ou demande une info) ou une remarque hors-sujet :
-1. NE RÉPONDS PAS à sa question.
-2. DANS LE CHAMP "intro", ÉCRIS EXACTEMENT ET UNIQUEMENT CECI : "Durant la phase d'analyse je ne peux pas répondre à votre question. Merci de seulement répondre à la question pour obtenir votre ASR et les documents relatifs. Pour toute question vous pouvez aussi contacter notre support : hello@ai-visionary.com"
-3. REPOSE LA MÊME QUESTION que tu posais juste avant (celle du bloc en cours : **${nextBlockName}**).
+🚨 GESTION INTELLIGENTE DES INTERACTIONS (V2) :
+
+1. INTERROGATION ("Pourquoi ?", "A quoi ça sert ?", "Je ne comprends pas") :
+   - C'est une demande légitime ! NE LOUPES PAS CETTE OCCASION.
+   - EXPLIQUE PÉDAGOGIQUEMENT en 1 phrase simple pourquoi cette info renforce l'ASR (Crédibilité, Transparence...).
+   - PUIS REPOSE la question du bloc en cours (**${nextBlockName}**).
+   - Ne dis JAMAIS "Je ne peux pas répondre". Tu es un expert bienveillant.
+
+2. REFUS / CRITIQUE ("C'est débile", "Ça ne me concerne pas", "Non", "Pfff") :
+   - L'utilisateur refuse de répondre. C'est son droit.
+   - ACCEPTE LE REFUS AVEC EMPATHIE : "Je comprends, ce point n'est peut-être pas adapté à votre structure. Je le note comme 'Non applicable' (Unknown)."
+   - PASSE IMMÉDIATEMENT à la question suivante (celle demandée ci-dessous : **${nextBlockName}**).
+   - NE POSE PAS de question sur le bloc refusé.
+
+3. RÉPONSE STANDARD :
+   - Enchaîne directement sur la question du bloc **${nextBlockName}**.
 
 🚫 RÈGLES DE CONTENU INTERDIT :
 - NE JAMAIS DEMANDER LE CHIFFRE D'AFFAIRES (CA), LE REVENU, OU LE TURNOVER. Si le bloc est "business_model", demande plutôt "Quel est votre modèle de vente (Abonnement, Vente unique...) ?".

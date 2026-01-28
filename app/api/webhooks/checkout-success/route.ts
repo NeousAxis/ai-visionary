@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import Stripe from 'stripe';
+import JSZip from 'jszip';
 
 // Initialize Services (Resend is safe to init outside)
 // Initialize Services (Resend is safe to init outside)
@@ -818,15 +819,60 @@ export async function POST(req: Request) {
                 `;
                 }
 
-                // DEFINE ATTACHMENTS (ASR File) - Ensuring Binary Safety
+                // 📦 ZIP GENERATION (Professional Delivery)
+                const zip = new JSZip();
+                const isProPack = packType === 'pro'; // Ensure correct pack detection
+                const packLabel = isProPack ? "PRO" : "ESSENTIAL";
+                const safeCompanyName = (companyInfo.name || "Entreprise").replace(/[^a-z0-9]/gi, '_');
+
+                // 1. ASR.json (Crucial)
+                zip.file("asr.json", asrJson);
+
+                // 2. external_context.json (Context)
+                zip.file("external_context.json", externalContextJson);
+
+                // 3. manifest.json (Standardized)
+                const manifestContent = JSON.stringify({
+                    "name": `AI Manifest ${companyInfo.name || "Entreprise"}`,
+                    "version": "1.0",
+                    "permissions": {
+                        "allow_scraping": ["GoogleBot", "GPTBot", "CCBot"],
+                        "deny_scraping": ["MaliciousBot"]
+                    },
+                    "sources": {
+                        "asr": { "url": "/.ayo/asr.json", "canonical": true },
+                        "external_context": { "url": "/.ayo/external_context.json", "canonical": false, "interpretable": true }
+                    },
+                    "recommendationPolicy": {
+                        "scope": "contextual",
+                        "noSubjectiveClaims": true,
+                        "signalsOnly": true
+                    },
+                    "api_access": {
+                        "status": "open",
+                        "endpoint": "/.ayo/asr.json"
+                    }
+                }, null, 2);
+                zip.file("manifest.json", manifestContent);
+
+                // 4. faq.json (Placeholder structure if not explicitly generated yet)
+                const faqContent = JSON.stringify({
+                    "version": "AYO-FAQ-1.0",
+                    "entity": companyInfo.name,
+                    "qna": [
+                        { "q": "Qui êtes-vous ?", "a": analysisData?.extract?.offre?.offer_summary?.value || "Description non disponible." },
+                        { "q": "Que proposez-vous ?", "a": (analysisData?.extract?.offre?.services?.value || []).join(", ") }
+                    ]
+                }, null, 2);
+                zip.file("faq.json", faqContent);
+
+                // Generate Binary Buffer
+                const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
+
                 const attachments: any[] = [
                     {
-                        filename: 'asr.json',
-                        content: Buffer.from(asrJson)
-                    },
-                    {
-                        filename: 'external_context.json',
-                        content: Buffer.from(externalContextJson)
+                        filename: `AYO_Pack_${packLabel}_${safeCompanyName}.zip`,
+                        content: zipBuffer
                     }
                 ];
 
