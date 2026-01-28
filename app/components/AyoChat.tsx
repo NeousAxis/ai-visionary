@@ -360,7 +360,19 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     )}
 
                     {qcmData.intro && (
-                        <p className="mb-4 font-semibold text-teal-800 whitespace-pre-line">{qcmData.intro}</p>
+                        <div className="mb-4 text-teal-800 markdown-intro">
+                            <ReactMarkdown components={{
+                                strong: ({ node, ...props }) => <span className="font-bold text-teal-900 block mt-4 mb-2 text-lg" {...props} />,
+                                h1: ({ node, ...props }) => <h1 className="font-bold text-xl text-teal-900 mt-6 mb-3 uppercase tracking-wide" {...props} />,
+                                h2: ({ node, ...props }) => <h2 className="font-bold text-lg text-teal-900 mt-5 mb-2" {...props} />,
+                                h3: ({ node, ...props }) => <h3 className="font-bold text-base text-teal-900 mt-4 mb-2" {...props} />,
+                                ul: ({ node, ...props }) => <ul className="list-disc pl-5 my-2 space-y-1" {...props} />,
+                                li: ({ node, ...props }) => <li className="text-slate-700" {...props} />,
+                                p: ({ node, ...props }) => <p className="mb-2 leading-relaxed text-slate-700" {...props} />
+                            }}>
+                                {qcmData.intro}
+                            </ReactMarkdown>
+                        </div>
                     )}
 
                     <div className="flex flex-col gap-6">
@@ -372,7 +384,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             const filteredOptions = q.options.filter(opt => {
                                 const lower = opt.toLowerCase().trim();
                                 // Remove "Autre" variants
-                                if (['autre', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower)) return false;
+                                if (['autre', 'autres', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower)) return false;
                                 // Remove "Les deux" / combined options (redundant with checkboxes)
                                 if (lower.includes('les deux') || lower.includes('both') || lower.includes('tous') || lower.includes('toutes') || lower.includes('all')) return false;
                                 return true;
