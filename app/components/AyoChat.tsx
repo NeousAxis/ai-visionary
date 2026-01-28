@@ -195,13 +195,17 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         const lastAiMsg = messages.filter(m => m.role === 'assistant').pop()?.content || "";
         const allContent = messages.map(m => m.content).join(" ");
 
-        if (allContent.includes("Envoi en cours") || allContent.includes("dossier est prêt")) {
+        // PRIORITY ORDER FOR DETECTION (Step 5 -> 1)
+        if (allContent.includes("Paiement confirmé") || allContent.includes("Dossier Final Envoyé") || allContent.includes("Envoi en cours")) {
             currentStep = 5; // Livraison
-        } else if (lastAiMsg.includes("email professionnel") || lastAiMsg.includes("Adresse email")) {
-            currentStep = 4; // Finalisation (Email/Payment)
-        } else if (lastAiMsg.includes("PACK LIGHT") || lastAiMsg.includes("PACK ESSENTIAL") || lastAiMsg.includes("PACK PRO") || lastAiMsg.includes("Score AIO")) {
-            currentStep = 3; // Choix ASR
-        } else if (lastAiMsg.includes("Analyse AIO Finale") || lastAiMsg.includes("SCAN TERMINÉ")) {
+        }
+        else if (lastAiMsg.includes("Entrez votre email professionnel pour finaliser") || lastAiMsg.includes("Lien sécurisé") || lastAiMsg.includes("Activer la Certification")) {
+            currentStep = 4; // Finalisation (Email / Paiement)
+        }
+        else if (lastAiMsg.includes("OPPORTUNITÉ STRATÉGIQUE") || lastAiMsg.includes("Votre décision finale") || lastAiMsg.includes("PACK ESSENTIAL") || lastAiMsg.includes("PACK PRO")) {
+            currentStep = 3; // Choix ASR (Sales Pitch)
+        }
+        else if (lastAiMsg.includes("Score AIO") || lastAiMsg.includes("Analyse AIO Finale") || lastAiMsg.includes("SCAN TERMINÉ") || lastAiMsg.includes("Analyse en cours")) {
             currentStep = 2; // Analyse
         }
 
