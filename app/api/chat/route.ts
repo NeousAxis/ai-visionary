@@ -31,7 +31,7 @@ try {
 
 // [SYSTEM PROMPT UPDATE]
 // [SYSTEM PROMPT DYNAMIC GENERATOR]
-const getSystemPrompt = (realAsrId: string, realIsoDate: string, targetUrl: string = "", targetEmail: string = "") => {
+const getSystemPrompt = (realAsrId: string, realIsoDate: string, targetUrl: string = "", targetEmail: string = "", isAyaRegisteredByScanner: boolean = false) => {
     // Generate Stripe Params with Metadata (Client Reference ID)
     // CRITICAL FIX: We MUST encode URL/Email in the ID because we are Stateless (Serverless).
     // DB persistence on /tmp does not work across Vercel lambdas.
@@ -74,6 +74,7 @@ Tu dois AGIR comme un moteur d'enregistrement officiel.
 
 🆔 SESSION ID: ${realAsrId}
 📅 DATE: ${realIsoDate}
+🏠 REGISTRE AYA: ${isAyaRegisteredByScanner ? "CERTIFIÉ" : "NON PRÉSENT"}
 
 ⚠️ RÈGLES DE SCORING (STRICT & DÉTERMINISTE) :
 Tu dois calculer le SCORE AIO (0-100) en suivant ce barème EXACT. Ne devine pas.
@@ -1374,7 +1375,8 @@ ${scanResult.text}
                     jsonld_count: scanResult.jsonLdCount,
                     has_asr_file: scanResult.hasAsrFile,
                     has_faq_content: scanResult.hasFaqContent,
-                    has_faq_schema: scanResult.hasFaqSchema
+                    has_faq_schema: scanResult.hasFaqSchema,
+                    is_aya_registered: scanResult.isAyaRegistered
                 };
 
                 // Force Tech Fields in 'fields' to match scan
@@ -1944,7 +1946,7 @@ Bienvenue dans l'élite des entreprises AI-Ready.
         // We perform a light scan if needed to populate the prompt context.
 
         // Define clean defaults for prompt context
-        let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false };
+        let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false, isAyaRegistered: false };
         let promptUrlToScan = detectedUrl;
 
         // Run light scan if we are NOT running full analysis but have a URL
@@ -1957,15 +1959,7 @@ Bienvenue dans l'élite des entreprises AI-Ready.
                 console.warn("Prompt Context Scan failed", e);
             }
         } else if (isAnalysisRun) {
-            // If Analysis RUN, we assume scanResult is available? 
-            // Wait, variable scope... 'scanResult' is inside the 441 block.
-            // We cannot access 'scanResult' here easily if block scoped.
-            // But we need it for SYSTEM_PROMPT. 
-            // Quick Fix: Re-scan or rely on LLM memory? 
-            // Better: scanUrl is cheap/cached usually. We scan again here or extract from above?
-            // Actually, if isAnalysisRun is true, we might as well populate promptScanResult from the same source?
-            // Since we are stateless, we can just re-run scanUrlForAioSignals below or define SYSTEM_PROMPT generic.
-            // Let's re-run scanUrlForAioSignals safely (heuristic: it's cached or fast).
+            // If Analysis RUN, we need to ensure promptScanResult is populated from a scan
             if (promptUrlToScan) {
                 const lightScan = await scanUrlForAioSignals(promptUrlToScan);
                 promptScanResult = lightScan;
@@ -2027,7 +2021,8 @@ CONTEXTE TECHNIQUE(DONNÉES SCANNÉES)
 L'utilisateur analyse l'URL: ${promptScanResult.url || 'Non fournie'}
 Titre détecté: "${promptScanResult.metaTitle || 'Non détecté'}"
 Description détectée: "${promptScanResult.metaDescription || 'Non détectée'}"
-                JSON - LD Détecté: ${promptScanResult.hasJsonLd ? 'OUI' : 'NON'}
+JSON-LD Détecté: ${promptScanResult.hasJsonLd ? 'OUI' : 'NON'}
+REGISTRE AYA: ${promptScanResult.isAyaRegistered ? 'VÉRIFIÉ ✅' : 'NON PRÉSENT ❌'}
 
 ────────────────────────────────────────────────────────
                 0) CHAMP D’APPLICATION

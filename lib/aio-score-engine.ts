@@ -15,6 +15,7 @@ export type AyoExtract = {
             has_asr_file: boolean | null;
             has_faq_content: boolean | null;
             has_faq_schema: boolean | null;
+            is_aya_registered?: boolean;
         };
     };
     fields: {
@@ -152,15 +153,23 @@ export function computeAioScore(extract: AyoExtract) {
     // a) Absence de JSON-LD détectée => plafond dur (site "muet")
     // On vérifie le scan technique (vérité terrain) ET l'extraction (vérité perçue)
     const scanHasJsonLd = extract.source.scan.has_jsonld;
-    if (scanHasJsonLd === false) {
+    const isAyaRegistered = extract.source.scan.is_aya_registered === true;
+
+    if (scanHasJsonLd === false && !isAyaRegistered) {
         // Site techniquement muet : on force un plafond défendable
         total = Math.min(total, 50);
     }
 
     // b) Si ASR absent : jamais 100 (max 90)
-    const hasAsr = extract.source.scan.has_asr_file === true || extract.fields?.structure_technique?.has_asr?.value === true;
+    // EXCEPTION : Si enregistré dans AYA, AYA SERT DE PROXY ASR. On lève le plafond.
+    const hasAsr = extract.source.scan.has_asr_file === true || extract.fields?.structure_technique?.has_asr?.value === true || isAyaRegistered;
     if (!hasAsr) {
         total = Math.min(total, 90);
+    }
+
+    // c) TRUST BONUS: Si AYA Registered, on garantit un score de confiance minimal
+    if (isAyaRegistered) {
+        total = Math.max(total, 95); // Un client AYA est par définition optimisé
     }
 
     // c) Accessibilité : si site inaccessible => technique pénalisée implicitement (optionnel)

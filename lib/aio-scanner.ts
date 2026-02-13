@@ -1,9 +1,4 @@
-
-/**
- * AIO Scanner Logic
- * Ce module effectue une "vraie" analyse technique de la page cible
- * pour nourrir le contexte de l'IA avec des faits avérés, pas des hallucinations.
- */
+import { db } from './db';
 
 export interface AioScanResult {
     url: string;
@@ -13,6 +8,7 @@ export interface AioScanResult {
     hasAsrFile: boolean;
     hasFaqContent: boolean; // Détecte un lien ou une section FAQ visible
     hasFaqSchema: boolean; // Détecte le schéma spécifique FAQPage
+    isAyaRegistered: boolean; // Détecte la présence dans le Registre AYA
     metaTitle: string | null;
     metaDescription: string | null;
     h1: string[];
@@ -29,12 +25,24 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
         hasAsrFile: false,
         hasFaqContent: false,
         hasFaqSchema: false,
+        isAyaRegistered: false,
         metaTitle: null,
         metaDescription: null,
         h1: [],
         text: "",
         scoreFactors: []
     };
+
+    // 0. CHECK AYA REGISTRY (Internal database signal)
+    try {
+        const ayaData = await db.getLatestAnalysisByUrl(targetUrl);
+        if (ayaData && ayaData.email) { // If it has an email and is in DB, we consider it "registered" for trust purposes
+            result.isAyaRegistered = true;
+            result.scoreFactors.push(`✅ Entité présente dans le Registre de Confiance AYA.`);
+        }
+    } catch (e) {
+        // Safe skip
+    }
 
     try {
         // 1. Normaliser l'URL
