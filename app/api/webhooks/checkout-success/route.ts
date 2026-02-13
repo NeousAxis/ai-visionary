@@ -458,6 +458,86 @@ export async function POST(req: Request) {
             emailMissing = true;
         }
 
+        // 6. ENREGISTREMENT REGISTRE AYA
+        let ayaEntityId = "";
+        try {
+            // Import dynamically to avoid circular deps if needed
+            const { registerOrUpdateEntity } = await import('@/lib/aya/registry');
+
+            const mode = packType === 'AYA_SUB' ? 'subscription' : 'purchase';
+
+            // Prepare Entity Data from Analyze
+            const entityDraft = {
+                legal_name: (analysisData.extract as any).identite?.name?.value || "Unknown Entity",
+                display_name: (analysisData.extract as any).identite?.name?.value || "Unknown",
+                country_legal: (analysisData.extract as any).identite?.country?.value || "CH",
+                sector_macro: (analysisData.extract as any).identite?.sector?.value || "General",
+                // Store the full analyze as payload
+                asr_payload: {
+                    version: "1.0",
+                    data: analysisData.extract,
+                    signature: {
+                        hash: session_id, // Simple proof for now
+                        public_key: "ayo-system-v1"
+                    }
+                }
+            };
+
+            ayaEntityId = await registerOrUpdateEntity(entityDraft, mode);
+            console.log(`✅ AYA REGISTRY: Entity ${ayaEntityId} registered successfully in mode ${mode}.`);
+
+        } catch (regErr) {
+            console.error("❌ AYA REGISTRY ERROR:", regErr);
+            // Non-blocking but critical log
+        }
+
+        // 7. GÉNÉRATION ZIP & ENVOI (CONDITIONNEL)
+
+        // CAS A : ABONNEMENT AYA (19/mois) -> PAS DE FICHIERS SOURCES
+        if (packType === 'AYA_SUB') {
+            console.log("💎 PACK AYA_SUB: Sending Welcome Email (No Attachments).");
+
+            try {
+                const { data, error } = await resend.emails.send({
+                    from: 'AYO Registry <registry@ai-visionary.com>',
+                    to: [customerEmail],
+                    subject: 'Confirmation : Votre Entité est Active dans AYA',
+                    html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+                        <h2 style="color: #2563EB;">Votre Visibilité IA est Active.</h2>
+                        <p>Bonjour,</p>
+                        <p>Votre abonnement au <strong>Registre AYA</strong> est confirmé.</p>
+                        
+                        <div style="background: #eff6ff; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                            <p style="margin: 0; font-weight: bold;">Statut : ✅ ACTIF (Priorité IA)</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9em;">ID Entité : ${ayaEntityId}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9em;">Validité : Renouvellement Mensuel</p>
+                        </div>
+                        
+                        <p>Les Agents IA (ChatGPT, Gemini, Claude) peuvent désormais accéder à votre fiche d'identité structurée via notre API.</p>
+                        <p>Vous n'avez rien à installer sur votre site.</p>
+                        
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+                        <p style="font-size: 0.8em; color: #666;">Ceci est un service de location de visibilité. Pour obtenir vos fichiers sources propriétaires, vous pouvez upgrader vers le Pack AYO PRO à tout moment.</p>
+                    </div>
+                    `
+                });
+
+                if (error) throw error;
+                console.log("✅ Email AYA_SUB Sent!");
+                return NextResponse.json({ received: true, status: 'subscription_activated' });
+
+            } catch (emailErr) {
+                console.error("❌ Email Error (AYA_SUB):", emailErr);
+                return NextResponse.json({ received: true, status: 'error_email' });
+            }
+        }
+
+        // CAS B : ACHAT (PRO / ESSENTIAL) -> GÉNÉRATION ZIP + ENVOI
+        // (Reste du code existant pour générer les fichiers et envoyer le ZIP)
+
+        console.log("📦 PACK AYO PRO/ESSENTIAL: Generating ZIP & Sending Files.");
+
         // Generate REAL Files (SAFE WRAPPER)
         const sessionDate = new Date().toISOString();
         let asrJson = "{}";
@@ -494,6 +574,8 @@ export async function POST(req: Request) {
             console.error("❌ Failed to generate External Context JSON", extErr);
             externalContextJson = JSON.stringify({ note: "No external context data available." }, null, 2);
         }
+
+        // ... (Suite de la logique d'envoi ZIP existante)
 
         // 🔐 VALIDATION EMAIL
         const VALIDATION_DISABLED = true; // PROD FIX: Allow gmail/etc. for artisans

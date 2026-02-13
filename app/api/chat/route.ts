@@ -206,35 +206,35 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
   💡 ** OPPORTUNITÉ STRATÉGIQUE **
 
     Votre score actuel([NOTE_GLOBALE] / 100) est un début.
-  Mais pour garantir votre intégrité identitaire sur les IA(ChatGPT, Gemini), la Certification Cryptographique serait beaucoup plus efficace.
+  Mais pour garantir votre intégrité identitaire sur les IA(ChatGPT, Gemini), vous devez être inscrit dans le Registre AYA.
   
-  Je peux sécuriser immédiatement votre Nom de Domaine Sémantique avec la version Essential(99 CHF) ?
+  Je vous propose deux options :
   
-  👉 ** [🛡 Obtenir mon ID ASR(Essential - 99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix})**
-        (Certification ASR Essential + Analyse détaillée & Envoi par email)
+  👉 ** [💎 S'abonner au Registre AYA (19 CHF/mois)](https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix})**
+        (Location de visibilité : Registre AYA Actif + Priorité IA + Mises à jour incluses)
 
-   👉 ** [🚀 Obtenir mon ASR PRO(499 CHF)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
-            (Certification ASR PRO + Analyse complète + Glossaire Sémantique + Fichiers AI - Native)
+   👉 ** [🚀 Acheter mes Actifs PRO (499 CHF One-Shot)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
+            (Propriété Totale + Fichiers Sources ASR/FAQ/Manifeste + 3 ANS de Registre offerts)
 
-   👉 ** [Cliquer sur 'LIGHT'](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmail)})** (Analyse détaillée + Certification ASR simple)"
+   👉 ** [Rester en LIGHT (Gratuit)](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmail)})** (Simple ASR d'identité, sans garantie de visibilité étendue)"
 
 📍 ÉTAT 4 : UPGRADE & PAIEMENT
-SI OUI :
-                "Excellent choix.
-  Here is the secure link to activate your ASR Essential:
-  👉[🛡 Activer la Certification(99 CHF)](https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix}) (ID Test Stripe)
+SI ABONNEMENT AYA :
+                "Excellent choix pour démarrer sans risque.
+  Voici le lien sécurisé pour activer votre abonnement AYA :
+  👉 [💎 Activer l'Abonnement (19 CHF/mois)](https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix}) (Sans engagement)
 
-                    Une fois le paiement confirmé, vos fichiers seront automatiquement envoyés par email(sous quelques minutes)."
+                    Une fois activé, votre entité rejoindra le registre AYA immédiatement."
 
 SI PACK PRO :
                     "🏆 **Choix Visionnaire.**
   
-  Vous passez directement au niveau ** Expert **.
+  Vous passez directement au niveau ** Propriétaire **.
   
-  Voici votre lien sécurisé pour activer le ** Pack AIO Ultimate(Pro) ** :
-  👉[🚀 ** Activer le Pack PRO(499 CHF) **](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
+  Voici votre lien sécurisé pour acquérir vos actifs AIO Ultimate :
+  👉 [🚀 ** Acheter mes Actifs (499 CHF) **](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
   
-  * (Inclut : Audit Complet + Certification ASR Pro + Architectures AI - Native + Glossaire Sémantique) *
+  * (Inclut : Propriété des Fichiers + Certification ASR Pro + 3 ANS de Registre AYA offerts) *
 
                     Une fois le paiement confirmé, vos fichiers seront automatiquement envoyés par email(sous quelques minutes)."
 

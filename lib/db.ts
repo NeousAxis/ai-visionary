@@ -203,6 +203,40 @@ export const database = {
             console.error('❌ [Firestore] Query By EMAIL Error:', error);
             return null;
         }
+    },
+    updateEntityRecommendability: async (entityId: string, data: any): Promise<void> => {
+        const dbInstance = getDb();
+        if (!dbInstance) {
+            console.log(`⚠️ DB Disabled: Skipping AYA update for ${entityId}`);
+            return;
+        }
+        try {
+            await dbInstance.collection('aya_registry').doc(entityId).set(data, { merge: true });
+            console.log(`💾 [Firestore] AYA Entity updated: ${entityId}`);
+        } catch (error) {
+            console.error('❌ [Firestore] AYA Update Error:', error);
+        }
+    },
+    /**
+     * Get all active entities from AYA Registry
+     */
+    getAyaEntities: async (limit: number = 20): Promise<any[]> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return [];
+
+        try {
+            const snapshot = await dbInstance.collection('aya_registry')
+                .orderBy('last_update', 'desc')
+                .limit(limit)
+                .get();
+
+            if (snapshot.empty) return [];
+
+            return snapshot.docs.map(doc => doc.data());
+        } catch (error) {
+            console.error('❌ [Firestore] Get AYA Entities Error:', error);
+            return [];
+        }
     }
 };
 

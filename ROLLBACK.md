@@ -25,3 +25,4 @@ Si la version actuelle est cassée, choisissez un **TAG** dans la liste ci-desso
 | `deploy-202601281613` | 28/01/2026 16:13 | Fix Markdown Formatting & Duplicate Autre |
 | `deploy-202601281618` | 28/01/2026 16:18 | Fix Progress Bar Stuck at Step 3 |
 | `deploy-202601281643` | 28/01/2026 16:43 | Fix Stepper stuck & Markdown Styles |
+| `deploy-202602130820` | 13/02/2026 08:20 | Infrastructure AYA V1: Registre dynamique, Sitemap, Profils Entités & Webhook Stripe |

@@ -28,28 +28,46 @@ export async function POST(req: Request) {
         const payload = { u: url, e: email };
         const clientReferenceId = Buffer.from(JSON.stringify(payload)).toString('base64');
 
-        // Product IDs (from your Stripe dashboard)
-        const priceId = packType === 'PRO'
-            ? 'price_1SlM9iPkCQYUm8hQKqOV8eqU'  // PRO 499 CHF
-            : 'price_1SlM8kPkCQYUm8hQJU6kvMMa'; // Essential 99 CHF
+        // 🛒 NEW PRICING LOGIC (AYA ABONNEMENT vs AYO ONE-SHOT)
+        let priceId = '';
+        let mode: Stripe.Checkout.SessionCreateParams.Mode = 'payment';
+
+        if (packType === 'AYA_SUB') {
+            // Option 2: Abonnement AYA (19 CHF / mois)
+            // Test Price ID: price_1SzazaPkCQYUm8hQJfrKc9EJ (Fourni par user)
+            // Prod Price ID: TO BE DEFINED IN ENV
+            priceId = process.env.STRIPE_PRICE_AYA_SUB || 'price_1SzazaPkCQYUm8hQJfrKc9EJ';
+            mode = 'subscription';
+        } else if (packType === 'PRO') {
+            // Option 3: Achat AYO Full (499 CHF One-Shot)
+            priceId = 'price_1SlM9iPkCQYUm8hQKqOV8eqU';
+            mode = 'payment';
+        } else {
+            // Fallback (Essentiel/Light => Redirige vers Abo ou Pro selon stratégie, ici legacy Essential en fallback)
+            // price_1SlM8kPkCQYUm8hQJU6kvMMa (Old 99 CHF)
+            priceId = 'price_1SlM8kPkCQYUm8hQJU6kvMMa';
+            mode = 'payment';
+        }
 
         // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
-            mode: 'payment',
+            mode: mode,
             line_items: [
                 {
                     price: priceId,
                     quantity: 1,
                 },
             ],
-            success_url: `https://ai-visionary.com?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `https://ai-visionary.com?session_id={CHECKOUT_SESSION_ID}`, // Devrait être dynamique selon env
             cancel_url: 'https://ai-visionary.com',
-            client_reference_id: clientReferenceId,
-            customer_email: email,
+            client_reference_id: clientReferenceId, // Critical for Webhook Email recovery
+            customer_email: email, // Pre-fill email in Stripe Checkout
+            allow_promotion_codes: true, // Bonus commercial
             metadata: {
-                pack_type: packType,
+                pack_type: packType, // 'AYA_SUB' | 'PRO' | 'ESSENTIAL'
                 analyzed_url: url,
-                customer_email: email
+                customer_email: email,
+                mode: mode // 'subscription' | 'payment'
             }
         });
 

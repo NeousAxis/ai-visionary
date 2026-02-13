@@ -22,14 +22,17 @@ export default function Home() {
               style={{ height: '180px', width: 'auto', margin: '0 auto' }}
             />
           </div>
-          <h1 className="headline">Aujourd’hui, vos clients passent par des IA pour chercher des professionnels.</h1>
+          <h1 className="headline">Devenez l'entreprise que l'IA recommande en priorité.</h1>
           <div className="subheadline">
-            <p>Si votre site n’est pas correctement documenté pour les IA, vous n’êtes pas recommandé par ChatGPT, Gemini, Claude, etc.</p>
-            <p className="tagline">Ne laissez pas les IA deviner à partir d’informations incomplètes. Optimisez votre site pour les IA.</p>
+            <p>Rendez votre entreprise visible pour les millions d'utilisateurs qui posent des questions à l'IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...).</p>
+            <p className="tagline">Ne laissez pas les IA deviner qui vous êtes. Prenez le contrôle de votre recommandation.</p>
           </div>
-          <div className="cta-group">
-            <Link href="/diagnostic" className="btn btn-primary">
+          <div className="cta-group" style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '30px' }}>
+            <Link href="/diagnostic" className="btn btn-primary" style={{ boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }}>
               → Vérifier si mon site est correctement documenté
+            </Link>
+            <Link href="/aya" className="btn" style={{ background: 'transparent', border: '2px solid #e2e8f0', color: '#334155', fontWeight: '600', padding: '12px 24px', borderRadius: '8px', transition: 'all 0.2s' }}>
+              🔍 Explorer le Registre AYA
             </Link>
           </div>
         </div>
@@ -200,16 +203,66 @@ export default function Home() {
         </div>
       </section>
 
+      {/* AYA PRESENTATION (NEW) */}
+      <section className="section aya-presentation-section" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)', color: 'white', padding: '80px 0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <span className="badge" style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', border: '1px solid #0ea5e9', padding: '6px 18px', borderRadius: '20px', fontSize: '0.85rem', letterSpacing: '1.2px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+              INFRASTRUCTURE
+            </span>
+            <h2 style={{ fontSize: '3.5rem', fontWeight: '800', marginTop: '25px', marginBottom: '20px', color: '#ffffff', textShadow: '0 4px 15px rgba(0,0,0,0.5)', lineHeight: 1.1 }}>
+              Devenez l'entreprise que l'IA recommande en priorité.
+            </h2>
+            <p style={{ fontSize: '1.3rem', color: '#e2e8f0', maxWidth: '750px', margin: '0 auto', lineHeight: '1.6', fontWeight: '500' }}>
+              Rendez votre entreprise visible pour les millions d'utilisateurs qui posent des questions à l'IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...).
+            </p>
+          </div>
+
+          <div className="process-grid grid-3">
+            <div className="process-step" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', padding: '30px', borderRadius: '16px' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '20px' }}>🌐</div>
+              <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '10px' }}>Connecteur Universel</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                AYA <strong>héberge et diffuse</strong> votre <strong>ASR</strong> (généré par AYO) directement auprès des IAs, garantissant qu'elles accèdent à votre vérité officielle en temps réel.
+              </p>
+            </div>
+
+            <div className="process-step" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', padding: '30px', borderRadius: '16px' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '20px' }}>🔒</div>
+              <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '10px' }}>Signature Cryptographique</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
+                Chaque entité dans AYA reçoit une signature inviolable. Les IAs savent immédiatement que votre information est <strong>authentique et vérifiée</strong> (Anti-Hallucination).
+              </p>
+            </div>
+
+            <div className="process-step" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', padding: '30px', borderRadius: '16px' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '20px' }}>⚡️</div>
+              <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '10px' }}>Priorité de Réponse</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                Quand un utilisateur demande <em>"Plombier urgence Lyon"</em>, les IAs privilégient les entités structurées (horaires, localisation précise) du registre AYA plutôt que les annuaires obsolètes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PRICING */}
       <section id="pricing" className="section pricing-section">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 className="section-title" style={{ fontSize: "2.5rem" }}>Investissez dans votre infrastructure sémantique.</h2>
           <div className="grid-3 pricing-grid">
 
+            {/* OPTION 1 : GRATUIT (PRODUIT D'APPEL) */}
             <div className="card pricing-card">
-              <h3>AIO Light <br /><span className="card-subtitle">Diagnostic de visibilité</span></h3>
+              <h3>Diagnostic AIO <br /><span className="card-subtitle">Test de Visibilité</span></h3>
               <div className="price">Gratuit</div>
-              <p className="price-details">Analyse détaillée + Génération de votre ASR (Carte d'identité IA)</p>
+              <p className="price-details">Analyse technique complète + Génération de votre Identité IA de base (ASR Light).</p>
+              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                <li>✅ Scan technique du site</li>
+                <li>✅ Score de lisibilité IA</li>
+                <li>✅ Fichier identité JSON (Light)</li>
+                <li style={{ textDecoration: 'line-through', opacity: 0.6 }}>Registre AYA complet</li>
+              </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic?pack=light" className="btn btn-secondary w-full" style={{ width: '100%' }}>
                   Lancer l'audit
@@ -217,25 +270,43 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="card pricing-card featured">
-              <h3>Pack AIO Essential <br /><span className="card-subtitle">Mise aux normes IA</span></h3>
-              <div className="price">99 CHF</div>
-              <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. <br />Signature cryptographique incluse.</p>
+            {/* OPTION 2 : ABONNEMENT (LOCATION VISIBILITÉ) - NOUVEAU */}
+            <div className="card pricing-card featured" style={{ border: '2px solid var(--primary-color)' }}>
+              <div style={{ background: 'var(--primary-color)', color: 'white', padding: '5px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', display: 'inline-block', marginBottom: '10px' }}>
+                RECOMMANDÉ POUR DÉMARRER
+              </div>
+              <h3>Abonnement AYA <br /><span className="card-subtitle">Visibilité IA-Native</span></h3>
+              <div className="price">19 CHF <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>/ mois</span></div>
+              <p className="price-details">Location de votre présence dans le registre AYA. Sans toucher à votre site.</p>
+              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                <li>✅ <strong>Registre AYA Actif</strong> (Priorité IA)</li>
+                <li>✅ Données hébergées par AYA</li>
+                <li>✅ Recommandabilité immédiate</li>
+                <li>✅ Mises à jour illimitées</li>
+                <li style={{ textDecoration: 'line-through', opacity: 0.6 }}>Propriété des fichiers sources</li>
+              </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic?pack=essential" className="btn btn-primary w-full" style={{ width: '100%' }}>
-                  Analyser mon site
+                <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary w-full" style={{ width: '100%' }}>
+                  S'abonner (Sans engagement)
                 </Link>
               </div>
             </div>
 
+            {/* OPTION 3 : ACHAT (INVESTISSEMENT PATRIMONIAL) */}
             <div className="card pricing-card">
-              <h3>Pack AIO Pro <br /><span className="card-subtitle">Expertise & Sémantique</span></h3>
+              <h3>Pack AYO Full <br /><span className="card-subtitle">Propriété & Sémantique</span></h3>
 
-              <div className="price">499 CHF</div>
-              <p className="price-details">Génération de votre ASR (Carte d'identité IA) + JSON-LD complet. Signature cryptographique incluse. <br /><br /><strong>+ La couche de confiance totale pour les IA. Glossaire, FAQ Structurée, Architecture & Manifest.</strong></p>
+              <div className="price">499 CHF <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>one-shot</span></div>
+              <p className="price-details">Achat définitif de vos actifs sémantiques (ASR, FAQ, Manifeste). Vous possédez la donnée.</p>
+              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                <li>✅ <strong>3 ANS de Registre AYA offerts</strong></li>
+                <li>✅ Fichiers Sources (ASR, FAQ, Manifeste)</li>
+                <li>✅ Indépendance technique</li>
+                <li>✅ Propriété intellectuelle totale</li>
+              </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic?pack=pro" className="btn btn-secondary w-full" style={{ width: '100%' }}>
-                  Analyser mon site
+                  Acheter mes actifs
                 </Link>
               </div>
             </div>
