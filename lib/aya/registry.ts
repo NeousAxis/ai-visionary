@@ -38,6 +38,7 @@ export async function registerOrUpdateEntity(
         entity_type: entityData.entity_type || 'company',
         country_legal: entityData.country_legal || 'CH',
         sector_macro: entityData.sector_macro || 'General',
+        website: entityData.website || (entityData.asr_payload?.data?.url as string) || undefined,
 
         created_at: entityData.created_at || now.toISOString(),
         last_update: now.toISOString(),

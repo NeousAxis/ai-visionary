@@ -9,6 +9,7 @@ export interface AyaEntity {
     entity_type: 'company' | 'association' | 'individual' | 'public_body';
     country_legal: string; // ISO Code (CH, FR...)
     sector_macro: string; // Ex: "Construction", "Santé"
+    website?: string;      // URL associée (AIO Signal principal)
 
     // Temporalité (CRUCIAL POUR LES BOTS)
     created_at: string;      // ISO Date - Ne bouge jamais
