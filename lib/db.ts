@@ -237,6 +237,48 @@ export const database = {
             console.error('❌ [Firestore] Get AYA Entities Error:', error);
             return [];
         }
+    },
+
+    /**
+     * Retrieve an AYA Entity by its URL (Smart Search)
+     */
+    getAyaEntityByUrl: async (url: string): Promise<any | null> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
+
+        try {
+            const normalizedTarget = database.normalizeUrl(url);
+            console.log(`🔍 [Firestore] Searching for AYA Entity with URL: ${normalizedTarget}`);
+
+            // 1. Try finding by 'website' field (Fastest)
+            const snapshot = await dbInstance.collection('aya_registry')
+                .where('website', '==', url)
+                .limit(1)
+                .get();
+
+            if (!snapshot.empty) {
+                console.log(`✅ [Firestore] AYA Entity found by 'website' field.`);
+                return snapshot.docs[0].data();
+            }
+
+            // 2. DEEP SEARCH in asr_payload for legacy/unindexed records
+            const allEntitiesSnapshot = await dbInstance.collection('aya_registry').get();
+
+            for (const doc of allEntitiesSnapshot.docs) {
+                const data = doc.data();
+                if (data.website && database.normalizeUrl(data.website) === normalizedTarget) {
+                    return data;
+                }
+                if (data.asr_payload?.data?.url && database.normalizeUrl(data.asr_payload.data.url) === normalizedTarget) {
+                    return data;
+                }
+            }
+
+            return null;
+        } catch (error) {
+            console.error('❌ [Firestore] Query AYA By URL Error:', error);
+            return null;
+        }
     }
 };
 
