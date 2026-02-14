@@ -898,10 +898,18 @@ GÉNÈRE CE JSON MAINTENANT :
             ];
 
             // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
-            // HIGH confidence blocks are completely excluded
+            // FORCE: Always ensure Country is evaluated first if not high-confidence
             const validationQueue = allBlockNames.filter(b => lowConfidenceKeys.includes(b));
             const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
-            const combinedQueue = [...validationQueue, ...questionQueue];
+
+            // Prioritize Country (identite.juridical_country) at the very beginning of everything
+            let combinedQueue = [...validationQueue, ...questionQueue];
+            const countryIndex = combinedQueue.indexOf("identite.juridical_country");
+            if (countryIndex > 0) {
+                // Move country to first position
+                combinedQueue.splice(countryIndex, 1);
+                combinedQueue.unshift("identite.juridical_country");
+            }
 
             console.log(`📋 QUEUE: ${combinedQueue.length} items to process (${validationQueue.length} validations + ${questionQueue.length} questions)`);
 
@@ -1036,9 +1044,9 @@ RAPPEL : Si c'est "business_model", ne demande PAS de chiffres ! Demande la mét
 
                 const continueResult = await generateText({
                     model: modelToUse,
-                    temperature: 0.1,
-                    system: CONTINUE_PROMPT,
-                    messages: messages // Pass full history so LLM knows what user just answered
+                    temperature: 0, // Force determinism for protocol
+                    system: CONTINUE_PROMPT + "\n\n⚠️ IMPORTANT : RÉPONDS UNIQUEMENT AVEC LE JSON. PAS DE TEXTE AVANT OU APRÈS.",
+                    messages: messages
                 });
 
                 const rawResponse = continueResult.text;
