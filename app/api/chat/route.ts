@@ -498,8 +498,8 @@ export async function POST(req: Request) {
 
         let triggerMode = "CHAT";
 
-        // PRIORITY 1: Recognition of EXISTING AYA REGISTERED CLIENT
-        if (urlInLastMessage && !hasQuestionBlockSent && !hasFinalScore) {
+        // PRIORITY 1: Recognition of EXISTING AYA REGISTERED CLIENT (Always check if URL is in last message)
+        if (urlInLastMessage && !hasFinalScore) {
             console.log(`🕵️ CHECKING REGISTRY FOR: ${urlInLastMessage}`);
             // @ts-ignore
             const existingClient = await db.getAyaEntityByUrl(urlInLastMessage);
@@ -507,9 +507,12 @@ export async function POST(req: Request) {
             if (existingClient) {
                 console.log(`💎 RECOGNIZED CLIENT: ${existingClient.legal_name}`);
                 triggerMode = "EXISTING_CLIENT";
-            } else {
-                // Not in registry -> NEW SCAN
+            } else if (stepsCompleted === 0) {
+                // Not in registry AND first interaction with this URL -> NEW SCAN
                 triggerMode = "SCAN_AND_QUESTION";
+            } else {
+                // URL mentioned but questioning already started
+                triggerMode = "CONTINUE_QUESTIONING";
             }
         }
         // PRIORITY 2: Continue conversation if questions are already started
@@ -529,8 +532,7 @@ export async function POST(req: Request) {
 
         // 🛡️ HANDLER: EXISTING_CLIENT (Immediate Recognition)
         if (triggerMode === "EXISTING_CLIENT") {
-            const urlMatch_ec = lastMessage.content.match(urlRegex);
-            const ec_url = urlMatch_ec ? urlMatch_ec[0] : "";
+            const ec_url = urlInLastMessage || "";
             // @ts-ignore
             const client = await db.getAyaEntityByUrl(ec_url);
 
