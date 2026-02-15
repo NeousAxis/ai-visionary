@@ -498,6 +498,28 @@ export async function POST(req: Request) {
 
         let triggerMode = "CHAT";
 
+        // 🏗️ CONTEXT INITIALIZATION
+        let detectedUrl = "";
+        let detectedEmail = "";
+
+        // URL Detection from current turn or history
+        if (userUrlMatch) {
+            detectedUrl = userUrlMatch[0];
+        } else if (hasUrlHistory) {
+            const histUrlMatch = messages[actualUrlMsgIndex].content.match(urlRegex);
+            if (histUrlMatch) detectedUrl = histUrlMatch[0];
+        }
+
+        // Email Detection
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+        const emailMatch = lastMessage.content.match(emailRegex);
+        if (emailMatch) {
+            detectedEmail = emailMatch[0].toLowerCase();
+        }
+
+        // Prompt Context Initialization
+        let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false, isAyaRegistered: false };
+
         // PRIORITY 1: Recognition of EXISTING AYA REGISTERED CLIENT (Always check if URL is in last message)
         if (urlInLastMessage && !hasFinalScore) {
             console.log(`🕵️ CHECKING REGISTRY FOR: ${urlInLastMessage}`);
@@ -1018,76 +1040,56 @@ GÉNÈRE CE JSON MAINTENANT :
             if (triggerMode === "CONTINUE_QUESTIONING") {
 
                 const CONTINUE_PROMPT = `
-Tu es AYO. Phase de Scan Complémentaire.
+Tu es AYO, l'IA de AI VISIONARY. Tu es l'Expert Gardien du Registre AYA.
 
-🚫 RÈGLE STRICTE : JSON UNIQUEMENT. PAS DE MARKDOWN.
-✅ LANGUE OBLIGATOIRE : FRANÇAIS (FRENCH).
-⚠️ UNE SEULE QUESTION PAR BLOC.
-⚠️ RISQUE CRITIQUE : N'ÉCRIS AUCUN TEXTE AVANT LE JSON ! COMMENCE DIRECTEMENT PAR '{'.
+📍 MISSION : Remplir le bloc **${nextBlockName}**
+Tu te trouves dans une phase de dialogue pédagogique et de collecte de données.
 
-🚨 GESTION INTELLIGENTE DES INTERACTIONS (V2) :
+🧠 TON CERVEAU (LA BIBLE AI VISIONARY) :
+L'utilisateur peut te poser des questions sur la visibilité IA. Voici tes vérités :
+- L'ASR (AYO Singular Record) est l'acte de naissance numérique. Sans lui, les IA (ChatGPT/Gemini) "devinent" et hallucinent.
+- Lisibilité = Recommandabilité. Si une IA ne peut pas te "lire" techniquement, elle ne te "recommandera" pas.
+- INDÉPENDANCE : Les fichiers (ASR, FAQ, Manifeste) appartiennent au client. C'est un système OUVERT. Le client n'est pas prisonnier d'une plateforme, il possède son identité sémantique.
+- AIO (AI Optimization) est la nouvelle infrastructure qui remplace le SEO traditionnel dans un monde d'assistants conversationnels.
 
-1. INTERROGATION ("Pourquoi ?", "A quoi ça sert ?", "Je ne comprends pas") :
-   - C'est une demande légitime ! NE LOUPES PAS CETTE OCCASION.
-   - EXPLIQUE PÉDAGOGIQUEMENT en 1 phrase simple pourquoi cette info renforce l'ASR (Crédibilité, Transparence...).
-   - PUIS REPOSE la question du bloc en cours (**${nextBlockName}**).
-   - Ne dis JAMAIS "Je ne peux pas répondre". Tu es un expert bienveillant.
+🚨 RÈGLES DE RÉPONSE HYBRIDE (PEDAGOGUE + GREFFIER) :
 
-2. REFUS / CRITIQUE ("C'est débile", "Ça ne me concerne pas", "Non", "Pfff") :
-   - L'utilisateur refuse de répondre. C'est son droit.
-   - ACCEPTE LE REFUS AVEC EMPATHIE : "Je comprends, ce point n'est peut-être pas adapté à votre structure. Je le note comme 'Non applicable' (Unknown)."
-   - PASSE IMMÉDIATEMENT à la question suivante (celle demandée ci-dessous : **${nextBlockName}**).
-   - NE POSE PAS de question sur le bloc refusé.
+1. SI L'UTILISATEUR POSE UNE QUESTION (Pourquoi ? A quoi ça sert ? C'est quoi l'ASR ?) :
+   - Réponds avec expertise et passion dans le champ "intro" du JSON. 
+   - Explique la valeur de l'indépendance, de la visibilité et de la recommandabilité.
+   - PUIS, dans le même JSON, repose la question du bloc **${nextBlockName}**.
 
-3. RÉPONSE STANDARD :
-   - Enchaîne directement sur la question du bloc **${nextBlockName}**.
+2. SI L'UTILISATEUR RÉPOND À LA QUESTION :
+   - Note la réponse.
+   - Passe au bloc suivant ou valide le bloc actuel.
 
-🚫 RÈGLES DE CONTENU INTERDIT :
-- NE JAMAIS DEMANDER LE CHIFFRE D'AFFAIRES (CA), LE REVENU, OU LE TURNOVER. Si le bloc est "business_model", demande plutôt "Quel est votre modèle de vente (Abonnement, Vente unique...) ?".
+3. STRATÉGIE DE VENTE :
+   - Rappelle subtilement que le diagnostic gratuit mène à un rapport ASR Light, et que la Certification (Pack Essential/Pro) est le seul moyen de garantir la recommandation.
 
-${nextBlockName === 'identite.legal_form' ? `⚠️ CRITIQUE - ADAPTATION PAYS :
-Le pays détecté pour cette entreprise est : "${detectedValues['identite.juridical_country'] || detectedValues['identite.country'] || 'Inconnu'}".
-VOUS NE DEVEZ PROPOSER QUE DES FORMES JURIDIQUES EXISTANTES ET VALIDES POUR CE PAYS.
-- Si Suisse : SA, Sàrl, Raison Individuelle, Association, Fondation...
-- Si France : SAS, SARL, EURL, Auto-entrepreneur...
-- Si Autre : Adaptez localement.
-NE MELANGEZ PAS LES STATUTS (Pas de SAS en Suisse).` : ''}
+🚫 RÈGLES TECHNIQUES :
+- RÉPONSE OBLIGATOIREMENT AU FORMAT JSON "question_block".
+- PAS DE MARKDOWN EN DEHORS DU JSON.
+- UNE SEULE QUESTION À LA FOIS.
 
-📡 DONNÉES TECHNIQUES :
-${contextScanResult ? `- URL: ${contextScanResult.url}` : 'N/A'}
+### ÉTAT ACTUEL DU DOSSIER :
+- Client : ${promptScanResult.metaTitle || 'En cours'}
+- URL : ${promptScanResult.url || 'Inconnue'}
+- Données déjà validées : ${highConfidenceData || 'Aucune'}
 
-🧮 ÉTAT DÉTERMINISTE (pas de parsing texte) :
-
-✅ HAUTE CONFIANCE (NE PAS REDEMANDER - DÉJÀ VALIDÉ) :
-${highConfidenceData || '(Aucune)'}
-
-⚠️ BASSE CONFIANCE (DEMANDER VALIDATION "Est-ce correct ?") :
-${lowConfidenceData || '(Aucune)'}
-
-### TA MISSION POUR LE BLOC : **${nextBlockName}**
-
+### TA MISSION IMMÉDIATE : 
 ${isValidationQuestion ?
-                        `🔍 MODE VALIDATION : La valeur détectée est "${detectedValueForValidation}"
-Pose UNE question de confirmation simple : "Nous avons détecté ${detectedValueForValidation}. Est-ce correct ?"
-Options : Oui, c'est correct / Non, je précise` :
-                        `🔍 MODE QUESTION COMPLÈTE : Cette information est INCONNUE.
-Pose la question standard pour obtenir cette information.
-RAPPEL : Si c'est "business_model", ne demande PAS de chiffres ! Demande la méthode.`}
+                        `Confirmer la donnée détectée : "${detectedValueForValidation}" pour le bloc ${nextBlockName}.` :
+                        `Poser la question pour le bloc ${nextBlockName} car nous n'avons aucune donnée.`}
 
-⚠️ RÈGLES DES QUESTIONS :
-1. NE METS JAMAIS "Autre" dans les options → Le système l'ajoute automatiquement !
-2. Utilise "allowMultiple: true" pour : offre.audience, identite.sector, external_context.keywords, external_context.intents
-3. Utilise "allowMultiple: false" pour les autres blocs
-
-### FORMAT JSON ATTENDU
+### FORMAT JSON ATTENDU :
 {
   "type": "question_block",
-  "intro": "Phrase d'introduction courte et naturelle (Ex: Parlons de votre offre...)",
+  "intro": "Ton explication pédagogique (si besoin) + transition naturelle",
   "questions": [
     {
       "id": "q_${nextBlockName.replace('.', '_')}",
-      "text": "Votre question ici ?",
-      "options": ["Option A", "Option B", "Option C"],
+      "text": "Ta question ?",
+      "options": ["Choix A", "Choix B"],
       "allowCustom": true,
       "allowMultiple": ${['offre.audience', 'identite.sector', 'external_context.keywords', 'external_context.intents'].includes(nextBlockName) ? 'true' : 'false'}
     }
@@ -1984,19 +1986,10 @@ Bienvenue dans l'élite des entreprises AI-Ready.
 
 
 
-        // ENRICH SYSTEM PROMPT IF CONTEXT EXISTS
-        // Find URL in history to pass to Stripe (Robust Regex)
-        const robustHistoryUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-        const historyUrlMatch = messages.find((m: any) => m.content.match(robustHistoryUrlRegex));
-        let detectedUrl = historyUrlMatch ? historyUrlMatch.content.match(robustHistoryUrlRegex)[0] : "";
-
-        // Normalize
-        if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
-
-        // Find Email in history to pass to Stripe (Robust Backup)
-        const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
-        const historyEmailMatch = messages.slice().reverse().find((m: any) => m.role === 'user' && m.content.match(emailRegex));
-        const detectedEmail = historyEmailMatch ? historyEmailMatch.content.match(emailRegex)[0] : "";
+        // Normalize detectedUrl if found
+        if (detectedUrl && !detectedUrl.startsWith('http')) {
+            detectedUrl = 'https://' + detectedUrl;
+        }
 
         let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
 
@@ -2006,14 +1999,11 @@ Bienvenue dans l'élite des entreprises AI-Ready.
         // If analysis NOT run yet, we still need the prompt to interview the user.
         // We perform a light scan if needed to populate the prompt context.
 
-        // Define clean defaults for prompt context
-        let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false, isAyaRegistered: false };
-        let promptUrlToScan = detectedUrl;
-
         // Run light scan if we are NOT running full analysis but have a URL
         if (detectedUrl && !isAnalysisRun) {
             try {
                 // Reuse scan logic to get Meta for Prompt
+                // @ts-ignore
                 const lightScan = await scanUrlForAioSignals(detectedUrl);
                 promptScanResult = lightScan;
             } catch (e) {
@@ -2021,8 +2011,9 @@ Bienvenue dans l'élite des entreprises AI-Ready.
             }
         } else if (isAnalysisRun) {
             // If Analysis RUN, we need to ensure promptScanResult is populated from a scan
-            if (promptUrlToScan) {
-                const lightScan = await scanUrlForAioSignals(promptUrlToScan);
+            if (detectedUrl) {
+                // @ts-ignore
+                const lightScan = await scanUrlForAioSignals(detectedUrl);
                 promptScanResult = lightScan;
             }
         }
@@ -2066,141 +2057,6 @@ Bienvenue dans l'élite des entreprises AI-Ready.
                 }
             }
         } catch (e) { console.warn("Stripe Param Gen Error", e); }
-
-        // -----------------------------------------------------------------------
-        // SYSTEM PROMPT CONSTRUCTION (AYO_PROMPT_V3 — CANONIQUE)
-        // -----------------------------------------------------------------------
-        const SYSTEM_PROMPT = `
-                AYO_PROMPT_V4 — DYNAMIC ASCENSION(AYO ONLY)
-                Version: 4.0
-                Statut: ACTIF
-                But: Adapter le questionnement au type de site détecté(Phase 1 Dynamic), tout en VERROUILLANT le tunnel de conclusion(Phase 2 & 3).
-
-────────────────────────────────────────────────────────
-CONTEXTE TECHNIQUE(DONNÉES SCANNÉES)
-────────────────────────────────────────────────────────
-L'utilisateur analyse l'URL: ${promptScanResult.url || 'Non fournie'}
-Titre détecté: "${promptScanResult.metaTitle || 'Non détecté'}"
-Description détectée: "${promptScanResult.metaDescription || 'Non détectée'}"
-JSON-LD Détecté: ${promptScanResult.hasJsonLd ? 'OUI' : 'NON'}
-REGISTRE AYA: ${promptScanResult.isAyaRegistered ? 'VÉRIFIÉ ✅' : 'NON PRÉSENT ❌'}
-
-────────────────────────────────────────────────────────
-                0) CHAMP D’APPLICATION
-────────────────────────────────────────────────────────
-Tu es AYO, l'assistant IA de AI-VISIONARY.
-Ton but: diagnostiquer la lisibilité AIO d'un site.
-Tu es un AUDITEUR TECHNIQUE IMPLACABLE.
-                    AYO = structure de données.
-                        AYO ≠ SEO.
-
-────────────────────────────────────────────────────────
-IX) SCRIPT CONVERSATIONNEL — ÉTATS(V4 HYBRIDE)
-────────────────────────────────────────────────────────
-ÉTAT 0 — ACCUEIL
-                Message: "AYO analyse si votre entreprise est lisible par les IA (ChatGPT, Gemini...). Donnez-moi l'URL de votre site."
-
-ÉTAT 1 — COLLECTE CONTEXTUELLE(PROTOCOLE STRICT JSON)
-⚠️ RÈGLE ABSOLUE: CETTE PHASE EST GÉRÉE DYNAMIQUEMENT PAR LE CODE.
-⚠️ TU NE DOIS JAMAIS POSER DE QUESTIONS EN TEXTE LIBRE PENDANT LE QUESTIONNAIRE.
-⚠️ SI LE CODE TE DEMANDE DE GÉNÉRER UNE QUESTION, TU DOIS OBLIGATOIREMENT UTILISER LE FORMAT JSON question_block.
-
-POURQUOI C'EST CRITIQUE :
-                    - Les réponses JSON sont stockées en base de données
-                        - Elles servent à générer l'analyse détaillée (LIGHT/Essential/PRO)
-                            - Elles alimentent les fichiers ASR
-                                - Le texte libre CASSE tout ce système
-
-SI TU TE RETROUVES ICI(le code n'a pas pris le relais) :
-🚫 INTERDIT : "Afin d'affiner l'analyse, pourriez-vous confirmer : ..."
-✅ OBLIGATOIRE : Générer un JSON question_block avec UNE SEULE question au format exact ci - dessous
-
-FORMAT OBLIGATOIRE(SANS MARKDOWN, JUSTE LE JSON) :
-                                    { "type": "question_block", "intro": "Merci. Question suivante...", "questions": [{ "id": "q_X", "text": "UNE SEULE QUESTION ICI ?", "options": ["Option 1", "Option 2"], "allowCustom": true, "customLabel": "Autre" }] }
-
-SI L'UTILISATEUR POSE UNE QUESTION HORS SUJET (ex: "C'est quoi AYO ? ") :
-→ Tu peux répondre normalement en texte
-→ PUIS tu renvoies vers le questionnaire avec un JSON question_block
-
-ÉTAT 2 — ANALYSE & SCAN(V3)
-                                    (Géré par le code TS pour l'affichage "|||", mais tu dois connaître la logique).
-
-ÉTAT 3 — FIN DU QUESTIONNAIRE (SILENCE & ANALYSE)
-Si tu as posé toutes les questions (ou si le contexte est suffisant) :
-✅ OBLIGATOIRE : Tu ne dois PLUS RIEN ÉCRIRE.
-✅ Tu dois générer un JSON spécial de fin : { "type": "final_analysis" }
-OU simplement dire : "Analyse en cours..." et laisser le système prendre le relais.
-
-❌ INTERDIT DE GÉNÉRER LE RAPPORT TOI-MÊME.
-❌ INTERDIT D'AFFICHER DES PRIX OU DES LIENS.
-❌ INTERDIT DE DEMANDER L'EMAIL EN TEXTE LIBRE.
-
-Tout l'affichage du SCORE, des OFFRES, et du PAIEMENT est géré par l'interface graphique.
-Ton rôle s'arrête strictement à la collecte d'informations contextuelles.
-
-Utilise ce ton : Professionnel, froid, clinique, expert.
-`;
-        finalSystemPrompt = SYSTEM_PROMPT;
-
-        console.log("Injecting real website content into AI context...");
-
-        // Keep the text injection for content analysis
-        if (websiteData.text) {
-            finalSystemPrompt += `\n\n[CONTENU TEXTUEL BRUT POUR ANALYSE SÉMANTIQUE]
-                                                    """
-${websiteData.text}
-"""`;
-        }
-
-        // DEBUG MODE: NO STREAMING
-        console.log("Generating text (no stream)...");
-        console.log("🤖 PROMPT VERSION CHECK: " + (finalSystemPrompt.includes("DYNAMIC") ? "✅ V4" : "❌ OLD"));
-        const result = await generateText({
-            model: modelToUse,
-            temperature: 0.1, // STRICT DETERMINISTIC MODE
-            system: finalSystemPrompt,
-            messages,
-        });
-
-        // INTERCEPT & PROCESS RESPONSE
-        finalResponseText = result.text;
-
-        // Check for generated JSON in the response (Hidden ASR Pro)
-        const jsonMatch = finalResponseText.match(/```json([\s\S]*?)```/);
-
-        // NEW: CRITICAL SAVE TO DB FOR SOURCE OF TRUTH
-        if (jsonMatch) {
-            const extractedJson = jsonMatch[1].trim();
-            try {
-                const parsed = JSON.parse(extractedJson);
-                // Extract score if available
-                let score = 0;
-                if (parsed['ayo:score'] && parsed['ayo:score'].value) {
-                    if (typeof parsed['ayo:score'].value === 'string') {
-                        score = parseInt(parsed['ayo:score'].value) || 0;
-                    } else {
-                        score = parsed['ayo:score'].value;
-                    }
-                }
-
-                // SAVE EXACT ANALYSIS TO DB (Source of Truth)
-                await db.saveAnalysis(sessionAsrId, {
-                    id: sessionAsrId,
-                    url: parsed.url,
-                    email: null,
-                    score: score,
-                    data: parsed
-                });
-                console.log(`💾 ANALYSIS SOURCE OF TRUTH SAVED: ${sessionAsrId}`);
-            } catch (e) {
-                console.error("❌ Failed to save source of truth to DB:", e);
-            }
-        }
-
-
-
-        // REMOVED: "Fait" logic - Payment confirmation is now handled ONLY by Stripe Webhook
-        // This prevents users from bypassing payment by simply typing "Fait" in the chat
 
         return new Response(JSON.stringify({ text: finalResponseText }), {
             status: 200,
