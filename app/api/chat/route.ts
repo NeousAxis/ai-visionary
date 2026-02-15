@@ -178,9 +178,9 @@ Calcul du score en cours...
 🔒 ** RÉSULTAT DÉTAILLÉ VERROUILLÉ **
     (Les explications critiques et les correctifs ont été générés mais sont masqués).
 
-J'ai préparé votre **ASR Light** (Carte d'identité numérique) qui corrige ces lacunes.
+J'ai analysé votre présence numérique et identifié les lacunes critiques.
 
-(ℹ️ * Note : Il existe une version ** Essential ** (Certifiée & Signée) pour 99 CHF, je vous proposerai l'upgrade juste après.*)
+(ℹ️ *Note : Il existe un **Abonnement AYA** (19 CHF) ou un **Pack PRO** (499 CHF) pour activer votre visibilité réelle.*)
 
 Pour déverrouiller votre analyse complète, veuillez confirmer votre propriété.
 
@@ -198,46 +198,29 @@ Pour déverrouiller votre analyse complète, veuillez confirmer votre propriét�
 [LOGIQUE : Si email valide et correspond au domaine]
 "✅ **Email validé.**
   
-  📨 ** Envoi en cours vers[EMAIL_USER]...**
-    Le système d'envoi sécurisé AYO a pris en charge votre dossier (Rapport + ASR Light).
-        (Vérifiez vos spams).
-
+  📨 **Envoi en cours vers [EMAIL_USER]...**
+    Le système d'analyse AYO a finalisé votre dossier.
+    
   ---
   
-  💡 ** OPPORTUNITÉ STRATÉGIQUE **
+  💡 **OPPORTUNITÉ STRATÉGIQUE**
 
-    Votre score actuel([NOTE_GLOBALE] / 100) est un début.
-  Mais pour garantir votre intégrité identitaire sur les IA(ChatGPT, Gemini), vous devez être inscrit dans le Registre AYA.
+    Votre score actuel ([NOTE_GLOBALE]/100) montre que vous avez des bases, mais pour garantir votre intégrité et votre priorité sur les IA (ChatGPT, Gemini), vous devez activer votre présence officielle.
   
   Je vous propose deux options :
   
-  👉 ** [💎 S'abonner au Registre AYA (19 CHF/mois)](https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix})**
+  👉 **[💎 S'abonner au Registre AYA (19 CHF/mois)](https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix})**
         (Location de visibilité : Registre AYA Actif + Priorité IA + Mises à jour incluses)
 
-   👉 ** [🚀 Acheter mes Actifs PRO (499 CHF One-Shot)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
-            (Propriété Totale + Fichiers Sources ASR/FAQ/Manifeste + 3 ANS de Registre offerts)
-
-   👉 ** [Rester en LIGHT (Gratuit)](https://ai-visionary.com/api/light-report?email=${encodeURIComponent(targetEmail)})** (Simple ASR d'identité, sans garantie de visibilité étendue)"
+  👉 **[🚀 Acheter mes Actifs PRO (499 CHF One-Shot)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
+        (Propriété Totale + Fichiers Sources + 3 ANS de Registre offerts)"
 
 📍 ÉTAT 4 : UPGRADE & PAIEMENT
 SI ABONNEMENT AYA :
-                "Excellent choix pour démarrer sans risque.
-  Voici le lien sécurisé pour activer votre abonnement AYA :
-  👉 [💎 Activer l'Abonnement (19 CHF/mois)](https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix}) (Sans engagement)
-
-                    Une fois activé, votre entité rejoindra le registre AYA immédiatement."
+    "Excellent choix pour démarrer sans risque. Votre entité rejoindra le registre AYA immédiatement après validation."
 
 SI PACK PRO :
-                    "🏆 **Choix Visionnaire.**
-  
-  Vous passez directement au niveau ** Propriétaire **.
-  
-  Voici votre lien sécurisé pour acquérir vos actifs AIO Ultimate :
-  👉 [🚀 ** Acheter mes Actifs (499 CHF) **](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
-  
-  * (Inclut : Propriété des Fichiers + Certification ASR Pro + 3 ANS de Registre AYA offerts) *
-
-                    Une fois le paiement confirmé, vos fichiers seront automatiquement envoyés par email(sous quelques minutes)."
+    "🏆 **Choix Visionnaire.** Vous passez directement au niveau **Propriétaire**."
 
 SI NON :
                     "C'est noté. Je reste ici si besoin."
@@ -520,35 +503,42 @@ export async function POST(req: Request) {
         // Prompt Context Initialization
         let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false, isAyaRegistered: false };
 
-        // PRIORITY 1: Recognition of EXISTING AYA REGISTERED CLIENT (Always check if URL is in last message)
+        // 🔍 DETERMINISTIC TRIGGER CALCULATOR
+        // CRITICAL: We check if a scan has ALREADY been performed in this conversation.
+        const hasScanInHistory = messages.some((m: any) => m.role === 'assistant' && m.content.includes('scan_state'));
+
+        // PRIORITY 1: REGISTRY RECOGNITION (Existing Clients)
         if (urlInLastMessage && !hasFinalScore) {
-            console.log(`🕵️ CHECKING REGISTRY FOR: ${urlInLastMessage}`);
             // @ts-ignore
             const existingClient = await db.getAyaEntityByUrl(urlInLastMessage);
-
             if (existingClient) {
-                console.log(`💎 RECOGNIZED CLIENT: ${existingClient.legal_name}`);
                 triggerMode = "EXISTING_CLIENT";
-            } else if (stepsCompleted === 0) {
-                // Not in registry AND first interaction with this URL -> NEW SCAN
+            } else if (!hasScanInHistory) {
+                // Not in registry AND no scan in history -> FORCE START SCAN
                 triggerMode = "SCAN_AND_QUESTION";
             } else {
-                // URL mentioned but questioning already started
+                // URL repeated but scan already done -> Continue
                 triggerMode = "CONTINUE_QUESTIONING";
             }
         }
-        // PRIORITY 2: Continue conversation if questions are already started
-        else if (hasUrlHistory && stepsCompleted > 0 && !hasFinalScore) {
+        // PRIORITY 2: SALES FUNNEL (Update Profile or Packs)
+        else if (lastMessage.content.toLowerCase().match(/(abonnement|pack pro|update_profile)/)) {
+            triggerMode = lastMessage.content.toLowerCase().includes("update_profile") ? "SCAN_AND_QUESTION" : "SALES_FUNNEL";
+        }
+        // PRIORITY 3: SEQUENTIAL QUESTIONING (If URL in history)
+        else if (hasUrlHistory && !hasFinalScore) {
             if (stepsCompleted < 16) {
                 triggerMode = "CONTINUE_QUESTIONING";
             } else {
                 triggerMode = "FINAL_ANALYSIS";
             }
         }
-        // PRIORITY 3: Fallback (Chat)
+        // PRIORITY 4: CHAT FALLBACK
         else {
             triggerMode = "CHAT";
         }
+
+        console.log(`🎯 TRIGGER MODE: ${triggerMode} | URL: ${detectedUrl} | Steps: ${stepsCompleted} | HasScan: ${hasScanInHistory}`);
 
         console.log(`🎯 TRIGGER MODE CALCULATED: "${triggerMode}"`);
 
@@ -586,8 +576,7 @@ export async function POST(req: Request) {
         }
 
         // 🚀 SALES FUNNEL & UPDATES OVERRIDE
-        if (lowText.includes("pack light") || lowText.includes("pack essential") ||
-            lowText.includes("pack pro") || lowText.includes("confirmer") ||
+        if (lowText.includes("abonnement") || lowText.includes("pack pro") ||
             lowText.includes("valider") || lowText.includes("je reste") ||
             lowText.includes("passer en") || lowText.includes("upgrader") ||
             lowText.includes("update_profile")) {
@@ -973,49 +962,50 @@ GÉNÈRE CE JSON MAINTENANT :
             ];
 
             // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
-            // FORCE: Always ensure Country is evaluated first if not high-confidence
             const validationQueue = allBlockNames.filter(b => lowConfidenceKeys.includes(b));
             const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
-
-            // Prioritize Country (identite.juridical_country) at the very beginning of everything
             let combinedQueue = [...validationQueue, ...questionQueue];
+
+            // Prioritize Country (identite.juridical_country)
             const countryIndex = combinedQueue.indexOf("identite.juridical_country");
             if (countryIndex > 0) {
-                // Move country to first position
                 combinedQueue.splice(countryIndex, 1);
                 combinedQueue.unshift("identite.juridical_country");
             }
 
-            console.log(`📋 QUEUE: ${combinedQueue.length} items to process (${validationQueue.length} validations + ${questionQueue.length} questions)`);
+            console.log(`📋 QUEUE: ${combinedQueue.length} items to process`);
 
-            // Select Next Block based on User Progress
-            let questionIndex = 0;
+            // 🎯 PROGRESS-BASED INDEXING
+            // We use stepsCompleted to point into our 16-point queue.
+            // Turn breakdown:
+            // 0: URL -> SCAN (Done)
+            // 1: Ownership Answer -> calibration Q (or first block)
+            // 2: calibration Answer -> first block from Queue
+            // 3: First block Answer -> second block from Queue...
+
             let nextBlockName = "";
+            let queueIndex = -1;
 
-            // 🆕 STEP 2: ACTIVITY CALIBRATION (Inserted Flow)
             if (stepsCompleted === 1) {
                 nextBlockName = "activity_calibration";
-                triggerMode = "CALIBRATION_STEP"; // Override trigger to handle separately
+                triggerMode = "CALIBRATION_STEP";
             } else {
-                // Normal Queue (Shifted by 1)
-                questionIndex = Math.max(0, stepsCompleted - 2);
-                nextBlockName = combinedQueue[questionIndex] || "FINALISATION";
+                // If stepsCompleted is 2, we want combinedQueue[0]
+                // If stepsCompleted is 3, we want combinedQueue[1]
+                queueIndex = stepsCompleted - 2;
+                nextBlockName = combinedQueue[queueIndex] || "FINALISATION";
             }
-            const isValidationQuestion = lowConfidenceKeys.includes(nextBlockName);
 
-            // Get the detected value for validation questions
+            console.log(`➡️ PROGRESS: Turn=${stepsCompleted} | QueueIdx=${queueIndex} | NextBlock=${nextBlockName}`);
+
+            const isValidationQuestion = lowConfidenceKeys.includes(nextBlockName);
             let detectedValueForValidation = "";
-            // Use stored detected value for validation questions (much simpler!)
             if (isValidationQuestion && detectedValues[nextBlockName]) {
                 detectedValueForValidation = detectedValues[nextBlockName];
             }
 
-            console.log(`➡️ NEXT: ${nextBlockName} (${isValidationQuestion ? 'VALIDATION' : 'FULL QUESTION'})`);
-            if (isValidationQuestion) console.log(`   Detected value: "${detectedValueForValidation}"`);
-
-            // 🛑 CRITICAL FIX: IF QUEUE IS FINISHED, TRIGGER ANALYSIS IMMEDIATELY
             if (nextBlockName === "FINALISATION") {
-                console.log("🏁 Queue exhausted (Natural End). Triggering FINAL_ANALYSIS...");
+                console.log("🏁 All blocks covered. Triggering FINAL_ANALYSIS...");
                 triggerMode = "FINAL_ANALYSIS";
             }
 
@@ -1052,34 +1042,24 @@ L'utilisateur peut te poser des questions sur la visibilité IA. Voici tes véri
 - INDÉPENDANCE : Les fichiers (ASR, FAQ, Manifeste) appartiennent au client. C'est un système OUVERT. Le client n'est pas prisonnier d'une plateforme, il possède son identité sémantique.
 - AIO (AI Optimization) est la nouvelle infrastructure qui remplace le SEO traditionnel dans un monde d'assistants conversationnels.
 
-🚨 RÈGLES DE RÉPONSE HYBRIDE (PEDAGOGUE + GREFFIER) :
+🚨 RÈGLES DE RÉPONSE (EXPERTISE CONCISE) :
 
-1. SI L'UTILISATEUR POSE UNE QUESTION (Pourquoi ? A quoi ça sert ? C'est quoi l'ASR ?) :
-   - Réponds avec expertise et passion dans le champ "intro" du JSON. 
-   - Explique la valeur de l'indépendance, de la visibilité et de la recommandabilité.
-   - PUIS, dans le même JSON, repose la question du bloc **${nextBlockName}**.
+1. SOIS BREF ET DIRECT : Ne fais pas de longs discours de pédagogie PAR DÉFAUT. 
+   - Si l'utilisateur répond simplement, passe direct à la suite avec une transition courte (max 1 phrase).
+   - N'ajoute de la pédagogie (Bible) QUE SI l'utilisateur pose une question explicite (Pourquoi ? C'est quoi ?).
 
-2. SI L'UTILISATEUR RÉPOND À LA QUESTION :
-   - Note la réponse.
-   - Passe au bloc suivant ou valide le bloc actuel.
+2. STRATÉGIE "GREFFIER" : Ta priorité est de remplir le bloc **${nextBlockName}**.
+   - Ne répète JAMAIS la même question si l'utilisateur y a déjà répondu dans l'historique.
+   - Si tu as un doute, valide au lieu de demander à nouveau.
 
-3. STRATÉGIE DE VENTE :
-   - Rappelle subtilement que le diagnostic gratuit mène à un rapport ASR Light, et que la Certification (Pack Essential/Pro) est le seul moyen de garantir la recommandation.
+3. UN SEUL JSON : Réponds OBLIGATOIREMENT au format JSON "question_block".
 
-🚫 RÈGLES TECHNIQUES :
-- RÉPONSE OBLIGATOIREMENT AU FORMAT JSON "question_block".
-- PAS DE MARKDOWN EN DEHORS DU JSON.
-- UNE SEULE QUESTION À LA FOIS.
+### ÉTAT DU DOSSIER :
+- Déjà validé : ${highConfidenceData || 'Aucun'}
+- À valider (Low Confidence) : ${lowConfidenceData || 'Aucun'}
 
-### ÉTAT ACTUEL DU DOSSIER :
-- Client : ${promptScanResult.metaTitle || 'En cours'}
-- URL : ${promptScanResult.url || 'Inconnue'}
-- Données déjà validées : ${highConfidenceData || 'Aucune'}
-
-### TA MISSION IMMÉDIATE : 
-${isValidationQuestion ?
-                        `Confirmer la donnée détectée : "${detectedValueForValidation}" pour le bloc ${nextBlockName}.` :
-                        `Poser la question pour le bloc ${nextBlockName} car nous n'avons aucune donnée.`}
+### MISSION : 
+Poser la question pour le bloc **${nextBlockName}**.
 
 ### FORMAT JSON ATTENDU :
 {
@@ -1127,18 +1107,19 @@ ${isValidationQuestion ?
                         // SKIP LOGIC CHECK
                         else if (parsedResponse.skip === true || (parsedResponse.questions && parsedResponse.questions.length === 0)) {
                             console.log(`⏭️ SKIPPING ${nextBlockName} - Already known.`);
-                            const nextQuestionIndex = questionIndex + 1;
-                            const nextNextBlockName = combinedQueue[nextQuestionIndex] || "FINALISATION";
+                            const currentIdx = combinedQueue.indexOf(nextBlockName);
+                            const nextNextBlockName = combinedQueue[currentIdx + 1] || "FINALISATION";
 
-                            if (nextNextBlockName === "FINALISATION" || nextQuestionIndex >= combinedQueue.length) {
+                            if (nextNextBlockName === "FINALISATION") {
                                 console.log("✅ Triggering FINAL_ANALYSIS...");
                                 triggerMode = "FINAL_ANALYSIS";
+                                finalResponseText = "";
                             } else {
                                 finalResponseText = JSON.stringify({
                                     type: "question_block",
                                     intro: `✅ ${nextBlockName} validé.`,
                                     questions: [{
-                                        id: `q_${nextNextBlockName}`,
+                                        id: `q_${nextNextBlockName.replace('.', '_')}`,
                                         text: `Précision sur ${nextNextBlockName} ?`,
                                         options: ["Oui", "Non"],
                                         allowCustom: true
@@ -1197,10 +1178,15 @@ ${isValidationQuestion ?
                 console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
                 console.log(`🔍 DEBUG: triggerMode = "${triggerMode}", isAnalysisRun will be set to true`);
                 isAnalysisRun = true;
-                let urlToScan = userUrlMatch ? userUrlMatch[0] : (messages[urlMsgIndex].content.match(urlRegex)[0]);
+                let urlToScan = detectedUrl;
+                if (!urlToScan && hasUrlHistory) {
+                    // Emergency fallback if detectedUrl is empty for some reason
+                    const histMatch = messages[actualUrlMsgIndex]?.content?.match(urlRegex);
+                    if (histMatch) urlToScan = histMatch[0];
+                }
 
                 // Normalize URL: Ensure https://
-                if (!urlToScan.startsWith('http')) {
+                if (urlToScan && !urlToScan.startsWith('http')) {
                     urlToScan = 'https://' + urlToScan;
                 }
 
@@ -1530,8 +1516,8 @@ Votre score actuel ne permet pas une recommandation optimale par ChatGPT ou Gemi
 Pour activer votre visibilité, choisissez votre niveau de certification :`,
                     questions: [{
                         id: "pack_intention",
-                        text: "Sélectionnez votre Pack :",
-                        options: ["🔹 Pack LIGHT — Gratuit", "🛡 Pack ESSENTIAL — 99 CHF", "🚀 Pack PRO — 499 CHF"],
+                        text: "Sélectionnez votre Pack pour activer votre recommandation :",
+                        options: ["🔄 Abonnement AYA — 19 CHF/mois", "🚀 Pack PRO — 499 CHF (Propriété)"],
                         allowCustom: false,
                         allowMultiple: false
                     }]
@@ -1547,307 +1533,80 @@ Pour activer votre visibilité, choisissez votre niveau de certification :`,
                 Veuillez réessayer ou contacter hello@ai-visionary.com.`;
             }
         } else if (!finalResponseText) {
-            // 🎯 PACK SELECTION & SALES FUNNEL LOGIC (2-STEP UPSELL FLOW)
+            // 🎯 PACK SELECTION & SALES FUNNEL LOGIC
             const userContent = lastMessage.content.trim().toLowerCase();
             const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
             const emailMatch = userContent.match(emailCaptureRegex);
 
-            // ---------------------------------------------------------
-            // ÉTAPE 1 : RÉPONSE À L'INTENTION (DISPLAY PITCH / UPSELL)
-            // ---------------------------------------------------------
+            console.log("🔍 SALES FUNNEL - content:", userContent);
 
-            console.log("🔍 DEBUG PACK SELECTION - content:", userContent);
-
-            // SECURITY CATCH-ALL FOR ESSENTIAL (Force match if containing key terms)
-            if (userContent.includes("essential") && userContent.includes("99")) {
-                console.log("🎯 SECURITY MATCH: ESSENTIAL 99 DETECTED -> Force Presentation");
-                // Check if it's a validation or initial selection
+            // 1. INTENTION DETECTION & PITCHES
+            // 🔄 CASE: ABONNEMENT AYA (19 CHF / MOIS)
+            if (userContent.includes("abonnement") || (userContent.includes("aya") && userContent.includes("19"))) {
+                console.log("🎯 Selection: Abonnement AYA");
                 if (userContent.includes("valider") || userContent.includes("confirmer")) {
-                    console.log("-> Direct Validation");
-                    finalResponseText = `🛡 **Choix Validé : PACK ESSENTIAL (99 CHF).**\nVous avez fait le choix de la sécurité et de la visibilité certifiée.\n\n👉 **Entrez votre email professionnel pour finaliser la commande :**\nEX : hello@votre-domaine.com`;
+                    finalResponseText = `🔄 **Choix Validé : ABONNEMENT AYA (19 CHF/mois).**\nVous activez votre présence prioritaire dans le Registre AYA.\n\n👉 **Entrez votre email professionnel pour finaliser l'abonnement :**\nEX : hello@votre-domaine.com`;
                 } else {
-                    console.log("-> Initial Pitch");
                     finalResponseText = JSON.stringify({
                         type: "question_block",
-                        intro: `**OPPORTUNITÉ STRATÉGIQUE**
-Votre entreprise est déjà visible et lisible.
-Mais est-elle recommandable par les IA ?
+                        intro: `**VISIBILITÉ IA-NATIVE (ABONNEMENT)**
 
-Votre score actuel montre que votre site existe et fonctionne.
-Mais les IA ne se contentent plus de lire des pages :
-elles doivent comprendre, qualifier et décider.
+L'Abonnement AYA est conçu pour les entreprises qui veulent des résultats sans complexité technique.
 
-Sans structure claire, elles hésitent.
-**Quand elles hésitent, elles évitent de vous recommander.**
+**Bénéfices Immédiats :**
+- ✅ **Registre AYA Actif** : Priorité absolue auprès des bots IA.
+- ✅ **Données Hébergées** : Nous portons vos fichiers ASR/FAQ sur nos infrastructures sécurisées.
+- ✅ **Anti-Hallucination** : Source de données officielle et signée.
+- ✅ **Évolutif** : Mises à jour incluses.
 
-La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
-
-**COMMENT FONCTIONNE AI-VISIONARY**
-
-Elle a créé AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
-
-Selon le niveau choisi, vous obtenez :
-- une analyse claire
-- une certification officielle ASR
-- des fichiers AI-Native exploitables
-- et un avantage durable dans un internet en mutation
-
-Bravo vous avez choisi le **PACK ESSENTIAL**. Vous offrez à votre entreprise les moyens d'être pleinement visible et lisible par les IA.
-
-**PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)**
-
-**Obtenir mon ID ASR — Essential**
-(Certification ASR Essential + Analyse détaillée + Envoi par email)
-
-**Documents fournis par AYO**
-- **asr.json (Essential)**
-→ Identité, offre, signaux techniques, conformité minimale
-- **manifest.json**
-→ Règles claires pour les robots et IA
-- **faq.json**
-→ Réponses structurées directement exploitables par les moteurs IA
-- **Analyse AYO détaillée** (PDF ou email)
-
-**Bénéfices concrets**
-- Votre entreprise devient une entité identifiable sans ambiguïté
-- Les IA savent qui vous êtes, ce que vous faites, dans quel contexte vous citer
-- Réduction du risque d’erreur, d’approximation ou de silence IA
-- Base stable et durable, indépendante du SEO
-
-Recommandé pour toute entreprise souhaitant rester visible à moyen terme.`,
+**Tarif : 19 CHF / mois (Sans engagement)**`,
                         questions: [{
-                            id: "confirm_essential",
+                            id: "confirm_subscription",
                             text: "Votre décision finale :",
-                            options: ["Valider ESSENTIAL (99 CHF)", "Upgrader en PRO (499 CHF)"],
+                            options: ["Valider l'ABONNEMENT (19 CHF/mois)", "Upgrader vers la PROPRIÉTÉ (499 CHF)"],
+                            allowCustom: false
+                        }]
+                    });
+                }
+            }
+            // 🚀 CASE: PACK PRO (499 CHF)
+            else if (userContent.includes("pro") || userContent.includes("499") || userContent.includes("propriété")) {
+                console.log("🎯 Selection: Pack PRO");
+                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("passer") || userContent.includes("upgrader")) {
+                    finalResponseText = `🚀 **Choix Validé : PACK PRO (Propriété).**\nPropriété Totale de vos actifs sémantiques. 3 ans de Registre inclus.\n\n👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
+                } else {
+                    finalResponseText = JSON.stringify({
+                        type: "question_block",
+                        intro: `**DEVENIR UNE RÉFÉRENCE (PACK PRO)**
+
+Vous offrez à votre entreprise la possibilité réelle d'être visible et recommandable par les IA avec une propriété totale de vos actifs.
+
+**Documents fournis (Complet) :**
+- 👑 **asr.json (PRO, signé)** → Contexte & critères IA avancés.
+- ⚙️ **manifest.json (PRO)** → Politique de recommandation stricte.
+- 💬 **faq.json enrichi** → Réponses contextuelles pour LLMs.
+- 📖 **glossary.json** → Vocabulaire métier précis.
+- 🌐 **external_context.json** → Avis et signaux encapsulés.
+- 📄 **3 ANS de Registre AYA inclus**.
+
+**Tarif : 499 CHF (Achat unique)**`,
+                        questions: [{
+                            id: "confirm_pro",
+                            text: "Votre décision finale :",
+                            options: ["Valider le PACK PRO (499 CHF)", "Prendre l'ABONNEMENT (19 CHF)"],
                             allowCustom: false
                         }]
                     });
                 }
             }
 
-            // CAS A-2 : CONFIRMATION CHOIX LIGHT (FIX BUG BOUCLE INFINIE)
-            else if (userContent.includes("je reste en light") || (userContent.includes("light") && userContent.includes("reste"))) {
-                console.log("🎯 User CONFIRMED LIGHT -> Asking Email");
-                finalResponseText = `Merci de confirmer votre choix pour le PACK LIGHT.
-                 
-👉 Entrez votre email professionnel pour recevoir votre lien d'activation :
-EX : hello@votre-domaine.com`;
-            }
-
-            // CAS A : INTENTION "PACK LIGHT" (Afficher le pitch complet + choix final)
-            else if (userContent.includes("pack light") || (userContent.includes("light") && !userContent.includes("reste") && !userContent.includes("confirme"))) {
-                console.log("🎯 User Selection: Pack LIGHT");
-                finalResponseText = JSON.stringify({
-                    type: "question_block",
-                    intro: `**OPPORTUNITÉ STRATÉGIQUE**
- 
-Votre entreprise est déjà à minima visible.
-Mais est-elle lisible et recommandable par les IA ?
- 
-Votre score actuel montre que votre site existe et fonctionne.
-Mais les IA ne se contentent plus de lire des pages :
-elles doivent comprendre, qualifier et décider.
- 
-Sans structure claire, elles hésitent.
-**Quand elles hésitent, elles évitent de vous recommander.**
- 
-La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
- 
-**COMMENT FONCTIONNE AI-VISIONARY**
- 
-Elle a créé AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
- 
-Selon le niveau choisi, vous obtenez :
-- une analyse claire
-- une certification officielle ASR
-- des fichiers AI-Native exploitables
-- et un avantage durable dans un internet en mutation
- 
-**PACK LIGHT — DÉMARRER (gratuit / accès direct)**
- 
-**Cliquer sur “LIGHT”**
- 
-**Ce que vous obtenez**
-- Analyse détaillée de votre site par AYO
-- Score AIO (lisibilité actuelle pour les IA)
-- Certification ASR simple (niveau LIGHT)
- 
-**Bénéfices concrets**
-- Comprendre comment les IA perçoivent votre site aujourd’hui
-- Identifier ce qui bloque la compréhension
-- Poser une première existence lisible pour les IA
-- Sans engagement, sans modification de votre site
- 
-Idéal pour explorer, tester et comprendre.`,
-                    questions: [{
-                        id: "confirm_light",
-                        text: "Votre décision finale",
-                        options: ["Je reste en LIGHT (Gratuit)", "Passer en ESSENTIAL (99 CHF)", "Passer en PRO (499 CHF)"],
-                        allowCustom: false
-                    }]
-                });
-            }
-
-            // CAS B-2 : CONFIRMATION CHOIX ESSENTIAL (FIX BUG BOUCLE INFINIE - MUST BE BEFORE GENERIC)
-            else if (userContent.includes("valider essential") || (userContent.includes("essential") && (userContent.includes("99") || userContent.includes("valider") || userContent.includes("confirmer")))) {
-                console.log("🎯 User CONFIRMED ESSENTIAL -> Asking Email");
-                finalResponseText = `🛡 **Choix Validé : PACK ESSENTIAL (99 CHF).**\nVous avez fait le choix de la sécurité et de la visibilité certifiée.\n\n👉 **Entrez votre email professionnel pour finaliser la commande :**\nEX : hello@votre-domaine.com`;
-            }
-
-            // CAS B : INTENTION "PACK ESSENTIAL" (AFFICHAGE PITCH INITIAL)
-            else if (userContent.includes("pack essential") || (userContent.includes("essential") && !userContent.includes("valider") && !userContent.includes("confirmer") && !userContent.includes("99"))) {
-                console.log("🎯 User Selection: Pack ESSENTIAL");
-                finalResponseText = JSON.stringify({
-                    type: "question_block",
-                    intro: `**OPPORTUNITÉ STRATÉGIQUE**
- 
-Votre entreprise est déjà visible et lisible.
-Mais est-elle recommandable par les IA ?
- 
-Votre score actuel montre que votre site existe et fonctionne.
-Mais les IA ne se contentent plus de lire des pages :
-elles doivent comprendre, qualifier et décider.
- 
-Sans structure claire, elles hésitent.
-**Quand elles hésitent, elles évitent de vous recommander.**
- 
-La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
- 
-**COMMENT FONCTIONNE AI-VISIONARY**
- 
-Elle a créé AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
- 
-Selon le niveau choisi, vous obtenez :
-- une analyse claire
-- une certification officielle ASR
-- des fichiers AI-Native exploitables
-- et un avantage durable dans un internet en mutation
- 
-Bravo vous avez choisi le **PACK ESSENTIAL**. Vous offrez à votre entreprise les moyens d'être pleinement visible et lisible par les IA.
- 
-**PACK ESSENTIAL — ÊTRE RECONNAISSABLE (99 CHF)**
- 
-**Obtenir mon ID ASR — Essential**
-(Certification ASR Essential + Analyse détaillée + Envoi par email)
- 
-**Documents fournis par AYO**
-- **asr.json (Essential)** → Identité, offre, signaux techniques
-- **manifest.json** → Règles claires pour les robots
-- **faq.json** → Réponses structurées IA
-- **Analyse AYO détaillée**
- 
-**Bénéfices concrets**
-- Votre entreprise devient une entité identifiable sans ambiguïté
-- Les IA savent qui vous êtes et dans quel contexte vous citer
-- Réduction du risque d’erreur ou de silence IA
-- Base stable et durable, indépendante du SEO
- 
-Recommandé pour toute entreprise souhaitant rester visible à moyen terme.`,
-                    questions: [{
-                        id: "confirm_essential",
-                        text: "Votre décision finale :",
-                        options: ["Valider ESSENTIAL (99 CHF)", "Upgrader en PRO (499 CHF)"],
-                        allowCustom: false
-                    }]
-                });
-            }
-
-            // CAS C : INTENTION "PACK PRO" -> VICTOIRE IMMÉDIATE
-            else if (userContent.includes("pack pro") || (userContent.match(/\bpro\b/) && !userContent.includes("passer") && !userContent.includes("upgrader"))) {
-                console.log("🎯 User Selection: Pack PRO");
-                // DIRECT TO EMAIL
-                finalResponseText = `OPPORTUNITÉ STRATÉGIQUE
- 
-Votre entreprise est déjà visible et lisible.
-Mais est-elle recommandable par les IA ?
- 
-Votre score actuel montre que votre site existe et fonctionne.
-Mais les IA ne se contentent plus de lire des pages :
-elles doivent comprendre, qualifier et décider.
- 
-Sans structure claire, elles hésitent.
-Quand elles hésitent, elles évitent de vous recommander.
- 
-La Certification AIO / ASR transforme votre site en source exploitable par les IA, aujourd’hui et demain.
- 
-COMMENT FONCTIONNE AI-VISIONARY
- 
-Elle a créer AYO, un agent complexe qui analyse exclusivement les informations publiées sur votre site internet, puis génère des fichiers lisibles par les IA, sans modifier votre contenu, sans SEO artificiel.
- 
-Selon le niveau choisi, vous obtenez :
-une analyse claire
-une certification officielle ASR
-des fichiers AI-Native exploitables
-et un avantage durable dans un internet en mutation
-
-Vous avez choisi le PACK PRO BRAVO. Vous offrez à votre entreprise la possibilité réelle d'être visible et recommandable par les IA.
-
-PACK PRO — DEVENIR UNE RÉFÉRENCE (499 CHF)
-
-(Certification ASR PRO + Analyse complète + Glossaire + Fichiers AI-Native avancés)
-
-Documents fournis (complet)
-asr.json (PRO, signé) → Contexte & critères IA avancés
-manifest.json (PRO) → Politique de recommandation stricte
-faq.json enrichi → Réponses contextuelles pour LLMs
-glossary.json → Vocabulaire métier précis, zéro hallucination
-external_context.json → Avis et signaux encapsulés
-Analyse AYO complète & stratégique
-
-Bénéfices concrets
-Votre site devient une source de référence fiable pour les IA
-Compatibilité avec le web actuel (avis, intentions)
-Préparation au monde post-SEO sans refonte future
-Avantage concurrentiel durable : structurer l’essentiel
-
-Destiné aux entreprises qui prennent une longueur d’avance.
-
-👉 Entrez votre email professionnel pour recevoir votre lien d'activation :
-EX : hello@votre-domaine.com`;
-            }
-
-            // ---------------------------------------------------------
-            // ÉTAPE 2 : VALIDATION FINALE & EMAIL (AFTER UPSELL)
-            // ---------------------------------------------------------
-
-            // VALIDATION FINAL LIGHT
-            else if (userContent.includes("reste en light") || userContent.includes("light")) {
-                finalResponseText = `🔹 **C'est noté. Pack LIGHT validé.**
-Vous recevrez votre rapport d'audit technique et votre Certification ASR (Niveau Light) par email.
-
-👉 **Entrez votre email pour recevoir vos documents gratuits :**`;
-            }
-
-            // VALIDATION FINAL ESSENTIAL (Moved to higher priority above - this is now a fallback only for edge cases)
-            // NOTE: Primary handling is now at line ~1473 to prevent infinite loop
-
-            // VALIDATION FINAL PRO
-            else if (userContent.includes("passer en pro") || userContent.includes("upgrader") || userContent.includes("pro") || userContent.includes("499")) {
-                finalResponseText = `🚀 **Choix Validé : PACK PRO.**
-Bienvenue dans l'élite des entreprises AI-Ready.
-
-👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
-            }
-
-            // ---------------------------------------------------------
-            // ÉTAPE 3 : GESTION DE L'EMAIL (SCENARIO 2)
-            // ---------------------------------------------------------
-
-            // SCENARIO 2 : User provides Email (Update DB & Offer Payment/Report)
-            // SCENARIO 2 : User provides Email (Update DB & Offer Payment/Report)
+            // 2. EMAIL HANDLING & PAYMENT LINK GENERATION
             else if (lastMessage.role === 'user' && emailMatch) {
                 const userEmail = emailMatch[0];
-                console.log(`📧 DETECTED EMAIL: ${userEmail}. Updating Analysis Record...`);
+                console.log(`📧 DETECTED EMAIL: ${userEmail}`);
 
-                // CRITICAL: Save email for PaymentHandler recovery (Post-Payment Redirect)
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('ayo_customer_email', userEmail);
-                }
-
-                // 1. Find the URL created in previous steps from history
+                // Find the URL from history
                 const historyUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
-
-                // Find the user message that contained the URL (and was NOT an email)
                 const historyUrlMatchMsg = messages.find((m: any) => {
                     const isMsgEmail = m.content.trim().match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/);
                     return m.role === 'user' && m.content.match(historyUrlRegex) && !isMsgEmail;
@@ -1860,87 +1619,57 @@ Bienvenue dans l'élite des entreprises AI-Ready.
                     if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
                 }
 
-                if (detectedUrl) {
-                    // Update DB with Email
-                    try {
-                        const existingAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
-                        if (existingAnalysis) {
-                            await db.saveAnalysis(existingAnalysis.id, { email: userEmail });
-                            console.log(`✅ DB UPDATED: ${userEmail} linked to Analysis ${existingAnalysis.id}`);
-                        }
-                    } catch (dbErr) { console.error("❌ Failed to link email:", dbErr); }
+                // Identify plan from context
+                const lastAssistantMsg = messages[messages.length - 2]?.content || "";
+                let selectedPlan = "AYA_SUB"; // Default to sub if unsure
+                if (lastAssistantMsg.includes("PRO") || lastAssistantMsg.includes("499")) selectedPlan = "PRO";
+
+                console.log(`🎯 TARGET PLAN: ${selectedPlan}`);
+
+                // Generate Redirect Link
+                let actionLink = "";
+                const payload = { u: detectedUrl || "unknown", e: userEmail };
+                const b64 = Buffer.from(JSON.stringify(payload)).toString('base64');
+                const stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
+
+                if (selectedPlan === "PRO") {
+                    actionLink = `https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix}`;
+                } else {
+                    actionLink = `https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix}`;
                 }
 
-                // 2. IDENTIFY CHOSEN PACK FROM ASSISTANT HISTORY
-                // We look at the LAST assistant message (before the user's email) to see what Pack was confirmed
-                const lastAssistantMsg = messages[messages.length - 2]?.content || ""; // -1 is user email, -2 is assistant prompt
-
-                let selectedPlan = "light"; // Default
-                if (lastAssistantMsg.includes("PACK ESSENTIAL")) selectedPlan = "essential";
-                else if (lastAssistantMsg.includes("PACK PRO")) selectedPlan = "pro";
-
-                console.log(`🎯 DETECTED PLAN FROM CONTEXT: ${selectedPlan}`);
-
-                // 3. GENERATE LINK
-                let actionLink = "";
-                let stripeSuffix = "";
-
-                try {
-                    const payload = { u: detectedUrl || "unknown", e: userEmail };
-                    const jsonStr = JSON.stringify(payload);
-                    const b64 = Buffer.from(jsonStr).toString('base64');
-                    // Ensure < 255 chars for Stripe client_reference_id
-                    if (b64.length <= 200) {
-                        stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
-                    }
-                } catch (e) { console.error("Stripe Param Error", e); }
-
-                if (selectedPlan === "essential") {
-                    actionLink = `https://buy.stripe.com/test_dRm5kFc1W1YA1GdfHfcV200${stripeSuffix}`;
+                if (selectedPlan === "PRO") {
                     finalResponseText = `✅ **Email enregistré.**
 
-🛡 **Finaliser ma commande PACK ESSENTIAL (99 CHF)**
+🚀 **Finaliser mon PACK PRO - Propriété (499 CHF)**
 
-**Inclus dans votre Pack :**
-🆔 **asr.json** (Fichier d'identité ASR)
-⚙️ **manifest.json** (Protocoles techniques)
-💬 **faq.json** (Réponses optimisées IA)
-📄 **Certificat ASR** (Document PDF)
+**Inclus :**
+👑 **ASR PRO (Signé)** + Manifest + FAQ
+📖 **Glossaire Métier** complet
+🌐 **Fichier Contexte Externe**
+📜 **3 Ans de Registre AYA** inclus
 
-👉 **[Payer et recevoir mon ASR Essential](${actionLink})**
+👉 **[Acheter mes actifs sémantiques](${actionLink})**
 
-*Vous recevrez votre reçu et vos fichiers instantanément après validation.*`;
-
-                } else if (selectedPlan === "pro") {
-                    actionLink = `https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix}`;
-                    finalResponseText = `✅ **Email enregistré.**
-
-🚀 **Finaliser ma commande PACK PRO (499 CHF)**
-
-**Inclus dans votre Pack :**
-👑 **asr.json** (Certification PRO Signée)
-⚙️ **manifest.json** (Protocoles avancés)
-📖 **glossary.json** (Vocabulaire métier)
-💬 **faq.json** (Enrichie)
-🌐 **external_context.json** (Gestion de réputation)
-
-👉 **[Payer et recevoir mon ASR PRO (Complet)](${actionLink})**
-
-*Vous recevrez votre reçu et vos fichiers instantanément après validation.*`;
-
+*Vous recevrez vos fichiers et votre certificat instantanément après validation.*`;
                 } else {
-                    // LIGHT (Default)
-                    actionLink = `https://ai-visionary.com/api/light-report?email=${encodeURIComponent(userEmail)}&url=${encodeURIComponent(detectedUrl || "")}`;
                     finalResponseText = `✅ **Email enregistré.**
 
-🔹 **Activer mon PACK LIGHT (Gratuit)**
+🔄 **Finaliser mon ABONNEMENT AYA (19 CHF/mois)**
 
-👉 **[Recevoir mon rapport AIO maintenant](${actionLink})**
+**Votre accès privilège :**
+📡 **Présence Active** dans le Registre AYA
+🛡 **Anti-Hallucination** (Données vérifiées)
+⚡ **Priorité de recommandation** IA
+🔄 **Mises à jour illimitées**
 
-*Votre rapport détaillé est en cours de génération et arrivera dans votre boîte mail d'ici quelques minutes.*`;
+👉 **[Activer mon Abonnement maintenant](${actionLink})**
+
+*Vous serez redirigé vers notre plateforme de paiement sécurisée.*`;
                 }
             }
-        } // END OF ELSE BLOCK (Email Logic)
+        }
+        // END OF ELSE BLOCK (Email Logic)
 
         // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
         // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
@@ -2057,6 +1786,22 @@ Bienvenue dans l'élite des entreprises AI-Ready.
                 }
             }
         } catch (e) { console.warn("Stripe Param Gen Error", e); }
+
+        // -----------------------------------------------------------------------
+        // FINAL FALLBACK: GENERIC CHAT (INTELLIGENT REPLIES)
+        // -----------------------------------------------------------------------
+        if (!finalResponseText) {
+            console.log("🧠 NO TRIGGER MATCHED -> Standard Chat Generation...");
+
+            const chatResult = await generateText({
+                model: modelToUse,
+                temperature: 0.7, // More creative for chat
+                system: finalSystemPrompt + "\n\n⚠️ IMPORTANT : Reste concentré sur la mission AYO. Si l'utilisateur n'a pas donné d'URL, demande-la poliment.",
+                messages: messages
+            });
+
+            finalResponseText = chatResult.text;
+        }
 
         return new Response(JSON.stringify({ text: finalResponseText }), {
             status: 200,

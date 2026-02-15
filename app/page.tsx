@@ -250,40 +250,22 @@ export default function Home() {
       <section id="pricing" className="section pricing-section">
         <div className="container" style={{ textAlign: "center" }}>
           <h2 className="section-title" style={{ fontSize: "2.5rem" }}>Investissez dans votre infrastructure sémantique.</h2>
-          <div className="grid-3 pricing-grid">
+          <div className="grid-2 pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', maxWidth: '900px', margin: '0 auto' }}>
 
-            {/* OPTION 1 : GRATUIT (PRODUIT D'APPEL) */}
-            <div className="card pricing-card">
-              <h3>Diagnostic AIO <br /><span className="card-subtitle">Test de Visibilité</span></h3>
-              <div className="price">Gratuit</div>
-              <p className="price-details">Analyse technique complète + Génération de votre Identité IA de base (ASR Light).</p>
-              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <li>✅ Scan technique du site</li>
-                <li>✅ Score de lisibilité IA</li>
-                <li>✅ Fichier identité JSON (Light)</li>
-                <li style={{ textDecoration: 'line-through', opacity: 0.6 }}>Registre AYA complet</li>
-              </ul>
-              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic?pack=light" className="btn btn-secondary w-full" style={{ width: '100%' }}>
-                  Lancer l'audit
-                </Link>
-              </div>
-            </div>
-
-            {/* OPTION 2 : ABONNEMENT (LOCATION VISIBILITÉ) - NOUVEAU */}
+            {/* OPTION 1 : ABONNEMENT (LOCATION VISIBILITÉ) */}
             <div className="card pricing-card featured" style={{ border: '2px solid var(--primary-color)' }}>
               <div style={{ background: 'var(--primary-color)', color: 'white', padding: '5px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', display: 'inline-block', marginBottom: '10px' }}>
                 RECOMMANDÉ POUR DÉMARRER
               </div>
               <h3>Abonnement AYA <br /><span className="card-subtitle">Visibilité IA-Native</span></h3>
               <div className="price">19 CHF <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>/ mois</span></div>
-              <p className="price-details">Location de votre présence dans le registre AYA. Sans toucher à votre site.</p>
+              <p className="price-details">Activation de votre présence dans le registre AYA. Sans toucher à votre site.</p>
               <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                 <li>✅ <strong>Registre AYA Actif</strong> (Priorité IA)</li>
                 <li>✅ Données hébergées par AYA</li>
-                <li>✅ Recommandabilité immédiate</li>
-                <li>✅ Mises à jour illimitées</li>
-                <li style={{ textDecoration: 'line-through', opacity: 0.6 }}>Propriété des fichiers sources</li>
+                <li>✅ Recommandabilité officielle</li>
+                <li>✅ Mises à jour incluses</li>
+                <li>✅ Signature cryptographique</li>
               </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary w-full" style={{ width: '100%' }}>
@@ -292,17 +274,18 @@ export default function Home() {
               </div>
             </div>
 
-            {/* OPTION 3 : ACHAT (INVESTISSEMENT PATRIMONIAL) */}
+            {/* OPTION 2 : ACHAT (INVESTISSEMENT PATRIMONIAL) */}
             <div className="card pricing-card">
-              <h3>Pack AYO Full <br /><span className="card-subtitle">Propriété & Sémantique</span></h3>
+              <h3>Pack PRO Propriété <br /><span className="card-subtitle">Actifs Sémantiques</span></h3>
 
               <div className="price">499 CHF <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>one-shot</span></div>
-              <p className="price-details">Achat définitif de vos actifs sémantiques (ASR, FAQ, Manifeste). Vous possédez la donnée.</p>
+              <p className="price-details">Achat définitif de vos fichiers sources sémantiques (ASR, FAQ, Manifeste). Vous possédez votre identité digitale.</p>
               <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                 <li>✅ <strong>3 ANS de Registre AYA offerts</strong></li>
-                <li>✅ Fichiers Sources (ASR, FAQ, Manifeste)</li>
-                <li>✅ Indépendance technique</li>
-                <li>✅ Propriété intellectuelle totale</li>
+                <li>✅ Fichiers Sources complets (JSON-LD, ASR)</li>
+                <li>✅ Indépendance technique totale</li>
+                <li>✅ Propriété intellectuelle garantie</li>
+                <li>✅ Analyse AYO exhaustive</li>
               </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic?pack=pro" className="btn btn-secondary w-full" style={{ width: '100%' }}>
@@ -310,6 +293,7 @@ export default function Home() {
                 </Link>
               </div>
             </div>
+
           </div>
 
         </div>
