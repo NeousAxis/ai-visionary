@@ -491,88 +491,87 @@ export async function POST(req: Request) {
         console.log(`DEBUG: hasFinalScore=${hasFinalScore}`);
         console.log(`DEBUG: hasQuestionBlockSent=${hasQuestionBlockSent}`);
 
+        // 🎯 TARGET URL IDENTIFICATION
+        const urlInLastMessage = userUrlMatch ? userUrlMatch[0] : null;
+
+        console.log(`🎯 TRIGGER ANALYSIS: urlInLastMessage=${urlInLastMessage}, stepsCompleted=${stepsCompleted}, hasFinalScore=${hasFinalScore}`);
+
         let triggerMode = "CHAT";
 
-        // PRIORITY 1: User has given URL, no answers yet → SCAN_AND_QUESTION
-        if (hasUrlHistory && stepsCompleted === 0 && !hasFinalScore) {
-            triggerMode = "SCAN_AND_QUESTION";
-            console.log(`✅ TRIGGER MODE: ${triggerMode} (URL in history, 0 responses)`);
+        // PRIORITY 1: Recognition of EXISTING AYA REGISTERED CLIENT
+        if (urlInLastMessage && !hasQuestionBlockSent && !hasFinalScore) {
+            console.log(`🕵️ CHECKING REGISTRY FOR: ${urlInLastMessage}`);
+            // @ts-ignore
+            const existingClient = await db.getAyaEntityByUrl(urlInLastMessage);
+
+            if (existingClient) {
+                console.log(`💎 RECOGNIZED CLIENT: ${existingClient.legal_name}`);
+                triggerMode = "EXISTING_CLIENT";
+            } else {
+                // Not in registry -> NEW SCAN
+                triggerMode = "SCAN_AND_QUESTION";
+            }
         }
-        // PRIORITY 2: User gave URL in CURRENT message and no question sent yet → FORCE SCAN_AND_QUESTION
-        else if (userUrlMatch && !hasQuestionBlockSent && !hasFinalScore) {
-            triggerMode = "SCAN_AND_QUESTION";
-            console.log(`✅ TRIGGER MODE: ${triggerMode} (FORCED - URL in current message)`);
-        }
-        // PRIORITY 3: User has answered questions → CONTINUE or FINAL
+        // PRIORITY 2: Continue conversation if questions are already started
         else if (hasUrlHistory && stepsCompleted > 0 && !hasFinalScore) {
             if (stepsCompleted < 16) {
                 triggerMode = "CONTINUE_QUESTIONING";
             } else {
                 triggerMode = "FINAL_ANALYSIS";
             }
-            console.log(`✅ TRIGGER MODE: ${triggerMode} (stepsCompleted: ${stepsCompleted})`);
-        } else {
-            console.log(`⚠️ TRIGGER MODE: ${triggerMode} (FALLBACK - LLM will handle)`);
+        }
+        // PRIORITY 3: Fallback (Chat)
+        else {
+            triggerMode = "CHAT";
         }
 
-        console.log(`🎯 TRIGGER MODE CALCULATED: "${triggerMode}" (stepsCompleted: ${stepsCompleted}, hasUrlHistory: ${hasUrlHistory}, hasFinalScore: ${hasFinalScore})`);
+        console.log(`🎯 TRIGGER MODE CALCULATED: "${triggerMode}"`);
 
-        // 🚀 OVERRIDE: SALES FUNNEL DETECTION (Prevent Infinite Loop)
-        const lowerContent = lastMessage.content.toLowerCase();
+        // 🛡️ HANDLER: EXISTING_CLIENT (Immediate Recognition)
+        if (triggerMode === "EXISTING_CLIENT") {
+            const urlMatch_ec = lastMessage.content.match(urlRegex);
+            const ec_url = urlMatch_ec ? urlMatch_ec[0] : "";
+            // @ts-ignore
+            const client = await db.getAyaEntityByUrl(ec_url);
 
-        // 🛡️ CRITICAL INTELLIGENT ROUTING: 
-        // 1. We first normalize the URL to check if this entity is already in our registry.
-        const urlMatch = lastMessage.content.match(urlRegex);
-        const currentUrl = urlMatch ? urlMatch[0] : null;
-
-        if (currentUrl && !hasQuestionBlockSent && !hasFinalScore) {
-            const normalizedUrl = db.normalizeUrl(currentUrl);
-            console.log(`🕵️ CHECKING REGISTRY FOR: ${normalizedUrl}`);
-
-            // @ts-ignore - We added this in previous step
-            const existingClient = await db.getAyaEntityByUrl(currentUrl);
-
-            if (existingClient) {
-                console.log(`💎 RECOGNIZED CLIENT: ${existingClient.legal_name} (ID: ${existingClient.aya_entity_id})`);
-
-                return new Response(JSON.stringify({
-                    text: `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${existingClient.display_name || existingClient.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :\n1. 🔄 **Faire une mise à jour** de vos informations ?\n2. 📜 **Voir votre certificat** d'AIO Compliance ?\n3. ⚙️ **Gérer votre abonnement** ou résilier ?`,
-                    buttons: [
-                        { label: "Mettre à jour ma fiche 🔄", action: "update_profile" },
-                        { label: "Voir mon certificat 📜", action: "view_certificate", url: `https://ai-visionary.com/certificate/${existingClient.aya_entity_id}` },
-                        { label: "Gérer mon abonnement / Résilier ⚙️", action: "manage_subscription" }
-                    ]
-                }), { status: 200 });
-            }
-        }
-
-        // 🛡️ CRITICAL INTELLIGENT ROUTING: SUBSCRIPTION MANAGEMENT
-        if (lowerContent.includes("manage_subscription") || lowerContent.includes("gérer mon abonnement") || lowerContent.includes("résilier")) {
             return new Response(JSON.stringify({
-                text: `⚙️ **Gestion de votre Abonnement**\n\nVous pouvez gérer votre abonnement, mettre à jour votre mode de paiement ou résilier directement via votre portail client sécurisé Stripe.\n\n👉 **[Accéder à mon Portail de Gestion (Stripe)](https://billing.stripe.com/p/login/test_91ceX9c6E6075908ww)**\n\n*(Lien sécurisé lié à votre email de facturation)*`,
-                buttons: [{ label: "Retour au début 👋", action: "restart" }]
-            }), { status: 200 });
+                text: `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${client.display_name || client.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :\n1. 🔄 **Faire une mise à jour** de vos informations ?\n2. 📜 **Voir votre certificat** d'AIO Compliance ?\n3. ⚙️ **Gérer votre abonnement** ou résilier ?`,
+                buttons: [
+                    { label: "Mettre à jour ma fiche 🔄", action: "update_profile" },
+                    { label: "Voir mon certificat 📜", action: "view_certificate", url: `https://ai-visionary.com/certificate/${client.aya_entity_id}` },
+                    { label: "Gérer mon abonnement / Résilier ⚙️", action: "manage_subscription" }
+                ]
+            }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // 🛡️ HANDLER: SUBSCRIPTION & CERTIFICATE (Quick Actions)
+        const lowText = lastMessage.content.toLowerCase();
+        if (lowText.includes("manage_subscription") || lowText.includes("résilier")) {
+            return new Response(JSON.stringify({
+                text: `⚙️ **Gestion de votre Abonnement**\n\nVous pouvez gérer votre abonnement, résilier ou modifier votre mode de paiement via le portail Stripe officiel.\n\n👉 **[Accéder à mon Portail Stripe](https://billing.stripe.com/p/login/test_91ceX9c6E6075908ww)**`,
+                buttons: [{ label: "Retour", action: "restart" }]
+            }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
 
         // 🛡️ CRITICAL INTELLIGENT ROUTING: CERTIFICATE VIEW
-        if (lowerContent.includes("view_certificate")) {
+        if (lowText.includes("view_certificate")) {
             return new Response(JSON.stringify({
                 text: `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/certificate/latest)**\n\nIl atteste de votre structure de donnée compatible IA.`,
                 buttons: [{ label: "Retour", action: "back" }]
             }), { status: 200 });
         }
 
-        // 🚀 OVERRIDE: SALES FUNNEL DETECTION (Prevent Infinite Loop)
-        if (lowerContent.includes("pack light") || lowerContent.includes("pack essential") ||
-            lowerContent.includes("pack pro") || lowerContent.includes("confirmer") ||
-            lowerContent.includes("valider") || lowerContent.includes("je reste") ||
-            lowerContent.includes("passer en") || lowerContent.includes("upgrader") ||
-            lowerContent.includes("update_profile")) {
+        // 🚀 SALES FUNNEL & UPDATES OVERRIDE
+        if (lowText.includes("pack light") || lowText.includes("pack essential") ||
+            lowText.includes("pack pro") || lowText.includes("confirmer") ||
+            lowText.includes("valider") || lowText.includes("je reste") ||
+            lowText.includes("passer en") || lowText.includes("upgrader") ||
+            lowText.includes("update_profile")) {
 
-            if (lowerContent.includes("update_profile")) {
-                console.log("🔄 FORCING PROFILE UPDATE (New Scan Flow)");
+            if (lowText.includes("update_profile")) {
+                console.log("🔄 FORCING PROFILE UPDATE -> SCAN_AND_QUESTION");
+                triggerMode = "SCAN_AND_QUESTION";
             } else {
-                console.log("💰 SALES FUNNEL INTERACTION DETECTED. Forcing mode to SALES_FUNNEL.");
                 triggerMode = "SALES_FUNNEL";
             }
         }
