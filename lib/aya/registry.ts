@@ -28,9 +28,30 @@ export async function registerOrUpdateEntity(
         validUntil.setMonth(now.getMonth() + 1); // +1 mois (renouvelable)
     }
 
-    const entityId = entityData.aya_entity_id || crypto.randomUUID();
+    // 2. CHECK DUPLICATE: Try to find existing entity by URL to prevent duplicates
+    let entityId = entityData.aya_entity_id;
+    const targetUrl = entityData.website || (entityData.asr_payload?.data?.url as string);
 
-    // 2. Construire l'objet Final
+    if (!entityId && targetUrl) {
+        try {
+            console.log(`🔍 AYA REGISTRY: Checking for existing entity with URL: ${targetUrl}`);
+            const existing = await db.getAyaEntityByUrl(targetUrl);
+            if (existing && existing.aya_entity_id) {
+                console.log(`♻️ AYA REGISTRY: DUPLICATE FOUND. Updating existing Entity ID: ${existing.aya_entity_id}`);
+                entityId = existing.aya_entity_id;
+            } else {
+                console.log(`✨ AYA REGISTRY: No duplicate found. Creating new Entity.`);
+            }
+        } catch (checkErr) {
+            console.error("⚠️ AYA REGISTRY: Error checking duplicate", checkErr);
+        }
+    }
+
+    if (!entityId) {
+        entityId = crypto.randomUUID();
+    }
+
+    // 3. Construire l'objet Final
     const newRecord: AyaEntity = {
         aya_entity_id: entityId,
         legal_name: entityData.legal_name || "Unknown Entity",
@@ -38,7 +59,7 @@ export async function registerOrUpdateEntity(
         entity_type: entityData.entity_type || 'company',
         country_legal: entityData.country_legal || 'CH',
         sector_macro: entityData.sector_macro || 'General',
-        website: entityData.website || (entityData.asr_payload?.data?.url as string) || undefined,
+        website: targetUrl || undefined,
 
         created_at: entityData.created_at || now.toISOString(),
         last_update: now.toISOString(),

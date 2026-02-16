@@ -1,149 +1,180 @@
-
-import { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
+import Link from 'next/link';
 
-// Fetch real data from Firestore
-async function getEntityData(id: string) {
-    try {
-        const dbInstance = (db as any).getDb ? (db as any).getDb() : null;
-        if (!dbInstance) return null;
+// Force dynamic
+export const revalidate = 0;
 
-        const doc = await dbInstance.collection('aya_registry').doc(id).get();
-        if (!doc.exists) {
-            // Fallback for Demo Entities (hardcoded for testing)
-            if (id === '7f8a9d12-3b4c-4d5e-9f0a-1b2c3d4e5f6a') {
-                return { id: '7f8a9d12-3b4c-4d5e-9f0a-1b2c3d4e5f6a', name: "Horlogerie du Léman SA", type: "Luxe", sector: "Industrie", country: "CH", status: "verified", asr_score: 99, description: "Manufacture horlogère de précision à Genève.", city: "Genève", website: "https://horlogerie-leman.ch" };
-            }
-            return null;
-        }
-
-        const data = doc.data();
-        return {
-            id: data.aya_entity_id,
-            name: data.display_name || data.legal_name,
-            type: data.entity_type,
-            sector: data.sector_macro,
-            country: data.country_legal,
-            asr_score: Math.round((data.recommendability?.freshness_score || 0.99) * 100),
-            description: data.asr_payload?.data?.offre?.services?.value?.[0] || data.legal_name + " - Entité certifiée ASR.",
-            city: data.asr_payload?.data?.identite?.city?.value || "Non spécifié",
-            website: data.asr_payload?.data?.identite?.url?.value || "#"
-        };
-    } catch (err) {
-        console.error("Error fetching entity data:", err);
-        return null;
-    }
-}
-
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-    const entity = await getEntityData(params.id);
-    if (!entity) return { title: 'Entité non trouvée' };
-
-    return {
-        title: `${entity.name} | Registre Officiel AYA`,
-        description: `Profil certifié ASR pour ${entity.name}. Identité sémantique vérifiée pour les Agents IA.`,
-    };
-}
-
-export default async function EntityProfilePage({ params }: { params: { id: string } }) {
-    const entity = await getEntityData(params.id);
+export default async function CertificatePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const entity = await db.getAyaEntityById(id);
 
     if (!entity) {
-        notFound();
+        return notFound();
     }
 
-    // STRUCTURE JSON-LD POUR LES BOTS (Schema.org + ASR Extension)
-    const jsonLd = {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": entity.name,
-        "description": entity.description,
-        "address": {
-            "@type": "PostalAddress",
-            "addressCountry": entity.country,
-            "addressLocality": entity.city
-        },
-        "url": entity.website,
-        "identifier": `aya:v1:${entity.id}`,
-        // Extension ASR Propriétaire pour AI Visionary
-        "asr_verified": true,
-        "asr_score": entity.asr_score,
-        "asr_version": "1.0"
-    };
+    const isValid = new Date(entity.valid_until) > new Date();
+    const creationDate = new Date(entity.created_at).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
+    const validUntilDate = new Date(entity.valid_until).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
+    const score = entity.asr_score || 100;
+
+    // DATA EXTRACTION
+    const asrData = entity.asr_payload?.data || {};
+    const description = asrData.description || asrData.pitch || "Aucune description sémantique définie.";
+    const keywords = asrData.keywords || asrData.services || asrData.tags || [];
 
     return (
-        <div style={{ background: 'var(--bg-main)', minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
+        <main style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
 
-            <header style={{ background: 'white', borderBottom: '1px solid var(--border-light)', padding: '15px 0' }}>
-                <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Link href="/aya" style={{ textDecoration: 'none', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        ← Retour au Registre
-                    </Link>
-                    <Link href="/">
-                        <img src="/logo-v2.png" alt="AI Visionary" style={{ height: '30px', cursor: 'pointer' }} />
-                    </Link>
+            {/* COMPACT NAV (Like Home) */}
+            <div className="container" style={{ padding: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ background: 'var(--text-main)', color: 'white', padding: '5px 8px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem' }}>AV</div>
+                    <span style={{ fontWeight: 'bold', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>AI VISIONARY</span>
+                </Link>
+                <Link href="/aya" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>
+                    ✕ FERMER
+                </Link>
+            </div>
+
+            {/* HERO SECTION - REUSING 'hero-section' STYLES BUT COMPACT */}
+            <section className="section" style={{ paddingTop: '2rem', paddingBottom: '4rem', textAlign: 'center' }}>
+                <div className="container">
+                    <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                        Registre Officiel AYA
+                    </p>
+
+                    <h1 className="headline" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem' }}>
+                        {entity.display_name}
+                    </h1>
+
+                    <div className="subheadline" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                        <span>📍 {entity.country_legal === 'CH' ? 'Suisse' : entity.country_legal}</span>
+                        <span>🏢 {entity.entity_type}</span>
+                        {entity.website && (
+                            <a href={entity.website} target="_blank" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>
+                                🔗 {entity.website.replace(/^https?:\/\//, '')}
+                            </a>
+                        )}
+                    </div>
                 </div>
-            </header>
+            </section>
 
-            <main className="section">
-                <div className="container" style={{ maxWidth: '800px' }}>
-                    <div className="card" style={{ padding: '40px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+            {/* MAIN CONTENT - REUSING GRID & CARDS */}
+            <section className="section" style={{ paddingTop: '0' }}>
+                <div className="container">
+
+                    <div className="grid-2" style={{ alignItems: 'start' }}>
+
+                        {/* LEFT: IDENTITY CARD */}
+                        <div className="card">
+                            <h3 style={{ fontSize: '1.2rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
+                                Identification
+                            </h3>
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                    <span style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>Statut Actuel</span>
+                                    <span style={{
+                                        padding: '4px 12px',
+                                        borderRadius: '20px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: 'bold',
+                                        background: isValid ? 'var(--bg-accent)' : '#FEE2E2',
+                                        color: isValid ? 'var(--primary-color)' : '#EF4444'
+                                    }}>
+                                        {isValid ? '● CERTIFIÉ ACTIF' : '● EXPIRÉ'}
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>Score de Confiance</span>
+                                    <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>
+                                        {score}<span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>/100</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div style={{ background: 'var(--bg-main)', padding: '15px', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem' }}>
+                                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px', letterSpacing: '0.05em' }}>
+                                    Clé Publique (AYA ID)
+                                </p>
+                                <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', wordBreak: 'break-all', color: 'var(--text-main)' }}>
+                                    {entity.aya_entity_id}
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                <div>
+                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>Date d'émission</p>
+                                    <p style={{ fontWeight: '600' }}>{creationDate}</p>
+                                </div>
+                                <div>
+                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>Validité</p>
+                                    <p style={{ fontWeight: '600', color: isValid ? 'var(--primary-color)' : 'inherit' }}>{validUntilDate}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT: SEMANTIC DATA CARD */}
+                        <div className="card">
+                            <h3 style={{ fontSize: '1.2rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
+                                <span style={{ width: '10px', height: '10px', background: 'var(--primary-color)', borderRadius: '50%' }}></span>
+                                Données Sémantiques (IA)
+                            </h3>
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <p style={{ fontStyle: 'italic', fontSize: '1.1rem', color: 'var(--text-body)', lineHeight: '1.8' }}>
+                                    "{description}"
+                                </p>
+                            </div>
+
+                            <div style={{ marginBottom: '2rem' }}>
+                                <p style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 'bold', marginBottom: '10px', letterSpacing: '0.05em' }}>
+                                    Mots-Clés Indexés
+                                </p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                                    {keywords.length > 0 ? keywords.map((kw: string, i: number) => (
+                                        <span key={i} style={{
+                                            background: 'var(--bg-main)',
+                                            padding: '6px 14px',
+                                            borderRadius: '50px',
+                                            fontSize: '0.9rem',
+                                            color: 'var(--text-main)',
+                                            fontWeight: '500',
+                                            border: '1px solid var(--border-light)'
+                                        }}>
+                                            #{kw}
+                                        </span>
+                                    )) : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Aucun mot-clé défini.</span>}
+                                </div>
+                            </div>
+
                             <div>
-                                <span style={{ background: 'var(--bg-accent)', color: 'var(--primary-color)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                    PROFIL VÉRIFIÉ PAR IA VISIONARY
-                                </span>
-                                <h1 style={{ fontSize: '2.5rem', marginTop: '15px', color: 'var(--text-main)' }}>{entity.name}</h1>
-                            </div>
-                            <div style={{ textAlign: 'center', background: 'var(--bg-main)', padding: '15px', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>{entity.asr_score}%</div>
-                                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Trust Score</div>
-                            </div>
-                        </div>
-
-                        <div className="grid-2" style={{ marginBottom: '40px' }}>
-                            <div>
-                                <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Secteur</h3>
-                                <p style={{ fontSize: '1.2rem', fontWeight: '500' }}>{entity.sector}</p>
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Localisation</h3>
-                                <p style={{ fontSize: '1.2rem', fontWeight: '500' }}>{entity.city}, {entity.country}</p>
+                                <p style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 'bold', marginBottom: '10px', letterSpacing: '0.05em' }}>
+                                    Protocoles Supportés
+                                </p>
+                                <ul style={{ fontSize: '0.95rem', color: 'var(--text-body)' }}>
+                                    <li style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                                        <span style={{ color: 'var(--primary-color)' }}>✓</span> JSON-LD Structure
+                                    </li>
+                                    <li style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                                        <span style={{ color: 'var(--primary-color)' }}>✓</span> ASR v1.0 Standard
+                                    </li>
+                                </ul>
                             </div>
                         </div>
 
-                        <div style={{ background: 'var(--bg-accent)', padding: '25px', borderRadius: '12px', marginBottom: '40px' }}>
-                            <h3 style={{ fontSize: '1rem', marginBottom: '10px' }}>Description Sémantique (ASR)</h3>
-                            <p style={{ lineHeight: '1.6', fontSize: '1.1rem' }}>{entity.description}</p>
-                        </div>
-
-                        <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '30px' }}>
-                            <h3 style={{ fontSize: '1rem', marginBottom: '20px' }}>Identifiants d'Infrastructure</h3>
-                            <code style={{ display: 'block', background: '#f1f5f9', padding: '15px', borderRadius: '8px', fontSize: '0.85rem', color: '#475569', overflowX: 'auto' }}>
-                                ID: aya:{entity.country.toLowerCase()}:{entity.id}
-                            </code>
-                        </div>
                     </div>
 
-                    <div style={{ textAlign: 'center', marginTop: '40px' }}>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                            Cette page est Machine-Readable. Les Agents IA utilisent ce point de terminaison pour valider l'identité de cette entreprise.
+                    {/* FOOTER BADGE */}
+                    <div style={{ marginTop: '3rem', textAlign: 'center', opacity: 0.6 }}>
+                        <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            Secured by AYO Consensus • Swiss Hosting
                         </p>
                     </div>
-                </div>
-            </main>
 
-            <footer className="footer" style={{ background: 'var(--text-main)', color: 'white', padding: '40px 0', textAlign: 'center' }}>
-                <div className="container">
-                    <p style={{ color: '#ffffff', opacity: 0.9, fontSize: '0.9rem', fontWeight: '500' }}>Registre AYA v1.0 • Powered by AI Visionary</p>
                 </div>
-            </footer>
-        </div>
+            </section>
+        </main>
     );
 }

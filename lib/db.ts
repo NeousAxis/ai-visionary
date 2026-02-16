@@ -240,6 +240,28 @@ export const database = {
     },
 
     /**
+     * Retrieve an AYA Entity by its ID
+     */
+    getAyaEntityById: async (id: string): Promise<any | null> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
+
+        try {
+            console.log(`🔍 [Firestore] Fetching AYA Entity ID: ${id}`);
+            const doc = await dbInstance.collection('aya_registry').doc(id).get();
+
+            if (!doc.exists) {
+                console.warn(`⚠️ [Firestore] Entity not found: ${id}`);
+                return null;
+            }
+            return doc.data();
+        } catch (error) {
+            console.error('❌ [Firestore] Get Entity By ID Error:', error);
+            return null;
+        }
+    },
+
+    /**
      * Retrieve an AYA Entity by its URL (Smart Search)
      */
     getAyaEntityByUrl: async (url: string): Promise<any | null> => {
