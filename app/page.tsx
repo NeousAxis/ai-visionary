@@ -289,7 +289,7 @@ export default function Home() {
               </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic?pack=pro" className="btn btn-secondary w-full" style={{ width: '100%' }}>
-                  Acheter mes actifs
+                  Acheter mes fichiers propriétaires
                 </Link>
               </div>
             </div>

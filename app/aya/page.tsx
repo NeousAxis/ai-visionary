@@ -11,35 +11,31 @@ import { useState, useEffect } from 'react';
 // 👉 À SUPPRIMER OU COMMENTER dès que la connexion à la vraie base de données (Firestore) est active.
 // 👉 Le système utilise des UUIDs, donc la suppression de ces lignes ne cassera pas la numérotation.
 // =========================================================================================
-const DEMO_ENTITIES = [
-    { _is_demo: true, id: '7f8a9d12-3b4c-4d5e-9f0a-1b2c3d4e5f6a', name: "Horlogerie du Léman SA", type: "Luxe", sector: "Industrie", country: "CH", status: "verified", asr_score: 99, description: "Manufacture horlogère de précision à Genève." },
-    { _is_demo: true, id: 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d', name: "Bistro Parisien", type: "Commerce", sector: "Restauration", country: "FR", status: "verified", asr_score: 95, description: "Cuisine traditionnelle française, Paris 7ème." },
-    { _is_demo: true, id: '9c8d7e6f-5a4b-3c2d-1e0f-9a8b7c6d5e4f', name: "Chocolatier Vandamme", type: "Artisan", sector: "Alimentation", country: "BE", status: "verified", asr_score: 97, description: "Maître chocolatier depuis 1950, Bruxelles." },
-    { _is_demo: true, id: '1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d', name: "LuxFinance Partners", type: "Finance", sector: "Banque", country: "LU", status: "verified", asr_score: 100, description: "Gestion de patrimoine et conseil fiscal, Luxembourg." },
-    { _is_demo: true, id: 'e1d2c3b4-a5f6-0987-1234-567890abcdef', name: "Clinique Santé Lausanne", type: "Santé", sector: "Médical", country: "CH", status: "pending", asr_score: 82, description: "Centre médical pluridisciplinaire, Vaud." },
-    { _is_demo: true, id: 'f0e9d8c7-b6a5-4321-8765-432109876543', name: "TechStart Lyon", type: "Start-up", sector: "Numérique", country: "FR", status: "verified", asr_score: 94, description: "Incubateur technologique Auvergne-Rhône-Alpes." },
-];
-
 export default function AyaPage() {
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState<any[]>(DEMO_ENTITIES);
-    const [isLive, setIsLive] = useState(false);
+    const [results, setResults] = useState<any[]>([]); // Start empty, no fake data
+    const [loading, setLoading] = useState(true);
 
-    // CONNEXION BACKEND RÉEL (Mode Hybride : Démo -> Prod progressif)
+    // CONNEXION BACKEND RÉEL
     useEffect(() => {
+        setLoading(true);
         fetch('/api/aya/live')
             .then(res => res.json())
             .then(apiRes => {
-                if (apiRes.success && apiRes.data && Array.isArray(apiRes.data) && apiRes.data.length > 0) {
+                if (apiRes.success && apiRes.data && Array.isArray(apiRes.data)) {
                     console.log(`🔥 AYA LIVE: Loading ${apiRes.data.length} real entities from Firestore/DB!`);
                     setResults(apiRes.data);
-                    setIsLive(true);
                 } else {
-                    console.log("ℹ️ AYA: No live data found yet, keeping Demo Entities active.");
+                    console.log("ℹ️ AYA: No live data found.");
+                    setResults([]);
                 }
             })
             .catch(err => {
-                console.warn("⚠️ AYA Backend connectivity issue, keeping Demo Mode.", err);
+                console.warn("⚠️ AYA Backend connectivity issue.", err);
+                setResults([]);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     }, []);
 
@@ -49,7 +45,9 @@ export default function AyaPage() {
         const q = query.toLowerCase();
         return (
             (ent.name && ent.name.toLowerCase().includes(q)) ||
+            (ent.display_name && ent.display_name.toLowerCase().includes(q)) ||
             (ent.description && ent.description.toLowerCase().includes(q)) ||
+            (ent.website && ent.website.toLowerCase().includes(q)) || // Added website search
             (ent.sector && ent.sector.toLowerCase().includes(q)) ||
             (ent.country && ent.country.toLowerCase().includes(q))
         );
@@ -121,12 +119,14 @@ export default function AyaPage() {
                             <p style={{ color: 'var(--text-muted)' }}>Ces entreprises viennent d'obtenir leur validité ASR pour être citées par les Agents IA.</p>
                         </div>
                         <div style={{ background: 'var(--bg-accent)', padding: '5px 12px', borderRadius: '8px', fontSize: '0.9rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>
-                            {isLive ? `${results.length} Entités Réelles` : '142 Entités Actives (Live)'}
+                            {loading ? 'Chargement...' : `${results.length} Entités Réelles`}
                         </div>
                     </div>
 
                     <div className="grid-3" style={{ rowGap: '30px' }}>
-                        {displayedResults.length > 0 ? (
+                        {loading ? (
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>Loading...</div>
+                        ) : displayedResults.length > 0 ? (
                             displayedResults.map((entity) => (
                                 <div key={entity.id || entity.aya_entity_id} className="card" style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>

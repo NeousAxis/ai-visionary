@@ -423,7 +423,7 @@ export async function POST(req: Request) {
         const triggerEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const isTriggerEmail = lastMessage.content.trim().match(triggerEmailRegex);
 
-        const userUrlMatch = isTriggerEmail ? null : rawUrlMatch;
+        let userUrlMatch = isTriggerEmail ? null : rawUrlMatch;
 
         let finalResponseText = "";
         let isAnalysisRun = false;
@@ -500,6 +500,28 @@ export async function POST(req: Request) {
             detectedEmail = emailMatch[0].toLowerCase();
         }
 
+        // 🛡️ RECOVER COMPOSITE ACTION (update_profile|https://...)
+        // If the user clicked a button with a piped payload
+        if (lastMessage.content.startsWith("update_profile|")) {
+            const parts = lastMessage.content.split('|');
+            if (parts.length > 1 && parts[1].startsWith('http')) {
+                // @ts-ignore
+                userUrlMatch = [parts[1]]; // Mock Regex Match to trick downstream logic
+                detectedUrl = parts[1];
+                console.log(`🔄 RECOVERED URL FROM ACTION: ${detectedUrl}`);
+            }
+        }
+
+        if (lastMessage.content.startsWith("main_menu|")) {
+            const parts = lastMessage.content.split('|');
+            if (parts.length > 1 && parts[1].startsWith('http')) {
+                // @ts-ignore
+                userUrlMatch = [parts[1]];
+                detectedUrl = parts[1];
+                console.log(`🔄 RECOVERED URL FROM MAIN_MENU ACTION: ${detectedUrl}`);
+            }
+        }
+
         // Prompt Context Initialization
         let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false, isAyaRegistered: false };
 
@@ -525,6 +547,10 @@ export async function POST(req: Request) {
         else if (lastMessage.content.toLowerCase().match(/(abonnement|pack pro|update_profile)/)) {
             triggerMode = lastMessage.content.toLowerCase().includes("update_profile") ? "SCAN_AND_QUESTION" : "SALES_FUNNEL";
         }
+        // PRIORITY 2.5: MAIN MENU RETURN
+        else if (lastMessage.content.startsWith("main_menu|")) {
+            triggerMode = "EXISTING_CLIENT";
+        }
         // PRIORITY 3: SEQUENTIAL QUESTIONING (If URL in history)
         else if (hasUrlHistory && !hasFinalScore) {
             if (stepsCompleted < 16) {
@@ -543,32 +569,63 @@ export async function POST(req: Request) {
         console.log(`🎯 TRIGGER MODE CALCULATED: "${triggerMode}"`);
 
         // 🛡️ HANDLER: EXISTING_CLIENT (Immediate Recognition)
-        if (triggerMode === "EXISTING_CLIENT") {
-            const ec_url = urlInLastMessage || "";
+        // CRITICAL FIX: Handle case where triggerMode is set manualy to EXISTING_CLIENT
+        if (triggerMode === "EXISTING_CLIENT" || lastMessage.content === "EXISTING_CLIENT") {
+            const ec_url = urlInLastMessage || detectedUrl || "";
             // @ts-ignore
             const client = await db.getAyaEntityByUrl(ec_url);
 
-            return new Response(JSON.stringify({
-                text: `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${client.display_name || client.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :\n1. 🔄 **Faire une mise à jour** de vos informations ?\n2. 📜 **Voir votre certificat** d'AIO Compliance ?\n3. ⚙️ **Gérer votre abonnement** ou résilier ?`,
-                buttons: [
-                    { label: "Mettre à jour ma fiche 🔄", action: "update_profile" },
-                    { label: "Voir mon certificat 📜", action: "view_certificate", url: `https://ai-visionary.com/certificate/${client.aya_entity_id}` },
-                    { label: "Gérer mon abonnement / Résilier ⚙️", action: "manage_subscription" }
-                ]
-            }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            if (!client) {
+                // Fallback if URL lost: Asks user to re-identify or go to home
+                return new Response(JSON.stringify({
+                    text: `🔒 **Session Expirée.**\n\nJe ne retrouve pas votre URL de session. Veuillez entrer votre URL pour accéder à votre espace client.`,
+                    buttons: []
+                }), { status: 200 });
+            }
+
+            // FORCE RESET FOR UPDATE PROFILE
+            const isUpdate = lastMessage.content.includes("update_profile");
+            if (isUpdate) {
+                console.log("🔄 UPDATE PROFILE TRIGGERED: FORCING RESCAN");
+                // Do NOT return. Let it fall through to SCAN logic.
+            } else {
+                return new Response(JSON.stringify({
+                    text: `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${client.display_name || client.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :`,
+                    buttons: [
+                        { label: "Mettre à jour ma fiche 🔄", action: `update_profile|${ec_url}` },
+                        { label: "Voir mon certificat 📜", action: "view_certificate", url: client.aya_entity_id ? `https://www.ai-visionary.com/aya/e/${client.aya_entity_id}` : undefined },
+                        { label: "Gérer mon abonnement ⚙️", action: "manage_subscription" }
+                    ]
+                }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            }
         }
 
         // 🛡️ HANDLER: SUBSCRIPTION & CERTIFICATE (Quick Actions)
         const lowText = lastMessage.content.toLowerCase();
         if (lowText.includes("manage_subscription") || lowText.includes("résilier")) {
             return new Response(JSON.stringify({
-                text: `⚙️ **Gestion de votre Abonnement**\n\nVous pouvez gérer votre abonnement, résilier ou modifier votre mode de paiement via le portail Stripe officiel.\n\n👉 **[Accéder à mon Portail Stripe](https://billing.stripe.com/p/login/test_91ceX9c6E6075908ww)**`,
-                buttons: [{ label: "Retour", action: "restart" }]
+                text: `⚙️ **Gestion de votre Abonnement**\n\nPour toute demande de modification, résiliation ou changement de moyen de paiement, veuillez contacter le support dédié.\n*(Le portail automatique est en maintenance)*`,
+                buttons: [
+                    { label: "Modifier / Résilier (Email Support) 📧", url: "mailto:support@ai-visionary.com?subject=Gestion Abonnement AYA" },
+                    { label: "Découvrir le Pack PRO 🚀", action: "Je veux découvrir le Pack PRO" },
+                    // CRITICAL FIX: Ensure main_menu action has the URL to avoid restart
+                    { label: "Retour Menu Principal", action: detectedUrl ? `main_menu|${detectedUrl}` : "EXISTING_CLIENT" }
+                ]
+            }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // 🛡️ HANDLER: PEDAGOGICAL (TRUTH & CONSISTENCY)
+        if (lowText.match(/(men[st]|mentir|fausse|fake|triche|vérité|honnête)/)) {
+            return new Response(JSON.stringify({
+                text: `💡 **Excellente question.**\n\nTechniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).\n\n⚠️ **MAIS c'est une stratégie dangereuse.**\nLes IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :\n\n1. Elles lisent votre **Déclaration (ASR)**.\n2. Elles la comparent à votre **Réalité Observable** (Site Web, Avis, Base de données).\n\nS'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.\n\n🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
+                buttons: [
+                    { label: "Bien compris, continuons ✅", action: `main_menu|${detectedUrl}` }
+                ]
             }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
 
         // 🛡️ CRITICAL INTELLIGENT ROUTING: CERTIFICATE VIEW
-        if (lowText.includes("view_certificate")) {
+        if (lowText.includes("view_certificate") || lowText.includes("voir mon certificat") || lowText.includes("mon certificat")) {
             return new Response(JSON.stringify({
                 text: `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/certificate/latest)**\n\nIl atteste de votre structure de donnée compatible IA.`,
                 buttons: [{ label: "Retour", action: "back" }]
@@ -594,6 +651,12 @@ export async function POST(req: Request) {
 
             // CRITICAL: Extract URL from last user message
             let urlToScan = userUrlMatch ? userUrlMatch[0] : "";
+
+            // FALLBACK TO DETECTED URL FROM HISTORY IF USER JUST CLICKED "UPDATE PROFILE"
+            if (!urlToScan && detectedUrl) {
+                console.log(`🔄 Using Detected URL from history for scan: ${detectedUrl}`);
+                urlToScan = detectedUrl;
+            }
             if (!urlToScan.startsWith('http')) {
                 urlToScan = 'https://' + urlToScan;
             }
@@ -1575,6 +1638,19 @@ L'Abonnement AYA est conçu pour les entreprises qui veulent des résultats sans
                 if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("passer") || userContent.includes("upgrader")) {
                     finalResponseText = `🚀 **Choix Validé : PACK PRO (Propriété).**\nPropriété Totale de vos actifs sémantiques. 3 ans de Registre inclus.\n\n👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
                 } else {
+                    // CHECK IF CLIENT IS EXISTING TO ADAPT BUTTON TEXT (Using detectedUrl)
+                    let isExisting = false;
+                    if (detectedUrl) {
+                        // @ts-ignore
+                        const client = await db.getAyaEntityByUrl(detectedUrl);
+                        if (client) isExisting = true;
+                    }
+
+                    // Fallback check in messages
+                    if (!isExisting) {
+                        isExisting = messages.some((m: any) => m.content.includes("DÉJÀ CLIENT"));
+                    }
+
                     finalResponseText = JSON.stringify({
                         type: "question_block",
                         intro: `**DEVENIR UNE RÉFÉRENCE (PACK PRO)**
@@ -1593,7 +1669,7 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                         questions: [{
                             id: "confirm_pro",
                             text: "Votre décision finale :",
-                            options: ["Valider le PACK PRO (499 CHF)", "Prendre l'ABONNEMENT (19 CHF)"],
+                            options: ["Valider le PACK PRO (499 CHF)", isExisting ? "Rester sur mon abonnement" : "Prendre l'ABONNEMENT (19 CHF)"],
                             allowCustom: false
                         }]
                     });

@@ -151,9 +151,14 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 setIsAnalyzing(false);
 
             } else {
-                // NORMAL FAST RESPONSE (Might be JSON QCM or Text)
+                // NORMAL FAST RESPONSE (Might be JSON QCM or Text or Buttons)
                 const botMessageId = (Date.now() + 1).toString();
-                setMessages(prev => [...prev, { role: 'assistant', content: data.text, id: botMessageId }]);
+                setMessages(prev => [...prev, {
+                    role: 'assistant',
+                    content: data.text,
+                    id: botMessageId,
+                    buttons: data.buttons // <--- Store buttons
+                }]);
                 setIsLoading(false);
             }
 
@@ -596,6 +601,51 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                 </div>
                             );
                         })}
+                    </div>
+                </div>
+            );
+        }
+
+        // BUTTONS MODE (New Implementation for Suggestions/Actions)
+        if (msg.buttons && msg.buttons.length > 0) {
+            return (
+                <div className="flex flex-col gap-4">
+                    <ReactMarkdown
+                        components={{
+                            a: ({ node, ...props }) => (
+                                <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: msg.role === 'user' ? 'white' : 'blue', textDecoration: 'underline' }} />
+                            )
+                        }}
+                    >
+                        {msg.content}
+                    </ReactMarkdown>
+
+                    <div className="grid grid-cols-1 gap-3 mt-2">
+                        {msg.buttons.map((btn: any, idx: number) => (
+                            <button
+                                key={idx}
+                                onClick={() => {
+                                    if (btn.url) {
+                                        // Open URL if present (e.g. view certificate)
+                                        window.open(btn.url, '_blank');
+                                    } else if (!isLoading) {
+                                        // Otherwise, act as a chat response
+                                        handleSubmit(undefined, btn.action);
+                                    }
+                                }}
+                                disabled={isLoading}
+                                className="group flex items-center !gap-4 w-full !px-5 !py-4 !rounded-xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
+                            >
+                                <span className="text-[15px] font-bold text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors leading-snug">
+                                    {btn.label}
+                                </span>
+                                <div className="w-6 h-6 rounded-full border-2 border-slate-200 group-hover:border-white group-hover:bg-white/20 flex items-center justify-center relative z-10 transition-colors flex-shrink-0">
+                                    <svg className="w-3.5 h-3.5 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </button>
+                        ))}
                     </div>
                 </div>
             );
