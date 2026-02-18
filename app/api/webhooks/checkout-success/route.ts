@@ -495,6 +495,7 @@ export async function POST(req: Request) {
                 website: companyInfo.url, // Explicitly pass the analyzed URL
                 country_legal: (analysisData.extract as any).identite?.country?.value || "CH",
                 sector_macro: (analysisData.extract as any).identite?.sector?.value || "General",
+                asr_score: analysisData.score || 0,
                 // Store the full analyze as payload
                 asr_payload: {
                     version: "1.0",
@@ -545,7 +546,16 @@ export async function POST(req: Request) {
                             <div style="background-color: #ecfdf5; border: 1px solid #d1fae5; border-radius: 8px; padding: 20px; margin: 25px 0; text-align: center;">
                                 <p style="color: #047857; font-weight: 700; font-size: 18px; margin: 0;">✅ STATUT : ACTIF</p>
                                 <p style="color: #065f46; font-size: 14px; margin: 5px 0 0 0;">Priorité d'indexation : HAUTE</p>
-                                <div style="margin-top: 15px; border-top: 1px dashed #6ee7b7; padding-top: 15px;">
+                                
+                                <div style="margin: 15px 0; border-top: 1px dashed #6ee7b7; border-bottom: 1px dashed #6ee7b7; padding: 10px 0;">
+                                     <p style="font-size: 12px; color: #064e3b; margin: 0; text-transform: uppercase;">Qualité de l'Info (Score ASR)</p>
+                                     <p style="font-size: 24px; font-weight: 800; color: #059669; margin: 5px 0;">${analysisData.score}/100</p>
+                                     <p style="font-size: 11px; color: #047857; font-style: italic; max-width: 80%; margin: 5px auto;">
+                                        "Un score bas signifie que vous donnez peu d'infos aux IA, même si vous êtes une source de confiance."
+                                     </p>
+                                </div>
+
+                                <div style="padding-top: 15px;">
                                     <p style="font-size: 12px; color: #064e3b; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">AYA ID (Public)</p>
                                     <p style="font-family: monospace; font-size: 16px; color: #065f46; margin: 5px 0 0 0; background: #fff; display: inline-block; padding: 4px 12px; border-radius: 4px; border: 1px solid #a7f3d0;">${ayaEntityId}</p>
                                 </div>
@@ -553,6 +563,7 @@ export async function POST(req: Request) {
 
                             <p style="font-size: 16px; color: #374151; line-height: 1.5; text-align: center;">
                                 Votre certificat de présence est public et vérifiable par les Agents IA.
+                                <br/><strong>Conseil :</strong> Vous pourrez bientôt mettre à jour vos infos pour augmenter votre Score.
                             </p>
 
                             <!-- CTA Button -->

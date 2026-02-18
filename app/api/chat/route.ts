@@ -6,16 +6,25 @@ import { generateText } from 'ai';
 import fs from 'fs';
 import path from 'path';
 import { Resend } from 'resend';
+import Link from 'next/link';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
+import { registerOrUpdateEntity } from '@/lib/aya/registry'; // Logic Registry
 import { AYO_BUSINESS_CATEGORIES, getScanSystemPrompt } from '@/lib/ayo-categories';
 import crypto from 'crypto';
+import Stripe from 'stripe';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
+
+// Initialize Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    // @ts-ignore
+    apiVersion: '2025-01-27.acacia', // Use latest API version compatible
+});
 
 // Load the "Brain" (Context & Rules)
 const dataSectorsPath = path.join(process.cwd(), 'public', 'AYO_SECTORS_V1.json');
@@ -570,7 +579,10 @@ export async function POST(req: Request) {
 
         // 🛡️ HANDLER: EXISTING_CLIENT (Immediate Recognition)
         // CRITICAL FIX: Handle case where triggerMode is set manualy to EXISTING_CLIENT
-        if (triggerMode === "EXISTING_CLIENT" || lastMessage.content === "EXISTING_CLIENT") {
+        // AND ensure we are NOT in an OTP flow (send_otp or 6 digits)
+        const isOtpFlow = lastMessage.content.startsWith("send_otp") || lastMessage.content.match(/^\d{6}$/);
+
+        if ((triggerMode === "EXISTING_CLIENT" || lastMessage.content === "EXISTING_CLIENT") && !isOtpFlow) {
             const ec_url = urlInLastMessage || detectedUrl || "";
             // @ts-ignore
             const client = await db.getAyaEntityByUrl(ec_url);
@@ -603,15 +615,224 @@ export async function POST(req: Request) {
         // 🛡️ HANDLER: SUBSCRIPTION & CERTIFICATE (Quick Actions)
         const lowText = lastMessage.content.toLowerCase();
         if (lowText.includes("manage_subscription") || lowText.includes("résilier")) {
+
+            let portalUrl = "";
+            let messageText = `⚙️ **Gestion de votre Abonnement**\n\nAccédez à votre espace sécurisé pour gérer vos factures, votre moyen de paiement ou résilier votre abonnement en toute autonomie.`;
+
+            // STRIPE PORTAL GENERATION
+            if (process.env.STRIPE_SECRET_KEY && detectedUrl) {
+                try {
+                    console.log(`🔐 GENERATING PORTAL LINK for ${detectedUrl}...`);
+                    // 1. Get Client from DB to find Stripe ID
+                    // @ts-ignore
+                    const clientSub = await db.getAyaEntityByUrl(detectedUrl);
+                    let customerId = clientSub?.stripe_customer_id;
+
+                    // 2. Fallback: Search Stripe by Email if ID missing in DB
+                    if (!customerId && clientSub?.contact_email) {
+                        const customers = await stripe.customers.list({ email: clientSub.contact_email, limit: 1 });
+                        if (customers.data.length > 0) {
+                            customerId = customers.data[0].id;
+                            console.log(`✅ FOUND Stripe Customer ID via Email: ${customerId}`);
+                        }
+                    }
+
+                    // 3. Create Portal Session
+                    if (customerId) {
+                        const session = await stripe.billingPortal.sessions.create({
+                            customer: customerId,
+                            return_url: `https://www.ai-visionary.com`, // Return to home after management
+                        });
+                        portalUrl = session.url;
+                    } else {
+                        console.warn("⚠️ No Stripe Customer ID found for portal generation.");
+                    }
+                } catch (e) {
+                    console.error("🔥 Stripe Portal Error:", e);
+                }
+            }
+            // 🛡️ SECURITY STEP: Don't give portal URL yet. Challenge with OTP first.
+            // UNLESS already authenticated (Token in history? Hard in stateless).
+
+            // 🛡️ SECURITY BLOCK: If manual click, force security check unless already authenticated (hard to detect stateless)
+            // Retrieve Email to mask it properly
+            // STRATEGY: Try Registry first, then Analysis (Fallback)
+            let emailToUse = "";
+            let clientSec: any = null;
+
+            // 1. Registry Lookup
+            // @ts-ignore
+            clientSec = await db.getAyaEntityByUrl(detectedUrl);
+            if (clientSec && clientSec.contact_email) {
+                emailToUse = clientSec.contact_email;
+            }
+
+            // 2. Analysis Fallback (If registry empty or no email)
+            if (!emailToUse) {
+                console.log(`ℹ️ Email not in Registry, trying Analysis DB for ${detectedUrl}...`);
+                // @ts-ignore
+                const analysis = await db.getLatestAnalysisByUrl(detectedUrl);
+                if (analysis && analysis.email) {
+                    emailToUse = analysis.email;
+                    console.log(`✅ Email found in Analysis: ${emailToUse}`);
+                }
+            }
+
+            let maskedEmail = "admin@...";
+            if (emailToUse) {
+                const parts = emailToUse.split('@');
+                if (parts.length === 2) {
+                    const namePart = parts[0];
+                    const domainPart = parts[1];
+                    // Smart Masking: Show first 2 chars if len > 2, else 1 char
+                    const showLen = namePart.length > 2 ? 2 : 1;
+                    maskedEmail = `${namePart.substring(0, showLen)}***@${domainPart}`;
+                }
+            } else {
+                console.warn(`⚠️ No email found for ${detectedUrl} in DB.`);
+                // If we really can't find it, we shouldn't even offer the button ideally, but let's keep flow.
+                maskedEmail = "inconnu (contactez le support)";
+            }
+
             return new Response(JSON.stringify({
-                text: `⚙️ **Gestion de votre Abonnement**\n\nPour toute demande de modification, résiliation ou changement de moyen de paiement, veuillez contacter le support dédié.\n*(Le portail automatique est en maintenance)*`,
+                text: `🔒 **Sécurité Requise**\n\nPour accéder aux données confidentielles de **${detectedUrl}**, je dois vérifier que vous êtes bien l'administrateur.\n\nJe peux envoyer un code temporaire à l'email connu (**${maskedEmail}**).`,
                 buttons: [
-                    { label: "Modifier / Résilier (Email Support) 📧", url: "mailto:support@ai-visionary.com?subject=Gestion Abonnement AYA" },
-                    { label: "Découvrir le Pack PRO 🚀", action: "Je veux découvrir le Pack PRO" },
-                    // CRITICAL FIX: Ensure main_menu action has the URL to avoid restart
-                    { label: "Retour Menu Principal", action: detectedUrl ? `main_menu|${detectedUrl}` : "EXISTING_CLIENT" }
+                    { label: "Envoyer le code de sécurité 📨", action: `send_otp|${detectedUrl}` },
+                    { label: "Annuler", action: `main_menu|${detectedUrl}` }
                 ]
             }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        // 🛡️ HANDLER: SEND OTP ACTION
+        if (lastMessage.content.startsWith("send_otp|")) {
+            const parts = lastMessage.content.split('|');
+            const targetUrl = parts[1] || detectedUrl;
+
+            console.log(`📧 SENDING OTP to owner of ${targetUrl}...`);
+
+            // Call our internal API (Internal fetch)
+            // We can't easily fetch internal localhost in Vercel Edge/Serverless sometimes without full URL.
+            // Better to import logic? No, modularity. Let's try direct DB call or fetch absolute URL.
+            // SAFEST: Direct DB/Resend call here or assume user will type code.
+
+            // Simplest: Just simulate the API call here to ensure reliability
+            // 1. Get Email (Robust Strategy: Registry -> Analysis)
+            let targetEmail = "";
+
+            // A. Registry
+            // @ts-ignore
+            const clientSec = await db.getAyaEntityByUrl(targetUrl);
+            if (clientSec && clientSec.contact_email) {
+                targetEmail = clientSec.contact_email;
+            }
+
+            // B. Analysis Fallback
+            if (!targetEmail) {
+                // @ts-ignore
+                const analysis = await db.getLatestAnalysisByUrl(targetUrl);
+                if (analysis && analysis.email) {
+                    targetEmail = analysis.email;
+                }
+            }
+
+            if (targetEmail) {
+                const code = Math.floor(100000 + Math.random() * 900000).toString();
+                // @ts-ignore
+                await db.saveOTP(targetEmail, code);
+
+                const { error } = await resend.emails.send({
+                    from: 'AI Visionary Security <security@ai-visionary.com>',
+                    to: [targetEmail],
+                    subject: `🔒 Votre code de sécurité : ${code}`,
+                    html: `
+                    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                        <h2>Code de Sécurité AYO</h2>
+                        <p>Voici votre code de vérification pour <strong>${targetUrl}</strong> :</p>
+                        <div style="background-color: #f3f4f6; padding: 15px; font-size: 24px; letter-spacing: 5px; font-weight: bold; text-align: center; border-radius: 8px; margin: 20px 0;">
+                            ${code}
+                        </div>
+                        <p style="font-size: 12px; color: #666;">Valide 10 minutes. Ne le partagez pas.</p>
+                    </div>
+                    `
+                });
+
+                if (error) console.error("Resend Error", error);
+
+                return new Response(JSON.stringify({
+                    text: `✅ **Code Envoyé !**\n\nVeuillez consulter la boîte mail **${targetEmail.substring(0, 3)}***@...**\n\n👉 **Entrez le code à 6 chiffres ci-dessous :**`,
+                    buttons: []
+                }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
+            } else {
+                console.error(`❌ OTP Error: No email found for ${targetUrl}`);
+                return new Response(JSON.stringify({
+                    text: `❌ **Erreur :** Aucun email administrateur trouvé pour ce site.\n\nNous ne pouvons pas vérifier votre identité automatiquement.`,
+                    buttons: [{ label: "Contacter le Support 📧", url: "mailto:hello@ai-visionary.com?subject=Problème Authentification OTP" }]
+                }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            }
+        }
+
+        // 🛡️ HANDLER: VERIFY OTP CODE (Regex Detection)
+        // If message is EXACTLY 6 digits
+        if (lastMessage.content.trim().match(/^\d{6}$/)) {
+            const code = lastMessage.content.trim();
+            console.log(`🔐 VERIFYING CODE: ${code} for ${detectedUrl}`);
+
+            // @ts-ignore
+            const clientVerif = await db.getAyaEntityByUrl(detectedUrl);
+            let emailToVerify = "";
+
+            if (clientVerif && clientVerif.contact_email) {
+                emailToVerify = clientVerif.contact_email;
+            }
+            if (!emailToVerify) {
+                // @ts-ignore
+                const analysis = await db.getLatestAnalysisByUrl(detectedUrl);
+                if (analysis && analysis.email) emailToVerify = analysis.email;
+            }
+
+            if (emailToVerify) {
+                // @ts-ignore
+                const isValid = await db.verifyOTP(emailToVerify, code);
+
+                if (isValid) {
+                    // 🎉 SUCCESS: GENERATE PORTAL LINK NOW
+                    let successUrl = "";
+                    // Need Stripe ID logic again or ensure it's in clientVerif
+                    let stripeId = clientVerif?.stripe_customer_id;
+
+                    if (!stripeId && emailToVerify) {
+                        // Fallback look up via Stripe API
+                        const customers = await stripe.customers.list({ email: emailToVerify, limit: 1 });
+                        if (customers.data.length > 0) stripeId = customers.data[0].id;
+                    }
+
+                    if (process.env.STRIPE_SECRET_KEY && stripeId) {
+                        const session = await stripe.billingPortal.sessions.create({
+                            customer: stripeId,
+                            return_url: `https://www.ai-visionary.com`,
+                        });
+                        successUrl = session.url;
+                    }
+
+                    return new Response(JSON.stringify({
+                        text: `🔓 **Identité Confirmée.**\n\nVous avez maintenant un accès sécurisé temporaire à votre espace de gestion.`,
+                        buttons: [
+                            { label: "Accéder au Portail Client 🔒", url: successUrl },
+                            { label: "Mettre à jour ma fiche 🔄", action: `update_profile|${detectedUrl}` },
+                            { label: "Retour Menu", action: `main_menu|${detectedUrl}` }
+                        ]
+                    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
+                } else {
+                    return new Response(JSON.stringify({
+                        text: `⛔ **Code Incorrect ou Expiré.**\n\nVeuillez réessayer ou demander un nouveau code.`,
+                        buttons: [
+                            { label: "Renvoyer un code 📨", action: `send_otp|${detectedUrl}` }
+                        ]
+                    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+                }
+            }
         }
 
         // 🛡️ HANDLER: PEDAGOGICAL (TRUTH & CONSISTENCY)
@@ -940,8 +1161,56 @@ GÉNÈRE CE JSON MAINTENANT :
                     });
                 }
 
-                // If user said YES, continue with real questions
-                console.log("✅ Ownership confirmed. Starting real clarification questions...");
+                // If user said YES, continue with WARNING Block instead of questions directly
+                console.log("✅ Ownership confirmed. Showing WARNING Block...");
+
+                // NEW BLOCK: Educational Warning before proceeding
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: `💡 **Excellente question.**
+                    
+Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).
+
+⚠️ **MAIS c'est une stratégie dangereuse.** Les IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :
+1. Elles lisent votre Déclaration (ASR).
+2. Elles la comparent à votre Réalité Observable (Site Web, Avis).
+3. S'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.
+
+🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
+                    questions: [{
+                        id: "truth_confirmation",
+                        text: "Souhaitez-vous continuer avec les données actuelles ou modifier votre site/réponses ?",
+                        options: ["✅ Continuer (Données exactes)", "🔄 Modifier mes réponses (Relancer)"],
+                        allowCustom: false
+                    }]
+                });
+
+                return new Response(JSON.stringify({ text: finalResponseText }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
+            // HANDLE RESPONSE TO WARNING BLOCK (TRUTH CONFIRMATION)
+            const isTruthResponse = messages.some((m: any) =>
+                m.role === 'assistant' && m.content.includes('truth_confirmation')
+            );
+
+            if (isTruthResponse) {
+                const userChoice = lastMessage.content.toLowerCase();
+
+                // If user wants to MODIFY / RESTART
+                if (userChoice.includes("modifier") || userChoice.includes("relancer")) {
+                    finalResponseText = `🔄 **Relance de l'analyse.**\n\nVeuillez entrer à nouveau l'URL de votre site (ou une autre URL) pour recommencer le scan avec les informations à jour :`;
+                    // We reset by just asking for URL, natural flow will pick it up as new scan request
+                    return new Response(JSON.stringify({ text: finalResponseText }), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
+
+                // If user wants to CONTINUE, we fall through to the normal logic below...
+                console.log("✅ User chose to CONTINUE after warning.");
             }
 
             // Get URL from history to scan
@@ -1502,11 +1771,7 @@ ${scanResult.text}
                 console.log("... Computing Deterministic Score ...");
                 const scoreResult = computeAioScore(extractJson);
 
-                // EXCEPTION AI-VISIONARY.COM
-                if (urlToScan.includes('ai-visionary.com') || scanResult.hasAsrFile) {
-                    scoreResult.total = 100;
-                    Object.keys(scoreResult.blocks).forEach(k => scoreResult.blocks[k as keyof typeof scoreResult.blocks] = 99); // Max display
-                }
+                // REMOVED HARCODED EXCEPTION FOR AI-VISIONARY TO ALLOW HONEST CONTENT SCORING
 
                 // 4b. USE STRUCTURED ANALYSIS FROM ENGINE (Centralized Logic)
                 let structuredAnalysis = scoreResult.audit;
@@ -1541,6 +1806,40 @@ ${scanResult.text}
                         }
                     });
                     console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
+
+                    // 🔥 NEW: ALSO UPDATE AYA REGISTRY IMMEDIATELY (For Score & Data)
+                    // Even if not yet paid/valid, we can update the "draft" data or existing entity if found.
+                    // This fixes the "Score 100" default issue.
+                    // We need to map Analysis Data -> Entity Data
+                    const entityDraft = {
+                        legal_name: (extractJson.fields.identite as any)?.legal_name?.value || (extractJson.fields.identite as any)?.name?.value || "Unknown Entity",
+                        display_name: (extractJson.fields.identite as any)?.name?.value || "Unknown",
+                        entity_type: (extractJson.fields.identite as any)?.business_type?.value || 'company',
+                        country_legal: (extractJson.fields.identite as any)?.country?.value || "CH",
+                        sector_macro: (extractJson.fields.identite as any)?.business_type?.value || "General",
+                        website: urlToScan,
+                        asr_score: scoreResult.total, // CRITICAL: Propagate Score
+                        asr_payload: {
+                            version: "1.0",
+                            data: {
+                                description: (structuredAnalysis as any)?.pitch?.short || (structuredAnalysis as any)?.identite?.summary || "Données en cours d'indexation...",
+                                keywords: (structuredAnalysis as any)?.seo?.keywords || [],
+                                url: urlToScan
+                            },
+                            signature: { hash: "pending", public_key: "pending" }
+                        }
+                    };
+
+                    try {
+                        // We use 'subscription' mode to default to 1 month validity if new, 
+                        // but really we just want to update the data. 
+                        // registerOrUpdateEntity handles duplicate checks by URL.
+                        const updatedId = await registerOrUpdateEntity(entityDraft as any, 'subscription');
+                        console.log(`✅ AYA REGISTRY UPDATED via Chatbot: ${updatedId}`);
+                    } catch (regErr) {
+                        console.error("⚠️ Failed to update Registry from Chatbot:", regErr);
+                    }
+
                 } catch (dbErr: any) {
                     console.error("❌ Failed to save analysis to DB:", dbErr);
                     console.error("❌ Error details:", dbErr.message, dbErr.stack);
@@ -1566,25 +1865,31 @@ Calcul du score en cours...
 |||
 📊 SCORE FINAL AIO : ${scoreResult.total} / 100
 
-ℹ️ *Note : L'analyse IA peut présenter de légères variations d'un scan à l'autre. Cette marge normale n'affecte pas la conformité technique du certificat ASR délivré.*
+${(scanResult.hasAsrFile || urlToScan.includes('ai-visionary.com')) && scoreResult.total < 50 ?
+                        `✅ **Conformité Technique (ASR)** : 100% (Validé).
+⚠️ **Richesse Sémantique (Contenu)** : Faible (${scoreResult.total}/100).
+*Votre fichier existe mais il y a très peu d'informations. Plus vous renseignerez les champs demandés, plus la recherche sera efficace pour les IA.*`
+                        :
+                        `ℹ️ *Note : L'analyse IA peut présenter de légères variations d'un scan à l'autre. Cette marge normale n'affecte pas la conformité technique du certificat ASR délivré.*`
+                    }
 
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
 (Les explications critiques et les correctifs ont été générés mais sont masqués).
 |||
 ${JSON.stringify({
-                    type: "question_block",
-                    intro: `💡 **IMPACT STRATÉGIQUE** :
+                        type: "question_block",
+                        intro: `💡 **IMPACT STRATÉGIQUE** :
 Votre score actuel ne permet pas une recommandation optimale par ChatGPT ou Gemini.
 
 Pour activer votre visibilité, choisissez votre niveau de certification :`,
-                    questions: [{
-                        id: "pack_intention",
-                        text: "Sélectionnez votre Pack pour activer votre recommandation :",
-                        options: ["🔄 Abonnement AYA — 19 CHF/mois", "🚀 Pack PRO — 499 CHF (Propriété)"],
-                        allowCustom: false,
-                        allowMultiple: false
-                    }]
-                })}`;
+                        questions: [{
+                            id: "pack_intention",
+                            text: "Sélectionnez votre Pack pour activer votre recommandation :",
+                            options: ["🔄 Abonnement AYA — 19 CHF/mois", "🚀 Pack PRO — 499 CHF (Propriété)"],
+                            allowCustom: false,
+                            allowMultiple: false
+                        }]
+                    })}`;
 
 
             } catch (err: any) {

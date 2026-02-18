@@ -301,6 +301,71 @@ export const database = {
             console.error('❌ [Firestore] Query AYA By URL Error:', error);
             return null;
         }
+    },
+
+    /**
+     * OTP MANAGEMENT (One Time Password)
+     */
+    saveOTP: async (email: string, code: string): Promise<void> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return;
+
+        try {
+            // ID = email (easy lookup, one code per user at a time)
+            // But emails can have special chars, so hash or sanitize? Firestore doc IDs allow most.
+            // Let's us sanitize just in case.
+            const docId = email.replace(/[^a-zA-Z0-9]/g, '_');
+
+            await dbInstance.collection('otps').doc(docId).set({
+                email: email,
+                code: code,
+                created_at: new Date().toISOString(),
+                expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 mins validity
+            });
+            console.log(`🔐 [Firestore] OTP saved for ${email}`);
+        } catch (e) {
+            console.error("Error saving OTP:", e);
+        }
+    },
+
+    verifyOTP: async (email: string, code: string): Promise<boolean> => {
+        const dbInstance = getDb();
+        if (!dbInstance) return false;
+
+        try {
+            const docId = email.replace(/[^a-zA-Z0-9]/g, '_');
+            const docRef = dbInstance.collection('otps').doc(docId);
+            const doc = await docRef.get();
+
+            if (!doc.exists) {
+                console.log(`❌ [Firestore] No OTP found for ${email}`);
+                return false;
+            }
+
+            const data = doc.data();
+            if (!data) return false;
+
+            const now = new Date();
+            const expires = new Date(data.expires_at);
+
+            if (now > expires) {
+                console.log(`❌ [Firestore] OTP expired for ${email}`);
+                await docRef.delete(); // Cleanup
+                return false;
+            }
+
+            if (data.code === code) {
+                console.log(`✅ [Firestore] OTP Validated for ${email}`);
+                await docRef.delete(); // Burn the code (One Time Use)
+                return true;
+            }
+
+            console.log(`❌ [Firestore] Invalid OTP for ${email}`);
+            return false;
+        } catch (e) {
+            console.error("Error verifying OTP:", e);
+            return false;
+        }
     }
 };
 

@@ -28,9 +28,10 @@ export async function registerOrUpdateEntity(
         validUntil.setMonth(now.getMonth() + 1); // +1 mois (renouvelable)
     }
 
-    // 2. CHECK DUPLICATE: Try to find existing entity by URL to prevent duplicates
+    // 3. CHECK DUPLICATE & PREPARE MERGE
     let entityId = entityData.aya_entity_id;
     const targetUrl = entityData.website || (entityData.asr_payload?.data?.url as string);
+    let existingData: Partial<AyaEntity> = {};
 
     if (!entityId && targetUrl) {
         try {
@@ -39,6 +40,7 @@ export async function registerOrUpdateEntity(
             if (existing && existing.aya_entity_id) {
                 console.log(`♻️ AYA REGISTRY: DUPLICATE FOUND. Updating existing Entity ID: ${existing.aya_entity_id}`);
                 entityId = existing.aya_entity_id;
+                existingData = existing; // Keep existing data
             } else {
                 console.log(`✨ AYA REGISTRY: No duplicate found. Creating new Entity.`);
             }
@@ -51,23 +53,26 @@ export async function registerOrUpdateEntity(
         entityId = crypto.randomUUID();
     }
 
-    // 3. Construire l'objet Final
+    // 4. Construire l'objet Final (MERGE STRATEGY: New Data > Existing Data > Defaults)
     const newRecord: AyaEntity = {
         aya_entity_id: entityId,
-        legal_name: entityData.legal_name || "Unknown Entity",
-        display_name: entityData.display_name || entityData.legal_name || "Unknown",
-        entity_type: entityData.entity_type || 'company',
-        country_legal: entityData.country_legal || 'CH',
-        sector_macro: entityData.sector_macro || 'General',
-        website: targetUrl || undefined,
+        legal_name: entityData.legal_name || existingData.legal_name || "Unknown Entity",
+        display_name: entityData.display_name || existingData.display_name || entityData.legal_name || "Unknown",
+        entity_type: entityData.entity_type || existingData.entity_type || 'company',
+        country_legal: entityData.country_legal || existingData.country_legal || 'CH',
+        sector_macro: entityData.sector_macro || existingData.sector_macro || 'General',
+        website: targetUrl || existingData.website || undefined,
 
-        created_at: entityData.created_at || now.toISOString(),
-        last_update: now.toISOString(),
-        valid_until: validUntil.toISOString(),
+        // CRITICAL FIX: Respect new score if provided, else keep existing, else 0
+        asr_score: (entityData.asr_score !== undefined && entityData.asr_score !== null) ? entityData.asr_score : (existingData.asr_score || 0),
+
+        created_at: existingData.created_at || entityData.created_at || now.toISOString(),
+        last_update: now.toISOString(), // Always refresh update time
+        valid_until: validUntil.toISOString(), // Refresh validity
 
         data_origin: 'AYO',
 
-        asr_payload: entityData.asr_payload || { version: "1.0", data: {}, signature: { hash: "", public_key: "" } },
+        asr_payload: entityData.asr_payload || existingData.asr_payload || { version: "1.0", data: {}, signature: { hash: "", public_key: "" } },
 
         recommendability: {
             machine_readable: true,

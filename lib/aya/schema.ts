@@ -10,6 +10,7 @@ export interface AyaEntity {
     country_legal: string; // ISO Code (CH, FR...)
     sector_macro: string; // Ex: "Construction", "Santé"
     website?: string;      // URL associée (AIO Signal principal)
+    asr_score?: number;    // Score de qualité de l'information (0-100)
 
     // Temporalité (CRUCIAL POUR LES BOTS)
     created_at: string;      // ISO Date - Ne bouge jamais

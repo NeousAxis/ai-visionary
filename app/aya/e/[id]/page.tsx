@@ -16,11 +16,13 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     const isValid = new Date(entity.valid_until) > new Date();
     const creationDate = new Date(entity.created_at).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
     const validUntilDate = new Date(entity.valid_until).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
-    const score = entity.asr_score || 100;
+
+    // Fix: Respect 0 score, fallback to 100 only if undefined (legacy/mock)
+    const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : 100;
 
     // DATA EXTRACTION
     const asrData = entity.asr_payload?.data || {};
-    const description = asrData.description || asrData.pitch || "Aucune description sémantique définie.";
+    const description = asrData.description || asrData.pitch || "Données sémantiques en cours d'indexation par le réseau AYA...";
     const keywords = asrData.keywords || asrData.services || asrData.tags || [];
 
     return (
@@ -87,11 +89,16 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <span style={{ color: 'var(--text-muted)' }}>Score de Confiance</span>
+                                    <div>
+                                        <span style={{ color: 'var(--text-muted)' }}>Qualité de l'Info (ASR)</span>
+                                    </div>
                                     <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>
                                         {score}<span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>/100</span>
                                     </span>
                                 </div>
+                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '5px', fontStyle: 'italic', lineHeight: '1.3', borderLeft: '2px solid var(--border-light)', paddingLeft: '8px' }}>
+                                    * Un score bas n'affecte pas la confiance (Validité), mais indique une quantité d'information limitée transmise aux IA.
+                                </p>
                             </div>
 
                             <div style={{ background: 'var(--bg-main)', padding: '15px', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem' }}>
@@ -112,6 +119,12 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                     <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>Validité</p>
                                     <p style={{ fontWeight: '600', color: isValid ? 'var(--primary-color)' : 'inherit' }}>{validUntilDate}</p>
                                 </div>
+                            </div>
+
+                            <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px dashed var(--border-light)' }}>
+                                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'right', fontStyle: 'italic' }}>
+                                    Dernière modification le : {new Date(entity.last_update).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
                             </div>
                         </div>
 

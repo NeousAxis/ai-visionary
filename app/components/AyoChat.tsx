@@ -320,7 +320,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     if (option === '__AUTRE__') {
                         if (isSelecting) {
                             // If selecting "Autre", pre-fill the main input and focus it
-                            const prefix = customLabel ? "" : "Autre : ";
+                            const cleanLabel = customLabel ? customLabel.replace(/\.\.\.$/, '').replace(/:$/, '').trim() : "Autre";
+                            const prefix = `${cleanLabel} : `;
                             setInput((prevInput) => prevInput ? prevInput : prefix);
                             // Try to focus main input (dirty but effective)
                             setTimeout(() => {
@@ -409,8 +410,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                 q.id === 'ownership_confirm';
 
                             // FORCE allowMultiple based on question keywords (LLM often forgets)
-                            // BUT NOT for ownership question
-                            const forceMultiple = !isOwnershipQuestion && (
+                            // BUT NOT for ownership question OR if explicitly set to false
+                            const forceMultiple = !isOwnershipQuestion && q.allowMultiple !== false && (
                                 q.allowMultiple ||
                                 questionLower.includes('public') ||
                                 questionLower.includes('cible') ||
@@ -579,7 +580,12 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {!isOwnershipQuestion && q.allowCustom !== false && (
                                                     <button
                                                         onClick={() => {
-                                                            setInput(q.customLabel ? "" : "Autre : ");
+                                                            // CUSTOM LABEL HANDLING:
+                                                            // If label is "Activité...", prefix becomes "Activité : "
+                                                            const cleanLabel = q.customLabel ? q.customLabel.replace(/\.\.\.$/, '').replace(/:$/, '').trim() : "Autre";
+                                                            const prefix = `${cleanLabel} : `;
+
+                                                            setInput(prefix);
                                                             setTimeout(() => {
                                                                 const mainInput = document.querySelector('.chat-input') as HTMLElement;
                                                                 if (mainInput) mainInput.focus();
