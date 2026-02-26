@@ -28,3 +28,4 @@ Si la version actuelle est cassée, choisissez un **TAG** dans la liste ci-desso
 | `deploy-202602130820` | 13/02/2026 08:20 | Infrastructure AYA V1: Registre dynamique, Sitemap, Profils Entités & Webhook Stripe |
 | `deploy-202602262020` | 26/02/2026 20:20 | HOTFIX: Fix certificate link /certificate/ → /aya/e/ + Fix email scores mismatch (save email to analysis DB) |
 | `deploy-202602262036` | 26/02/2026 20:36 | MAJOR FIX: Enrich ASR with methodology/certifications/KPIs + Dynamic FAQ + Fix permissions defaulting to false + Fix Autre UI bug erasing multi-selections |
+| `deploy-202602262048` | 26/02/2026 20:48 | CRITICAL FIX: Questionnaire now validates ALL low-confidence items (methodology, legal form, certifications, contact). Threshold raised from 50 to 85. |

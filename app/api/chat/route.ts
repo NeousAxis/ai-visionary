@@ -1058,8 +1058,11 @@ GÉNÈRE CE JSON MAINTENANT :
                     scanState.detected[key] = answer.answer;
                     scanState.confidence[key] = conf;
 
-                    // 🎯 SMART SKIP: If confidence is 50 or more, we skip the "Is this correct?" question.
-                    if (conf >= 50) {
+                    // 🎯 SMART SKIP: ONLY skip if confidence is genuinely HIGH (90+).
+                    // Low confidence (70) items MUST be validated by the user.
+                    // Previous threshold of 50 was too low, causing low-confidence items
+                    // (methodology, legal form, certifications, contact) to be silently skipped.
+                    if (conf >= 85) {
                         scanState.high_confidence_keys.push(key);
                     } else if (conf > 0) {
                         scanState.low_confidence_keys.push(key);
