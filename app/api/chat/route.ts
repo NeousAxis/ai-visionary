@@ -1193,8 +1193,8 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
 🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
                     questions: [{
                         id: "truth_confirmation",
-                        text: "Souhaitez-vous continuer avec les données actuelles ou modifier votre site/réponses ?",
-                        options: ["✅ Continuer (Données exactes)", "🔄 Modifier mes réponses (Relancer)"],
+                        text: "Souhaitez-vous continuer l'analyse avec ces données ?",
+                        options: ["✅ Continuer (Données exactes)", "❌ Annuler (Ce n'est pas mon site)"],
                         allowCustom: false
                     }]
                 });
