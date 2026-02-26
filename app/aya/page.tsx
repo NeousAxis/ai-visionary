@@ -131,7 +131,9 @@ export default function AyaPage() {
                                 <div key={entity.id || entity.aya_entity_id} className="card" style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                                         <span style={{ background: 'var(--bg-main)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                                            {entity.country || entity.country_legal} • {entity.type || entity.entity_type || 'Entity'}
+                                            {(entity.country || entity.country_legal || 'XX').toUpperCase().slice(0, 2)} • {
+                                                ({ 'company': 'Entreprise', 'association': 'Association', 'public_body': 'Organisme Public', 'individual': 'Indépendant' } as Record<string, string>)[entity.type || entity.entity_type] || 'Organisation'
+                                            }
                                         </span>
                                         {(entity.status === 'verified' || entity.recommendability?.status === 'fresh') && (
                                             <span style={{ color: 'var(--primary-color)', fontSize: '0.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>

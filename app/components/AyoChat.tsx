@@ -394,8 +394,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             // FILTER OUT "Autre" variants AND redundant "Les deux" options
                             const filteredOptions = q.options.filter(opt => {
                                 const lower = opt.toLowerCase().trim();
-                                // Remove "Autre" variants
-                                if (['autre', 'autres', 'other', 'préciser', 'préciser...', 'autre...', 'autre / préciser', 'autre / préciser...'].includes(lower)) return false;
+                                // Remove "Autre" variants via includes to catch "Autre, à préciser"
+                                if (lower.includes('autre') || lower.includes('other') || lower.includes('préciser')) return false;
                                 // Remove "Les deux" / combined options (redundant with checkboxes)
                                 if (lower.includes('les deux') || lower.includes('both') || lower.includes('tous') || lower.includes('toutes') || lower.includes('all')) return false;
                                 return true;

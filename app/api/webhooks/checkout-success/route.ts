@@ -480,6 +480,53 @@ export async function POST(req: Request) {
             emailMissing = true;
         }
 
+        // 🎯 ENTITY TYPE DETECTION from analysis data (legal_form, business_type)
+        const rawLegalForm = ((analysisData.extract as any).identite?.legal_form?.value ||
+            (analysisData.extract as any).identite?.business_type?.value || "").toLowerCase();
+        let detectedEntityType: 'company' | 'association' | 'individual' | 'public_body' = 'company';
+        if (rawLegalForm.includes('association') || rawLegalForm.includes('ong') || rawLegalForm.includes('fondation') || rawLegalForm.includes('utilité publique')) {
+            detectedEntityType = 'association';
+        } else if (rawLegalForm.includes('public') || rawLegalForm.includes('commune') || rawLegalForm.includes('canton') || rawLegalForm.includes('état')) {
+            detectedEntityType = 'public_body';
+        } else if (rawLegalForm.includes('indépendant') || rawLegalForm.includes('freelance') || rawLegalForm.includes('auto-entrepreneur')) {
+            detectedEntityType = 'individual';
+        }
+
+        // 🎯 RECALCUL DU SCORE RÉEL POST-ENREGISTREMENT ASR
+        // Un client enregistré dans AYA possède un fichier ASR machine-readable.
+        // Cela augmente FACTUELLEMENT sa recommandabilité par les IA.
+        // On recalcule le score via le moteur officiel avec is_aya_registered=true.
+        const baseScore = analysisData.score || 0;
+        let asrBonusScore = baseScore;
+        try {
+            // Inject registration truth into the extract for recalculation
+            // Un client enregistré reçoit le KIT COMPLET : ASR + Manifest + FAQ + External Context
+            const extractForRecalc = JSON.parse(JSON.stringify(analysisData.extract || {}));
+            if (!extractForRecalc.source) extractForRecalc.source = { url: companyInfo.url || '', scan: {} };
+            if (!extractForRecalc.source.scan) extractForRecalc.source.scan = {};
+
+            // Vérité technique : TOUS les fichiers sont générés pour un client enregistré
+            extractForRecalc.source.scan.is_aya_registered = true;
+            extractForRecalc.source.scan.has_asr_file = true;
+
+            // Le kit inclut aussi FAQ structurée, Manifest (documentation), et External Context
+            if (!extractForRecalc.fields) extractForRecalc.fields = {};
+            if (!extractForRecalc.fields.structure_technique) extractForRecalc.fields.structure_technique = {};
+            extractForRecalc.fields.structure_technique.has_asr = { value: true, q: 1, evidence: ['AYA Registration'] };
+
+            if (!extractForRecalc.fields.contenus_pedagogiques) extractForRecalc.fields.contenus_pedagogiques = {};
+            extractForRecalc.fields.contenus_pedagogiques.has_faq = { value: true, q: 1, evidence: ['FAQ structurée générée'] };
+            extractForRecalc.fields.contenus_pedagogiques.has_documentation = { value: true, q: 1, evidence: ['Manifest généré'] };
+
+            // Recalculate with real engine
+            const recalcResult = computeAioScore(extractForRecalc);
+            asrBonusScore = recalcResult.total;
+            console.log(`🎯 SCORE RECALCULÉ POST-ASR (Kit complet): Base=${baseScore} → Réel=${asrBonusScore}`);
+        } catch (recalcErr) {
+            console.warn('⚠️ Recalculation failed, keeping base score:', recalcErr);
+            asrBonusScore = baseScore;
+        }
+
         // 6. ENREGISTREMENT REGISTRE AYA
         let ayaEntityId = "";
         try {
@@ -488,14 +535,14 @@ export async function POST(req: Request) {
 
             const mode = packType === 'AYA_SUB' ? 'subscription' : 'purchase';
 
-            // Prepare Entity Data from Analyze
             const entityDraft = {
                 legal_name: (analysisData.extract as any).identite?.name?.value || "Unknown Entity",
                 display_name: (analysisData.extract as any).identite?.name?.value || "Unknown",
+                entity_type: detectedEntityType,
                 website: companyInfo.url, // Explicitly pass the analyzed URL
                 country_legal: (analysisData.extract as any).identite?.country?.value || "CH",
                 sector_macro: (analysisData.extract as any).identite?.sector?.value || "General",
-                asr_score: analysisData.score || 0,
+                asr_score: asrBonusScore,
                 // Store the full analyze as payload
                 asr_payload: {
                     version: "1.0",
@@ -549,7 +596,7 @@ export async function POST(req: Request) {
                                 
                                 <div style="margin: 15px 0; border-top: 1px dashed #6ee7b7; border-bottom: 1px dashed #6ee7b7; padding: 10px 0;">
                                      <p style="font-size: 12px; color: #064e3b; margin: 0; text-transform: uppercase;">Qualité de l'Info (Score ASR)</p>
-                                     <p style="font-size: 24px; font-weight: 800; color: #059669; margin: 5px 0;">${analysisData.score}/100</p>
+                                     <p style="font-size: 24px; font-weight: 800; color: #059669; margin: 5px 0;">${asrBonusScore}/100</p>
                                      <p style="font-size: 11px; color: #047857; font-style: italic; max-width: 80%; margin: 5px auto;">
                                         "Un score bas signifie que vous donnez peu d'infos aux IA, même si vous êtes une source de confiance."
                                      </p>
@@ -568,7 +615,7 @@ export async function POST(req: Request) {
 
                             <!-- CTA Button -->
                             <div style="text-align: center; margin: 35px 0;">
-                                <a href="https://ai-visionary.com/certificate/${ayaEntityId}" style="background-color: #2563EB; color: #ffffff; font-weight: 600; font-size: 16px; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+                                <a href="https://www.ai-visionary.com/aya/e/${ayaEntityId}" style="background-color: #2563EB; color: #ffffff; font-weight: 600; font-size: 16px; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
                                     Voir mon Certificat Officiel &rarr;
                                 </a>
                             </div>
@@ -780,7 +827,7 @@ export async function POST(req: Request) {
                                     <p style="font-family: monospace; font-size: 16px; color: #0284c7; margin: 5px 0 0 0; background: #fff; display: inline-block; padding: 4px 12px; border-radius: 4px; border: 1px solid #7dd3fc;">${ayaEntityId}</p>
                                 </div>
                                 <div style="margin-top: 15px;">
-                                    <a href="https://ai-visionary.com/certificate/${ayaEntityId}" style="color: #0284c7; text-decoration: underline; font-weight: 600; font-size: 14px;">Voir mon Certificat en ligne &rarr;</a>
+                                    <a href="https://ai-visionary.com/aya/e/${ayaEntityId}" style="color: #0284c7; text-decoration: underline; font-weight: 600; font-size: 14px;">Voir mon Certificat en ligne &rarr;</a>
                                 </div>
                             </div>
                             

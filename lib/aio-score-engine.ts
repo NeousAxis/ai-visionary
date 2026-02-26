@@ -167,10 +167,9 @@ export function computeAioScore(extract: AyoExtract) {
         total = Math.min(total, 90);
     }
 
-    // c) TRUST BONUS: Si AYA Registered, on garantit un score de confiance minimal
-    if (isAyaRegistered) {
-        total = Math.max(total, 95); // Un client AYA est par définition optimisé
-    }
+    // c) TRUST: Si AYA Registered, les plafonds techniques sont levés (ASR = machine-readable).
+    // Le score reste celui calculé par la qualité des données — pas de plancher artificiel.
+    // L'ASR permet d'ATTEINDRE 100, il ne DONNE pas 95.
 
     // c) Accessibilité : si site inaccessible => technique pénalisée implicitement (optionnel)
     // Ici on ne change pas les champs, on laisse la qualité q faire le job.

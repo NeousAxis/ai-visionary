@@ -558,11 +558,16 @@ export async function POST(req: Request) {
         }
         // PRIORITY 2.5: MAIN MENU RETURN
         else if (lastMessage.content.startsWith("main_menu|")) {
-            triggerMode = "EXISTING_CLIENT";
+            // If a scan is already in progress, continue the questionnaire instead of going to client menu
+            if (hasScanInHistory && !hasFinalScore) {
+                triggerMode = "CONTINUE_QUESTIONING";
+            } else {
+                triggerMode = "EXISTING_CLIENT";
+            }
         }
         // PRIORITY 3: SEQUENTIAL QUESTIONING (If URL in history)
         else if (hasUrlHistory && !hasFinalScore) {
-            if (stepsCompleted < 16) {
+            if (stepsCompleted < 18) {
                 triggerMode = "CONTINUE_QUESTIONING";
             } else {
                 triggerMode = "FINAL_ANALYSIS";
@@ -836,7 +841,8 @@ export async function POST(req: Request) {
         }
 
         // 🛡️ HANDLER: PEDAGOGICAL (TRUTH & CONSISTENCY)
-        if (lowText.match(/(men[st]|mentir|fausse|fake|triche|vérité|honnête)/)) {
+        // GUARD: Only trigger when NOT in active questionnaire to prevent hijacking mid-interview
+        if (!hasScanInHistory && lowText.match(/(men[st]|mentir|fausse|fake|triche|vérité|honnête)/)) {
             return new Response(JSON.stringify({
                 text: `💡 **Excellente question.**\n\nTechniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).\n\n⚠️ **MAIS c'est une stratégie dangereuse.**\nLes IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :\n\n1. Elles lisent votre **Déclaration (ASR)**.\n2. Elles la comparent à votre **Réalité Observable** (Site Web, Avis, Base de données).\n\nS'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.\n\n🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
                 buttons: [
@@ -848,7 +854,7 @@ export async function POST(req: Request) {
         // 🛡️ CRITICAL INTELLIGENT ROUTING: CERTIFICATE VIEW
         if (lowText.includes("view_certificate") || lowText.includes("voir mon certificat") || lowText.includes("mon certificat")) {
             return new Response(JSON.stringify({
-                text: `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/certificate/latest)**\n\nIl atteste de votre structure de donnée compatible IA.`,
+                text: `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/aya)**\n\nIl atteste de votre structure de donnée compatible IA.`,
                 buttons: [{ label: "Retour", action: "back" }]
             }), { status: 200 });
         }
@@ -944,9 +950,9 @@ STRATÉGIE DE CONFIANCE (FILTRE ANTI-BULLSHIT) :
    - Information totalement introuvable.
 
 TA MISSION :
-Essaie de répondre aux 16 questions critiques pour construire un ASR.
+Essaie de répondre aux 18 questions critiques pour construire un ASR.
 
-LES 16 QUESTIONS CRITIQUES :
+LES 18 QUESTIONS CRITIQUES :
 1. Nom exact (Priorité au JSON-LD "name" ou au Titre)
 2. Pays d'établissement (Cherche "Paris", "Suisse", "+33", noms de villes...)
 3. Statut juridique (Cherche "SARL", "SAS", "Inc", "Limited" dans le footer - Sinon "unknown")
@@ -963,6 +969,8 @@ LES 16 QUESTIONS CRITIQUES :
 14. Mots-clés principaux (Ceux du Titre et H1)
 15. Intentions utilisateur (Pour quoi vient-on sur ce site ?)
 16. Canaux d'accès (Email ? Tel ?)
+17. Processus et Méthodes (Étapes de prestation, méthodologie, comment le service est délivré)
+18. Indicateurs clés (Comment sont mesurés les succès, KPIs, rapports)
 
 FORMAT JSON ATTENDU :
 {
@@ -1008,14 +1016,16 @@ GÉNÈRE CE JSON MAINTENANT :
                 "offre.audience", "offre.offer_summary", "offre.business_model", "identite.team",
                 "offre.value_proposition", "structure_technique.technologies", "structure_technique.ai_usage",
                 "external_context.presence", "engagements_conformite.certifications",
-                "external_context.keywords", "external_context.intents", "external_context.contact"
+                "external_context.keywords", "external_context.intents", "external_context.contact",
+                "processus_methodes.process_steps", "indicateurs.key_indicators"
             ];
 
             const questionLabels = [
                 "Nom", "Pays", "Statut juridique", "Secteur",
                 "Audience", "Offre", "Modèle économique", "Équipe",
                 "Mission", "Technologies", "IA", "Réseau",
-                "Certifications", "Mots-clés", "Intentions", "Contact"
+                "Certifications", "Mots-clés", "Intentions", "Contact",
+                "Méthodologie", "Indicateurs"
             ];
 
             // Build scan_state object (SINGLE SOURCE OF TRUTH)
@@ -1039,11 +1049,12 @@ GÉNÈRE CE JSON MAINTENANT :
                 next_block_key: ""
             };
 
-            extractedAnswers.forEach((answer, index) => {
-                const key = blockKeys[index] || `block_${index}`;
-                const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 70 : 0);
+            blockKeys.forEach((key, index) => {
+                // Match by index (LLM returns {question_id, answer, confidence} ordered 1-18)
+                const answer = extractedAnswers[index];
 
-                if (answer.answer && answer.answer !== 'null') {
+                if (answer && answer.answer && answer.answer !== 'null' && answer.confidence !== 'unknown') {
+                    const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 70 : 0);
                     scanState.detected[key] = answer.answer;
                     scanState.confidence[key] = conf;
 
@@ -1192,15 +1203,15 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             }
 
             // HANDLE RESPONSE TO WARNING BLOCK (TRUTH CONFIRMATION)
-            const isTruthResponse = messages.some((m: any) =>
-                m.role === 'assistant' && m.content.includes('truth_confirmation')
-            );
+            const safeMessagesTruth = messages || [];
+            const lastAssistantMsgTruth = safeMessagesTruth.filter((m: any) => m.role === 'assistant').pop() || null;
+            const isTruthResponse = lastAssistantMsgTruth && lastAssistantMsgTruth.content.includes('truth_confirmation');
 
             if (isTruthResponse) {
                 const userChoice = lastMessage.content.toLowerCase();
 
                 // If user wants to MODIFY / RESTART
-                if (userChoice.includes("modifier") || userChoice.includes("relancer")) {
+                if (userChoice.includes("(relancer)")) {
                     finalResponseText = `🔄 **Relance de l'analyse.**\n\nVeuillez entrer à nouveau l'URL de votre site (ou une autre URL) pour recommencer le scan avec les informations à jour :`;
                     // We reset by just asking for URL, natural flow will pick it up as new scan request
                     return new Response(JSON.stringify({ text: finalResponseText }), {
@@ -1284,13 +1295,13 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             console.log(`   UNKNOWN (ASK FULL): ${unknownKeys.length} → ${unknownKeys.join(', ')}`);
 
 
-            // FULL LIST OF 16 BLOCKS (aligned with scan_state keys)
             const allBlockNames = [
                 "identite.name", "identite.juridical_country", "identite.legal_form", "identite.sector",
                 "offre.audience", "offre.offer_summary", "offre.business_model", "identite.team",
-                "offre.value_proposition", "structure_technique.ai_usage",
+                "offre.value_proposition", "structure_technique.technologies", "structure_technique.ai_usage",
                 "external_context.presence", "engagements_conformite.certifications",
-                "external_context.keywords", "external_context.intents", "external_context.contact"
+                "external_context.keywords", "external_context.intents", "external_context.contact",
+                "processus_methodes.process_steps", "indicateurs.key_indicators"
             ];
 
             // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
@@ -1429,13 +1440,11 @@ Poser la question pour le bloc **${nextBlockName}**.
                     try {
                         const parsedResponse = JSON.parse(potentialJson);
 
-                        // 🔍 CHECK FOR "ANALYSE EN COURS" SIGNAL INSIDE JSON
+                        // 🔒 DETERMINISTIC ONLY: LLM cannot trigger FINAL_ANALYSIS.
+                        // Only the queue-based progression (nextBlockName === "FINALISATION") can end the questionnaire.
+                        // This prevents the LLM from prematurely cutting the interview.
                         const jsonStringContent = JSON.stringify(parsedResponse).toLowerCase();
-                        if (jsonStringContent.includes("analyse en cours") || jsonStringContent.includes("final_analysis")) {
-                            console.log("🤖 LLM signalled END OF QUESTIONS (inside JSON). Triggering FINAL_ANALYSIS...");
-                            triggerMode = "FINAL_ANALYSIS";
-                            finalResponseText = ""; // Clear to allow fall-through to analysis block
-                        }
+                        if (false) { /* DISABLED: LLM-triggered finalization removed */ }
                         // SKIP LOGIC CHECK
                         else if (parsedResponse.skip === true || (parsedResponse.questions && parsedResponse.questions.length === 0)) {
                             console.log(`⏭️ SKIPPING ${nextBlockName} - Already known.`);
@@ -1478,11 +1487,10 @@ Poser la question pour le bloc **${nextBlockName}**.
                     const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
                     if (jsonMatch) finalResponseText = jsonMatch[1];
                 } else {
-                    // CHECK FOR "ANALYSE EN COURS" TEXT SIGNAL
-                    if (rawResponse.toLowerCase().includes("analyse en cours") || rawResponse.includes("FINAL_ANALYSIS")) {
-                        console.log("🤖 LLM signalled END OF QUESTIONS. Triggering FINAL_ANALYSIS...");
+                    // 🔒 DETERMINISTIC ONLY: LLM cannot trigger FINAL_ANALYSIS.
+                    // Disabled to prevent premature questionnaire termination by LLM hallucination.
+                    if (false) { /* DISABLED: LLM-triggered finalization removed */
                         triggerMode = "FINAL_ANALYSIS";
-                        // We do NOT set finalResponseText here, so the code flows to the next block
                         finalResponseText = "";
                     } else {
                         console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Forcing Text into JSON.`);
@@ -1525,21 +1533,47 @@ Poser la question pour le bloc **${nextBlockName}**.
                 // 1. SCANNING (Technical Truth)
                 const scanResult = await scanUrlForAioSignals(urlToScan);
 
-                // 1b. GATHER USER CONTEXT (Answers)
-                const scanMsgIndex = messages.findIndex((m: any) => m.role === 'assistant' && m.content.includes("Analyse Préliminaire Effectuée"));
+                // 1b. GATHER USER CONTEXT (ALL questionnaire answers)
+                // CRITICAL: We need ALL user answers, not just the last one.
+                // Search for the scan message using multiple possible markers.
+                const scanMsgIndex = messages.findIndex((m: any) =>
+                    m.role === 'assistant' && (
+                        m.content.includes("INFORMATIONS DÉTECTÉES") ||
+                        m.content.includes("scan_state") ||
+                        m.content.includes("Analyse Préliminaire Effectuée") ||
+                        m.content.includes("SCAN TERMINÉ")
+                    )
+                );
                 let userAnswersContext = "";
                 if (scanMsgIndex !== -1) {
+                    // Capture ALL messages after the scan (questions + answers)
                     const subsequentMessages = messages.slice(scanMsgIndex);
                     userAnswersContext = subsequentMessages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
                 } else {
-                    userAnswersContext = lastMessage.content;
+                    // SAFETY NET: If no scan marker found, include ALL user messages after the URL
+                    const urlMsgIdx = messages.findIndex((m: any) => m.role === 'user' && m.content.match(/https?:\/\/|www\./));
+                    if (urlMsgIdx !== -1) {
+                        const allAfterUrl = messages.slice(urlMsgIdx);
+                        userAnswersContext = allAfterUrl.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
+                    } else {
+                        userAnswersContext = messages.filter((m: any) => m.role === 'user').map((m: any) => m.content).join('\n');
+                    }
                 }
+                console.log(`📋 USER CONTEXT LENGTH: ${userAnswersContext.length} chars (from msgIndex ${scanMsgIndex})`);
 
                 // 2. EXTRACTION (Semantic Perception via LLM)
                 const EXTRACTION_PROMPT = `
 Tu es un moteur d'extraction de données AIO (Artificial Intelligence Optimization).
 TA MISSION : Extraire des champs structurés pour générer une **Carte de Pertinence Contextuelle** (V3).
 INTERDICTION FORMELLE DE CALCULER UN SCORE. Tu ne notes rien. Tu extrais seulement.
+
+⚠️ RÈGLE CRITIQUE : PRIORISE LES RÉPONSES DU QUESTIONNAIRE (USER CONTEXT) PAR-DESSUS LE CONTENU DU SITE.
+Si l'utilisateur a répondu à une question sur ses indicateurs, ses méthodes, ses certifications ou sa méthodologie,
+ces réponses font FOI et doivent être extraites avec q=1.
+- Si l'utilisateur mentionne des KPIs, métriques, résultats mesurables → indicateurs.key_indicators (q=1)
+- Si l'utilisateur mentionne une méthodologie, des étapes de prestation → processus_methodes.process_steps (q=1)
+- Si l'utilisateur mentionne des certifications, labels, memberships → engagements_conformite.certifications (q=1)
+- Si l'utilisateur mentionne des réseaux, associations, fédérations → engagements_conformite.frameworks (q=1)
 
 RÈGLE DE QUALITÉ (q) :
 1 = Information explicite, claire, structurée.
@@ -1647,7 +1681,7 @@ ${scanResult.text}
                 try {
                     // Timeout promise
                     const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error("LLM_TIMEOUT")), 8000)
+                        setTimeout(() => reject(new Error("LLM_TIMEOUT")), 45000)
                     );
 
                     // LLM extraction promise
@@ -1807,38 +1841,7 @@ ${scanResult.text}
                     });
                     console.log(`💾 ANALYSIS SAVED TO DB: ${sessionAsrId}, Score: ${scoreResult.total}`);
 
-                    // 🔥 NEW: ALSO UPDATE AYA REGISTRY IMMEDIATELY (For Score & Data)
-                    // Even if not yet paid/valid, we can update the "draft" data or existing entity if found.
-                    // This fixes the "Score 100" default issue.
-                    // We need to map Analysis Data -> Entity Data
-                    const entityDraft = {
-                        legal_name: (extractJson.fields.identite as any)?.legal_name?.value || (extractJson.fields.identite as any)?.name?.value || "Unknown Entity",
-                        display_name: (extractJson.fields.identite as any)?.name?.value || "Unknown",
-                        entity_type: (extractJson.fields.identite as any)?.business_type?.value || 'company',
-                        country_legal: (extractJson.fields.identite as any)?.country?.value || "CH",
-                        sector_macro: (extractJson.fields.identite as any)?.business_type?.value || "General",
-                        website: urlToScan,
-                        asr_score: scoreResult.total, // CRITICAL: Propagate Score
-                        asr_payload: {
-                            version: "1.0",
-                            data: {
-                                description: (structuredAnalysis as any)?.pitch?.short || (structuredAnalysis as any)?.identite?.summary || "Données en cours d'indexation...",
-                                keywords: (structuredAnalysis as any)?.seo?.keywords || [],
-                                url: urlToScan
-                            },
-                            signature: { hash: "pending", public_key: "pending" }
-                        }
-                    };
 
-                    try {
-                        // We use 'subscription' mode to default to 1 month validity if new, 
-                        // but really we just want to update the data. 
-                        // registerOrUpdateEntity handles duplicate checks by URL.
-                        const updatedId = await registerOrUpdateEntity(entityDraft as any, 'subscription');
-                        console.log(`✅ AYA REGISTRY UPDATED via Chatbot: ${updatedId}`);
-                    } catch (regErr) {
-                        console.error("⚠️ Failed to update Registry from Chatbot:", regErr);
-                    }
 
                 } catch (dbErr: any) {
                     console.error("❌ Failed to save analysis to DB:", dbErr);
@@ -2000,6 +2003,18 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                     if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
                 }
 
+                // 🔥 CRITICAL FIX: Update the analysis record in DB with this email
+                // Without this, the webhook cannot find the analysis by email and falls back to fake scores!
+                try {
+                    await db.saveAnalysis(sessionAsrId, {
+                        email: userEmail,
+                        url: detectedUrl || undefined
+                    } as any);
+                    console.log(`💾 ANALYSIS UPDATED WITH EMAIL: ${userEmail} (Session: ${sessionAsrId})`);
+                } catch (dbUpdateErr) {
+                    console.error(`❌ Failed to update analysis with email:`, dbUpdateErr);
+                }
+
                 // Identify plan from context
                 const lastAssistantMsg = messages[messages.length - 2]?.content || "";
                 let selectedPlan = "AYA_SUB"; // Default to sub if unsure
@@ -2030,7 +2045,7 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
 🌐 **Fichier Contexte Externe**
 📜 **3 Ans de Registre AYA** inclus
 
-👉 **[Acheter mes actifs sémantiques](${actionLink})**
+👉 **[Acheter mes fichiers ASR](${actionLink})**
 
 *Vous recevrez vos fichiers et votre certificat instantanément après validation.*`;
                 } else {
