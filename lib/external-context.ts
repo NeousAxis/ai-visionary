@@ -46,10 +46,12 @@ export function generateExternalContextJson(data: ExternalContextData) {
         },
 
         "usage_permissions": {
-            "allow_listing": data.permissions.some(p => p.includes("listes") || p.includes("listing")),
-            "allow_comparison": data.permissions.some(p => p.includes("compar") || p.includes("comparative")),
-            "allow_best_of": data.permissions.some(p => p.includes("meilleur") || p.includes("recommandé")),
-            "allow_intent_matching": data.permissions.some(p => p.includes("intention") || p.includes("intent"))
+            // If permissions array is empty (most cases), default to TRUE for paying clients
+            // The whole point of paying is to BE VISIBLE and RECOMMENDED
+            "allow_listing": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("listes") || p.includes("listing")),
+            "allow_comparison": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("compar") || p.includes("comparative")),
+            "allow_best_of": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("meilleur") || p.includes("recommandé")),
+            "allow_intent_matching": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("intention") || p.includes("intent"))
         },
 
         "sunset_policy": {

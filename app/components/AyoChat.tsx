@@ -77,7 +77,32 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
         const textToSend = overrideInput || input;
         if (!textToSend.trim() || isLoading) return;
 
-        const userMessage = { role: 'user', content: textToSend };
+        // 🔥 FIX: If there are active multiple selections AND user is typing a custom value,
+        // combine them instead of losing the checkbox selections.
+        let finalText = textToSend;
+        if (!overrideInput && Object.keys(selectedMultiple).length > 0) {
+            // User pressed Enter in the text input while checkboxes are selected
+            const questionId = Object.keys(selectedMultiple)[0];
+            const selections = selectedMultiple[questionId]?.filter(s => s !== '__AUTRE__') || [];
+
+            if (selections.length > 0) {
+                // Combine checkbox selections + custom text
+                const customText = input.trim();
+                const allAnswers = [...selections];
+                if (customText && !customText.startsWith("Autre :") || customText.includes(":")) {
+                    // Extract just the value after "Autre : " or "Label : "
+                    const colonIdx = customText.indexOf(':');
+                    const cleanCustom = colonIdx >= 0 ? customText.substring(colonIdx + 1).trim() : customText;
+                    if (cleanCustom) allAnswers.push(cleanCustom);
+                }
+                finalText = allAnswers.join(', ');
+
+                // Clear the multi-select state
+                setSelectedMultiple({});
+            }
+        }
+
+        const userMessage = { role: 'user', content: finalText };
 
         // 1. Optimistic update
         setMessages(prev => [...prev, { ...userMessage, id: Date.now().toString() }]);

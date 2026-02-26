@@ -938,14 +938,96 @@ export async function POST(req: Request) {
                 }, null, 2);
                 zip.file("manifest.json", manifestContent);
 
-                // 4. faq.json (Placeholder structure if not explicitly generated yet)
+                // 4. faq.json (DYNAMIC - built from real analysis data)
+                const ext = analysisData?.extract || {} as any;
+                const entityName = ext.identite?.name?.value || companyInfo.name || "Notre entreprise";
+                const services = (ext.offre?.services?.value || []).join(", ");
+                const products = (ext.offre?.products?.value || []).join(", ");
+                const audience = ext.offre?.target_audience?.value || "";
+                const processSteps = (ext.processus_methodes?.process_steps?.value || []).join(". ");
+                const certifications = (ext.engagements_conformite?.certifications?.value || []).join(", ");
+                const frameworks = (ext.engagements_conformite?.frameworks?.value || []).join(", ");
+                const kpis = (ext.indicateurs?.key_indicators?.value || []).join(", ");
+                const city = ext.identite?.city?.value || "";
+                const country = ext.identite?.country?.value || "";
+                const useCases = (ext.offre?.use_cases?.value || []).join(", ");
+
+                const faqEntries: { q: string; a: string }[] = [];
+
+                // Always include identity
+                faqEntries.push({
+                    q: `Qui est ${entityName} ?`,
+                    a: `${entityName} est ${ext.identite?.business_type?.value || "une organisation"}${city ? ` basée à ${city}` : ""}${country ? ` (${country})` : ""}.${services ? ` Nous proposons : ${services}.` : ""}`
+                });
+
+                // Services
+                if (services) {
+                    faqEntries.push({
+                        q: `Quels services proposez-vous ?`,
+                        a: services
+                    });
+                }
+
+                // Products
+                if (products) {
+                    faqEntries.push({
+                        q: `Quels sont vos produits ?`,
+                        a: products
+                    });
+                }
+
+                // Methodology
+                if (processSteps) {
+                    faqEntries.push({
+                        q: `Quelle est votre méthodologie ?`,
+                        a: processSteps
+                    });
+                }
+
+                // Audience
+                if (audience) {
+                    faqEntries.push({
+                        q: `À qui s'adressent vos services ?`,
+                        a: audience
+                    });
+                }
+
+                // Certifications
+                if (certifications || frameworks) {
+                    faqEntries.push({
+                        q: `Quelles sont vos certifications et affiliations ?`,
+                        a: [certifications, frameworks].filter(Boolean).join(". ")
+                    });
+                }
+
+                // KPIs
+                if (kpis) {
+                    faqEntries.push({
+                        q: `Comment mesurez-vous vos résultats ?`,
+                        a: `Nos indicateurs clés : ${kpis}`
+                    });
+                }
+
+                // Use cases
+                if (useCases) {
+                    faqEntries.push({
+                        q: `Pour quels cas d'usage ?`,
+                        a: useCases
+                    });
+                }
+
+                // Fallback minimum if nothing
+                if (faqEntries.length < 2) {
+                    faqEntries.push({
+                        q: "Comment nous contacter ?",
+                        a: `Contactez ${entityName} via notre site web.`
+                    });
+                }
+
                 const faqContent = JSON.stringify({
                     "version": "AYO-FAQ-1.0",
-                    "entity": companyInfo.name,
-                    "qna": [
-                        { "q": "Qui êtes-vous ?", "a": analysisData?.extract?.offre?.offer_summary?.value || "Description non disponible." },
-                        { "q": "Que proposez-vous ?", "a": (analysisData?.extract?.offre?.services?.value || []).join(", ") }
-                    ]
+                    "entity": entityName,
+                    "qna": faqEntries
                 }, null, 2);
                 zip.file("faq.json", faqContent);
 

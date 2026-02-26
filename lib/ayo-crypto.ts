@@ -123,6 +123,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const offer: any = {
         "services": data.offre?.services?.value || [],
         "products": data.offre?.products?.value || [],
+        "use_cases": data.offre?.use_cases?.value || [],
     };
 
     if (mode !== 'LIGHT') {
@@ -131,6 +132,39 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     } else {
         // LIGHT: "services génériques" (Already usually generic, but we remove details)
         offer.services = (offer.services || []).slice(0, 3); // Limit to 3 items
+    }
+
+    // Process & Methods (NEW - was completely missing from ASR output)
+    const processus: any = {};
+    if (mode !== 'LIGHT') {
+        processus.process_steps = data.processus_methodes?.process_steps?.value || [];
+        processus.delivery_mode = data.processus_methodes?.delivery_mode?.value || "";
+        processus.geographies_served = data.processus_methodes?.geographies_served?.value || "";
+        processus.quality_assurance = data.processus_methodes?.quality_assurance?.value || "";
+    }
+
+    // Engagements & Compliance (NEW - certifications were never injected)
+    const engagements: any = {};
+    if (mode !== 'LIGHT') {
+        engagements.certifications = data.engagements_conformite?.certifications?.value || [];
+        engagements.frameworks = data.engagements_conformite?.frameworks?.value || [];
+        engagements.policies = data.engagements_conformite?.policies?.value || [];
+        engagements.security_measures = data.engagements_conformite?.security_measures?.value || [];
+    }
+
+    // Indicators / KPIs (NEW - was absent from schema)
+    const indicateurs: any = {};
+    if (mode !== 'LIGHT') {
+        indicateurs.key_indicators = data.indicateurs?.key_indicators?.value || [];
+        indicateurs.last_review_date = data.indicateurs?.last_review_date?.value || "";
+    }
+
+    // Educational Content (NEW)
+    const contenus: any = {};
+    if (mode !== 'LIGHT') {
+        contenus.has_faq = data.contenus_pedagogiques?.has_faq?.value || false;
+        contenus.has_glossary = data.contenus_pedagogiques?.has_glossary?.value || false;
+        contenus.has_documentation = data.contenus_pedagogiques?.has_documentation?.value || false;
     }
 
     // Meta
@@ -147,9 +181,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "meta": meta,
         "identity": identity,
         "offer": offer,
+        "processus_methodes": mode !== 'LIGHT' ? processus : undefined,
+        "engagements_conformite": mode !== 'LIGHT' ? engagements : undefined,
+        "indicateurs": mode !== 'LIGHT' ? indicateurs : undefined,
+        "contenus_pedagogiques": mode !== 'LIGHT' ? contenus : undefined,
         "compliance": {
             // Basic only for LIGHT
-            "gdpr": scoreToUse > 50 ? "compliant" : "unknown"
+            "gdpr": scoreToUse > 50 ? "compliant" : "unknown",
+            "policies": mode !== 'LIGHT' ? (data.engagements_conformite?.policies?.value || []) : undefined
         },
         "technical_signals": {
             "json_ld_present": true,
