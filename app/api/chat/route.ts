@@ -22,11 +22,16 @@ export const maxDuration = 30;
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    // @ts-ignore
-    apiVersion: '2025-01-27.acacia', // Use latest API version compatible
-});
+// Initialize Stripe lazily to avoid build-time crash when env var is missing
+let _stripe: Stripe | null = null;
+function getStripe(): Stripe {
+    if (!_stripe) {
+        _stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_placeholder', {
+            apiVersion: '2025-01-27.acacia' as any,
+        });
+    }
+    return _stripe;
+}
 
 // Load the "Brain" (Context & Rules)
 const dataSectorsPath = path.join(process.cwd(), 'public', 'AYO_SECTORS_V1.json');
@@ -662,7 +667,7 @@ export async function POST(req: Request) {
 
                     // 2. Fallback: Search Stripe by Email if ID missing in DB
                     if (!customerId && clientSub?.contact_email) {
-                        const customers = await stripe.customers.list({ email: clientSub.contact_email, limit: 1 });
+                        const customers = await getStripe().customers.list({ email: clientSub.contact_email, limit: 1 });
                         if (customers.data.length > 0) {
                             customerId = customers.data[0].id;
                             console.log(`✅ FOUND Stripe Customer ID via Email: ${customerId}`);
@@ -671,7 +676,7 @@ export async function POST(req: Request) {
 
                     // 3. Create Portal Session
                     if (customerId) {
-                        const session = await stripe.billingPortal.sessions.create({
+                        const session = await getStripe().billingPortal.sessions.create({
                             customer: customerId,
                             return_url: `https://www.ai-visionary.com`, // Return to home after management
                         });
@@ -835,12 +840,12 @@ export async function POST(req: Request) {
 
                     if (!stripeId && emailToVerify) {
                         // Fallback look up via Stripe API
-                        const customers = await stripe.customers.list({ email: emailToVerify, limit: 1 });
+                        const customers = await getStripe().customers.list({ email: emailToVerify, limit: 1 });
                         if (customers.data.length > 0) stripeId = customers.data[0].id;
                     }
 
                     if (process.env.STRIPE_SECRET_KEY && stripeId) {
-                        const session = await stripe.billingPortal.sessions.create({
+                        const session = await getStripe().billingPortal.sessions.create({
                             customer: stripeId,
                             return_url: `https://www.ai-visionary.com`,
                         });
