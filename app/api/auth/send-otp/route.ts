@@ -73,8 +73,9 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, maskedEmail: masked }, { status: 200 });
 
-    } catch (e: any) {
-        console.error("🔥 OTP SEND ERROR:", e);
-        return NextResponse.json({ error: e.message }, { status: 500 });
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        console.error("🔥 OTP SEND ERROR:", message);
+        return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 }

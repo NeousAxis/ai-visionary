@@ -1,8 +1,8 @@
 import nacl from 'tweetnacl';
 
-// Keys
-const SECRET_KEY_BASE64 = "WkEwqzDRclqFhMEAwISCId28zIqAaUUTRugtU37SGIg/fEaY1dwbbcWeKzUF1UFjbuptXT87oSZh3/bw90fU7Q==";
-const KEY_ID = "ayo-root-2026";
+// Keys loaded from environment — NEVER hardcode secrets
+const SECRET_KEY_BASE64 = process.env.AYO_SIGNING_KEY || '';
+const KEY_ID = process.env.AYO_KEY_ID || 'ayo-root-2026';
 
 /**
  * Canonizes a JSON object (Stable stringify) to ensure reproducible hash.
@@ -27,6 +27,10 @@ function canonicalize(obj: any): string {
  * Signs an ASR Object using Ed25519.
  */
 export async function signAsrContent(asrObject: any) {
+    if (!SECRET_KEY_BASE64) {
+        throw new Error('AYO_SIGNING_KEY env var is not set — cannot sign ASR');
+    }
+
     const contentToSign = { ...asrObject };
     delete contentToSign['ayo:seal'];
 

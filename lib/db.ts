@@ -145,31 +145,52 @@ export const database = {
             // First try exact match
             let snapshot = await dbInstance.collection('analyses')
                 .where('url', '==', url)
-                .limit(1)
+                .orderBy('timestamp', 'desc')
+                .limit(5) // Fetch a few to filter out empty ones in code
                 .get();
 
             if (!snapshot.empty) {
-                const data = snapshot.docs[0].data() as AnalysisRecord;
-                console.log(`✅ [Firestore] Analysis retrieved for URL (exact): ${url}`);
-                return data;
+                // Return the first one that has actual data
+                for (const doc of snapshot.docs) {
+                    const data = doc.data() as AnalysisRecord;
+                    if (data.data?.fields || data.score) {
+                        console.log(`✅ [Firestore] Analysis retrieved for URL (latest with data): ${url}`);
+                        return data;
+                    }
+                }
+                // Fallback to first one if none have data (though unlikely to be useful)
+                return snapshot.docs[0].data() as AnalysisRecord;
             }
 
-            // If exact match fails, try normalized search
+            // If exact match fails, try common URL variants (NO full collection scan)
             const normalizedSearch = database.normalizeUrl(url);
-            console.log(`🔍 Trying normalized search: ${normalizedSearch}`);
+            console.log(`🔍 Trying URL variants for: ${normalizedSearch}`);
 
-            // Get all analyses and filter manually (since we can't query on normalized field)
-            const allDocs = await dbInstance.collection('analyses').get();
+            const variants = [
+                `https://${normalizedSearch}`,
+                `https://www.${normalizedSearch}`,
+                `http://${normalizedSearch}`,
+                `${url}/`,
+                url.replace(/\/$/, ''),
+            ];
 
-            for (const doc of allDocs.docs) {
-                const data = doc.data() as AnalysisRecord;
-                if (data.url && database.normalizeUrl(data.url) === normalizedSearch) {
-                    console.log(`✅ [Firestore] Analysis found via normalization: ${data.url} → ${normalizedSearch}`);
-                    return data;
+            for (const variant of variants) {
+                if (variant === url) continue; // Skip already tried
+                const variantSnapshot = await dbInstance.collection('analyses')
+                    .where('url', '==', variant)
+                    .orderBy('timestamp', 'desc')
+                    .limit(1)
+                    .get();
+                if (!variantSnapshot.empty) {
+                    const data = variantSnapshot.docs[0].data() as AnalysisRecord;
+                    if (data.data?.fields || data.score) {
+                        console.log(`✅ [Firestore] Analysis found via variant: ${variant}`);
+                        return data;
+                    }
                 }
             }
 
-            console.log(`⚠️ [Firestore] No analysis found for URL: ${url} (tried normalized too)`);
+            console.log(`⚠️ [Firestore] No analysis found for URL: ${url}`);
             return null;
         } catch (error) {
             console.error('❌ [Firestore] Query By URL Error:', error);
@@ -188,7 +209,8 @@ export const database = {
             // SIMPLIFIED: Removed orderBy to avoid "Index Link" error
             const snapshot = await dbInstance.collection('analyses')
                 .where('email', '==', email)
-                .limit(1)
+                .orderBy('timestamp', 'desc')
+                .limit(5)
                 .get();
 
             if (snapshot.empty) {
@@ -196,9 +218,15 @@ export const database = {
                 return null;
             }
 
-            const data = snapshot.docs[0].data() as AnalysisRecord;
-            console.log(`✅ [Firestore] Analysis retrieved for EMAIL: ${email}`);
-            return data;
+            for (const doc of snapshot.docs) {
+                const data = doc.data() as AnalysisRecord;
+                if (data.data?.fields || data.score) {
+                    console.log(`✅ [Firestore] Analysis retrieved for EMAIL (latest with data): ${email}`);
+                    return data;
+                }
+            }
+
+            return snapshot.docs[0].data() as AnalysisRecord;
         } catch (error) {
             console.error('❌ [Firestore] Query By EMAIL Error:', error);
             return null;
@@ -283,16 +311,22 @@ export const database = {
                 return snapshot.docs[0].data();
             }
 
-            // 2. DEEP SEARCH in asr_payload for legacy/unindexed records
-            const allEntitiesSnapshot = await dbInstance.collection('aya_registry').get();
+            // 2. Try URL variants instead of full collection scan
+            const variants = [
+                `https://${normalizedTarget}`,
+                `https://www.${normalizedTarget}`,
+                `http://${normalizedTarget}`,
+            ];
 
-            for (const doc of allEntitiesSnapshot.docs) {
-                const data = doc.data();
-                if (data.website && database.normalizeUrl(data.website) === normalizedTarget) {
-                    return data;
-                }
-                if (data.asr_payload?.data?.url && database.normalizeUrl(data.asr_payload.data.url) === normalizedTarget) {
-                    return data;
+            for (const variant of variants) {
+                if (variant === url) continue;
+                const variantSnapshot = await dbInstance.collection('aya_registry')
+                    .where('website', '==', variant)
+                    .limit(1)
+                    .get();
+                if (!variantSnapshot.empty) {
+                    console.log(`✅ [Firestore] AYA Entity found via variant: ${variant}`);
+                    return variantSnapshot.docs[0].data();
                 }
             }
 

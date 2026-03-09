@@ -1,49 +1,63 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { createLogger } from '@/lib/logger';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+    const logger = createLogger('admin_clean', 'admin');
+
+    // Require ADMIN_SECRET instead of hardcoded password
+    const auth = requireAdmin(req);
+    if (!auth.authorized) {
+        logger.warn('AUTH_FAILED', 'Unauthorized clean attempt');
+        return auth.response!;
+    }
+
     try {
         const url = new URL(req.url);
-        const secret = url.searchParams.get('secret');
-        if (secret !== 'ayo1234') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const targetUrl = url.searchParams.get('url');
+
+        if (!targetUrl) {
+            return NextResponse.json({ error: 'Missing url parameter' }, { status: 400 });
         }
 
-        if (!getApps().length) {
-            const projectId = process.env.FIREBASE_PROJECT_ID;
-            const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-            let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+        logger.info('CLEAN_START', `Cleaning records for: ${targetUrl}`);
 
-            if (projectId && clientEmail && privateKey) {
-                privateKey = privateKey.replace(/\\n/g, '\n').replace(/\\\\n/g, '\n');
-                initializeApp({
-                    credential: cert({ projectId, clientEmail, privateKey })
-                });
-            } else {
-                return NextResponse.json({ error: 'Missing creds' }, { status: 500 });
-            }
+        const dbInstance = (db as any).getDb?.() || null;
+        if (!dbInstance) {
+            return NextResponse.json({ error: 'DB not available' }, { status: 503 });
         }
 
-        const firestore = getFirestore();
-        const docs = await firestore.collection('aya_registry').where('website', '==', 'https://www.eclore-asso.org').get();
-        const docs2 = await firestore.collection('aya_registry').where('website', '==', 'https://eclore-asso.org').get();
+        // Dynamic URL search (not hardcoded to a single domain)
+        const normalizedUrl = targetUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+        const variants = [
+            `https://${normalizedUrl}`,
+            `https://www.${normalizedUrl}`,
+            `http://${normalizedUrl}`,
+            targetUrl,
+        ];
 
         let deleted = 0;
 
-        for (const doc of docs.docs) {
-            await doc.ref.delete();
-            deleted++;
-        }
-        for (const doc2 of docs2.docs) {
-            await doc2.ref.delete();
-            deleted++;
+        for (const variant of variants) {
+            // @ts-expect-error — Firestore dynamic access
+            const dbAccess = db.database ? db.database : db;
+            const getDb = dbAccess.getDb || (() => dbInstance);
+            const firestore = getDb() || dbInstance;
+
+            const docs = await firestore.collection('aya_registry').where('website', '==', variant).get();
+            for (const doc of docs.docs) {
+                await doc.ref.delete();
+                deleted++;
+            }
         }
 
+        logger.info('CLEAN_DONE', `Deleted ${deleted} records for ${targetUrl}`);
         return NextResponse.json({ success: true, deleted });
 
-    } catch (e: any) {
-        return NextResponse.json({ error: e.message }, { status: 500 });
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'Unknown error';
+        logger.error('CLEAN_ERROR', message);
+        return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 }
