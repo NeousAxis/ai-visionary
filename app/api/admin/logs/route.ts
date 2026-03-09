@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getApps } from 'firebase-admin/app';
+import '@/lib/db'; // Trigger Firebase Admin initialization
 
 export const dynamic = 'force-dynamic';
 
