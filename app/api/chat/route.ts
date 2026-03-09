@@ -8,6 +8,7 @@ import path from 'path';
 import { Resend } from 'resend';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
+import { getFirestore } from 'firebase-admin/firestore';
 import { registerOrUpdateEntity } from '@/lib/aya/registry'; // Logic Registry
 import { AYO_BUSINESS_CATEGORIES, getScanSystemPrompt } from '@/lib/ayo-categories';
 import { getSystemPrompt } from '@/lib/ayo-system-prompt';
@@ -1119,6 +1120,19 @@ GÉNÈRE CE JSON MAINTENANT :
                 unknown: scanState.unknown_keys.length
             });
 
+            // 🔧 Persist scan_state in Firestore (instead of embedding in chat messages)
+            try {
+                const scanStateDocId = Buffer.from(urlToScan).toString('base64url').substring(0, 128);
+                await getFirestore().collection('scan_states').doc(scanStateDocId).set({
+                    ...scanState,
+                    created_at: new Date().toISOString(),
+                    url: urlToScan,
+                });
+                logger.info('SCAN_STATE_SAVED', `Saved scan_state to Firestore for ${urlToScan}`);
+            } catch (saveErr) {
+                console.error("⚠️ Failed to save scan_state to Firestore:", saveErr);
+            }
+
             // 2b. COMPUTE INITIAL SCORE (Bible 7-bloc engine)
             // Build a partial AyoExtract from scan data + extracted answers
             const initialExtract: AyoExtract = {
@@ -1248,15 +1262,13 @@ GÉNÈRE CE JSON MAINTENANT :
 
             // Add initial 7-bloc score display (from deterministic engine)
             transparencySummary += `📊 **SCORE INITIAL AIO : ${initialScore.total} / 100**\n\n`;
-            transparencySummary += `|||\n`;
             transparencySummary += `🔎 Identité & Ancrage : ${initialScore.blocks.identite}/10\n`;
             transparencySummary += `🔎 Clarté de l'Offre : ${initialScore.blocks.offre}/20\n`;
             transparencySummary += `🔎 Processus & Méthodes : ${initialScore.blocks.processus_methodes}/15\n`;
             transparencySummary += `🔎 Confiance & Conformité : ${initialScore.blocks.engagements_conformite}/15\n`;
             transparencySummary += `🔎 Preuve Sociale & Métriques : ${initialScore.blocks.indicateurs}/20\n`;
             transparencySummary += `🔎 Pédagogie & Supports : ${initialScore.blocks.contenus_pedagogiques}/10\n`;
-            transparencySummary += `🔎 Socle Technique AIO : ${initialScore.blocks.structure_technique}/10\n`;
-            transparencySummary += `|||\n\n`;
+            transparencySummary += `🔎 Socle Technique AIO : ${initialScore.blocks.structure_technique}/10\n\n`;
 
             const weakBlocks = Object.entries(initialScore.audit || {})
                 .filter(([, v]: [string, any]) => v.status === 'error' || v.status === 'warning')
@@ -1277,7 +1289,7 @@ GÉNÈRE CE JSON MAINTENANT :
                 finalResponseText = JSON.stringify({
                     type: "question_block",
                     intro: transparencySummary + "\n\n✅ **Toutes les informations ont été collectées !**",
-                    scan_state: scanState, // 🔧 INCLUDE SCAN_STATE
+                    // scan_state persisted in Firestore (not sent to client)
                     questions: [{
                         id: "ownership_confirm",
                         text: "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
@@ -1289,7 +1301,7 @@ GÉNÈRE CE JSON MAINTENANT :
                 finalResponseText = JSON.stringify({
                     type: "question_block",
                     intro: transparencySummary + `\n\n⚠️ **Important** : AYO sert à structurer votre vérité, pas à la fabriquer. Les IA vérifient vos déclarations par recoupement. Toute incohérence vous classerait comme "Source Non Fiable".`,
-                    scan_state: scanState, // 🔧 INCLUDE SCAN_STATE
+                    // scan_state persisted in Firestore (not sent to client)
                     questions: [{
                         id: "ownership_confirm",
                         text: "Confirmez-vous que ce site vous appartient et que les données sont exactes ?",
@@ -1403,29 +1415,49 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 }
             }
 
-            // 🔧 ARCHITECTURAL FIX: Read scan_state JSON directly (NO TEXT PARSING)
-            const scanStateMsg = [...messages].reverse().find((m: any) => {
-                if (m.role !== 'assistant') return false;
-                try {
-                    const parsed = JSON.parse(m.content);
-                    return parsed.scan_state !== undefined;
-                } catch (e) {
-                    return false;
-                }
-            });
-
+            // 🔧 ARCHITECTURAL FIX: Read scan_state from Firestore (not from chat messages)
             let scanState: any = null;
 
-            if (scanStateMsg) {
-                try {
-                    const parsed = JSON.parse(scanStateMsg.content);
-                    scanState = parsed.scan_state;
-                    console.log("✅ SCAN_STATE LOADED FROM JSON:", JSON.stringify(scanState, null, 2));
-                } catch (e) {
-                    console.error("❌ Failed to parse scan_state from message:", e);
+            if (historyUrlMatch) {
+                let urlForState = historyUrlMatch.content.match(historyUrlRegex)?.[0] || "";
+                if (urlForState && !urlForState.startsWith('http')) {
+                    urlForState = 'https://' + urlForState;
                 }
-            } else {
-                console.warn("⚠️ No scan_state found in history. Falling back to empty state.");
+                try {
+                    const scanStateDocId = Buffer.from(urlForState).toString('base64url').substring(0, 128);
+                    const scanStateDoc = await getFirestore().collection('scan_states').doc(scanStateDocId).get();
+                    if (scanStateDoc.exists) {
+                        scanState = scanStateDoc.data();
+                        console.log("✅ SCAN_STATE LOADED FROM FIRESTORE for:", urlForState);
+                    } else {
+                        console.warn("⚠️ No scan_state found in Firestore for:", urlForState);
+                    }
+                } catch (e) {
+                    console.error("❌ Failed to load scan_state from Firestore:", e);
+                }
+            }
+
+            // Fallback: try reading from message history (backward compat)
+            if (!scanState) {
+                const scanStateMsg = [...messages].reverse().find((m: any) => {
+                    if (m.role !== 'assistant') return false;
+                    try {
+                        const parsed = JSON.parse(m.content);
+                        return parsed.scan_state !== undefined;
+                    } catch (e) {
+                        return false;
+                    }
+                });
+                if (scanStateMsg) {
+                    try {
+                        scanState = JSON.parse(scanStateMsg.content).scan_state;
+                        console.log("✅ SCAN_STATE LOADED FROM HISTORY (fallback)");
+                    } catch (e) {
+                        console.error("❌ Failed to parse scan_state from message:", e);
+                    }
+                } else {
+                    console.warn("⚠️ No scan_state found anywhere. Using empty state.");
+                }
             }
 
             // Use scan_state directly (deterministic, no parsing)
