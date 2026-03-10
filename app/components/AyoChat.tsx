@@ -292,6 +292,10 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
     // (Effect removed as stepCount logic is replaced by content detection)
 
     const renderMessageContent = (msg: any) => {
+        // Strip [AYO_SID:...] from display (used internally for session recovery, never shown to user)
+        const cleanMsg = { ...msg, content: (msg.content || '').replace(/\s*\[AYO_SID:[^\]]*\]/g, '').trim() };
+        msg = cleanMsg;
+
         // Try to parse JSON if it looks like JSON
         let qcmData: QuestionBlock | null = null;
         if (msg.role === 'assistant' && (msg.content.trim().startsWith('{') || msg.content.includes('```json'))) {
