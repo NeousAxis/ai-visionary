@@ -261,6 +261,7 @@ export const database = {
 
         try {
             const snapshot = await dbInstance.collection('aya_registry')
+                .where('payment_completed', '==', true)
                 .orderBy('last_update', 'desc')
                 .limit(limit)
                 .get();

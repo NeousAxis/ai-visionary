@@ -78,6 +78,7 @@ export async function registerOrUpdateEntity(
         valid_until: validUntil.toISOString(), // Refresh validity
 
         data_origin: 'AYO',
+        payment_completed: true, // Entité visible sur AYA uniquement après paiement
 
         asr_payload: entityData.asr_payload || existingData.asr_payload || { version: "1.0", data: {}, signature: { hash: "", public_key: "" } },
 
