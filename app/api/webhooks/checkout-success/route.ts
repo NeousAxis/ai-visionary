@@ -632,7 +632,7 @@ export async function POST(req: Request) {
             try {
                 // Try AI-powered generation (rich, contextual content)
                 const semanticTimeout = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("SEMANTIC_TIMEOUT")), 25000)
+                    setTimeout(() => reject(new Error("SEMANTIC_TIMEOUT")), 8000)
                 );
                 const semanticPromise = generateSemanticAssets(analysisData.extract as any);
                 const assets = await Promise.race([semanticPromise, semanticTimeout]) as any;
