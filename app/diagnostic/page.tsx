@@ -28,7 +28,7 @@ export default function DiagnosticPage() {
 
             {/* Footer Text */}
             <div style={{ textAlign: 'center', paddingBottom: '20px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                © 2026 AI Visionary
+                © 2026 AI Visionary • 🇨🇭 Basée à Genève
             </div>
         </div>
     );

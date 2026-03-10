@@ -406,7 +406,7 @@ export default function AyaPage() {
             {/* FOOTER */}
             <footer className="footer" style={{ background: 'var(--text-main)', color: 'white', padding: '40px 0', textAlign: 'center' }}>
                 <div className="container">
-                    <p style={{ color: '#ffffff', opacity: 0.9, fontSize: '0.9rem', fontWeight: '500' }}>Registre AYA v1.0 • Powered by AI Visionary</p>
+                    <p style={{ color: '#ffffff', opacity: 0.9, fontSize: '0.9rem', fontWeight: '500' }}>Registre AYA v1.0 • Powered by AI Visionary • 🇨🇭 Basée à Genève</p>
                 </div>
             </footer>
         </div>

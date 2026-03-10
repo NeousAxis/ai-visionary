@@ -15,7 +15,7 @@ export default function Footer() {
                     <Link href="/mentions">Mentions</Link>
                     <Link href="/confidentialite">Confidentialité</Link>
                 </div>
-                <p className="footer-copy">© 2025 AI VISIONARY. Tous droits réservés.</p>
+                <p className="footer-copy">© 2025 AI VISIONARY. Tous droits réservés. 🇨🇭 Basée à Genève</p>
             </div>
         </footer>
     );
