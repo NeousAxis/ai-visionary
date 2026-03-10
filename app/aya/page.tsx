@@ -144,7 +144,7 @@ export default function AyaPage() {
 
                                     <Link href={`/aya/e/${entity.id || entity.aya_entity_id}`} style={{ textDecoration: 'none' }}>
                                         <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: 'var(--text-main)', cursor: 'pointer' }}>
-                                            {entity.name || entity.display_name}
+                                            {entity.display_name || entity.legal_name || entity.name || "Entite certifiee"}
                                         </h3>
                                     </Link>
                                     <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>{entity.description || "Identité Sémantique optimisée pour les IAs."}</p>

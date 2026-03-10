@@ -8,8 +8,9 @@ import crypto from 'crypto';
  * Gestion centrale des enregistrements : Création, Mise à jour, Lecture.
  */
 
-// Simulation Firestore Collection Name
-const COLLECTION_NAME = 'aya_registry_v1';
+// Note: Collection name is managed by db.ts ('aya_registry')
+// This constant is kept for reference only
+const COLLECTION_NAME = 'aya_registry';
 
 export async function registerOrUpdateEntity(
     entityData: Partial<AyaEntity>,
@@ -57,7 +58,13 @@ export async function registerOrUpdateEntity(
     const newRecord: AyaEntity = {
         aya_entity_id: entityId,
         legal_name: entityData.legal_name || existingData.legal_name || "Unknown Entity",
-        display_name: entityData.display_name || existingData.display_name || entityData.legal_name || "Unknown",
+        // ALWAYS prefer new legal_name for display if existing is generic
+        display_name: entityData.display_name
+            || (entityData.legal_name && entityData.legal_name !== "Entity" && entityData.legal_name !== "Unknown Entity" ? entityData.legal_name : null)
+            || (existingData.display_name && existingData.display_name !== "Unknown" && existingData.display_name !== "Entity" ? existingData.display_name : null)
+            || entityData.legal_name
+            || existingData.display_name
+            || "Entreprise",
         entity_type: entityData.entity_type || existingData.entity_type || 'company',
         country_legal: entityData.country_legal || existingData.country_legal || 'CH',
         sector_macro: entityData.sector_macro || existingData.sector_macro || 'General',

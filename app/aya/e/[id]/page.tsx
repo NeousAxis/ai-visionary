@@ -22,7 +22,20 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
 
     // DATA EXTRACTION
     const asrData = entity.asr_payload?.data || {};
-    const description = asrData.description || asrData.pitch || "Données sémantiques en cours d'indexation par le réseau AYA...";
+
+    // 🎨 ROBUST FALLBACKS — skip generic names
+    const genericNames = ["Unknown", "Entity", "Unknown Entity", "Entreprise Inconnue"];
+    const rawDisplayName = entity.display_name || entity.legal_name || entity.name;
+    const displayName = (rawDisplayName && !genericNames.includes(rawDisplayName))
+        ? rawDisplayName
+        : (entity.website ? entity.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : "Identité Web Certifiée");
+
+    const description = asrData.description && asrData.description !== "null"
+        ? asrData.description
+        : (asrData.pitch && asrData.pitch !== "null"
+            ? asrData.pitch
+            : "Certification de présence sémantique active. Cette entité a validé son existence et ses champs d'expertise auprès du consensus AYO.");
+
     const keywords = asrData.keywords || asrData.services || asrData.tags || [];
 
     return (
@@ -47,7 +60,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                     </p>
 
                     <h1 className="headline" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem' }}>
-                        {entity.display_name}
+                        {displayName}
                     </h1>
 
                     <div className="subheadline" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>

@@ -542,6 +542,7 @@ export async function POST(req: Request) {
             const { registerOrUpdateEntity } = await import('@/lib/aya/registry');
             ayaId = await registerOrUpdateEntity({
                 legal_name: entityName,
+                display_name: entityName,
                 website: analysisData.url,
                 asr_score: Math.round(analysisData.score || 0),
                 asr_payload: { data: analysisData.extract } as any
