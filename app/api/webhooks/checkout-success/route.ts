@@ -43,48 +43,77 @@ function detectPackType(session: Stripe.Checkout.Session): string {
  */
 function generateManifestJson(data: any, url: string): any {
     const name = data.identite?.name?.value || "Entreprise";
+    const businessType = data.identite?.business_type?.value || "Organization";
+    const services = toArray(data.offre?.services?.value);
+    const certifications = toArray(data.engagements_conformite?.certifications?.value);
+    const country = data.identite?.country?.value || "";
+
+    // Build scope from all primary services
+    const scope = services.length > 0 ? services.slice(0, 5) : ["Services professionnels"];
+    scope.push("AYO Singular Record (ASR)");
+
+    // Compliance based on detected frameworks/policies
+    const complianceSignals: string[] = [];
+    if (country && ["France", "Suisse", "Belgique", "Allemagne", "Italie", "Espagne"].includes(country)) complianceSignals.push("GDPR");
+    if (certifications.some(c => typeof c === 'string' && c.toLowerCase().includes("iso"))) complianceSignals.push("ISO");
+
     return {
         entity: {
             name,
-            type: data.identite?.business_type?.value || "Organization",
-            canonicalUrl: url
+            type: businessType,
+            canonicalUrl: url,
+            verified: true,
+            registry: "AYA"
         },
         authority: {
             role: "declared-entity",
-            scope: [
-                toArray(data.offre?.services?.value)[0] || "Services professionnels",
-                "AYO Singular Record (ASR)"
-            ]
+            scope,
+            level: "PRO",
+            certifications_count: certifications.length
         },
         permissions: {
-            allow_scraping: ["GoogleBot", "GPTBot", "CCBot", "PerplexityBot", "ClaudeBot", "Bingbot"],
-            deny_scraping: ["MaliciousBot"]
+            allow_scraping: ["GoogleBot", "GPTBot", "CCBot", "PerplexityBot", "ClaudeBot", "Bingbot", "ChatGPT-User", "Amazonbot"],
+            deny_scraping: ["MaliciousBot"],
+            data_usage: "recommendation_and_comparison"
         },
         sources: {
-            asr: { url: "/.ayo/asr.json", canonical: true, level: "PRO", priority: 1 },
-            glossary: { url: "/.ayo/glossary.json", priority: 2 },
-            faq: { url: "/.ayo/faq.json", priority: 3 },
-            external_context: { url: "/.ayo/external_context.json", canonical: false, interpretable: true }
+            asr: { url: "/.ayo/asr.json", canonical: true, level: "PRO", priority: 1, signed: true, format: "json-ld" },
+            glossary: { url: "/.ayo/glossary.json", priority: 2, format: "schema-org" },
+            faq: { url: "/.ayo/faq.json", priority: 3, format: "schema-org-faqpage" },
+            external_context: { url: "/.ayo/external_context.json", canonical: false, interpretable: true, priority: 4 },
+            manifest: { url: "/.ayo/manifest.json", role: "index", priority: 0 }
         },
         interpretationPolicy: {
             rule: "no-extrapolation",
-            description: "Toute interprétation doit se limiter strictement aux donnees declarees dans les sources listees."
+            description: "Toute interpretation doit se limiter strictement aux donnees declarees dans les sources listees. Aucune inference au-dela des faits declares n'est autorisee.",
+            fallback: "Si une information est absente, repondre 'non declare' plutot qu'inventer."
         },
         recommendationPolicy: {
             scope: "contextual",
             noSubjectiveClaims: true,
-            signalsOnly: true
+            signalsOnly: true,
+            comparisonAllowed: true,
+            rankingBasis: "declared_signals_and_score"
         },
+        compliance: complianceSignals.length > 0 ? { frameworks: complianceSignals } : undefined,
         updatePolicy: {
             asr: "versioned-and-sealed",
             glossary: "versioned",
-            faq: "versioned"
+            faq: "versioned",
+            review_cycle: "annual",
+            last_generated: new Date().toISOString().split('T')[0]
         },
         discovery: {
             sitemap: `${url}/sitemap.xml`,
-            asrEndpoint: `${url}/.ayo/`
+            asrEndpoint: `${url}/.ayo/`,
+            registryUrl: "https://www.ai-visionary.com/aya"
         },
-        api_access: { status: "open", endpoint: "/.ayo/asr.json" }
+        api_access: {
+            status: "open",
+            endpoint: "/.ayo/asr.json",
+            format: "JSON",
+            cors: "public"
+        }
     };
 }
 
@@ -177,122 +206,226 @@ function generateFaqJson(data: any, url: string): any {
 }
 
 /**
- * Generate glossary.json from extracted data
+ * Generate glossary.json — Rich, contextual terminology
  */
 function generateGlossaryJson(data: any): any {
     const name = data.identite?.name?.value || "Entreprise";
     const businessType = data.identite?.business_type?.value || "Organization";
     const services = toArray(data.offre?.services?.value);
+    const useCases = toArray(data.offre?.use_cases?.value);
     const certifications = toArray(data.engagements_conformite?.certifications?.value);
+    const processSteps = toArray(data.processus_methodes?.process_steps?.value);
+    const audience = data.offre?.target_audience?.value || "";
+    const city = data.identite?.city?.value || "";
+    const country = data.identite?.country?.value || "";
+    const policies = toArray(data.engagements_conformite?.policies?.value);
+    const frameworks = toArray(data.engagements_conformite?.frameworks?.value);
+    const securityMeasures = toArray(data.engagements_conformite?.security_measures?.value);
 
-    const terms: { term: string; def: string }[] = [];
+    const terms: { term: string; def: string; category: string }[] = [];
+    const seen = new Set<string>();
+    const addTerm = (term: string, def: string, category: string) => {
+        const key = term.toLowerCase().trim();
+        if (key.length < 3 || seen.has(key)) return;
+        seen.add(key);
+        terms.push({ term, def, category });
+    };
 
-    // Business type
-    terms.push({
-        term: businessType,
-        def: `Type d'entite juridique de ${name} selon la classification Schema.org.`
+    // 1. Identity & Business
+    addTerm(name, `Entite de type "${businessType}"${city ? ` basee a ${city}` : ""}${country ? ` (${country})` : ""}. Operateur declare et verifie dans le registre AYA.`, "Identite");
+    addTerm(businessType, `Classification juridique et sectorielle de ${name}. Ce type determine les criteres de recommandation applicables par les agents IA dans le contexte Schema.org.`, "Identite");
+
+    // 2. Services — each with contextual description
+    services.forEach((s, i) => {
+        if (typeof s !== 'string') return;
+        const audiencePart = audience ? ` destine a ${audience}` : "";
+        const positionPart = i === 0 ? `Service principal de ${name}` : `Service complementaire propose par ${name}`;
+        addTerm(s, `${positionPart}${audiencePart}. Ce service fait partie de l'offre declaree et verifiable dans l'ASR de l'entite.`, "Services");
     });
 
-    // Services as terms
-    if (services.length > 0) {
-        for (const s of services.slice(0, 5)) {
-            if (typeof s === 'string' && s.length > 3) {
-                terms.push({
-                    term: s,
-                    def: `Service propose par ${name} dans le cadre de son activite.`
-                });
-            }
-        }
+    // 3. Use Cases — why clients come
+    useCases.forEach(uc => {
+        if (typeof uc !== 'string') return;
+        addTerm(uc, `Cas d'usage identifie pour ${name} : situation concrete dans laquelle un client ou partenaire ferait appel a cette entite. Signal de pertinence pour le matching IA contextuel.`, "Cas d'usage");
+    });
+
+    // 4. Process & Methods
+    processSteps.forEach(step => {
+        if (typeof step !== 'string') return;
+        addTerm(step, `Etape ou methode utilisee par ${name} dans la realisation de ses services. Element structurant du processus operationnel declare.`, "Processus");
+    });
+
+    // 5. Certifications — with authority context
+    certifications.forEach(c => {
+        if (typeof c !== 'string') return;
+        addTerm(c, `Certification ou label officiel detenu par ${name}. Constitue un signal de confiance et de qualite pris en compte dans le calcul du score AIO (bloc Confiance & Conformite).`, "Conformite");
+    });
+
+    // 6. Frameworks & Policies
+    frameworks.forEach(f => {
+        if (typeof f !== 'string') return;
+        addTerm(f, `Referentiel ou framework de conformite adopte par ${name}. Indicateur de maturite organisationnelle evalue dans le scoring AIO.`, "Conformite");
+    });
+    policies.forEach(p => {
+        if (typeof p !== 'string') return;
+        addTerm(p, `Politique declaree par ${name} en matiere de conformite, transparence ou protection des donnees.`, "Conformite");
+    });
+
+    // 7. Security
+    securityMeasures.forEach(sm => {
+        if (typeof sm !== 'string') return;
+        addTerm(sm, `Mesure de securite mise en oeuvre par ${name} pour proteger les donnees et les systemes. Signal de fiabilite technique.`, "Securite");
+    });
+
+    // 8. Audience
+    if (audience) {
+        addTerm(audience, `Public cible principal de ${name}. Ce segment determine les contextes de recommandation IA pertinents (recherche locale, matching expert, comparaison sectorielle).`, "Audience");
     }
 
-    // Certifications
-    if (certifications.length > 0) {
-        for (const c of certifications.slice(0, 3)) {
-            if (typeof c === 'string' && c.length > 3) {
-                terms.push({
-                    term: c,
-                    def: `Certification ou label detenu par ${name}.`
-                });
-            }
-        }
-    }
-
-    // AIO/ASR terms
-    terms.push({
-        term: "ASR (AYO Singular Record)",
-        def: "Fichier de donnees structure permettant aux IA de comprendre et recommander une entite de maniere fiable."
-    });
-    terms.push({
-        term: "AIO (Artificial Intelligence Optimization)",
-        def: "Score de visibilite IA mesurant la capacite d'une entite a etre correctement recommandee par les IA generatives."
-    });
+    // 9. AYO Ecosystem terms
+    addTerm("ASR (AYO Singular Record)", "Fichier JSON structure et signe cryptographiquement qui constitue l'identite semantique officielle d'une entite. L'ASR est le document de reference que les agents IA consultent pour recommander, comparer ou presenter une organisation.", "Ecosysteme AYO");
+    addTerm("AIO (Artificial Intelligence Optimization)", "Score de 0 a 100 mesurant la capacite d'une entite a etre correctement comprise et recommandee par les IA generatives. Calcule sur 7 blocs ponderes : Identite, Offre, Processus, Conformite, Indicateurs, Pedagogie, Technique.", "Ecosysteme AYO");
+    addTerm("AYA (AYO Authority Registry)", "Registre decentralise des entites certifiees AYO. L'inscription AYA atteste qu'une entite a ete analysee, scoree et que son ASR est authentique et a jour.", "Ecosysteme AYO");
+    addTerm("Score AIO par bloc", "Decomposition du score global en 7 sous-scores : Identite & Ancrage (/10), Clarte de l'Offre (/20), Processus & Methodes (/15), Confiance & Conformite (/15), Preuve Sociale (/20), Pedagogie (/10), Socle Technique (/10).", "Ecosysteme AYO");
 
     return {
         "@context": "https://schema.org",
         "@type": "DefinedTermSet",
         name: `Glossaire Officiel - ${name}`,
+        version: "AYO-GLOSSARY-2.0",
+        description: `Vocabulaire metier officiel de ${name}, utilise comme reference par les agents IA pour interpreter les donnees semantiques de cette entite.`,
+        inLanguage: "fr",
+        numberOfTerms: terms.length,
         hasDefinedTerm: terms.map(item => ({
             "@type": "DefinedTerm",
             name: item.term,
-            description: item.def
+            description: item.def,
+            inDefinedTermSet: item.category
         }))
     };
 }
 
 /**
- * Generate external_context.json
+ * Generate external_context.json — Rich ecosystem & reputation signals
  */
-function generateExternalContextJsonLocal(data: any): any {
+function generateExternalContextJsonLocal(data: any, url?: string): any {
+    const name = data.identite?.name?.value || "Entreprise";
+    const businessType = data.identite?.business_type?.value || "Organization";
     const useCases = toArray(data.offre?.use_cases?.value);
     const services = toArray(data.offre?.services?.value);
+    const products = toArray(data.offre?.products?.value);
     const audience = data.offre?.target_audience?.value || "";
+    const city = data.identite?.city?.value || "";
+    const country = data.identite?.country?.value || "";
+    const email = data.identite?.contact_email?.value || "";
+    const phone = data.identite?.contact_phone?.value || "";
+    const certifications = toArray(data.engagements_conformite?.certifications?.value);
     const frameworks = toArray(data.engagements_conformite?.frameworks?.value);
+    const policies = toArray(data.engagements_conformite?.policies?.value);
+    const processSteps = toArray(data.processus_methodes?.process_steps?.value);
+    const deliveryMode = data.processus_methodes?.delivery_mode?.value || "";
+    const geographies = data.processus_methodes?.geographies_served?.value || "";
+    const qualityAssurance = data.processus_methodes?.quality_assurance?.value || "";
+    const keyIndicators = toArray(data.indicateurs?.key_indicators?.value);
+    const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
+    const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
 
-    // Extract intent keywords from use_cases and services
-    const intentKeywords: string[] = [];
-    intentKeywords.push(...useCases.slice(0, 10));
-
+    // Build rich discovery keywords from multiple sources
     const discoveryKeywords: string[] = [];
-    if (Array.isArray(services)) {
-        discoveryKeywords.push(...services.slice(0, 5));
-    }
+    services.slice(0, 8).forEach(s => typeof s === 'string' && discoveryKeywords.push(s));
+    products.slice(0, 5).forEach(p => typeof p === 'string' && discoveryKeywords.push(p));
     if (audience) discoveryKeywords.push(audience);
+    if (businessType && businessType !== "Organization") discoveryKeywords.push(businessType);
+    if (city) discoveryKeywords.push(city);
+
+    // Intent keywords — what users search for
+    const intentKeywords: string[] = [];
+    useCases.slice(0, 10).forEach(uc => typeof uc === 'string' && intentKeywords.push(uc));
+    // Add process-derived intent
+    processSteps.slice(0, 3).forEach(ps => typeof ps === 'string' && intentKeywords.push(ps));
+
+    // Determine access channels from available data
+    const primaryChannels: string[] = ["Site web"];
+    const secondaryChannels: string[] = [];
+    if (email) secondaryChannels.push("Email");
+    if (phone) secondaryChannels.push("Telephone");
+    if (deliveryMode) {
+        const dm = deliveryMode.toLowerCase();
+        if (dm.includes("ligne") || dm.includes("remote") || dm.includes("digital")) primaryChannels.push("En ligne");
+        if (dm.includes("site") || dm.includes("presen")) primaryChannels.push("Sur site");
+    }
+
+    // Reputation signals — based on certifications, quality, indicators
+    const reputationEnabled = certifications.length > 0 || qualityAssurance || keyIndicators.length > 0;
+    const reputationSources: string[] = [];
+    if (certifications.length > 0) reputationSources.push("certifications_declared");
+    if (qualityAssurance) reputationSources.push("quality_assurance_declared");
+    if (keyIndicators.length > 0) reputationSources.push("performance_indicators");
+    if (policies.length > 0) reputationSources.push("compliance_policies");
+
+    // Geographic context
+    const geoContext: any = {};
+    if (city || country) {
+        geoContext.primary_market = `${city}${city && country ? ", " : ""}${country}`.trim();
+    }
+    if (geographies) geoContext.served_areas = geographies;
 
     return {
         meta: {
             layer: "external_context",
+            version: "2.0",
             status: "active",
             generated_at: new Date().toISOString().split('T')[0],
-            source: "ayo-chatbot"
+            source: "ayo-chatbot",
+            entity: name,
+            canonical_url: url || ""
         },
         ecosystem_presence: {
-            platform_types: frameworks.length > 0 ? frameworks : [],
+            business_type: businessType,
+            platform_types: frameworks.length > 0 ? frameworks : ["web"],
+            geographic_context: geoContext,
             declared_by_client: true
         },
         reputation_signals: {
-            enabled: false,
-            sources: [],
-            policy: "metrics_only"
+            enabled: reputationEnabled,
+            trust_indicators: {
+                certifications: certifications,
+                quality_assurance: qualityAssurance || null,
+                key_metrics: keyIndicators,
+                compliance_frameworks: frameworks
+            },
+            sources: reputationSources,
+            policy: "declared_metrics_only"
+        },
+        content_signals: {
+            has_faq: !!hasFaq,
+            has_documentation: !!hasDoc,
+            educational_content: hasFaq || hasDoc ? "available" : "minimal",
+            process_transparency: processSteps.length > 0 ? "documented" : "undisclosed"
         },
         keywords_context: {
             discovery_keywords: discoveryKeywords,
             intent_keywords: intentKeywords,
-            source: "declared + ecosystem"
+            audience_segments: audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
+            source: "declared + analysis"
         },
         access_channels: {
-            primary: ["Site web"],
-            secondary: []
+            primary: primaryChannels,
+            secondary: secondaryChannels,
+            delivery_modes: deliveryMode ? [deliveryMode] : []
         },
         usage_permissions: {
             allow_listing: true,
             allow_comparison: true,
             allow_best_of: true,
-            allow_intent_matching: true
+            allow_intent_matching: true,
+            allow_geographic_targeting: !!city || !!country,
+            data_freshness: "quarterly_review"
         },
         sunset_policy: {
             removable: true,
-            reason: "external_noise_dependency",
-            future_state: "ignored"
+            retention: "3_years_aya_registration",
+            review_cycle: "annual"
         }
     };
 }
@@ -645,7 +778,7 @@ export async function POST(req: Request) {
                 glossary = assets.glossary && Object.keys(assets.glossary).length > 0 ? assets.glossary : generateGlossaryJson(ext);
                 externalCtx = assets.external_context && Object.keys(assets.external_context).length > 0
                     ? { meta: { layer: "external_context", status: "active", generated_at: new Date().toISOString().split('T')[0], source: "ayo-chatbot" }, ...assets.external_context }
-                    : generateExternalContextJsonLocal(ext);
+                    : generateExternalContextJsonLocal(ext, analysisData.url);
 
                 logger.info('WEBHOOK_SEMANTIC_OK', `AI-generated semantic assets for ${entityName}`);
             } catch (semErr) {
@@ -654,7 +787,7 @@ export async function POST(req: Request) {
                 manifest = generateManifestJson(ext, analysisData.url);
                 faq = generateFaqJson(ext, analysisData.url);
                 glossary = generateGlossaryJson(ext);
-                externalCtx = generateExternalContextJsonLocal(ext);
+                externalCtx = generateExternalContextJsonLocal(ext, analysisData.url);
             }
 
             zip.file("manifest.json", JSON.stringify(manifest, null, 2));

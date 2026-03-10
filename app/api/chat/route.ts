@@ -428,21 +428,35 @@ export async function POST(req: Request) {
         }
 
         // 🧠 REAL-TIME GENERATION
-        // 🧠 SESSION & ANALYSIS ID (Stable logic)
-        // Try to recover an existing Analysis ID from previous assistant messages to keep results linked
-        let sessionAsrId = crypto.randomUUID();
-        const lastAyoMsg = [...messages].reverse().find((m: any) => m.role === 'assistant');
-        if (lastAyoMsg) {
-            const idMatch = lastAyoMsg.content.match(/client_reference_id=([a-zA-Z0-9+/=]+)/);
+        // 🧠 SESSION & ANALYSIS ID (Stable logic — MUST be stable across all API calls for same session)
+        // Recovery priority: 1) AYO_SID marker in any assistant message, 2) client_reference_id, 3) new UUID
+        let sessionAsrId = "";
+        for (let i = messages.length - 1; i >= 0; i--) {
+            const msg = messages[i];
+            if (msg.role !== 'assistant') continue;
+            // Priority 1: Look for embedded session marker (most reliable)
+            const sidMatch = msg.content.match(/\[AYO_SID:([a-f0-9-]{36})\]/);
+            if (sidMatch) {
+                sessionAsrId = sidMatch[1];
+                console.log("♻️ RECOVERED SESSION ID FROM AYO_SID MARKER:", sessionAsrId);
+                break;
+            }
+            // Priority 2: Look for client_reference_id in Stripe links
+            const idMatch = msg.content.match(/client_reference_id=([a-zA-Z0-9+/=]+)/);
             if (idMatch) {
                 try {
                     const decoded = JSON.parse(Buffer.from(idMatch[1], 'base64').toString('utf-8'));
                     if (decoded.aid) {
                         sessionAsrId = decoded.aid;
-                        console.log("♻️ REUSING STABLE ANALYSIS ID FROM HISTORY:", sessionAsrId);
+                        console.log("♻️ RECOVERED SESSION ID FROM STRIPE LINK:", sessionAsrId);
+                        break;
                     }
                 } catch (e) { }
             }
+        }
+        if (!sessionAsrId) {
+            sessionAsrId = crypto.randomUUID();
+            console.log("🆕 NEW SESSION ID GENERATED:", sessionAsrId);
         }
 
         const sessionDate = new Date().toISOString();
@@ -1319,6 +1333,13 @@ GÉNÈRE CE JSON MAINTENANT :
         // 🛑 EARLY RETURN for SCAN_AND_QUESTION (prevent email check)
         if (triggerMode === "SCAN_AND_QUESTION" && finalResponseText) {
             console.log("✅ Returning SCAN_AND_QUESTION result (skipping email logic)");
+            // Inject SID marker so subsequent calls can recover it
+            try {
+                const parsed = JSON.parse(finalResponseText);
+                parsed._sid = sessionAsrId;
+                parsed.intro = (parsed.intro || "") + `\n[AYO_SID:${sessionAsrId}]`;
+                finalResponseText = JSON.stringify(parsed);
+            } catch { finalResponseText += `\n[AYO_SID:${sessionAsrId}]`; }
             return new Response(JSON.stringify({ text: finalResponseText }), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
@@ -2185,14 +2206,36 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                     if (detectedUrl && !detectedUrl.startsWith('http')) detectedUrl = 'https://' + detectedUrl;
                 }
 
-                // 🔥 CRITICAL FIX: Update the analysis record in DB with this email
-                // Without this, the webhook cannot find the analysis by email and falls back to fake scores!
+                // 🔥 CRITICAL FIX: Ensure the analysis document has BOTH email AND enriched data
+                // Problem: sessionAsrId may differ from the one used during INITIAL_SCAN/FINAL_ANALYSIS
+                // Solution: Look for existing analysis by URL with real data, and use its ID or copy its data
                 try {
-                    await db.saveAnalysis(sessionAsrId, {
-                        email: userEmail,
-                        url: detectedUrl || undefined
-                    } as any);
-                    console.log(`💾 ANALYSIS UPDATED WITH EMAIL: ${userEmail} (Session: ${sessionAsrId})`);
+                    // First check if current sessionAsrId document already has data
+                    const currentDoc = await db.getAnalysis(sessionAsrId);
+                    const hasData = currentDoc && (currentDoc.score > 0 || (currentDoc.data?.fields && Object.keys(currentDoc.data.fields).some((k: string) => currentDoc.data.fields[k] && Object.keys(currentDoc.data.fields[k]).length > 0)));
+
+                    if (hasData) {
+                        // Good — just add the email
+                        await db.saveAnalysis(sessionAsrId, { email: userEmail, url: detectedUrl || undefined } as any);
+                        console.log(`💾 ANALYSIS UPDATED WITH EMAIL: ${userEmail} (Session: ${sessionAsrId}, has data ✅)`);
+                    } else {
+                        // Current doc has no enriched data — find the real one by URL
+                        let realAnalysis = null;
+                        if (detectedUrl) {
+                            realAnalysis = await db.getLatestAnalysisByUrl(detectedUrl);
+                        }
+                        if (realAnalysis && realAnalysis.score > 0 && realAnalysis.id) {
+                            // Found the enriched analysis under a different ID — switch to it
+                            console.log(`🔄 SWITCHING SESSION ID: ${sessionAsrId} → ${realAnalysis.id} (has score ${realAnalysis.score})`);
+                            sessionAsrId = realAnalysis.id;
+                            await db.saveAnalysis(sessionAsrId, { email: userEmail } as any);
+                            console.log(`💾 REAL ANALYSIS UPDATED WITH EMAIL: ${userEmail} (Session: ${sessionAsrId})`);
+                        } else {
+                            // No enriched analysis found — save email anyway (webhook will fallback to scan_state)
+                            await db.saveAnalysis(sessionAsrId, { email: userEmail, url: detectedUrl || undefined } as any);
+                            console.warn(`⚠️ NO ENRICHED ANALYSIS FOUND BY URL. Email saved to empty doc: ${sessionAsrId}`);
+                        }
+                    }
                 } catch (dbUpdateErr) {
                     console.error(`❌ Failed to update analysis with email:`, dbUpdateErr);
                 }
@@ -2250,9 +2293,28 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
         }
         // END OF ELSE BLOCK (Email Logic)
 
+        // 🏷️ INJECT SESSION ID MARKER into response (so subsequent calls can recover it)
+        if (finalResponseText && sessionAsrId) {
+            const sidMarker = `[AYO_SID:${sessionAsrId}]`;
+            if (!finalResponseText.includes(sidMarker)) {
+                try {
+                    const parsed = JSON.parse(finalResponseText);
+                    if (!parsed._sid) {
+                        parsed._sid = sessionAsrId;
+                        if (parsed.intro && !parsed.intro.includes('AYO_SID')) {
+                            parsed.intro += `\n${sidMarker}`;
+                        }
+                        finalResponseText = JSON.stringify(parsed);
+                    }
+                } catch {
+                    // Not JSON — append as text
+                    finalResponseText += `\n${sidMarker}`;
+                }
+            }
+        }
+
         // 🛑 PERFORMANCE OPTIMIZATION (CRITICAL FIX FOR 500 ERRORS)
         // If we already generated a deterministic response (Analysis Phase), return IMMEDIATELY.
-        // This prevents the code from running a SECOND scan and a SECOND LLM call (Hallucination/Timeout).
         if (isAnalysisRun && finalResponseText) {
             console.log("✅ Returning Deterministic Analysis Result (Skipping secondary LLM call).");
             return new Response(JSON.stringify({ text: finalResponseText }), {
@@ -2262,7 +2324,6 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
         }
 
         // 🛑 CRITICAL FIX: Return immediately if a response was generated (Sales Tunnel, Analysis, or Questioning)
-        // This prevents the code from falling through to the generic LLM which would overwrite the specific response.
         if (finalResponseText) {
             console.log("✅ Returning Generated Response (Skipping fallback LLM call). Content start: " + finalResponseText.substring(0, 50));
             return new Response(JSON.stringify({ text: finalResponseText }), {

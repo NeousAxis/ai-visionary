@@ -110,23 +110,41 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     };
 
     // Identity (Always present but stripped for LIGHT)
+    const entityName = data.identite?.name?.value || "Entreprise Inconnue";
+    const entityUrl = data.identite?.url?.value || data.url || "";
+    const entityDescription = data.identite?.description?.value || data.offre?.description?.value || "";
+
     const identity: any = {
         "@type": businessType,
-        "name": data.identite?.name?.value || "Entreprise Inconnue",
+        "name": entityName,
     };
+
+    if (entityUrl) identity.url = entityUrl;
+    if (entityDescription) identity.description = entityDescription;
 
     if (mode !== 'LIGHT') {
         identity.legalName = data.identite?.legal_name?.value;
         identity.location = data.identite?.legal_country?.value || "Non spécifié";
         identity.address = address;
         identity.areaServed = areaServed;
-        identity.contactPoint = {
-            "@type": "ContactPoint",
-            "email": data.identite?.contact_email?.value,
-            "telephone": data.identite?.contact_phone?.value
-        };
+
+        // Rich contactPoint with multiple channels
+        const contactChannels: any[] = [];
+        if (data.identite?.contact_email?.value) {
+            contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "email": data.identite.contact_email.value });
+        }
+        if (data.identite?.contact_phone?.value) {
+            contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "telephone": data.identite.contact_phone.value });
+        }
+        if (entityUrl) {
+            contactChannels.push({ "@type": "ContactPoint", "contactType": "online", "url": entityUrl });
+        }
+        identity.contactPoint = contactChannels.length > 0 ? contactChannels : [{ "@type": "ContactPoint", "contactType": "general" }];
+
+        // Sector & industry detection
+        if (data.identite?.sector?.value) identity.industry = data.identite.sector.value;
+        if (data.identite?.founding_year?.value) identity.foundingDate = data.identite.founding_year.value;
     } else {
-        // LIGHT Constraint: "localisation partielle ou inconnue"
         identity.location = data.identite?.legal_country?.value || "Inconnu";
         identity.activity_detected = "Partiel (Needs Verification)";
     }
@@ -184,7 +202,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "aio_score": Math.round(scoreToUse),
         "generated_at": realDate,
         "asr_id": realAsrId || `asr_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-        "version": `3.0-${mode}`
+        "version": `3.0-${mode}`,
+        "schema_version": "3.0",
+        "protocol": "AYO-ASR",
+        "tier": mode,
+        "validity_period": mode === 'PRO' ? "3 years" : mode === 'ESSENTIAL' ? "1 year" : "demo",
+        "spec": "https://ai-visionary.com/specs/asr-v3"
     };
 
     const asrContent: any = {
@@ -204,8 +227,13 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         },
         "technical_signals": {
             "json_ld_present": true,
-            "sitemap": true,
-            "https": true
+            "sitemap": data.technique?.has_sitemap?.value ?? true,
+            "https": entityUrl ? entityUrl.startsWith("https") : true,
+            "robots_txt": data.technique?.has_robots?.value ?? true,
+            "structured_data": data.technique?.structured_data?.value ?? "partial",
+            "mobile_friendly": data.technique?.mobile_friendly?.value ?? true,
+            "asr_protocol_version": "3.0",
+            "ayo_compatible": true
         }
     };
 
@@ -219,19 +247,30 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
         // Enrich compliance
         asrContent.compliance.policies = toArray(data.engagements_conformite?.policies?.value);
+
+        // PRO-exclusive: Interoperability layer for AI agents
+        asrContent.interoperability = {
+            "protocol": "AYO-ASR-v3",
+            "consumption": {
+                "recommended_agents": ["GPTBot", "ChatGPT-User", "Google-Extended", "Amazonbot", "ClaudeBot", "PerplexityBot"],
+                "data_format": "application/ld+json",
+                "refresh_policy": "quarterly",
+                "cache_ttl_hours": 720
+            },
+            "trust_chain": {
+                "issuer": "AYO Trusted Authority",
+                "registry": "https://ai-visionary.com/aya/registry",
+                "verification_endpoint": "https://ai-visionary.com/api/verify-asr"
+            },
+            "source_priority": ["asr_protocol", "manifest", "external_context", "faq", "glossary"]
+        };
     }
     else if (mode === 'ESSENTIAL') {
-        // ESSENTIAL: "Complet et scellé" but "sans optimisation contextuelle avancée"
-        // We include Signals & Conditions (Base V3) but NOT the Recommendations Simulation/Contexts.
         asrContent.selectionConditions = selectionConditions;
-        asrContent.contextualSignals = contextualSignals; // Structural signals present
-        // EXCLUDE: contextualRelevance (The "Map")
+        asrContent.contextualSignals = contextualSignals;
     }
     else {
-        // LIGHT
-        // "volontairement incomplet"
-        // No conditions, no contexts, no signals.
-        // Just Identity + Offer + Tech.
+        // LIGHT — volontairement incomplet
         asrContent.note = "VERSION DEMO - NON CERTIFIÉE - INVISIBLE POUR LES AGENTS IA COMMERCIAUX";
     }
 
