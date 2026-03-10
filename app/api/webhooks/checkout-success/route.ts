@@ -130,77 +130,167 @@ function toArray(val: any): string[] {
  */
 function generateFaqJson(data: any, url: string): any {
     const name = data.identite?.name?.value || "Notre entreprise";
+    const businessType = data.identite?.business_type?.value || "Organisation";
     const services = toArray(data.offre?.services?.value);
-    const audience = data.offre?.target_audience?.value || "les professionnels";
+    const products = toArray(data.offre?.products?.value);
+    const audience = data.offre?.target_audience?.value || "";
     const useCases = toArray(data.offre?.use_cases?.value);
     const pricing = data.offre?.pricing_indication?.value || "";
     const email = data.identite?.contact_email?.value || "";
+    const phone = data.identite?.contact_phone?.value || "";
     const city = data.identite?.city?.value || "";
     const country = data.identite?.country?.value || "";
+    const legalName = data.identite?.legal_name?.value || "";
     const processSteps = toArray(data.processus_methodes?.process_steps?.value);
+    const deliveryMode = data.processus_methodes?.delivery_mode?.value || "";
+    const geoServed = data.processus_methodes?.geographies_served?.value || "";
+    const qualityAssurance = data.processus_methodes?.quality_assurance?.value || "";
     const certifications = toArray(data.engagements_conformite?.certifications?.value);
+    const frameworks = toArray(data.engagements_conformite?.frameworks?.value);
+    const policies = toArray(data.engagements_conformite?.policies?.value);
+    const securityMeasures = toArray(data.engagements_conformite?.security_measures?.value);
+    const keyIndicators = toArray(data.indicateurs?.key_indicators?.value);
+    const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
+    const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
 
-    const qna: { q: string; a: string }[] = [];
+    const isAssociation = businessType.toLowerCase().includes("association");
+    const entityType = isAssociation ? "une association" : "une entreprise";
+    const locationStr = [city, country].filter(Boolean).join(", ");
 
-    // Q1: Who are you?
+    const qna: { q: string; a: string; category: string }[] = [];
+
+    // --- IDENTITE ---
     qna.push({
         q: `Qui est ${name} ?`,
-        a: `${name} est ${data.identite?.business_type?.value === "Association" ? "une association" : "une entreprise"} ${city ? `basee a ${city}` : ""} ${country ? `(${country})` : ""}. ${services.length > 0 ? `Nous proposons : ${services.slice(0, 3).join(", ")}.` : ""}`
+        a: `${name} est ${entityType} de type "${businessType}"${locationStr ? `, basee a ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Notre activite principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `Nous nous adressons principalement a ${audience}.` : ""}`.trim(),
+        category: "Identite"
     });
 
-    // Q2: Services
+    if (locationStr) {
+        qna.push({
+            q: `Ou est situe ${name} ?`,
+            a: `${name} est implante a ${locationStr}.${geoServed ? ` Notre zone d'intervention couvre : ${geoServed}.` : ` Nous intervenons principalement dans la region de ${city || country}.`}`,
+            category: "Identite"
+        });
+    }
+
+    // --- OFFRE ---
     if (services.length > 0) {
         qna.push({
-            q: `Quels services proposez-vous ?`,
-            a: `Nos services incluent : ${services.join(", ")}. ${audience ? `Nous nous adressons a ${audience}.` : ""}`
+            q: `Quels sont les services proposes par ${name} ?`,
+            a: `${name} propose ${services.length} service${services.length > 1 ? "s" : ""} : ${services.join(", ")}.${products.length > 0 ? ` Nous proposons egalement : ${products.join(", ")}.` : ""} ${audience ? `Ces services s'adressent a ${audience}.` : ""}`.trim(),
+            category: "Offre"
         });
     }
 
-    // Q3: How it works
-    if (processSteps.length > 0) {
-        qna.push({
-            q: `Comment fonctionne votre methode ?`,
-            a: `Notre approche se deroule en plusieurs etapes : ${processSteps.slice(0, 5).join(" → ")}.`
-        });
-    }
-
-    // Q4: Pricing
-    qna.push({
-        q: `Combien coutent vos services ?`,
-        a: pricing ? `Nos tarifs : ${pricing}.` : `Nos tarifs sont communiques sur demande. Contactez-nous pour un devis personnalise.`
-    });
-
-    // Q5: Certifications
-    if (certifications.length > 0) {
-        qna.push({
-            q: `Quelles sont vos certifications ?`,
-            a: `Nous disposons des certifications suivantes : ${certifications.join(", ")}.`
-        });
-    }
-
-    // Q6: Use cases
     if (useCases.length > 0) {
         qna.push({
-            q: `Dans quels cas faire appel a ${name} ?`,
-            a: `Nos cas d'usage principaux : ${useCases.slice(0, 5).join(", ")}.`
+            q: `Dans quelles situations faire appel a ${name} ?`,
+            a: `${name} intervient dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}) ${uc}`).join(" ; ")}. ${audience ? `Ces cas concernent principalement ${audience}.` : ""}`.trim(),
+            category: "Offre"
         });
     }
 
-    // Q7: Contact
+    if (audience) {
+        qna.push({
+            q: `A qui s'adressent les services de ${name} ?`,
+            a: `Les services de ${name} sont conçus pour ${audience}. ${useCases.length > 0 ? `Les situations typiques incluent : ${useCases.slice(0, 3).join(", ")}.` : ""}`.trim(),
+            category: "Offre"
+        });
+    }
+
+    // --- PROCESSUS ---
+    if (processSteps.length > 0) {
+        qna.push({
+            q: `Comment fonctionne la methode de ${name} ?`,
+            a: `Notre approche repose sur un processus structure : ${processSteps.map((s, i) => `Etape ${i + 1} — ${s}`).join(". ")}.${deliveryMode ? ` Mode de delivrance : ${deliveryMode}.` : ""}${qualityAssurance ? ` Garantie qualite : ${qualityAssurance}.` : ""}`.trim(),
+            category: "Processus"
+        });
+    }
+
+    if (deliveryMode || geoServed) {
+        qna.push({
+            q: `Comment ${name} delivre ses services ?`,
+            a: `${deliveryMode ? `Nos services sont delivres en mode ${deliveryMode}. ` : ""}${geoServed ? `Zone geographique desservie : ${geoServed}. ` : ""}${qualityAssurance ? `Notre engagement qualite : ${qualityAssurance}.` : ""}`.trim() || `Contactez-nous pour en savoir plus sur nos modalites de prestation.`,
+            category: "Processus"
+        });
+    }
+
+    // --- TARIFS ---
+    qna.push({
+        q: `Quels sont les tarifs de ${name} ?`,
+        a: pricing ? `Nos conditions tarifaires : ${pricing}. Pour un devis adapte a votre situation, contactez-nous directement${email ? ` a ${email}` : ` via ${url}`}.` : `Nos tarifs sont etablis sur mesure en fonction de votre projet et de vos besoins specifiques. Contactez-nous pour recevoir une proposition personnalisee${email ? ` : ${email}` : ` via ${url}`}.`,
+        category: "Commercial"
+    });
+
+    // --- CONFIANCE & CONFORMITE ---
+    if (certifications.length > 0) {
+        qna.push({
+            q: `Quelles certifications et labels ${name} detient-${isAssociation ? "elle" : "il"} ?`,
+            a: `${name} detient les certifications suivantes : ${certifications.join(", ")}. ${frameworks.length > 0 ? `Nous respectons les referentiels : ${frameworks.join(", ")}. ` : ""}Ces certifications attestent de notre engagement qualite et conformite.`,
+            category: "Conformite"
+        });
+    }
+
+    if (policies.length > 0 || securityMeasures.length > 0) {
+        qna.push({
+            q: `Quelles sont les garanties de conformite et securite de ${name} ?`,
+            a: `${policies.length > 0 ? `Politiques en place : ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Mesures de securite : ${securityMeasures.join(", ")}. ` : ""}${frameworks.length > 0 ? `Referentiels suivis : ${frameworks.join(", ")}.` : ""}`.trim(),
+            category: "Conformite"
+        });
+    }
+
+    // --- INDICATEURS ---
+    if (keyIndicators.length > 0) {
+        qna.push({
+            q: `Quels sont les indicateurs de performance de ${name} ?`,
+            a: `Nos indicateurs cles incluent : ${keyIndicators.join(", ")}. Ces metriques temoignent de notre impact et de la qualite de nos interventions.`,
+            category: "Indicateurs"
+        });
+    }
+
+    // --- RESSOURCES PEDAGOGIQUES ---
+    if (hasDoc || hasFaq) {
+        qna.push({
+            q: `${name} propose-t-${isAssociation ? "elle" : "il"} des ressources pedagogiques ?`,
+            a: `Oui. ${typeof hasDoc === 'string' ? `Documentation disponible : ${hasDoc}. ` : hasDoc ? "Nous mettons a disposition une documentation complete. " : ""}${hasFaq ? "Une FAQ est egalement disponible pour repondre a vos questions courantes. " : ""}Consultez notre site ${url} pour y acceder.`,
+            category: "Ressources"
+        });
+    }
+
+    // --- CONTACT ---
+    const contactParts: string[] = [];
+    if (email) contactParts.push(`par email a ${email}`);
+    if (phone) contactParts.push(`par telephone au ${phone}`);
+    contactParts.push(`via notre site web ${url}`);
+
     qna.push({
         q: `Comment contacter ${name} ?`,
-        a: email ? `Vous pouvez nous contacter par email a ${email} ou via notre site web ${url}.` : `Rendez-vous sur notre site web : ${url}`
+        a: `Vous pouvez nous joindre ${contactParts.join(", ")}. Nous repondons generalement sous 48h ouvrables.`,
+        category: "Contact"
+    });
+
+    // --- AYO / VISIBILITE IA ---
+    qna.push({
+        q: `${name} est-${isAssociation ? "elle" : "il"} certifie${isAssociation ? "e" : ""} AYO ?`,
+        a: `Oui. ${name} a realise un diagnostic AYO complet et dispose d'un fichier ASR (AYO Singular Record) signe cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre precisement notre activite et de nous recommander de maniere fiable. Notre entite est enregistree dans le Registre AYA.`,
+        category: "Visibilite IA"
     });
 
     return {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        version: "AYO-FAQ-1.0",
-        entity: name,
-        mainEntity: qna.map(item => ({
+        "version": "AYO-FAQ-2.0",
+        "entity": name,
+        "url": url,
+        "numberOfQuestions": qna.length,
+        "categories": [...new Set(qna.map(q => q.category))],
+        "inLanguage": "fr",
+        "mainEntity": qna.map(item => ({
             "@type": "Question",
-            name: item.q,
-            acceptedAnswer: { "@type": "Answer", text: item.a }
+            "name": item.q,
+            "about": item.category,
+            "acceptedAnswer": { "@type": "Answer", "text": item.a }
         }))
     };
 }
