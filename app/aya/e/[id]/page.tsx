@@ -36,7 +36,11 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
             ? asrData.pitch
             : "Certification de présence sémantique active. Cette entité a validé son existence et ses champs d'expertise auprès du consensus AYO.");
 
-    const keywords = asrData.keywords || asrData.services || asrData.tags || [];
+    // Ensure keywords is always an array (services can be a string)
+    const rawKeywords = asrData.keywords || asrData.services || asrData.tags || [];
+    const keywords = Array.isArray(rawKeywords)
+        ? rawKeywords
+        : (typeof rawKeywords === 'string' ? rawKeywords.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
 
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
