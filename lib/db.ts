@@ -142,52 +142,43 @@ export const database = {
         if (!dbInstance) return null;
 
         try {
-            // First try exact match
-            let snapshot = await dbInstance.collection('analyses')
-                .where('url', '==', url)
-                .orderBy('timestamp', 'desc')
-                .limit(5) // Fetch a few to filter out empty ones in code
-                .get();
-
-            if (!snapshot.empty) {
-                // Return the first one that has actual data
-                for (const doc of snapshot.docs) {
-                    const data = doc.data() as AnalysisRecord;
-                    if (data.data?.fields || data.score) {
-                        console.log(`✅ [Firestore] Analysis retrieved for URL (latest with data): ${url}`);
-                        return data;
-                    }
-                }
-                // Fallback to first one if none have data (though unlikely to be useful)
-                return snapshot.docs[0].data() as AnalysisRecord;
-            }
-
-            // If exact match fails, try common URL variants (NO full collection scan)
+            // Build ALL URL variants to search (www/no-www, http/https, trailing slash)
             const normalizedSearch = database.normalizeUrl(url);
-            console.log(`🔍 Trying URL variants for: ${normalizedSearch}`);
-
-            const variants = [
+            const allVariants = new Set([
+                url,
                 `https://${normalizedSearch}`,
                 `https://www.${normalizedSearch}`,
                 `http://${normalizedSearch}`,
+                `http://www.${normalizedSearch}`,
                 `${url}/`,
                 url.replace(/\/$/, ''),
-            ];
+            ]);
 
-            for (const variant of variants) {
-                if (variant === url) continue; // Skip already tried
-                const variantSnapshot = await dbInstance.collection('analyses')
+            // Search ALL variants and collect the BEST result (highest score with data)
+            let bestResult: AnalysisRecord | null = null;
+
+            for (const variant of allVariants) {
+                const snapshot = await dbInstance.collection('analyses')
                     .where('url', '==', variant)
                     .orderBy('timestamp', 'desc')
-                    .limit(1)
+                    .limit(3)
                     .get();
-                if (!variantSnapshot.empty) {
-                    const data = variantSnapshot.docs[0].data() as AnalysisRecord;
-                    if (data.data?.fields || data.score) {
-                        console.log(`✅ [Firestore] Analysis found via variant: ${variant}`);
-                        return data;
+
+                for (const doc of snapshot.docs) {
+                    const data = doc.data() as AnalysisRecord;
+                    const hasData = data.data?.fields && Object.keys(data.data.fields).some((k: string) => data.data.fields[k] && Object.keys(data.data.fields[k]).length > 0);
+                    const score = data.score || 0;
+
+                    if (hasData && score > (bestResult?.score || 0)) {
+                        bestResult = data;
+                        console.log(`🔍 [Firestore] Better analysis found: variant=${variant}, score=${score}, id=${data.id}`);
                     }
                 }
+            }
+
+            if (bestResult) {
+                console.log(`✅ [Firestore] Best analysis for URL ${url}: score=${bestResult.score}, id=${bestResult.id}`);
+                return bestResult;
             }
 
             console.log(`⚠️ [Firestore] No analysis found for URL: ${url}`);
