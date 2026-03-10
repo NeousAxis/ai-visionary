@@ -107,7 +107,7 @@ export async function registerOrUpdateEntity(
 export async function getLiveEntities(): Promise<AyaEntity[]> {
     console.log('🔍 AYA REGISTRY: Fetching live entities from Firestore...');
     try {
-        const entities = await db.getAyaEntities(50);
+        const entities = await db.getAyaEntities(500);
         return entities as AyaEntity[];
     } catch (err) {
         console.error('❌ AYA REGISTRY: Failed to fetch live entities', err);

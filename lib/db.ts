@@ -155,24 +155,31 @@ export const database = {
             ]);
 
             // Search ALL variants and collect the BEST result (highest score with data)
+            // NOTE: NO orderBy to avoid FAILED_PRECONDITION (missing composite index).
+            // We sort client-side instead — we want the BEST score anyway, not the latest.
             let bestResult: AnalysisRecord | null = null;
 
             for (const variant of allVariants) {
-                const snapshot = await dbInstance.collection('analyses')
-                    .where('url', '==', variant)
-                    .orderBy('timestamp', 'desc')
-                    .limit(3)
-                    .get();
+                try {
+                    const snapshot = await dbInstance.collection('analyses')
+                        .where('url', '==', variant)
+                        .limit(10)
+                        .get();
 
-                for (const doc of snapshot.docs) {
-                    const data = doc.data() as AnalysisRecord;
-                    const hasData = data.data?.fields && Object.keys(data.data.fields).some((k: string) => data.data.fields[k] && Object.keys(data.data.fields[k]).length > 0);
-                    const score = data.score || 0;
+                    for (const doc of snapshot.docs) {
+                        const data = doc.data() as AnalysisRecord;
+                        if (!data.id) data.id = doc.id;
+                        const hasData = data.data?.fields && Object.keys(data.data.fields).some((k: string) => data.data.fields[k] && Object.keys(data.data.fields[k]).length > 0);
+                        const score = data.score || 0;
 
-                    if (hasData && score > (bestResult?.score || 0)) {
-                        bestResult = data;
-                        console.log(`🔍 [Firestore] Better analysis found: variant=${variant}, score=${score}, id=${data.id}`);
+                        if (hasData && score > (bestResult?.score || 0)) {
+                            bestResult = data;
+                            console.log(`🔍 [Firestore] Better analysis found: variant=${variant}, score=${score}, id=${data.id}`);
+                        }
                     }
+                } catch (variantErr) {
+                    // Per-variant catch so one failure doesn't abort all searches
+                    console.warn(`⚠️ [Firestore] Variant query failed for ${variant}:`, variantErr);
                 }
             }
 
@@ -197,11 +204,11 @@ export const database = {
         if (!dbInstance) return null;
 
         try {
-            // SIMPLIFIED: Removed orderBy to avoid "Index Link" error
+            // NO orderBy — avoids FAILED_PRECONDITION (missing composite index)
+            // We get all docs and pick the best score client-side
             const snapshot = await dbInstance.collection('analyses')
                 .where('email', '==', email)
-                .orderBy('timestamp', 'desc')
-                .limit(5)
+                .limit(10)
                 .get();
 
             if (snapshot.empty) {
@@ -209,12 +216,21 @@ export const database = {
                 return null;
             }
 
+            // Pick the doc with the HIGHEST score
+            let bestResult: AnalysisRecord | null = null;
             for (const doc of snapshot.docs) {
                 const data = doc.data() as AnalysisRecord;
-                if (data.data?.fields || data.score) {
-                    console.log(`✅ [Firestore] Analysis retrieved for EMAIL (latest with data): ${email}`);
-                    return data;
+                if (!data.id) data.id = doc.id;
+                const score = data.score || 0;
+                const hasData = data.data?.fields && Object.keys(data.data.fields).some((k: string) => data.data.fields[k] && Object.keys(data.data.fields[k]).length > 0);
+                if (hasData && score > (bestResult?.score || 0)) {
+                    bestResult = data;
                 }
+            }
+
+            if (bestResult) {
+                console.log(`✅ [Firestore] Best analysis for EMAIL ${email}: score=${bestResult.score}, id=${bestResult.id}`);
+                return bestResult;
             }
 
             return snapshot.docs[0].data() as AnalysisRecord;
