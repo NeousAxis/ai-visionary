@@ -11,6 +11,7 @@ import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { createLogger } from '@/lib/logger';
 import { getFirestore } from 'firebase-admin/firestore';
 import { generateSemanticAssets } from '@/lib/ayo-semantics';
+import { computeAioScore } from '@/lib/aio-score-engine';
 import '@/lib/db'; // Ensure Firebase Admin is initialized
 
 // --- HELPERS ---
@@ -473,10 +474,34 @@ export async function POST(req: Request) {
         logger.info('WEBHOOK_PACK', `Pack: ${packType}`, { packType, amount: session.amount_total });
 
         // 3. RETRIEVE ANALYSIS DATA from Firestore (saved during chat)
+        // CRITICAL: A document may exist with just {email, url, timestamp} (no score/data).
+        // We must verify the document has ACTUAL analysis data before accepting it.
+        const hasRealData = (doc: any) => doc && (doc.score > 0 || (doc.data?.fields && Object.keys(doc.data.fields).some((k: string) => doc.data.fields[k] && Object.keys(doc.data.fields[k]).length > 0)));
+
         let dbAnalysis = null;
-        if (analysisId) dbAnalysis = await db.getAnalysis(analysisId);
-        if (!dbAnalysis && analyzedUrl) dbAnalysis = await db.getLatestAnalysisByUrl(analyzedUrl);
-        if (!dbAnalysis && customerEmail) dbAnalysis = await db.getLatestAnalysisByEmail(customerEmail);
+        if (analysisId) {
+            const directLookup = await db.getAnalysis(analysisId);
+            if (hasRealData(directLookup)) {
+                dbAnalysis = directLookup;
+                logger.info('WEBHOOK_ANALYSIS_BY_ID', `Found COMPLETE analysis by ID: ${analysisId}`, { score: directLookup?.score });
+            } else {
+                logger.warn('WEBHOOK_ANALYSIS_PARTIAL', `Analysis ${analysisId} found but has no score/data — searching by URL/email`, { keys: directLookup ? Object.keys(directLookup) : [] });
+            }
+        }
+        if (!dbAnalysis && analyzedUrl) {
+            const byUrl = await db.getLatestAnalysisByUrl(analyzedUrl);
+            if (hasRealData(byUrl)) {
+                dbAnalysis = byUrl;
+                logger.info('WEBHOOK_ANALYSIS_BY_URL', `Found COMPLETE analysis by URL: ${analyzedUrl}`, { score: byUrl?.score });
+            }
+        }
+        if (!dbAnalysis && customerEmail) {
+            const byEmail = await db.getLatestAnalysisByEmail(customerEmail);
+            if (hasRealData(byEmail)) {
+                dbAnalysis = byEmail;
+                logger.info('WEBHOOK_ANALYSIS_BY_EMAIL', `Found COMPLETE analysis by email: ${customerEmail}`, { score: byEmail?.score });
+            }
+        }
 
         // 3b. FALLBACK: Read from scan_states collection if analysis not found
         if (!dbAnalysis && analyzedUrl) {
@@ -497,10 +522,29 @@ export async function POST(req: Request) {
                             }
                         }
                     }
+                    // Recalculate score from reconstructed fields using the Bible engine
+                    let recalcScore = 0;
+                    let recalcBlocks: Record<string, number> = {};
+                    try {
+                        const fakeExtract = {
+                            fields,
+                            source: { scan: { is_reachable: true, has_jsonld: true, has_asr_file: false, is_aya_registered: false, has_faq_schema: false, has_faq_content: false } }
+                        };
+                        const scoreResult = computeAioScore(fakeExtract as any);
+                        recalcScore = scoreResult.total;
+                        recalcBlocks = {};
+                        for (const [k, v] of Object.entries(scoreResult.blocks)) {
+                            recalcBlocks[k] = (v as any).score;
+                        }
+                        logger.info('WEBHOOK_SCANSTATE_SCORE', `Recalculated score from scan_state: ${recalcScore}`, { recalcScore, recalcBlocks });
+                    } catch (scoreErr) {
+                        logger.warn('WEBHOOK_SCANSTATE_SCORE_ERROR', `Failed to recalculate: ${scoreErr}`);
+                    }
+
                     dbAnalysis = {
-                        score: 0, // Will be recalculated from fields
+                        score: recalcScore,
                         url: analyzedUrl,
-                        data: { fields }
+                        data: { fields, blocks: recalcBlocks }
                     } as any;
                 }
             } catch (e) {
