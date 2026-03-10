@@ -296,7 +296,11 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         let qcmData: QuestionBlock | null = null;
         if (msg.role === 'assistant' && (msg.content.trim().startsWith('{') || msg.content.includes('```json'))) {
             try {
-                const cleanJson = msg.content.replace(/```json/g, '').replace(/```/g, '').trim();
+                // Strip [AYO_SID:...] marker and code fences before parsing
+                const cleanJson = msg.content
+                    .replace(/```json/g, '').replace(/```/g, '')
+                    .replace(/\s*\[AYO_SID:[^\]]*\]\s*/g, '')
+                    .trim();
                 const parsed = JSON.parse(cleanJson);
                 if (parsed.type === 'question_block') {
                     qcmData = parsed;
