@@ -569,7 +569,10 @@ export async function POST(req: Request) {
 
         // 🔍 DETERMINISTIC TRIGGER CALCULATOR
         // CRITICAL: We check if a scan has ALREADY been performed in this conversation.
-        const hasScanInHistory = messages.some((m: any) => m.role === 'assistant' && m.content.includes('scan_state'));
+        // Check for "SCAN TERMINÉ" in assistant messages (scan_state is no longer embedded in client messages)
+        const hasScanInHistory = messages.some((m: any) => m.role === 'assistant' && (
+            m.content.includes('SCAN TERMIN') || m.content.includes('ownership_confirm')
+        ));
 
         // PRIORITY 1: REGISTRY RECOGNITION (Existing Clients)
         if (urlInLastMessage && !hasFinalScore) {
