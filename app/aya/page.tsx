@@ -304,7 +304,7 @@ export default function AyaPage() {
                             type="text"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Rechercher une entité (ex: 'Horlogerie Suisse', 'Restaurant Paris')..."
+                            placeholder="Rechercher une entreprise (ex: 'Nexora', 'Éclore', 'MedConnect')..."
                             style={{
                                 width: '100%',
                                 padding: '18px 25px',
