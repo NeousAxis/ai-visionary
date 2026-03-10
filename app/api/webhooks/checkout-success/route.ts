@@ -49,7 +49,7 @@ function generateManifestJson(data: any, url: string): any {
         authority: {
             role: "declared-entity",
             scope: [
-                data.offre?.services?.value?.[0] || "Services professionnels",
+                toArray(data.offre?.services?.value)[0] || "Services professionnels",
                 "AYO Singular Record (ASR)"
             ]
         },
@@ -85,20 +85,28 @@ function generateManifestJson(data: any, url: string): any {
     };
 }
 
+// Safely convert any value to an array (handles strings, arrays, nullish)
+function toArray(val: any): string[] {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
+    return [];
+}
+
 /**
  * Generate faq.json from extracted data
  */
 function generateFaqJson(data: any, url: string): any {
     const name = data.identite?.name?.value || "Notre entreprise";
-    const services = data.offre?.services?.value || [];
+    const services = toArray(data.offre?.services?.value);
     const audience = data.offre?.target_audience?.value || "les professionnels";
-    const useCases = data.offre?.use_cases?.value || [];
+    const useCases = toArray(data.offre?.use_cases?.value);
     const pricing = data.offre?.pricing_indication?.value || "";
     const email = data.identite?.contact_email?.value || "";
     const city = data.identite?.city?.value || "";
     const country = data.identite?.country?.value || "";
-    const processSteps = data.processus_methodes?.process_steps?.value || [];
-    const certifications = data.engagements_conformite?.certifications?.value || [];
+    const processSteps = toArray(data.processus_methodes?.process_steps?.value);
+    const certifications = toArray(data.engagements_conformite?.certifications?.value);
 
     const qna: { q: string; a: string }[] = [];
 
@@ -120,7 +128,7 @@ function generateFaqJson(data: any, url: string): any {
     if (processSteps.length > 0) {
         qna.push({
             q: `Comment fonctionne votre methode ?`,
-            a: `Notre approche se deroule en plusieurs etapes : ${typeof processSteps === 'string' ? processSteps : processSteps.slice(0, 5).join(" → ")}.`
+            a: `Notre approche se deroule en plusieurs etapes : ${processSteps.slice(0, 5).join(" → ")}.`
         });
     }
 
@@ -142,7 +150,7 @@ function generateFaqJson(data: any, url: string): any {
     if (useCases.length > 0) {
         qna.push({
             q: `Dans quels cas faire appel a ${name} ?`,
-            a: `Nos cas d'usage principaux : ${typeof useCases === 'string' ? useCases : useCases.slice(0, 5).join(", ")}.`
+            a: `Nos cas d'usage principaux : ${useCases.slice(0, 5).join(", ")}.`
         });
     }
 
@@ -171,8 +179,8 @@ function generateFaqJson(data: any, url: string): any {
 function generateGlossaryJson(data: any): any {
     const name = data.identite?.name?.value || "Entreprise";
     const businessType = data.identite?.business_type?.value || "Organization";
-    const services = data.offre?.services?.value || [];
-    const certifications = data.engagements_conformite?.certifications?.value || [];
+    const services = toArray(data.offre?.services?.value);
+    const certifications = toArray(data.engagements_conformite?.certifications?.value);
 
     const terms: { term: string; def: string }[] = [];
 
@@ -232,18 +240,14 @@ function generateGlossaryJson(data: any): any {
  * Generate external_context.json
  */
 function generateExternalContextJsonLocal(data: any): any {
-    const useCases = data.offre?.use_cases?.value || [];
-    const services = data.offre?.services?.value || [];
+    const useCases = toArray(data.offre?.use_cases?.value);
+    const services = toArray(data.offre?.services?.value);
     const audience = data.offre?.target_audience?.value || "";
-    const frameworks = data.engagements_conformite?.frameworks?.value || [];
+    const frameworks = toArray(data.engagements_conformite?.frameworks?.value);
 
     // Extract intent keywords from use_cases and services
     const intentKeywords: string[] = [];
-    if (typeof useCases === 'string') {
-        intentKeywords.push(useCases);
-    } else if (Array.isArray(useCases)) {
-        intentKeywords.push(...useCases.slice(0, 10));
-    }
+    intentKeywords.push(...useCases.slice(0, 10));
 
     const discoveryKeywords: string[] = [];
     if (Array.isArray(services)) {

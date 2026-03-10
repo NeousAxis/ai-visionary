@@ -57,6 +57,14 @@ export async function signAsrContent(asrObject: any) {
     return { ...contentToSign, "ayo:seal": seal };
 }
 
+// Safely convert any value to an array (handles strings, arrays, nullish)
+function toArray(val: any): string[] {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
+    return [];
+}
+
 /**
  * Generates Real ASR JSON based on Tier (LIGHT, ESSENTIAL, PRO)
  */
@@ -97,8 +105,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const contextualSignals = {
         pricingLevel: data.contextual_signals?.pricing_level?.value || "undisclosed",
         access: data.contextual_signals?.access_mode?.value || "public",
-        serviceMode: data.contextual_signals?.service_mode?.value || ["onSite"],
-        schedule: data.contextual_signals?.schedule_type?.value || ["businessHours"]
+        serviceMode: toArray(data.contextual_signals?.service_mode?.value).length > 0 ? toArray(data.contextual_signals?.service_mode?.value) : ["onSite"],
+        schedule: toArray(data.contextual_signals?.schedule_type?.value).length > 0 ? toArray(data.contextual_signals?.schedule_type?.value) : ["businessHours"]
     };
 
     // Identity (Always present but stripped for LIGHT)
@@ -125,9 +133,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // Offer
     const offer: any = {
-        "services": data.offre?.services?.value || [],
-        "products": data.offre?.products?.value || [],
-        "use_cases": data.offre?.use_cases?.value || [],
+        "services": toArray(data.offre?.services?.value),
+        "products": toArray(data.offre?.products?.value),
+        "use_cases": toArray(data.offre?.use_cases?.value),
     };
 
     if (mode !== 'LIGHT') {
@@ -141,7 +149,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Process & Methods (NEW - was completely missing from ASR output)
     const processus: any = {};
     if (mode !== 'LIGHT') {
-        processus.process_steps = data.processus_methodes?.process_steps?.value || [];
+        processus.process_steps = toArray(data.processus_methodes?.process_steps?.value);
         processus.delivery_mode = data.processus_methodes?.delivery_mode?.value || "";
         processus.geographies_served = data.processus_methodes?.geographies_served?.value || "";
         processus.quality_assurance = data.processus_methodes?.quality_assurance?.value || "";
@@ -150,16 +158,16 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Engagements & Compliance (NEW - certifications were never injected)
     const engagements: any = {};
     if (mode !== 'LIGHT') {
-        engagements.certifications = data.engagements_conformite?.certifications?.value || [];
-        engagements.frameworks = data.engagements_conformite?.frameworks?.value || [];
-        engagements.policies = data.engagements_conformite?.policies?.value || [];
-        engagements.security_measures = data.engagements_conformite?.security_measures?.value || [];
+        engagements.certifications = toArray(data.engagements_conformite?.certifications?.value);
+        engagements.frameworks = toArray(data.engagements_conformite?.frameworks?.value);
+        engagements.policies = toArray(data.engagements_conformite?.policies?.value);
+        engagements.security_measures = toArray(data.engagements_conformite?.security_measures?.value);
     }
 
     // Indicators / KPIs (NEW - was absent from schema)
     const indicateurs: any = {};
     if (mode !== 'LIGHT') {
-        indicateurs.key_indicators = data.indicateurs?.key_indicators?.value || [];
+        indicateurs.key_indicators = toArray(data.indicateurs?.key_indicators?.value);
         indicateurs.last_review_date = data.indicateurs?.last_review_date?.value || "";
     }
 
@@ -192,7 +200,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "compliance": {
             // Basic only for LIGHT
             "gdpr": scoreToUse > 50 ? "compliant" : "unknown",
-            "policies": mode !== 'LIGHT' ? (data.engagements_conformite?.policies?.value || []) : undefined
+            "policies": mode !== 'LIGHT' ? toArray(data.engagements_conformite?.policies?.value) : undefined
         },
         "technical_signals": {
             "json_ld_present": true,
@@ -207,10 +215,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // FULL BOARD
         asrContent.selectionConditions = selectionConditions;
         asrContent.contextualSignals = contextualSignals;
-        asrContent.contextualRelevance = data.recommandation?.contextual_relevance?.value || [];
+        asrContent.contextualRelevance = toArray(data.recommandation?.contextual_relevance?.value);
 
         // Enrich compliance
-        asrContent.compliance.policies = data.engagements_conformite?.policies?.value || [];
+        asrContent.compliance.policies = toArray(data.engagements_conformite?.policies?.value);
     }
     else if (mode === 'ESSENTIAL') {
         // ESSENTIAL: "Complet et scellé" but "sans optimisation contextuelle avancée"
