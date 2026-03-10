@@ -3,6 +3,9 @@ import { Resend } from 'resend';
 import Stripe from 'stripe';
 import JSZip from 'jszip';
 
+// Vercel function config — 60s max (native Next.js method, more reliable than vercel.json)
+export const maxDuration = 60;
+
 // Initialize Services
 const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
 
@@ -662,20 +665,35 @@ export async function POST(req: Request) {
             const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
             logger.info('WEBHOOK_ZIP_BUILT', `ZIP built with 5 files for ${entityName}`, { files: 5 });
 
-            await resend.emails.send({
-                from: 'AYO Delivery <delivery@ai-visionary.com>',
-                to: [customerEmail],
-                subject: `📥 Votre Pack AYO PRO — ${entityName}`,
-                attachments: [{ filename: 'AYO_Pack_PRO.zip', content: zipBuffer }],
-                html: buildProEmailHtml({
+            // Build email HTML first (to catch errors before Resend call)
+            let emailHtml: string;
+            try {
+                emailHtml = buildProEmailHtml({
                     name: entityName,
                     url: analysisData.url,
                     score: analysisData.score,
                     ayaId,
                     blocks: analysisData.blocks || {}
-                })
-            });
-            logger.info('WEBHOOK_EMAIL_PRO', `PRO email sent to ${customerEmail} with 5 files`);
+                });
+                logger.info('WEBHOOK_HTML_BUILT', `Email HTML built (${emailHtml.length} chars)`, { zipSize: zipBuffer.length });
+            } catch (htmlErr: any) {
+                logger.critical('WEBHOOK_HTML_CRASH', `buildProEmailHtml crashed: ${htmlErr.message}`, { stack: htmlErr.stack?.substring(0, 500) });
+                throw htmlErr;
+            }
+
+            try {
+                const emailResult = await resend.emails.send({
+                    from: 'AYO Delivery <delivery@ai-visionary.com>',
+                    to: [customerEmail],
+                    subject: `📥 Votre Pack AYO PRO — ${entityName}`,
+                    attachments: [{ filename: 'AYO_Pack_PRO.zip', content: zipBuffer }],
+                    html: emailHtml
+                });
+                logger.info('WEBHOOK_EMAIL_PRO', `PRO email sent to ${customerEmail} with 5 files`, { resendId: (emailResult as any)?.data?.id });
+            } catch (emailErr: any) {
+                logger.critical('WEBHOOK_EMAIL_CRASH', `Resend API failed: ${emailErr.message}`, { stack: emailErr.stack?.substring(0, 500), statusCode: emailErr.statusCode });
+                throw emailErr;
+            }
         } else {
             logger.warn('WEBHOOK_NO_DELIVERY', `Unknown pack type: ${packType}`, { packType, session_id });
         }
