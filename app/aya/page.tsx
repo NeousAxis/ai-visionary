@@ -221,7 +221,6 @@ export default function AyaPage() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]); // Start empty
     const [loading, setLoading] = useState(true);
-    const [showAll, setShowAll] = useState(false);
 
     // CONNEXION BACKEND RÉEL + SEED DATA
     useEffect(() => {
@@ -262,7 +261,7 @@ export default function AyaPage() {
         );
     });
     const isSearching = query.length > 0;
-    const displayedResults = (isSearching || showAll) ? filteredResults : filteredResults.slice(0, 6);
+    const displayedResults = isSearching ? filteredResults : filteredResults.slice(0, 6);
 
     return (
         <div style={{ background: 'var(--bg-main)', minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
@@ -383,18 +382,6 @@ export default function AyaPage() {
                         )}
                     </div>
 
-                    {/* Bouton Voir plus / Voir moins */}
-                    {!isSearching && filteredResults.length > 6 && (
-                        <div style={{ textAlign: 'center', marginTop: '40px' }}>
-                            <button
-                                onClick={() => setShowAll(!showAll)}
-                                className="btn"
-                                style={{ background: 'var(--bg-accent)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', padding: '12px 30px', fontSize: '1rem', cursor: 'pointer', borderRadius: '8px', fontWeight: '600' }}
-                            >
-                                {showAll ? 'Afficher moins' : `Voir les ${filteredResults.length} entreprises`}
-                            </button>
-                        </div>
-                    )}
                 </div>
             </section>
 
