@@ -541,7 +541,7 @@ export async function POST(req: Request) {
                         recalcScore = scoreResult.total;
                         recalcBlocks = {};
                         for (const [k, v] of Object.entries(scoreResult.blocks)) {
-                            recalcBlocks[k] = (v as any).score;
+                            recalcBlocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
                         }
                         logger.info('WEBHOOK_SCANSTATE_SCORE', `Recalculated score from scan_state: ${recalcScore}`, { recalcScore, recalcBlocks });
                     } catch (scoreErr) {
