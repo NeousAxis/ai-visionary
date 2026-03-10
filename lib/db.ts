@@ -262,13 +262,15 @@ export const database = {
         try {
             const snapshot = await dbInstance.collection('aya_registry')
                 .where('payment_completed', '==', true)
-                .orderBy('last_update', 'desc')
                 .limit(limit)
                 .get();
 
             if (snapshot.empty) return [];
 
-            return snapshot.docs.map(doc => doc.data());
+            // Tri client-side par last_update desc
+            return snapshot.docs.map(doc => doc.data()).sort((a: any, b: any) =>
+                (b.last_update || '').localeCompare(a.last_update || '')
+            );
         } catch (error) {
             console.error('❌ [Firestore] Get AYA Entities Error:', error);
             return [];
