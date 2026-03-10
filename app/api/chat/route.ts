@@ -1329,10 +1329,9 @@ GÉNÈRE CE JSON MAINTENANT :
             console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V5 Context-Aware)...");
             console.log("Asking NEXT Block...");
 
-            // Check if this is a response to ownership confirmation
-            const isOwnershipResponse = messages.some((m: any) =>
-                m.role === 'assistant' && m.content.includes('ownership_confirm')
-            );
+            // Check if the LAST assistant message was the ownership question (one-shot guard)
+            const lastAssistantMsgOwn = messages.filter((m: any) => m.role === 'assistant').pop();
+            const isOwnershipResponse = lastAssistantMsgOwn && lastAssistantMsgOwn.content.includes('ownership_confirm');
 
             if (isOwnershipResponse && stepsCompleted === 1) {
                 const lastUserMsg = lastMessage.content.toLowerCase();
@@ -1499,10 +1498,10 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             ];
 
             // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
-            // LIMITED TO 7 QUESTIONS MAX (Plan: 5-7 questions for UX)
+            // No artificial limit — queue only contains items that need asking
             const validationQueue = allBlockNames.filter(b => lowConfidenceKeys.includes(b));
             const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
-            let combinedQueue = [...validationQueue, ...questionQueue].slice(0, 7);
+            let combinedQueue = [...validationQueue, ...questionQueue];
 
             // Prioritize Country (identite.juridical_country)
             const countryIndex = combinedQueue.indexOf("identite.juridical_country");
@@ -1527,9 +1526,9 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 nextBlockName = "activity_calibration";
                 triggerMode = "CALIBRATION_STEP";
             } else {
-                // The first 2 questions are Calibration.
-                // At Turn 3, questionsAskedCount is 2. queueIndex should be 0.
-                queueIndex = questionsAskedCount - 2;
+                // The first 3 question_blocks are: ownership_confirm, truth_confirmation, calibration.
+                // At Turn 4, questionsAskedCount is 3. queueIndex should be 0.
+                queueIndex = questionsAskedCount - 3;
                 nextBlockName = combinedQueue[queueIndex] || "FINALISATION";
             }
 
