@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import Stripe from 'stripe';
 import JSZip from 'jszip';
+import crypto from 'crypto';
 
 // Vercel function config — 60s max (native Next.js method, more reliable than vercel.json)
 export const maxDuration = 60;
@@ -13,7 +14,8 @@ import { db } from '@/lib/db';
 import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { createLogger } from '@/lib/logger';
 import { getFirestore } from 'firebase-admin/firestore';
-import { generateSemanticAssets } from '@/lib/ayo-semantics';
+// Gemini AI generation disabled — deterministic generators are now quality-controlled
+// import { generateSemanticAssets } from '@/lib/ayo-semantics';
 import { computeAioScore } from '@/lib/aio-score-engine';
 import '@/lib/db'; // Ensure Firebase Admin is initialized
 
@@ -42,11 +44,20 @@ function detectPackType(session: Stripe.Checkout.Session): string {
  * Generate manifest.json for the .ayo folder
  */
 function generateManifestJson(data: any, url: string): any {
-    const name = data.identite?.name?.value || "Entreprise";
-    const businessType = data.identite?.business_type?.value || "Organization";
-    const services = toArray(data.offre?.services?.value);
-    const certifications = toArray(data.engagements_conformite?.certifications?.value);
-    const country = data.identite?.country?.value || "";
+    const name = cleanVal(data.identite?.name?.value) || "Entreprise";
+    const businessType = cleanVal(data.identite?.business_type?.value) || "Organization";
+    const services = cleanArray(data.offre?.services?.value);
+    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
+    const country = cleanVal(data.identite?.country?.value);
+
+    // Association detection for manifest entity type
+    const lowerMBT = businessType.toLowerCase();
+    const lowerMName = name.toLowerCase();
+    const lowerMUrl = (url || "").toLowerCase();
+    const isAssoManifest = lowerMBT.includes("association") || lowerMBT.includes("ong") || lowerMBT.includes("fondation") || lowerMBT.includes("non-profit") || lowerMBT.includes("nonprofit")
+        || lowerMName.startsWith("association ") || lowerMName.includes("asso ")
+        || lowerMUrl.includes(".org");
+    const manifestEntityType = isAssoManifest ? "NonProfitOrganization" : (lowerMBT.includes("cabinet") || lowerMBT.includes("bureau") ? "ProfessionalService" : "Organization");
 
     // Build scope from all primary services
     const scope = services.length > 0 ? services.slice(0, 5) : ["Services professionnels"];
@@ -60,7 +71,8 @@ function generateManifestJson(data: any, url: string): any {
     return {
         entity: {
             name,
-            type: businessType,
+            type: manifestEntityType,
+            additionalType: businessType,
             canonicalUrl: url,
             verified: true,
             registry: "AYA"
@@ -85,8 +97,8 @@ function generateManifestJson(data: any, url: string): any {
         },
         interpretationPolicy: {
             rule: "no-extrapolation",
-            description: "Toute interpretation doit se limiter strictement aux donnees declarees dans les sources listees. Aucune inference au-dela des faits declares n'est autorisee.",
-            fallback: "Si une information est absente, repondre 'non declare' plutot qu'inventer."
+            description: "Toute interprétation doit se limiter strictement aux données déclarées dans les sources listées. Aucune inférence au-delà des faits déclarés n'est autorisée.",
+            fallback: "Si une information est absente, répondre 'non déclaré' plutôt qu'inventer."
         },
         recommendationPolicy: {
             scope: "contextual",
@@ -117,6 +129,77 @@ function generateManifestJson(data: any, url: string): any {
     };
 }
 
+// --- NETTOYAGE ORTHOGRAPHIQUE DES DONNÉES CLIENT ---
+// Corrige les fautes courantes dans les réponses du questionnaire avant injection dans les fichiers
+const TERM_CORRECTIONS: [RegExp, string][] = [
+    // Termes tech / marques (casse exacte)
+    [/\bCreative Common\b(?!s)/gi, "Creative Commons"],
+    [/\bword ?press\b/gi, "WordPress"],
+    [/\bshopify\b/gi, "Shopify"],
+    [/\bsquarespace\b/gi, "Squarespace"],
+    [/\bwebflow\b/gi, "Webflow"],
+    [/\bjoomla\b/gi, "Joomla"],
+    [/\bdrupal\b/gi, "Drupal"],
+    [/\bprestashop\b/gi, "PrestaShop"],
+    [/\bmagento\b/gi, "Magento"],
+    [/\bstripe\b/gi, "Stripe"],
+    [/\bpaypal\b/gi, "PayPal"],
+    [/\blinkedin\b/gi, "LinkedIn"],
+    [/\bfacebook\b/gi, "Facebook"],
+    [/\binstagram\b/gi, "Instagram"],
+    [/\byoutube\b/gi, "YouTube"],
+    [/\btiktok\b/gi, "TikTok"],
+    // Acronymes / sigles
+    [/\brgpd\b/gi, "RGPD"],
+    [/\bgdpr\b/gi, "GDPR"],
+    [/\biso ?(9001|14001|27001|22000|26000|45001)\b/gi, "ISO $1"],
+    [/\brse\b/g, "RSE"], // only lowercase to avoid false positives
+    [/\btva\b/g, "TVA"],
+    [/\bseo\b/gi, "SEO"],
+    [/\bia\b/g, "IA"],
+    // Nettoyage plateforme — retirer "de Wix", "de WordPress" etc.
+    [/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, ""],
+    // Français courant — fautes fréquentes
+    [/\bpermettre de ([aeiouhé])/gi, "permettre d'$1"],
+    [/\bnotre objectif est de\b/gi, "l'objectif est de"],
+    [/\betc\.\.\./g, "etc."],
+    [/\betc\.{2,}/g, "etc."],
+];
+
+// Nettoyage typographique français
+function cleanText(s: string): string {
+    if (!s || typeof s !== 'string') return s || "";
+    let cleaned = s.trim();
+    // Normaliser les espaces multiples
+    cleaned = cleaned.replace(/\s{2,}/g, ' ');
+    // Appliquer les corrections de termes
+    for (const [pattern, replacement] of TERM_CORRECTIONS) {
+        cleaned = cleaned.replace(pattern, replacement as string);
+    }
+    // Espaces insécables avant ponctuation double (: ; ! ?)
+    cleaned = cleaned.replace(/ ([:;!?])/g, '\u00A0$1');
+    // Supprimer espace avant ponctuation simple (, .)
+    cleaned = cleaned.replace(/ ([,.])/g, '$1');
+    // Trim final (les regex de suppression peuvent laisser des espaces)
+    cleaned = cleaned.replace(/\s{2,}/g, ' ').trim();
+    // Première lettre en majuscule si la chaîne commence par une minuscule
+    if (cleaned.length > 0 && /^[a-zàâäéèêëïîôùûüÿç]/.test(cleaned)) {
+        cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    }
+    return cleaned;
+}
+
+// Nettoie un tableau de strings client
+function cleanArray(val: any): string[] {
+    return toArray(val).map(s => cleanText(s));
+}
+
+// Nettoie une valeur string simple
+function cleanVal(val: any): string {
+    if (!val) return "";
+    return cleanText(String(val));
+}
+
 // Safely convert any value to an array (handles strings, arrays, nullish)
 function toArray(val: any): string[] {
     if (!val) return [];
@@ -129,72 +212,83 @@ function toArray(val: any): string[] {
  * Generate faq.json from extracted data
  */
 function generateFaqJson(data: any, url: string): any {
-    const name = data.identite?.name?.value || "Notre entreprise";
-    const businessType = data.identite?.business_type?.value || "Organisation";
-    const services = toArray(data.offre?.services?.value);
-    const products = toArray(data.offre?.products?.value);
-    const audience = data.offre?.target_audience?.value || "";
-    const useCases = toArray(data.offre?.use_cases?.value);
-    const pricing = data.offre?.pricing_indication?.value || "";
-    const email = data.identite?.contact_email?.value || "";
-    const phone = data.identite?.contact_phone?.value || "";
-    const city = data.identite?.city?.value || "";
-    const country = data.identite?.country?.value || "";
-    const legalName = data.identite?.legal_name?.value || "";
-    const processSteps = toArray(data.processus_methodes?.process_steps?.value);
-    const deliveryMode = data.processus_methodes?.delivery_mode?.value || "";
-    const geoServed = data.processus_methodes?.geographies_served?.value || "";
-    const qualityAssurance = data.processus_methodes?.quality_assurance?.value || "";
-    const certifications = toArray(data.engagements_conformite?.certifications?.value);
-    const frameworks = toArray(data.engagements_conformite?.frameworks?.value);
-    const policies = toArray(data.engagements_conformite?.policies?.value);
-    const securityMeasures = toArray(data.engagements_conformite?.security_measures?.value);
-    const keyIndicators = toArray(data.indicateurs?.key_indicators?.value);
+    const name = cleanVal(data.identite?.name?.value) || "Notre entreprise";
+    const businessType = cleanVal(data.identite?.business_type?.value) || "Organisation";
+    const services = cleanArray(data.offre?.services?.value);
+    const products = cleanArray(data.offre?.products?.value);
+    const audience = cleanVal(data.offre?.target_audience?.value);
+    const useCases = cleanArray(data.offre?.use_cases?.value);
+    const pricing = cleanVal(data.offre?.pricing_indication?.value);
+    const email = data.identite?.contact_email?.value || ""; // email: pas de cleanText
+    const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
+    const phone = /^[\d\s\+\-\(\)\.]{6,}$/.test(rawPhone) ? rawPhone : "";
+    const city = cleanVal(data.identite?.city?.value);
+    const country = cleanVal(data.identite?.country?.value);
+    const legalName = cleanVal(data.identite?.legal_name?.value);
+    const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
+    const deliveryMode = cleanVal(data.processus_methodes?.delivery_mode?.value);
+    const geoServed = cleanVal(data.processus_methodes?.geographies_served?.value);
+    const qualityAssurance = cleanVal(data.processus_methodes?.quality_assurance?.value);
+    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
+    const frameworks = cleanArray(data.engagements_conformite?.frameworks?.value);
+    const policies = cleanArray(data.engagements_conformite?.policies?.value);
+    const securityMeasures = cleanArray(data.engagements_conformite?.security_measures?.value);
+    const keyIndicators = cleanArray(data.indicateurs?.key_indicators?.value);
     const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
 
-    const isAssociation = businessType.toLowerCase().includes("association");
+    // Check businessType, entity name AND URL (.org) for association detection
+    const lowerBT = businessType.toLowerCase();
+    const lowerName = name.toLowerCase();
+    const lowerUrl = (url || "").toLowerCase();
+    const isAssociation = lowerBT.includes("association") || lowerBT.includes("ong") || lowerBT.includes("fondation") || lowerBT.includes("non-profit") || lowerBT.includes("nonprofit")
+        || lowerName.startsWith("association ") || lowerName.includes("asso ")
+        || lowerUrl.includes(".org");
     const entityType = isAssociation ? "une association" : "une entreprise";
+    // Smart French article: "d'Association Éclore" vs "de Happy Green Food"
+    const nameArticle = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
     const locationStr = [city, country].filter(Boolean).join(", ");
+    // Feminine agreement for associations
+    const eAccord = isAssociation ? "e" : "";
 
     const qna: { q: string; a: string; category: string }[] = [];
 
-    // --- IDENTITE ---
+    // --- IDENTITÉ ---
     qna.push({
         q: `Qui est ${name} ?`,
-        a: `${name} est ${entityType} de type "${businessType}"${locationStr ? `, basee a ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Notre activite principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `Nous nous adressons principalement a ${audience}.` : ""}`.trim(),
-        category: "Identite"
+        a: `${name} est ${entityType} spécialisée dans ${businessType.toLowerCase().startsWith("bureau") || businessType.toLowerCase().startsWith("cabinet") ? `le ${businessType.toLowerCase()}` : businessType.toLowerCase()}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `${name} s'adresse principalement aux ${audience.toLowerCase()}.` : ""}`.trim(),
+        category: "Identité"
     });
 
     if (locationStr) {
         qna.push({
-            q: `Ou est situe ${name} ?`,
-            a: `${name} est implante a ${locationStr}.${geoServed ? ` Notre zone d'intervention couvre : ${geoServed}.` : ` Nous intervenons principalement dans la region de ${city || country}.`}`,
-            category: "Identite"
+            q: `Où se situe ${name} ?`,
+            a: `${name} est implanté${eAccord} à ${locationStr}.${geoServed ? ` Sa zone d'intervention couvre : ${geoServed}.` : ` L'activité se concentre principalement dans la région de ${city || country}.`}`,
+            category: "Identité"
         });
     }
 
     // --- OFFRE ---
     if (services.length > 0) {
         qna.push({
-            q: `Quels sont les services proposes par ${name} ?`,
-            a: `${name} propose ${services.length} service${services.length > 1 ? "s" : ""} : ${services.join(", ")}.${products.length > 0 ? ` Nous proposons egalement : ${products.join(", ")}.` : ""} ${audience ? `Ces services s'adressent a ${audience}.` : ""}`.trim(),
+            q: `Quels services propose ${name} ?`,
+            a: `${name} propose ${services.length > 1 ? "plusieurs services" : "un service principal"} : ${services.join(", ")}.${products.length > 0 ? ` L'offre inclut également : ${products.join(", ")}.` : ""}${audience ? ` Ces prestations s'adressent aux ${audience.toLowerCase()}.` : ""}`.trim(),
             category: "Offre"
         });
     }
 
     if (useCases.length > 0) {
         qna.push({
-            q: `Dans quelles situations faire appel a ${name} ?`,
-            a: `${name} intervient dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}) ${uc}`).join(" ; ")}. ${audience ? `Ces cas concernent principalement ${audience}.` : ""}`.trim(),
+            q: `Dans quelles situations faire appel à ${name} ?`,
+            a: `${name} intervient notamment dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}) ${uc}`).join(" ; ")}.${audience ? ` Ces situations concernent principalement les ${audience.toLowerCase()}.` : ""}`.trim(),
             category: "Offre"
         });
     }
 
     if (audience) {
         qna.push({
-            q: `A qui s'adressent les services de ${name} ?`,
-            a: `Les services de ${name} sont conçus pour ${audience}. ${useCases.length > 0 ? `Les situations typiques incluent : ${useCases.slice(0, 3).join(", ")}.` : ""}`.trim(),
+            q: `À qui s'adresse ${name} ?`,
+            a: `L'offre ${nameArticle} est conçue pour les ${audience.toLowerCase()}.${useCases.length > 0 ? ` Les contextes d'intervention typiques incluent : ${useCases.slice(0, 3).join(", ")}.` : ""}`.trim(),
             category: "Offre"
         });
     }
@@ -202,79 +296,91 @@ function generateFaqJson(data: any, url: string): any {
     // --- PROCESSUS ---
     if (processSteps.length > 0) {
         qna.push({
-            q: `Comment fonctionne la methode de ${name} ?`,
-            a: `Notre approche repose sur un processus structure : ${processSteps.map((s, i) => `Etape ${i + 1} — ${s}`).join(". ")}.${deliveryMode ? ` Mode de delivrance : ${deliveryMode}.` : ""}${qualityAssurance ? ` Garantie qualite : ${qualityAssurance}.` : ""}`.trim(),
+            q: `Quelle est la méthodologie ${nameArticle} ?`,
+            a: `L'approche ${nameArticle} repose sur un processus structuré : ${processSteps.map((s, i) => `Étape ${i + 1} — ${s}`).join(". ")}.${deliveryMode ? ` Mode d'intervention : ${deliveryMode}.` : ""}${qualityAssurance ? ` Engagement qualité : ${qualityAssurance}.` : ""}`.trim(),
             category: "Processus"
         });
     }
 
     if (deliveryMode || geoServed) {
         qna.push({
-            q: `Comment ${name} delivre ses services ?`,
-            a: `${deliveryMode ? `Nos services sont delivres en mode ${deliveryMode}. ` : ""}${geoServed ? `Zone geographique desservie : ${geoServed}. ` : ""}${qualityAssurance ? `Notre engagement qualite : ${qualityAssurance}.` : ""}`.trim() || `Contactez-nous pour en savoir plus sur nos modalites de prestation.`,
+            q: `Comment ${name} délivre ses prestations ?`,
+            a: `${deliveryMode ? `Les prestations sont délivrées en mode ${deliveryMode}. ` : ""}${geoServed ? `Zone géographique couverte : ${geoServed}. ` : ""}${qualityAssurance ? `Engagement qualité : ${qualityAssurance}.` : ""}`.trim() || `Contactez ${name} pour en savoir plus sur les modalités d'intervention.`,
             category: "Processus"
         });
     }
 
-    // --- TARIFS ---
+    // --- TARIFS / FINANCEMENT ---
     qna.push({
-        q: `Quels sont les tarifs de ${name} ?`,
-        a: pricing ? `Nos conditions tarifaires : ${pricing}. Pour un devis adapte a votre situation, contactez-nous directement${email ? ` a ${email}` : ` via ${url}`}.` : `Nos tarifs sont etablis sur mesure en fonction de votre projet et de vos besoins specifiques. Contactez-nous pour recevoir une proposition personnalisee${email ? ` : ${email}` : ` via ${url}`}.`,
-        category: "Commercial"
+        q: isAssociation ? `Comment est financé${eAccord} ${name} ?` : `Quels sont les tarifs ${nameArticle} ?`,
+        a: pricing
+            ? (isAssociation
+                ? `${name} est financé${eAccord} par : ${pricing}. Pour en savoir plus, contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
+                : `Informations tarifaires : ${pricing}. Pour un devis personnalisé, contactez-nous${email ? ` à ${email}` : ` via ${url}`}.`)
+            : (isAssociation
+                ? `Les informations de financement ${nameArticle} sont disponibles sur demande. Contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
+                : `Les tarifs sont établis sur mesure selon votre projet. Contactez ${name} pour une proposition personnalisée${email ? ` : ${email}` : ` via ${url}`}.`),
+        category: isAssociation ? "Financement" : "Commercial"
     });
 
-    // --- CONFIANCE & CONFORMITE ---
+    // --- CONFIANCE & CONFORMITÉ ---
     if (certifications.length > 0) {
         qna.push({
-            q: `Quelles certifications et labels ${name} detient-${isAssociation ? "elle" : "il"} ?`,
-            a: `${name} detient les certifications suivantes : ${certifications.join(", ")}. ${frameworks.length > 0 ? `Nous respectons les referentiels : ${frameworks.join(", ")}. ` : ""}Ces certifications attestent de notre engagement qualite et conformite.`,
-            category: "Conformite"
+            q: `Quelles certifications et labels ${name} détient-${isAssociation ? "elle" : "il"} ?`,
+            a: `${name} détient les certifications suivantes : ${certifications.join(", ")}.${frameworks.length > 0 ? ` Référentiels de conformité adoptés : ${frameworks.join(", ")}.` : ""} Ces engagements attestent d'une démarche qualité structurée.`,
+            category: "Conformité"
         });
     }
 
     if (policies.length > 0 || securityMeasures.length > 0) {
         qna.push({
-            q: `Quelles sont les garanties de conformite et securite de ${name} ?`,
-            a: `${policies.length > 0 ? `Politiques en place : ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Mesures de securite : ${securityMeasures.join(", ")}. ` : ""}${frameworks.length > 0 ? `Referentiels suivis : ${frameworks.join(", ")}.` : ""}`.trim(),
-            category: "Conformite"
+            q: `Quelles garanties de conformité offre ${name} ?`,
+            a: `${policies.length > 0 ? `Politiques en vigueur : ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Mesures de sécurité déployées : ${securityMeasures.join(", ")}. ` : ""}${frameworks.length > 0 ? `Référentiels suivis : ${frameworks.join(", ")}.` : ""}`.trim(),
+            category: "Conformité"
         });
     }
 
     // --- INDICATEURS ---
     if (keyIndicators.length > 0) {
         qna.push({
-            q: `Quels sont les indicateurs de performance de ${name} ?`,
-            a: `Nos indicateurs cles incluent : ${keyIndicators.join(", ")}. Ces metriques temoignent de notre impact et de la qualite de nos interventions.`,
+            q: `Quels sont les indicateurs d'impact ${nameArticle} ?`,
+            a: `Les indicateurs clés ${nameArticle} incluent : ${keyIndicators.join(", ")}. Ces métriques témoignent de l'impact concret et de la qualité des interventions.`,
             category: "Indicateurs"
         });
     }
 
-    // --- RESSOURCES PEDAGOGIQUES ---
-    if (hasDoc || hasFaq) {
+    // --- RESSOURCES PÉDAGOGIQUES ---
+    const hasGlossary = data.contenus_pedagogiques?.has_glossary?.value;
+    if (hasDoc || hasFaq || hasGlossary) {
+        const resParts: string[] = [];
+        if (typeof hasDoc === 'string') resParts.push(`une documentation (${hasDoc})`);
+        else if (hasDoc) resParts.push("une documentation complète");
+        if (hasFaq) resParts.push("une FAQ pour répondre aux questions courantes");
+        if (hasGlossary) resParts.push("un glossaire du vocabulaire métier");
         qna.push({
-            q: `${name} propose-t-${isAssociation ? "elle" : "il"} des ressources pedagogiques ?`,
-            a: `Oui. ${typeof hasDoc === 'string' ? `Documentation disponible : ${hasDoc}. ` : hasDoc ? "Nous mettons a disposition une documentation complete. " : ""}${hasFaq ? "Une FAQ est egalement disponible pour repondre a vos questions courantes. " : ""}Consultez notre site ${url} pour y acceder.`,
+            q: `${name} propose-t-${isAssociation ? "elle" : "il"} des ressources pédagogiques ?`,
+            a: `Oui. ${name} met à disposition ${resParts.join(", ")}. Retrouvez ces ressources sur ${url}.`,
             category: "Ressources"
         });
     }
 
     // --- CONTACT ---
     const contactParts: string[] = [];
-    if (email) contactParts.push(`par email a ${email}`);
-    if (phone) contactParts.push(`par telephone au ${phone}`);
-    contactParts.push(`via notre site web ${url}`);
+    if (email) contactParts.push(`par email à ${email}`);
+    if (phone) contactParts.push(`par téléphone au ${phone}`);
+    contactParts.push(`via le site web ${url}`);
 
     qna.push({
         q: `Comment contacter ${name} ?`,
-        a: `Vous pouvez nous joindre ${contactParts.join(", ")}. Nous repondons generalement sous 48h ouvrables.`,
+        a: `Vous pouvez joindre ${name} ${contactParts.join(", ")}.`,
         category: "Contact"
     });
 
-    // --- AYO / VISIBILITE IA ---
+    // --- AYO / VISIBILITÉ IA ---
     qna.push({
-        q: `${name} est-${isAssociation ? "elle" : "il"} certifie${isAssociation ? "e" : ""} AYO ?`,
-        a: `Oui. ${name} a realise un diagnostic AYO complet et dispose d'un fichier ASR (AYO Singular Record) signe cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre precisement notre activite et de nous recommander de maniere fiable. Notre entite est enregistree dans le Registre AYA.`,
-        category: "Visibilite IA"
+        q: `${name} est-${isAssociation ? "elle" : "il"} certifié${eAccord} AYO ?`,
+        a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AYO Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssociation ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`,
+        category: "Visibilité IA"
     });
 
     return {
@@ -299,91 +405,119 @@ function generateFaqJson(data: any, url: string): any {
  * Generate glossary.json — Rich, contextual terminology
  */
 function generateGlossaryJson(data: any): any {
-    const name = data.identite?.name?.value || "Entreprise";
-    const businessType = data.identite?.business_type?.value || "Organization";
-    const services = toArray(data.offre?.services?.value);
-    const useCases = toArray(data.offre?.use_cases?.value);
-    const certifications = toArray(data.engagements_conformite?.certifications?.value);
-    const processSteps = toArray(data.processus_methodes?.process_steps?.value);
-    const audience = data.offre?.target_audience?.value || "";
-    const city = data.identite?.city?.value || "";
-    const country = data.identite?.country?.value || "";
-    const policies = toArray(data.engagements_conformite?.policies?.value);
-    const frameworks = toArray(data.engagements_conformite?.frameworks?.value);
-    const securityMeasures = toArray(data.engagements_conformite?.security_measures?.value);
+    const name = cleanVal(data.identite?.name?.value) || "Entreprise";
+    const businessType = cleanVal(data.identite?.business_type?.value) || "Organization";
+    const services = cleanArray(data.offre?.services?.value);
+    const useCases = cleanArray(data.offre?.use_cases?.value);
+    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
+    const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
+    const audience = cleanVal(data.offre?.target_audience?.value);
+    const city = cleanVal(data.identite?.city?.value);
+    const country = cleanVal(data.identite?.country?.value);
+    const policies = cleanArray(data.engagements_conformite?.policies?.value);
+    const frameworks = cleanArray(data.engagements_conformite?.frameworks?.value);
+    const securityMeasures = cleanArray(data.engagements_conformite?.security_measures?.value);
+
+    // Smart French article for entity name
+    const nameArticleG = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
 
     const terms: { term: string; def: string; category: string }[] = [];
     const seen = new Set<string>();
     const addTerm = (term: string, def: string, category: string) => {
         const key = term.toLowerCase().trim();
         if (key.length < 3 || seen.has(key)) return;
+        // Normalize "Creative Common" → "Creative Commons"
+        const cleanTerm = term.replace(/Creative Common\b(?!s)/gi, "Creative Commons");
         seen.add(key);
-        terms.push({ term, def, category });
+        terms.push({ term: cleanTerm, def, category });
     };
 
-    // 1. Identity & Business
-    addTerm(name, `Entite de type "${businessType}"${city ? ` basee a ${city}` : ""}${country ? ` (${country})` : ""}. Operateur declare et verifie dans le registre AYA.`, "Identite");
-    addTerm(businessType, `Classification juridique et sectorielle de ${name}. Ce type determine les criteres de recommandation applicables par les agents IA dans le contexte Schema.org.`, "Identite");
+    // 1. Identity & Business — contextual description
+    addTerm(name, `${city ? `Organisation basée à ${city}` : "Organisation"}${country ? ` (${country})` : ""}, spécialisée dans ${businessType.toLowerCase()}. Entité vérifiée et enregistrée dans le registre AYA avec un ASR signé cryptographiquement.`, "Identité");
+    if (businessType !== "Organization") {
+        addTerm(businessType, `Domaine d'activité principal ${nameArticleG}. Cette classification détermine le positionnement sectoriel et les critères de recommandation par les agents IA.`, "Identité");
+    }
 
-    // 2. Services — each with contextual description
+    // 2. Services — each with unique contextual description
+    const serviceDescTemplates = [
+        (s: string) => `Prestation phare ${nameArticleG}${audience ? `, conçue pour les ${audience.toLowerCase()}` : ""}. Ce service constitue le cœur de l'offre déclarée dans l'ASR.`,
+        (s: string) => `Service complémentaire proposé par ${name}${audience ? ` à destination des ${audience.toLowerCase()}` : ""}. Enrichit le périmètre d'intervention de l'entité.`,
+        (s: string) => `Activité spécialisée ${nameArticleG}. Fait partie de l'offre vérifiable et documentée dans les actifs sémantiques.`,
+    ];
     services.forEach((s, i) => {
         if (typeof s !== 'string') return;
-        const audiencePart = audience ? ` destine a ${audience}` : "";
-        const positionPart = i === 0 ? `Service principal de ${name}` : `Service complementaire propose par ${name}`;
-        addTerm(s, `${positionPart}${audiencePart}. Ce service fait partie de l'offre declaree et verifiable dans l'ASR de l'entite.`, "Services");
+        addTerm(s, serviceDescTemplates[i % serviceDescTemplates.length](s), "Services");
     });
 
     // 3. Use Cases — why clients come
-    useCases.forEach(uc => {
+    const useCaseDescTemplates = [
+        (uc: string) => `Contexte d'intervention clé ${nameArticleG}. Situation concrète dans laquelle un agent IA orienterait un utilisateur vers cette entité.`,
+        (uc: string) => `Scénario opérationnel déclaré par ${name}. Signal de pertinence pour le matching entre requêtes utilisateurs et expertise disponible.`,
+        (uc: string) => `Cas de figure récurrent adressé par ${name}. Enrichit la compréhension contextuelle de l'entité par les IA génératives.`,
+        (uc: string) => `Application terrain des compétences ${nameArticleG}. Permet aux agents IA de recommander l'entité dans le bon contexte décisionnel.`,
+    ];
+    useCases.forEach((uc, i) => {
         if (typeof uc !== 'string') return;
-        addTerm(uc, `Cas d'usage identifie pour ${name} : situation concrete dans laquelle un client ou partenaire ferait appel a cette entite. Signal de pertinence pour le matching IA contextuel.`, "Cas d'usage");
+        addTerm(uc, useCaseDescTemplates[i % useCaseDescTemplates.length](uc), "Cas d'usage");
     });
 
-    // 4. Process & Methods
-    processSteps.forEach(step => {
+    // 4. Process & Methods — varied descriptions
+    const processDescTemplates = [
+        (step: string, i: number) => `Phase ${i + 1} de la méthodologie ${nameArticleG}. Étape structurante du parcours d'accompagnement.`,
+        (step: string, i: number) => `${i + 1}${i === 0 ? "ère" : "ème"} étape du processus opérationnel. Élément clé du dispositif d'intervention ${nameArticleG}.`,
+    ];
+    processSteps.forEach((step, i) => {
         if (typeof step !== 'string') return;
-        addTerm(step, `Etape ou methode utilisee par ${name} dans la realisation de ses services. Element structurant du processus operationnel declare.`, "Processus");
+        addTerm(step, processDescTemplates[i % processDescTemplates.length](step, i), "Processus");
     });
 
     // 5. Certifications — with authority context
     certifications.forEach(c => {
         if (typeof c !== 'string') return;
-        addTerm(c, `Certification ou label officiel detenu par ${name}. Constitue un signal de confiance et de qualite pris en compte dans le calcul du score AIO (bloc Confiance & Conformite).`, "Conformite");
+        addTerm(c, `Certification ou label officiel détenu par ${name}. Signal de confiance évalué dans le scoring AIO (bloc Confiance & Conformité, pondéré à 15/100).`, "Conformité");
     });
 
-    // 6. Frameworks & Policies
+    // 6. Frameworks & Policies — cleaned descriptions
     frameworks.forEach(f => {
         if (typeof f !== 'string') return;
-        addTerm(f, `Referentiel ou framework de conformite adopte par ${name}. Indicateur de maturite organisationnelle evalue dans le scoring AIO.`, "Conformite");
+        addTerm(f, `Référentiel de conformité adopté par ${name}. Témoigne d'une maturité organisationnelle évaluée dans le scoring AIO.`, "Conformité");
     });
     policies.forEach(p => {
         if (typeof p !== 'string') return;
-        addTerm(p, `Politique declaree par ${name} en matiere de conformite, transparence ou protection des donnees.`, "Conformite");
+        // Clean up: remove platform-specific mentions like "de Wix", "de WordPress"
+        const cleanDef = `Politique de conformité ${nameArticleG} en matière de protection des données et de transparence.`;
+        addTerm(p.replace(/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, "").trim(), cleanDef, "Conformité");
     });
 
-    // 7. Security
+    // 7. Security — clean platform mentions
     securityMeasures.forEach(sm => {
         if (typeof sm !== 'string') return;
-        addTerm(sm, `Mesure de securite mise en oeuvre par ${name} pour proteger les donnees et les systemes. Signal de fiabilite technique.`, "Securite");
+        const cleanSm = sm.replace(/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, "").trim();
+        addTerm(cleanSm, `Mesure de sécurité déployée par ${name} pour la protection des données et des systèmes. Signal de fiabilité technique.`, "Sécurité");
     });
 
-    // 8. Audience
+    // 8. Audience — split if comma-separated
     if (audience) {
-        addTerm(audience, `Public cible principal de ${name}. Ce segment determine les contextes de recommandation IA pertinents (recherche locale, matching expert, comparaison sectorielle).`, "Audience");
+        const segments = audience.split(',').map(s => s.trim()).filter(Boolean);
+        if (segments.length > 1) {
+            segments.forEach(seg => addTerm(seg, `Segment cible ${nameArticleG}. Ce public détermine les contextes de recommandation IA pertinents.`, "Audience"));
+        } else {
+            addTerm(audience, `Public cible principal ${nameArticleG}. Ce segment détermine les contextes de recommandation IA (recherche locale, matching expert, comparaison sectorielle).`, "Audience");
+        }
     }
 
-    // 9. AYO Ecosystem terms
-    addTerm("ASR (AYO Singular Record)", "Fichier JSON structure et signe cryptographiquement qui constitue l'identite semantique officielle d'une entite. L'ASR est le document de reference que les agents IA consultent pour recommander, comparer ou presenter une organisation.", "Ecosysteme AYO");
-    addTerm("AIO (Artificial Intelligence Optimization)", "Score de 0 a 100 mesurant la capacite d'une entite a etre correctement comprise et recommandee par les IA generatives. Calcule sur 7 blocs ponderes : Identite, Offre, Processus, Conformite, Indicateurs, Pedagogie, Technique.", "Ecosysteme AYO");
-    addTerm("AYA (AYO Authority Registry)", "Registre decentralise des entites certifiees AYO. L'inscription AYA atteste qu'une entite a ete analysee, scoree et que son ASR est authentique et a jour.", "Ecosysteme AYO");
-    addTerm("Score AIO par bloc", "Decomposition du score global en 7 sous-scores : Identite & Ancrage (/10), Clarte de l'Offre (/20), Processus & Methodes (/15), Confiance & Conformite (/15), Preuve Sociale (/20), Pedagogie (/10), Socle Technique (/10).", "Ecosysteme AYO");
+    // 9. AYO Ecosystem terms — professional and precise
+    addTerm("ASR (AYO Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", "Écosystème AYO");
+    addTerm("AIO (Artificial Intelligence Optimization)", "Score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Calculé sur 7 blocs pondérés : Identité (10), Offre (20), Processus (15), Conformité (15), Indicateurs (20), Pédagogie (10), Technique (10).", "Écosystème AYO");
+    addTerm("AYA (AYO Authority Registry)", "Registre officiel des entités certifiées AYO. L'inscription AYA atteste qu'une entité a été analysée, scorée, et que son ASR est authentique, signé et à jour.", "Écosystème AYO");
+    addTerm("Pack AYO PRO", "Ensemble de 5 fichiers sémantiques (ASR, manifest, FAQ, glossaire, contexte externe) livrés à une entité pour optimiser sa visibilité auprès des agents IA. Inclut 3 ans d'inscription au registre AYA.", "Écosystème AYO");
 
     return {
         "@context": "https://schema.org",
         "@type": "DefinedTermSet",
         name: `Glossaire Officiel - ${name}`,
         version: "AYO-GLOSSARY-2.0",
-        description: `Vocabulaire metier officiel de ${name}, utilise comme reference par les agents IA pour interpreter les donnees semantiques de cette entite.`,
+        description: `Vocabulaire métier officiel ${nameArticleG}, utilisé comme référence par les agents IA pour interpréter les données sémantiques de cette entité.`,
         inLanguage: "fr",
         numberOfTerms: terms.length,
         hasDefinedTerm: terms.map(item => ({
@@ -399,40 +533,71 @@ function generateGlossaryJson(data: any): any {
  * Generate external_context.json — Rich ecosystem & reputation signals
  */
 function generateExternalContextJsonLocal(data: any, url?: string): any {
-    const name = data.identite?.name?.value || "Entreprise";
-    const businessType = data.identite?.business_type?.value || "Organization";
-    const useCases = toArray(data.offre?.use_cases?.value);
-    const services = toArray(data.offre?.services?.value);
-    const products = toArray(data.offre?.products?.value);
-    const audience = data.offre?.target_audience?.value || "";
-    const city = data.identite?.city?.value || "";
-    const country = data.identite?.country?.value || "";
-    const email = data.identite?.contact_email?.value || "";
-    const phone = data.identite?.contact_phone?.value || "";
-    const certifications = toArray(data.engagements_conformite?.certifications?.value);
-    const frameworks = toArray(data.engagements_conformite?.frameworks?.value);
-    const policies = toArray(data.engagements_conformite?.policies?.value);
-    const processSteps = toArray(data.processus_methodes?.process_steps?.value);
-    const deliveryMode = data.processus_methodes?.delivery_mode?.value || "";
-    const geographies = data.processus_methodes?.geographies_served?.value || "";
-    const qualityAssurance = data.processus_methodes?.quality_assurance?.value || "";
-    const keyIndicators = toArray(data.indicateurs?.key_indicators?.value);
+    const name = cleanVal(data.identite?.name?.value) || "Entreprise";
+    const businessType = cleanVal(data.identite?.business_type?.value) || "Organization";
+    const useCases = cleanArray(data.offre?.use_cases?.value);
+    const services = cleanArray(data.offre?.services?.value);
+    const products = cleanArray(data.offre?.products?.value);
+    const audience = cleanVal(data.offre?.target_audience?.value);
+    const city = cleanVal(data.identite?.city?.value);
+    const country = cleanVal(data.identite?.country?.value);
+    const email = data.identite?.contact_email?.value || ""; // email: pas de cleanText
+    const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
+    const phone = /^[\d\s\+\-\(\)\.]{6,}$/.test(rawPhoneExt) ? rawPhoneExt : "";
+    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
+    const frameworks = cleanArray(data.engagements_conformite?.frameworks?.value);
+    const policies = cleanArray(data.engagements_conformite?.policies?.value);
+    const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
+    const deliveryMode = cleanVal(data.processus_methodes?.delivery_mode?.value);
+    const geographies = cleanVal(data.processus_methodes?.geographies_served?.value);
+    const qualityAssurance = cleanVal(data.processus_methodes?.quality_assurance?.value);
+    const keyIndicators = cleanArray(data.indicateurs?.key_indicators?.value);
     const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
+    const hasGlossaryEC = data.contenus_pedagogiques?.has_glossary?.value;
 
-    // Build rich discovery keywords from multiple sources
+    // Read declared keywords/intents from questionnaire (external_context block)
+    const declaredKeywords = toArray(data.external_context?.keywords?.value);
+    const declaredIntents = toArray(data.external_context?.intents?.value);
+
+    // Deduplicate helper (case-insensitive)
+    const addUnique = (arr: string[], val: string) => {
+        if (typeof val !== 'string' || val.length < 2) return;
+        const lower = val.toLowerCase().trim();
+        if (!arr.some(existing => existing.toLowerCase().trim() === lower)) arr.push(val.trim());
+    };
+
+    // Build rich discovery keywords from multiple sources (deduplicated)
     const discoveryKeywords: string[] = [];
-    services.slice(0, 8).forEach(s => typeof s === 'string' && discoveryKeywords.push(s));
-    products.slice(0, 5).forEach(p => typeof p === 'string' && discoveryKeywords.push(p));
-    if (audience) discoveryKeywords.push(audience);
-    if (businessType && businessType !== "Organization") discoveryKeywords.push(businessType);
-    if (city) discoveryKeywords.push(city);
+    // Priority 1: User-declared keywords — split long comma-separated strings
+    declaredKeywords.slice(0, 15).forEach(k => {
+        if (typeof k !== 'string') return;
+        // Split if the keyword contains commas (user entered a list as a single value)
+        if (k.includes(',')) {
+            k.split(',').map(s => s.trim()).filter(Boolean).forEach(sub => addUnique(discoveryKeywords, sub));
+        } else {
+            addUnique(discoveryKeywords, k);
+        }
+    });
+    // Priority 2: Auto-derived from services/products
+    services.slice(0, 8).forEach(s => addUnique(discoveryKeywords, s));
+    products.slice(0, 5).forEach(p => addUnique(discoveryKeywords, p));
+    if (audience) addUnique(discoveryKeywords, audience);
+    if (city) addUnique(discoveryKeywords, city);
 
-    // Intent keywords — what users search for
+    // Intent keywords — what users search for (deduplicated)
     const intentKeywords: string[] = [];
-    useCases.slice(0, 10).forEach(uc => typeof uc === 'string' && intentKeywords.push(uc));
-    // Add process-derived intent
-    processSteps.slice(0, 3).forEach(ps => typeof ps === 'string' && intentKeywords.push(ps));
+    // Priority 1: User-declared intents
+    declaredIntents.slice(0, 15).forEach(i => {
+        if (typeof i !== 'string') return;
+        if (i.includes(',')) {
+            i.split(',').map(s => s.trim()).filter(Boolean).forEach(sub => addUnique(intentKeywords, sub));
+        } else {
+            addUnique(intentKeywords, i);
+        }
+    });
+    // Priority 2: Auto-derived from use cases
+    useCases.slice(0, 10).forEach(uc => addUnique(intentKeywords, uc));
 
     // Determine access channels from available data
     const primaryChannels: string[] = ["Site web"];
@@ -441,8 +606,8 @@ function generateExternalContextJsonLocal(data: any, url?: string): any {
     if (phone) secondaryChannels.push("Telephone");
     if (deliveryMode) {
         const dm = deliveryMode.toLowerCase();
-        if (dm.includes("ligne") || dm.includes("remote") || dm.includes("digital")) primaryChannels.push("En ligne");
-        if (dm.includes("site") || dm.includes("presen")) primaryChannels.push("Sur site");
+        if (dm.includes("ligne") || dm.includes("remote") || dm.includes("digital") || dm.includes("visio") || dm.includes("web") || dm.includes("plateforme") || dm.includes("online")) primaryChannels.push("En ligne");
+        if (dm.includes("site") || dm.includes("presen") || dm.includes("atelier")) primaryChannels.push("Sur site");
     }
 
     // Reputation signals — based on certifications, quality, indicators
@@ -489,9 +654,10 @@ function generateExternalContextJsonLocal(data: any, url?: string): any {
         },
         content_signals: {
             has_faq: !!hasFaq,
+            has_glossary: !!hasGlossaryEC,
             has_documentation: !!hasDoc,
-            educational_content: hasFaq || hasDoc ? "available" : "minimal",
-            process_transparency: processSteps.length > 0 ? "documented" : "undisclosed"
+            educational_content: (hasFaq || hasGlossaryEC || hasDoc) ? "available" : "minimal",
+            process_transparency: (processSteps.length > 0 || deliveryMode) ? "documented" : "undisclosed"
         },
         keywords_context: {
             discovery_keywords: discoveryKeywords,
@@ -502,7 +668,9 @@ function generateExternalContextJsonLocal(data: any, url?: string): any {
         access_channels: {
             primary: primaryChannels,
             secondary: secondaryChannels,
-            delivery_modes: deliveryMode ? [deliveryMode] : []
+            delivery_modes: deliveryMode
+                ? deliveryMode.split(/[,;\/]/).map((m: string) => m.trim()).filter(Boolean)
+                : []
         },
         usage_permissions: {
             allow_listing: true,
@@ -534,12 +702,12 @@ function buildProEmailHtml(params: {
     const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
 
     const blockLabels: Record<string, { label: string; max: number }> = {
-        identite: { label: "Identite & Ancrage", max: 10 },
-        offre: { label: "Clarte de l'Offre", max: 20 },
-        processus_methodes: { label: "Processus & Methodes", max: 15 },
-        engagements_conformite: { label: "Confiance & Conformite", max: 15 },
-        indicateurs: { label: "Preuve Sociale & Metriques", max: 20 },
-        contenus_pedagogiques: { label: "Pedagogie & Supports", max: 10 },
+        identite: { label: "Identité & Ancrage", max: 10 },
+        offre: { label: "Clarté de l'Offre", max: 20 },
+        processus_methodes: { label: "Processus & Méthodes", max: 15 },
+        engagements_conformite: { label: "Confiance & Conformité", max: 15 },
+        indicateurs: { label: "Preuve Sociale & Métriques", max: 20 },
+        contenus_pedagogiques: { label: "Pédagogie & Supports", max: 10 },
         structure_technique: { label: "Socle Technique AIO", max: 10 }
     };
 
@@ -561,8 +729,8 @@ function buildProEmailHtml(params: {
     <meta charset="utf-8">
 
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#128640; Votre Pack AYO PRO est pret !</h1>
-        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Propriete totale de vos actifs semantiques IA</p>
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#128640; Votre Pack AYO PRO est prêt !</h1>
+        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Propriété totale de vos actifs sémantiques IA</p>
     </div>
 
     <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
@@ -574,12 +742,12 @@ function buildProEmailHtml(params: {
             <p style="margin: 5px 0; font-size: 42px; font-weight: bold; color: ${score >= 60 ? '#166534' : score >= 40 ? '#854d0e' : '#991b1b'};">${Math.round(score)} / 100</p>
         </div>
 
-        <h3 style="color:#212E53; margin-top:25px;">&#128202; Detail par bloc</h3>
+        <h3 style="color:#212E53; margin-top:25px;">&#128202; Détail par bloc</h3>
         ${scoreRows}
 
         <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bfdbfe;">
             <h3 style="margin-top:0; color: #1e40af;">&#127760; Votre Certificat AYA est actif</h3>
-            <p style="font-size: 14px;">Votre entite est desormais enregistree dans le <strong>Registre AYA</strong> (3 ans inclus).</p>
+            <p style="font-size: 14px;">Votre entité est désormais enregistrée dans le <strong>Registre AYA</strong> (3 ans inclus).</p>
             <p style="text-align: center; margin: 15px 0;">
                 <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Voir mon certificat AYA</a>
             </p>
@@ -591,10 +759,10 @@ function buildProEmailHtml(params: {
         <h3 style="color:#212E53;">&#128230; Contenu de votre Pack PRO</h3>
         <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
             <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; line-height: 2;">
-                <li>&#128081; <strong>ASR-Protocol.json</strong> — Votre identite semantique complete (signe)</li>
+                <li>&#128081; <strong>ASR-Protocol.json</strong> — Votre identité sémantique complète (signé)</li>
                 <li>&#9881;&#65039; <strong>manifest.json</strong> — Politique de recommandation IA</li>
-                <li>&#128172; <strong>faq.json</strong> — FAQ structuree pour agents IA</li>
-                <li>&#128214; <strong>glossary.json</strong> — Vocabulaire metier officiel</li>
+                <li>&#128172; <strong>faq.json</strong> — FAQ structurée pour agents IA</li>
+                <li>&#128214; <strong>glossary.json</strong> — Vocabulaire métier officiel</li>
                 <li>&#127760; <strong>external_context.json</strong> — Signaux et contexte externe</li>
             </ul>
         </div>
@@ -604,8 +772,8 @@ function buildProEmailHtml(params: {
             <p style="font-size: 14px; font-weight: bold;">Comment installer vos fichiers ASR ?</p>
 
             <div style="background: #fff; padding: 12px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #bbdefb;">
-                <h4 style="margin: 0 0 8px; color: #0277bd;">METHODE 1 : Simple (Recommandee)</h4>
-                <p style="margin: 0; font-size: 13px;">Copiez le contenu de <code>ASR-Protocol.json</code> dans l'en-tete de votre site :</p>
+                <h4 style="margin: 0 0 8px; color: #0277bd;">MÉTHODE 1 : Simple (Recommandée)</h4>
+                <p style="margin: 0; font-size: 13px;">Copiez le contenu de <code>ASR-Protocol.json</code> dans l'en-tête de votre site :</p>
                 <div style="background: #f5f5f5; padding: 8px; margin-top: 8px; font-family: monospace; font-size: 11px; border: 1px dashed #ccc; color: #555;">
                     &lt;script type="application/ld+json"&gt;<br>
                     ... COLLEZ LE CONTENU DE ASR-Protocol.json ...<br>
@@ -614,14 +782,14 @@ function buildProEmailHtml(params: {
             </div>
 
             <div style="background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #bbdefb;">
-                <h4 style="margin: 0 0 8px; color: #0277bd;">METHODE 2 : Expert</h4>
-                <p style="margin: 0; font-size: 13px;">Decompressez le ZIP et placez tous les fichiers dans un dossier <code>.ayo/</code> a la racine de votre site.</p>
+                <h4 style="margin: 0 0 8px; color: #0277bd;">MÉTHODE 2 : Expert</h4>
+                <p style="margin: 0; font-size: 13px;">Décompressez le ZIP et placez tous les fichiers dans un dossier <code>.ayo/</code> à la racine de votre site.</p>
             </div>
         </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
             <h4 style="margin-top:0; color: #e65100;">&#127384; Besoin d'aide ?</h4>
-            <p style="font-size: 13px; margin-bottom: 0;">Notre equipe est disponible pour vous accompagner dans l'installation.</p>
+            <p style="font-size: 13px; margin-bottom: 0;">Notre équipe est disponible pour vous accompagner dans l'installation.</p>
             <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
         </div>
     </div>
@@ -742,7 +910,7 @@ export async function POST(req: Request) {
                     const scanState = scanStateDoc.data();
                     logger.info('WEBHOOK_SCANSTATE_FALLBACK', `Found scan_state for ${analyzedUrl}`, { url: analyzedUrl });
                     // Reconstruct a minimal analysis from scan_state detected values
-                    const fields: any = { identite: {}, offre: {}, processus_methodes: {}, engagements_conformite: {}, indicateurs: {}, contenus_pedagogiques: {}, structure_technique: {} };
+                    const fields: any = { identite: {}, offre: {}, processus_methodes: {}, engagements_conformite: {}, indicateurs: {}, contenus_pedagogiques: {}, structure_technique: {}, external_context: {}, contextual_signals: {}, recommandation: {} };
                     if (scanState?.detected) {
                         for (const [key, val] of Object.entries(scanState.detected)) {
                             const [bloc, field] = key.split('.');
@@ -811,12 +979,36 @@ export async function POST(req: Request) {
             || "Entreprise";
 
         // 4. REGISTRY AYA
+        // Extract entity metadata from analysis data (instead of defaulting to CH/company/General)
+        const entityBusinessType = ext.identite?.business_type?.value || "";
+        const entityCountry = ext.identite?.country?.value || "";
+        const lowerEBT = entityBusinessType.toLowerCase();
+        const lowerEName = entityName.toLowerCase();
+        const lowerEUrl = (analysisData.url || "").toLowerCase();
+        const isAssociationType = lowerEBT.includes("association") || lowerEBT.includes("ong") || lowerEBT.includes("fondation") || lowerEBT.includes("non-profit") || lowerEBT.includes("nonprofit")
+            || lowerEName.startsWith("association ") || lowerEName.includes("asso ")
+            || lowerEUrl.includes(".org");
+        const resolvedEntityType = isAssociationType ? 'association' as const : 'company' as const;
+        // Map country name to ISO code
+        const countryIsoMap: Record<string, string> = {
+            'france': 'FR', 'suisse': 'CH', 'switzerland': 'CH', 'belgique': 'BE', 'belgium': 'BE',
+            'allemagne': 'DE', 'germany': 'DE', 'italie': 'IT', 'italy': 'IT', 'espagne': 'ES', 'spain': 'ES',
+            'luxembourg': 'LU', 'canada': 'CA', 'états-unis': 'US', 'united states': 'US', 'usa': 'US',
+            'royaume-uni': 'GB', 'united kingdom': 'GB', 'uk': 'GB', 'maroc': 'MA', 'tunisie': 'TN',
+            'sénégal': 'SN', 'côte d\'ivoire': 'CI', 'cameroun': 'CM'
+        };
+        const resolvedCountryLegal = (entityCountry.length === 2 ? entityCountry.toUpperCase() : countryIsoMap[entityCountry.toLowerCase()] || entityCountry.toUpperCase().slice(0, 2)) || 'XX';
+        const resolvedSector = entityBusinessType || ext.offre?.services?.value?.[0] || 'General';
+
         let ayaId = "pending";
         try {
             const { registerOrUpdateEntity } = await import('@/lib/aya/registry');
             ayaId = await registerOrUpdateEntity({
                 legal_name: entityName,
                 display_name: entityName,
+                entity_type: resolvedEntityType,
+                country_legal: resolvedCountryLegal,
+                sector_macro: resolvedSector,
                 website: analysisData.url,
                 asr_score: Math.round(analysisData.score || 0),
                 asr_payload: { data: analysisData.extract } as any
@@ -849,36 +1041,18 @@ export async function POST(req: Request) {
             const zip = new JSZip();
 
             // 1. ASR-Protocol.json (main ASR — always deterministic)
-            const asr = await generateRealAsrJson(analysisData.extract, analysisData.score, new Date().toISOString(), session_id, "PRO");
+            // Generate a proper ASR ID (not the Stripe checkout session ID)
+            const asrId = `asr_${ayaId || crypto.randomUUID().replace(/-/g, '').substring(0, 16)}`;
+            const asr = await generateRealAsrJson(analysisData.extract, analysisData.score, new Date().toISOString(), asrId, "PRO", analysisData.url);
             zip.file("ASR-Protocol.json", JSON.stringify(asr, null, 2));
 
-            // 2-5. Semantic assets (Gemini AI-generated with deterministic fallback)
-            let manifest: any, faq: any, glossary: any, externalCtx: any;
-
-            try {
-                // Try AI-powered generation (rich, contextual content)
-                const semanticTimeout = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("SEMANTIC_TIMEOUT")), 8000)
-                );
-                const semanticPromise = generateSemanticAssets(analysisData.extract as any);
-                const assets = await Promise.race([semanticPromise, semanticTimeout]) as any;
-
-                manifest = generateManifestJson(ext, analysisData.url); // manifest is structural, always deterministic
-                faq = assets.faq && Object.keys(assets.faq).length > 0 ? assets.faq : generateFaqJson(ext, analysisData.url);
-                glossary = assets.glossary && Object.keys(assets.glossary).length > 0 ? assets.glossary : generateGlossaryJson(ext);
-                externalCtx = assets.external_context && Object.keys(assets.external_context).length > 0
-                    ? { meta: { layer: "external_context", status: "active", generated_at: new Date().toISOString().split('T')[0], source: "ayo-chatbot" }, ...assets.external_context }
-                    : generateExternalContextJsonLocal(ext, analysisData.url);
-
-                logger.info('WEBHOOK_SEMANTIC_OK', `AI-generated semantic assets for ${entityName}`);
-            } catch (semErr) {
-                // Fallback to deterministic generation
-                logger.warn('WEBHOOK_SEMANTIC_FALLBACK', `Gemini unavailable, using deterministic generation: ${semErr}`);
-                manifest = generateManifestJson(ext, analysisData.url);
-                faq = generateFaqJson(ext, analysisData.url);
-                glossary = generateGlossaryJson(ext);
-                externalCtx = generateExternalContextJsonLocal(ext, analysisData.url);
-            }
+            // 2-5. Semantic assets — ALWAYS use deterministic generators
+            // (Gemini AI was overriding our grammar/quality fixes — disabled for FAQ/Glossary/ExternalContext)
+            const manifest = generateManifestJson(ext, analysisData.url);
+            const faq = generateFaqJson(ext, analysisData.url);
+            const glossary = generateGlossaryJson(ext);
+            const externalCtx = generateExternalContextJsonLocal(ext, analysisData.url);
+            logger.info('WEBHOOK_ASSETS_DETERMINISTIC', `Deterministic semantic assets generated for ${entityName}`);
 
             zip.file("manifest.json", JSON.stringify(manifest, null, 2));
             zip.file("faq.json", JSON.stringify(faq, null, 2));
