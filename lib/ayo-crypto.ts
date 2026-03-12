@@ -121,7 +121,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const data = extractedData || {};
 
     // --- V3 BLOCKS CONSTRUCTION ---
-    const businessType = cleanValAsr(data.identite?.business_type?.value) || "Organization";
+    // Sanitize business_type: reject LLM placeholder values
+    const PLACEHOLDER_PATTERNS = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|)$/i;
+    const rawBusinessType = cleanValAsr(data.identite?.business_type?.value);
+    const businessType = (rawBusinessType && !PLACEHOLDER_PATTERNS.test(rawBusinessType.trim())) ? rawBusinessType : "Organization";
 
     // Smart @type: Use Schema.org types for associations/nonprofits
     const lowerBT = businessType.toLowerCase();
@@ -199,8 +202,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const identity: any = {
         "@type": schemaType,
         "name": entityName,
-        "additionalType": businessType,
     };
+    // Only include additionalType if it's a real value (not the default "Organization")
+    if (businessType !== "Organization") {
+        identity.additionalType = businessType;
+    }
 
     if (resolvedEntityUrl) identity.url = resolvedEntityUrl;
     if (entityDescription) identity.description = entityDescription;
@@ -226,8 +232,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         }
         identity.contactPoint = contactChannels.length > 0 ? contactChannels : [{ "@type": "ContactPoint", "contactType": "general" }];
 
-        // Sector & industry detection
-        if (data.identite?.business_type?.value) identity.industry = data.identite.business_type.value;
+        // Sector & industry detection — only if it's a real value (not placeholder)
+        if (businessType !== "Organization") identity.industry = businessType;
         if (data.identite?.founding_year?.value) identity.foundingDate = data.identite.founding_year.value;
     } else {
         identity.location = data.identite?.country?.value || "Inconnu";
@@ -327,7 +333,25 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // FULL BOARD
         asrContent.selectionConditions = selectionConditions;
         asrContent.contextualSignals = contextualSignals;
-        asrContent.contextualRelevance = toArray(data.recommandation?.contextual_relevance?.value);
+        // Sanitize contextualRelevance: filter out LLM placeholder entries
+        const rawCtxRelevance = Array.isArray(data.recommandation?.contextual_relevance?.value)
+            ? data.recommandation.contextual_relevance.value
+            : [];
+        asrContent.contextualRelevance = rawCtxRelevance
+            .filter((cr: any) => {
+                if (!cr || typeof cr !== 'object') return false;
+                const intent = (cr.userIntent || "").toLowerCase();
+                const status = (cr.status || "").toLowerCase();
+                // Reject placeholder entries
+                if (intent.includes("ex:") || intent.includes("exemple") || intent.includes("recherche salle sport")) return false;
+                if (status.includes("/") || status === "eligible/uncertain") return false;
+                if (!cr.userIntent || cr.userIntent.length < 5) return false;
+                return true;
+            })
+            .map((cr: any) => ({
+                ...cr,
+                status: (cr.status && !cr.status.includes("/")) ? cr.status : "eligible"
+            }));
 
         // Enrich compliance (cleaned)
         asrContent.compliance.policies = cleanArrayAsr(data.engagements_conformite?.policies?.value);

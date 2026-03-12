@@ -45,7 +45,7 @@ function detectPackType(session: Stripe.Checkout.Session): string {
  */
 function generateManifestJson(data: any, url: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = cleanVal(data.identite?.business_type?.value) || "Organization";
+    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Organization");
     const services = cleanArray(data.offre?.services?.value);
     const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
     const country = cleanVal(data.identite?.country?.value);
@@ -72,7 +72,7 @@ function generateManifestJson(data: any, url: string): any {
         entity: {
             name,
             type: manifestEntityType,
-            additionalType: businessType,
+            ...(businessType !== "Organization" ? { additionalType: businessType } : {}),
             canonicalUrl: url,
             verified: true,
             registry: "AYA"
@@ -200,6 +200,13 @@ function cleanVal(val: any): string {
     return cleanText(String(val));
 }
 
+// Sanitize business_type: reject LLM placeholder values like "Type Schema.org"
+const BUSINESS_TYPE_PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|)$/i;
+function sanitizeBusinessType(val: string, fallback: string = ""): string {
+    if (!val || BUSINESS_TYPE_PLACEHOLDER_RE.test(val.trim())) return fallback;
+    return val;
+}
+
 // Safely convert any value to an array (handles strings, arrays, nullish)
 function toArray(val: any): string[] {
     if (!val) return [];
@@ -213,7 +220,7 @@ function toArray(val: any): string[] {
  */
 function generateFaqJson(data: any, url: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Notre entreprise";
-    const businessType = cleanVal(data.identite?.business_type?.value) || "Organisation";
+    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value));
     const services = cleanArray(data.offre?.services?.value);
     const products = cleanArray(data.offre?.products?.value);
     const audience = cleanVal(data.offre?.target_audience?.value);
@@ -256,7 +263,7 @@ function generateFaqJson(data: any, url: string): any {
     // --- IDENTITÉ ---
     qna.push({
         q: `Qui est ${name} ?`,
-        a: `${name} est ${entityType} spécialisée dans ${businessType.toLowerCase().startsWith("bureau") || businessType.toLowerCase().startsWith("cabinet") ? `le ${businessType.toLowerCase()}` : businessType.toLowerCase()}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `${name} s'adresse principalement aux ${audience.toLowerCase()}.` : ""}`.trim(),
+        a: `${name} est ${entityType}${businessType ? ` spécialisée dans ${businessType.toLowerCase().startsWith("bureau") || businessType.toLowerCase().startsWith("cabinet") ? `le ${businessType.toLowerCase()}` : businessType.toLowerCase()}` : ""}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `${name} s'adresse principalement aux ${audience.toLowerCase()}.` : ""}`.trim(),
         category: "Identité"
     });
 
@@ -406,7 +413,7 @@ function generateFaqJson(data: any, url: string): any {
  */
 function generateGlossaryJson(data: any): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = cleanVal(data.identite?.business_type?.value) || "Organization";
+    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Organization");
     const services = cleanArray(data.offre?.services?.value);
     const useCases = cleanArray(data.offre?.use_cases?.value);
     const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
@@ -433,7 +440,7 @@ function generateGlossaryJson(data: any): any {
     };
 
     // 1. Identity & Business — contextual description
-    addTerm(name, `${city ? `Organisation basée à ${city}` : "Organisation"}${country ? ` (${country})` : ""}, spécialisée dans ${businessType.toLowerCase()}. Entité vérifiée et enregistrée dans le registre AYA avec un ASR signé cryptographiquement.`, "Identité");
+    addTerm(name, `${city ? `Organisation basée à ${city}` : "Organisation"}${country ? ` (${country})` : ""}${businessType !== "Organization" ? `, spécialisée dans ${businessType.toLowerCase()}` : ""}. Entité vérifiée et enregistrée dans le registre AYA avec un ASR signé cryptographiquement.`, "Identité");
     if (businessType !== "Organization") {
         addTerm(businessType, `Domaine d'activité principal ${nameArticleG}. Cette classification détermine le positionnement sectoriel et les critères de recommandation par les agents IA.`, "Identité");
     }
@@ -534,7 +541,7 @@ function generateGlossaryJson(data: any): any {
  */
 function generateExternalContextJsonLocal(data: any, url?: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = cleanVal(data.identite?.business_type?.value) || "Organization";
+    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Organization");
     const useCases = cleanArray(data.offre?.use_cases?.value);
     const services = cleanArray(data.offre?.services?.value);
     const products = cleanArray(data.offre?.products?.value);

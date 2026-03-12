@@ -1861,7 +1861,7 @@ FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-3.0") :
     "identite": {
       "name": { "value": "Nom", "q": 0, "evidence": [] },
       "legal_name": { "value": "", "q": 0, "evidence": [] },
-      "business_type": { "value": "Type Schema.org", "q": 0, "evidence": [] },
+      "business_type": { "value": "", "q": 0, "evidence": [] },
       "city": { "value": "", "q": 0, "evidence": [] },
       "country": { "value": "Pays", "q": 0, "evidence": [] },
       "contact_email": { "value": "", "q": 0, "evidence": [] },
@@ -1891,8 +1891,8 @@ FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-3.0") :
       "last_review_date": { "value": "", "q": 0, "evidence": [] }
     },
     "contextual_signals": {
-      "pricing_level": { "value": "premium/standard/undisclosed", "q": 0, "evidence": [] },
-      "access_mode": { "value": "public/membersOnly", "q": 0, "evidence": [] },
+      "pricing_level": { "value": "", "q": 0, "evidence": [] },
+      "access_mode": { "value": "", "q": 0, "evidence": [] },
       "service_mode": { "value": ["onSite", "online"], "q": 0, "evidence": [] },
       "schedule_type": { "value": ["businessHours"], "q": 0, "evidence": [] }
     },
@@ -1908,16 +1908,9 @@ FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-3.0") :
       "mobile_optimized": { "value": true, "q": 1, "evidence": ["Assumed"] }
     },
     "recommandation": {
-        "contextual_relevance": { "value": [
-            { "userIntent": "Ex: Recherche Salle Sport", "queryExamples": ["gym near me"], "decisionCriteria": ["proximity", "pricing"], "status": "eligible/uncertain" }
-        ], "q": 1, "evidence": [] },
-        "selection_conditions": { "value": {
-            "required": ["Ex: Pricing", "Location"],
-            "exclusion": ["Ex: No City Found"]
-        }, "q": 1, "evidence": [] },
-        "ai_simulation": { "value": [
-            { "query": "Ex: Centre en ville", "result": "✅/⚠️/❌", "reason": "Address found." }
-        ], "q": 1, "evidence": [] }
+        "contextual_relevance": { "value": [], "q": 0, "evidence": [] },
+        "selection_conditions": { "value": { "required": [], "exclusion": [] }, "q": 0, "evidence": [] },
+        "ai_simulation": { "value": [], "q": 0, "evidence": [] }
     },
     "external_context": {
         "ecosystem_presence": { "value": [], "q": 0, "evidence": [] },
