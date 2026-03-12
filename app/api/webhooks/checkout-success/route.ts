@@ -1007,7 +1007,7 @@ export async function POST(req: Request) {
             'sénégal': 'SN', 'côte d\'ivoire': 'CI', 'cameroun': 'CM'
         };
         const resolvedCountryLegal = (entityCountry.length === 2 ? entityCountry.toUpperCase() : countryIsoMap[entityCountry.toLowerCase()] || entityCountry.toUpperCase().slice(0, 2)) || 'XX';
-        const resolvedSector = entityBusinessType || ext.offre?.services?.value?.[0] || 'General';
+        const resolvedSector = sanitizeBusinessType(entityBusinessType) || ext.offre?.services?.value?.[0] || 'General';
 
         let ayaId = "pending";
         try {

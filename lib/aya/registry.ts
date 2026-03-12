@@ -67,7 +67,14 @@ export async function registerOrUpdateEntity(
             || "Entreprise",
         entity_type: entityData.entity_type || existingData.entity_type || 'company',
         country_legal: entityData.country_legal || existingData.country_legal || 'CH',
-        sector_macro: entityData.sector_macro || existingData.sector_macro || 'General',
+        sector_macro: (() => {
+            const PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null)$/i;
+            const raw = entityData.sector_macro || '';
+            if (raw && !PLACEHOLDER_RE.test(raw.trim())) return raw;
+            const existing = existingData.sector_macro || '';
+            if (existing && !PLACEHOLDER_RE.test(existing.trim())) return existing;
+            return 'General';
+        })(),
         website: targetUrl || existingData.website || undefined,
 
         // CRITICAL FIX: Respect new score if provided, else keep existing, else 0
@@ -87,7 +94,7 @@ export async function registerOrUpdateEntity(
             status: 'fresh',
             freshness_score: 1.0,
             priority_level: 'normal',
-            source_url: `https://aya.ai-visionary.com/e/${entityId}`
+            source_url: `https://www.ai-visionary.com/aya/e/${entityId}`
         }
     };
 

@@ -45,12 +45,11 @@ export default function AyaPage() {
         if (!query) return true;
         const q = query.toLowerCase();
         return (
-            (ent.name && ent.name.toLowerCase().includes(q)) ||
             (ent.display_name && ent.display_name.toLowerCase().includes(q)) ||
-            (ent.description && ent.description.toLowerCase().includes(q)) ||
+            (ent.legal_name && ent.legal_name.toLowerCase().includes(q)) ||
             (ent.website && ent.website.toLowerCase().includes(q)) ||
-            (ent.sector && ent.sector.toLowerCase().includes(q)) ||
-            (ent.country && ent.country.toLowerCase().includes(q))
+            (ent.sector_macro && ent.sector_macro.toLowerCase().includes(q)) ||
+            (ent.country_legal && ent.country_legal.toLowerCase().includes(q))
         );
     });
 
@@ -132,8 +131,8 @@ export default function AyaPage() {
                                 <div key={entity.id || entity.aya_entity_id} className="card" style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                                         <span style={{ background: 'var(--bg-main)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                                            {(entity.country || entity.country_legal || 'XX').toUpperCase().slice(0, 2)} • {
-                                                ({ 'company': 'Entreprise', 'association': 'Association', 'public_body': 'Organisme Public', 'individual': 'Indépendant' } as Record<string, string>)[entity.type || entity.entity_type] || 'Organisation'
+                                            {(entity.country_legal || 'XX').toUpperCase().slice(0, 2)} • {
+                                                ({ 'company': 'Entreprise', 'association': 'Association', 'public_body': 'Organisme Public', 'individual': 'Indépendant' } as Record<string, string>)[entity.entity_type] || 'Organisation'
                                             }
                                         </span>
                                         {(entity.status === 'verified' || entity.recommendability?.status === 'fresh') && (
@@ -145,19 +144,19 @@ export default function AyaPage() {
 
                                     <Link href={`/aya/e/${entity.id || entity.aya_entity_id}`} style={{ textDecoration: 'none' }}>
                                         <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: 'var(--text-main)', cursor: 'pointer' }}>
-                                            {entity.display_name || entity.legal_name || entity.name || "Entite certifiee"}
+                                            {entity.display_name || entity.legal_name || "Entité certifiée"}
                                         </h3>
                                     </Link>
-                                    <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>{entity.description || "Identité Sémantique optimisée pour les IAs."}</p>
+                                    <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>{entity.sector_macro && entity.sector_macro !== 'General' && !/type schema/i.test(entity.sector_macro) && !/^organization$/i.test(entity.sector_macro) ? entity.sector_macro : "Identité Sémantique optimisée pour les IAs."}</p>
 
                                     <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                                             <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#94a3b8', letterSpacing: '-0.5px' }}>
-                                                ID: aya:{(entity.country || entity.country_legal || 'xx').toLowerCase()}:{(entity.id || entity.aya_entity_id).slice(0, 8)}...
+                                                ID: aya:{(entity.country_legal || 'xx').toLowerCase()}:{(entity.aya_entity_id || entity.id || '').slice(0, 8)}...
                                             </span>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary-color)', lineHeight: 1 }}>{entity.asr_score || Math.round((entity.recommendability?.freshness_score || 0.99) * 100)}%</span>
+                                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary-color)', lineHeight: 1 }}>{entity.asr_score != null ? entity.asr_score : Math.round((entity.recommendability?.freshness_score ?? 0.99) * 100)}%</span>
                                             <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Trust Score</span>
                                         </div>
                                     </div>
