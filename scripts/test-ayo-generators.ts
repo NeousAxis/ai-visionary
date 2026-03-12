@@ -678,44 +678,44 @@ const TEST_DATASETS: { name: string; data: any; url: string }[] = [
         }
     },
     {
-        name: "Restaurant Happy Green Food (riche)",
+        name: "Happy Green Food (restauration collective)",
         url: "https://www.happygreenfood.ch",
         data: {
             identite: {
                 name: { value: "Happy Green Food" },
-                business_type: { value: "Restaurant bio et durable" },
-                city: { value: "Lausanne" },
+                business_type: { value: "Restauration collective durable" },
+                city: { value: "Genève" },
                 country: { value: "Suisse" },
-                legal_name: { value: "Happy Green Food SA" },
+                legal_name: { value: "Happy Green Food Sàrl" },
                 contact_email: { value: "contact@happygreenfood.ch" },
-                contact_phone: { value: "+41 21 345 67 89" },
+                contact_phone: { value: "+41 22 345 67 89" },
                 founding_year: { value: "2019" }
             },
             offre: {
-                services: { value: ["Restauration bio", "Traiteur événementiel", "Ateliers cuisine durable"] },
-                products: { value: ["Menu du jour bio", "Paniers repas", "Box déjeuner"] },
-                target_audience: { value: "Particuliers, entreprises, collectivités" },
-                use_cases: { value: ["Déjeuner healthy au bureau", "Événement d'entreprise écoresponsable", "Atelier team building culinaire"] },
-                pricing_indication: { value: "Menu du jour à partir de 18 CHF, traiteur sur devis" }
+                services: { value: ["Restauration collective bio", "Traiteur événementiel", "Conseil en alimentation durable"] },
+                products: { value: ["Menus collectifs bio", "Paniers repas entreprise", "Formations nutrition"] },
+                target_audience: { value: "Entreprises, collectivités, écoles, crèches" },
+                use_cases: { value: ["Restauration collective pour entreprises", "Repas scolaires bio et locaux", "Événements d'entreprise écoresponsables"] },
+                pricing_indication: { value: "Forfait repas à partir de 15 CHF/personne, devis sur mesure pour collectivités" }
             },
             processus_methodes: {
-                process_steps: { value: ["Sélection des producteurs locaux", "Préparation quotidienne", "Livraison écoresponsable"] },
-                delivery_mode: { value: "Sur place, livraison, traiteur sur site" },
-                geographies_served: { value: "Canton de Vaud" },
-                quality_assurance: { value: "Bio Suisse certifié" }
+                process_steps: { value: ["Audit des besoins nutritionnels", "Sélection des producteurs locaux", "Élaboration des menus saisonniers", "Préparation quotidienne", "Livraison et service", "Suivi qualité et satisfaction"] },
+                delivery_mode: { value: "Sur site client, livraison" },
+                geographies_served: { value: "Canton de Genève et Vaud" },
+                quality_assurance: { value: "Bio Suisse certifié, contrôles HACCP" }
             },
             engagements_conformite: {
-                certifications: { value: ["Bio Suisse", "ISO 22000"] },
-                frameworks: { value: ["HACCP", "Charte développement durable VD"] },
-                policies: { value: ["Zéro déchet alimentaire", "Approvisionnement 100% local"] },
+                certifications: { value: ["Bio Suisse", "ISO 22000", "Fourchette Verte"] },
+                frameworks: { value: ["HACCP", "Charte développement durable"] },
+                policies: { value: ["Zéro déchet alimentaire", "Approvisionnement 80% local et saisonnier"] },
                 security_measures: { value: ["Traçabilité complète des ingrédients", "Conformité RGPD"] }
             },
-            indicateurs: { key_indicators: { value: ["98% de satisfaction client", "50 tonnes de CO2 évitées/an", "100% producteurs locaux"] } },
-            contenus_pedagogiques: { has_faq: { value: true }, has_glossary: { value: true }, has_documentation: { value: "Guide du bio en entreprise" } }
+            indicateurs: { key_indicators: { value: ["98% de satisfaction client", "12 000 repas/mois", "80% fournisseurs locaux", "50 tonnes de CO2 évitées/an"] } },
+            contenus_pedagogiques: { has_faq: { value: true }, has_glossary: { value: true }, has_documentation: { value: "Guide alimentation durable en collectivité" } }
         }
     },
     {
-        name: "Association Éclore (ONG)",
+        name: "Association Éclore (association)",
         url: "https://www.eclore-asso.org",
         data: {
             identite: {
