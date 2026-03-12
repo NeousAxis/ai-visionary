@@ -170,6 +170,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const isValidPricingLevel = rawPricingLevel
         && !rawPricingLevel.toLowerCase().includes("undisclosed")
         && !rawPricingLevel.includes("/")
+        && !PLACEHOLDER_PATTERNS.test(rawPricingLevel.trim())
         && rawPricingLevel.length < 40;
     const pricingLevel = isValidPricingLevel
         ? rawPricingLevel

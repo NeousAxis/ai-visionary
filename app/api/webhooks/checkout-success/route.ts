@@ -435,6 +435,8 @@ function generateGlossaryJson(data: any): any {
         if (key.length < 3 || seen.has(key)) return;
         // Normalize "Creative Common" → "Creative Commons"
         const cleanTerm = term.replace(/Creative Common\b(?!s)/gi, "Creative Commons");
+        // Skip terms longer than 80 chars — they're likely full sentences copied verbatim
+        if (cleanTerm.length > 80) return;
         seen.add(key);
         terms.push({ term: cleanTerm, def, category });
     };
@@ -541,7 +543,7 @@ function generateGlossaryJson(data: any): any {
  */
 function generateExternalContextJsonLocal(data: any, url?: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Organization");
+    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Activité non spécifiée");
     const useCases = cleanArray(data.offre?.use_cases?.value);
     const services = cleanArray(data.offre?.services?.value);
     const products = cleanArray(data.offre?.products?.value);
