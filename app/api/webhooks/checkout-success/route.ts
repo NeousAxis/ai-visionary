@@ -1070,14 +1070,11 @@ export async function POST(req: Request) {
                 if (typeof obj === 'object' && obj !== null) {
                     const result: any = {};
                     for (const [key, value] of Object.entries(obj)) {
-                        if (key === 'value') {
-                            result[key] = sanitizePayloadDeep(value);
-                            // If value was cleaned to empty, also set q=0
-                            if (result[key] === '' && value !== '' && obj.q !== undefined) {
-                                result.q = 0;
-                            }
-                        } else {
-                            result[key] = value;
+                        // Recurse into ALL nested structures, not just 'value'
+                        result[key] = sanitizePayloadDeep(value);
+                        // If a 'value' key was cleaned to empty, also set q=0
+                        if (key === 'value' && result[key] === '' && value !== '' && obj.q !== undefined) {
+                            result.q = 0;
                         }
                     }
                     return result;
