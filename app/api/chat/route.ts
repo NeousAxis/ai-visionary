@@ -1000,9 +1000,9 @@ STRATÉGIE DE CONFIANCE (FILTRE ANTI-BULLSHIT) :
    - Information totalement introuvable.
 
 TA MISSION :
-Essaie de répondre aux 20 questions critiques pour construire un ASR.
+Essaie de répondre aux 27 questions critiques pour construire un ASR.
 
-LES 20 QUESTIONS CRITIQUES :
+LES 25 QUESTIONS CRITIQUES :
 1. Nom exact (Identité commerciale)
 2. Pays d'établissement (Localisation principale)
 3. Dénomination sociale (Nom légal, Kbis, IDE, SIREN)
@@ -1011,18 +1011,23 @@ LES 20 QUESTIONS CRITIQUES :
 6. Email de contact public
 7. Téléphone de contact
 8. Public cible (Audience B2B, B2C, Collectivités)
-9. Liste des services/produits
-10. Tarification (Modèle éco: Devis, Prix fixe, Abonnement)
-11. Cas d'usage (Pourquoi on vous cherche ? Intentions utilisateur)
-12. Méthodologie (Processus, étapes d'accompagnement)
-13. Zone géographique servie
-14. Signaux de confiance (Avis, Garanties, Qualité)
-15. Certifications (Labels, Diplômes, Certifs)
-16. Mesures de sécurité (Confidentialité, RGPD)
-17. Politiques (Lien CGV ou mention légale)
-18. Indicateurs de succès (KPIs: Nombre de clients, tonnes CO2, CA, Résultats mesurables)
-19. Supports pédagogiques (Livre blanc, FAQ, Plateforme, Documentation)
-20. Date de dernière mise à jour (Fraîcheur des données)
+9. Liste des services
+10. Liste des produits (physiques ou numériques)
+11. Tarification (Modèle éco: Devis, Prix fixe, Abonnement)
+12. Cas d'usage (Pourquoi on vous cherche ? Intentions utilisateur)
+13. Méthodologie (Processus, étapes d'accompagnement)
+14. Mode de livraison (En ligne, sur site, hybride, ateliers, formations)
+15. Zone géographique servie
+16. Signaux de confiance (Avis, Garanties, Qualité)
+17. Certifications (Labels, Diplômes, Certifs)
+18. Réseaux & fédérations (Faîtières, associations professionnelles)
+19. Mesures de sécurité (Confidentialité, RGPD)
+20. Politiques (Lien CGV ou mention légale)
+21. Indicateurs de succès (KPIs: Nombre de clients, tonnes CO2, CA, Résultats mesurables)
+22. Date de dernière mise à jour (Fraîcheur des données)
+23. Supports pédagogiques (Livre blanc, FAQ, Plateforme, Documentation)
+24. Mots-clés de recherche (Comment vos clients vous trouvent)
+25. Intentions de recherche typiques (Requêtes que vos clients tapent sur Google/IA)
 
 FORMAT JSON ATTENDU :
 {
@@ -1030,7 +1035,7 @@ FORMAT JSON ATTENDU :
     {"question_id": 1, "answer": "Ta réponse ou null", "confidence": "high|low|unknown"},
     {"question_id": 2, "answer": "...", "confidence": "..."},
     ...
-    {"question_id": 20, "answer": "...", "confidence": "..."}
+    {"question_id": 25, "answer": "...", "confidence": "..."}
   ]
 }
 
@@ -1065,20 +1070,40 @@ GÉNÈRE CE JSON MAINTENANT :
 
             // 🔧 ARCHITECTURAL FIX: Build scan_state JSON (never parse text again)
             const blockKeys = [
+                // Identité (7)
                 "identite.name", "identite.country", "identite.legal_name", "identite.business_type",
-                "identite.city", "identite.contact_email", "identite.contact_phone", "offre.target_audience",
-                "offre.services", "offre.pricing_indication", "offre.use_cases", "processus_methodes.process_steps",
-                "processus_methodes.geographies_served", "processus_methodes.quality_assurance", "engagements_conformite.certifications",
-                "engagements_conformite.security_measures", "engagements_conformite.policies", "indicateurs.key_indicators",
-                "contenus_pedagogiques.has_documentation", "indicateurs.last_review_date"
+                "identite.city", "identite.contact_email", "identite.contact_phone",
+                // Offre (5)
+                "offre.target_audience", "offre.services", "offre.products", "offre.pricing_indication", "offre.use_cases",
+                // Processus & Méthodes (4)
+                "processus_methodes.process_steps", "processus_methodes.delivery_mode",
+                "processus_methodes.geographies_served", "processus_methodes.quality_assurance",
+                // Conformité (4)
+                "engagements_conformite.certifications", "engagements_conformite.frameworks",
+                "engagements_conformite.security_measures", "engagements_conformite.policies",
+                // Indicateurs (2)
+                "indicateurs.key_indicators", "indicateurs.last_review_date",
+                // Pédagogie (3)
+                "contenus_pedagogiques.has_faq", "contenus_pedagogiques.has_glossary", "contenus_pedagogiques.has_documentation",
+                // Contexte externe (2)
+                "external_context.keywords", "external_context.intents"
             ];
 
             const questionLabels = [
-                "Nom", "Pays", "Nom légal", "Secteur",
-                "Ville", "Email", "Téléphone", "Audience",
-                "Services", "Tarifs", "Cas d'usage", "Méthodologie",
-                "Zone d'intervention", "Qualité", "Certifications", "Sécurité",
-                "Politiques", "Indicateurs", "Documentation", "Date mise à jour"
+                // Identité (7)
+                "Nom", "Pays", "Nom légal", "Secteur", "Ville", "Email", "Téléphone",
+                // Offre (5)
+                "Audience", "Services", "Produits", "Tarifs", "Cas d'usage",
+                // Processus (4)
+                "Méthodologie", "Mode de livraison", "Zone d'intervention", "Qualité",
+                // Conformité (4)
+                "Certifications", "Réseaux & fédérations", "Sécurité", "Politiques",
+                // Indicateurs (2)
+                "Indicateurs", "Date mise à jour",
+                // Pédagogie (3)
+                "FAQ", "Glossaire", "Documentation",
+                // Contexte externe (2)
+                "Mots-clés", "Intentions de recherche"
             ];
 
             // Build scan_state object (SINGLE SOURCE OF TRUTH)
@@ -1178,20 +1203,20 @@ GÉNÈRE CE JSON MAINTENANT :
                     },
                     offre: {
                         services: { value: [], q: scanState.confidence["offre.services"] >= 85 ? 1 : scanState.confidence["offre.services"] > 0 ? 0.5 : 0, evidence: [] },
-                        products: { value: [], q: 0, evidence: [] },
+                        products: { value: [], q: scanState.confidence["offre.products"] >= 85 ? 1 : scanState.confidence["offre.products"] > 0 ? 0.5 : 0, evidence: [] },
                         use_cases: { value: [], q: scanState.confidence["offre.use_cases"] >= 85 ? 1 : scanState.confidence["offre.use_cases"] > 0 ? 0.5 : 0, evidence: [] },
                         target_audience: { value: scanState.detected["offre.target_audience"] || "", q: scanState.confidence["offre.target_audience"] >= 85 ? 1 : scanState.confidence["offre.target_audience"] > 0 ? 0.5 : 0, evidence: [] },
                         pricing_indication: { value: scanState.detected["offre.pricing_indication"] || "", q: scanState.confidence["offre.pricing_indication"] >= 85 ? 1 : scanState.confidence["offre.pricing_indication"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     processus_methodes: {
                         process_steps: { value: [], q: scanState.confidence["processus_methodes.process_steps"] >= 85 ? 1 : scanState.confidence["processus_methodes.process_steps"] > 0 ? 0.5 : 0, evidence: [] },
-                        delivery_mode: { value: "", q: 0, evidence: [] },
+                        delivery_mode: { value: scanState.detected["processus_methodes.delivery_mode"] || "", q: scanState.confidence["processus_methodes.delivery_mode"] >= 85 ? 1 : scanState.confidence["processus_methodes.delivery_mode"] > 0 ? 0.5 : 0, evidence: [] },
                         geographies_served: { value: scanState.detected["processus_methodes.geographies_served"] || "", q: scanState.confidence["processus_methodes.geographies_served"] >= 85 ? 1 : scanState.confidence["processus_methodes.geographies_served"] > 0 ? 0.5 : 0, evidence: [] },
                         quality_assurance: { value: scanState.detected["processus_methodes.quality_assurance"] || "", q: scanState.confidence["processus_methodes.quality_assurance"] >= 85 ? 1 : scanState.confidence["processus_methodes.quality_assurance"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     engagements_conformite: {
                         policies: { value: [], q: scanState.confidence["engagements_conformite.policies"] >= 85 ? 1 : scanState.confidence["engagements_conformite.policies"] > 0 ? 0.5 : 0, evidence: [] },
-                        frameworks: { value: [], q: 0, evidence: [] },
+                        frameworks: { value: [], q: scanState.confidence["engagements_conformite.frameworks"] >= 85 ? 1 : scanState.confidence["engagements_conformite.frameworks"] > 0 ? 0.5 : 0, evidence: [] },
                         certifications: { value: [], q: scanState.confidence["engagements_conformite.certifications"] >= 85 ? 1 : scanState.confidence["engagements_conformite.certifications"] > 0 ? 0.5 : 0, evidence: [] },
                         security_measures: { value: [], q: scanState.confidence["engagements_conformite.security_measures"] >= 85 ? 1 : scanState.confidence["engagements_conformite.security_measures"] > 0 ? 0.5 : 0, evidence: [] },
                     },
@@ -1200,9 +1225,9 @@ GÉNÈRE CE JSON MAINTENANT :
                         last_review_date: { value: scanState.detected["indicateurs.last_review_date"] || "", q: scanState.confidence["indicateurs.last_review_date"] >= 85 ? 1 : scanState.confidence["indicateurs.last_review_date"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     contenus_pedagogiques: {
-                        has_faq: { value: deepScanResult.hasFaqContent ?? false, q: deepScanResult.hasFaqContent ? 1 : 0, evidence: [] },
-                        has_glossary: { value: false, q: 0, evidence: [] },
-                        has_documentation: { value: false, q: scanState.confidence["contenus_pedagogiques.has_documentation"] >= 85 ? 1 : scanState.confidence["contenus_pedagogiques.has_documentation"] > 0 ? 0.5 : 0, evidence: [] },
+                        has_faq: { value: scanState.detected["contenus_pedagogiques.has_faq"] || deepScanResult.hasFaqContent || false, q: scanState.confidence["contenus_pedagogiques.has_faq"] >= 85 ? 1 : (deepScanResult.hasFaqContent ? 1 : (scanState.confidence["contenus_pedagogiques.has_faq"] > 0 ? 0.5 : 0)), evidence: [] },
+                        has_glossary: { value: scanState.detected["contenus_pedagogiques.has_glossary"] || false, q: scanState.confidence["contenus_pedagogiques.has_glossary"] >= 85 ? 1 : scanState.confidence["contenus_pedagogiques.has_glossary"] > 0 ? 0.5 : 0, evidence: [] },
+                        has_documentation: { value: scanState.detected["contenus_pedagogiques.has_documentation"] || false, q: scanState.confidence["contenus_pedagogiques.has_documentation"] >= 85 ? 1 : scanState.confidence["contenus_pedagogiques.has_documentation"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     structure_technique: {
                         has_asr: { value: deepScanResult.hasAsrFile ?? false, q: deepScanResult.hasAsrFile ? 1 : 0, evidence: [] },
@@ -1220,6 +1245,14 @@ GÉNÈRE CE JSON MAINTENANT :
                         contextual_relevance: { value: [], q: 0, evidence: [] },
                         selection_conditions: { value: { required: [], exclusion: [] }, q: 0, evidence: [] },
                         ai_simulation: { value: [], q: 0, evidence: [] },
+                    },
+                    external_context: {
+                        ecosystem_presence: { value: [], q: 0, evidence: [] },
+                        reputation_signals: { value: false, q: 0, evidence: [] },
+                        keywords: { value: [], q: scanState.confidence["external_context.keywords"] >= 85 ? 1 : scanState.confidence["external_context.keywords"] > 0 ? 0.5 : 0, evidence: [] },
+                        intents: { value: [], q: scanState.confidence["external_context.intents"] >= 85 ? 1 : scanState.confidence["external_context.intents"] > 0 ? 0.5 : 0, evidence: [] },
+                        channels: { value: [], q: 0, evidence: [] },
+                        permissions: { value: [], q: 0, evidence: [] },
                     },
                 }
             } as AyoExtract;
@@ -1510,12 +1543,23 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
 
 
             const allBlockNames = [
+                // Identité (7)
                 "identite.name", "identite.country", "identite.legal_name", "identite.business_type",
-                "identite.city", "identite.contact_email", "identite.contact_phone", "offre.target_audience",
-                "offre.services", "offre.pricing_indication", "offre.use_cases", "processus_methodes.process_steps",
-                "processus_methodes.geographies_served", "processus_methodes.quality_assurance", "engagements_conformite.certifications",
-                "engagements_conformite.security_measures", "engagements_conformite.policies", "indicateurs.key_indicators",
-                "contenus_pedagogiques.has_documentation", "indicateurs.last_review_date"
+                "identite.city", "identite.contact_email", "identite.contact_phone",
+                // Offre (5)
+                "offre.target_audience", "offre.services", "offre.products", "offre.pricing_indication", "offre.use_cases",
+                // Processus & Méthodes (4)
+                "processus_methodes.process_steps", "processus_methodes.delivery_mode",
+                "processus_methodes.geographies_served", "processus_methodes.quality_assurance",
+                // Conformité (4)
+                "engagements_conformite.certifications", "engagements_conformite.frameworks",
+                "engagements_conformite.security_measures", "engagements_conformite.policies",
+                // Indicateurs (2)
+                "indicateurs.key_indicators", "indicateurs.last_review_date",
+                // Pédagogie (3)
+                "contenus_pedagogiques.has_faq", "contenus_pedagogiques.has_glossary", "contenus_pedagogiques.has_documentation",
+                // Contexte externe (2)
+                "external_context.keywords", "external_context.intents"
             ];
 
             // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
@@ -1524,11 +1568,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
             let combinedQueue = [...validationQueue, ...questionQueue];
 
-            // Prioritize Country (identite.juridical_country)
-            const countryIndex = combinedQueue.indexOf("identite.juridical_country");
+            // Prioritize Country (identite.country)
+            const countryIndex = combinedQueue.indexOf("identite.country");
             if (countryIndex > 0) {
                 combinedQueue.splice(countryIndex, 1);
-                combinedQueue.unshift("identite.juridical_country");
+                combinedQueue.unshift("identite.country");
             }
 
             console.log(`📋 QUEUE: ${combinedQueue.length} items to process`);
@@ -1629,7 +1673,7 @@ Poser la question EXACTE pour obtenir ou valider le bloc : **${nextBlockName}**.
       "text": "Ta question ?",
       "options": ["Choix A", "Choix B"],
       "allowCustom": true,
-      "allowMultiple": ${['offre.audience', 'identite.sector', 'external_context.keywords', 'external_context.intents'].includes(nextBlockName) ? 'true' : 'false'}
+      "allowMultiple": ${['offre.target_audience', 'offre.products', 'offre.use_cases', 'offre.services', 'engagements_conformite.frameworks', 'engagements_conformite.certifications', 'engagements_conformite.policies', 'engagements_conformite.security_measures', 'indicateurs.key_indicators', 'external_context.keywords', 'external_context.intents'].includes(nextBlockName) ? 'true' : 'false'}
     }
   ]
 }
@@ -1763,20 +1807,42 @@ TA MISSION : Extraire des champs structurés pour générer une **Carte de Perti
 INTERDICTION FORMELLE DE CALCULER UN SCORE. Tu ne notes rien. Tu extrais seulement.
 
 ⚠️ RÈGLE CRITIQUE : PRIORISE LES RÉPONSES DU QUESTIONNAIRE (USER CONTEXT) PAR-DESSUS LE CONTENU DU SITE.
-Si l'utilisateur a répondu à une question sur ses indicateurs, ses méthodes, ses certifications ou sa méthodologie,
-ces réponses font FOI et doivent être extraites avec q=1.
-- Si l'utilisateur mentionne des KPIs, métriques ou résultats mesurables (ex: "12 communes", "450 tonnes de CO2", "500 clients", "X ateliers réalisés") -> indicateurs.key_indicators (q=1)
-- Si l'utilisateur mentionne une méthodologie, des étapes de prestation -> processus_methodes.process_steps (q=1)
-- Si l'utilisateur mentionne des certifications, labels, memberships -> engagements_conformite.certifications (q=1)
-- Si l'utilisateur mentionne des réseaux, associations, fédérations -> engagements_conformite.frameworks (q=1)
-- Si l'utilisateur mentionne des plateformes web, FAQ, wikis ou outils d'accompagnement didactiques (ex: "re-GE-nère", "Livre blanc") -> contenus_pedagogiques.has_documentation ou has_faq (q=1)
-- Si l'utilisateur mentionne des politiques de sécurité, RGPD ou confidentialité -> engagements_conformite.security_measures (q=1)
-- Si l'utilisateur mentionne une date de Copyright ou mise à jour (ex: "En 2024", "Janvier 2025") -> indicateurs.last_review_date (q=1)
+Les réponses utilisateur font FOI pour la valeur extraite — mais la QUALITÉ (q) dépend de la SUBSTANCE de la réponse.
 
-RÈGLE DE QUALITÉ (q) :
-1 = Information explicite, claire, structurée.
-0.5 = Information présente mais floue.
-0 = Absent.
+RÈGLE DE QUALITÉ (q) — SOIS STRICT ET HONNÊTE :
+q=1 : Information SPÉCIFIQUE, VÉRIFIABLE et EXPLOITABLE par une IA.
+  Exemples q=1 : "ISO 27001", "12 communes accompagnées", "3 étapes : audit, stratégie, implémentation", "RGPD + politique de confidentialité publiée"
+q=0.5 : Information PRÉSENTE mais VAGUE, GÉNÉRIQUE ou NON-VÉRIFIABLE.
+  Exemples q=0.5 : "satisfaction client" (pas de chiffre), "RGPD" (mentionné seul sans preuve), "en phase de reconditionnement" (pas encore en place), "sur devis" (pas informatif), "bouche à oreille" (pas mesurable), "oui" sans détail
+q=0 : Information ABSENTE, NIÉE ou EXPLICITEMENT REFUSÉE.
+  Exemples q=0 : "non", "nous n'avons pas de glossaire", "pas applicable", champ laissé vide
+
+RÈGLES SPÉCIFIQUES PAR CHAMP :
+- indicateurs.key_indicators : q=1 UNIQUEMENT si l'utilisateur donne des CHIFFRES CONCRETS ou des métriques mesurables (ex: "450 tonnes CO2 évitées", "500 clients", "12 communes"). Des termes vagues comme "satisfaction client", "bouche à oreille", "recommandabilité" = q=0.5 maximum.
+- engagements_conformite.certifications : q=1 UNIQUEMENT pour des certifications NOMMÉES et RECONNUES (ex: "ISO 27001", "B Corp", "label RGE"). Mentionner "RGPD" seul = q=0.5 (c'est une obligation légale, pas une certification).
+- engagements_conformite.policies : q=1 UNIQUEMENT si une politique EST en place et documentée. "En phase de reconditionnement", "en cours", "prévu" = q=0.5 maximum (pas encore effectif).
+- engagements_conformite.frameworks : q=1 UNIQUEMENT pour des frameworks NOMMÉS et IDENTIFIABLES (ex: "Agile Scrum", "ITIL", "ISO 14001"). Des réponses vagues = q=0.5.
+- engagements_conformite.security_measures : q=1 UNIQUEMENT pour des mesures SPÉCIFIQUES (ex: "chiffrement AES-256", "audits trimestriels par X"). "Audits de sécurité" seul = q=0.5.
+- contenus_pedagogiques.has_glossary : q=0 si l'utilisateur dit "non" ou "pas de glossaire". Ne PAS inverser un refus explicite.
+- contenus_pedagogiques.has_documentation : q=0 si l'utilisateur dit "non" ou nie la présence de documentation. Ne PAS inverser un refus explicite.
+- offre.pricing_indication : "sur devis" = q=0.5 (c'est mieux que rien mais pas informatif). q=1 nécessite une fourchette ou un modèle de pricing.
+- processus_methodes.process_steps : q=1 UNIQUEMENT si au moins 3 étapes distinctes et concrètes sont décrites.
+- indicateurs.last_review_date : q=1 UNIQUEMENT si une date est explicitement mentionnée. "Première soumission" ou "jamais" = q=0.
+
+MAPPING DES RÉPONSES UTILISATEUR :
+- KPIs avec chiffres concrets -> indicateurs.key_indicators (q selon règles ci-dessus)
+- Méthodologie avec étapes détaillées -> processus_methodes.process_steps (q selon règles)
+- Mode de livraison (en ligne, sur site, hybride) -> processus_methodes.delivery_mode (q=1 si clair)
+- Produits nommés -> offre.products (q=1)
+- Certifications nommées reconnues -> engagements_conformite.certifications (q selon règles)
+- Réseaux/associations/fédérations nommés -> engagements_conformite.frameworks (q selon règles)
+- FAQ confirmée sur le site -> contenus_pedagogiques.has_faq (q=1)
+- Glossaire confirmé -> contenus_pedagogiques.has_glossary (q=1 si oui, q=0 si non)
+- Documentation/guides confirmés -> contenus_pedagogiques.has_documentation (q=1 si oui, q=0 si non)
+- Politiques de sécurité effectives -> engagements_conformite.security_measures (q selon règles)
+- Date de mise à jour explicite -> indicateurs.last_review_date (q=1 si date précise)
+- Mots-clés pertinents -> external_context.keywords (q=1)
+- Intentions de recherche -> external_context.intents (q=1)
 
 RÈGLES V3 "CONTEXT & SIMULATION" :
 1. **Contextual Relevance** : Définis pour quels intents utilisateurs ce site est pertinent (ex: "Local Search", "B2B Query").
@@ -1948,6 +2014,14 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                                 contextual_relevance: { value: [], q: 0 },
                                 selection_conditions: { value: {}, q: 0 },
                                 ai_simulation: { value: [], q: 0 }
+                            },
+                            external_context: {
+                                ecosystem_presence: { value: [], q: 0 },
+                                reputation_signals: { value: false, q: 0 },
+                                keywords: { value: [], q: 0 },
+                                intents: { value: [], q: 0 },
+                                channels: { value: [], q: 0 },
+                                permissions: { value: [], q: 0 }
                             }
                         }
                     });
@@ -1987,6 +2061,104 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                             }
                         }
                     } as any;
+                }
+
+                // 2b. POST-LLM VALIDATION — Safety net: downgrade q values when LLM ignores prompt rules
+                if (extractJson?.fields) {
+                    const f = extractJson.fields;
+
+                    // INDICATEURS: key_indicators — q=1 only if concrete numbers exist
+                    if (f.indicateurs?.key_indicators) {
+                        const ki = f.indicateurs.key_indicators;
+                        if (ki.q === 1 && Array.isArray(ki.value)) {
+                            const hasConcreteNumber = ki.value.some((item: any) => {
+                                const str = typeof item === 'string' ? item : JSON.stringify(item);
+                                return /\d/.test(str) && !/satisfaction|bouche.?à.?oreille|qualité|confiance/i.test(str);
+                            });
+                            if (!hasConcreteNumber) {
+                                ki.q = 0.5;
+                                logger.info('Q_DOWNGRADE', 'key_indicators downgraded: no concrete numbers found');
+                            }
+                        }
+                    }
+
+                    // INDICATEURS: last_review_date — q=1 only if explicit date
+                    if (f.indicateurs?.last_review_date) {
+                        const lr = f.indicateurs.last_review_date;
+                        if (lr.q === 1) {
+                            const val = String(lr.value || '');
+                            const hasDate = /\d{4}[-/]\d{2}|jan|fév|mar|avr|mai|juin|juil|aoû|sep|oct|nov|déc/i.test(val);
+                            if (!hasDate) {
+                                lr.q = 0;
+                                logger.info('Q_DOWNGRADE', 'last_review_date downgraded: no explicit date');
+                            }
+                        }
+                    }
+
+                    // ENGAGEMENTS: certifications — q=1 only for named recognized certs
+                    if (f.engagements_conformite?.certifications) {
+                        const cert = f.engagements_conformite.certifications;
+                        if (cert.q === 1 && Array.isArray(cert.value)) {
+                            const knownCerts = /iso|ohsas|haccp|b.?corp|fair.?trade|leed|ce\b|nf\b|afnor|tuv|ul\b|fda|gmp|gdpr|rgpd|soc.?[12]|pci|hipaa|fedramp/i;
+                            const hasRealCert = cert.value.some((c: any) => knownCerts.test(String(c)));
+                            if (!hasRealCert) {
+                                cert.q = 0.5;
+                                logger.info('Q_DOWNGRADE', 'certifications downgraded: no recognized certification names');
+                            }
+                        }
+                    }
+
+                    // ENGAGEMENTS: policies — q=1 only if policy IS active (not "en cours")
+                    if (f.engagements_conformite?.policies) {
+                        const pol = f.engagements_conformite.policies;
+                        if (pol.q === 1 && Array.isArray(pol.value)) {
+                            const inProgress = /en cours|en phase|prochainement|bientôt|prévu|planifié/i;
+                            const allInProgress = pol.value.every((p: any) => inProgress.test(String(p)));
+                            if (allInProgress && pol.value.length > 0) {
+                                pol.q = 0.5;
+                                logger.info('Q_DOWNGRADE', 'policies downgraded: all policies are in-progress');
+                            }
+                        }
+                    }
+
+                    // CONTENUS PEDAGOGIQUES: has_glossary, has_documentation — q=0 if explicitly "non"
+                    ['has_glossary', 'has_documentation', 'has_faq'].forEach(field => {
+                        const node = f.contenus_pedagogiques?.[field as keyof typeof f.contenus_pedagogiques] as any;
+                        if (node && node.q >= 0.5 && node.value === false) {
+                            node.q = 0;
+                            logger.info('Q_DOWNGRADE', `${field} downgraded: value is explicitly false`);
+                        }
+                    });
+
+                    // OFFRE: pricing_indication — "sur devis" = 0.5 max
+                    if (f.offre?.pricing_indication) {
+                        const pi = f.offre.pricing_indication;
+                        if (pi.q === 1) {
+                            const val = String(pi.value || '').toLowerCase();
+                            if (/sur devis|à définir|variable|selon|dépend/i.test(val) && !/\d/.test(val)) {
+                                pi.q = 0.5;
+                                logger.info('Q_DOWNGRADE', 'pricing_indication downgraded: vague pricing');
+                            }
+                        }
+                    }
+
+                    // PROCESSUS: process_steps — q=1 only if 3+ concrete steps
+                    if (f.processus_methodes?.process_steps) {
+                        const ps = f.processus_methodes.process_steps;
+                        if (ps.q === 1 && Array.isArray(ps.value) && ps.value.length < 3) {
+                            ps.q = 0.5;
+                            logger.info('Q_DOWNGRADE', `process_steps downgraded: only ${ps.value.length} steps (need 3+)`);
+                        }
+                    }
+
+                    // OFFRE: services/products — q=1 only if 2+ items
+                    ['services', 'products'].forEach(field => {
+                        const node = f.offre?.[field as keyof typeof f.offre] as any;
+                        if (node && node.q === 1 && Array.isArray(node.value) && node.value.length < 2) {
+                            node.q = 0.5;
+                            logger.info('Q_DOWNGRADE', `${field} downgraded: only ${node.value.length} item(s)`);
+                        }
+                    });
                 }
 
                 // 3. INJECT TECHNICAL TRUTH (Overrule LLM for tech fields)
@@ -2077,7 +2249,9 @@ ${(scanResult.hasAsrFile || urlToScan.includes('ai-visionary.com')) && scoreResu
 ⚠️ **Richesse Sémantique (Contenu)** : Faible (${scoreResult.total}/100).
 *Votre fichier existe mais il y a très peu d'informations. Plus vous renseignerez les champs demandés, plus la recherche sera efficace pour les IA.*`
                         :
-                        `ℹ️ *Note : L'analyse IA peut présenter de légères variations d'un scan à l'autre. Cette marge normale n'affecte pas la conformité technique du certificat ASR délivré.*`
+                        `⚠️ **Important** : Un résultat élevé ne garantit pas la recommandabilité de votre entreprise par les IA.
+Ce qui aide les IA à vous lire et à vous recommander dans leurs réponses, c'est la façon dont nous structurons vos données dans des **fichiers sémantiques** (ASR, FAQ, Glossaire, Manifeste) que nous allons créer pour votre entreprise.
+Sans ces fichiers installés sur votre site, **les IA (ChatGPT, Gemini, Claude, Perplexity) ne peuvent pas exploiter ces informations**.`
                     }
 
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
@@ -2085,10 +2259,10 @@ ${(scanResult.hasAsrFile || urlToScan.includes('ai-visionary.com')) && scoreResu
 |||
 ${JSON.stringify({
                         type: "question_block",
-                        intro: `💡 **IMPACT STRATÉGIQUE** :
-Votre score actuel ne permet pas une recommandation optimale par ChatGPT ou Gemini.
+                        intro: `💡 **PROCHAINE ÉTAPE** :
+Votre profil est complet, mais pour que les IA puissent réellement vous lire et vous recommander, il faut transformer ces données en **fichiers sémantiques structurés** (ASR, FAQ, Glossaire, Manifest, Contexte).
 
-Pour activer votre visibilité, choisissez votre niveau de certification :`,
+Choisissez votre niveau de certification :`,
                         questions: [{
                             id: "pack_intention",
                             text: "Sélectionnez votre Pack pour activer votre recommandation :",
