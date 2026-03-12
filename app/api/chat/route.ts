@@ -2056,6 +2056,95 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     } as any;
                 }
 
+                // 2a. POST-LLM SANITIZATION — Remove template/placeholder values the LLM copied from examples
+                if (extractJson?.fields) {
+                    const TEMPLATE_PATTERNS = /^(Ex:|type schema\.?org|schema\.?org|organisation|organization|premium\/standard\/undisclosed|public\/membersOnly|eligible\/uncertain|✅\/⚠️\/❌|gym near me|Centre en ville|Recherche Salle|No City Found|undisclosed)$/i;
+                    const TEMPLATE_PARTIAL = /^Ex:|eligible\/uncertain|✅\/⚠️\/❌|premium\/standard|public\/members/i;
+
+                    function isTemplatePlaceholder(val: any): boolean {
+                        if (typeof val === 'string') return TEMPLATE_PATTERNS.test(val.trim()) || TEMPLATE_PARTIAL.test(val.trim());
+                        return false;
+                    }
+
+                    function sanitizeFieldValue(val: any): any {
+                        if (typeof val === 'string') {
+                            return isTemplatePlaceholder(val) ? '' : val;
+                        }
+                        if (Array.isArray(val)) {
+                            return val.filter((item: any) => {
+                                if (typeof item === 'string') return !isTemplatePlaceholder(item);
+                                if (typeof item === 'object' && item !== null) {
+                                    // contextual_relevance entries with template userIntent
+                                    if (item.userIntent && isTemplatePlaceholder(item.userIntent)) return false;
+                                    if (item.status && isTemplatePlaceholder(item.status)) return false;
+                                    if (item.query && isTemplatePlaceholder(item.query)) return false;
+                                    if (item.result && isTemplatePlaceholder(item.result)) return false;
+                                    // Clean sub-arrays
+                                    if (item.queryExamples) item.queryExamples = item.queryExamples.filter((e: any) => !isTemplatePlaceholder(e));
+                                    if (item.decisionCriteria) item.decisionCriteria = item.decisionCriteria.filter((e: any) => !isTemplatePlaceholder(e));
+                                }
+                                return true;
+                            });
+                        }
+                        if (typeof val === 'object' && val !== null) {
+                            // selection_conditions: { required: [...], exclusion: [...] }
+                            if (val.required) val.required = val.required.filter((v: any) => !isTemplatePlaceholder(v));
+                            if (val.exclusion) val.exclusion = val.exclusion.filter((v: any) => !isTemplatePlaceholder(v));
+                        }
+                        return val;
+                    }
+
+                    // Traverse all blocks and sanitize every field value
+                    const ff = extractJson.fields as any;
+                    for (const blockName of Object.keys(ff)) {
+                        const block = (ff as any)[blockName];
+                        if (typeof block !== 'object' || block === null) continue;
+                        for (const fieldName of Object.keys(block)) {
+                            const field = block[fieldName];
+                            if (field && typeof field === 'object' && 'value' in field) {
+                                const originalVal = field.value;
+                                field.value = sanitizeFieldValue(field.value);
+                                // If value was sanitized to empty, set q=0
+                                const isEmpty = field.value === '' || (Array.isArray(field.value) && field.value.length === 0);
+                                if (isEmpty && originalVal !== field.value) {
+                                    field.q = 0;
+                                    logger.info('TEMPLATE_SANITIZE', `${blockName}.${fieldName}: template placeholder removed`);
+                                }
+                            }
+                        }
+                    }
+
+                    // Special: business_type "Organization" / "Type Schema.org" → empty
+                    if (ff.identite?.business_type?.value) {
+                        const bt = String(ff.identite.business_type.value).trim();
+                        if (/^(type schema\.?org|schema\.?org|organisation|organization)$/i.test(bt)) {
+                            ff.identite.business_type.value = '';
+                            ff.identite.business_type.q = 0;
+                            logger.info('TEMPLATE_SANITIZE', 'business_type placeholder removed');
+                        }
+                    }
+
+                    // Special: pricing_level "premium/standard/undisclosed" → empty
+                    if (ff.contextual_signals?.pricing_level?.value) {
+                        const pl = String(ff.contextual_signals.pricing_level.value).trim();
+                        if (/premium\/standard|undisclosed/i.test(pl)) {
+                            ff.contextual_signals.pricing_level.value = '';
+                            ff.contextual_signals.pricing_level.q = 0;
+                            logger.info('TEMPLATE_SANITIZE', 'pricing_level placeholder removed');
+                        }
+                    }
+
+                    // Special: access_mode "public/membersOnly" → empty
+                    if (ff.contextual_signals?.access_mode?.value) {
+                        const am = String(ff.contextual_signals.access_mode.value).trim();
+                        if (/public\/membersOnly/i.test(am)) {
+                            ff.contextual_signals.access_mode.value = '';
+                            ff.contextual_signals.access_mode.q = 0;
+                            logger.info('TEMPLATE_SANITIZE', 'access_mode placeholder removed');
+                        }
+                    }
+                }
+
                 // 2b. POST-LLM VALIDATION — Safety net: downgrade q values when LLM ignores prompt rules
                 if (extractJson?.fields) {
                     const f = extractJson.fields;

@@ -11,6 +11,7 @@ export interface AyaEntity {
     sector_macro: string; // Ex: "Construction", "Santé"
     website?: string;      // URL associée (AIO Signal principal)
     asr_score?: number;    // Score de qualité de l'information (0-100)
+    payment_completed?: boolean; // Entité visible sur AYA uniquement après paiement
 
     // Temporalité (CRUCIAL POUR LES BOTS)
     created_at: string;      // ISO Date - Ne bouge jamais

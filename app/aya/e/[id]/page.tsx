@@ -20,27 +20,32 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     // Fix: Respect 0 score, fallback to 100 only if undefined (legacy/mock)
     const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : 100;
 
-    // DATA EXTRACTION
+    // DATA EXTRACTION — asrData is the extract fields object (e.g. { identite: { name: { value, q, evidence } }, offre: {...}, ... })
     const asrData = entity.asr_payload?.data || {};
 
     // 🎨 ROBUST FALLBACKS — skip generic names
     const genericNames = ["Unknown", "Entity", "Unknown Entity", "Entreprise Inconnue"];
-    const rawDisplayName = entity.display_name || entity.legal_name || entity.name;
+    const rawDisplayName = entity.display_name || entity.legal_name;
     const displayName = (rawDisplayName && !genericNames.includes(rawDisplayName))
         ? rawDisplayName
         : (entity.website ? entity.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : "Identité Web Certifiée");
 
-    const description = asrData.description && asrData.description !== "null"
-        ? asrData.description
-        : (asrData.pitch && asrData.pitch !== "null"
-            ? asrData.pitch
+    // Build description from extract fields (correct paths for FieldNode<T> structure)
+    const services = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
+    const businessType = asrData.identite?.business_type?.value || entity.sector_macro || "";
+    const audience = asrData.offre?.target_audience?.value || "";
+    const description = services.length > 0
+        ? `${businessType ? `${businessType} — ` : ""}${services.slice(0, 3).join(", ")}${audience ? `. S'adresse à ${audience}.` : "."}`
+        : (businessType
+            ? `${businessType}. Entité certifiée avec présence sémantique active auprès du consensus AYO.`
             : "Certification de présence sémantique active. Cette entité a validé son existence et ses champs d'expertise auprès du consensus AYO.");
 
-    // Ensure keywords is always an array (services can be a string)
-    const rawKeywords = asrData.keywords || asrData.services || asrData.tags || [];
-    const keywords = Array.isArray(rawKeywords)
-        ? rawKeywords
-        : (typeof rawKeywords === 'string' ? rawKeywords.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+    // Build keywords from extract fields (correct paths)
+    const serviceKeywords = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
+    const useCaseKeywords = Array.isArray(asrData.offre?.use_cases?.value) ? asrData.offre.use_cases.value : [];
+    const declaredKeywords = Array.isArray(asrData.external_context?.keywords?.value) ? asrData.external_context.keywords.value : [];
+    const allKeywords = [...new Set([...declaredKeywords, ...serviceKeywords, ...useCaseKeywords])].filter((k: any) => typeof k === 'string' && k.length > 2);
+    const keywords = allKeywords.slice(0, 10);
 
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
@@ -68,8 +73,8 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                     </h1>
 
                     <div className="subheadline" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                        <span>📍 {entity.country_legal === 'CH' ? 'Suisse' : entity.country_legal}</span>
-                        <span>🏢 {entity.entity_type}</span>
+                        <span>📍 {({'CH':'Suisse','FR':'France','BE':'Belgique','DE':'Allemagne','IT':'Italie','ES':'Espagne','LU':'Luxembourg','CA':'Canada','US':'États-Unis','GB':'Royaume-Uni','MA':'Maroc'} as Record<string,string>)[entity.country_legal] || entity.country_legal}</span>
+                        <span>🏢 {({'company':'Entreprise','association':'Association','individual':'Indépendant','public_body':'Organisme Public'} as Record<string,string>)[entity.entity_type] || entity.entity_type}</span>
                         {entity.website && (
                             <a href={entity.website} target="_blank" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>
                                 🔗 {entity.website.replace(/^https?:\/\//, '')}

@@ -1046,6 +1046,67 @@ export async function POST(req: Request) {
             logger.info('WEBHOOK_EMAIL_SUB', `Sub email sent to ${customerEmail}`);
 
         } else if (packType === 'PRO') {
+            // SANITIZE DATA BEFORE GENERATION — Remove ALL template/placeholder values
+            const TEMPLATE_RE = /^(Ex:|type schema\.?org|schema\.?org|organisation|organization|premium\/standard\/undisclosed|public\/membersOnly|eligible\/uncertain|✅\/⚠️\/❌|gym near me|Centre en ville|Recherche Salle|No City Found|undisclosed|non spécifié|n\/a)$/i;
+            const TEMPLATE_PARTIAL_RE = /^Ex:|eligible\/uncertain|✅\/⚠️\/❌|premium\/standard|public\/members/i;
+
+            function isTemplate(val: any): boolean {
+                if (typeof val !== 'string') return false;
+                return TEMPLATE_RE.test(val.trim()) || TEMPLATE_PARTIAL_RE.test(val.trim());
+            }
+
+            function sanitizePayloadDeep(obj: any): any {
+                if (typeof obj === 'string') return isTemplate(obj) ? '' : obj;
+                if (Array.isArray(obj)) return obj.filter((item: any) => {
+                    if (typeof item === 'string') return !isTemplate(item);
+                    if (typeof item === 'object' && item !== null) {
+                        if (item.userIntent && isTemplate(item.userIntent)) return false;
+                        if (item.status && isTemplate(item.status)) return false;
+                        if (item.query && isTemplate(item.query)) return false;
+                        if (item.result && isTemplate(item.result)) return false;
+                    }
+                    return true;
+                });
+                if (typeof obj === 'object' && obj !== null) {
+                    const result: any = {};
+                    for (const [key, value] of Object.entries(obj)) {
+                        if (key === 'value') {
+                            result[key] = sanitizePayloadDeep(value);
+                            // If value was cleaned to empty, also set q=0
+                            if (result[key] === '' && value !== '' && obj.q !== undefined) {
+                                result.q = 0;
+                            }
+                        } else {
+                            result[key] = value;
+                        }
+                    }
+                    return result;
+                }
+                return obj;
+            }
+
+            // Deep-sanitize the extract data before generators use it
+            if (ext) {
+                for (const blockName of Object.keys(ext)) {
+                    const block = ext[blockName];
+                    if (typeof block === 'object' && block !== null) {
+                        for (const fieldName of Object.keys(block)) {
+                            const field = block[fieldName];
+                            if (field && typeof field === 'object' && 'value' in field) {
+                                const cleanedValue = sanitizePayloadDeep(field.value);
+                                if (JSON.stringify(cleanedValue) !== JSON.stringify(field.value)) {
+                                    logger.info('WEBHOOK_SANITIZE', `Cleaned template value from ${blockName}.${fieldName}`);
+                                    field.value = cleanedValue;
+                                    if (cleanedValue === '' || (Array.isArray(cleanedValue) && cleanedValue.length === 0)) {
+                                        field.q = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // Generate ALL 5 pack files
             const zip = new JSZip();
 
