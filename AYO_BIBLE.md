@@ -2098,3 +2098,54 @@ execute procedure aya_set_destruction_date();
 Le job doit être idempotent (ce code l’est).
 
 
+XVIII. PROTOCOLE D'ATOMICITÉ ET ROBUSTESSE (V3.0)
+
+1. Principe de l'AID (Analysis ID)
+→ Chaque session de diagnostic doit générer un ID unique et stable (UUID) dès le premier message.
+→ Cet AID doit être épinglé à l'objet Stripe (client_reference_id) pour garantir que le paiement livre les BONNES données à la BONNE personne.
+→ INTERDICTION d'utiliser l'URL seule comme clé primaire pour la livraison (risque de collision).
+
+2. Primauté du Contexte Utilisateur (User Context Primacy)
+→ Format d'extraction : AYO-EXTRACT-3.0.
+→ Règle d'or : "L'utilisateur a toujours le dernier mot".
+→ Toute donnée validée en chat reçoit un indice de confiance q=1.
+→ Toute donnée issue du scan automatique reçoit un indice de confiance q=0.
+→ Lors de la génération finale, q=1 écrase systématiquement q=0.
+
+3. Protocole de Livraison Webhook (Zéro Échec)
+→ Le Webhook doit suivre cet ordre de recherche strict pour livrer les fichiers :
+   1. Recherche par AID (Priorité Absolue).
+   2. Recherche par URL (Fallback 1).
+   3. Recherche par Email (Fallback 2).
+→ Si aucune donnée n'est trouvée, le Webhook déclenche une analyse de secours "Deep Scan" mais doit logger l'incident dans `webhook_debug`.
+
+4. Discipline du Questionnaire (Les 20 Indicateurs)
+→ Un diagnostic complet ne peut se terminer sans avoir couvert les 20 indicateurs fondamentaux :
+   1.  identite.name (Nom commercial)
+   2.  identite.country (Pays d'ancrage)
+   3.  identite.legal_name (Dénomination officielle)
+   4.  identite.business_type (Secteur/Activité)
+   5.  identite.city (Ville du siège)
+   6.  identite.contact_email (Email de contact)
+   7.  identite.contact_phone (Téléphone)
+   8.  offre.target_audience (Cible principale)
+   9.  offre.services (Prestations majeures)
+   10. offre.pricing_indication (Positionnement tarifaire)
+   11. offre.use_cases (Pourquoi l'IA doit vous recommander)
+   12. processus_methodes.process_steps (Étapes de réalisation)
+   13. processus_methodes.geographies_served (Zone desservie)
+   14. processus_methodes.quality_assurance (Garanties/Méthodologie)
+   15. engagements_conformite.certifications (Labels/Certificats)
+   16. engagements_conformite.security_measures (Protection des données)
+   17. engagements_conformite.policies (CGV/Confidentialité)
+   18. indicateurs.key_indicators (Chiffres clés réels)
+   19. contenus_pedagogiques.has_documentation (Support de preuve technique)
+   20. indicateurs.last_review_date (Date de fraîcheur)
+→ Le chatbot doit maintenir un compteur d'étapes (`questionsAskedCount`) basé sur les blocs de questions réellement envoyés, insensible aux interruptions pédagogiques.
+
+5. Sécurité de Captation d'Email
+→ L'email client doit être capturé et synchronisé en base de données AVANT le clic vers Stripe.
+→ Le système doit "verrouiller" l'email dans la fiche d'analyse pour assurer la livraison même en cas de latence Stripe.
+
+
+

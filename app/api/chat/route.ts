@@ -1783,19 +1783,41 @@ Poser la question EXACTE pour obtenir ou valider le bloc : **${nextBlockName}**.
                         m.content.includes("SCAN TERMINÉ")
                     )
                 );
+                // Filter out pure confirmation messages that carry no data
+                // These cause the LLM to extract "Oui c'est correct" as field values
+                const CONFIRMATION_RE = /^(oui|ok|okay|d'accord|exact|exactement|c'est correct|oui c'est correct|oui c'est bon|c'est bon|c'est ça|parfait|tout est correct|validé|je confirme|je valide|bien reçu|noté|entendu|ça me va|ça marche|très bien|super|génial|nickel|impeccable|affirmatif|absolument|tout à fait|bien sûr|évidemment|effectivement|en effet|voilà|yep|yup|yes|yeah|sure|right|correct|confirmed|alright|got it|that's right|that's correct)[\s!.✅✓]*$/i;
+                const isConfirmationOnly = (content: string): boolean => {
+                    if (!content || typeof content !== 'string') return false;
+                    const trimmed = content.trim();
+                    // Short messages that are pure confirmation
+                    if (trimmed.length < 60 && CONFIRMATION_RE.test(trimmed)) return true;
+                    // Also catch numbered confirmations like "1" "2" "3" (option selections)
+                    if (/^\d{1,2}[\s.!]*$/.test(trimmed)) return true;
+                    return false;
+                };
+
                 let userAnswersContext = "";
                 if (scanMsgIndex !== -1) {
                     // Capture ALL messages after the scan (questions + answers)
-                    const subsequentMessages = messages.slice(scanMsgIndex);
+                    // BUT FILTER OUT pure confirmation messages from users
+                    const subsequentMessages = messages.slice(scanMsgIndex).filter((m: any) => {
+                        if (m.role === 'user' && isConfirmationOnly(m.content)) {
+                            return false; // Skip "oui c'est correct" etc.
+                        }
+                        return true;
+                    });
                     userAnswersContext = subsequentMessages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
                 } else {
                     // SAFETY NET: If no scan marker found, include ALL user messages after the URL
                     const urlMsgIdx = messages.findIndex((m: any) => m.role === 'user' && m.content.match(/https?:\/\/|www\./));
                     if (urlMsgIdx !== -1) {
-                        const allAfterUrl = messages.slice(urlMsgIdx);
+                        const allAfterUrl = messages.slice(urlMsgIdx).filter((m: any) => {
+                            if (m.role === 'user' && isConfirmationOnly(m.content)) return false;
+                            return true;
+                        });
                         userAnswersContext = allAfterUrl.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
                     } else {
-                        userAnswersContext = messages.filter((m: any) => m.role === 'user').map((m: any) => m.content).join('\n');
+                        userAnswersContext = messages.filter((m: any) => m.role === 'user' && !isConfirmationOnly(m.content)).map((m: any) => m.content).join('\n');
                     }
                 }
                 console.log(`📋 USER CONTEXT LENGTH: ${userAnswersContext.length} chars (from msgIndex ${scanMsgIndex})`);
@@ -1808,6 +1830,11 @@ INTERDICTION FORMELLE DE CALCULER UN SCORE. Tu ne notes rien. Tu extrais seuleme
 
 ⚠️ RÈGLE CRITIQUE : PRIORISE LES RÉPONSES DU QUESTIONNAIRE (USER CONTEXT) PAR-DESSUS LE CONTENU DU SITE.
 Les réponses utilisateur font FOI pour la valeur extraite — mais la QUALITÉ (q) dépend de la SUBSTANCE de la réponse.
+
+⚠️ RÈGLE ANTI-CONFIRMATION : IGNORE les messages de CONFIRMATION PURE de l'utilisateur.
+Les phrases comme "Oui c'est correct", "Exact", "C'est bon", "Parfait", "Je confirme", "Ok", "D'accord"
+NE SONT PAS DES VALEURS DE CHAMP. Ce sont des acquittements. JAMAIS stocker une confirmation comme valeur.
+Si l'utilisateur dit "Oui c'est correct" après qu'on lui montre "Type: API de glossaires", la valeur est "API de glossaires", PAS "Oui c'est correct".
 
 RÈGLE DE QUALITÉ (q) — SOIS STRICT ET HONNÊTE :
 q=1 : Information SPÉCIFIQUE, VÉRIFIABLE et EXPLOITABLE par une IA.
@@ -2109,6 +2136,24 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                                 if (isEmpty && originalVal !== field.value) {
                                     field.q = 0;
                                     logger.info('TEMPLATE_SANITIZE', `${blockName}.${fieldName}: template placeholder removed`);
+                                }
+                            }
+                        }
+                    }
+
+                    // POST-LLM: Reject confirmation phrases stored as field values
+                    // e.g. "Oui c'est correct", "Exact", "C'est bon" should NOT be field values
+                    const CONFIRMATION_VALUE_RE = /^(oui|ok|okay|d'accord|exact|exactement|c'est correct|oui c'est correct|oui c'est bon|c'est bon|c'est ça|parfait|tout est correct|validé|je confirme|je valide|bien reçu|noté|entendu|ça me va|ça marche|très bien|super|génial|nickel|impeccable|affirmatif|absolument|tout à fait|bien sûr|évidemment|effectivement|en effet|voilà|yep|yup|yes|yeah|sure|right|correct|confirmed|alright|got it|that's right|that's correct)[\s!.✅✓]*$/i;
+                    for (const blockName of Object.keys(ff)) {
+                        const block = (ff as any)[blockName];
+                        if (typeof block !== 'object' || block === null) continue;
+                        for (const fieldName of Object.keys(block)) {
+                            const field = block[fieldName];
+                            if (field && typeof field === 'object' && 'value' in field && typeof field.value === 'string') {
+                                if (field.value.trim().length < 60 && CONFIRMATION_VALUE_RE.test(field.value.trim())) {
+                                    logger.info('CONFIRMATION_SANITIZE', `${blockName}.${fieldName}: confirmation phrase "${field.value}" removed`);
+                                    field.value = '';
+                                    field.q = 0;
                                 }
                             }
                         }

@@ -41,3 +41,26 @@ yarn-error.log*
 next-env.d.ts
 .firebase/
 .env*.local
+
+# secrets & admin
+ADMIN_SECRETS*
+*SECRETS*
+*secrets*
+
+# claude code
+.claude/
+
+# debug/test scripts (root level)
+check*.js
+clean_db.js
+debug_*.js
+delete_ghost.*
+fix-*.js
+force_send_*.sh
+repro_*.sh
+run-*.js
+simulate_*.js
+test-*.js
+test-*.ts
+test-*.sh
+TEST_*.json
