@@ -322,6 +322,50 @@ Le plan complet est dans **`PLAN-ACTION-AYO-COMPLET.md`** (20 sections, ~1460 li
 
 > **METTRE À JOUR CE TABLEAU** après chaque sprint complété.
 
+### Organisation du travail en SESSIONS
+
+Les sprints sont regroupés en **sessions de travail Claude Code** de 2-3h chacune.
+Chaque session peut être lancée de manière autonome (Claude lit ce fichier et sait quoi faire).
+**Cyril doit être présent pour la Session 4** (réécriture du cœur du produit).
+
+| Session | Sprints | Contenu | Durée estimée | Risque | Cyril requis ? |
+|---------|---------|---------|---------------|--------|----------------|
+| **Session 1** | Sprint 1 | Logger + Dashboard Admin → que des fichiers NOUVEAUX, zéro modification de l'existant | ~2h | 🟢 Zéro | Non |
+| **Session 2** | Sprint 2 | Failles critiques → corrections chirurgicales (1 ligne ici, 1 ligne là) | ~2h | 🟡 Faible | Non |
+| **Session 3** | Sprint 3 + 4 | Failles hautes + moyennes → appliquer rate-limit, Zod, SSRF, CSP, protéger debug | ~4h | 🟡 Faible | Non |
+| **Session 4** | Sprint 5 | ⚠️ **REWRITE PROMPT CHAT** — Questionnaire universel, scoring transparent, semantic validator. C'est le CŒUR du produit. | ~4h | 🔴 Critique | **OUI — Cyril doit valider** |
+| **Session 5** | Sprint 6 | Fix webhook + Bug Score 0 + emails + fusion PaymentHandler | ~3h | 🟡 Moyen | Non |
+| **Session 6** | Sprint 7 | Modules sémantiques (ayo-semantics, external-context, ASR crypto) | ~3h | 🟡 Moyen | Non |
+| **Session 7** | Sprint 8 | Pages AYA + certificat + cycle de vie client (MAJ, renouvellements, crons) | ~3h | 🟡 Moyen | Non |
+| **Session 8** | Sprint 9 + 10 | UI/SEO/sitemap/robots + pages légales + tests + nettoyage | ~3h | 🟢 Faible | Non |
+
+**Protocole pour chaque session** :
+1. Vérifier la branche : `git checkout fix/remediation`
+2. Lire ce tableau → identifier la prochaine session non complétée
+3. Lire le détail du sprint dans `PLAN-ACTION-AYO-COMPLET.md`
+4. Travailler, commiter après chaque tâche (`git commit`)
+5. Vérifier le build : `npm run build`
+6. Pusher : `git push origin fix/remediation`
+7. **Mettre à jour le tableau d'avancement ci-dessus** (changer ❌ en ✅)
+8. Si quelque chose casse → revenir au commit précédent, documenter le problème
+
+**IMPORTANT** : Ne JAMAIS merger dans `main` sans validation de Cyril. La branche `fix/remediation` est l'espace de travail sécurisé.
+
+### État des sessions
+
+| Session | Statut | Date | Notes |
+|---------|--------|------|-------|
+| Session 1 | ❌ Pas commencée | — | — |
+| Session 2 | ❌ Pas commencée | — | — |
+| Session 3 | ❌ Pas commencée | — | — |
+| Session 4 | ❌ Pas commencée | — | ⚠️ Cyril doit être présent |
+| Session 5 | ❌ Pas commencée | — | — |
+| Session 6 | ❌ Pas commencée | — | — |
+| Session 7 | ❌ Pas commencée | — | — |
+| Session 8 | ❌ Pas commencée | — | — |
+
+> **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
+
 ---
 
 ## 8. BRANCHES GIT
