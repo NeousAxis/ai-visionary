@@ -937,36 +937,58 @@ export async function POST(req: Request) {
                 console.log(`🔄 Using Detected URL from history for scan: ${detectedUrl}`);
                 urlToScan = detectedUrl;
             }
+            // Normalisation intelligente : essayer plusieurs variantes (https, http, www, sans www)
             if (!urlToScan.startsWith('http')) {
                 urlToScan = 'https://' + urlToScan;
             }
 
-            // 🔒 VALIDATION: Check if URL exists before scanning
+            // 🔒 VALIDATION: Try URL variants until one works
             logger.info('URL_VALIDATE', `Validating URL accessibility: ${urlToScan}`);
-            try {
-                const urlCheck = await fetch(urlToScan, {
-                    method: 'HEAD',
-                    redirect: 'follow',
-                    signal: AbortSignal.timeout(10000) // 10 second timeout
-                });
+            const urlObj = new URL(urlToScan);
+            const domain = urlObj.hostname;
+            const path = urlObj.pathname;
+            const variants: string[] = [urlToScan];
+            // Add protocol variant
+            if (urlToScan.startsWith('https://')) {
+                variants.push(urlToScan.replace('https://', 'http://'));
+            } else {
+                variants.push(urlToScan.replace('http://', 'https://'));
+            }
+            // Add www variants
+            if (!domain.startsWith('www.')) {
+                variants.push(`https://www.${domain}${path}`);
+                variants.push(`http://www.${domain}${path}`);
+            } else {
+                variants.push(`https://${domain.replace('www.', '')}${path}`);
+                variants.push(`http://${domain.replace('www.', '')}${path}`);
+            }
 
-                if (!urlCheck.ok && urlCheck.status !== 405) {
-                    console.warn(`❌ URL not accessible: ${urlToScan} (status: ${urlCheck.status})`);
-                    finalResponseText = `❌ **URL Inaccessible**\n\nLe site **${urlToScan}** n'est pas accessible (erreur ${urlCheck.status}).\n\n**Vérifiez que :**\n- L'URL est correctement orthographiée\n- Le site est en ligne\n- Le domaine existe\n\nVeuillez réessayer avec une URL valide.`;
-                    return new Response(JSON.stringify({ text: finalResponseText }), {
-                        status: 200,
-                        headers: { 'Content-Type': 'application/json' }
+            let urlValidated = false;
+            for (const variant of variants) {
+                try {
+                    const urlCheck = await fetch(variant, {
+                        method: 'HEAD',
+                        redirect: 'follow',
+                        signal: AbortSignal.timeout(5000)
                     });
+                    if (urlCheck.ok || urlCheck.status === 405) {
+                        urlToScan = variant;
+                        urlValidated = true;
+                        break;
+                    }
+                } catch {
+                    // Try next variant
                 }
-            } catch (urlError: any) {
-                console.warn(`❌ URL validation failed: ${urlToScan}`, urlError.message);
+            }
+
+            if (!urlValidated) {
                 finalResponseText = `❌ **Site Introuvable**\n\nImpossible d'accéder à **${urlToScan}**.\n\n**Causes possibles :**\n- Le domaine n'existe pas\n- Le site est hors ligne\n- L'URL est mal formatée\n\nVeuillez vérifier l'URL et réessayer.`;
                 return new Response(JSON.stringify({ text: finalResponseText }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' }
                 });
             }
-            console.log(`✅ URL validated: ${urlToScan}`);
+            logger.info('URL_VALIDATE', `URL validated: ${urlToScan}`);
 
             // 1. DEEP SCAN to get ALL possible data
             console.log(`📡 Deep scanning ${urlToScan}...`);
