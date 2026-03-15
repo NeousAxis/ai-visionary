@@ -2391,12 +2391,11 @@ Calcul du score en cours...
 |||
 📊 SCORE FINAL AIO : ${scoreResult.total} / 100
 
-${(scanResult.hasAsrFile || urlToScan.includes('ai-visionary.com')) && scoreResult.total < 50 ?
-                        `✅ **Conformité Technique (ASR)** : 100% (Validé).
-⚠️ **Richesse Sémantique (Contenu)** : Faible (${scoreResult.total}/100).
-*Votre fichier existe mais il y a très peu d'informations. Plus vous renseignerez les champs demandés, plus la recherche sera efficace pour les IA.*`
+${scoreResult.total >= 50 ?
+                        `📌 **Ce score mesure la structuration de vos données pour les IA** (ChatGPT, Gemini, Claude...).
+Vous avez déjà une bonne base de données structurées. Avec nos fichiers ASR, vous augmenterez encore vos chances d'être recommandé par les IA.`
                         :
-                        `📌 **Ce score mesure la lisibilité de votre entreprise par les IA** (ChatGPT, Gemini, Claude...).
+                        `📌 **Ce score mesure la structuration de vos données pour les IA** (ChatGPT, Gemini, Claude...).
 Un score bas signifie que vos données ne sont pas structurées pour être lues par les IA — elles ne peuvent donc ni vous identifier, ni vous recommander.
 Pour améliorer ce score, il faut créer des **fichiers sémantiques structurés** (ASR) que les bots IA savent lire et exploiter.`
                     }
