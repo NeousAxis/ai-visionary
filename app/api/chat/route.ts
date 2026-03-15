@@ -1334,7 +1334,7 @@ GÉNÈRE CE JSON MAINTENANT :
             transparencySummary += `\n**Ce que cela signifie :**\n`;
             transparencySummary += `Votre entreprise possède des informations, mais elles ne sont pas structurées de manière lisible par les IA (ChatGPT, Gemini, Claude...). Résultat : ces IA ne peuvent ni vous identifier clairement, ni vous recommander.\n\n`;
             transparencySummary += `**Ce que nous allons faire :**\n`;
-            transparencySummary += `Je vais vous poser ${Math.min(missingInfos.length, 7)} questions ciblées. Vos réponses me permettront de créer des fichiers structurés (ASR) qui rendront votre entreprise **lisible**, donc **visible**, et en conséquence **recommandable** par les IA.\n\n`;
+            transparencySummary += `Je vais vous poser plusieurs questions ciblées. Vos réponses me permettront de créer des fichiers structurés (ASR) qui rendront votre entreprise **lisible**, donc **visible**, et en conséquence **recommandable** par les IA.\n\n`;
             transparencySummary += `➡️ Mais avant tout...`;
 
             // 4. First question: Ownership validation
