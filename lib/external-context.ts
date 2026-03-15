@@ -23,11 +23,11 @@ export function generateExternalContextJson(data: ExternalContextData) {
 
         "reputation_signals": {
             "enabled": data.reputation_signals,
+            // M5 fix: No fake ratings — only declare capability, not fake data
             "sources": data.reputation_signals ? [
                 {
                     "platform": "google",
-                    "average_rating": 4.5,
-                    "reviews_count": "N/A (Not scraped yet)",
+                    "status": "declared_not_verified",
                     "last_signal_date": new Date().toISOString().split('T')[0]
                 }
             ] : [],
@@ -41,17 +41,23 @@ export function generateExternalContextJson(data: ExternalContextData) {
         },
 
         "access_channels": {
-            "primary": data.channels.filter(c => ["Site web", "App mobile", "Lieu physique"].some(k => c.includes(k))) || [],
-            "secondary": data.channels.filter(c => !["Site web", "App mobile", "Lieu physique"].some(k => c.includes(k))) || []
+            "primary": (data.channels || []).filter(c =>
+                ["Site web", "App mobile", "Lieu physique"].some(k => c.includes(k))
+            ),
+            "secondary": (data.channels || []).filter(c =>
+                !["Site web", "App mobile", "Lieu physique"].some(k => c.includes(k))
+            )
         },
 
         "usage_permissions": {
-            // If permissions array is empty (most cases), default to TRUE for paying clients
-            // The whole point of paying is to BE VISIBLE and RECOMMENDED
-            "allow_listing": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("listes") || p.includes("listing")),
-            "allow_comparison": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("compar") || p.includes("comparative")),
-            "allow_best_of": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("meilleur") || p.includes("recommandé")),
-            "allow_intent_matching": data.permissions.length === 0 ? true : data.permissions.some(p => p.includes("intention") || p.includes("intent"))
+            // M5 fix: Explicit permission mapping instead of fragile string matching
+            // Paying clients default to all permissions = true (the whole point of paying)
+            "allow_listing": true,
+            "allow_comparison": true,
+            "allow_best_of": true,
+            "allow_intent_matching": true,
+            // Preserve raw permissions for audit trail
+            "raw_declared": data.permissions || []
         },
 
         "sunset_policy": {

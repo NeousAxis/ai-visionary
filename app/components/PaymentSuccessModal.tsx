@@ -7,16 +7,19 @@ export default function PaymentSuccessModal() {
     const searchParams = useSearchParams();
     const [showModal, setShowModal] = useState(false);
     const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
-    const [packType, setPackType] = useState<'essential' | 'pro'>('essential');
+    const [packType, setPackType] = useState<'plateforme' | 'pro'>('plateforme');
 
     useEffect(() => {
         const paymentSuccess = searchParams.get('payment_success');
         const sessionId = searchParams.get('session_id');
 
-        if (paymentSuccess === 'true' && sessionId) {
+        // M8: Validate session_id format (Stripe session IDs start with cs_)
+        const isValidSessionId = sessionId && /^cs_(test_|live_)[a-zA-Z0-9]{10,}$/.test(sessionId);
+
+        if (paymentSuccess === 'true' && isValidSessionId) {
             setShowModal(true);
 
-            // Trigger file generation in background
+            // H9 fix: Only this component triggers the webhook (PaymentHandler removed)
             const processOrder = async () => {
                 try {
                     const res = await fetch('/api/webhooks/checkout-success', {
@@ -42,6 +45,11 @@ export default function PaymentSuccessModal() {
             };
 
             processOrder();
+        } else if (paymentSuccess === 'true' && sessionId && !isValidSessionId) {
+            // Invalid session_id format — don't call webhook
+            console.error('[PaymentSuccessModal] Invalid session_id format:', sessionId?.substring(0, 10));
+            setShowModal(true);
+            setStatus('error');
         }
     }, [searchParams]);
 
@@ -111,7 +119,7 @@ export default function PaymentSuccessModal() {
                                 </h2>
 
                                 <p className="text-xl text-gray-200 mb-6">
-                                    Votre Pack <span className="font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{packType === 'pro' ? 'PRO' : 'Essential'}</span> est activé
+                                    Votre Pack <span className="font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{packType === 'pro' ? 'PRO' : 'Plateforme'}</span> est activé
                                 </p>
 
                                 {/* Info Box */}
@@ -125,7 +133,7 @@ export default function PaymentSuccessModal() {
                                         <div className="flex-1">
                                             <h3 className="text-white font-bold mb-2 text-lg">📧 Fichiers envoyés</h3>
                                             <p className="text-gray-300 text-sm leading-relaxed">
-                                                Vos fichiers {packType === 'pro' ? <strong className="text-purple-400">PRO (ASR + JSON-LD + Glossaire + FAQ)</strong> : <strong className="text-purple-400">Essential (ASR + JSON-LD)</strong>} ont été envoyés à votre adresse email.
+                                                Vos fichiers {packType === 'pro' ? <strong className="text-purple-400">PRO (ASR + JSON-LD + Glossaire + FAQ)</strong> : <strong className="text-purple-400">Plateforme (ASR + JSON-LD)</strong>} ont été envoyés à votre adresse email.
                                             </p>
                                             <p className="text-purple-300 text-sm mt-2">
                                                 💡 Pensez à vérifier vos spams

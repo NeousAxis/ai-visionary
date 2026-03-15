@@ -34,10 +34,10 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
         scoreFactors: []
     };
 
-    // 0. CHECK AYA REGISTRY (Internal database signal)
+    // 0. CHECK AYA REGISTRY (M4 fix: check aya_registry, not analyses)
     try {
-        const ayaData = await db.getLatestAnalysisByUrl(targetUrl);
-        if (ayaData && ayaData.email) { // If it has an email and is in DB, we consider it "registered" for trust purposes
+        const ayaEntity = await db.getAyaEntityByUrl(targetUrl);
+        if (ayaEntity && ayaEntity.payment_completed) {
             result.isAyaRegistered = true;
             result.scoreFactors.push(`✅ Entité présente dans le Registre de Confiance AYA.`);
         }
