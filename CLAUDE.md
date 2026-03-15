@@ -355,7 +355,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 
 | Session | Statut | Date | Notes |
 |---------|--------|------|-------|
-| Session 1 | ❌ Pas commencée | — | — |
+| Session 1 | ✅ **TERMINÉE** | 2026-03-14 | Logger/rate-limit/validators/auth intégrés dans les 11 routes API. Build OK. |
 | Session 2 | ❌ Pas commencée | — | — |
 | Session 3 | ❌ Pas commencée | — | — |
 | Session 4 | ❌ Pas commencée | — | ⚠️ Cyril doit être présent |
