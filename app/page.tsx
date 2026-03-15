@@ -3,13 +3,13 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import Footer from './components/Footer';
 // AyoChat widget REMOVED from Home Page.
-import PaymentHandler from './components/PaymentHandler';
+import PaymentSuccessModal from './components/PaymentSuccessModal';
 
 export default function Home() {
   return (
     <main>
       <Suspense fallback={null}>
-        <PaymentHandler />
+        <PaymentSuccessModal />
       </Suspense>
       {/* SECTION 1 — Hero */}
       <section id="hero" className="hero-section">
