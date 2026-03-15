@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/private/', '/admin/', '/api/', '/debug/', '/certificate/'],
+            disallow: ['/admin/', '/api/', '/debug/'],
         },
         sitemap: 'https://ai-visionary.com/sitemap.xml',
     };

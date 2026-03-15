@@ -1,41 +1,65 @@
 
 import { MetadataRoute } from 'next';
-
-// Mock function - En production, cela cherchera tous les IDs actifs dans Firestore
-async function getAllEntityIds() {
-    return [
-        '7f8a9d12-3b4c-4d5e-9f0a-1b2c3d4e5f6a',
-        'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d'
-    ];
-}
+import { db } from '@/lib/db';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://ai-visionary.com';
 
     // 1. Pages Statiques
-    const staticPages = [
+    const staticPages: MetadataRoute.Sitemap = [
         {
             url: baseUrl,
             lastModified: new Date(),
-            changeFrequency: 'weekly' as const,
+            changeFrequency: 'weekly',
             priority: 1,
         },
         {
             url: `${baseUrl}/aya`,
             lastModified: new Date(),
-            changeFrequency: 'daily' as const,
+            changeFrequency: 'daily',
             priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/diagnostic`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/ai-et-votre-entreprise`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/mentions`,
+            lastModified: new Date(),
+            changeFrequency: 'yearly',
+            priority: 0.3,
+        },
+        {
+            url: `${baseUrl}/confidentialite`,
+            lastModified: new Date(),
+            changeFrequency: 'yearly',
+            priority: 0.3,
         },
     ];
 
-    // 2. Pages Entités (Dynamiques)
-    const ids = await getAllEntityIds();
-    const entityPages = ids.map(id => ({
-        url: `${baseUrl}/aya/e/${id}`,
-        lastModified: new Date(),
-        changeFrequency: 'monthly' as const,
-        priority: 0.7,
-    }));
+    // 2. Pages Entités Dynamiques (depuis Firestore)
+    let entityPages: MetadataRoute.Sitemap = [];
+    try {
+        const entities = await db.getAyaEntities(100);
+        entityPages = entities
+            .filter((e: any) => e.payment_completed)
+            .map((entity: any) => ({
+                url: `${baseUrl}/aya/e/${entity.id || entity.aya_entity_id}`,
+                lastModified: new Date(entity.last_update || entity.created_at),
+                changeFrequency: 'monthly' as const,
+                priority: 0.7,
+            }));
+    } catch {
+        // Firestore indisponible au build — sitemap statique uniquement
+    }
 
     return [...staticPages, ...entityPages];
 }

@@ -6,9 +6,33 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "AI VISIONARY",
-  description: "Un Internet lisible. Une visibilité durable. AYA et AIO structurent et rendent lisible le web pour l'IA.",
-
+  metadataBase: new URL('https://ai-visionary.com'),
+  title: {
+    default: "AI VISIONARY — Rendez votre entreprise visible par l'IA",
+    template: "%s | AI VISIONARY",
+  },
+  description: "Rendez votre entreprise lisible, visible et recommandable par les IA (ChatGPT, Gemini, Claude). Diagnostic gratuit, fichiers ASR certifiés, Registre AYA.",
+  keywords: ["AIO", "visibilité IA", "ChatGPT", "Gemini", "Claude", "ASR", "AYA", "référencement IA", "AI Visionary", "Genève"],
+  authors: [{ name: "AI Visionary" }],
+  openGraph: {
+    type: "website",
+    locale: "fr_CH",
+    url: "https://ai-visionary.com",
+    siteName: "AI VISIONARY",
+    title: "AI VISIONARY — Rendez votre entreprise visible par l'IA",
+    description: "Diagnostic gratuit de visibilité IA. Fichiers ASR certifiés pour être recommandé par ChatGPT, Gemini, Claude et tous les agents IA.",
+    images: [{ url: "/icon-v2.png", width: 512, height: 512, alt: "AI Visionary Logo" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "AI VISIONARY — Visibilité IA pour votre entreprise",
+    description: "Rendez votre entreprise lisible et recommandable par les IA.",
+    images: ["/icon-v2.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
