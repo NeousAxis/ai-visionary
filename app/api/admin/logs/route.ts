@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getApps } from 'firebase-admin/app';
 import '@/lib/db'; // Trigger Firebase Admin initialization
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,10 @@ function getDb() {
 }
 
 export async function GET(req: NextRequest) {
+    // Rate limit admin endpoints
+    const rateLimited = checkRateLimit(req, 'admin-logs', RATE_LIMITS.debug);
+    if (rateLimited) return rateLimited;
+
     const auth = requireAdmin(req);
     if (!auth.authorized) return auth.response!;
 

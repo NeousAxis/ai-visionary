@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { createLogger } from '@/lib/logger';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
-    const logger = createLogger('admin_clean', 'admin');
+    // Rate limit debug endpoints
+    const rateLimited = checkRateLimit(req, 'debug-clean', RATE_LIMITS.debug);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'admin');
 
     // Require ADMIN_SECRET instead of hardcoded password
     const auth = requireAdmin(req);

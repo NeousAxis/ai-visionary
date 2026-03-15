@@ -1,13 +1,22 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { Resend } from 'resend';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { urlSchema } from '@/lib/validators';
+import { maskEmail } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
+    // Rate limit: 5 requests/min per IP
+    const rateLimited = checkRateLimit(req, 'send-otp', RATE_LIMITS.otp);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'auth');
+
     try {
         const body = await req.json();
         const { url } = body;
@@ -16,27 +25,35 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "URL is required" }, { status: 400 });
         }
 
-        console.log(`🔐 OTP REQUEST: For Entity ${url}`);
+        // Validate URL format
+        const parsed = urlSchema.safeParse(url);
+        if (!parsed.success) {
+            logger.warn('OTP_INVALID_URL', `Invalid URL format: ${url}`);
+            return NextResponse.json({ error: "URL invalide" }, { status: 400 });
+        }
+
+        logger.info('OTP_SEND_START', `OTP request for ${url}`);
 
         // 1. Find Admin Email associated with this entity
         // @ts-ignore
         const client = await db.getAyaEntityByUrl(url);
 
         if (!client) {
+            logger.warn('OTP_ENTITY_NOT_FOUND', `No entity for ${url}`);
             return NextResponse.json({ error: "Entity not found." }, { status: 404 });
         }
 
-        const adminEmail = client.contact_email; // This is the "Billing Email" from Stripe usually
+        const adminEmail = client.contact_email;
 
         if (!adminEmail) {
-            console.error(`❌ No email found for ${url}`);
+            logger.error('OTP_NO_EMAIL', `No email found for ${url}`);
             return NextResponse.json({ error: "No admin email linked to this entity." }, { status: 400 });
         }
 
         // 2. Generate 6-digit Code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // 3. Save to DB (expires in 10 mins) (Using the new helper)
+        // 3. Save to DB (expires in 10 mins)
         // @ts-ignore
         await db.saveOTP(adminEmail, code);
 
@@ -61,21 +78,20 @@ export async function POST(req: NextRequest) {
         });
 
         if (error) {
-            console.error("❌ Email Send Error:", error);
+            logger.error('OTP_EMAIL_FAIL', `Failed to send OTP email`, { error: error.message });
             return NextResponse.json({ error: "Failed to send email." }, { status: 500 });
         }
 
-        console.log(`✅ OTP sent to ${adminEmail}`);
+        logger.info('OTP_SENT', `OTP sent to ${maskEmail(adminEmail)}`);
 
         // Return masked email for UI
-        const [user, domain] = adminEmail.split('@');
-        const masked = `${user.substring(0, 2)}***@${domain}`;
+        const masked = maskEmail(adminEmail);
 
         return NextResponse.json({ success: true, maskedEmail: masked }, { status: 200 });
 
     } catch (e: unknown) {
         const message = e instanceof Error ? e.message : 'Unknown error';
-        console.error("🔥 OTP SEND ERROR:", message);
+        logger.error('OTP_SEND_ERROR', message);
         return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 }

@@ -1,19 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { requireAdmin } from '@/lib/auth';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+    // Require admin auth for debug endpoints
+    const auth = requireAdmin(req);
+    if (!auth.authorized) return auth.response!;
+
+    // Rate limit debug endpoints
+    const rateLimited = checkRateLimit(req, 'debug', RATE_LIMITS.debug);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'admin');
     const { searchParams } = new URL(req.url);
     const targetEmail = searchParams.get('email');
 
     if (!targetEmail) {
         return NextResponse.json({
-            error: "Please provide an email query param. Example: /api/debug/email?email=votre@email.com",
-            env_check: {
-                RESEND_API_KEY_CONFIGURED: !!process.env.RESEND_API_KEY,
-                KEY_LENGTH: process.env.RESEND_API_KEY ? process.env.RESEND_API_KEY.length : 0
-            }
+            error: "Please provide an email query param. Example: /api/debug/email?email=votre@email.com&secret=YOUR_SECRET",
         });
     }
 
@@ -33,13 +41,10 @@ export async function GET(req: Request) {
             message: `Email sent to ${targetEmail}`
         });
     } catch (error: any) {
+        logger.error('DEBUG_EMAIL_ERROR', error.message || 'Unknown error');
         return NextResponse.json({
             success: false,
             error: error.message,
-            stack: error.stack,
-            env_check: {
-                RESEND_API_KEY_CONFIGURED: !!process.env.RESEND_API_KEY
-            }
         }, { status: 500 });
     }
 }

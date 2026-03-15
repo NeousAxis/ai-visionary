@@ -1,11 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { db } from '@/lib/db';
 import { generateRealAsrJson } from '@/lib/ayo-crypto';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { emailSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+    // Rate limit: 5 requests/min per IP
+    const rateLimited = checkRateLimit(req, 'light-report', RATE_LIMITS.checkout);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'email');
     const { searchParams } = new URL(req.url);
     const email = searchParams.get('email');
     const url = searchParams.get('url');
@@ -16,13 +24,22 @@ export async function GET(req: Request) {
         });
     }
 
+    // Validate email
+    const emailParsed = emailSchema.safeParse(email);
+    if (!emailParsed.success) {
+        logger.warn('LIGHT_INVALID_EMAIL', `Invalid email: ${email}`);
+        return new Response('<h1>❌ Email invalide</h1>', {
+            headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        });
+    }
+
     // Initialize Resend
     const resendKey = process.env.RESEND_API_KEY;
     if (!resendKey) return NextResponse.json({ error: 'Resend Key Missing' }, { status: 500 });
     const resend = new Resend(resendKey);
 
     try {
-        console.log(`🚀 Sending LIGHT report to ${email}${url ? ` for ${url}` : ''}...`);
+        logger.info('LIGHT_REPORT_START', `Sending LIGHT report to ${email}${url ? ` for ${url}` : ''}`);
 
         // 1. Retrieve Analysis (prioritize URL if provided)
         let analysis;

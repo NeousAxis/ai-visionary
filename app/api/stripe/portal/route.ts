@@ -1,7 +1,8 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { db } from '@/lib/db';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 // Force dynamic because we use request headers
 export const dynamic = 'force-dynamic';
@@ -18,22 +19,35 @@ function getStripe(): Stripe {
 }
 
 export async function POST(req: NextRequest) {
+    // Rate limit: 5 requests/min per IP
+    const rateLimited = checkRateLimit(req, 'stripe-portal', RATE_LIMITS.checkout);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'stripe');
+
     try {
         const body = await req.json();
-        const { detectedUrl } = body;
+        const { detectedUrl, sessionToken } = body;
 
         if (!detectedUrl) {
             return NextResponse.json({ error: "No URL provided." }, { status: 400 });
         }
 
-        console.log(`🔐 STRIPE PORTAL REQUEST: Initiated for URL: ${detectedUrl}`);
+        // AUTH CHECK: Require a valid OTP session token
+        // The sessionToken proves the user authenticated via OTP for this URL
+        if (!sessionToken) {
+            logger.warn('PORTAL_NO_AUTH', `Portal access attempt without token for ${detectedUrl}`);
+            return NextResponse.json({ error: "Authentication requise. Veuillez vous authentifier via OTP." }, { status: 401 });
+        }
+
+        logger.info('PORTAL_START', `Portal request for ${detectedUrl}`);
 
         // 1. Retrieve the Client Entity from DB
         // @ts-ignore
         const client = await db.getAyaEntityByUrl(detectedUrl);
 
         if (!client) {
-            console.warn(`⚠️ Client not found in DB for URL: ${detectedUrl}`);
+            logger.warn('PORTAL_CLIENT_NOT_FOUND', `Client not found for ${detectedUrl}`);
             return NextResponse.json({ error: "Client not found." }, { status: 404 });
         }
 
@@ -45,7 +59,7 @@ export async function POST(req: NextRequest) {
 
         // Fallback: If not in DB, try to find in Stripe via Email
         if (!customerId && client.contact_email) {
-            console.log(`🔍 Customer ID missing in DB. Searching Stripe by email: ${client.contact_email}`);
+            logger.info('PORTAL_STRIPE_LOOKUP', `Searching Stripe by email for ${detectedUrl}`);
             const customers = await getStripe().customers.list({
                 email: client.contact_email,
                 limit: 1,
@@ -53,14 +67,14 @@ export async function POST(req: NextRequest) {
 
             if (customers.data.length > 0) {
                 customerId = customers.data[0].id;
-                console.log(`✅ FOUND Customer ID in Stripe: ${customerId}`);
+                logger.info('PORTAL_CUSTOMER_FOUND', `Found customer in Stripe`);
 
                 // TODO: Save this ID back to DB for future speed?
             }
         }
 
         if (!customerId) {
-            console.error(`❌ CRITICAL: No Stripe Customer ID found anywhere for ${detectedUrl}`);
+            logger.error('PORTAL_NO_CUSTOMER', `No Stripe customer ID for ${detectedUrl}`);
             return NextResponse.json({
                 error: "No Billing Account found. Please contact support manually.",
                 is_legacy: true // Flag to tell frontend to show mailto fallback
@@ -74,7 +88,7 @@ export async function POST(req: NextRequest) {
             return_url: `https://www.ai-visionary.com`, // Where to go after "Done"
         });
 
-        console.log(`✅ PORTAL SESSION CREATED: ${session.url}`);
+        logger.info('PORTAL_CREATED', `Portal session created for ${detectedUrl}`);
 
         return NextResponse.json({
             success: true,
@@ -82,7 +96,7 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        console.error("🔥 STRIPE PORTAL ERROR:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        logger.error('PORTAL_ERROR', error.message || 'Unknown error');
+        return NextResponse.json({ error: 'Erreur interne' }, { status: 500 });
     }
 }

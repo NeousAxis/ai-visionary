@@ -1,16 +1,22 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getFirestore } from 'firebase-admin/firestore';
 import '@/lib/db'; // Ensure Firebase Admin is initialized
+import { requireAdmin } from '@/lib/auth';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
-const ADMIN_SECRET = process.env.ADMIN_FIX_SECRET || 'ayo-fix-2026';
 const PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|general)$/i;
 
-export async function POST(req: Request) {
-    // Simple auth check
-    const { secret } = await req.json().catch(() => ({ secret: '' }));
-    if (secret !== ADMIN_SECRET) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function POST(req: NextRequest) {
+    // Auth via ADMIN_SECRET (env var, not hardcoded)
+    const auth = requireAdmin(req);
+    if (!auth.authorized) return auth.response!;
+
+    // Rate limit
+    const rateLimited = checkRateLimit(req, 'admin-fix', RATE_LIMITS.debug);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'admin');
 
     try {
         const firestore = getFirestore();

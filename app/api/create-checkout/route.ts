@@ -1,5 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { emailSchema, urlSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +12,12 @@ export const dynamic = 'force-dynamic';
  * Cette API crée une session Stripe et encode l'URL + Email dans client_reference_id
  */
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+    // Rate limit: 5 requests/min per IP
+    const rateLimited = checkRateLimit(req, 'checkout', RATE_LIMITS.checkout);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'checkout');
     const { searchParams } = new URL(req.url);
     const email = searchParams.get('email');
     const url = searchParams.get('url');
@@ -18,6 +26,16 @@ export async function GET(req: Request) {
     if (!email || !url) {
         return new Response('Email and URL are required', { status: 400 });
     }
+
+    // Validate inputs
+    const emailParsed = emailSchema.safeParse(email);
+    const urlParsed = urlSchema.safeParse(url);
+    if (!emailParsed.success || !urlParsed.success) {
+        logger.warn('CHECKOUT_INVALID_INPUT', 'Invalid email or URL', { email, url });
+        return new Response('Invalid email or URL', { status: 400 });
+    }
+
+    logger.info('CHECKOUT_GET_START', `Creating checkout for ${email}`, { packType });
 
     try {
         const stripeKey = process.env.STRIPE_SECRET_KEY;
@@ -58,13 +76,29 @@ export async function GET(req: Request) {
     }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+    // Rate limit: 5 requests/min per IP
+    const rateLimited = checkRateLimit(req, 'checkout', RATE_LIMITS.checkout);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'checkout');
+
     try {
         const { email, url, packType } = await req.json();
 
         if (!email || !url) {
             return NextResponse.json({ error: 'Missing email or url' }, { status: 400 });
         }
+
+        // Validate inputs
+        const emailParsed = emailSchema.safeParse(email);
+        const urlParsed = urlSchema.safeParse(url);
+        if (!emailParsed.success || !urlParsed.success) {
+            logger.warn('CHECKOUT_INVALID_INPUT', 'Invalid email or URL', { email, url });
+            return NextResponse.json({ error: 'Invalid email or URL' }, { status: 400 });
+        }
+
+        logger.info('CHECKOUT_POST_START', `Creating checkout for ${email}`, { packType });
 
         const stripeKey = process.env.STRIPE_SECRET_KEY;
         if (!stripeKey) {
@@ -120,7 +154,7 @@ export async function POST(req: Request) {
             }
         });
 
-        console.log(`✅ Checkout Session created: ${session.id} for ${email}`);
+        logger.info('CHECKOUT_CREATED', `Session ${session.id} for ${email}`);
 
         return NextResponse.json({
             url: session.url,
@@ -128,9 +162,9 @@ export async function POST(req: Request) {
         });
 
     } catch (error: any) {
-        console.error('❌ Checkout Creation Error:', error);
+        logger.error('CHECKOUT_ERROR', error.message || 'Unknown error');
         return NextResponse.json({
-            error: error.message
+            error: 'Erreur lors de la creation du paiement'
         }, { status: 500 });
     }
 }

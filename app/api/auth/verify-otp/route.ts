@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import crypto from 'crypto';
-import { createLogger } from '@/lib/logger';
+import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { otpCodeSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +11,11 @@ export const dynamic = 'force-dynamic';
 const SESSION_SECRET = process.env.SESSION_SECRET || process.env.ADMIN_SECRET;
 
 export async function POST(req: NextRequest) {
-    const logger = createLogger('otp_verify', 'auth');
+    // Rate limit: 5 requests/min per IP (brute-force protection)
+    const rateLimited = checkRateLimit(req, 'verify-otp', RATE_LIMITS.otp);
+    if (rateLimited) return rateLimited;
+
+    const logger = createLogger(generateCorrelationId(), 'auth');
 
     try {
         const body = await req.json();
@@ -19,8 +25,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Parametres manquants." }, { status: 400 });
         }
 
-        // Validate OTP format (4-6 digits)
-        if (!/^\d{4,6}$/.test(code)) {
+        // Validate OTP format with Zod
+        const otpParsed = otpCodeSchema.safeParse(code);
+        if (!otpParsed.success) {
             return NextResponse.json({ error: "Format de code invalide." }, { status: 400 });
         }
 

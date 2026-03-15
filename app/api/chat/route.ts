@@ -14,6 +14,7 @@ import { AYO_BUSINESS_CATEGORIES, getScanSystemPrompt } from '@/lib/ayo-categori
 import { getSystemPrompt } from '@/lib/ayo-system-prompt';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { sanitizeForPrompt } from '@/lib/sanitize';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import crypto from 'crypto';
 import Stripe from 'stripe';
 
@@ -359,6 +360,10 @@ async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJson
 import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
 
 export async function POST(req: Request) {
+    // Rate limit: 15 requests/min per IP
+    const rateLimited = checkRateLimit(req as any, 'chat', RATE_LIMITS.chat);
+    if (rateLimited) return rateLimited;
+
     const correlationId = generateCorrelationId();
     const logger = createLogger(correlationId, 'chat');
 
