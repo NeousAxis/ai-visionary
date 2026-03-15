@@ -111,7 +111,18 @@ export default function PaymentSuccessModal() {
                                         <div className="flex-1">
                                             <h3 className="text-white font-bold mb-2 text-lg">📧 Fichiers envoyés</h3>
                                             <p className="text-gray-300 text-sm leading-relaxed">
-                                                Vos fichiers {packType === 'pro' ? <strong className="text-purple-400">PRO (ASR + JSON-LD + Glossaire + FAQ)</strong> : <strong className="text-purple-400">Plateforme (ASR + JSON-LD)</strong>} ont été envoyés à votre adresse email.
+                                                {packType === 'pro' ? (
+                                                    <>
+                                                        Vos <strong className="text-purple-400">5 fichiers PRO</strong> ont été envoyés à votre adresse email :
+                                                        <span className="block mt-2 text-xs text-gray-400 font-mono leading-relaxed">
+                                                            1. ASR-Protocol.json &bull; 2. external_context.json &bull; 3. faq.json &bull; 4. glossary.json &bull; 5. manifest.json
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        Votre fichier <strong className="text-purple-400">ASR-Protocol.json</strong> a été envoyé à votre adresse email.
+                                                    </>
+                                                )}
                                             </p>
                                             <p className="text-purple-300 text-sm mt-2">
                                                 💡 Pensez à vérifier vos spams
