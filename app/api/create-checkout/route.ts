@@ -6,15 +6,18 @@ import { emailSchema, urlSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
 
-// SECURITY: All Stripe Price IDs from env vars (no hardcoded secrets)
+// SECURITY: Stripe Price IDs from env vars (no hardcoded secrets)
+// Only 2 products exist:
+//   - AYA_SUB: AYA Plateforme — 19 CHF/mois (subscription)
+//   - PRO: Pack AIO Pro — 499 CHF one-shot (payment)
 const PRICE_AYA_SUB = process.env.STRIPE_PRICE_AYA_SUB || '';
 const PRICE_PRO = process.env.STRIPE_PRICE_PRO || '';
-const PRICE_ESSENTIAL = process.env.STRIPE_PRICE_ESSENTIAL || '';
 
 /**
  * 🛒 CREATE STRIPE CHECKOUT SESSION (Dynamic)
- * 
+ *
  * Cette API crée une session Stripe et encode l'URL + Email dans client_reference_id
+ * Seuls 2 packs existent: AYA_SUB (19 CHF/mois) et PRO (499 CHF)
  */
 
 export async function GET(req: NextRequest) {
@@ -60,8 +63,9 @@ export async function GET(req: NextRequest) {
             priceId = PRICE_PRO;
             mode = 'payment';
         } else {
-            priceId = PRICE_ESSENTIAL;
-            mode = 'payment';
+            // Unknown pack type — reject
+            logger.warn('CHECKOUT_UNKNOWN_PACK', `Unknown packType: ${packType}`);
+            return new Response('Pack inconnu', { status: 400 });
         }
 
         if (!priceId) {
@@ -77,7 +81,7 @@ export async function GET(req: NextRequest) {
             client_reference_id: clientReferenceId,
             customer_email: email,
             allow_promotion_codes: true,
-            metadata: { pack_type: packType || "UNKNOWN", analyzed_url: url }
+            metadata: { pack_type: packType, analyzed_url: url }
         });
 
         return NextResponse.redirect(session.url!);
@@ -121,7 +125,7 @@ export async function POST(req: NextRequest) {
         const payload = { u: url, e: email };
         const clientReferenceId = Buffer.from(JSON.stringify(payload)).toString('base64');
 
-        // 🛒 NEW PRICING LOGIC (AYA ABONNEMENT vs AYO ONE-SHOT)
+        // Only 2 products: AYA_SUB (19 CHF/mois) and PRO (499 CHF)
         let priceId = '';
         let mode: Stripe.Checkout.SessionCreateParams.Mode = 'payment';
 
@@ -132,8 +136,9 @@ export async function POST(req: NextRequest) {
             priceId = PRICE_PRO;
             mode = 'payment';
         } else {
-            priceId = PRICE_ESSENTIAL;
-            mode = 'payment';
+            // Unknown pack type — reject
+            logger.warn('CHECKOUT_UNKNOWN_PACK', `Unknown packType: ${packType}`);
+            return NextResponse.json({ error: 'Pack inconnu' }, { status: 400 });
         }
 
         if (!priceId) {
@@ -150,15 +155,14 @@ export async function POST(req: NextRequest) {
                     quantity: 1,
                 },
             ],
-            success_url: `https://ai-visionary.com?session_id={CHECKOUT_SESSION_ID}`, // Devrait être dynamique selon env
+            success_url: `https://ai-visionary.com?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: 'https://ai-visionary.com',
-            client_reference_id: clientReferenceId, // Critical for Webhook Email recovery
-            customer_email: email, // Pre-fill email in Stripe Checkout
-            allow_promotion_codes: true, // Bonus commercial
+            client_reference_id: clientReferenceId,
+            customer_email: email,
+            allow_promotion_codes: true,
             metadata: {
-                pack_type: packType, // 'AYA_SUB' | 'PRO' | 'ESSENTIAL'
+                pack_type: packType, // 'AYA_SUB' | 'PRO'
                 analyzed_url: url,
-                // SECURITY: email NOT stored in metadata (already in customer_email field)
                 mode: mode // 'subscription' | 'payment'
             }
         });
