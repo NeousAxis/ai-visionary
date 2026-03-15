@@ -233,7 +233,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         else if (lastAiMsg.includes("Finaliser ma commande") || lastAiMsg.includes("Payer et recevoir") || lastAiMsg.includes("Entrez votre email professionnel pour finaliser") || lastAiMsg.includes("Lien sécurisé") || lastAiMsg.includes("Activer la Certification") || lastAiMsg.includes("Email enregistré")) {
             currentStep = 4; // Finalisation (Email / Paiement)
         }
-        else if (lastAiMsg.includes("OPPORTUNITÉ STRATÉGIQUE") || lastAiMsg.includes("Votre décision finale") || lastAiMsg.includes("PACK ESSENTIAL") || lastAiMsg.includes("PACK PRO")) {
+        else if (lastAiMsg.includes("OPPORTUNITÉ STRATÉGIQUE") || lastAiMsg.includes("Votre décision finale") || lastAiMsg.includes("PACK PLATEFORME") || lastAiMsg.includes("PACK PRO")) {
             currentStep = 3; // Choix ASR (Sales Pitch)
         }
         else if (lastAiMsg.includes("Score AIO") || lastAiMsg.includes("Analyse AIO Finale") || lastAiMsg.includes("SCAN TERMINÉ") || lastAiMsg.includes("Analyse en cours")) {

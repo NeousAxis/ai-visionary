@@ -155,7 +155,7 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
             if (hasFaqLink || hasFaqText) {
                 result.hasFaqContent = true;
                 if (!result.hasFaqSchema) {
-                    result.scoreFactors.push(`⚠️ Contenu FAQ détecté mais NON STRUCURÉ pour l'IA (Manque Schema.org).`);
+                    result.scoreFactors.push(`⚠️ Contenu FAQ détecté mais NON STRUCTURÉ pour l'IA (Manque Schema.org).`);
                 }
             }
 

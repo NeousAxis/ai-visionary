@@ -11,7 +11,7 @@ export function generateExternalContextJson(data: ExternalContextData) {
     return {
         "meta": {
             "layer": "external_context",
-            "status": "transitional",
+            "status": "active",
             "generated_at": new Date().toISOString().split('T')[0],
             "source": "ayo-chatbot"
         },
@@ -50,13 +50,10 @@ export function generateExternalContextJson(data: ExternalContextData) {
         },
 
         "usage_permissions": {
-            // M5 fix: Explicit permission mapping instead of fragile string matching
-            // Paying clients default to all permissions = true (the whole point of paying)
-            "allow_listing": true,
-            "allow_comparison": true,
-            "allow_best_of": true,
-            "allow_intent_matching": true,
-            // Preserve raw permissions for audit trail
+            "allow_listing": (data.permissions || []).some(p => p.toLowerCase().includes("listing") || p.toLowerCase().includes("all")),
+            "allow_comparison": (data.permissions || []).some(p => p.toLowerCase().includes("compar") || p.toLowerCase().includes("all")),
+            "allow_best_of": (data.permissions || []).some(p => p.toLowerCase().includes("best") || p.toLowerCase().includes("classement") || p.toLowerCase().includes("all")),
+            "allow_intent_matching": (data.permissions || []).some(p => p.toLowerCase().includes("intent") || p.toLowerCase().includes("recommand") || p.toLowerCase().includes("all")),
             "raw_declared": data.permissions || []
         },
 

@@ -97,13 +97,14 @@ export async function generateSemanticAssets(extract: AyoExtract): Promise<Seman
                 rawLength: rawJson.length,
                 first200: rawJson.substring(0, 200),
             });
-            // Return empty assets instead of crashing
+            // Return empty assets instead of crashing — but log it as critical
+            logger.critical('SEMANTICS_EMPTY_FALLBACK', 'Returning empty assets due to invalid Gemini JSON');
             return { manifest: {}, faq: {}, glossary: {}, external_context: {} };
         }
 
         // Validate expected structure
         if (!assets || typeof assets !== 'object') {
-            logger.warn('SEMANTICS_BAD_STRUCTURE', 'Gemini returned non-object');
+            logger.critical('SEMANTICS_EMPTY_FALLBACK', 'Gemini returned non-object — empty assets returned');
             return { manifest: {}, faq: {}, glossary: {}, external_context: {} };
         }
 
@@ -118,8 +119,8 @@ export async function generateSemanticAssets(extract: AyoExtract): Promise<Seman
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         const isTimeout = message.includes('abort') || message.includes('timeout');
-        logger.error('SEMANTICS_FAILURE', isTimeout ? 'Gemini timeout (30s)' : message);
-        // Fallback vide (ne casse pas le flux)
+        logger.critical('SEMANTICS_FAILURE', isTimeout ? 'Gemini timeout (30s)' : message);
+        // Fallback vide (ne casse pas le flux) — logged as critical for monitoring
         return { manifest: {}, faq: {}, glossary: {}, external_context: {} };
     }
 }

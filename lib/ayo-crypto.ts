@@ -31,7 +31,7 @@ export async function signAsrContent(asrObject: any) {
         throw new Error('AYO_SIGNING_KEY env var is not set — cannot sign ASR');
     }
 
-    const contentToSign = { ...asrObject };
+    const contentToSign = JSON.parse(JSON.stringify(asrObject));
     delete contentToSign['ayo:seal'];
 
     const canonicalString = canonicalize(contentToSign);
@@ -46,7 +46,7 @@ export async function signAsrContent(asrObject: any) {
     const signatureBase64 = Buffer.from(signatureBytes).toString('base64');
 
     const seal = {
-        level: contentToSign.meta.version.includes("PRO") ? "PRO" : "ESSENTIAL",
+        level: contentToSign.meta.version.includes("PRO") ? "PRO" : "PLATEFORME",
         issuer: "AYO Trusted Authority",
         issuedAt: new Date().toISOString(),
         keyId: KEY_ID,
@@ -103,16 +103,16 @@ function cleanValAsr(val: any): string {
 }
 
 /**
- * Generates Real ASR JSON based on Tier (LIGHT, ESSENTIAL, PRO)
+ * Generates Real ASR JSON based on Tier (LIGHT, PLATEFORME, PRO)
  */
-export async function generateRealAsrJson(extractedData: any, scoreToUse: number, realDate: string, realAsrId: string | null = null, tier: 'LIGHT' | 'ESSENTIAL' | 'PRO' | 'isProLegacy' = 'ESSENTIAL', entityUrl?: string): Promise<any> {
+export async function generateRealAsrJson(extractedData: any, scoreToUse: number, realDate: string, realAsrId: string | null = null, tier: 'LIGHT' | 'PLATEFORME' | 'PRO' | 'isProLegacy' = 'PLATEFORME', entityUrl?: string): Promise<any> {
 
     // Legacy support (boolean param)
-    let mode = 'ESSENTIAL';
+    let mode = 'PLATEFORME';
     if (typeof tier === 'boolean') {
-        mode = tier ? 'PRO' : 'ESSENTIAL';
+        mode = tier ? 'PRO' : 'PLATEFORME';
     } else if (tier === 'isProLegacy') {
-        mode = 'ESSENTIAL'; // Fallback
+        mode = 'PLATEFORME'; // Fallback
     } else {
         mode = tier;
     }
@@ -149,7 +149,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             ? { "@type": "Country", "name": cleanValAsr(data.identite.country.value) }
             : { "@type": "AdministrativeArea", "name": cleanValAsr(data.identite?.city?.value) || "Non spécifié" });
 
-    // V3 Advanced Blocks (Only for PRO/ESSENTIAL depending on strategy)
+    // V3 Advanced Blocks (Only for PRO/PLATEFORME depending on strategy)
     // selectionConditions: build from actual data, not generic defaults
     const selectionRequired: string[] = ["ASR Protocol verified"];
     if (data.identite?.business_type?.value) selectionRequired.push("businessType declared");
@@ -297,7 +297,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "schema_version": "3.0",
         "protocol": "AYO-ASR",
         "tier": mode,
-        "validity_period": mode === 'PRO' ? "3 years" : mode === 'ESSENTIAL' ? "1 year" : "demo",
+        "validity_period": mode === 'PRO' ? "3 years" : mode === 'PLATEFORME' ? "1 year" : "demo",
         "spec": "https://ai-visionary.com/specs/asr-v3"
     };
 
@@ -374,7 +374,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             "source_priority": ["asr_protocol", "manifest", "external_context", "faq", "glossary"]
         };
     }
-    else if (mode === 'ESSENTIAL') {
+    else if (mode === 'PLATEFORME') {
         asrContent.selectionConditions = selectionConditions;
         asrContent.contextualSignals = contextualSignals;
     }
@@ -384,7 +384,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     }
 
     // Sign ONLY if not LIGHT (or maybe sign light too? "ASR LIGHT... prouve l’existence") -> "NON SCELLE" usually.
-    // User said: "ASR ESSENTIAL complet et scellé". Implies LIGHT is NOT sealed or weakly sealed.
+    // User said: "ASR PLATEFORME complet et scellé". Implies LIGHT is NOT sealed or weakly sealed.
     // "ASR LIGHT ... Un artefact qui prouve l’existence".
     // Let's sign it but with a "DEMO" issuer or just standard signing?
     // Let's sign it standard for technical validity, but the content itself is poor.
