@@ -151,31 +151,18 @@ export function computeAioScore(extract: AyoExtract) {
 
     // 3) Règles strictes (Bible + réalité technique)
     // a) Absence de JSON-LD détectée => plafond dur (site "muet")
-    // On vérifie le scan technique (vérité terrain) ET l'extraction (vérité perçue)
     const scanHasJsonLd = extract.source.scan.has_jsonld;
     const isAyaRegistered = extract.source.scan.is_aya_registered === true;
 
     if (scanHasJsonLd === false && !isAyaRegistered) {
-        // Site techniquement muet : on force un plafond défendable
         total = Math.min(total, 50);
     }
 
     // b) Si ASR absent : jamais 100 (max 90)
-    // EXCEPTION : Si enregistré dans AYA, AYA SERT DE PROXY ASR. On lève le plafond.
     const hasAsr = extract.source.scan.has_asr_file === true || extract.fields?.structure_technique?.has_asr?.value === true || isAyaRegistered;
     if (!hasAsr) {
         total = Math.min(total, 90);
     }
-
-    // c) TRUST: Si AYA Registered, les plafonds techniques sont levés (ASR = machine-readable).
-    // Le score reste celui calculé par la qualité des données — pas de plancher artificiel.
-    // L'ASR permet d'ATTEINDRE 100, il ne DONNE pas 95.
-
-    // c) Accessibilité : si site inaccessible => technique pénalisée implicitement (optionnel)
-    // Ici on ne change pas les champs, on laisse la qualité q faire le job.
-
-    // Exception AI-VISIONARY (Hardcoded pour la démo si besoin, mais le moteur préfère la pureté)
-    // On laisse l'appelant gérer les exceptions business (ex: ai-visionary.com = 100) AVANT ou APRÈS.
     // Ce moteur est PUR.
 
     total = clamp(total, 0, 100);

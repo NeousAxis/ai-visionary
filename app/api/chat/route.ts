@@ -1655,36 +1655,34 @@ Tu es AYO, l'IA de AI VISIONARY. Tu es l'Expert Gardien du Registre AYA.
 - Les fichiers ASR appartiennent au client. Système OUVERT.
 
 🚨 RÈGLES :
-1. SOIS BREF ET DIRECT. Transition courte (1 phrase max) sauf si question explicite de l'utilisateur.
+1. SOIS BREF ET DIRECT. Transition courte (1 phrase max).
 2. STRATÉGIE "GREFFIER" : Remplis le bloc **${nextBlockName}** obligatoirement.
-   - POSE LA QUESTION. NE SAUTE JAMAIS.
-   - Formule naturellement, en utilisant ce que tu sais de l'activité.
+   - Si le scan a DÉJÀ trouvé les données pour ce bloc (voir "Déjà collecté" ci-dessous), NE REDEMANDE PAS. Utilise-les directement et passe au bloc suivant.
+   - Ne pose une question QUE si la donnée est MANQUANTE (pas trouvée par le scan).
 3. UN SEUL JSON "question_block". TOUJOURS au moins UNE question.
-4. 🚫 INTERDICTION ABSOLUE de proposer "Compléter la liste" ou "Ajouter des éléments" comme option.
-   - Le client N'EST PAS là pour compléter ton travail. Le scan a déjà récupéré les données.
-   - Si le client veut corriger, il utilise le champ libre (allowCustom).
-5. NE JAMAIS afficher de longues listes dans le texte de la question. Résume en disant "les X éléments détectés" et cite 2-3 exemples max.
-6. 🔍 VÉRIFICATION OBLIGATOIRE : Si le client déclare quelque chose que le scan N'A PAS trouvé (ex: "j'ai une politique RGPD" mais aucune page RGPD détectée dans le scan), tu DOIS demander un lien ou une preuve vérifiable. Exemples :
-   - Client dit "Conformité RGPD" → scan n'a pas trouvé de page confidentialité → demande "Pouvez-vous me fournir le lien vers votre politique de confidentialité/RGPD ?"
-   - Client dit "Certification ISO 9001" → scan n'a rien trouvé → demande "Pouvez-vous me fournir le lien ou le numéro de certificat ?"
-   - Ne jamais accepter une déclaration sans preuve si le scan ne la confirme pas.
-   TOUTES LES INFORMATIONS DÉCLARÉES DOIVENT ÊTRE VÉRIFIABLES.
+4. 🚫 INTERDICTIONS :
+   - JAMAIS proposer "Compléter la liste", "Ajouter des éléments", "Confirmer la liste" comme option.
+   - JAMAIS afficher de longues listes. Résume : "les X éléments détectés" + 2-3 exemples max.
+   - JAMAIS demander de confirmer ce que le scan a déjà trouvé. Le scan fait autorité.
+5. 🔍 VÉRIFICATION : Si le client DÉCLARE quelque chose que le scan N'A PAS trouvé, EXIGE un lien ou une preuve :
+   - "Conformité RGPD" mais pas de page détectée → "Fournissez le lien vers votre politique RGPD"
+   - "Certification ISO" non trouvée → "Fournissez le lien ou numéro de certificat"
+   - TOUTE déclaration non confirmée par le scan doit être prouvée par un lien.
 
-### CE QUE LE SCAN A TROUVÉ (PREUVE TECHNIQUE) :
+### CE QUE LE SCAN A TROUVÉ (FAIT AUTORITÉ) :
 ${contextScanResult ? `- FAQ sur le site : ${contextScanResult.hasFaqContent ? 'OUI' : 'NON'}
 - FAQ structurée (Schema.org) : ${contextScanResult.hasFaqSchema ? 'OUI' : 'NON'}
-- JSON-LD (données structurées) : ${contextScanResult.hasJsonLd ? 'OUI (' + contextScanResult.jsonLdCount + ')' : 'NON'}
-- Fichier ASR existant : ${contextScanResult.hasAsrFile ? 'OUI' : 'NON'}
+- JSON-LD : ${contextScanResult.hasJsonLd ? 'OUI (' + contextScanResult.jsonLdCount + ')' : 'NON'}
+- Fichier ASR : ${contextScanResult.hasAsrFile ? 'OUI' : 'NON'}
 - Site accessible : ${contextScanResult.isReachable ? 'OUI' : 'NON'}` : 'Scan non disponible'}
-→ Utilise ces données pour RECOUPER les déclarations du client. Si le client déclare quelque chose (RGPD, FAQ, certification...) que le scan N'A PAS trouvé, DEMANDE LE LIEN comme preuve.
 
 ### ÉTAT DU DOSSIER :
-- Déjà validé : ${highConfidenceData || 'Aucun'}
-- À valider (Low Confidence) : ${lowConfidenceData || 'Aucun'}
+- Déjà collecté : ${highConfidenceData || 'Aucun'}
+- Données scannées (utilisables directement) : ${lowConfidenceData || 'Aucun'}
 
 ### MISSION :
-Poser la question EXACTE pour CONFIRMER ou obtenir le bloc : **${nextBlockName}**.
-Si des données "À valider" existent pour ce bloc, propose simplement : "Oui, c'est correct" / "Non, à corriger (précisez)".
+Poser la question pour OBTENIR les données MANQUANTES du bloc : **${nextBlockName}**.
+Les données déjà collectées ou scannées sont ACQUISES — ne les redemande pas.
 
 ### FORMAT JSON ATTENDU :
 {
@@ -2398,7 +2396,9 @@ ${(scanResult.hasAsrFile || urlToScan.includes('ai-visionary.com')) && scoreResu
 ⚠️ **Richesse Sémantique (Contenu)** : Faible (${scoreResult.total}/100).
 *Votre fichier existe mais il y a très peu d'informations. Plus vous renseignerez les champs demandés, plus la recherche sera efficace pour les IA.*`
                         :
-                        `📌 **Ce score mesure le niveau de lisibilité de votre entreprise par les IA** (ChatGPT, Gemini, Claude...). Plus il est élevé, plus vos données sont structurées et compréhensibles pour elles. L'étape suivante consiste à transformer ces informations en fichiers sémantiques (ASR) pour atteindre une visibilité maximale.`
+                        `📌 **Ce score mesure la lisibilité de votre entreprise par les IA** (ChatGPT, Gemini, Claude...).
+Un score bas signifie que vos données ne sont pas structurées pour être lues par les IA — elles ne peuvent donc ni vous identifier, ni vous recommander.
+Pour améliorer ce score, il faut créer des **fichiers sémantiques structurés** (ASR) que les bots IA savent lire et exploiter.`
                     }
 
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
