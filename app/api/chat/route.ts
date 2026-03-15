@@ -244,12 +244,12 @@ SI NON :
                     "C'est noté. Je reste ici si besoin."
                     [FIN]
 
-📍 ÉTAT 5 : LIVRAISON ASR ESSENTIAL(Si Paiement)
+📍 ÉTAT 5 : LIVRAISON ASR PLATEFORME (Si Paiement)
                     (Après confirmation "Fait").
 
                     TÂCHE :
                     1. Récupère ta meilleure analyse de l'entreprise (State 2).
-2. Construis le fichier JSON "ASR ESSENTIAL PRO" suivant la structure CANONIQUE(12 Blocs).
+2. Construis le fichier JSON "ASR-Protocol" suivant la structure CANONIQUE(12 Blocs).
 3. Remplis les champs intelligemment.
 4. Affiche le JSON dans un bloc de code.
 
@@ -291,7 +291,7 @@ STRUCTURE DU JSON À GÉNÉRER :
   
   "ayo:seal": {
     "issuer": "AYO Trusted Authority",
-    "level": "ESSENTIAL_PRO",
+    "level": "PLATEFORME",
     "hash": "${realAsrId}",
     "signature": "sig_ed25519_${realAsrId}",
     "timestamp": "${realIsoDate}"
@@ -304,7 +304,7 @@ MESSAGE À L'UTILISATEUR (Après le bloc JSON) :
 Hash de certification : **${realAsrId}**.
 
 📧 **Dossier Final Envoyé !**
-Votre ASR Essential PRO (Structure Décisionnelle Complète) est dans votre boîte mail.
+Votre ASR-Protocol (Structure Décisionnelle Complète) est dans votre boîte mail.
 Installez-le pour activer votre autorité."
 
 📍 ÉTAT 6 : ACTIVATION
@@ -472,7 +472,7 @@ export async function POST(req: Request) {
         const urlRegex = /[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}/gi;
 
         const rawUrlMatch = lastMessage.content.match(urlRegex);
-        console.log("🔍 DEBUG V4.1: Parsed URL Match:", rawUrlMatch);
+        logger.info('URL_PARSE', `Parsed URL Match: ${rawUrlMatch}`);
 
         // CHECK IF IT IS AN EMAIL (Priority: If Email -> It's NOT a URL for analysis)
         const triggerEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -489,9 +489,9 @@ export async function POST(req: Request) {
         const hasUrlHistory = urlMsgIndex !== -1;
         const actualUrlMsgIndex = hasUrlHistory ? (messages.length - 1 - urlMsgIndex) : -1;
 
-        console.log(`🔍 DEBUG TRIGGER: hasUrlHistory=${hasUrlHistory}, actualUrlMsgIndex=${actualUrlMsgIndex}`);
+        logger.info('URL_TRIGGER', `hasUrlHistory=${hasUrlHistory}, actualUrlMsgIndex=${actualUrlMsgIndex}`);
         if (hasUrlHistory) {
-            console.log(`🔍 URL Message found: "${messages[actualUrlMsgIndex].content}"`);
+            logger.info('URL_FOUND', `URL Message: "${messages[actualUrlMsgIndex].content}"`);
         }
 
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
@@ -525,9 +525,7 @@ export async function POST(req: Request) {
 
         const hasQuestionBlock = stepsCompleted > 0; // Virtual indicator
 
-        console.log(`DEBUG: Protocol Steps Completed (User Turns): ${stepsCompleted}/16`);
-        console.log(`DEBUG: hasFinalScore=${hasFinalScore}`);
-        console.log(`DEBUG: hasQuestionBlockSent=${hasQuestionBlockSent}`);
+        logger.info('PROTOCOL_STATE', `Steps: ${stepsCompleted}/16, hasFinalScore=${hasFinalScore}, hasQuestionBlockSent=${hasQuestionBlockSent}`);
 
         // 🎯 TARGET URL IDENTIFICATION
         const urlInLastMessage = userUrlMatch ? userUrlMatch[0] : null;
@@ -944,7 +942,7 @@ export async function POST(req: Request) {
             }
 
             // 🔒 VALIDATION: Check if URL exists before scanning
-            console.log(`🔍 Validating URL accessibility: ${urlToScan}...`);
+            logger.info('URL_VALIDATE', `Validating URL accessibility: ${urlToScan}`);
             try {
                 const urlCheck = await fetch(urlToScan, {
                     method: 'HEAD',
@@ -1759,8 +1757,7 @@ Poser la question EXACTE pour obtenir ou valider le bloc : **${nextBlockName}**.
 
         if (triggerMode === "FINAL_ANALYSIS") {
             try {
-                console.log("🚀 TRIGGERING DETERMINISTIC AIO ENGINE (V3 Contextual)...");
-                console.log(`🔍 DEBUG: triggerMode = "${triggerMode}", isAnalysisRun will be set to true`);
+                logger.info('AIO_ENGINE', `Triggering deterministic AIO engine, triggerMode="${triggerMode}"`);
                 isAnalysisRun = true;
                 let urlToScan = detectedUrl;
                 if (!urlToScan && hasUrlHistory) {
@@ -2416,7 +2413,7 @@ Veuillez réessayer ou contacter hello@ai-visionary.com.`;
             const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
             const emailMatch = userContent.match(emailCaptureRegex);
 
-            console.log("🔍 SALES FUNNEL - content:", userContent);
+            logger.info('SALES_FUNNEL', `User content: ${userContent.substring(0, 100)}`);
 
             // 1. INTENTION DETECTION & PITCHES
             // 🔄 CASE: ABONNEMENT AYA (19 CHF / MOIS)
@@ -2472,10 +2469,10 @@ L'Abonnement AYA est conçu pour les entreprises qui veulent des résultats sans
 
 Vous offrez à votre entreprise la possibilité réelle d'être visible et recommandable par les IA avec une propriété totale de vos actifs.
 
-**Documents fournis (Complet) :**
-- 👑 **asr.json (PRO, signé)** → Contexte & critères IA avancés.
-- ⚙️ **manifest.json (PRO)** → Politique de recommandation stricte.
-- 💬 **faq.json enrichi** → Réponses contextuelles pour LLMs.
+**Vos 5 fichiers PRO :**
+- 👑 **ASR-Protocol.json** → Contexte & critères IA avancés (signé).
+- ⚙️ **manifest.json** → Politique de recommandation stricte.
+- 💬 **faq.json** → Réponses contextuelles pour LLMs.
 - 📖 **glossary.json** → Vocabulaire métier précis.
 - 🌐 **external_context.json** → Avis et signaux encapsulés.
 - 📄 **3 ANS de Registre AYA inclus**.
@@ -2569,11 +2566,13 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
 
 🚀 **Finaliser mon PACK PRO - Propriété (499 CHF)**
 
-**Inclus :**
-👑 **ASR PRO (Signé)** + Manifest + FAQ
-📖 **Glossaire Métier** complet
-🌐 **Fichier Contexte Externe**
-📜 **3 Ans de Registre AYA** inclus
+**Vos 5 fichiers PRO :**
+👑 **ASR-Protocol.json** (signé)
+⚙️ **manifest.json**
+💬 **faq.json**
+📖 **glossary.json**
+🌐 **external_context.json**
+📜 + **3 Ans de Registre AYA** inclus
 
 👉 **[Acheter mes fichiers ASR](${actionLink})**
 
