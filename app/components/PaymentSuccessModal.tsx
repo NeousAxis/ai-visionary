@@ -11,19 +11,22 @@ export default function PaymentSuccessModal() {
 
     useEffect(() => {
         const sessionId = searchParams.get('session_id');
+        const pack = searchParams.get('pack');
 
         // M8: Validate session_id format (Stripe session IDs start with cs_)
         const isValidSessionId = sessionId && /^cs_(test_|live_)[a-zA-Z0-9]{10,}$/.test(sessionId);
 
         if (isValidSessionId) {
             setShowModal(true);
+            if (pack === 'pro') setPackType('pro');
+            else setPackType('plateforme');
 
             // The REAL order processing is done by Stripe's webhook (with signature verification).
             // This modal is purely UX — show a brief "processing" animation, then success.
             // We do NOT call the webhook from the browser (it requires Stripe signature).
             const timer = setTimeout(() => {
                 setStatus('success');
-                // Clean URL (remove session_id from browser bar)
+                // Clean URL (remove session_id and pack from browser bar)
                 window.history.replaceState({}, '', window.location.pathname);
             }, 2000);
 
@@ -33,7 +36,6 @@ export default function PaymentSuccessModal() {
 
     const handleClose = () => {
         setShowModal(false);
-        // Clean URL
         window.history.replaceState({}, '', '/');
     };
 
@@ -43,117 +45,199 @@ export default function PaymentSuccessModal() {
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-black/70 backdrop-blur-md z-[9999] transition-opacity duration-300"
+                className="fixed inset-0 z-[9999] transition-opacity duration-300"
+                style={{ background: 'rgba(33, 46, 83, 0.6)', backdropFilter: 'blur(8px)' }}
                 onClick={handleClose}
             />
 
             {/* Modal */}
             <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 pointer-events-none">
                 <div
-                    className="pointer-events-auto bg-gradient-to-br from-[#0f0518] via-[#1a0b2e] to-[#0f0518] border-2 border-purple-500/30 rounded-3xl shadow-2xl max-w-lg w-full p-8 relative overflow-hidden"
+                    className="pointer-events-auto w-full"
                     style={{
+                        maxWidth: '480px',
+                        background: '#FFFFFF',
+                        borderRadius: '24px',
+                        border: '1px solid #D4E0DC',
+                        boxShadow: '0 25px 60px rgba(33, 46, 83, 0.18), 0 8px 20px rgba(33, 46, 83, 0.08)',
                         animation: 'modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                        boxShadow: '0 0 60px rgba(139, 92, 246, 0.4), 0 0 120px rgba(217, 70, 239, 0.2)'
+                        overflow: 'hidden',
                     }}
                 >
-                    {/* Animated background gradient */}
-                    <div className="absolute inset-0 opacity-30">
-                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-600/20 via-transparent to-pink-600/20 animate-pulse"></div>
+                    {/* Teal header bar */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, #4A919E 0%, #356D76 100%)',
+                        padding: '28px 32px',
+                        textAlign: 'center',
+                    }}>
+                        {status === 'processing' && (
+                            <>
+                                <div style={{
+                                    width: '56px', height: '56px', margin: '0 auto 16px',
+                                    border: '3px solid rgba(255,255,255,0.3)', borderTop: '3px solid #fff',
+                                    borderRadius: '50%', animation: 'spin 1s linear infinite',
+                                }} />
+                                <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+                                    Préparation en cours...
+                                </h2>
+                                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginTop: '6px' }}>
+                                    Nous préparons vos fichiers AIO
+                                </p>
+                            </>
+                        )}
+                        {status === 'success' && (
+                            <>
+                                <div style={{
+                                    width: '64px', height: '64px', margin: '0 auto 16px',
+                                    background: 'rgba(255,255,255,0.2)', borderRadius: '50%',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <h2 style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+                                    Paiement validé !
+                                </h2>
+                                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1rem', marginTop: '8px', fontWeight: 500 }}>
+                                    Votre Pack <strong>{packType === 'pro' ? 'PRO' : 'Plateforme'}</strong> est activé
+                                </p>
+                            </>
+                        )}
+                        {status === 'error' && (
+                            <>
+                                <div style={{
+                                    width: '64px', height: '64px', margin: '0 auto 16px',
+                                    background: 'rgba(255,255,255,0.2)', borderRadius: '50%',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
+                                    Erreur technique
+                                </h2>
+                            </>
+                        )}
                     </div>
 
-                    <div className="relative z-10">
+                    {/* Body */}
+                    <div style={{ padding: '28px 32px 32px' }}>
                         {status === 'processing' && (
-                            <div className="text-center">
-                                <div className="w-20 h-20 mx-auto mb-6 relative">
-                                    <div className="absolute inset-0 border-4 border-purple-500/30 rounded-full"></div>
-                                    <div className="absolute inset-0 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                                    <div className="absolute inset-2 border-4 border-pink-500/30 rounded-full"></div>
-                                    <div className="absolute inset-2 border-4 border-pink-500 border-b-transparent rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-                                </div>
-                                <h2 className="text-2xl font-bold text-white mb-3">Génération en cours...</h2>
-                                <p className="text-gray-300">Nous préparons vos fichiers AIO</p>
-                                <div className="mt-4 flex justify-center gap-1">
-                                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
+                                    {[0, 150, 300].map((delay) => (
+                                        <div key={delay} style={{
+                                            width: '8px', height: '8px', borderRadius: '50%',
+                                            background: '#4A919E',
+                                            animation: `bounce 1.4s infinite ease-in-out`,
+                                            animationDelay: `${delay}ms`,
+                                        }} />
+                                    ))}
                                 </div>
                             </div>
                         )}
 
                         {status === 'success' && (
-                            <div className="text-center">
-                                {/* Success Icon with animation */}
-                                <div className="relative w-24 h-24 mx-auto mb-6">
-                                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 animate-ping opacity-75"></div>
-                                    <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/50">
-                                        <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    </div>
-                                </div>
-
-                                <h2 className="text-4xl font-bold text-white mb-3 animate-fade-in">
-                                    🎉 Paiement validé !
-                                </h2>
-
-                                <p className="text-xl text-gray-200 mb-6">
-                                    Votre Pack <span className="font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{packType === 'pro' ? 'PRO' : 'Plateforme'}</span> est activé
-                                </p>
-
-                                {/* Info Box */}
-                                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8 text-left">
-                                    <div className="flex items-start gap-4">
-                                        <div className="mt-1 bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-xl shadow-lg">
-                                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            <>
+                                {/* Files info card */}
+                                <div style={{
+                                    background: '#F5F9F8',
+                                    border: '1px solid #D4E0DC',
+                                    borderRadius: '16px',
+                                    padding: '20px 24px',
+                                    marginBottom: '24px',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>
+                                        <div style={{
+                                            width: '42px', height: '42px', borderRadius: '12px', flexShrink: 0,
+                                            background: '#4A919E', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        }}>
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                             </svg>
                                         </div>
-                                        <div className="flex-1">
-                                            <h3 className="text-white font-bold mb-2 text-lg">📧 Fichiers envoyés</h3>
-                                            <p className="text-gray-300 text-sm leading-relaxed">
-                                                {packType === 'pro' ? (
-                                                    <>
-                                                        Vos <strong className="text-purple-400">5 fichiers PRO</strong> ont été envoyés à votre adresse email :
-                                                        <span className="block mt-2 text-xs text-gray-400 font-mono leading-relaxed">
-                                                            1. ASR-Protocol.json &bull; 2. external_context.json &bull; 3. faq.json &bull; 4. glossary.json &bull; 5. manifest.json
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        Votre fichier <strong className="text-purple-400">ASR-Protocol.json</strong> a été envoyé à votre adresse email.
-                                                    </>
-                                                )}
-                                            </p>
-                                            <p className="text-purple-300 text-sm mt-2">
-                                                💡 Pensez à vérifier vos spams
-                                            </p>
+                                        <div style={{ flex: 1 }}>
+                                            <h3 style={{ color: '#212E53', fontSize: '1rem', fontWeight: 700, margin: '0 0 6px 0' }}>
+                                                Fichiers envoyés par email
+                                            </h3>
+                                            {packType === 'pro' ? (
+                                                <>
+                                                    <p style={{ color: '#324066', fontSize: '0.9rem', margin: '0 0 10px 0', lineHeight: 1.5 }}>
+                                                        Vos <strong style={{ color: '#4A919E' }}>5 fichiers PRO</strong> ont été envoyés :
+                                                    </p>
+                                                    <div style={{
+                                                        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px',
+                                                        fontSize: '0.82rem', fontFamily: 'monospace', color: '#64748B', lineHeight: 1.7,
+                                                    }}>
+                                                        <span>1. ASR-Protocol.json</span>
+                                                        <span>2. external_context.json</span>
+                                                        <span>3. faq.json</span>
+                                                        <span>4. glossary.json</span>
+                                                        <span>5. manifest.json</span>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <p style={{ color: '#324066', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>
+                                                    Votre fichier <strong style={{ color: '#4A919E' }}>ASR-Protocol.json</strong> a été envoyé.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
+                                {/* Spam reminder */}
+                                <p style={{
+                                    textAlign: 'center', color: '#64748B', fontSize: '0.85rem',
+                                    marginBottom: '24px', fontStyle: 'italic',
+                                }}>
+                                    Pensez à vérifier vos spams si vous ne recevez rien.
+                                </p>
+
+                                {/* CTA button */}
                                 <button
                                     onClick={handleClose}
-                                    className="w-full px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 text-white font-bold text-lg rounded-xl hover:from-purple-700 hover:via-purple-600 hover:to-pink-700 transition-all duration-300 shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 hover:-translate-y-1 transform"
+                                    style={{
+                                        width: '100%', padding: '14px 24px',
+                                        background: '#4A919E', color: '#fff',
+                                        fontSize: '1rem', fontWeight: 600,
+                                        border: 'none', borderRadius: '50px', cursor: 'pointer',
+                                        boxShadow: '0 4px 14px rgba(74, 145, 158, 0.3)',
+                                        transition: 'all 0.2s ease',
+                                        letterSpacing: '0.02em', textTransform: 'uppercase',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = '#356D76';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(74, 145, 158, 0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = '#4A919E';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 14px rgba(74, 145, 158, 0.3)';
+                                    }}
                                 >
-                                    → Retour à l'accueil
+                                    Retour à l&apos;accueil
                                 </button>
-                            </div>
+                            </>
                         )}
 
                         {status === 'error' && (
-                            <div className="text-center">
-                                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center">
-                                    <svg className="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
-                                </div>
-                                <h2 className="text-2xl font-bold text-white mb-3">Erreur technique</h2>
-                                <p className="text-gray-300 mb-6">
+                            <div style={{ textAlign: 'center' }}>
+                                <p style={{ color: '#324066', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '20px' }}>
                                     Votre paiement a été reçu mais nous rencontrons un problème technique.
+                                    Nos équipes sont notifiées.
                                 </p>
                                 <a
                                     href="mailto:hello@ai-visionary.com"
-                                    className="inline-block px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg transition-colors"
+                                    style={{
+                                        display: 'inline-block', padding: '12px 28px',
+                                        background: '#F5F9F8', border: '1px solid #D4E0DC',
+                                        borderRadius: '50px', color: '#212E53', fontWeight: 600,
+                                        fontSize: '0.95rem', textDecoration: 'none',
+                                        transition: 'all 0.2s',
+                                    }}
                                 >
                                     Contacter le support
                                 </a>
@@ -165,21 +249,15 @@ export default function PaymentSuccessModal() {
 
             <style jsx>{`
                 @keyframes modalSlideIn {
-                    from {
-                        opacity: 0;
-                        transform: scale(0.8) translateY(50px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: scale(1) translateY(0);
-                    }
+                    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
                 }
-                @keyframes fade-in {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
                 }
-                .animate-fade-in {
-                    animation: fade-in 0.5s ease-out;
+                @keyframes bounce {
+                    0%, 80%, 100% { transform: scale(0); }
+                    40% { transform: scale(1); }
                 }
             `}</style>
         </>
