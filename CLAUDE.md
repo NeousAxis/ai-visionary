@@ -356,7 +356,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session | Statut | Date | Notes |
 |---------|--------|------|-------|
 | Session 1 | ✅ **TERMINÉE** | 2026-03-14 | Logger/rate-limit/validators/auth intégrés dans les 11 routes API. Build OK. |
-| Session 2 | ❌ Pas commencée | — | — |
+| Session 2 | ✅ **TERMINÉE** | 2026-03-14 | C1+C2 critiques, H1-H3 hautes, M1+M2+M6 moyennes. CSP, anti-SSRF, ignoreBuildErrors:false. ⚠️ AJOUTER env vars: SESSION_SECRET, STRIPE_PRICE_PRO, STRIPE_PRICE_ESSENTIAL sur Vercel |
 | Session 3 | ❌ Pas commencée | — | — |
 | Session 4 | ❌ Pas commencée | — | ⚠️ Cyril doit être présent |
 | Session 5 | ❌ Pas commencée | — | — |
