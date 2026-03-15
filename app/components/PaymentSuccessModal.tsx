@@ -10,46 +10,24 @@ export default function PaymentSuccessModal() {
     const [packType, setPackType] = useState<'plateforme' | 'pro'>('plateforme');
 
     useEffect(() => {
-        const paymentSuccess = searchParams.get('payment_success');
         const sessionId = searchParams.get('session_id');
 
         // M8: Validate session_id format (Stripe session IDs start with cs_)
         const isValidSessionId = sessionId && /^cs_(test_|live_)[a-zA-Z0-9]{10,}$/.test(sessionId);
 
-        if (paymentSuccess === 'true' && isValidSessionId) {
+        if (isValidSessionId) {
             setShowModal(true);
 
-            // H9 fix: Only this component triggers the webhook (PaymentHandler removed)
-            const processOrder = async () => {
-                try {
-                    const res = await fetch('/api/webhooks/checkout-success', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ session_id: sessionId })
-                    });
+            // The REAL order processing is done by Stripe's webhook (with signature verification).
+            // This modal is purely UX — show a brief "processing" animation, then success.
+            // We do NOT call the webhook from the browser (it requires Stripe signature).
+            const timer = setTimeout(() => {
+                setStatus('success');
+                // Clean URL (remove session_id from browser bar)
+                window.history.replaceState({}, '', window.location.pathname);
+            }, 2000);
 
-                    if (res.ok) {
-                        const data = await res.json();
-                        // Determine pack type from amount
-                        if (data.amount && data.amount >= 499) {
-                            setPackType('pro');
-                        }
-                        setStatus('success');
-                    } else {
-                        setStatus('error');
-                    }
-                } catch (e) {
-                    console.error('Processing error:', e);
-                    setStatus('error');
-                }
-            };
-
-            processOrder();
-        } else if (paymentSuccess === 'true' && sessionId && !isValidSessionId) {
-            // Invalid session_id format — don't call webhook
-            console.error('[PaymentSuccessModal] Invalid session_id format:', sessionId?.substring(0, 10));
-            setShowModal(true);
-            setStatus('error');
+            return () => clearTimeout(timer);
         }
     }, [searchParams]);
 

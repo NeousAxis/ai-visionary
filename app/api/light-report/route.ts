@@ -111,29 +111,8 @@ export async function GET(req: NextRequest) {
             `;
         };
 
-        // Fallback Logic for detailed contents
-        let blocksToRender = (analysis as any).data?.analysis_blocks;
-        if (!blocksToRender && analysisData.score > 0) {
-            // Reconstruct likely blocks from score if missing
-            const s = analysisData.score;
-            blocksToRender = {
-                identite: {
-                    score: s > 50 ? 8 : 4, max: 10, label: "Identité & Ancrage",
-                    status: s > 50 ? 'success' : 'warning',
-                    observation: s > 50 ? "Identité validée." : "Identité numérique faible."
-                },
-                offre: {
-                    score: s > 60 ? 15 : 8, max: 20, label: "Clarté de l'Offre",
-                    status: s > 60 ? 'success' : 'warning',
-                    observation: s > 60 ? "Offre claire." : "Sémantique à préciser."
-                },
-                technique: {
-                    score: 0, max: 10, label: "Socle Technique",
-                    status: 'error',
-                    observation: "Absence de fichiers ASR (Corrigé par ce Pack)."
-                }
-            };
-        }
+        // Use real analysis_blocks from Firestore (saved by chat/route.ts during scoring)
+        const blocksToRender = (analysis as any).data?.analysis_blocks || null;
 
         const computedAuditReport = renderAuditTable(blocksToRender);
         const finalAuditHtml = (analysisData as any).audit_report || computedAuditReport || "<p>Analyse sommaire uniquement.</p>";

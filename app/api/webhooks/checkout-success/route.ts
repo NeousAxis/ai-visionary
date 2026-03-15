@@ -221,6 +221,7 @@ export async function POST(req: Request) {
 
         if (!analyzedUrl && session.metadata?.analyzed_url) analyzedUrl = session.metadata.analyzed_url;
         if (!customerEmail && session.metadata?.customer_email) customerEmail = session.metadata.customer_email;
+        if (!analysisId && session.metadata?.analysis_id) analysisId = session.metadata.analysis_id;
 
         logger.info('WEBHOOK_IDENTIFIED', `Customer identified`, { email: customerEmail, url: analyzedUrl, aid: analysisId });
 
@@ -323,15 +324,41 @@ export async function POST(req: Request) {
             };
             logger.info('WEBHOOK_DATA_FOUND', `Analysis found, score=${analysisData.score}`, { score: analysisData.score, aid: analysisId });
         } else {
-            // CRITICAL: Data not found even after all fallbacks
-            logger.critical('WEBHOOK_DATA_NOT_FOUND', `No analysis data in Firestore for session ${session_id}. Customer paid but data is missing.`, {
+            // CRITICAL: Data not found even after all fallbacks — DO NOT generate empty files
+            logger.critical('WEBHOOK_DATA_NOT_FOUND', `No analysis data in Firestore for session ${session_id}. Customer paid but data is missing. Sending error notification.`, {
                 session_id, analyzedUrl, analysisId, customerEmail
             });
-            analysisData = {
-                score: 0,
-                extract: {},
-                url: analyzedUrl || ""
-            };
+
+            // Send an apology email to the customer instead of empty files
+            try {
+                await resend.emails.send({
+                    from: 'AYO Support <hello@ai-visionary.com>',
+                    to: [customerEmail],
+                    subject: `⚠️ Votre commande AYO est en cours de traitement`,
+                    html: `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
+                        <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                            <h1 style="color: #fff; margin: 0; font-size: 22px;">Votre paiement a bien été reçu</h1>
+                        </div>
+                        <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
+                            <p>Bonjour,</p>
+                            <p>Merci pour votre achat ! Votre paiement a été confirmé avec succès.</p>
+                            <p>Nos systèmes sont en train de finaliser la génération de vos fichiers. Vous les recevrez par email dans les prochaines minutes.</p>
+                            <p>Si vous ne recevez rien dans l'heure, contactez-nous :</p>
+                            <p style="text-align: center; margin: 20px 0;">
+                                <a href="mailto:hello@ai-visionary.com" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contacter le support</a>
+                            </p>
+                        </div>
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
+                            <p style="font-size: 12px; color: #9ca3af; margin: 0;">AI Visionary — Ref: ${session_id.substring(0, 20)}</p>
+                        </div>
+                    </div>`
+                });
+                logger.info('WEBHOOK_ERROR_EMAIL_SENT', `Error notification sent to ${customerEmail}`);
+            } catch (emailErr) {
+                logger.error('WEBHOOK_ERROR_EMAIL_FAILED', `Failed to send error notification: ${emailErr}`);
+            }
+
+            return NextResponse.json({ error: 'Analysis data not found', session_id }, { status: 422 });
         }
 
         // Resolve entity name (multiple fallbacks to avoid "Entity" or "Entreprise Inconnue")

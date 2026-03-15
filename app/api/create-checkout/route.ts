@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
     const email = searchParams.get('email');
     const url = searchParams.get('url');
     const packType = searchParams.get('packType');
+    const analysisId = searchParams.get('aid');
 
     if (!email || !url) {
         return new Response('Email and URL are required', { status: 400 });
@@ -58,7 +59,8 @@ export async function GET(req: NextRequest) {
         if (!stripeKey) throw new Error('Stripe not configured');
         const stripe = new Stripe(stripeKey);
 
-        const payload = { u: url, e: email };
+        const payload: Record<string, string> = { u: url, e: email };
+        if (analysisId) payload.aid = analysisId;
         const clientReferenceId = Buffer.from(JSON.stringify(payload)).toString('base64');
 
         let priceId = '';
@@ -89,7 +91,7 @@ export async function GET(req: NextRequest) {
             client_reference_id: clientReferenceId,
             customer_email: email,
             allow_promotion_codes: true,
-            metadata: { pack_type: packType, analyzed_url: url }
+            metadata: { pack_type: packType, analyzed_url: url, analysis_id: analysisId || '' }
         });
 
         return NextResponse.redirect(session.url!);
@@ -106,7 +108,7 @@ export async function POST(req: NextRequest) {
     const logger = createLogger(generateCorrelationId(), 'checkout');
 
     try {
-        const { email, url, packType } = await req.json();
+        const { email, url, packType, analysisId: aid } = await req.json();
 
         if (!email || !url) {
             return NextResponse.json({ error: 'Missing email or url' }, { status: 400 });
@@ -129,8 +131,9 @@ export async function POST(req: NextRequest) {
 
         const stripe = new Stripe(stripeKey);
 
-        // Encode URL + Email in Base64 for client_reference_id
-        const payload = { u: url, e: email };
+        // Encode URL + Email + AnalysisId in Base64 for client_reference_id
+        const payload: Record<string, string> = { u: url, e: email };
+        if (aid) payload.aid = aid;
         const clientReferenceId = Buffer.from(JSON.stringify(payload)).toString('base64');
 
         // Only 2 products: AYA_SUB (19 CHF/mois) and PRO (499 CHF)
@@ -171,6 +174,7 @@ export async function POST(req: NextRequest) {
             metadata: {
                 pack_type: packType, // 'AYA_SUB' | 'PRO'
                 analyzed_url: url,
+                analysis_id: aid || '',
                 mode: mode // 'subscription' | 'payment'
             }
         });

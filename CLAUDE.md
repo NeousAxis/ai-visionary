@@ -132,12 +132,12 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 |---------|------|--------|------|
 | `lib/ayo-system-prompt.ts` | System prompt V3 du chatbot | 104 | ⚠️ À réécrire (V4) |
 | `lib/aio-score-engine.ts` | Moteur de score déterministe (7 blocs) | 319 | ✅ Conforme à la Bible (hard cap invisible) |
-| `lib/aio-scanner.ts` | Scanner URL — HTML, JSON-LD, ASR, AYA | 179 | ⚠️ Pas d'anti-SSRF, vérifie mauvaise collection |
+| `lib/aio-scanner.ts` | Scanner URL — HTML, JSON-LD, ASR, AYA | 179 | ✅ Anti-SSRF ajouté, M4 fixé (vérifie aya_registry) |
 | `lib/ayo-generators.ts` | Générateurs des 5 fichiers PRO (partagés chat+webhook) | 677 | ✅ OK |
 | `lib/ayo-crypto.ts` | Signature Ed25519 + génération ASR JSON-LD | 399 | ⚠️ Clé hardcodée |
-| `lib/ayo-semantics.ts` | Génération FAQ/Glossaire/Manifest via Gemini 1.5 Flash | 132 | ⚠️ Pas de validation JSON, pas de timeout |
+| `lib/ayo-semantics.ts` | Génération FAQ/Glossaire/Manifest via Gemini 1.5 Flash | 132 | ✅ JSON validation, timeout 30s, GEMINI_API_KEY unique |
 | `lib/ayo-categories.ts` | Taxonomie 25 secteurs d'activité | 40 | ✅ OK |
-| `lib/external-context.ts` | Génération external_context JSON | 64 | ⚠️ Fake rating 4.5, permissions par string match |
+| `lib/external-context.ts` | Génération external_context JSON | 64 | ✅ Fake rating supprimé, permissions simplifiées |
 | `lib/db.ts` | Firebase Admin Firestore operations | 418 | ✅ OK |
 | `lib/auth.ts` | Middleware admin (ADMIN_SECRET, timing-safe) | — | ✅ OK |
 | `lib/logger.ts` | Logger structuré avec correlation IDs | — | ✅ OK |
@@ -158,7 +158,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 | `app/diagnostic/page.tsx` | Page chat AYO fullscreen (36 lignes) | ✅ OK, pas de SEO |
 | `app/aya/page.tsx` | **REGISTRE AYA PUBLIC** (205 lignes) | ✅ EXISTE — manque pagination/filtres |
 | `app/aya/e/[id]/page.tsx` | **CERTIFICAT AYA** — page détail (216 lignes) | ✅ EXISTE — manque JSON-LD, blocs score |
-| `app/certificate/[id]/page.tsx` | Ancien certificat (doublon) (115 lignes) | 🔴 DOUBLON à supprimer |
+| `app/certificate/[id]/page.tsx` | ~~Ancien certificat~~ | 🗑️ SUPPRIMÉ (Session 3 — B4) |
 | `app/ai-et-votre-entreprise/page.tsx` | Page marketing (179 lignes) | ✅ OK, styles inline |
 | `app/confidentialite/page.tsx` | Politique de confidentialité (35 lignes) | ⚠️ TROP COURTE |
 | `app/mentions/page.tsx` | Mentions légales (33 lignes) | ⚠️ TROP COURTE |
@@ -169,8 +169,8 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 | Fichier | Rôle | État |
 |---------|------|------|
 | `app/components/AyoChat.tsx` | Chat interactif principal (~52KB) | ⚠️ Markdown non-sanitisé (XSS), types `any[]` |
-| `app/components/PaymentHandler.tsx` | Traitement paiement invisible (41 lignes) | ⚠️ Pas de retry, erreur silencieuse |
-| `app/components/PaymentSuccessModal.tsx` | Modal post-paiement (191 lignes) | ⚠️ DOUBLON webhook avec PaymentHandler |
+| `app/components/PaymentHandler.tsx` | No-op (H9 fix — webhook déplacé dans Modal) | ✅ Neutralisé |
+| `app/components/PaymentSuccessModal.tsx` | Modal post-paiement + webhook unique | ✅ H9 fixé, M8 session_id validé, Essential→Plateforme |
 | `app/components/FAQ.tsx` | FAQ component | ✅ OK |
 | `app/components/Footer.tsx` | Footer avec drapeau suisse | ✅ OK |
 
@@ -180,8 +180,8 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 |---------|-------|
 | `vercel.json` | maxDuration=60s pour checkout-success et chat |
 | `firebase.json` | Config minimale, pas de security rules |
-| `next.config.ts` | ⚠️ `ignoreBuildErrors: true` |
-| `app/robots.ts` | ⚠️ Manque disallow /admin/ et /api/ |
+| `next.config.ts` | ✅ `ignoreBuildErrors: false` + CSP header |
+| `app/robots.ts` | ✅ Disallow /admin/, /api/, /debug/, /certificate/ |
 | `app/sitemap.ts` | ⚠️ MOCK avec 2 entity IDs hardcodés |
 
 ---
@@ -357,7 +357,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 |---------|--------|------|-------|
 | Session 1 | ✅ **TERMINÉE** | 2026-03-14 | Logger/rate-limit/validators/auth intégrés dans les 11 routes API. Build OK. |
 | Session 2 | ✅ **TERMINÉE** | 2026-03-14 | C1+C2 critiques, H1-H3 hautes, M1+M2+M6 moyennes. CSP, anti-SSRF, ignoreBuildErrors:false. ⚠️ AJOUTER env vars: SESSION_SECRET, STRIPE_PRICE_PRO sur Vercel (Essential supprimé — n'existe plus) |
-| Session 3 | ❌ Pas commencée | — | — |
+| Session 3 | ✅ **TERMINÉE** | 2026-03-15 | H9 double webhook fix, H10 JSON validation, H11 timeout 30s, M4 scanner aya_registry, M5 fake rating supprimé, M8 session_id validation, B2+B4 dead code supprimé, B6 env var unique, Essential→Plateforme, scripts debug supprimés, tsconfig exclude scripts/, Vercel deploy OK |
 | Session 4 | ❌ Pas commencée | — | ⚠️ Cyril doit être présent |
 | Session 5 | ❌ Pas commencée | — | — |
 | Session 6 | ❌ Pas commencée | — | — |
