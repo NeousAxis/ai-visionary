@@ -231,17 +231,12 @@ ${JSON.stringify(asrJson, null, 2)}
         });
 
     } catch (error: any) {
-        console.error("❌ Send Light Error:", error);
+        logger.error('LIGHT_REPORT_ERROR', error.message || 'Unknown error');
         return new Response(`
             <div style="font-family: sans-serif; text-align: center; margin-top: 50px; color: #dc2626;">
                 <h1>❌ Erreur d'envoi</h1>
-                <p>Impossible d'envoyer l'email à <strong>${email}</strong>.</p>
-                <div style="background: #fef2f2; padding: 15px; border: 1px solid #fca5a5; display: inline-block; text-align: left; margin-top: 20px;">
-                    <strong>Message Technique :</strong><br>
-                    <code>${error.message || JSON.stringify(error)}</code>
-                </div>
-                <br><br>
-                <p>Vérifiez que votre clé API Resend est valide et que le domaine est vérifié.</p>
+                <p>Impossible d'envoyer l'email. Veuillez réessayer ou contacter le support.</p>
+                <p style="margin-top: 20px;"><a href="mailto:hello@ai-visionary.com" style="color: #dc2626;">hello@ai-visionary.com</a></p>
             </div>
         `, {
             headers: { 'Content-Type': 'text/html; charset=utf-8' },

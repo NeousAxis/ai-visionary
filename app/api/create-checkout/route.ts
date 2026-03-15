@@ -6,6 +6,11 @@ import { emailSchema, urlSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
 
+// SECURITY: All Stripe Price IDs from env vars (no hardcoded secrets)
+const PRICE_AYA_SUB = process.env.STRIPE_PRICE_AYA_SUB || '';
+const PRICE_PRO = process.env.STRIPE_PRICE_PRO || '';
+const PRICE_ESSENTIAL = process.env.STRIPE_PRICE_ESSENTIAL || '';
+
 /**
  * 🛒 CREATE STRIPE CHECKOUT SESSION (Dynamic)
  * 
@@ -49,14 +54,19 @@ export async function GET(req: NextRequest) {
         let mode: Stripe.Checkout.SessionCreateParams.Mode = 'payment';
 
         if (packType === 'AYA_SUB') {
-            priceId = process.env.STRIPE_PRICE_AYA_SUB || 'price_1SzazaPkCQYUm8hQJfrKc9EJ';
+            priceId = PRICE_AYA_SUB;
             mode = 'subscription';
         } else if (packType === 'PRO') {
-            priceId = 'price_1SlM9iPkCQYUm8hQKqOV8eqU';
+            priceId = PRICE_PRO;
             mode = 'payment';
         } else {
-            priceId = 'price_1SlM8kPkCQYUm8hQJU6kvMMa';
+            priceId = PRICE_ESSENTIAL;
             mode = 'payment';
+        }
+
+        if (!priceId) {
+            logger.error('CHECKOUT_NO_PRICE', `Missing STRIPE_PRICE env var for pack: ${packType}`);
+            return new Response('Configuration error', { status: 500 });
         }
 
         const session = await stripe.checkout.sessions.create({
@@ -67,12 +77,12 @@ export async function GET(req: NextRequest) {
             client_reference_id: clientReferenceId,
             customer_email: email,
             allow_promotion_codes: true,
-            metadata: { pack_type: packType || "UNKNOWN", analyzed_url: url, customer_email: email }
+            metadata: { pack_type: packType || "UNKNOWN", analyzed_url: url }
         });
 
         return NextResponse.redirect(session.url!);
     } catch (e: any) {
-        return new Response(`Error: ${e.message}`, { status: 500 });
+        return new Response('Erreur lors de la creation du paiement', { status: 500 });
     }
 }
 
@@ -116,20 +126,19 @@ export async function POST(req: NextRequest) {
         let mode: Stripe.Checkout.SessionCreateParams.Mode = 'payment';
 
         if (packType === 'AYA_SUB') {
-            // Option 2: Abonnement AYA (19 CHF / mois)
-            // Test Price ID: price_1SzazaPkCQYUm8hQJfrKc9EJ (Fourni par user)
-            // Prod Price ID: TO BE DEFINED IN ENV
-            priceId = process.env.STRIPE_PRICE_AYA_SUB || 'price_1SzazaPkCQYUm8hQJfrKc9EJ';
+            priceId = PRICE_AYA_SUB;
             mode = 'subscription';
         } else if (packType === 'PRO') {
-            // Option 3: Achat AYO Full (499 CHF One-Shot)
-            priceId = 'price_1SlM9iPkCQYUm8hQKqOV8eqU';
+            priceId = PRICE_PRO;
             mode = 'payment';
         } else {
-            // Fallback (Essentiel/Light => Redirige vers Abo ou Pro selon stratégie, ici legacy Essential en fallback)
-            // price_1SlM8kPkCQYUm8hQJU6kvMMa (Old 99 CHF)
-            priceId = 'price_1SlM8kPkCQYUm8hQJU6kvMMa';
+            priceId = PRICE_ESSENTIAL;
             mode = 'payment';
+        }
+
+        if (!priceId) {
+            logger.error('CHECKOUT_NO_PRICE', `Missing STRIPE_PRICE env var for pack: ${packType}`);
+            return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
         }
 
         // Create Checkout Session
@@ -149,7 +158,7 @@ export async function POST(req: NextRequest) {
             metadata: {
                 pack_type: packType, // 'AYA_SUB' | 'PRO' | 'ESSENTIAL'
                 analyzed_url: url,
-                customer_email: email,
+                // SECURITY: email NOT stored in metadata (already in customer_email field)
                 mode: mode // 'subscription' | 'payment'
             }
         });

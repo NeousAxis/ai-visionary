@@ -1,4 +1,5 @@
 import { db } from './db';
+import { isAllowedUrl } from './validators';
 
 export interface AioScanResult {
     url: string;
@@ -49,6 +50,13 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
         let url = targetUrl;
         if (!url.startsWith('http')) {
             url = 'https://' + url;
+        }
+
+        // SECURITY: Anti-SSRF check — block private IPs, localhost, metadata endpoints
+        const ssrfCheck = isAllowedUrl(url);
+        if (!ssrfCheck.allowed) {
+            result.scoreFactors.push(`❌ URL non autorisée: ${ssrfCheck.reason}`);
+            return result;
         }
 
         // 2. Fetch du HTML Principal

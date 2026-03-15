@@ -7,8 +7,8 @@ import { otpCodeSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
 
-// Use a dedicated session secret, NOT the Stripe key
-const SESSION_SECRET = process.env.SESSION_SECRET || process.env.ADMIN_SECRET;
+// SECURITY: Dedicated session secret — no fallback to ADMIN_SECRET
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 export async function POST(req: NextRequest) {
     // Rate limit: 5 requests/min per IP (brute-force protection)

@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   typescript: {
-    // TODO: Fix all TypeScript errors and set this to false
-    ignoreBuildErrors: true,
+    // SECURITY: Build fails on TS errors — no hiding bugs
+    ignoreBuildErrors: false,
   },
 
   reactCompiler: false,
@@ -25,6 +25,10 @@ const nextConfig: NextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com https://*.firebaseio.com https://*.googleapis.com; frame-src https://js.stripe.com https://hooks.stripe.com;",
           },
         ],
       },
