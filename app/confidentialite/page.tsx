@@ -59,8 +59,8 @@ export default function ConfidentialitePage() {
 
                         <h2 style={{ fontSize: '1.2rem', marginTop: '30px', marginBottom: '10px', color: 'var(--text-main)' }}>6. Cookies</h2>
                         <p>
-                            Ce site utilise uniquement des cookies strictement nécessaires à son fonctionnement technique.
-                            Aucun cookie publicitaire ou de traçage n'est utilisé.
+                            Ce site n'utilise aucun cookie de traçage, publicitaire ou analytique (pas de Google Analytics ni équivalent).
+                            Seuls des cookies techniques strictement nécessaires au fonctionnement de l'application peuvent être déposés par l'hébergeur (Vercel).
                         </p>
 
                         <h2 style={{ fontSize: '1.2rem', marginTop: '30px', marginBottom: '10px', color: 'var(--text-main)' }}>7. Vos droits (RGPD)</h2>
