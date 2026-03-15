@@ -1139,13 +1139,13 @@ GÉNÈRE CE JSON MAINTENANT :
                     scanState.detected[key] = answer.answer;
                     scanState.confidence[key] = conf;
 
-                    // 🎯 SMART SKIP: ONLY skip if confidence is genuinely HIGH (90+).
-                    // Low confidence (70) items MUST be validated by the user.
-                    // Previous threshold of 50 was too low, causing low-confidence items
-                    // (methodology, legal form, certifications, contact) to be silently skipped.
-                    if (conf >= 85) {
+                    // 🎯 SMART SKIP: If AYO scraped it (conf > 0), accept it.
+                    // The client is NOT here to confirm data AYO already found.
+                    // Only truly missing data (conf = 0) goes to the questionnaire.
+                    if (conf > 0) {
                         scanState.high_confidence_keys.push(key);
-                    } else if (conf > 0) {
+                    } else if (false) {
+                        // LOW CONFIDENCE VALIDATION DISABLED — data accepted as-is
                         scanState.low_confidence_keys.push(key);
                     } else {
                         scanState.unknown_keys.push(key);
@@ -1567,11 +1567,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 "external_context.keywords", "external_context.intents"
             ];
 
-            // 🧮 ORDERED QUEUE: First validate LOW confidence, then ask UNKNOWN
-            // No artificial limit — queue only contains items that need asking
-            const validationQueue = allBlockNames.filter(b => lowConfidenceKeys.includes(b));
+            // 🧮 ORDERED QUEUE: Only ask for UNKNOWN/MISSING data.
+            // Low confidence data from the scan is accepted as-is (promoted to high confidence).
+            // AYO already scraped it — no need to ask the client to confirm.
             const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
-            let combinedQueue = [...validationQueue, ...questionQueue];
+            let combinedQueue = [...questionQueue];
 
             // Prioritize Country (identite.country)
             const countryIndex = combinedQueue.indexOf("identite.country");
@@ -1660,13 +1660,19 @@ Tu es AYO, l'IA de AI VISIONARY. Tu es l'Expert Gardien du Registre AYA.
    - POSE LA QUESTION. NE SAUTE JAMAIS.
    - Formule naturellement, en utilisant ce que tu sais de l'activité.
 3. UN SEUL JSON "question_block". TOUJOURS au moins UNE question.
+4. 🚫 INTERDICTION ABSOLUE de proposer "Compléter la liste" ou "Ajouter des éléments" comme option.
+   - Si des données existent déjà (À valider ci-dessous), tu demandes UNIQUEMENT une CONFIRMATION : "Oui, c'est correct" / "Non, à corriger".
+   - Le client N'EST PAS là pour compléter ton travail. Le scan a déjà récupéré les données.
+   - Si le client veut corriger, il utilise le champ libre (allowCustom).
+5. NE JAMAIS afficher de longues listes dans le texte de la question. Résume en disant "les X éléments détectés" et cite 2-3 exemples max.
 
 ### ÉTAT DU DOSSIER :
 - Déjà validé : ${highConfidenceData || 'Aucun'}
 - À valider (Low Confidence) : ${lowConfidenceData || 'Aucun'}
 
-### MISSION : 
-Poser la question EXACTE pour obtenir ou valider le bloc : **${nextBlockName}**.
+### MISSION :
+Poser la question EXACTE pour CONFIRMER ou obtenir le bloc : **${nextBlockName}**.
+Si des données "À valider" existent pour ce bloc, propose simplement : "Oui, c'est correct" / "Non, à corriger (précisez)".
 
 ### FORMAT JSON ATTENDU :
 {
