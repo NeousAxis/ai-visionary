@@ -17,8 +17,9 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     const creationDate = new Date(entity.created_at).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
     const validUntilDate = new Date(entity.valid_until).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Fix: Respect 0 score, fallback to 100 only if undefined (legacy/mock)
-    const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : 100;
+    // Fix: Respect 0 score, show "—" if undefined (no fake 100)
+    const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : null;
+    const packType = entity.pack_type || (entity.stripe_product_id?.includes('PRO') ? 'PRO' : 'PLATEFORME');
 
     // DATA EXTRACTION — asrData is the extract fields object (e.g. { identite: { name: { value, q, evidence } }, offre: {...}, ... })
     const asrData = entity.asr_payload?.data || {};
@@ -99,27 +100,39 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                             <div style={{ marginBottom: '2rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
                                     <span style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>Statut Actuel</span>
-                                    <span style={{
-                                        padding: '4px 12px',
-                                        borderRadius: '20px',
-                                        fontSize: '0.85rem',
-                                        fontWeight: 'bold',
-                                        background: isValid ? 'var(--bg-accent)' : '#FEE2E2',
-                                        color: isValid ? 'var(--primary-color)' : '#EF4444'
-                                    }}>
-                                        {isValid ? '● CERTIFIÉ ACTIF' : '● EXPIRÉ'}
-                                    </span>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <span style={{
+                                            padding: '4px 12px',
+                                            borderRadius: '20px',
+                                            fontSize: '0.85rem',
+                                            fontWeight: 'bold',
+                                            background: isValid ? 'var(--bg-accent)' : '#FEE2E2',
+                                            color: isValid ? 'var(--primary-color)' : '#EF4444'
+                                        }}>
+                                            {isValid ? '● CERTIFIÉ ACTIF' : '● EXPIRÉ'}
+                                        </span>
+                                        <span style={{
+                                            padding: '4px 10px',
+                                            borderRadius: '20px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 'bold',
+                                            background: packType === 'PRO' ? '#FEF3C7' : 'var(--bg-accent)',
+                                            color: packType === 'PRO' ? '#D97706' : 'var(--primary-color)'
+                                        }}>
+                                            {packType === 'PRO' ? '👑 PRO' : '📋 PLATEFORME'}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div>
-                                        <span style={{ color: 'var(--text-muted)' }}>Qualité de l'Info (ASR)</span>
+                                        <span style={{ color: 'var(--text-muted)' }}>Score AIO (Lisibilité IA)</span>
                                     </div>
                                     <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>
-                                        {score}<span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>/100</span>
+                                        {score !== null ? score : '—'}<span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>/100</span>
                                     </span>
                                 </div>
                                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '5px', fontStyle: 'italic', lineHeight: '1.3', borderLeft: '2px solid var(--border-light)', paddingLeft: '8px' }}>
-                                    * Un score bas n'affecte pas la confiance (Validité), mais indique une quantité d'information limitée transmise aux IA.
+                                    * Ce score mesure la lisibilité de l'entreprise par les IA (ChatGPT, Gemini, Claude...). Plus le score est élevé, plus l'entreprise est visible et recommandable.
                                 </p>
                             </div>
 
@@ -193,7 +206,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                         <span style={{ color: 'var(--primary-color)' }}>✓</span> JSON-LD Structure
                                     </li>
                                     <li style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                                        <span style={{ color: 'var(--primary-color)' }}>✓</span> ASR v1.0 Standard
+                                        <span style={{ color: 'var(--primary-color)' }}>✓</span> ASR v3.0 Standard
                                     </li>
                                 </ul>
                             </div>

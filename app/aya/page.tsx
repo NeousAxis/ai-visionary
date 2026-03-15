@@ -22,7 +22,7 @@ export default function AyaPage() {
             .then(res => res.json())
             .then(apiRes => {
                 if (apiRes.success && apiRes.data && Array.isArray(apiRes.data)) {
-                    console.log(`🔥 AYA LIVE: Loading ${apiRes.data.length} real entities from Firestore`);
+                    // Entities loaded from Firestore
                     // Merge: real entities first (by URL dedup), then seed data
                     const realUrls = new Set(apiRes.data.map((e: any) => (e.website || '').toLowerCase().replace(/\/$/, '')));
                     const filteredSeed = SEED_ENTITIES.filter(s => !realUrls.has((s.website || '').toLowerCase().replace(/\/$/, '')));
@@ -156,8 +156,8 @@ export default function AyaPage() {
                                             </span>
                                         </div>
                                         <div style={{ textAlign: 'right' }}>
-                                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary-color)', lineHeight: 1 }}>{entity.asr_score != null ? entity.asr_score : Math.round((entity.recommendability?.freshness_score ?? 0.99) * 100)}%</span>
-                                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Trust Score</span>
+                                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary-color)', lineHeight: 1 }}>{entity.asr_score != null ? entity.asr_score : '—'}<span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>/100</span></span>
+                                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Score AIO</span>
                                         </div>
                                     </div>
                                 </div>
