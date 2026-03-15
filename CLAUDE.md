@@ -359,7 +359,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 2 | ✅ **TERMINÉE** | 2026-03-14 | C1+C2 critiques, H1-H3 hautes, M1+M2+M6 moyennes. CSP, anti-SSRF, ignoreBuildErrors:false. ⚠️ AJOUTER env vars: SESSION_SECRET, STRIPE_PRICE_PRO sur Vercel (Essential supprimé — n'existe plus) |
 | Session 3 | ✅ **TERMINÉE** | 2026-03-15 | H9 double webhook fix, H10 JSON validation, H11 timeout 30s, M4 scanner aya_registry, M5 fake rating supprimé, M8 session_id validation, B2+B4 dead code supprimé, B6 env var unique, Essential→Plateforme, scripts debug supprimés, tsconfig exclude scripts/, Vercel deploy OK |
 | Session 4 | ❌ Pas commencée | — | ⚠️ Cyril doit être présent |
-| Session 5 | ❌ Pas commencée | — | — |
+| Session 5 | ✅ **TERMINÉE** | 2026-03-15 | PaymentSuccessModal: stop calling webhook from browser (UX fix — users saw false "erreur technique"). Webhook: refuse empty generation, send apology email + return 422. Light-report: remove fake block scores. create-checkout: include analysisId in client_reference_id. |
 | Session 6 | ❌ Pas commencée | — | — |
 | Session 7 | ❌ Pas commencée | — | — |
 | Session 8 | ❌ Pas commencée | — | — |
