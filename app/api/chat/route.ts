@@ -2386,7 +2386,7 @@ ${(scanResult.hasAsrFile || urlToScan.includes('ai-visionary.com')) && scoreResu
 ⚠️ **Richesse Sémantique (Contenu)** : Faible (${scoreResult.total}/100).
 *Votre fichier existe mais il y a très peu d'informations. Plus vous renseignerez les champs demandés, plus la recherche sera efficace pour les IA.*`
                         :
-                        `⚠️ **Important** : Si vous avez un résultat élevé cela ne garantit pas la recommandabilité de l'entreprise. Ce qui aide les IA à vous lire et à vous recommander dans leurs réponses c'est la façon dont nous structurons vos données dans des fichiers que nous créons pour votre entreprise.`
+                        `📌 **Ce score mesure le niveau de lisibilité de votre entreprise par les IA** (ChatGPT, Gemini, Claude...). Plus il est élevé, plus vos données sont structurées et compréhensibles pour elles. L'étape suivante consiste à transformer ces informations en fichiers sémantiques (ASR) pour atteindre une visibilité maximale.`
                     }
 
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
