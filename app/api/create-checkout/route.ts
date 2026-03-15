@@ -7,17 +7,25 @@ import { emailSchema, urlSchema } from '@/lib/validators';
 export const dynamic = 'force-dynamic';
 
 // SECURITY: Stripe Price IDs from env vars (no hardcoded secrets)
-// Only 2 products exist:
-//   - AYA_SUB: AYA Plateforme — 19 CHF/mois (subscription)
-//   - PRO: Pack AIO Pro — 499 CHF one-shot (payment)
-const PRICE_AYA_SUB = process.env.STRIPE_PRICE_AYA_SUB || '';
+// ┌──────────────────────────────────────────────────────────────┐
+// │ Produit Stripe         │ Tarif         │ Env var             │
+// ├──────────────────────────────────────────────────────────────┤
+// │ PACK PLATEFORME        │ 19 CHF/mois   │ STRIPE_PRICE_AYA   │
+// │ PACK PRO               │ 499 CHF       │ STRIPE_PRICE_PRO   │
+// └──────────────────────────────────────────────────────────────┘
+// packType côté frontend : 'AYA_SUB' → PACK PLATEFORME, 'PRO' → PACK PRO
+// Payment Links Stripe :
+//   PACK PLATEFORME : https://buy.stripe.com/cNidR860342e3KS7zC18c01
+//   PACK PRO        : https://buy.stripe.com/4gM4gydsvgP04OWf2418c00
+const PRICE_AYA = process.env.STRIPE_PRICE_AYA || process.env.STRIPE_PRICE_AYA_SUB || '';
 const PRICE_PRO = process.env.STRIPE_PRICE_PRO || '';
 
 /**
- * 🛒 CREATE STRIPE CHECKOUT SESSION (Dynamic)
+ * 🛒 CREATE STRIPE CHECKOUT SESSION
  *
- * Cette API crée une session Stripe et encode l'URL + Email dans client_reference_id
- * Seuls 2 packs existent: AYA_SUB (19 CHF/mois) et PRO (499 CHF)
+ * 2 produits uniquement :
+ *   - PACK PLATEFORME (19 CHF/mois, subscription) — packType='AYA_SUB'
+ *   - PACK PRO (499 CHF one-shot, payment) — packType='PRO'
  */
 
 export async function GET(req: NextRequest) {
@@ -57,7 +65,7 @@ export async function GET(req: NextRequest) {
         let mode: Stripe.Checkout.SessionCreateParams.Mode = 'payment';
 
         if (packType === 'AYA_SUB') {
-            priceId = PRICE_AYA_SUB;
+            priceId = PRICE_AYA;
             mode = 'subscription';
         } else if (packType === 'PRO') {
             priceId = PRICE_PRO;
@@ -130,7 +138,7 @@ export async function POST(req: NextRequest) {
         let mode: Stripe.Checkout.SessionCreateParams.Mode = 'payment';
 
         if (packType === 'AYA_SUB') {
-            priceId = PRICE_AYA_SUB;
+            priceId = PRICE_AYA;
             mode = 'subscription';
         } else if (packType === 'PRO') {
             priceId = PRICE_PRO;
