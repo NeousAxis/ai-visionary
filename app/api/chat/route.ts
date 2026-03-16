@@ -1161,13 +1161,11 @@ GÉNÈRE CE JSON MAINTENANT :
                     scanState.detected[key] = answer.answer;
                     scanState.confidence[key] = conf;
 
-                    // 🎯 SMART SKIP: If AYO scraped it (conf > 0), accept it.
-                    // The client is NOT here to confirm data AYO already found.
-                    // Only truly missing data (conf = 0) goes to the questionnaire.
-                    if (conf > 0) {
+                    if (conf >= 90) {
                         scanState.high_confidence_keys.push(key);
-                    } else if (false) {
-                        // LOW CONFIDENCE VALIDATION DISABLED — data accepted as-is
+                    } else if (conf >= 70) {
+                        // Low confidence: data found but uncertain.
+                        // Accepted as-is (not re-asked) but tracked separately.
                         scanState.low_confidence_keys.push(key);
                     } else {
                         scanState.unknown_keys.push(key);
@@ -1620,10 +1618,16 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 triggerMode = "CALIBRATION_STEP";
             } else {
                 // The first 3 question_blocks are: ownership_confirm, truth_confirmation, calibration.
-                // At Turn 4, questionsAskedCount is 3. queueIndex should be 0.
-                queueIndex = questionsAskedCount - 3;
-                nextBlockName = combinedQueue[queueIndex] || "FINALISATION";
+                // queueIndex = how many data questions we've already asked (after the 3 setup questions)
+                queueIndex = Math.max(0, questionsAskedCount - 3);
+                // Safety: clamp to queue size
+                if (queueIndex >= combinedQueue.length) {
+                    nextBlockName = "FINALISATION";
+                } else {
+                    nextBlockName = combinedQueue[queueIndex];
+                }
             }
+            console.log(`📋 QUEUE DEBUG: questionsAsked=${questionsAskedCount}, queueIdx=${queueIndex}, queueLen=${combinedQueue.length}, next=${nextBlockName}`);
 
             console.log(`➡️ PROGRESS: Turn=${stepsCompleted} | QueueIdx=${queueIndex} | NextBlock=${nextBlockName}`);
 
