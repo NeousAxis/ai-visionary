@@ -18,6 +18,28 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import crypto from 'crypto';
 import Stripe from 'stripe';
 
+// Multi-Agents imports
+import {
+    normalizeScanStateUrl,
+    scanStateDocId,
+    loadScanState,
+    formatScanForGreffier,
+    classifyScanConfidence,
+} from '@/lib/agents/scanner';
+import {
+    buildStripeLinks,
+    buildPackPresentation,
+    encodeClientReference,
+    STRIPE_TEST_LINKS,
+} from '@/lib/agents/vendeur';
+import {
+    formatScoreMessage,
+    formatDeltaMessage,
+} from '@/lib/agents/ayo-router';
+import {
+    analyseScore,
+} from '@/lib/agents/analyste';
+
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
@@ -47,9 +69,15 @@ try {
     console.warn("AYO Brain Warning: Could not load JSON context files.", error);
 }
 
-// [LEGACY SYSTEM PROMPT — Replaced by lib/ayo-system-prompt.ts]
-// Kept for reference but NOT used. The imported getSystemPrompt is used instead.
-const _legacySystemPrompt = (realAsrId: string, realIsoDate: string, targetUrl: string = "", targetEmail: string = "", isAyaRegisteredByScanner: boolean = false) => {
+// [LEGACY SYSTEM PROMPT supprimé — Sprint 0 Multi-Agents]
+// ~270 lignes supprimées. Remplacé par:
+//   - getSystemPrompt() from lib/ayo-system-prompt.ts
+//   - buildStripeLinks() from lib/agents/vendeur.ts
+//   - formatScoreMessage() from lib/agents/ayo-router.ts
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _legacySystemPrompt = () => { return ''; };
+/* LEGACY PROMPT START (supprimé Sprint 0)
     // Generate Stripe Params with Metadata (Client Reference ID)
     // CRITICAL FIX: We MUST encode URL/Email in the ID because we are Stateless (Serverless).
     // DB persistence on /tmp does not work across Vercel lambdas.
@@ -315,6 +343,7 @@ Installez-le pour activer votre autorité."
 FIN DU SCRIPT.
 `;
 }
+LEGACY PROMPT END */
 
 // Helper: Fetch and clean website content
 async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJsonLd: boolean }> {
@@ -357,7 +386,7 @@ async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJson
     }
 }
 
-import { computeAioScore, AyoExtract } from '@/lib/aio-score-engine';
+import { AyoExtract } from '@/lib/aio-score-engine';
 
 export async function POST(req: Request) {
     // Rate limit: 15 requests/min per IP
@@ -1187,8 +1216,8 @@ GÉNÈRE CE JSON MAINTENANT :
 
             // 🔧 Persist scan_state in Firestore (instead of embedding in chat messages)
             try {
-                const scanStateDocId = Buffer.from(urlToScan).toString('base64url').substring(0, 128);
-                await getFirestore().collection('scan_states').doc(scanStateDocId).set({
+                const docId = scanStateDocId(urlToScan);
+                await getFirestore().collection('scan_states').doc(docId).set({
                     ...scanState,
                     created_at: new Date().toISOString(),
                     url: urlToScan,
@@ -1280,10 +1309,12 @@ GÉNÈRE CE JSON MAINTENANT :
                 }
             } as AyoExtract;
 
-            const initialScore = computeAioScore(initialExtract);
+            const initialScore = analyseScore(initialExtract);
             logger.info('INITIAL_SCORE', `Initial AIO score for ${urlToScan}: ${initialScore.total}/100`, {
                 total: initialScore.total,
                 blocks: initialScore.blocks,
+                capApplied: initialScore.capApplied,
+                capReason: initialScore.capReason,
             });
 
             // 2c. SAVE INITIAL ANALYSIS TO DB (Source of Truth for Webhook)
@@ -1496,7 +1527,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 }
             }
 
-            // 🔧 ARCHITECTURAL FIX: Read scan_state from Firestore (not from chat messages)
+            // 🔧 ARCHITECTURAL FIX: Read scan_state from Firestore via Scanner agent
             let scanState: any = null;
 
             if (historyUrlMatch) {
@@ -1504,17 +1535,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 if (urlForState && !urlForState.startsWith('http')) {
                     urlForState = 'https://' + urlForState;
                 }
-                try {
-                    const scanStateDocId = Buffer.from(urlForState).toString('base64url').substring(0, 128);
-                    const scanStateDoc = await getFirestore().collection('scan_states').doc(scanStateDocId).get();
-                    if (scanStateDoc.exists) {
-                        scanState = scanStateDoc.data();
-                        console.log("✅ SCAN_STATE LOADED FROM FIRESTORE for:", urlForState);
-                    } else {
-                        console.warn("⚠️ No scan_state found in Firestore for:", urlForState);
-                    }
-                } catch (e) {
-                    console.error("❌ Failed to load scan_state from Firestore:", e);
+                scanState = await loadScanState(urlForState);
+                if (scanState) {
+                    console.log("✅ SCAN_STATE LOADED FROM FIRESTORE for:", urlForState);
+                } else {
+                    console.warn("⚠️ No scan_state found in Firestore for:", urlForState);
                 }
             }
 
@@ -1591,7 +1616,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             // 1. Low confidence data = ACQUIS (pas de confirmation demandée au client)
             // 2. Unknown/missing data = À DEMANDER (le scan n'a rien trouvé)
             // 3. Blocs critiques manquants = TOUJOURS demander même si peu de données manquent
-            const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b));
+            const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) || lowConfidenceKeys.includes(b));
             let combinedQueue = [...questionQueue];
 
             // Prioritize Country (identite.country)
@@ -1674,10 +1699,12 @@ Tu es AYO, l'IA de AI VISIONARY. Tu es l'Expert Gardien du Registre AYA.
 4. Confiance & Conformité (/15) — Certifications, politiques, frameworks, sécurité
 5. Preuve Sociale & Métriques (/20) — KPIs, indicateurs, date mise à jour
 6. Pédagogie & Supports (/10) — FAQ, glossaire, documentation
-7. Socle Technique AIO (/10) — JSON-LD, ASR, sitemap, mobile
+7. Socle Technique AIO (/10) — JSON-LD, ASR (AI Singular Record), sitemap, mobile
 
 🧠 CONNAISSANCES CLÉS :
+- ASR signifie UNIQUEMENT "AI Singular Record" (le fichier JSON structuré généré par AYO). Ce n'est PAS "Automatic Speech Recognition". NE JAMAIS poser de question sur la reconnaissance vocale.
 - L'ASR est l'acte de naissance numérique. Sans lui, les IA hallucinent.
+- 🚫 NE JAMAIS POSER DE QUESTION SUR L'ASR. Le scan technique détecte automatiquement si un fichier ASR-Protocol.json existe (voir "Fichier ASR" dans les résultats du scan). Cette donnée est DÉJÀ CONNUE, il n'y a RIEN à demander au client.
 - Lisibilité = Recommandabilité. Pas de lecture technique = pas de recommandation.
 - Les fichiers ASR appartiennent au client. Système OUVERT.
 
@@ -1696,12 +1723,14 @@ Tu es AYO, l'IA de AI VISIONARY. Tu es l'Expert Gardien du Registre AYA.
    - "Certification ISO" non trouvée → "Fournissez le lien ou numéro de certificat"
    - TOUTE déclaration non confirmée par le scan doit être prouvée par un lien.
 
-### CE QUE LE SCAN A TROUVÉ (FAIT AUTORITÉ) :
-${contextScanResult ? `- FAQ sur le site : ${contextScanResult.hasFaqContent ? 'OUI' : 'NON'}
-- FAQ structurée (Schema.org) : ${contextScanResult.hasFaqSchema ? 'OUI' : 'NON'}
-- JSON-LD : ${contextScanResult.hasJsonLd ? 'OUI (' + contextScanResult.jsonLdCount + ')' : 'NON'}
-- Fichier ASR : ${contextScanResult.hasAsrFile ? 'OUI' : 'NON'}
-- Site accessible : ${contextScanResult.isReachable ? 'OUI' : 'NON'}` : 'Scan non disponible'}
+### CE QUE LE SCAN A TROUVÉ (FAIT AUTORITÉ — NE JAMAIS REPOSER CES QUESTIONS) :
+${contextScanResult ? formatScanForGreffier({
+    ...contextScanResult,
+    hasSitemap: contextScanResult.hasSitemap ?? (detectedValues['engagements_conformite.policies'] || '').toLowerCase().includes('sitemap'),
+    hasRobotsTxt: contextScanResult.hasRobotsTxt ?? (detectedValues['engagements_conformite.policies'] || '').toLowerCase().includes('robot'),
+    detectedPolicies: contextScanResult.detectedPolicies ?? [],
+}) : 'Scan non disponible'}
+⚠️ Si une info ci-dessus est marquée OUI/DÉTECTÉ, NE POSE PAS de question dessus. C'est CONFIRMÉ par le scan.
 
 ### ÉTAT DU DOSSIER :
 - Déjà collecté : ${highConfidenceData || 'Aucun'}
@@ -1918,6 +1947,12 @@ MAPPING DES RÉPONSES UTILISATEUR :
 - Mots-clés pertinents -> external_context.keywords (q=1)
 - Intentions de recherche -> external_context.intents (q=1)
 
+RÈGLES DE FORMAT STRICTES :
+- offre.target_audience : DOIT être des segments courts séparés par virgules (ex: "Développeurs IA, chercheurs, entreprises ESG"). JAMAIS une phrase complète ou une description d'activité. Si l'utilisateur donne une description au lieu de segments, EXTRAIS les segments implicites.
+- offre.products : DOIT être un tableau de produits COMPLETS (noms entiers, pas tronqués). Si un produit est entre parenthèses, INCLURE la parenthèse fermante.
+- processus_methodes.quality_assurance : DOIT être un tableau de mesures séparées (ex: ["Vérification des sources", "Validation par des experts"]). PAS une string avec virgules.
+- processus_methodes.geographies_served : Si vide, utiliser le pays de l'identité comme fallback.
+
 RÈGLES V3 "CONTEXT & SIMULATION" :
 1. **Contextual Relevance** : Définis pour quels intents utilisateurs ce site est pertinent (ex: "Local Search", "B2B Query").
 2. **AI Simulation** : Simule 3 requêtes (Local, Expert, Specifique) et décide si une IA recommanderait ce site AUJOURD'HUI.
@@ -1952,7 +1987,7 @@ FORMAT DE SORTIE JSON OBLIGATOIRE (Strictement "AYO-EXTRACT-3.0") :
       "process_steps": { "value": [], "q": 0, "evidence": [] },
       "delivery_mode": { "value": "", "q": 0, "evidence": [] },
       "geographies_served": { "value": "", "q": 0, "evidence": [] },
-      "quality_assurance": { "value": "", "q": 0, "evidence": [] }
+      "quality_assurance": { "value": [], "q": 0, "evidence": [] }
     },
     "engagements_conformite": {
       "policies": { "value": [], "q": 0, "evidence": [] },
@@ -2353,10 +2388,15 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                 extractJson.fields.structure_technique.has_jsonld = { value: scanResult.hasJsonLd, q: scanResult.hasJsonLd ? 1 : 0, evidence: ["Scan Technique"] };
                 extractJson.fields.structure_technique.has_asr = { value: scanResult.hasAsrFile, q: scanResult.hasAsrFile ? 1 : 0, evidence: ["Scan Technique"] };
 
-                // 4. COMPUTE DETERMINISTIC SCORE (Bible 7-bloc engine)
+                // 4. COMPUTE DETERMINISTIC SCORE (Bible 7-bloc engine + semantic validation via Analyste)
                 logger.info('FINAL_SCORE_COMPUTE', `Computing deterministic AIO score for ${urlToScan}`);
-                const scoreResult = computeAioScore(extractJson);
-                logger.info('FINAL_SCORE_RESULT', `Final score: ${scoreResult.total}/100`, { blocks: scoreResult.blocks });
+                const scoreResult = analyseScore(extractJson);
+                logger.info('FINAL_SCORE_RESULT', `Final score: ${scoreResult.total}/100`, {
+                    blocks: scoreResult.blocks,
+                    capApplied: scoreResult.capApplied,
+                    capReason: scoreResult.capReason,
+                    rawTotal: scoreResult.rawTotal,
+                });
 
                 // REMOVED HARCODED EXCEPTION FOR AI-VISIONARY TO ALLOW HONEST CONTENT SCORING
 
@@ -2417,8 +2457,8 @@ Calcul du score en cours...
 🔎 Structure technique : ${scoreResult.blocks.structure_technique}/10
 |||
 📊 SCORE FINAL AIO : ${scoreResult.total} / 100
-
-📌 Si votre score est élevé, c'est que vous avez déjà une bonne base de données structurées. Avec nos fichiers ASR, vous augmenterez encore vos chances d'être recommandé par les IA.
+${scoreResult.capApplied ? `\n⚠️ **Plafond appliqué** : ${scoreResult.capReason} (score brut : ${scoreResult.rawTotal}/100)` : ''}
+📌 Si votre score est élevé, c'est que vous avez déjà une bonne base de données structurées. Avec nos fichiers ASR (AI Singular Record), vous augmenterez encore vos chances d'être recommandé par les IA.
 
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
 (Les explications critiques et les correctifs ont été générés mais sont masqués).
@@ -2587,18 +2627,18 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
 
                 console.log(`🎯 TARGET PLAN: ${selectedPlan}`);
 
-                // Generate Redirect Link
-                let actionLink = "";
-                const payload = { u: detectedUrl || "unknown", e: userEmail, aid: sessionAsrId };
-                const b64 = Buffer.from(JSON.stringify(payload)).toString('base64');
-                const stripeSuffix = `?client_reference_id=${b64}&prefilled_email=${encodeURIComponent(userEmail)}`;
+                // Generate Redirect Link (via Vendeur agent)
+                const clientRef = encodeClientReference({
+                    url: detectedUrl || "unknown",
+                    email: userEmail,
+                    analysisId: sessionAsrId,
+                });
+                const stripeSuffix = `?client_reference_id=${clientRef}&prefilled_email=${encodeURIComponent(userEmail)}`;
                 logger.info('STRIPE_LINK', `Stripe link generated with aid=${sessionAsrId}, email=${userEmail}`);
 
-                if (selectedPlan === "PRO") {
-                    actionLink = `https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix}`;
-                } else {
-                    actionLink = `https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix}`;
-                }
+                const actionLink = selectedPlan === "PRO"
+                    ? `${STRIPE_TEST_LINKS.PRO}${stripeSuffix}`
+                    : `${STRIPE_TEST_LINKS.AYA_SUB}${stripeSuffix}`;
 
                 if (selectedPlan === "PRO") {
                     finalResponseText = `✅ **Email enregistré.**
@@ -2730,45 +2770,9 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
         }
 
         // -----------------------------------------------------------------------
-        // GENERATE STRIPE PARAMS FOR PROMPT SALES LINKS
+        // GENERATE STRIPE PARAMS FOR PROMPT SALES LINKS (via Vendeur agent)
         // -----------------------------------------------------------------------
-        let stripeSuffix = "";
         let targetEmailPrompt = detectedEmail || "";
-
-        try {
-            const urlForLink = detectedUrl || "";
-            const emailForLink = detectedEmail || "";
-
-            if (urlForLink || emailForLink) {
-                const payload: any = {};
-                if (urlForLink) payload.u = urlForLink;
-                if (emailForLink) payload.e = emailForLink;
-                payload.aid = sessionAsrId; // TRACK THE EXACT ANALYSIS DOCUMENT
-
-                const jsonStr = JSON.stringify(payload);
-                const b64 = Buffer.from(jsonStr).toString('base64');
-
-                if (b64.length <= 250) {
-                    stripeSuffix = `?client_reference_id=${b64}`;
-                    if (emailForLink) {
-                        stripeSuffix += `&prefilled_email=${encodeURIComponent(emailForLink)}`;
-                    }
-                } else {
-                    // Fallback small: PRIORITIZE EMAIL (Critical for delivery)
-                    if (emailForLink) {
-                        const smallPayload = JSON.stringify({ e: emailForLink });
-                        const smallB64 = Buffer.from(smallPayload).toString('base64');
-                        stripeSuffix = `?client_reference_id=${smallB64}&prefilled_email=${encodeURIComponent(emailForLink)}`;
-                        console.warn("⚠️ Client Ref too long. Dropped URL, kept Email for delivery.");
-                    } else if (urlForLink) {
-                        // Only if no email, keep URL
-                        const smallPayload = JSON.stringify({ u: urlForLink });
-                        const smallB64 = Buffer.from(smallPayload).toString('base64');
-                        stripeSuffix = `?client_reference_id=${smallB64}`;
-                    }
-                }
-            }
-        } catch (e) { console.warn("Stripe Param Gen Error", e); }
 
         // -----------------------------------------------------------------------
         // FINAL FALLBACK: GENERIC CHAT (INTELLIGENT REPLIES)

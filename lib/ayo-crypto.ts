@@ -249,7 +249,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     };
 
     if (mode !== 'LIGHT') {
-        offer.audience = cleanValAsr(data.offre?.target_audience?.value) || "Général";
+        // Sanitize audience: reject full sentences, only keep short segments
+        const rawAudience = cleanValAsr(data.offre?.target_audience?.value);
+        const isAudienceSentence = rawAudience && (rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience);
+        offer.audience = isAudienceSentence ? "Général" : (rawAudience || "Général");
         offer.pricingIndication = cleanValAsr(data.offre?.pricing_indication?.value);
     } else {
         offer.services = (offer.services || []).slice(0, 3);
@@ -260,8 +263,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     if (mode !== 'LIGHT') {
         processus.process_steps = cleanArrayAsr(data.processus_methodes?.process_steps?.value);
         processus.delivery_mode = deliveryMode; // already cleaned above
-        processus.geographies_served = geoServed; // already cleaned above
-        processus.quality_assurance = cleanValAsr(data.processus_methodes?.quality_assurance?.value);
+        // geographies_served: fallback to country if empty
+        processus.geographies_served = geoServed || cleanValAsr(data.identite?.country?.value) || "";
+        // quality_assurance: force array format (comma-separated string → array)
+        const rawQA = cleanValAsr(data.processus_methodes?.quality_assurance?.value);
+        processus.quality_assurance = rawQA ? rawQA.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
     }
 
     // Engagements & Compliance

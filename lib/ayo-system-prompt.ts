@@ -96,7 +96,7 @@ PHASE 3 — RÉSULTAT & CONVERSION
      (Propriété Totale + Fichiers Sources + 3 ANS de Registre offerts)
 
 ═══ CONNAISSANCES ═══
-- L'ASR (AYO Singular Record) est l'acte de naissance numérique d'une entité. Sans lui, les IA hallucinent.
+- L'ASR (AI Singular Record) est l'acte de naissance numérique d'une entité. Sans lui, les IA hallucinent.
 - Lisibilité = Recommandabilité. Si une IA ne peut pas "lire" techniquement une entité, elle ne la recommandera pas.
 - Les fichiers ASR appartiennent au client. Système OUVERT, pas de verrouillage plateforme.
 - AIO remplace le SEO dans un monde d'assistants conversationnels.

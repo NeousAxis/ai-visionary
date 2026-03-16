@@ -73,6 +73,57 @@ export function cleanVal(val: any): string {
     return cleanText(String(val));
 }
 
+/**
+ * Sanitize audience: if it's a full sentence (>80 chars or contains URL), return empty string.
+ * The audience field should be short segments like "Développeurs IA, chercheurs, entreprises"
+ * NOT a full sentence like "Api-glossaries.com a été développé spécifiquement pour..."
+ */
+export function sanitizeAudience(val: string): string {
+    if (!val) return "";
+    const trimmed = val.trim();
+    // If it contains a URL pattern, it's a calibration answer pasted verbatim
+    if (/[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(trimmed) && trimmed.length > 60) return "";
+    // If it's a full sentence (too long for audience segments)
+    if (trimmed.length > 100 && !trimmed.includes(',')) return "";
+    return trimmed;
+}
+
+/**
+ * Sanitize keywords: filter out items that are full sentences (>60 chars)
+ * Keywords should be short phrases, not full descriptions
+ */
+export function sanitizeKeywords(items: string[], maxLen: number = 80): string[] {
+    return items.filter(k => k.length <= maxLen && !/[a-zA-Z0-9-]+\.(com|org|net|io|fr|ch)/i.test(k));
+}
+
+/**
+ * Policy-specific definitions for glossary (not all policies are about "data protection")
+ */
+const POLICY_DEFINITIONS: Record<string, string> = {
+    'sitemap': "Fichier XML listant les pages d'un site web pour faciliter l'exploration et l'indexation par les moteurs de recherche et les agents IA.",
+    'robots.txt': "Fichier de directive placé à la racine d'un site web, indiquant aux robots d'indexation les pages autorisées ou interdites d'accès.",
+    'robots': "Fichier de directive placé à la racine d'un site web, indiquant aux robots d'indexation les pages autorisées ou interdites d'accès.",
+    'rgpd': "Règlement Général sur la Protection des Données. Cadre réglementaire européen encadrant la collecte et le traitement des données personnelles.",
+    'gdpr': "General Data Protection Regulation. European regulatory framework governing the collection and processing of personal data.",
+    'confidentialité': "Politique encadrant la collecte, le traitement et la protection des données personnelles des utilisateurs.",
+    "conditions d'utilisation": "Document contractuel définissant les règles d'usage d'un service ou d'une plateforme.",
+    'cgu': "Conditions Générales d'Utilisation. Document contractuel définissant les règles d'usage d'un service ou d'une plateforme.",
+    'cgv': "Conditions Générales de Vente. Document contractuel encadrant les modalités commerciales entre le prestataire et ses clients.",
+    'mentions légales': "Page légale obligatoire identifiant l'éditeur du site, l'hébergeur et les conditions d'accès au service.",
+    'https': "Protocole de communication sécurisé chiffrant les échanges entre le navigateur et le serveur via un certificat SSL/TLS.",
+    'ssl': "Certificat de sécurité assurant le chiffrement des communications entre le navigateur et le serveur web.",
+    'tls': "Protocole cryptographique assurant la confidentialité et l'intégrité des données échangées sur Internet.",
+    'accessibilité': "Ensemble de bonnes pratiques visant à rendre un site web utilisable par tous, y compris les personnes en situation de handicap.",
+};
+
+function getPolicyDefinition(policy: string, entityName: string): string {
+    const lower = policy.toLowerCase().trim();
+    for (const [key, def] of Object.entries(POLICY_DEFINITIONS)) {
+        if (lower.includes(key)) return def;
+    }
+    return `Politique de conformité ${/^[aeiouhAEIOUHéÉàÀ]/.test(entityName) ? `d'${entityName}` : `de ${entityName}`} contribuant à la transparence et à la gouvernance de l'entité.`;
+}
+
 const BUSINESS_TYPE_PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|)$/i;
 export function sanitizeBusinessType(val: string, fallback: string = ""): string {
     if (!val || BUSINESS_TYPE_PLACEHOLDER_RE.test(val.trim())) return fallback;
@@ -234,7 +285,7 @@ export function generateFaqJson(data: any, url: string): any {
     const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value));
     const services = cleanArray(data.offre?.services?.value);
     const products = cleanArray(data.offre?.products?.value);
-    const audience = cleanVal(data.offre?.target_audience?.value);
+    const audience = sanitizeAudience(cleanVal(data.offre?.target_audience?.value));
     const useCases = cleanArray(data.offre?.use_cases?.value);
     const pricing = cleanVal(data.offre?.pricing_indication?.value);
     const email = data.identite?.contact_email?.value || "";
@@ -246,7 +297,9 @@ export function generateFaqJson(data: any, url: string): any {
     const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
     const deliveryMode = cleanVal(data.processus_methodes?.delivery_mode?.value);
     const geoServed = cleanVal(data.processus_methodes?.geographies_served?.value);
-    const qualityAssurance = cleanVal(data.processus_methodes?.quality_assurance?.value);
+    const rawQAfaq = data.processus_methodes?.quality_assurance?.value;
+    const qualityAssurance = Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ')
+        : cleanVal(rawQAfaq);
     const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
     const frameworks = cleanArray(data.engagements_conformite?.frameworks?.value);
     const policies = cleanArray(data.engagements_conformite?.policies?.value);
@@ -424,7 +477,7 @@ export function generateGlossaryJson(data: any): any {
     const useCases = cleanArray(data.offre?.use_cases?.value);
     const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
     const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
-    const audience = cleanVal(data.offre?.target_audience?.value);
+    const audience = sanitizeAudience(cleanVal(data.offre?.target_audience?.value));
     const city = cleanVal(data.identite?.city?.value);
     const country = cleanVal(data.identite?.country?.value);
     const policies = cleanArray(data.engagements_conformite?.policies?.value);
@@ -490,8 +543,8 @@ export function generateGlossaryJson(data: any): any {
     });
     policies.forEach(p => {
         if (typeof p !== 'string') return;
-        const cleanDef = `Politique de conformité ${nameArticleG} en matière de protection des données et de transparence.`;
-        addTerm(p.replace(/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, "").trim(), cleanDef, "Conformité");
+        const cleanP = p.replace(/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, "").trim();
+        addTerm(cleanP, getPolicyDefinition(cleanP, name), "Conformité");
     });
 
     securityMeasures.forEach(sm => {
@@ -538,7 +591,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const useCases = cleanArray(data.offre?.use_cases?.value);
     const services = cleanArray(data.offre?.services?.value);
     const products = cleanArray(data.offre?.products?.value);
-    const audience = cleanVal(data.offre?.target_audience?.value);
+    const audience = sanitizeAudience(cleanVal(data.offre?.target_audience?.value));
     const city = cleanVal(data.identite?.city?.value);
     const country = cleanVal(data.identite?.country?.value);
     const email = data.identite?.contact_email?.value || "";
@@ -550,7 +603,12 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
     const deliveryMode = cleanVal(data.processus_methodes?.delivery_mode?.value);
     const geographies = cleanVal(data.processus_methodes?.geographies_served?.value);
-    const qualityAssurance = cleanVal(data.processus_methodes?.quality_assurance?.value);
+    const rawQAec = data.processus_methodes?.quality_assurance?.value;
+    const qualityAssurance: string[] = Array.isArray(rawQAec)
+        ? rawQAec.filter((s: any) => typeof s === 'string' && s.trim()).map((s: string) => s.trim())
+        : (typeof rawQAec === 'string' && rawQAec.trim())
+            ? rawQAec.split(',').map((s: string) => s.trim()).filter(Boolean)
+            : [];
     const keyIndicators = cleanArray(data.indicateurs?.key_indicators?.value);
     const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
@@ -574,10 +632,19 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             addUnique(discoveryKeywords, k);
         }
     });
-    services.slice(0, 8).forEach(s => addUnique(discoveryKeywords, s));
-    products.slice(0, 5).forEach(p => addUnique(discoveryKeywords, p));
-    if (audience) addUnique(discoveryKeywords, audience);
+    // Products as keywords (short names only — long descriptions are NOT keywords)
+    products.slice(0, 10).forEach(p => {
+        if (typeof p === 'string' && p.length <= 50) addUnique(discoveryKeywords, p);
+    });
+    // Audience segments as keywords (split by comma, short segments only)
+    if (audience) {
+        audience.split(',').map((s: string) => s.trim()).filter(Boolean).forEach(seg => {
+            if (seg.length <= 50) addUnique(discoveryKeywords, seg);
+        });
+    }
     if (city) addUnique(discoveryKeywords, city);
+    // Business type as keyword
+    if (businessType && businessType.length <= 60) addUnique(discoveryKeywords, businessType);
 
     const intentKeywords: string[] = [];
     declaredIntents.slice(0, 15).forEach(i => {
@@ -600,10 +667,10 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
         if (dm.includes("site") || dm.includes("presen") || dm.includes("atelier")) primaryChannels.push("Sur site");
     }
 
-    const reputationEnabled = certifications.length > 0 || !!qualityAssurance || keyIndicators.length > 0;
+    const reputationEnabled = certifications.length > 0 || qualityAssurance.length > 0 || keyIndicators.length > 0;
     const reputationSources: string[] = [];
     if (certifications.length > 0) reputationSources.push("certifications_declared");
-    if (qualityAssurance) reputationSources.push("quality_assurance_declared");
+    if (qualityAssurance.length > 0) reputationSources.push("quality_assurance_declared");
     if (keyIndicators.length > 0) reputationSources.push("performance_indicators");
     if (policies.length > 0) reputationSources.push("compliance_policies");
 
@@ -633,7 +700,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             enabled: reputationEnabled,
             trust_indicators: {
                 certifications: certifications,
-                quality_assurance: qualityAssurance || null,
+                quality_assurance: qualityAssurance,
                 key_metrics: keyIndicators,
                 compliance_frameworks: frameworks
             },
@@ -648,8 +715,8 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             process_transparency: (processSteps.length > 0 || deliveryMode) ? "documented" : "undisclosed"
         },
         keywords_context: {
-            discovery_keywords: discoveryKeywords,
-            intent_keywords: intentKeywords,
+            discovery_keywords: sanitizeKeywords(discoveryKeywords),
+            intent_keywords: sanitizeKeywords(intentKeywords),
             audience_segments: audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
             source: "declared + analysis"
         },
