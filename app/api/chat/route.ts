@@ -1589,10 +1589,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 "external_context.keywords", "external_context.intents"
             ];
 
-            // 🧮 ORDERED QUEUE: Only ask for UNKNOWN/MISSING data.
-            // Low confidence data from the scan is accepted as-is (promoted to high confidence).
-            // AYO already scraped it — no need to ask the client to confirm.
-            const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
+            // 🧮 ORDERED QUEUE:
+            // 1. Low confidence data = ACQUIS (pas de confirmation demandée au client)
+            // 2. Unknown/missing data = À DEMANDER (le scan n'a rien trouvé)
+            // 3. Blocs critiques manquants = TOUJOURS demander même si peu de données manquent
+            const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b));
             let combinedQueue = [...questionQueue];
 
             // Prioritize Country (identite.country)
