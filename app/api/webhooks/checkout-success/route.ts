@@ -14,8 +14,6 @@ import { db } from '@/lib/db';
 import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { createLogger } from '@/lib/logger';
 import { getFirestore } from 'firebase-admin/firestore';
-// Gemini AI generation disabled — deterministic generators are now quality-controlled
-// import { generateSemanticAssets } from '@/lib/ayo-semantics';
 import { computeAioScore } from '@/lib/aio-score-engine';
 import '@/lib/db'; // Ensure Firebase Admin is initialized
 import {
@@ -23,6 +21,8 @@ import {
     sanitizeBusinessType, sanitizeExtract,
     generateManifestJson, generateFaqJson, generateGlossaryJson, generateExternalContextJsonLocal
 } from '@/lib/ayo-generators';
+// 🤖 Agent Architecte — génération + QC des fichiers PRO
+import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
 
 // --- HELPERS ---
 
@@ -434,30 +434,47 @@ export async function POST(req: Request) {
                 }
             }
 
-            // Generate ALL 5 pack files
-            const zip = new JSZip();
-
-            // 1. ASR-Protocol.json (main ASR — always deterministic)
-            // Generate a proper ASR ID (not the Stripe checkout session ID)
+            // 🤖 AGENT ARCHITECTE — Génère les 5 fichiers PRO + Contrôle Qualité
             const asrId = `asr_${ayaId || crypto.randomUUID().replace(/-/g, '').substring(0, 16)}`;
-            const asr = await generateRealAsrJson(analysisData.extract, analysisData.score, new Date().toISOString(), asrId, "PRO", analysisData.url);
-            zip.file("ASR-Protocol.json", JSON.stringify(asr, null, 2));
+            const architecteInput: ArchitecteInput = {
+                extractData: ext,
+                url: analysisData.url,
+                email: customerEmail,
+                mode: 'PRO',
+                score: analysisData.score,
+                date: new Date().toISOString(),
+                asrId,
+            };
 
-            // 2-5. Semantic assets — ALWAYS use deterministic generators
-            // (Gemini AI was overriding our grammar/quality fixes — disabled for FAQ/Glossary/ExternalContext)
-            const manifest = generateManifestJson(ext, analysisData.url);
-            const faq = generateFaqJson(ext, analysisData.url);
-            const glossary = generateGlossaryJson(ext);
-            const externalCtx = generateExternalContextJsonLocal(ext, analysisData.url);
-            logger.info('WEBHOOK_ASSETS_DETERMINISTIC', `Deterministic semantic assets generated for ${entityName}`);
+            const architecteResult = await generateProPack(architecteInput);
+            logger.info('ARCHITECTE_RESULT', `Architecte: delivered=${architecteResult.delivered}, attempts=${architecteResult.attempts}, errors=${architecteResult.qcResult.errors.length}`, {
+                delivered: architecteResult.delivered,
+                attempts: architecteResult.attempts,
+                totalErrors: architecteResult.qcResult.errors.length,
+                blockingErrors: architecteResult.qcResult.errors.filter(e => e.severity === 'blocking').length,
+                correctableErrors: architecteResult.qcResult.errors.filter(e => e.severity === 'correctable').length,
+            });
 
-            zip.file("manifest.json", JSON.stringify(manifest, null, 2));
-            zip.file("faq.json", JSON.stringify(faq, null, 2));
-            zip.file("glossary.json", JSON.stringify(glossary, null, 2));
-            zip.file("external_context.json", JSON.stringify(externalCtx, null, 2));
+            if (!architecteResult.delivered) {
+                const blockingErrors = architecteResult.qcResult.errors
+                    .filter(e => e.severity === 'blocking')
+                    .map(e => `${e.file}:${e.field} — ${e.message}`);
+                logger.critical('ARCHITECTE_QC_FAILED', `QC échoué après ${architecteResult.attempts} tentatives pour ${entityName}`, {
+                    blockingErrors,
+                });
+                // On continue quand même la livraison — les fichiers sont générés, juste pas parfaits.
+                // Le client reçoit ses fichiers + on log pour monitoring.
+            }
+
+            const zip = new JSZip();
+            zip.file("ASR-Protocol.json", JSON.stringify(architecteResult.files.asr, null, 2));
+            zip.file("manifest.json", JSON.stringify(architecteResult.files.manifest, null, 2));
+            zip.file("faq.json", JSON.stringify(architecteResult.files.faq, null, 2));
+            zip.file("glossary.json", JSON.stringify(architecteResult.files.glossary, null, 2));
+            zip.file("external_context.json", JSON.stringify(architecteResult.files.externalContext, null, 2));
 
             const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
-            logger.info('WEBHOOK_ZIP_BUILT', `ZIP built with 5 files for ${entityName}`, { files: 5 });
+            logger.info('WEBHOOK_ZIP_BUILT', `ZIP built with 5 files for ${entityName} (QC: ${architecteResult.delivered ? 'PASS' : 'WARN'})`, { files: 5 });
 
             // Build email HTML first (to catch errors before Resend call)
             let emailHtml: string;

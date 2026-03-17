@@ -1367,15 +1367,8 @@ GÉNÈRE CE JSON MAINTENANT :
                 transparencySummary += `\n`;
             }
 
-            // Add initial 7-bloc score display (from deterministic engine)
-            transparencySummary += `📊 **SCORE INITIAL AIO : ${initialScore.total} / 100**\n\n`;
-            transparencySummary += `🔎 Identité & Ancrage : ${initialScore.blocks.identite}/10\n`;
-            transparencySummary += `🔎 Clarté de l'Offre : ${initialScore.blocks.offre}/20\n`;
-            transparencySummary += `🔎 Processus & Méthodes : ${initialScore.blocks.processus_methodes}/15\n`;
-            transparencySummary += `🔎 Confiance & Conformité : ${initialScore.blocks.engagements_conformite}/15\n`;
-            transparencySummary += `🔎 Preuve Sociale & Métriques : ${initialScore.blocks.indicateurs}/20\n`;
-            transparencySummary += `🔎 Pédagogie & Supports : ${initialScore.blocks.contenus_pedagogiques}/10\n`;
-            transparencySummary += `🔎 Socle Technique AIO : ${initialScore.blocks.structure_technique}/10\n\n`;
+            // Add initial 7-bloc score display (from AYO Router formatScoreMessage)
+            transparencySummary += formatScoreMessage(initialScore, 'initial') + '\n\n';
 
             const weakBlocks = Object.entries(initialScore.audit || {})
                 .filter(([, v]: [string, any]) => v.status === 'error' || v.status === 'warning')
