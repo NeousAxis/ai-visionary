@@ -742,6 +742,9 @@ STRATÉGIE DE CONFIANCE (FILTRE ANTI-BULLSHIT) :
 3. **UNKNOWN (unknown)** :
    - Information totalement introuvable.
 
+TERMINOLOGIE CRITIQUE :
+ASR = "AI Singular Record" (JAMAIS "AYO Singular Record"). AYO est le nom de l'assistant IA, ASR est le nom du fichier. Ne confonds pas.
+
 TA MISSION :
 Essaie de répondre aux 27 questions critiques pour construire un ASR.
 
@@ -756,7 +759,7 @@ LES 25 QUESTIONS CRITIQUES :
 8. Public cible (Audience B2B, B2C, Collectivités)
 9. Liste des services
 10. Liste des produits (physiques ou numériques)
-11. Tarification (Modèle éco: Devis, Prix fixe, Abonnement)
+11. Tarification (MONTANTS RÉELS avec devise, ex: "19 CHF/mois", "499 CHF one-shot", "à partir de 50€/h". TOUJOURS inclure les chiffres, la devise et la fréquence. Ne JAMAIS répondre uniquement par des catégories comme "Abonnement" ou "Prix fixe".)
 12. Cas d'usage (Pourquoi on vous cherche ? Intentions utilisateur)
 13. Méthodologie (Processus, étapes d'accompagnement)
 14. Mode de livraison (En ligne, sur site, hybride, ateliers, formations)
@@ -771,6 +774,13 @@ LES 25 QUESTIONS CRITIQUES :
 23. Supports pédagogiques (Livre blanc, FAQ, Plateforme, Documentation)
 24. Mots-clés de recherche (Comment vos clients vous trouvent)
 25. Intentions de recherche typiques (Requêtes que vos clients tapent sur Google/IA)
+
+RÈGLE CRITIQUE POUR LA TARIFICATION (question 11) :
+- Cherche les MONTANTS en chiffres dans le texte extrait du site (ex: "19 CHF", "499€", "$99/month").
+- Inclus TOUJOURS le montant + la devise + la fréquence (ex: "Abonnement AYA : 19 CHF/mois, Pack PRO : 499 CHF achat unique").
+- Ne retourne JAMAIS uniquement des catégories ("Abonnement", "Prix fixe", "Sur devis") sans les montants associés.
+- Cherche les prix dans TOUT le texte visible de la page (pas seulement les meta-données ou JSON-LD).
+- Si des montants sont visibles sur la page, confidence = "high".
 
 FORMAT JSON ATTENDU :
 {
@@ -1602,7 +1612,7 @@ RÈGLES SPÉCIFIQUES PAR CHAMP :
 - engagements_conformite.security_measures : q=1 UNIQUEMENT pour des mesures SPÉCIFIQUES (ex: "chiffrement AES-256", "audits trimestriels par X"). "Audits de sécurité" seul = q=0.5.
 - contenus_pedagogiques.has_glossary : q=0 si l'utilisateur dit "non" ou "pas de glossaire". Ne PAS inverser un refus explicite.
 - contenus_pedagogiques.has_documentation : q=0 si l'utilisateur dit "non" ou nie la présence de documentation. Ne PAS inverser un refus explicite.
-- offre.pricing_indication : "sur devis" = q=0.5 (c'est mieux que rien mais pas informatif). q=1 nécessite une fourchette ou un modèle de pricing.
+- offre.pricing_indication : "sur devis" = q=0.5 (c'est mieux que rien mais pas informatif). q=1 nécessite des MONTANTS RÉELS avec devise (ex: "19 CHF/mois", "499 CHF"). Des catégories seules ("Abonnement", "Prix fixe") sans montants = q=0.5 maximum.
 - processus_methodes.process_steps : q=1 UNIQUEMENT si au moins 3 étapes distinctes et concrètes sont décrites.
 - indicateurs.last_review_date : q=1 UNIQUEMENT si une date est explicitement mentionnée. "Première soumission" ou "jamais" = q=0.
 
