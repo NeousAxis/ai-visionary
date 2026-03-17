@@ -56,7 +56,7 @@ export default function ComprendrePage() {
                     <div className="card" style={{ borderColor: 'rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.05)' }}>
                         <h2 style={{ marginBottom: '1rem', color: '#10b981' }}>2. Après une déclaration structurée et scellée : ce qui change</h2>
                         <p style={{ marginBottom: '1rem' }}>
-                            Avec une déclaration explicite (ASR – AYO Singular Record), votre entreprise devient pour l’IA :
+                            Avec une déclaration explicite (ASR – AI Singular Record), votre entreprise devient pour l’IA :
                         </p>
                         <ul className="clean-list" style={{ marginBottom: '1rem' }}>
                             <li>Une entité clairement bornée,</li>

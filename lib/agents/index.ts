@@ -42,10 +42,12 @@ export {
 export {
     QUESTIONNAIRE,
     buildQuestionQueue,
+    buildContinuePrompt,
     getGreffierPrompt,
     type BlocName,
     type BlocQuestion,
     type GreffierContext,
+    type ContinuePromptParams,
 } from './greffier';
 
 // Analyste

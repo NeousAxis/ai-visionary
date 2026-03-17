@@ -6,7 +6,7 @@ Artificial Intelligence Optimization
 
 ASR
 
-AYO Singular Record
+AI Singular Record
 → Document d’autorité IA, unique, canonique, prioritaire.
 
 II. PRINCIPES NON NÉGOCIABLES
@@ -370,7 +370,7 @@ AYO :
 
 structure proprement l’entreprise,
 
-génère un ASR (AYO Singular Record),
+génère un ASR (AI Singular Record),
 
 garantit une lisibilité maximale et canonique.
 

@@ -212,7 +212,7 @@ export function generateManifestJson(data: any, url: string): any {
     const manifestEntityType = isAssoManifest ? "NonProfitOrganization" : (lowerMBT.includes("cabinet") || lowerMBT.includes("bureau") ? "ProfessionalService" : "Organization");
 
     const scope = services.length > 0 ? services.slice(0, 5) : ["Services professionnels"];
-    scope.push("AYO Singular Record (ASR)");
+    scope.push("AI Singular Record (ASR)");
 
     const complianceSignals: string[] = [];
     if (country && ["France", "Suisse", "Belgique", "Allemagne", "Italie", "Espagne"].includes(country)) complianceSignals.push("GDPR");
@@ -447,7 +447,7 @@ export function generateFaqJson(data: any, url: string): any {
     // --- AYO / VISIBILITÉ IA ---
     qna.push({
         q: `${name} est-${isAssociation ? "elle" : "il"} certifié${eAccord} AYO ?`,
-        a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AYO Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssociation ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`,
+        a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AI Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssociation ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`,
         category: "Visibilité IA"
     });
 
@@ -562,7 +562,7 @@ export function generateGlossaryJson(data: any): any {
         }
     }
 
-    addTerm("ASR (AYO Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", "Écosystème AYO");
+    addTerm("ASR (AI Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", "Écosystème AYO");
     addTerm("AIO (Artificial Intelligence Optimization)", "Score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Calculé sur 7 blocs pondérés : Identité (10), Offre (20), Processus (15), Conformité (15), Indicateurs (20), Pédagogie (10), Technique (10).", "Écosystème AYO");
     addTerm("AYA (AYO Authority Registry)", "Registre officiel des entités certifiées AYO. L'inscription AYA atteste qu'une entité a été analysée, scorée, et que son ASR est authentique, signé et à jour.", "Écosystème AYO");
     addTerm("Pack AYO PRO", "Ensemble de 5 fichiers sémantiques (ASR, manifest, FAQ, glossaire, contexte externe) livrés à une entité pour optimiser sa visibilité auprès des agents IA. Inclut 3 ans d'inscription au registre AYA.", "Écosystème AYO");

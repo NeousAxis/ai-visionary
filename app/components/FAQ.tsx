@@ -72,7 +72,7 @@ export default function FAQ() {
                 </FaqItem>
 
                 <FaqItem question="2. Qu’est-ce que fait concrètement AYO ?">
-                    <p><strong>AYO crée un ASR — AYO Singular Record.</strong></p>
+                    <p><strong>AYO crée un ASR — AI Singular Record.</strong></p>
                     <p style={{ marginTop: '0.5rem' }}>Un ASR est une déclaration officielle et structurée de votre entreprise : ce que vous êtes, ce que vous faites, et ce que vous ne déclarez pas.</p>
                     <ul style={{ margin: '1rem 0', paddingLeft: '1.5rem' }}>
                         <li>Ce n’est ni du SEO,</li>

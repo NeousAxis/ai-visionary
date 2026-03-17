@@ -26,7 +26,7 @@ Le produit principal est **AYO** (AI Your Org) — un chatbot IA qui diagnostiqu
 | **AYO** | Le chatbot IA qui réalise le diagnostic. Utilise Google Gemini comme LLM. |
 | **AIO Score** | Score 0-100, déterministe, basé sur 7 blocs pondérés (la "Bible AIO"). |
 | **AYA** | Registre public des entités certifiées (Firestore `aya_registry`). |
-| **ASR** | AYO Singular Record — fichier JSON-LD signé Ed25519, identité numérique de l'entité. |
+| **ASR** | AI Singular Record — fichier JSON-LD signé Ed25519, identité numérique de l'entité. |
 | **Bible AIO** | Document de référence définissant les 7 blocs et leurs poids. Fichier : `AYO_BIBLE.md`. |
 | **Hard cap** | Pas de JSON-LD + pas d'AYA → score max 50. Pas d'ASR → max 90. |
 | **q values** | Qualité de chaque donnée extraite : 0 (absent/nul), 0.5 (vague), 1 (concret/vérifié). |

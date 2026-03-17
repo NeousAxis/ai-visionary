@@ -198,7 +198,7 @@ function generateFaqJson(data: any, url: string): any {
     const hasGlossary = data.contenus_pedagogiques?.has_glossary?.value;
     if (hasDoc || hasFaq || hasGlossary) { qna.push({ q: `${name} propose-t-${isAssociation ? "elle" : "il"} des ressources pédagogiques ?`, a: `Oui. ${name} met à disposition une documentation complète, une FAQ pour répondre aux questions courantes, un glossaire du vocabulaire métier. Retrouvez ces ressources sur ${url}.`, category: "Ressources" }); }
     qna.push({ q: `Comment contacter ${name} ?`, a: `Vous pouvez joindre ${name} ${email ? `par email à ${email}, ` : ""}via le site web ${url}.`, category: "Contact" });
-    qna.push({ q: `${name} est-${isAssociation ? "elle" : "il"} certifié${eAccord} AYO ?`, a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AYO Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssociation ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`, category: "Visibilité IA" });
+    qna.push({ q: `${name} est-${isAssociation ? "elle" : "il"} certifié${eAccord} AYO ?`, a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AI Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssociation ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`, category: "Visibilité IA" });
 
     return { "@context": "https://schema.org", "@type": "FAQPage", version: "AYO-FAQ-2.0", entity: name, url, numberOfQuestions: qna.length, categories: [...new Set(qna.map(q => q.category))], inLanguage: "fr", mainEntity: qna.map(item => ({ "@type": "Question", name: item.q, about: item.category, acceptedAnswer: { "@type": "Answer", text: item.a } })) };
 }
@@ -247,7 +247,7 @@ function generateGlossaryJson(data: any): any {
         else { addTerm(audience, `Public cible principal ${nameArticleG}.`, "Audience"); }
     }
 
-    addTerm("ASR (AYO Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519).", "Écosystème AYO");
+    addTerm("ASR (AI Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519).", "Écosystème AYO");
     addTerm("AIO (Artificial Intelligence Optimization)", "Score de 0 à 100 mesurant la lisibilité sémantique.", "Écosystème AYO");
     addTerm("AYA (AYO Authority Registry)", "Registre officiel des entités certifiées AYO.", "Écosystème AYO");
     addTerm("Pack AYO PRO", "Ensemble de 5 fichiers sémantiques.", "Écosystème AYO");

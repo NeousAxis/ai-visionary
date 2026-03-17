@@ -27,7 +27,7 @@ export interface ASR_Published extends ASR_Base {
 /**
  * AYO Cryptographic Seal Specification (Version Canonical AYO-AYA)
  *
- * Implements the rigorous process for sealing AYO Singular Records (ASR).
+ * Implements the rigorous process for sealing AI Singular Records (ASR).
  *
  * Process Overview:
  * 1. Generation: Collect data -> Build Object -> Validate

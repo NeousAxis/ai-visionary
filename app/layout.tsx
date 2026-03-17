@@ -65,7 +65,7 @@ export default function RootLayout({
                 "secondary": ["Artificial Intelligence Optimization (AIO)", "Data Structuring", "Digital Knowledge Representation"]
               },
               "ayo:offer": {
-                "services": ["AI-readiness audit", "Information structuring for IA", "AIO score evaluation", "ASR (AYO Singular Record) generation"]
+                "services": ["AI-readiness audit", "Information structuring for IA", "AIO score evaluation", "ASR (AI Singular Record) generation"]
               }
             })
           }}
