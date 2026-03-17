@@ -1389,7 +1389,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 const continueResult = await generateText({
                     model: modelToUse,
                     temperature: 0, // Force determinism for protocol
-                    system: CONTINUE_PROMPT + "\n\n⚠️ IMPORTANT : RÉPONDS UNIQUEMENT AVEC LE JSON. PAS DE TEXTE AVANT OU APRÈS. TU NE DOIS JAMAIS RENVOYER UN TABLEAU DE QUESTIONS VIDE.",
+                    system: CONTINUE_PROMPT + "\n\n⚠️ IMPORTANT : RÉPONDS UNIQUEMENT AVEC LE JSON. PAS DE TEXTE AVANT OU APRÈS. TU NE DOIS JAMAIS RENVOYER UN TABLEAU DE QUESTIONS VIDE.\n⚠️ Le champ \"intro\" et le champ \"text\" doivent contenir UNIQUEMENT du texte humain lisible. JAMAIS de JSON, guillemets, crochets ou accolades dans ces champs.",
                     messages: messages
                 });
 
@@ -1414,6 +1414,59 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                         if (!parsedResponse.questions || parsedResponse.questions.length === 0) {
                             throw new Error("LLM returned empty questions array");
                         }
+
+                        // 🧹 SANITIZER: Strip raw JSON fragments from user-facing text fields
+                        // The LLM sometimes leaks JSON syntax into the "intro" or question "text" fields.
+                        // Patterns: `","`, `"questions":[`, `"}]`, `"type":"`, `"id":"`, `[{"`
+                        const JSON_LEAK_PATTERNS = /(","|"\w+":\s*[\[{"]|\}\]|^\s*\{|"\s*:\s*")/;
+
+                        if (parsedResponse.intro && JSON_LEAK_PATTERNS.test(parsedResponse.intro)) {
+                            console.warn("⚠️ SANITIZER: Raw JSON detected in intro field. Cleaning...");
+                            // Extract only the human-readable part before JSON artifacts
+                            // Strategy: take text before first JSON-like pattern, or fallback to empty
+                            let cleanIntro = parsedResponse.intro
+                                // Remove anything that looks like JSON key-value pairs
+                                .replace(/"[a-zA-Z_]+"\s*:\s*[\[{"]/g, '')
+                                // Remove JSON array/object closures
+                                .replace(/[}\]]+\s*$/g, '')
+                                // Remove orphaned JSON punctuation
+                                .replace(/[{}\[\]]+/g, '')
+                                // Remove consecutive commas and orphaned quotes
+                                .replace(/"{2,}/g, '')
+                                .replace(/,{2,}/g, ',')
+                                // Remove trailing/leading commas and whitespace
+                                .replace(/^[\s,]+|[\s,]+$/g, '')
+                                .trim();
+
+                            // If cleaning left nothing meaningful, use a generic transition
+                            if (!cleanIntro || cleanIntro.length < 5) {
+                                cleanIntro = "Continuons l'analyse.";
+                            }
+                            parsedResponse.intro = cleanIntro;
+                        }
+
+                        // Sanitize question text fields too
+                        if (parsedResponse.questions && Array.isArray(parsedResponse.questions)) {
+                            parsedResponse.questions.forEach((q: any) => {
+                                if (q.text && JSON_LEAK_PATTERNS.test(q.text)) {
+                                    console.warn(`⚠️ SANITIZER: Raw JSON detected in question text (id=${q.id}). Cleaning...`);
+                                    q.text = q.text
+                                        .replace(/"[a-zA-Z_]+"\s*:\s*[\[{"]/g, '')
+                                        .replace(/[}\]]+\s*$/g, '')
+                                        .replace(/[{}\[\]]+/g, '')
+                                        .replace(/"{2,}/g, '')
+                                        .replace(/,{2,}/g, ',')
+                                        .replace(/^[\s,]+|[\s,]+$/g, '')
+                                        .trim();
+                                    if (!q.text || q.text.length < 5) {
+                                        q.text = `Concernant ${nextBlockName}, pourriez-vous préciser ?`;
+                                    }
+                                }
+                            });
+                        }
+
+                        // Re-serialize the sanitized response
+                        finalResponseText = JSON.stringify(parsedResponse);
                     } catch (e) {
                         console.warn("❌ JSON Parse Failed despite Regex match. Fallback to Text.", e);
                         // If it fails to parse, it's garbage. We wrap the RAW text in a basic message block to display it cleanly.

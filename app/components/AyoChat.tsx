@@ -20,6 +20,27 @@ interface QuestionBlock {
     }[];
 }
 
+/**
+ * Sanitize user-facing text fields to strip any raw JSON fragments
+ * that the LLM may have leaked. Defense-in-depth for the chat UI.
+ */
+function sanitizeDisplayText(text: string | undefined): string {
+    if (!text) return '';
+    // Detect JSON-like patterns that should never appear in user-facing text
+    const JSON_LEAK = /(","|"\w+":\s*[\[{"]|\}\]|^\s*\{|"\s*:\s*")/;
+    if (!JSON_LEAK.test(text)) return text;
+    // Strip JSON artifacts
+    let cleaned = text
+        .replace(/"[a-zA-Z_]+"\s*:\s*[\[{"]/g, '')
+        .replace(/[}\]]+\s*$/g, '')
+        .replace(/[{}\[\]]+/g, '')
+        .replace(/"{2,}/g, '')
+        .replace(/,{2,}/g, ',')
+        .replace(/^[\s,]+|[\s,]+$/g, '')
+        .trim();
+    return cleaned.length >= 5 ? cleaned : "Continuons l'analyse.";
+}
+
 export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     // UI State
     const [messages, setMessages] = useState<any[]>([]);
@@ -307,6 +328,13 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     .trim();
                 const parsed = JSON.parse(cleanJson);
                 if (parsed.type === 'question_block') {
+                    // Sanitize user-facing fields to strip any leaked JSON
+                    parsed.intro = sanitizeDisplayText(parsed.intro);
+                    if (parsed.questions && Array.isArray(parsed.questions)) {
+                        parsed.questions.forEach((q: any) => {
+                            q.text = sanitizeDisplayText(q.text) || q.text;
+                        });
+                    }
                     qcmData = parsed;
                 }
             } catch (e) {

@@ -315,13 +315,21 @@ Poser la question pour OBTENIR les données MANQUANTES du bloc : **${nextBlockNa
 Les données déjà collectées ou scannées sont ACQUISES — ne les redemande pas.
 
 ### FORMAT JSON ATTENDU :
+⚠️ RÈGLE CRITIQUE DE FORMAT :
+- Ta réponse DOIT être UNIQUEMENT du JSON valide. RIEN d'autre.
+- Le champ "intro" contient UNIQUEMENT du texte humain (pas de JSON, pas de guillemets doubles imbriqués, pas de crochets, pas d'accolades).
+- NE JAMAIS mélanger du texte libre et du JSON dans ta réponse.
+- NE JAMAIS inclure de fragments JSON dans le champ "intro" ou "text".
+- Exemple INTERDIT : "intro": "OK. Passons à la suite. ","questions":[  ← CECI EST CASSÉ
+- Exemple CORRECT : "intro": "Passons à la suite."
+
 {
   "type": "question_block",
-  "intro": "Ton introduction courte ou transition",
+  "intro": "Ton introduction courte ou transition (TEXTE PUR, JAMAIS de JSON ici)",
   "questions": [
     {
       "id": "q_${nextBlockName.replace('.', '_')}",
-      "text": "Ta question ?",
+      "text": "Ta question ? (TEXTE PUR, JAMAIS de JSON ici)",
       "options": ["Choix A", "Choix B"],
       "allowCustom": true,
       "allowMultiple": ${allowMultiple}

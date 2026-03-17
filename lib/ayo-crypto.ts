@@ -1,4 +1,5 @@
 import nacl from 'tweetnacl';
+import { sanitizeFieldValue, sanitizeFieldArray } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
 const SECRET_KEY_BASE64 = process.env.AYO_SIGNING_KEY || '';
@@ -121,10 +122,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const data = extractedData || {};
 
     // --- V3 BLOCKS CONSTRUCTION ---
-    // Sanitize business_type: reject LLM placeholder values
+    // Sanitize business_type: reject LLM placeholder values AND user garbage ("aucun", "non", etc.)
     const PLACEHOLDER_PATTERNS = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|)$/i;
-    const rawBusinessType = cleanValAsr(data.identite?.business_type?.value);
-    const businessType = (rawBusinessType && !PLACEHOLDER_PATTERNS.test(rawBusinessType.trim())) ? rawBusinessType : "Organization";
+    const rawBusinessTypeClean = cleanValAsr(data.identite?.business_type?.value);
+    const sanitizedBT = sanitizeFieldValue(rawBusinessTypeClean);
+    const businessType = (sanitizedBT && !PLACEHOLDER_PATTERNS.test(sanitizedBT.trim())) ? sanitizedBT : "Organization";
 
     // Smart @type: Use Schema.org types for associations/nonprofits
     const lowerBT = businessType.toLowerCase();
@@ -204,8 +206,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "@type": schemaType,
         "name": entityName,
     };
-    // Only include additionalType if it's a real value (not the default "Organization")
-    if (businessType !== "Organization") {
+    // Only include additionalType if it's a real value (not the default "Organization" or garbage)
+    if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) {
         identity.additionalType = businessType;
     }
 
@@ -233,8 +235,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         }
         identity.contactPoint = contactChannels.length > 0 ? contactChannels : [{ "@type": "ContactPoint", "contactType": "general" }];
 
-        // Sector & industry detection — only if it's a real value (not placeholder)
-        if (businessType !== "Organization") identity.industry = businessType;
+        // Sector & industry detection — only if it's a real value (not placeholder/garbage)
+        if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) identity.industry = businessType;
         if (data.identite?.founding_year?.value) identity.foundingDate = data.identite.founding_year.value;
     } else {
         identity.location = data.identite?.country?.value || "Inconnu";
@@ -243,16 +245,16 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // Offer
     const offer: any = {
-        "services": cleanArrayAsr(data.offre?.services?.value),
-        "products": cleanArrayAsr(data.offre?.products?.value),
-        "use_cases": cleanArrayAsr(data.offre?.use_cases?.value),
+        "services": sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value)),
+        "products": sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value)),
+        "use_cases": sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)),
     };
 
     if (mode !== 'LIGHT') {
-        // Sanitize audience: reject full sentences, only keep short segments
-        const rawAudience = cleanValAsr(data.offre?.target_audience?.value);
-        const isAudienceSentence = rawAudience && (rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience);
-        offer.audience = isAudienceSentence ? "Général" : (rawAudience || "Général");
+        // Sanitize audience: reject garbage values, full sentences, only keep short segments
+        const rawAudience = sanitizeFieldValue(cleanValAsr(data.offre?.target_audience?.value));
+        const isAudienceSentence = rawAudience && ((rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience));
+        offer.audience = isAudienceSentence ? "Grand public" : (rawAudience || "Grand public");
         offer.pricingIndication = cleanValAsr(data.offre?.pricing_indication?.value);
     } else {
         offer.services = (offer.services || []).slice(0, 3);
@@ -261,28 +263,31 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Process & Methods
     const processus: any = {};
     if (mode !== 'LIGHT') {
-        processus.process_steps = cleanArrayAsr(data.processus_methodes?.process_steps?.value);
-        processus.delivery_mode = deliveryMode; // already cleaned above
+        processus.process_steps = sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value));
+        processus.delivery_mode = sanitizeFieldValue(deliveryMode) || deliveryMode; // already cleaned above
         // geographies_served: fallback to country if empty
-        processus.geographies_served = geoServed || cleanValAsr(data.identite?.country?.value) || "";
+        const sanitizedGeoServed = sanitizeFieldValue(geoServed);
+        const sanitizedCountryFallback = sanitizeFieldValue(cleanValAsr(data.identite?.country?.value));
+        processus.geographies_served = sanitizedGeoServed || sanitizedCountryFallback || "";
         // quality_assurance: force array format (comma-separated string → array)
         const rawQA = cleanValAsr(data.processus_methodes?.quality_assurance?.value);
-        processus.quality_assurance = rawQA ? rawQA.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+        const qaArray = rawQA ? rawQA.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+        processus.quality_assurance = sanitizeFieldArray(qaArray);
     }
 
     // Engagements & Compliance
     const engagements: any = {};
     if (mode !== 'LIGHT') {
-        engagements.certifications = cleanArrayAsr(data.engagements_conformite?.certifications?.value);
-        engagements.frameworks = cleanArrayAsr(data.engagements_conformite?.frameworks?.value);
-        engagements.policies = cleanArrayAsr(data.engagements_conformite?.policies?.value);
-        engagements.security_measures = cleanArrayAsr(data.engagements_conformite?.security_measures?.value);
+        engagements.certifications = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value));
+        engagements.frameworks = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value));
+        engagements.policies = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value));
+        engagements.security_measures = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value));
     }
 
     // Indicators / KPIs
     const indicateurs: any = {};
     if (mode !== 'LIGHT') {
-        indicateurs.key_indicators = cleanArrayAsr(data.indicateurs?.key_indicators?.value);
+        indicateurs.key_indicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
         indicateurs.last_review_date = data.indicateurs?.last_review_date?.value || "";
     }
 
@@ -309,7 +314,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     const asrContent: any = {
         "@context": "https://ai-visionary.com/contexts/aio-v3.jsonld",
-        "type": "AYO_Singular_Record",
+        "type": "AI_Singular_Record",
         "meta": meta,
         "identity": identity,
         "offer": offer,

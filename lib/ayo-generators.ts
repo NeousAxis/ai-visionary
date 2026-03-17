@@ -9,6 +9,18 @@
  * Aucune copie de code : un seul module, deux consommateurs.
  */
 
+
+/**
+ * Joindre une base URL et un path sans produire de double slash.
+ * joinUrl('https://example.com/', '/sitemap.xml') -> 'https://example.com/sitemap.xml'
+ * joinUrl('https://example.com', 'sitemap.xml')   -> 'https://example.com/sitemap.xml'
+ */
+export function joinUrl(base: string, path: string): string {
+    const trimmedBase = base.replace(/\/+$/, '');
+    const trimmedPath = path.replace(/^\/+/, '');
+    return `${trimmedBase}/${trimmedPath}`;
+}
+
 // --- NETTOYAGE ORTHOGRAPHIQUE DES DONNÉES CLIENT ---
 const TERM_CORRECTIONS: [RegExp, string][] = [
     [/\bCreative Common\b(?!s)/gi, "Creative Commons"],
@@ -71,6 +83,71 @@ export function cleanArray(val: any): string[] {
 export function cleanVal(val: any): string {
     if (!val) return "";
     return cleanText(String(val));
+}
+
+// --- SANITISATION DES VALEURS GARBAGE ("aucun", "non", "à tout le monde", etc.) ---
+
+/**
+ * Patterns de réponses garbage / non-informatives que les utilisateurs donnent
+ * quand ils n'ont pas de vraie réponse. Ces valeurs ne doivent JAMAIS être
+ * injectées dans les fichiers PRO comme des données métier.
+ */
+const GARBAGE_VALUES_RE = /^(aucun[es]?|non|rien|pas applicable|n\/?a|néant|pas de .+|aucune idée|je ne sais pas|je sais pas|jsp|nsp|pas vraiment|rien de spécial|rien de particulier|pas spécialement|nan|nope|none|nothing|null|undefined|no|ras|r\.?a\.?s\.?|sans objet|sans|\/|-)$/i;
+
+/**
+ * Patterns de réponses frustrées / hors-sujet qui ne sont pas des données métier.
+ */
+const FRUSTRATED_RESPONSE_RE = /^(c'est|ce n'est|c est|ce n est).{0,60}(pas une? |pas du |pas de la |pas des )/i;
+
+/**
+ * Normalisation des valeurs vagues mais récupérables.
+ */
+const NORMALIZATIONS: [RegExp, string][] = [
+    [/^à tout le monde$/i, "Grand public"],
+    [/^tout le monde$/i, "Grand public"],
+    [/^tous?$/i, "Grand public"],
+    [/^tout public$/i, "Grand public"],
+    [/^toute?s? les? monde$/i, "Grand public"],
+    [/^pour tout le monde$/i, "Grand public"],
+    [/^n'importe qui$/i, "Grand public"],
+    [/^le grand public$/i, "Grand public"],
+    [/^particuliers et professionnels$/i, "Particuliers, Professionnels"],
+    [/^mondial[e]?$/i, "International"],
+    [/^partout$/i, "International"],
+    [/^partout dans le monde$/i, "International"],
+];
+
+/**
+ * Sanitize une valeur de champ utilisateur.
+ * Retourne null pour les valeurs garbage, normalise les valeurs vagues,
+ * et laisse passer les vraies valeurs.
+ */
+export function sanitizeFieldValue(value: string | null | undefined): string | null {
+    if (!value || typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return null;
+
+    // Valeurs garbage évidentes
+    if (GARBAGE_VALUES_RE.test(trimmed)) return null;
+
+    // Réponses frustrées ("c'est de la méditation pas une formation")
+    if (FRUSTRATED_RESPONSE_RE.test(trimmed)) return null;
+
+    // Normalisations (valeurs vagues mais récupérables)
+    for (const [pattern, replacement] of NORMALIZATIONS) {
+        if (pattern.test(trimmed)) return replacement;
+    }
+
+    return trimmed;
+}
+
+/**
+ * Version array: filtre les éléments garbage d'un array de valeurs.
+ */
+export function sanitizeFieldArray(values: string[]): string[] {
+    return values
+        .map(v => sanitizeFieldValue(v))
+        .filter((v): v is string => v !== null);
 }
 
 /**
@@ -198,10 +275,11 @@ export function sanitizeExtract(ext: Record<string, any>): { cleaned: Record<str
 // --- GENERATOR: manifest.json ---
 export function generateManifestJson(data: any, url: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Organization");
-    const services = cleanArray(data.offre?.services?.value);
-    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
-    const country = cleanVal(data.identite?.country?.value);
+    const rawBT = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
+    const businessType = sanitizeBusinessType(rawBT || "", "Organization");
+    const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
+    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
+    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
 
     const lowerMBT = businessType.toLowerCase();
     const lowerMName = name.toLowerCase();
@@ -266,8 +344,8 @@ export function generateManifestJson(data: any, url: string): any {
             last_generated: new Date().toISOString().split('T')[0]
         },
         discovery: {
-            sitemap: `${url}/sitemap.xml`,
-            asrEndpoint: `${url}/.ayo/`,
+            sitemap: joinUrl(url, 'sitemap.xml'),
+            asrEndpoint: joinUrl(url, '.ayo/'),
             registryUrl: "https://www.ai-visionary.com/aya"
         },
         api_access: {
@@ -282,29 +360,32 @@ export function generateManifestJson(data: any, url: string): any {
 // --- GENERATOR: faq.json ---
 export function generateFaqJson(data: any, url: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Notre entreprise";
-    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value));
-    const services = cleanArray(data.offre?.services?.value);
-    const products = cleanArray(data.offre?.products?.value);
-    const audience = sanitizeAudience(cleanVal(data.offre?.target_audience?.value));
-    const useCases = cleanArray(data.offre?.use_cases?.value);
-    const pricing = cleanVal(data.offre?.pricing_indication?.value);
+    const rawBTfaq = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
+    const businessType = sanitizeBusinessType(rawBTfaq || "");
+    const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
+    const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
+    const rawAudienceFaq = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
+    const audience = rawAudienceFaq ? sanitizeAudience(rawAudienceFaq) : "";
+    const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
+    const pricing = sanitizeFieldValue(cleanVal(data.offre?.pricing_indication?.value)) || "";
     const email = data.identite?.contact_email?.value || "";
     const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = /^[\d\s\+\-\(\)\.]{6,}$/.test(rawPhone) ? rawPhone : "";
-    const city = cleanVal(data.identite?.city?.value);
-    const country = cleanVal(data.identite?.country?.value);
-    const legalName = cleanVal(data.identite?.legal_name?.value);
-    const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
-    const deliveryMode = cleanVal(data.processus_methodes?.delivery_mode?.value);
-    const geoServed = cleanVal(data.processus_methodes?.geographies_served?.value);
+    const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
+    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
+    const legalName = sanitizeFieldValue(cleanVal(data.identite?.legal_name?.value)) || "";
+    const processSteps = sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value));
+    const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
+    const geoServed = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
     const rawQAfaq = data.processus_methodes?.quality_assurance?.value;
-    const qualityAssurance = Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ')
-        : cleanVal(rawQAfaq);
-    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
-    const frameworks = cleanArray(data.engagements_conformite?.frameworks?.value);
-    const policies = cleanArray(data.engagements_conformite?.policies?.value);
-    const securityMeasures = cleanArray(data.engagements_conformite?.security_measures?.value);
-    const keyIndicators = cleanArray(data.indicateurs?.key_indicators?.value);
+    const qualityAssurance = sanitizeFieldValue(
+        Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ') : cleanVal(rawQAfaq)
+    ) || "";
+    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
+    const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
+    const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
+    const securityMeasures = sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value));
+    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value));
     const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
 
@@ -322,9 +403,13 @@ export function generateFaqJson(data: any, url: string): any {
     const qna: { q: string; a: string; category: string }[] = [];
 
     // --- IDENTITÉ ---
+    // Si businessType est null/vide, ne pas générer "spécialisée dans [garbage]"
+    const btDescFaq = businessType
+        ? ` spécialisée dans ${businessType.toLowerCase().startsWith("bureau") || businessType.toLowerCase().startsWith("cabinet") ? `le ${businessType.toLowerCase()}` : businessType.toLowerCase()}`
+        : "";
     qna.push({
         q: `Qui est ${name} ?`,
-        a: `${name} est ${entityType}${businessType ? ` spécialisée dans ${businessType.toLowerCase().startsWith("bureau") || businessType.toLowerCase().startsWith("cabinet") ? `le ${businessType.toLowerCase()}` : businessType.toLowerCase()}` : ""}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `${name} s'adresse principalement aux ${audience.toLowerCase()}.` : ""}`.trim(),
+        a: `${name} est ${entityType}${btDescFaq}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `${name} s'adresse principalement aux ${audience.toLowerCase()}.` : ""}`.trim(),
         category: "Identité"
     });
 
@@ -472,23 +557,27 @@ export function generateFaqJson(data: any, url: string): any {
 // --- GENERATOR: glossary.json ---
 export function generateGlossaryJson(data: any): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Organization");
-    const services = cleanArray(data.offre?.services?.value);
-    const useCases = cleanArray(data.offre?.use_cases?.value);
-    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
-    const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
-    const audience = sanitizeAudience(cleanVal(data.offre?.target_audience?.value));
-    const city = cleanVal(data.identite?.city?.value);
-    const country = cleanVal(data.identite?.country?.value);
-    const policies = cleanArray(data.engagements_conformite?.policies?.value);
-    const frameworks = cleanArray(data.engagements_conformite?.frameworks?.value);
-    const securityMeasures = cleanArray(data.engagements_conformite?.security_measures?.value);
+    const rawBTgloss = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
+    const businessType = sanitizeBusinessType(rawBTgloss || "", "Organization");
+    const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
+    const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
+    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
+    const processSteps = sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value));
+    const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
+    const audience = rawAudienceGloss ? sanitizeAudience(rawAudienceGloss) : "";
+    const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
+    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
+    const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
+    const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
+    const securityMeasures = sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value));
 
     const nameArticleG = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
 
     const terms: { term: string; def: string; category: string }[] = [];
     const seen = new Set<string>();
     const addTerm = (term: string, def: string, category: string) => {
+        // Ne jamais ajouter un terme garbage comme DefinedTerm
+        if (sanitizeFieldValue(term) === null) return;
         const key = term.toLowerCase().trim();
         if (key.length < 3 || seen.has(key)) return;
         const cleanTerm = term.replace(/Creative Common\b(?!s)/gi, "Creative Commons");
@@ -498,7 +587,9 @@ export function generateGlossaryJson(data: any): any {
     };
 
     addTerm(name, `${city ? `Organisation basée à ${city}` : "Organisation"}${country ? ` (${country})` : ""}${businessType !== "Organization" ? `, spécialisée dans ${businessType.toLowerCase()}` : ""}. Entité vérifiée et enregistrée dans le registre AYA avec un ASR signé cryptographiquement.`, "Identité");
-    if (businessType !== "Organization") {
+    // Ne PAS créer de DefinedTerm pour businessType si c'est la valeur par défaut "Organization"
+    // (signifie que l'utilisateur a répondu "aucun" ou similaire → pas un vrai terme métier)
+    if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) {
         addTerm(businessType, `Domaine d'activité principal ${nameArticleG}. Cette classification détermine le positionnement sectoriel et les critères de recommandation par les agents IA.`, "Identité");
     }
 
@@ -587,29 +678,32 @@ export function generateGlossaryJson(data: any): any {
 // --- GENERATOR: external_context.json ---
 export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Activité non spécifiée");
-    const useCases = cleanArray(data.offre?.use_cases?.value);
-    const services = cleanArray(data.offre?.services?.value);
-    const products = cleanArray(data.offre?.products?.value);
-    const audience = sanitizeAudience(cleanVal(data.offre?.target_audience?.value));
-    const city = cleanVal(data.identite?.city?.value);
-    const country = cleanVal(data.identite?.country?.value);
+    const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
+    const businessType = sanitizeBusinessType(rawBTec || "", "Activité non spécifiée");
+    const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
+    const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
+    const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
+    const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
+    const audience = rawAudienceEC ? sanitizeAudience(rawAudienceEC) : "";
+    const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
+    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
     const email = data.identite?.contact_email?.value || "";
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = /^[\d\s\+\-\(\)\.]{6,}$/.test(rawPhoneExt) ? rawPhoneExt : "";
-    const certifications = cleanArray(data.engagements_conformite?.certifications?.value);
-    const frameworks = cleanArray(data.engagements_conformite?.frameworks?.value);
-    const policies = cleanArray(data.engagements_conformite?.policies?.value);
-    const processSteps = cleanArray(data.processus_methodes?.process_steps?.value);
-    const deliveryMode = cleanVal(data.processus_methodes?.delivery_mode?.value);
-    const geographies = cleanVal(data.processus_methodes?.geographies_served?.value);
+    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
+    const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
+    const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
+    const processSteps = sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value));
+    const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
+    const geographies = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
     const rawQAec = data.processus_methodes?.quality_assurance?.value;
-    const qualityAssurance: string[] = Array.isArray(rawQAec)
+    const qualityAssuranceRaw: string[] = Array.isArray(rawQAec)
         ? rawQAec.filter((s: any) => typeof s === 'string' && s.trim()).map((s: string) => s.trim())
         : (typeof rawQAec === 'string' && rawQAec.trim())
             ? rawQAec.split(',').map((s: string) => s.trim()).filter(Boolean)
             : [];
-    const keyIndicators = cleanArray(data.indicateurs?.key_indicators?.value);
+    const qualityAssurance = sanitizeFieldArray(qualityAssuranceRaw);
+    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value));
     const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
     const hasGlossaryEC = data.contenus_pedagogiques?.has_glossary?.value;
@@ -619,6 +713,8 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
 
     const addUnique = (arr: string[], val: string) => {
         if (typeof val !== 'string' || val.length < 2) return;
+        // Ne pas ajouter de valeurs garbage comme keywords
+        if (sanitizeFieldValue(val) === null) return;
         const lower = val.toLowerCase().trim();
         if (!arr.some(existing => existing.toLowerCase().trim() === lower)) arr.push(val.trim());
     };
