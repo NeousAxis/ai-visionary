@@ -470,6 +470,12 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                 questionLower.includes('propriétaire') ||
                                 q.id === 'ownership_confirm';
 
+                            // DETECT questions that should NOT have the "Non applicable" skip button
+                            const isTruthQuestion = q.id === 'truth_confirmation' || questionLower.includes('compris l\'importance');
+                            const isCalibrationQuestion = q.id === 'activity_calibration' || questionLower.includes('décrire votre activité');
+                            const isEmailQuestion = questionLower.includes('email') && (questionLower.includes('professionnel') || questionLower.includes('finaliser'));
+                            const showSkipButton = !isOwnershipQuestion && !isTruthQuestion && !isCalibrationQuestion && !isEmailQuestion;
+
                             // FORCE allowMultiple based on question keywords (LLM often forgets)
                             // BUT NOT for ownership question OR if explicitly set to false
                             const forceMultiple = !isOwnershipQuestion && q.allowMultiple !== false && (
@@ -614,6 +620,25 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                             >
                                                 ✓ Valider
                                             </button>
+
+                                            {/* NON APPLICABLE - Skip Button */}
+                                            {showSkipButton && (
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedMultiple(prev => {
+                                                            const newState = { ...prev };
+                                                            delete newState[questionId];
+                                                            return newState;
+                                                        });
+                                                        setInput('');
+                                                        handleSubmit(undefined, `${q.text} : [SKIP] Non applicable`);
+                                                    }}
+                                                    disabled={isLoading}
+                                                    className="mt-1 !px-6 !py-2.5 !rounded-lg text-[13px] font-medium text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 bg-transparent hover:bg-slate-50 transition-all duration-200 self-start"
+                                                >
+                                                    ⏭️ Non applicable à mon activité
+                                                </button>
+                                            )}
                                         </div>
                                     ) : (
                                         /* BUTTON MODE (Single Select) - LARGE BUBBLE STYLE FORCED */
@@ -660,6 +685,17 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         <svg className="w-5 h-5 text-slate-300 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                         </svg>
+                                                    </button>
+                                                )}
+
+                                                {/* NON APPLICABLE - Skip Button (Single Select) */}
+                                                {showSkipButton && (
+                                                    <button
+                                                        onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : [SKIP] Non applicable`)}
+                                                        disabled={isLoading}
+                                                        className="col-span-full !px-6 !py-2.5 !rounded-lg text-[13px] font-medium text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 bg-transparent hover:bg-slate-50 transition-all duration-200 self-start"
+                                                    >
+                                                        ⏭️ Non applicable à mon activité
                                                     </button>
                                                 )}
                                             </div>

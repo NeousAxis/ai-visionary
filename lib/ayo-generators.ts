@@ -92,7 +92,7 @@ export function cleanVal(val: any): string {
  * quand ils n'ont pas de vraie réponse. Ces valeurs ne doivent JAMAIS être
  * injectées dans les fichiers PRO comme des données métier.
  */
-const GARBAGE_VALUES_RE = /^(aucun[es]?|non|rien|pas applicable|n\/?a|néant|pas de .+|aucune idée|je ne sais pas|je sais pas|jsp|nsp|pas vraiment|rien de spécial|rien de particulier|pas spécialement|nan|nope|none|nothing|null|undefined|no|ras|r\.?a\.?s\.?|sans objet|sans|\/|-)$/i;
+const GARBAGE_VALUES_RE = /^(aucun[es]?|non|rien|pas applicable|n\/?a|néant|pas de .+|aucune idée|je ne sais pas|je sais pas|jsp|nsp|pas vraiment|rien de spécial|rien de particulier|pas spécialement|nan|nope|none|nothing|null|undefined|no|ras|r\.?a\.?s\.?|sans objet|sans|\/|-|__SKIPPED__|\[SKIP\] Non applicable)$/i;
 
 /**
  * Patterns de réponses frustrées / hors-sujet qui ne sont pas des données métier.

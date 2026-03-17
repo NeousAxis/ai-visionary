@@ -289,7 +289,8 @@ export function buildContinuePrompt(params: ContinuePromptParams): string {
 
 🚨 RÈGLES :
 1. SOIS BREF ET DIRECT. Transition courte (1 phrase max).
-2. STRATÉGIE "GREFFIER" : Remplis le bloc **${nextBlockName}** obligatoirement.
+2. Si le dernier message utilisateur contient "[SKIP] Non applicable", réponds avec un intro neutre comme "Noté. Question suivante." et passe au bloc suivant normalement. NE PAS commenter le skip, NE PAS insister.
+3. STRATÉGIE "GREFFIER" : Remplis le bloc **${nextBlockName}** obligatoirement.
    - Si le scan a DÉJÀ trouvé les données pour ce bloc (voir "Déjà collecté" ci-dessous), NE REDEMANDE PAS. Utilise-les directement et passe au bloc suivant.
    - Ne pose une question QUE si la donnée est MANQUANTE (pas trouvée par le scan).
 3. UN SEUL JSON "question_block". TOUJOURS au moins UNE question.

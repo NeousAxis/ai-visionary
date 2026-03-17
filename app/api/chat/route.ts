@@ -1606,6 +1606,9 @@ RÈGLES SPÉCIFIQUES PAR CHAMP :
 - processus_methodes.process_steps : q=1 UNIQUEMENT si au moins 3 étapes distinctes et concrètes sont décrites.
 - indicateurs.last_review_date : q=1 UNIQUEMENT si une date est explicitement mentionnée. "Première soumission" ou "jamais" = q=0.
 
+⚠️ RÈGLE "[SKIP] Non applicable" : Si l'utilisateur répond "[SKIP] Non applicable" à une question, cela signifie que ce champ n'est PAS PERTINENT pour son activité.
+Dans ce cas : value = "__SKIPPED__", q = 0. NE PAS interpréter comme "aucun" ou "non". C'est un skip volontaire.
+
 MAPPING DES RÉPONSES UTILISATEUR :
 - KPIs avec chiffres concrets -> indicateurs.key_indicators (q selon règles ci-dessus)
 - Méthodologie avec étapes détaillées -> processus_methodes.process_steps (q selon règles)
