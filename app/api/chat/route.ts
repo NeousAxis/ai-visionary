@@ -631,17 +631,20 @@ export async function POST(req: Request) {
         }
 
         // 🚀 SALES FUNNEL & UPDATES OVERRIDE (via state machine)
-        if (lowText.includes("abonnement") || lowText.includes("pack pro") ||
+        // CRITICAL: Only trigger AFTER scoring phase (not during questionnaire!)
+        // Otherwise, user messages containing "abonnement" or "pack pro" during Q&A
+        // would skip the entire questionnaire.
+        const isPostScore = ayoState === AyoState.PACK_SELECT || ayoState === AyoState.CAPTURE_EMAIL || ayoState === AyoState.PAIEMENT_EN_COURS || ayoState === AyoState.LIVRE;
+        const isScoreShown = messages.some((m: any) => typeof m.content === 'string' && m.content.includes('SCORE FINAL AIO'));
+        if ((isPostScore || isScoreShown) && (
+            lowText.includes("abonnement") || lowText.includes("pack pro") ||
             lowText.includes("valider") || lowText.includes("je reste") ||
-            lowText.includes("passer en") || lowText.includes("upgrader") ||
-            lowText.includes("update_profile")) {
-
-            if (lowText.includes("update_profile")) {
-                console.log(`🔄 AYO STATE → ${AyoState.SCAN_EN_COURS}: FORCING PROFILE UPDATE`);
-                ayoState = AyoState.SCAN_EN_COURS;
-            } else {
-                ayoState = AyoState.PACK_SELECT;
-            }
+            lowText.includes("passer en") || lowText.includes("upgrader"))) {
+            ayoState = AyoState.PACK_SELECT;
+        }
+        if (lowText.includes("update_profile")) {
+            console.log(`🔄 AYO STATE → ${AyoState.SCAN_EN_COURS}: FORCING PROFILE UPDATE`);
+            ayoState = AyoState.SCAN_EN_COURS;
         }
 
         if (ayoState === AyoState.SCAN_EN_COURS) {
