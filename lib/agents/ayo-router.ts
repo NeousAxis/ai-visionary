@@ -29,14 +29,24 @@ export enum AyoState {
     ATTENTE_URL = 'ATTENTE_URL',
     /** Scan en cours */
     SCAN_EN_COURS = 'SCAN_EN_COURS',
-    /** Questionnaire en cours */
+    /** Confirmation de propriété du site */
+    OWNERSHIP = 'OWNERSHIP',
+    /** Avertissement vérité / anti-bullshit */
+    TRUTH_WARNING = 'TRUTH_WARNING',
+    /** Calibration de l'activité (description libre) */
+    CALIBRATION = 'CALIBRATION',
+    /** Questionnaire en cours (blocs data) */
     QUESTIONNAIRE = 'QUESTIONNAIRE',
+    /** Calcul du score final + affichage */
+    SCORING = 'SCORING',
+    /** Sélection du pack (AYA Sub / PRO) */
+    PACK_SELECT = 'PACK_SELECT',
     /** Capture de l'email */
     CAPTURE_EMAIL = 'CAPTURE_EMAIL',
-    /** Proposition des packs */
-    PROPOSITION_PACKS = 'PROPOSITION_PACKS',
     /** Paiement en cours via Stripe */
     PAIEMENT_EN_COURS = 'PAIEMENT_EN_COURS',
+    /** Client existant reconnu */
+    EXISTING_CLIENT = 'EXISTING_CLIENT',
     /** Fichiers livrés */
     LIVRE = 'LIVRE',
 }
@@ -105,13 +115,32 @@ export interface StateTransition {
  * Transitions valides de la machine à états.
  */
 export const VALID_TRANSITIONS: StateTransition[] = [
+    // INIT → SCAN
     { from: AyoState.ATTENTE_URL, to: AyoState.SCAN_EN_COURS, trigger: 'url_received' },
-    { from: AyoState.SCAN_EN_COURS, to: AyoState.QUESTIONNAIRE, trigger: 'scan_complete' },
+    { from: AyoState.ATTENTE_URL, to: AyoState.EXISTING_CLIENT, trigger: 'existing_client_detected' },
+    // SCAN → OWNERSHIP
+    { from: AyoState.SCAN_EN_COURS, to: AyoState.OWNERSHIP, trigger: 'scan_complete' },
+    // OWNERSHIP → TRUTH_WARNING or abort
+    { from: AyoState.OWNERSHIP, to: AyoState.TRUTH_WARNING, trigger: 'ownership_confirmed' },
+    { from: AyoState.OWNERSHIP, to: AyoState.ATTENTE_URL, trigger: 'ownership_denied' },
+    // TRUTH_WARNING → CALIBRATION or abort
+    { from: AyoState.TRUTH_WARNING, to: AyoState.CALIBRATION, trigger: 'truth_accepted' },
+    { from: AyoState.TRUTH_WARNING, to: AyoState.ATTENTE_URL, trigger: 'truth_cancelled' },
+    // CALIBRATION → QUESTIONNAIRE
+    { from: AyoState.CALIBRATION, to: AyoState.QUESTIONNAIRE, trigger: 'calibration_done' },
+    // QUESTIONNAIRE progression
     { from: AyoState.QUESTIONNAIRE, to: AyoState.QUESTIONNAIRE, trigger: 'answer_received' },
-    { from: AyoState.QUESTIONNAIRE, to: AyoState.CAPTURE_EMAIL, trigger: 'questionnaire_complete' },
-    { from: AyoState.CAPTURE_EMAIL, to: AyoState.PROPOSITION_PACKS, trigger: 'email_captured' },
-    { from: AyoState.PROPOSITION_PACKS, to: AyoState.PAIEMENT_EN_COURS, trigger: 'pack_selected' },
+    { from: AyoState.QUESTIONNAIRE, to: AyoState.SCORING, trigger: 'questionnaire_complete' },
+    // SCORING → PACK_SELECT
+    { from: AyoState.SCORING, to: AyoState.PACK_SELECT, trigger: 'score_displayed' },
+    // PACK_SELECT → EMAIL
+    { from: AyoState.PACK_SELECT, to: AyoState.CAPTURE_EMAIL, trigger: 'pack_selected' },
+    // EMAIL → STRIPE
+    { from: AyoState.CAPTURE_EMAIL, to: AyoState.PAIEMENT_EN_COURS, trigger: 'email_captured' },
+    // STRIPE → LIVRE
     { from: AyoState.PAIEMENT_EN_COURS, to: AyoState.LIVRE, trigger: 'payment_confirmed' },
+    // EXISTING_CLIENT can restart scan (update profile)
+    { from: AyoState.EXISTING_CLIENT, to: AyoState.SCAN_EN_COURS, trigger: 'update_profile' },
 ];
 
 /**
@@ -142,11 +171,17 @@ export function transition(session: AyoSession, to: AyoState, trigger: string): 
 export type AyoAction =
     | { type: 'ASK_URL' }
     | { type: 'PERFORM_SCAN'; url: string }
+    | { type: 'ASK_OWNERSHIP' }
+    | { type: 'ASK_TRUTH_WARNING' }
+    | { type: 'ASK_CALIBRATION' }
     | { type: 'SHOW_INITIAL_SCORE'; score: AnalysteResult; scan: ScannerResult }
     | { type: 'ASK_QUESTION'; question: BlocQuestion; questionNumber: number; totalQuestions: number }
+    | { type: 'COMPUTE_FINAL_SCORE' }
     | { type: 'SHOW_ENRICHED_SCORE'; scoreBefore: AnalysteResult; scoreAfter: AnalysteResult }
+    | { type: 'SHOW_PACKS' }
     | { type: 'ASK_EMAIL' }
-    | { type: 'SHOW_PACKS'; url: string; email: string }
+    | { type: 'PROCESS_PAYMENT'; url: string; email: string }
+    | { type: 'SHOW_EXISTING_CLIENT' }
     | { type: 'GENERATE_FILES' }
     | { type: 'DELIVERED' }
     | { type: 'ERROR'; message: string };
@@ -163,17 +198,19 @@ export function getNextAction(session: AyoSession): AyoAction {
             if (!session.url) return { type: 'ERROR', message: 'URL manquante' };
             return { type: 'PERFORM_SCAN', url: session.url };
 
+        case AyoState.OWNERSHIP:
+            return { type: 'ASK_OWNERSHIP' };
+
+        case AyoState.TRUTH_WARNING:
+            return { type: 'ASK_TRUTH_WARNING' };
+
+        case AyoState.CALIBRATION:
+            return { type: 'ASK_CALIBRATION' };
+
         case AyoState.QUESTIONNAIRE:
             if (session.questionIndex >= session.questionQueue.length) {
-                // Plus de questions → passage au score enrichi
-                if (session.scoreInitial && session.scoreEnrichi) {
-                    return {
-                        type: 'SHOW_ENRICHED_SCORE',
-                        scoreBefore: session.scoreInitial,
-                        scoreAfter: session.scoreEnrichi,
-                    };
-                }
-                return { type: 'ASK_EMAIL' };
+                // Plus de questions → scoring
+                return { type: 'COMPUTE_FINAL_SCORE' };
             }
             const question = session.questionQueue[session.questionIndex];
             return {
@@ -183,17 +220,30 @@ export function getNextAction(session: AyoSession): AyoAction {
                 totalQuestions: session.questionQueue.length,
             };
 
+        case AyoState.SCORING:
+            if (session.scoreInitial && session.scoreEnrichi) {
+                return {
+                    type: 'SHOW_ENRICHED_SCORE',
+                    scoreBefore: session.scoreInitial,
+                    scoreAfter: session.scoreEnrichi,
+                };
+            }
+            return { type: 'COMPUTE_FINAL_SCORE' };
+
+        case AyoState.PACK_SELECT:
+            return { type: 'SHOW_PACKS' };
+
         case AyoState.CAPTURE_EMAIL:
             return { type: 'ASK_EMAIL' };
 
-        case AyoState.PROPOSITION_PACKS:
-            if (!session.url || !session.email) {
-                return { type: 'ERROR', message: 'URL ou email manquant pour les packs' };
-            }
-            return { type: 'SHOW_PACKS', url: session.url, email: session.email };
-
         case AyoState.PAIEMENT_EN_COURS:
-            return { type: 'GENERATE_FILES' };
+            if (!session.url || !session.email) {
+                return { type: 'ERROR', message: 'URL ou email manquant pour le paiement' };
+            }
+            return { type: 'PROCESS_PAYMENT', url: session.url, email: session.email };
+
+        case AyoState.EXISTING_CLIENT:
+            return { type: 'SHOW_EXISTING_CLIENT' };
 
         case AyoState.LIVRE:
             return { type: 'DELIVERED' };
@@ -272,3 +322,113 @@ export function formatDeltaMessage(before: AnalysteResult, after: AnalysteResult
 
 Vos réponses ont enrichi votre profil. Les données collectées permettent maintenant de générer des fichiers structurés pour les IA.`;
 }
+
+// --- DÉRIVATION D'ÉTAT DEPUIS L'HISTORIQUE (STATELESS) ---
+
+/**
+ * Contexte d'historique de conversation pour dériver l'état.
+ * Route.ts est stateless (serverless), on ne peut pas persister AyoSession.
+ * On reconstruit l'état à partir des signaux dans l'historique.
+ */
+export interface ConversationSignals {
+    /** URL détectée dans le dernier message user */
+    hasUrlInLastMessage: boolean;
+    /** URL trouvée dans l'historique */
+    hasUrlInHistory: boolean;
+    /** Le scan a déjà été fait (assistant a envoyé "SCAN TERMINÉ" ou "ownership_confirm") */
+    hasScanInHistory: boolean;
+    /** Le score final a été affiché */
+    hasFinalScore: boolean;
+    /** Nombre de question_blocks envoyés par l'assistant */
+    questionsAskedCount: number;
+    /** Nombre de steps (réponses utilisateur significatives après URL) */
+    stepsCompleted: number;
+    /** Client existant reconnu dans le registre AYA */
+    isExistingClient: boolean;
+    /** Dernier message assistant contient ownership_confirm */
+    lastAssistantHasOwnership: boolean;
+    /** Dernier message assistant contient truth_confirmation */
+    lastAssistantHasTruth: boolean;
+    /** Message est un email */
+    isEmail: boolean;
+    /** Message est un choix sales (abonnement, pack pro, etc.) */
+    isSalesIntent: boolean;
+    /** Message est un update_profile action */
+    isUpdateProfile: boolean;
+    /** Nombre total de blocs dans la queue combinée */
+    totalQueueBlocks: number;
+    /** Index du bloc suivant dans la queue */
+    queueIndex: number;
+}
+
+/**
+ * Dérive l'AyoState actuel depuis les signaux de la conversation.
+ *
+ * C'est la SEULE source de vérité pour le routage dans route.ts.
+ * Remplace la logique `triggerMode` ad-hoc.
+ */
+export function deriveState(signals: ConversationSignals): AyoState {
+    const {
+        hasUrlInLastMessage, hasUrlInHistory, hasScanInHistory, hasFinalScore,
+        questionsAskedCount, isExistingClient, lastAssistantHasOwnership,
+        lastAssistantHasTruth, isEmail, isSalesIntent, isUpdateProfile,
+        totalQueueBlocks, queueIndex, stepsCompleted,
+    } = signals;
+
+    // 1. Client existant reconnu (sauf si update profile)
+    if (isExistingClient && !isUpdateProfile) {
+        return AyoState.EXISTING_CLIENT;
+    }
+
+    // 2. Update profile = rescan
+    if (isUpdateProfile) {
+        return AyoState.SCAN_EN_COURS;
+    }
+
+    // 3. URL reçue, pas encore de scan → SCAN
+    if (hasUrlInLastMessage && !hasScanInHistory && !hasFinalScore) {
+        return AyoState.SCAN_EN_COURS;
+    }
+
+    // 4. Score final déjà affiché → sales funnel
+    if (hasFinalScore) {
+        if (isSalesIntent) return AyoState.PACK_SELECT;
+        if (isEmail) return AyoState.CAPTURE_EMAIL;
+        return AyoState.PACK_SELECT;
+    }
+
+    // 5. Post-scan, questionnaire en cours
+    if (hasScanInHistory && hasUrlInHistory && !hasFinalScore) {
+        // Ownership step (question_block #1)
+        if (lastAssistantHasOwnership && stepsCompleted <= 1) {
+            return AyoState.OWNERSHIP;
+        }
+
+        // Truth warning step (question_block #2)
+        if (lastAssistantHasTruth) {
+            return AyoState.TRUTH_WARNING;
+        }
+
+        // Calibration step (question_block #3)
+        if (questionsAskedCount < 3 && stepsCompleted <= 2) {
+            return AyoState.CALIBRATION;
+        }
+
+        // All queue items covered → SCORING
+        if (queueIndex >= totalQueueBlocks && totalQueueBlocks > 0) {
+            return AyoState.SCORING;
+        }
+
+        // Otherwise still in questionnaire
+        return AyoState.QUESTIONNAIRE;
+    }
+
+    // 6. URL in history but no scan yet and URL not in last message → continue from wherever we are
+    if (hasUrlInHistory && !hasScanInHistory) {
+        return AyoState.SCAN_EN_COURS;
+    }
+
+    // 7. Default → attente URL
+    return AyoState.ATTENTE_URL;
+}
+

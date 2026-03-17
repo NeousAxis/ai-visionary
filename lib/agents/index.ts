@@ -74,9 +74,14 @@ export {
 export {
     generateProPack,
     generateLightPack,
+    buildStructureRecommendations,
+    formatRecommendationsForChat,
+    getExtractionRulesForPrompt,
     ARCHITECTE_EXTRACTION_RULES,
     type ArchitecteInput,
     type ArchitecteOutput,
+    type StructureRecommendation,
+    type StructureRecommendationsResult,
 } from './architecte';
 
 // Contrôle Qualité

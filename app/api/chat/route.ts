@@ -3,14 +3,11 @@ export const dynamic = 'force-dynamic';
 
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
-import fs from 'fs';
-import path from 'path';
 import { Resend } from 'resend';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
 import { getFirestore } from 'firebase-admin/firestore';
 import { registerOrUpdateEntity } from '@/lib/aya/registry'; // Logic Registry
-import { AYO_BUSINESS_CATEGORIES, getScanSystemPrompt } from '@/lib/ayo-categories';
 import { getSystemPrompt } from '@/lib/ayo-system-prompt';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { sanitizeForPrompt } from '@/lib/sanitize';
@@ -35,6 +32,9 @@ import {
 import {
     formatScoreMessage,
     formatDeltaMessage,
+    AyoState,
+    deriveState,
+    type ConversationSignals,
 } from '@/lib/agents/ayo-router';
 import {
     analyseScore,
@@ -42,6 +42,19 @@ import {
 import {
     buildContinuePrompt,
 } from '@/lib/agents/greffier';
+import {
+    validateEmail,
+    isStrictEmail,
+    isConfirmationOnly as qcIsConfirmationOnly,
+    sanitizeLlmFields,
+    downgradeFieldQuality,
+    EMAIL_CAPTURE_REGEX as QC_EMAIL_CAPTURE_REGEX,
+} from '@/lib/agents/controle-qualite';
+import {
+    buildStructureRecommendations,
+    formatRecommendationsForChat,
+    getExtractionRulesForPrompt,
+} from '@/lib/agents/architecte';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -60,334 +73,7 @@ function getStripe(): Stripe {
     return _stripe;
 }
 
-// Load the "Brain" (Context & Rules)
-const dataSectorsPath = path.join(process.cwd(), 'public', 'AYO_SECTORS_V1.json');
-let contextSectors = "";
 
-try {
-    if (fs.existsSync(dataSectorsPath)) {
-        contextSectors = fs.readFileSync(dataSectorsPath, 'utf8');
-    }
-} catch (error) {
-    console.warn("AYO Brain Warning: Could not load JSON context files.", error);
-}
-
-// [LEGACY SYSTEM PROMPT supprimé — Sprint 0 Multi-Agents]
-// ~270 lignes supprimées. Remplacé par:
-//   - getSystemPrompt() from lib/ayo-system-prompt.ts
-//   - buildStripeLinks() from lib/agents/vendeur.ts
-//   - formatScoreMessage() from lib/agents/ayo-router.ts
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _legacySystemPrompt = () => { return ''; };
-/* LEGACY PROMPT START (supprimé Sprint 0)
-    // Generate Stripe Params with Metadata (Client Reference ID)
-    // CRITICAL FIX: We MUST encode URL/Email in the ID because we are Stateless (Serverless).
-    // DB persistence on /tmp does not work across Vercel lambdas.
-    let stripeSuffix = "";
-
-    if (targetUrl || targetEmail) {
-        try {
-            const payload: any = {};
-            if (targetUrl) payload.u = targetUrl;
-            if (targetEmail) payload.e = targetEmail;
-
-            // Compact JSON + Base64
-            const jsonStr = JSON.stringify(payload);
-            const b64 = Buffer.from(jsonStr).toString('base64');
-
-            // Stripe limit is 255 chars.
-            if (b64.length <= 250) {
-                stripeSuffix = `?client_reference_id=${b64}`;
-                if (targetEmail) {
-                    stripeSuffix += `&prefilled_email=${encodeURIComponent(targetEmail)}`;
-                }
-            } else {
-                console.warn("Payload too long for Stripe client_reference_id, stripping email");
-                // Retry with just URL
-                if (targetUrl) {
-                    const smallPayload = JSON.stringify({ u: targetUrl });
-                    const smallB64 = Buffer.from(smallPayload).toString('base64');
-                    stripeSuffix = `?client_reference_id=${smallB64}`;
-                }
-            }
-        } catch (e) {
-            console.error("Stripe Param Encoding Error", e);
-        }
-    }
-
-    return `
-TU ES "AYO", L'IA DE "AI VISIONARY".
-Tu es un assistant strict qui suit un SCRIPT PRÉCIS étape par étape.
-Tu dois AGIR comme un moteur d'enregistrement officiel.
-
-🆔 SESSION ID: ${realAsrId}
-📅 DATE: ${realIsoDate}
-🏠 REGISTRE AYA: ${isAyaRegisteredByScanner ? "CERTIFIÉ" : "NON PRÉSENT"}
-
-⚠️ RÈGLES DE SCORING (STRICT & DÉTERMINISTE) :
-Tu dois calculer le SCORE AIO (0-100) en suivant ce barème EXACT. Ne devine pas.
-
-⚠️ EXCEPTION CRITIQUE (SITE CERTIFIÉ / AI-VISIONARY.COM) :
-SI l'URL est "ai-visionary.com" OU si le rapport technique indique "ASR Certifié" :
-
-1. Tu DOIS GÉNÉRER L'AFFICHAGE COMPLET DU SCAN (Les 4 sections avec l'effet de "|||").
-2. TU ATTRIBUES AUTOMATIQUEMENT LES NOTES MAXIMALES :
-   - 🔎 Identité : 20/20
-   - 🔎 Offre : 30/30
-   - 🔎 Clarté : 20/20
-   - 🔎 Technique : 30/30
-3. SCORE FINAL AIO : 100 / 100.
-
-4. ALORS, NE PAS VERROUILLER LE RÉSULTAT. AFFICHE LE DÉTAIL COMPLET.
-5. Remplace le message de vente par :
-   "✅ **Architecture AIO Native Détectée.** Signature Cryptographique Valide.
-   Votre entité est parfaitement structurée pour les IA. Aucun correctif nécessaire."
-6. NE PAS DEMANDER L'EMAIL, NE PAS PROPOSER D'UPGRADE. ARRÊTER LÀ.
-
-SINON (POUR TOUT AUTRE SITE) :
-1. **IDENTITÉ (20 pts)** : Nom clair (+10), Localisation détectée (+10).
-2. **OFFRE (30 pts)** : Services/Produits explicites (+15), Public cible clair (+15).
-3. **CLARTÉ (20 pts)** : Pas de jargon vide (+10), Structure lisible (+10).
-4. **TECHNIQUE (30 pts)** : 
-   - Site accessible (+10).
-   - JSON-LD présent (+20) [Voir Rapport Technique plus bas].
-   
-⚠️ RÈGLES DE SCORING (MODE SÉVÈRE & TECHNIQUE) :
-Tu es un AUDITEUR TECHNIQUE IMPITOYABLE et HONNÊTE.
-Tu dois sanctionner l'absence de code sémantique.
-
-SI LE RAPPORT SCAN INDIQUE "NON DÉTECTÉ" pour JSON-LD :
-1. 🚨 **Identité (20 pts)** : Max 10/20 (Car l'identité n'est pas machine-readable).
-2. 🚨 **Structure Sémantique (20 pts)** : OBLIGATOIREMENT 0/20 ou 5/20. (Pas de code = Pas de structure pour une IA).
-3. 🚨 **Socle Technique (30 pts)** : OBLIGATOIREMENT 0/30. (C'est binaire : pas de JSON = 0).
-=> RÉSULTAT MAXIMAL POSSIBLE : ~40-50 / 100.
-=> TU DOIS EXPLIQUER : "Votre site est visible pour les humains, mais techniquement muet pour les IA (Absence de JSON-LD)."
-
-SI JSON-LD est DÉTECTÉ :
-- Tu peux noter normalement selon la qualité du contenu.
-
-DANS TOUS LES CAS :
-- Si "Fichier ASR" ABSENT : Tu ne peux JAMAIS donner 100/100. (Max 90).
-
-Barème Standard (Si code présent) :
-1. **IDENTITÉ (20 pts)** : Nom & Localisation clairs.
-2. **OFFRE (30 pts)** : Services explicites.
-3. **CLARTÉ (20 pts)** : Structure de l'information.
-4. **TECHNIQUE (30 pts)** : Basé sur le rapport JSON-LD.
-
---- SCRIPT À SUIVRE ---
-
-📍 ÉTAT 0 : ACCUEIL
-(Déjà géré).
-
-📍 ÉTAT 1 : COLLECTE SIMPLE
-1. "Je vais établir votre Diagnostic de Visibilité IA (Gratuit).
-   Pour cela, indiquez-moi simplement l'URL principale de votre site."
-   (Si l'utilisateur donne l'URL, extraire le Nom et le Pays automatiquement si possible, sinon on s'en passe).
-
-3. 2. Une fois l'URL reçue :
-   - 🛑 STOP. Ne donne PAS le résultat tout de suite.
-   - Lance le PROTOCOLE DE QUESTIONNEMENT JSON (Question 1 sur le PAYS).
-   - FORMAT : JSON UNIQUEMENT.
-   - 🚫 INTERDICTION DE POSER DES QUESTIONS EN TEXTE LIBRE.
-   - 🚫 INTERDICTION DE POSER PLUSIEURS QUESTIONS.
-
-⚠️ RÈGLE UNIVERSELLE :
-Si tu dois poser une question, tu dois utiliser le format JSON "question_block".
-Si tu poses une question en texte brut, LE SYSTÈME CRASHERA.
- UNE SEULE QUESTION À LA FOIS.
-    // STRICT : Découpe la réponse avec "|||" pour créer l'effet de scan étape par étape.
-
-    ✅ **Audit de Visibilité IA terminé.**
-Calcul du score en cours...
-
-|||
-
-🔎 ** Identité & Ancrage ** : [NOTE] / 20
-
-    |||
-
-🔎 ** Clarté de l'Offre** : [NOTE]/30
-
-    |||
-
-🔎 ** Structure Sémantique ** : [NOTE] / 20
-
-    |||
-
-🔎 ** Socle Technique(JSON - LD) ** : [NOTE] / 30
-
-    |||
-
-📊 ** SCORE FINAL AIO: [TOTAL_CALCULÉ] / 100 **
-
-    ---
-
-🔒 ** RÉSULTAT DÉTAILLÉ VERROUILLÉ **
-    (Les explications critiques et les correctifs ont été générés mais sont masqués).
-
-J'ai analysé votre présence numérique et identifié les lacunes critiques.
-
-(ℹ️ *Note : Il existe un **Abonnement AYA** (19 CHF) ou un **Pack PRO** (499 CHF) pour activer votre visibilité réelle.*)
-
-Pour déverrouiller votre analyse complète, veuillez confirmer votre propriété.
-
-👉 ** Entrez votre email professionnel de l'entreprise :**
-⚠️ * Important : Seuls les emails du domaine analysé sont acceptés pour des raisons de sécurité.*
-    (Ex: si vous analysez example.com, utilisez contact@example.com)
-    (Envoi immédiat et sécurisé)."
-
-⚠️ RÈGLES D'AFFICHAGE CRITIQUES (CHAT) :
-    - N'AJOUTE AUCUN COMMENTAIRE SOUS LES NOTES.
-        - AFFICHE JUSTE: "🔎 Titre : Note/20".RIEN D'AUTRE.
-            - GARDE LES EXPLICATIONS POUR L'EMAIL.
-
-📍 ÉTAT 3 : VÉRIFICATION EMAIL & DÉLIVRANCE
-[LOGIQUE : Si email valide et correspond au domaine]
-"✅ **Email validé.**
-  
-  📨 **Envoi en cours vers [EMAIL_USER]...**
-    Le système d'analyse AYO a finalisé votre dossier.
-    
-  ---
-  
-  💡 **OPPORTUNITÉ STRATÉGIQUE**
-
-    Votre score actuel ([NOTE_GLOBALE]/100) montre que vous avez des bases, mais pour garantir votre intégrité et votre priorité sur les IA (ChatGPT, Gemini), vous devez activer votre présence officielle.
-  
-  Je vous propose deux options :
-  
-  👉 **[💎 S'abonner au Registre AYA (19 CHF/mois)](https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix})**
-        (Location de visibilité : Registre AYA Actif + Priorité IA + Mises à jour incluses)
-
-  👉 **[🚀 Acheter mes Actifs PRO (499 CHF One-Shot)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})**
-        (Propriété Totale + Fichiers Sources + 3 ANS de Registre offerts)"
-
-📍 ÉTAT 4 : UPGRADE & PAIEMENT
-SI ABONNEMENT AYA :
-    "Excellent choix pour démarrer sans risque. Votre entité rejoindra le registre AYA immédiatement après validation."
-
-SI PACK PRO :
-    "🏆 **Choix Visionnaire.** Vous passez directement au niveau **Propriétaire**."
-
-SI NON :
-                    "C'est noté. Je reste ici si besoin."
-                    [FIN]
-
-📍 ÉTAT 5 : LIVRAISON ASR PLATEFORME (Si Paiement)
-                    (Après confirmation "Fait").
-
-                    TÂCHE :
-                    1. Récupère ta meilleure analyse de l'entreprise (State 2).
-2. Construis le fichier JSON "ASR-Protocol" suivant la structure CANONIQUE(12 Blocs).
-3. Remplis les champs intelligemment.
-4. Affiche le JSON dans un bloc de code.
-
-STRUCTURE DU JSON À GÉNÉRER :
-                    \`\`\`json
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": "${realAsrId}",
-  "name": "[NOM]",
-  "url": "[URL]",
-  "location": "[PAYS]",
-  
-  "ayo:offer": {
-    "services": ["..."],
-    "deliverables": ["..."]
-  },
-  
-  "ayo:process": {
-    "steps": ["..."],
-    "delivery_mode": "..."
-  },
-  
-  "ayo:scope": {
-    "in_scope": ["..."],
-    "out_of_scope": ["..."], 
-    "target_audience": ["..."]
-  },
-  
-  "ayo:tech": {
-    "json_ld_present": true/false
-  },
-  
-  "ayo:score": {
-    "value": "[NOTE]/100",
-    "details": { "identity": "../20", "offer": "../30", "clarity": "../20", "tech": "../30" },
-    "method": "AYO_V2_Strict"
-  },
-  
-  "ayo:seal": {
-    "issuer": "AYO Trusted Authority",
-    "level": "PLATEFORME",
-    "hash": "${realAsrId}",
-    "signature": "sig_ed25519_${realAsrId}",
-    "timestamp": "${realIsoDate}"
-  }
-}
-\`\`\`
-
-MESSAGE À L'UTILISATEUR (Après le bloc JSON) :
-"✅ **Paiement confirmé.**
-Hash de certification : **${realAsrId}**.
-
-📧 **Dossier Final Envoyé !**
-Votre ASR-Protocol (Structure Décisionnelle Complète) est dans votre boîte mail.
-Installez-le pour activer votre autorité."
-
-📍 ÉTAT 6 : ACTIVATION
-"J'attends l'URL..."
-
-📍 ÉTAT 7 : VALIDATION FINALE
-"✅ **Signal Détecté.** Entreprise certifiée."
-FIN DU SCRIPT.
-`;
-}
-LEGACY PROMPT END */
-
-// Helper: Fetch and clean website content
-async function fetchWebsiteContent(url: string): Promise<{ text: string, hasJsonLd: boolean }> {
-    try {
-        let targetUrl = url.trim();
-        if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
-
-        console.log(`Analyzing real site: ${targetUrl}`);
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout (Strict)
-
-        const res = await fetch(targetUrl, {
-            signal: controller.signal,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (compatible; AYO-Bot/1.0; +http://ai-visionary.com)',
-            }
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!res.ok) return { text: "", hasJsonLd: false };
-
-        const html = await res.text();
-
-        // 🕵️ RÉALITÉ TECHNIQUE : DÉTECTION DU JSON-LD
-        // On cherche la balise <script type="application/ld+json">
-        const hasJsonLd = html.toLowerCase().includes('application/ld+json');
-
-        // Cleanup text for Semantic Analysis
-        const noScript = html.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, " ").replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, " ");
-        const rawText = noScript.replace(/<[^>]+>/g, " ");
-        const cleanText = rawText.replace(/\s+/g, " ").trim().substring(0, 15000);
-
-        return { text: cleanText, hasJsonLd };
-
-    } catch (e) {
-        console.error("Analysis Error:", e);
-        return { text: "", hasJsonLd: false };
-    }
-}
 
 import { AyoExtract } from '@/lib/aio-score-engine';
 
@@ -507,8 +193,8 @@ export async function POST(req: Request) {
         logger.info('URL_PARSE', `Parsed URL Match: ${rawUrlMatch}`);
 
         // CHECK IF IT IS AN EMAIL (Priority: If Email -> It's NOT a URL for analysis)
-        const triggerEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const isTriggerEmail = lastMessage.content.trim().match(triggerEmailRegex);
+        // Délégué à l'agent Contrôle Qualité (isStrictEmail)
+        const isTriggerEmail = isStrictEmail(lastMessage.content);
 
         let userUrlMatch = isTriggerEmail ? null : rawUrlMatch;
 
@@ -555,8 +241,6 @@ export async function POST(req: Request) {
             stepsCompleted = msgsAfterUrl.filter((m: any) => m.role === 'user' && !isPedagogicalRequest(m.content)).length;
         }
 
-        const hasQuestionBlock = stepsCompleted > 0; // Virtual indicator
-
         logger.info('PROTOCOL_STATE', `Steps: ${stepsCompleted}/16, hasFinalScore=${hasFinalScore}, hasQuestionBlockSent=${hasQuestionBlockSent}`);
 
         // 🎯 TARGET URL IDENTIFICATION
@@ -564,7 +248,6 @@ export async function POST(req: Request) {
 
         console.log(`🎯 TRIGGER ANALYSIS: urlInLastMessage=${urlInLastMessage}, stepsCompleted=${stepsCompleted}, hasFinalScore=${hasFinalScore}`);
 
-        let triggerMode = "CHAT";
 
         // 🏗️ CONTEXT INITIALIZATION
         let detectedUrl = "";
@@ -578,11 +261,10 @@ export async function POST(req: Request) {
             if (histUrlMatch) detectedUrl = histUrlMatch[0];
         }
 
-        // Email Detection
-        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
-        const emailMatch = lastMessage.content.match(emailRegex);
-        if (emailMatch) {
-            detectedEmail = emailMatch[0].toLowerCase();
+        // Email Detection — délégué à l'agent Contrôle Qualité
+        const detectedEmailResult = validateEmail(lastMessage.content);
+        if (detectedEmailResult) {
+            detectedEmail = detectedEmailResult;
 
             // 💾 SYNC EMAIL TO DB RECORD (Crucial for Webhook Recovery)
             if (sessionAsrId) {
@@ -613,66 +295,70 @@ export async function POST(req: Request) {
             }
         }
 
-        // Prompt Context Initialization
-        let promptScanResult: any = { url: detectedUrl, metaTitle: '', metaDescription: '', h1: [], hasJsonLd: false, hasAsrFile: false, isAyaRegistered: false };
-
-        // 🔍 DETERMINISTIC TRIGGER CALCULATOR
+        // 🔍 DETERMINISTIC TRIGGER CALCULATOR (via AYO State Machine)
         // CRITICAL: We check if a scan has ALREADY been performed in this conversation.
         // Check for "SCAN TERMINÉ" in assistant messages (scan_state is no longer embedded in client messages)
         const hasScanInHistory = messages.some((m: any) => m.role === 'assistant' && (
             m.content.includes('SCAN TERMIN') || m.content.includes('ownership_confirm')
         ));
 
-        // PRIORITY 1: REGISTRY RECOGNITION (Existing Clients)
+        // Pre-compute signals for state machine
+        const lastAssistantMsg_sm = assistantMessages[assistantMessages.length - 1];
+        const lastAssistantHasOwnership = !!(lastAssistantMsg_sm && lastAssistantMsg_sm.content.includes('ownership_confirm'));
+        const lastAssistantHasTruth = !!(lastAssistantMsg_sm && lastAssistantMsg_sm.content.includes('truth_confirmation'));
+        const questionsAskedCountEarly = assistantMessages.filter((m: any) =>
+            m.content.includes('"type": "question_block"') || m.content.includes('question_block')
+        ).length;
+
+        // Check if client is in AYA registry
+        let isExistingClient_sm = false;
         if (urlInLastMessage && !hasFinalScore) {
             // @ts-ignore
             const existingClient = await db.getAyaEntityByUrl(urlInLastMessage);
-            if (existingClient) {
-                triggerMode = "EXISTING_CLIENT";
-            } else if (!hasScanInHistory) {
-                // Not in registry AND no scan in history -> FORCE START SCAN
-                triggerMode = "SCAN_AND_QUESTION";
-            } else {
-                // URL repeated but scan already done -> Continue
-                triggerMode = "CONTINUE_QUESTIONING";
-            }
+            if (existingClient) isExistingClient_sm = true;
         }
-        // PRIORITY 2: SALES FUNNEL (Update Profile or Packs)
-        else if (lastMessage.content.toLowerCase().match(/(abonnement|pack pro|update_profile)/)) {
-            triggerMode = lastMessage.content.toLowerCase().includes("update_profile") ? "SCAN_AND_QUESTION" : "SALES_FUNNEL";
-        }
-        // PRIORITY 2.5: MAIN MENU RETURN
-        else if (lastMessage.content.startsWith("main_menu|")) {
-            // If a scan is already in progress, continue the questionnaire instead of going to client menu
-            if (hasScanInHistory && !hasFinalScore) {
-                triggerMode = "CONTINUE_QUESTIONING";
-            } else {
-                triggerMode = "EXISTING_CLIENT";
-            }
-        }
-        // PRIORITY 3: SEQUENTIAL QUESTIONING (If URL in history)
-        else if (hasUrlHistory && !hasFinalScore) {
-            if (stepsCompleted < 30) {
-                triggerMode = "CONTINUE_QUESTIONING";
-            } else {
-                triggerMode = "FINAL_ANALYSIS";
-            }
-        }
-        // PRIORITY 4: CHAT FALLBACK
-        else {
-            triggerMode = "CHAT";
+        // main_menu returns also check for existing client
+        if (lastMessage.content.startsWith("main_menu|") && !hasScanInHistory) {
+            isExistingClient_sm = true;
         }
 
-        console.log(`🎯 TRIGGER MODE: ${triggerMode} | URL: ${detectedUrl} | Steps: ${stepsCompleted} | HasScan: ${hasScanInHistory}`);
+        const lowText_sm = lastMessage.content.toLowerCase();
+        const isSalesIntent_sm = !!(lowText_sm.match(/(abonnement|pack pro|valider|upgrader|passer en)/));
+        const isUpdateProfile_sm = lowText_sm.includes("update_profile");
 
-        console.log(`🎯 TRIGGER MODE CALCULATED: "${triggerMode}"`);
+        // Build conversation signals for state machine
+        const conversationSignals: ConversationSignals = {
+            hasUrlInLastMessage: !!urlInLastMessage,
+            hasUrlInHistory: hasUrlHistory,
+            hasScanInHistory,
+            hasFinalScore,
+            questionsAskedCount: questionsAskedCountEarly,
+            stepsCompleted,
+            isExistingClient: isExistingClient_sm,
+            lastAssistantHasOwnership,
+            lastAssistantHasTruth,
+            isEmail: !!isTriggerEmail,
+            isSalesIntent: isSalesIntent_sm,
+            isUpdateProfile: isUpdateProfile_sm,
+            totalQueueBlocks: 0, // Updated later in CONTINUE_QUESTIONING when queue is built
+            queueIndex: Math.max(0, questionsAskedCountEarly - 3),
+        };
+
+        // 🎯 STATE MACHINE: Derive state from conversation signals
+        let ayoState = deriveState(conversationSignals);
+
+        // Special case: main_menu with scan in progress → continue questionnaire
+        if (lastMessage.content.startsWith("main_menu|") && hasScanInHistory && !hasFinalScore) {
+            ayoState = AyoState.QUESTIONNAIRE;
+        }
+
+        console.log(`🎯 AYO STATE: ${ayoState} | URL: ${detectedUrl} | Steps: ${stepsCompleted} | HasScan: ${hasScanInHistory}`);
 
         // 🛡️ HANDLER: EXISTING_CLIENT (Immediate Recognition)
-        // CRITICAL FIX: Handle case where triggerMode is set manualy to EXISTING_CLIENT
-        // AND ensure we are NOT in an OTP flow (send_otp or 6 digits)
+        // Ensure we are NOT in an OTP flow (send_otp or 6 digits)
         const isOtpFlow = lastMessage.content.startsWith("send_otp") || lastMessage.content.match(/^\d{6}$/);
 
-        if ((triggerMode === "EXISTING_CLIENT" || lastMessage.content === "EXISTING_CLIENT") && !isOtpFlow) {
+        if ((ayoState === AyoState.EXISTING_CLIENT || lastMessage.content === "EXISTING_CLIENT") && !isOtpFlow) {
             const ec_url = urlInLastMessage || detectedUrl || "";
             // @ts-ignore
             const client = await db.getAyaEntityByUrl(ec_url);
@@ -944,21 +630,21 @@ export async function POST(req: Request) {
             }), { status: 200 });
         }
 
-        // 🚀 SALES FUNNEL & UPDATES OVERRIDE
+        // 🚀 SALES FUNNEL & UPDATES OVERRIDE (via state machine)
         if (lowText.includes("abonnement") || lowText.includes("pack pro") ||
             lowText.includes("valider") || lowText.includes("je reste") ||
             lowText.includes("passer en") || lowText.includes("upgrader") ||
             lowText.includes("update_profile")) {
 
             if (lowText.includes("update_profile")) {
-                console.log("🔄 FORCING PROFILE UPDATE -> SCAN_AND_QUESTION");
-                triggerMode = "SCAN_AND_QUESTION";
+                console.log(`🔄 AYO STATE → ${AyoState.SCAN_EN_COURS}: FORCING PROFILE UPDATE`);
+                ayoState = AyoState.SCAN_EN_COURS;
             } else {
-                triggerMode = "SALES_FUNNEL";
+                ayoState = AyoState.PACK_SELECT;
             }
         }
 
-        if (triggerMode === "SCAN_AND_QUESTION") {
+        if (ayoState === AyoState.SCAN_EN_COURS) {
             console.log("🚀 TRIGGERING PHASE 1: INTELLIGENT EXTRACTION (V8)...");
 
             // CRITICAL: Extract URL from last user message
@@ -1415,9 +1101,9 @@ GÉNÈRE CE JSON MAINTENANT :
 
         }
 
-        // 🛑 EARLY RETURN for SCAN_AND_QUESTION (prevent email check)
-        if (triggerMode === "SCAN_AND_QUESTION" && finalResponseText) {
-            console.log("✅ Returning SCAN_AND_QUESTION result (skipping email logic)");
+        // 🛑 EARLY RETURN for SCAN (prevent email check)
+        if (ayoState === AyoState.SCAN_EN_COURS && finalResponseText) {
+            console.log("✅ Returning SCAN result (skipping email logic)");
             // Inject SID marker so subsequent calls can recover it
             try {
                 const parsed = JSON.parse(finalResponseText);
@@ -1431,8 +1117,8 @@ GÉNÈRE CE JSON MAINTENANT :
             });
         }
 
-        if (triggerMode === "CONTINUE_QUESTIONING") {
-            console.log("🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V5 Context-Aware)...");
+        if (ayoState === AyoState.OWNERSHIP || ayoState === AyoState.TRUTH_WARNING || ayoState === AyoState.QUESTIONNAIRE || ayoState === AyoState.CALIBRATION) {
+            console.log(`🚀 TRIGGERING PHASE 2: SEQUENTIAL QUESTIONING (V5 Context-Aware) | AyoState=${ayoState}`);
             console.log("Asking NEXT Block...");
 
             // Check if the LAST assistant message was the ownership question (one-shot guard)
@@ -1634,9 +1320,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             let nextBlockName = "";
             let queueIndex = -1;
 
+            // 🎯 STATE MACHINE: Re-derive with queue info for precise routing
             if (stepsCompleted <= 2 && questionsAskedCount < 3) {
                 nextBlockName = "activity_calibration";
-                triggerMode = "CALIBRATION_STEP";
+                ayoState = AyoState.CALIBRATION;
+                console.log(`🎯 AYO STATE (refined): ${AyoState.CALIBRATION}`);
             } else {
                 // The first 3 question_blocks are: ownership_confirm, truth_confirmation, calibration.
                 // queueIndex = how many data questions we've already asked (after the 3 setup questions)
@@ -1659,12 +1347,12 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             }
 
             if (nextBlockName === "FINALISATION") {
-                console.log("🏁 All blocks covered. Triggering FINAL_ANALYSIS...");
-                triggerMode = "FINAL_ANALYSIS";
+                console.log(`🏁 AYO STATE → ${AyoState.SCORING}: All blocks covered. Triggering FINAL_ANALYSIS...`);
+                ayoState = AyoState.SCORING;
             }
 
             // 🆕 HANDLER FOR CALIBRATION STEP
-            if (triggerMode === "CALIBRATION_STEP") {
+            if (ayoState === AyoState.CALIBRATION) {
                 console.log("🛠️ SENDING CALIBRATION QUESTION (Static)");
                 finalResponseText = JSON.stringify({
                     type: "question_block",
@@ -1681,7 +1369,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             }
 
             // ONLY GENERATE A NEW QUESTION IF WE ARE STILL IN QUESTIONING MODE
-            if (triggerMode === "CONTINUE_QUESTIONING") {
+            if (ayoState === AyoState.QUESTIONNAIRE || ayoState === AyoState.OWNERSHIP || ayoState === AyoState.TRUTH_WARNING) {
 
                 // 🤖 AGENT GREFFIER — génère le prompt pour la prochaine question
                 const scanInfo = contextScanResult ? formatScanForGreffier({
@@ -1748,7 +1436,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     // 🔒 DETERMINISTIC ONLY: LLM cannot trigger FINAL_ANALYSIS.
                     // Disabled to prevent premature questionnaire termination by LLM hallucination.
                     if (false) { /* DISABLED: LLM-triggered finalization removed */
-                        triggerMode = "FINAL_ANALYSIS";
+                        ayoState = AyoState.SCORING;
                         finalResponseText = "";
                     } else {
                         console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Forcing Text into JSON.`);
@@ -1768,12 +1456,12 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 }
 
             }
-        } // End of conditional CONTINUE_QUESTIONING block
+        } // End of conditional questioning block (OWNERSHIP | TRUTH_WARNING | QUESTIONNAIRE | CALIBRATION)
 
 
-        if (triggerMode === "FINAL_ANALYSIS") {
+        if (ayoState === AyoState.SCORING) {
             try {
-                logger.info('AIO_ENGINE', `Triggering deterministic AIO engine, triggerMode="${triggerMode}"`);
+                logger.info('AIO_ENGINE', `Triggering deterministic AIO engine, ayoState=${ayoState}`);
                 isAnalysisRun = true;
                 let urlToScan = detectedUrl;
                 if (!urlToScan && hasUrlHistory) {
@@ -1802,17 +1490,8 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     )
                 );
                 // Filter out pure confirmation messages that carry no data
-                // These cause the LLM to extract "Oui c'est correct" as field values
-                const CONFIRMATION_RE = /^(oui|ok|okay|d'accord|exact|exactement|c'est correct|oui c'est correct|oui c'est bon|c'est bon|c'est ça|parfait|tout est correct|validé|je confirme|je valide|bien reçu|noté|entendu|ça me va|ça marche|très bien|super|génial|nickel|impeccable|affirmatif|absolument|tout à fait|bien sûr|évidemment|effectivement|en effet|voilà|yep|yup|yes|yeah|sure|right|correct|confirmed|alright|got it|that's right|that's correct)[\s!.✅✓]*$/i;
-                const isConfirmationOnly = (content: string): boolean => {
-                    if (!content || typeof content !== 'string') return false;
-                    const trimmed = content.trim();
-                    // Short messages that are pure confirmation
-                    if (trimmed.length < 60 && CONFIRMATION_RE.test(trimmed)) return true;
-                    // Also catch numbered confirmations like "1" "2" "3" (option selections)
-                    if (/^\d{1,2}[\s.!]*$/.test(trimmed)) return true;
-                    return false;
-                };
+                // Délégué à l'agent Contrôle Qualité (qcIsConfirmationOnly)
+                const isConfirmationOnly = qcIsConfirmationOnly;
 
                 let userAnswersContext = "";
                 if (scanMsgIndex !== -1) {
@@ -1889,11 +1568,7 @@ MAPPING DES RÉPONSES UTILISATEUR :
 - Mots-clés pertinents -> external_context.keywords (q=1)
 - Intentions de recherche -> external_context.intents (q=1)
 
-RÈGLES DE FORMAT STRICTES :
-- offre.target_audience : DOIT être des segments courts séparés par virgules (ex: "Développeurs IA, chercheurs, entreprises ESG"). JAMAIS une phrase complète ou une description d'activité. Si l'utilisateur donne une description au lieu de segments, EXTRAIS les segments implicites.
-- offre.products : DOIT être un tableau de produits COMPLETS (noms entiers, pas tronqués). Si un produit est entre parenthèses, INCLURE la parenthèse fermante.
-- processus_methodes.quality_assurance : DOIT être un tableau de mesures séparées (ex: ["Vérification des sources", "Validation par des experts"]). PAS une string avec virgules.
-- processus_methodes.geographies_served : Si vide, utiliser le pays de l'identité comme fallback.
+${getExtractionRulesForPrompt()}
 
 RÈGLES V3 "CONTEXT & SIMULATION" :
 1. **Contextual Relevance** : Définis pour quels intents utilisateurs ce site est pertinent (ex: "Local Search", "B2B Query").
@@ -2107,209 +1782,23 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     } as any;
                 }
 
-                // 2a. POST-LLM SANITIZATION — Remove template/placeholder values the LLM copied from examples
+                // 2a. POST-LLM SANITIZATION — Délégué à l'agent Contrôle Qualité
+                // Nettoie les placeholders de template et les phrases de confirmation copiées comme valeurs
                 if (extractJson?.fields) {
-                    const TEMPLATE_PATTERNS = /^(Ex:|type schema\.?org|schema\.?org|organisation|organization|premium\/standard\/undisclosed|public\/membersOnly|eligible\/uncertain|✅\/⚠️\/❌|gym near me|Centre en ville|Recherche Salle|No City Found|undisclosed)$/i;
-                    const TEMPLATE_PARTIAL = /^Ex:|eligible\/uncertain|✅\/⚠️\/❌|premium\/standard|public\/members/i;
-
-                    function isTemplatePlaceholder(val: any): boolean {
-                        if (typeof val === 'string') return TEMPLATE_PATTERNS.test(val.trim()) || TEMPLATE_PARTIAL.test(val.trim());
-                        return false;
-                    }
-
-                    function sanitizeFieldValue(val: any): any {
-                        if (typeof val === 'string') {
-                            return isTemplatePlaceholder(val) ? '' : val;
-                        }
-                        if (Array.isArray(val)) {
-                            return val.filter((item: any) => {
-                                if (typeof item === 'string') return !isTemplatePlaceholder(item);
-                                if (typeof item === 'object' && item !== null) {
-                                    // contextual_relevance entries with template userIntent
-                                    if (item.userIntent && isTemplatePlaceholder(item.userIntent)) return false;
-                                    if (item.status && isTemplatePlaceholder(item.status)) return false;
-                                    if (item.query && isTemplatePlaceholder(item.query)) return false;
-                                    if (item.result && isTemplatePlaceholder(item.result)) return false;
-                                    // Clean sub-arrays
-                                    if (item.queryExamples) item.queryExamples = item.queryExamples.filter((e: any) => !isTemplatePlaceholder(e));
-                                    if (item.decisionCriteria) item.decisionCriteria = item.decisionCriteria.filter((e: any) => !isTemplatePlaceholder(e));
-                                }
-                                return true;
-                            });
-                        }
-                        if (typeof val === 'object' && val !== null) {
-                            // selection_conditions: { required: [...], exclusion: [...] }
-                            if (val.required) val.required = val.required.filter((v: any) => !isTemplatePlaceholder(v));
-                            if (val.exclusion) val.exclusion = val.exclusion.filter((v: any) => !isTemplatePlaceholder(v));
-                        }
-                        return val;
-                    }
-
-                    // Traverse all blocks and sanitize every field value
-                    const ff = extractJson.fields as any;
-                    for (const blockName of Object.keys(ff)) {
-                        const block = (ff as any)[blockName];
-                        if (typeof block !== 'object' || block === null) continue;
-                        for (const fieldName of Object.keys(block)) {
-                            const field = block[fieldName];
-                            if (field && typeof field === 'object' && 'value' in field) {
-                                const originalVal = field.value;
-                                field.value = sanitizeFieldValue(field.value);
-                                // If value was sanitized to empty, set q=0
-                                const isEmpty = field.value === '' || (Array.isArray(field.value) && field.value.length === 0);
-                                if (isEmpty && originalVal !== field.value) {
-                                    field.q = 0;
-                                    logger.info('TEMPLATE_SANITIZE', `${blockName}.${fieldName}: template placeholder removed`);
-                                }
-                            }
-                        }
-                    }
-
-                    // POST-LLM: Reject confirmation phrases stored as field values
-                    // e.g. "Oui c'est correct", "Exact", "C'est bon" should NOT be field values
-                    const CONFIRMATION_VALUE_RE = /^(oui|ok|okay|d'accord|exact|exactement|c'est correct|oui c'est correct|oui c'est bon|c'est bon|c'est ça|parfait|tout est correct|validé|je confirme|je valide|bien reçu|noté|entendu|ça me va|ça marche|très bien|super|génial|nickel|impeccable|affirmatif|absolument|tout à fait|bien sûr|évidemment|effectivement|en effet|voilà|yep|yup|yes|yeah|sure|right|correct|confirmed|alright|got it|that's right|that's correct)[\s!.✅✓]*$/i;
-                    for (const blockName of Object.keys(ff)) {
-                        const block = (ff as any)[blockName];
-                        if (typeof block !== 'object' || block === null) continue;
-                        for (const fieldName of Object.keys(block)) {
-                            const field = block[fieldName];
-                            if (field && typeof field === 'object' && 'value' in field && typeof field.value === 'string') {
-                                if (field.value.trim().length < 60 && CONFIRMATION_VALUE_RE.test(field.value.trim())) {
-                                    logger.info('CONFIRMATION_SANITIZE', `${blockName}.${fieldName}: confirmation phrase "${field.value}" removed`);
-                                    field.value = '';
-                                    field.q = 0;
-                                }
-                            }
-                        }
-                    }
-
-                    // Special: business_type "Organization" / "Type Schema.org" → empty
-                    if (ff.identite?.business_type?.value) {
-                        const bt = String(ff.identite.business_type.value).trim();
-                        if (/^(type schema\.?org|schema\.?org|organisation|organization)$/i.test(bt)) {
-                            ff.identite.business_type.value = '';
-                            ff.identite.business_type.q = 0;
-                            logger.info('TEMPLATE_SANITIZE', 'business_type placeholder removed');
-                        }
-                    }
-
-                    // Special: pricing_level "premium/standard/undisclosed" → empty
-                    if (ff.contextual_signals?.pricing_level?.value) {
-                        const pl = String(ff.contextual_signals.pricing_level.value).trim();
-                        if (/premium\/standard|undisclosed/i.test(pl)) {
-                            ff.contextual_signals.pricing_level.value = '';
-                            ff.contextual_signals.pricing_level.q = 0;
-                            logger.info('TEMPLATE_SANITIZE', 'pricing_level placeholder removed');
-                        }
-                    }
-
-                    // Special: access_mode "public/membersOnly" → empty
-                    if (ff.contextual_signals?.access_mode?.value) {
-                        const am = String(ff.contextual_signals.access_mode.value).trim();
-                        if (/public\/membersOnly/i.test(am)) {
-                            ff.contextual_signals.access_mode.value = '';
-                            ff.contextual_signals.access_mode.q = 0;
-                            logger.info('TEMPLATE_SANITIZE', 'access_mode placeholder removed');
-                        }
+                    const sanitizeLogs = sanitizeLlmFields(extractJson.fields);
+                    for (const log of sanitizeLogs) {
+                        const tag = log.reason === 'confirmation_phrase' ? 'CONFIRMATION_SANITIZE' : 'TEMPLATE_SANITIZE';
+                        logger.info(tag, `${log.field}: ${log.reason}${log.originalValue ? ` (was: "${String(log.originalValue).substring(0, 50)}")` : ''}`);
                     }
                 }
 
-                // 2b. POST-LLM VALIDATION — Safety net: downgrade q values when LLM ignores prompt rules
+                // 2b. POST-LLM VALIDATION — Délégué à l'agent Contrôle Qualité
+                // Downgrade les q-values quand les règles métier ne sont pas respectées
                 if (extractJson?.fields) {
-                    const f = extractJson.fields;
-
-                    // INDICATEURS: key_indicators — q=1 only if concrete numbers exist
-                    if (f.indicateurs?.key_indicators) {
-                        const ki = f.indicateurs.key_indicators;
-                        if (ki.q === 1 && Array.isArray(ki.value)) {
-                            const hasConcreteNumber = ki.value.some((item: any) => {
-                                const str = typeof item === 'string' ? item : JSON.stringify(item);
-                                return /\d/.test(str) && !/satisfaction|bouche.?à.?oreille|qualité|confiance/i.test(str);
-                            });
-                            if (!hasConcreteNumber) {
-                                ki.q = 0.5;
-                                logger.info('Q_DOWNGRADE', 'key_indicators downgraded: no concrete numbers found');
-                            }
-                        }
+                    const downgradeLogs = downgradeFieldQuality(extractJson.fields);
+                    for (const log of downgradeLogs) {
+                        logger.info('Q_DOWNGRADE', `${log.field}: ${log.reason}`);
                     }
-
-                    // INDICATEURS: last_review_date — q=1 only if explicit date
-                    if (f.indicateurs?.last_review_date) {
-                        const lr = f.indicateurs.last_review_date;
-                        if (lr.q === 1) {
-                            const val = String(lr.value || '');
-                            const hasDate = /\d{4}[-/]\d{2}|jan|fév|mar|avr|mai|juin|juil|aoû|sep|oct|nov|déc/i.test(val);
-                            if (!hasDate) {
-                                lr.q = 0;
-                                logger.info('Q_DOWNGRADE', 'last_review_date downgraded: no explicit date');
-                            }
-                        }
-                    }
-
-                    // ENGAGEMENTS: certifications — q=1 only for named recognized certs
-                    if (f.engagements_conformite?.certifications) {
-                        const cert = f.engagements_conformite.certifications;
-                        if (cert.q === 1 && Array.isArray(cert.value)) {
-                            const knownCerts = /iso|ohsas|haccp|b.?corp|fair.?trade|leed|ce\b|nf\b|afnor|tuv|ul\b|fda|gmp|gdpr|rgpd|soc.?[12]|pci|hipaa|fedramp/i;
-                            const hasRealCert = cert.value.some((c: any) => knownCerts.test(String(c)));
-                            if (!hasRealCert) {
-                                cert.q = 0.5;
-                                logger.info('Q_DOWNGRADE', 'certifications downgraded: no recognized certification names');
-                            }
-                        }
-                    }
-
-                    // ENGAGEMENTS: policies — q=1 only if policy IS active (not "en cours")
-                    if (f.engagements_conformite?.policies) {
-                        const pol = f.engagements_conformite.policies;
-                        if (pol.q === 1 && Array.isArray(pol.value)) {
-                            const inProgress = /en cours|en phase|prochainement|bientôt|prévu|planifié/i;
-                            const allInProgress = pol.value.every((p: any) => inProgress.test(String(p)));
-                            if (allInProgress && pol.value.length > 0) {
-                                pol.q = 0.5;
-                                logger.info('Q_DOWNGRADE', 'policies downgraded: all policies are in-progress');
-                            }
-                        }
-                    }
-
-                    // CONTENUS PEDAGOGIQUES: has_glossary, has_documentation — q=0 if explicitly "non"
-                    ['has_glossary', 'has_documentation', 'has_faq'].forEach(field => {
-                        const node = f.contenus_pedagogiques?.[field as keyof typeof f.contenus_pedagogiques] as any;
-                        if (node && node.q >= 0.5 && node.value === false) {
-                            node.q = 0;
-                            logger.info('Q_DOWNGRADE', `${field} downgraded: value is explicitly false`);
-                        }
-                    });
-
-                    // OFFRE: pricing_indication — "sur devis" = 0.5 max
-                    if (f.offre?.pricing_indication) {
-                        const pi = f.offre.pricing_indication;
-                        if (pi.q === 1) {
-                            const val = String(pi.value || '').toLowerCase();
-                            if (/sur devis|à définir|variable|selon|dépend/i.test(val) && !/\d/.test(val)) {
-                                pi.q = 0.5;
-                                logger.info('Q_DOWNGRADE', 'pricing_indication downgraded: vague pricing');
-                            }
-                        }
-                    }
-
-                    // PROCESSUS: process_steps — q=1 only if 3+ concrete steps
-                    if (f.processus_methodes?.process_steps) {
-                        const ps = f.processus_methodes.process_steps;
-                        if (ps.q === 1 && Array.isArray(ps.value) && ps.value.length < 3) {
-                            ps.q = 0.5;
-                            logger.info('Q_DOWNGRADE', `process_steps downgraded: only ${ps.value.length} steps (need 3+)`);
-                        }
-                    }
-
-                    // OFFRE: services/products — q=1 only if 2+ items
-                    ['services', 'products'].forEach(field => {
-                        const node = f.offre?.[field as keyof typeof f.offre] as any;
-                        if (node && node.q === 1 && Array.isArray(node.value) && node.value.length < 2) {
-                            node.q = 0.5;
-                            logger.info('Q_DOWNGRADE', `${field} downgraded: only ${node.value.length} item(s)`);
-                        }
-                    });
                 }
 
                 // 3. INJECT TECHNICAL TRUTH (Overrule LLM for tech fields)
@@ -2380,7 +1869,15 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     logger.error('FINAL_SAVE_ERROR', dbErrMsg);
                 }
 
-                // 5. BUILD FINAL RESPONSE TEXT
+                // 5. BUILD FINAL RESPONSE TEXT (via Agent Architecte)
+                // L'Architecte analyse les lacunes et génère des recommandations personnalisées
+                const architecteRecommendations = buildStructureRecommendations(extractJson, scoreResult);
+                const architecteText = formatRecommendationsForChat(architecteRecommendations);
+                logger.info('ARCHITECTE_RECOMMENDATIONS', `Architecte: ${architecteRecommendations.recommendations.length} recs, gain estimé +${architecteRecommendations.estimatedScoreGain}pts`, {
+                    criticalFiles: architecteRecommendations.recommendations.filter(r => r.priority === 1).length,
+                    estimatedGain: architecteRecommendations.estimatedScoreGain,
+                });
+
                 finalResponseText = `✅ Audit de Visibilité IA terminé.
 Calcul du score en cours...
 |||
@@ -2400,15 +1897,16 @@ Calcul du score en cours...
 |||
 📊 SCORE FINAL AIO : ${scoreResult.total} / 100
 ${scoreResult.capApplied ? `\n⚠️ **Plafond appliqué** : ${scoreResult.capReason} (score brut : ${scoreResult.rawTotal}/100)` : ''}
-📌 Si votre score est élevé, c'est que vous avez déjà une bonne base de données structurées. Avec nos fichiers ASR (AI Singular Record), vous augmenterez encore vos chances d'être recommandé par les IA.
 
 🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
 (Les explications critiques et les correctifs ont été générés mais sont masqués).
 |||
+${architecteText}
+|||
 ${JSON.stringify({
                         type: "question_block",
                         intro: `💡 **PROCHAINE ÉTAPE** :
-Votre profil est complet, mais pour que les IA puissent réellement vous lire et vous recommander, il faut transformer ces données en **fichiers sémantiques structurés** (ASR, FAQ, Glossaire, Manifest, Contexte).
+${architecteRecommendations.summary}
 
 Choisissez votre niveau de certification :`,
                         questions: [{
@@ -2431,8 +1929,8 @@ Veuillez réessayer ou contacter hello@ai-visionary.com.`;
         } else if (!finalResponseText) {
             // 🎯 PACK SELECTION & SALES FUNNEL LOGIC
             const userContent = lastMessage.content.trim().toLowerCase();
-            const emailCaptureRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
-            const emailMatch = userContent.match(emailCaptureRegex);
+            // Email capture — délégué à l'agent Contrôle Qualité
+            const emailMatch = userContent.match(QC_EMAIL_CAPTURE_REGEX);
 
             logger.info('SALES_FUNNEL', `User content: ${userContent.substring(0, 100)}`);
 
@@ -2517,7 +2015,8 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                 // Find the URL from history
                 const historyUrlRegex = /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi;
                 const historyUrlMatchMsg = messages.find((m: any) => {
-                    const isMsgEmail = m.content.trim().match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$/);
+                    // Vérifie que le message n'est pas un email pur — délégué à l'agent Contrôle Qualité
+                    const isMsgEmail = isStrictEmail(m.content);
                     return m.role === 'user' && m.content.match(historyUrlRegex) && !isMsgEmail;
                 });
 
@@ -2656,65 +2155,12 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
             });
         }
 
-        // 🧠 INTELLIGENCE: REAL-TIME WEBSITE ANALYSIS (This block is now mostly for non-analysis states if needed)
-        let websiteData = { text: "", hasJsonLd: false };
-
-        // This part of websiteData fetching is now less critical for the main analysis flow
-        // as the deterministic engine handles it, but might be used for other LLM prompts.
-        if (messages.length === 6 && !isAnalysisRun) { // Only fetch if not already in analysis run
-            const urlMessage = messages[3];
-            if (urlMessage && urlMessage.role === 'user') {
-                websiteData = await fetchWebsiteContent(urlMessage.content);
-            }
-        }
-
-        // 💾 DATABASE PERSISTENCE (Simulation Log)
-        if (messages.length > 2) {
-            console.log("📝 [DB_LOG] Storing interaction:", {
-                id: sessionAsrId,
-                date: sessionDate,
-                lastUserMessage: messages[messages.length - 1].content
-            });
-        }
-
-
-
         // Normalize detectedUrl if found
         if (detectedUrl && !detectedUrl.startsWith('http')) {
             detectedUrl = 'https://' + detectedUrl;
         }
 
         let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
-
-        // -----------------------------------------------------------------------
-        // SYSTEM PROMPT CONSTRUCTION (ALWAYS LOAD V3 PROMPT IF URL EXISTS)
-        // -----------------------------------------------------------------------
-        // If analysis NOT run yet, we still need the prompt to interview the user.
-        // We perform a light scan if needed to populate the prompt context.
-
-        // Run light scan if we are NOT running full analysis but have a URL
-        if (detectedUrl && !isAnalysisRun) {
-            try {
-                // Reuse scan logic to get Meta for Prompt
-                // @ts-ignore
-                const lightScan = await scanUrlForAioSignals(detectedUrl);
-                promptScanResult = lightScan;
-            } catch (e) {
-                console.warn("Prompt Context Scan failed", e);
-            }
-        } else if (isAnalysisRun) {
-            // If Analysis RUN, we need to ensure promptScanResult is populated from a scan
-            if (detectedUrl) {
-                // @ts-ignore
-                const lightScan = await scanUrlForAioSignals(detectedUrl);
-                promptScanResult = lightScan;
-            }
-        }
-
-        // -----------------------------------------------------------------------
-        // GENERATE STRIPE PARAMS FOR PROMPT SALES LINKS (via Vendeur agent)
-        // -----------------------------------------------------------------------
-        let targetEmailPrompt = detectedEmail || "";
 
         // -----------------------------------------------------------------------
         // FINAL FALLBACK: GENERIC CHAT (INTELLIGENT REPLIES)

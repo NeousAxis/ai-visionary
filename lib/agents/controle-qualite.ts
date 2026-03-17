@@ -270,7 +270,283 @@ function validateManifest(manifest: Record<string, unknown>): QCError[] {
     return errors;
 }
 
-// --- API PUBLIQUE ---
+// =====================================================================
+// VALIDATION CONVERSATIONNELLE (Flux Chat)
+// =====================================================================
+
+/**
+ * Regex canoniques pour la validation d'email et d'URL.
+ * Exportées pour réutilisation cohérente dans tout le flux.
+ */
+export const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+export const EMAIL_STRICT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const URL_REGEX = /[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}/gi;
+export const EMAIL_CAPTURE_REGEX = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/;
+
+/**
+ * Valide un email (format).
+ * Retourne l'email normalisé (lowercase) ou null si invalide.
+ */
+export function validateEmail(input: string): string | null {
+    const match = input.match(EMAIL_REGEX);
+    if (!match) return null;
+    return match[0].toLowerCase();
+}
+
+/**
+ * Vérifie si un texte est strictement un email (et pas un contenu mixte avec URL).
+ */
+export function isStrictEmail(input: string): boolean {
+    return EMAIL_STRICT_REGEX.test(input.trim());
+}
+
+/**
+ * Normalise une URL : ajoute https:// si absent.
+ */
+export function normalizeUrl(url: string): string {
+    if (!url) return url;
+    if (!url.startsWith('http')) return 'https://' + url;
+    return url;
+}
+
+/**
+ * Regex de confirmation — détecte les "oui", "ok", "c'est correct", etc.
+ * Utilisée pour filtrer les réponses utilisateur qui ne sont PAS des données.
+ */
+export const CONFIRMATION_RE = /^(oui|ok|okay|d'accord|exact|exactement|c'est correct|oui c'est correct|oui c'est bon|c'est bon|c'est ça|parfait|tout est correct|validé|je confirme|je valide|bien reçu|noté|entendu|ça me va|ça marche|très bien|super|génial|nickel|impeccable|affirmatif|absolument|tout à fait|bien sûr|évidemment|effectivement|en effet|voilà|yep|yup|yes|yeah|sure|right|correct|confirmed|alright|got it|that's right|that's correct)[\s!.✅✓]*$/i;
+
+/**
+ * Détecte si un message utilisateur est une simple confirmation
+ * (ne contient aucune donnée exploitable).
+ */
+export function isConfirmationOnly(content: string): boolean {
+    if (!content || typeof content !== 'string') return false;
+    const trimmed = content.trim();
+    if (trimmed.length < 60 && CONFIRMATION_RE.test(trimmed)) return true;
+    // Numbered confirmations like "1" "2" "3" (option selections)
+    if (/^\d{1,2}[\s.!]*$/.test(trimmed)) return true;
+    return false;
+}
+
+// =====================================================================
+// SANITISATION POST-LLM (Template & Confirmation cleanup)
+// =====================================================================
+
+/** Patterns de templates/placeholders que le LLM copie depuis les exemples du prompt. */
+const TEMPLATE_PATTERNS = /^(Ex:|type schema\.?org|schema\.?org|organisation|organization|premium\/standard\/undisclosed|public\/membersOnly|eligible\/uncertain|✅\/⚠️\/❌|gym near me|Centre en ville|Recherche Salle|No City Found|undisclosed)$/i;
+const TEMPLATE_PARTIAL = /^Ex:|eligible\/uncertain|✅\/⚠️\/❌|premium\/standard|public\/members/i;
+
+function isTemplatePlaceholder(val: any): boolean {
+    if (typeof val === 'string') return TEMPLATE_PATTERNS.test(val.trim()) || TEMPLATE_PARTIAL.test(val.trim());
+    return false;
+}
+
+function sanitizeFieldValue(val: any): any {
+    if (typeof val === 'string') {
+        return isTemplatePlaceholder(val) ? '' : val;
+    }
+    if (Array.isArray(val)) {
+        return val.filter((item: any) => {
+            if (typeof item === 'string') return !isTemplatePlaceholder(item);
+            if (typeof item === 'object' && item !== null) {
+                if (item.userIntent && isTemplatePlaceholder(item.userIntent)) return false;
+                if (item.status && isTemplatePlaceholder(item.status)) return false;
+                if (item.query && isTemplatePlaceholder(item.query)) return false;
+                if (item.result && isTemplatePlaceholder(item.result)) return false;
+                if (item.queryExamples) item.queryExamples = item.queryExamples.filter((e: any) => !isTemplatePlaceholder(e));
+                if (item.decisionCriteria) item.decisionCriteria = item.decisionCriteria.filter((e: any) => !isTemplatePlaceholder(e));
+            }
+            return true;
+        });
+    }
+    if (typeof val === 'object' && val !== null) {
+        if (val.required) val.required = val.required.filter((v: any) => !isTemplatePlaceholder(v));
+        if (val.exclusion) val.exclusion = val.exclusion.filter((v: any) => !isTemplatePlaceholder(v));
+    }
+    return val;
+}
+
+export interface SanitizeLog {
+    field: string;
+    reason: string;
+    originalValue?: any;
+}
+
+/**
+ * Nettoie les valeurs de champs LLM en supprimant les placeholders de template
+ * et les phrases de confirmation copiées comme valeurs.
+ * Mutate `fields` in-place, retourne la liste des modifications effectuées.
+ */
+export function sanitizeLlmFields(fields: Record<string, any>): SanitizeLog[] {
+    const logs: SanitizeLog[] = [];
+
+    // Pass 1: Remove template placeholders
+    for (const blockName of Object.keys(fields)) {
+        const block = fields[blockName];
+        if (typeof block !== 'object' || block === null) continue;
+        for (const fieldName of Object.keys(block)) {
+            const field = block[fieldName];
+            if (field && typeof field === 'object' && 'value' in field) {
+                const originalVal = field.value;
+                field.value = sanitizeFieldValue(field.value);
+                const isEmpty = field.value === '' || (Array.isArray(field.value) && field.value.length === 0);
+                if (isEmpty && originalVal !== field.value) {
+                    field.q = 0;
+                    logs.push({ field: `${blockName}.${fieldName}`, reason: 'template_placeholder', originalValue: originalVal });
+                }
+            }
+        }
+    }
+
+    // Pass 2: Remove confirmation phrases stored as field values
+    for (const blockName of Object.keys(fields)) {
+        const block = fields[blockName];
+        if (typeof block !== 'object' || block === null) continue;
+        for (const fieldName of Object.keys(block)) {
+            const field = block[fieldName];
+            if (field && typeof field === 'object' && 'value' in field && typeof field.value === 'string') {
+                if (field.value.trim().length < 60 && CONFIRMATION_RE.test(field.value.trim())) {
+                    logs.push({ field: `${blockName}.${fieldName}`, reason: 'confirmation_phrase', originalValue: field.value });
+                    field.value = '';
+                    field.q = 0;
+                }
+            }
+        }
+    }
+
+    // Pass 3: Special fields with known placeholder patterns
+    if (fields.identite?.business_type?.value) {
+        const bt = String(fields.identite.business_type.value).trim();
+        if (/^(type schema\.?org|schema\.?org|organisation|organization)$/i.test(bt)) {
+            logs.push({ field: 'identite.business_type', reason: 'template_placeholder', originalValue: bt });
+            fields.identite.business_type.value = '';
+            fields.identite.business_type.q = 0;
+        }
+    }
+    if (fields.contextual_signals?.pricing_level?.value) {
+        const pl = String(fields.contextual_signals.pricing_level.value).trim();
+        if (/premium\/standard|undisclosed/i.test(pl)) {
+            logs.push({ field: 'contextual_signals.pricing_level', reason: 'template_placeholder', originalValue: pl });
+            fields.contextual_signals.pricing_level.value = '';
+            fields.contextual_signals.pricing_level.q = 0;
+        }
+    }
+    if (fields.contextual_signals?.access_mode?.value) {
+        const am = String(fields.contextual_signals.access_mode.value).trim();
+        if (/public\/membersOnly/i.test(am)) {
+            logs.push({ field: 'contextual_signals.access_mode', reason: 'template_placeholder', originalValue: am });
+            fields.contextual_signals.access_mode.value = '';
+            fields.contextual_signals.access_mode.q = 0;
+        }
+    }
+
+    return logs;
+}
+
+/**
+ * Downgrade les q-values des champs LLM quand les règles métier ne sont pas respectées.
+ * Mutate `fields` in-place, retourne la liste des downgrades effectués.
+ */
+export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[] {
+    const logs: SanitizeLog[] = [];
+
+    // INDICATEURS: key_indicators — q=1 only if concrete numbers exist
+    if (fields.indicateurs?.key_indicators) {
+        const ki = fields.indicateurs.key_indicators;
+        if (ki.q === 1 && Array.isArray(ki.value)) {
+            const hasConcreteNumber = ki.value.some((item: any) => {
+                const str = typeof item === 'string' ? item : JSON.stringify(item);
+                return /\d/.test(str) && !/satisfaction|bouche.?à.?oreille|qualité|confiance/i.test(str);
+            });
+            if (!hasConcreteNumber) {
+                ki.q = 0.5;
+                logs.push({ field: 'indicateurs.key_indicators', reason: 'no_concrete_numbers' });
+            }
+        }
+    }
+
+    // INDICATEURS: last_review_date — q=1 only if explicit date
+    if (fields.indicateurs?.last_review_date) {
+        const lr = fields.indicateurs.last_review_date;
+        if (lr.q === 1) {
+            const val = String(lr.value || '');
+            const hasDate = /\d{4}[-/]\d{2}|jan|fév|mar|avr|mai|juin|juil|aoû|sep|oct|nov|déc/i.test(val);
+            if (!hasDate) {
+                lr.q = 0;
+                logs.push({ field: 'indicateurs.last_review_date', reason: 'no_explicit_date' });
+            }
+        }
+    }
+
+    // ENGAGEMENTS: certifications — q=1 only for named recognized certs
+    if (fields.engagements_conformite?.certifications) {
+        const cert = fields.engagements_conformite.certifications;
+        if (cert.q === 1 && Array.isArray(cert.value)) {
+            const knownCerts = /iso|ohsas|haccp|b.?corp|fair.?trade|leed|ce\b|nf\b|afnor|tuv|ul\b|fda|gmp|gdpr|rgpd|soc.?[12]|pci|hipaa|fedramp/i;
+            const hasRealCert = cert.value.some((c: any) => knownCerts.test(String(c)));
+            if (!hasRealCert) {
+                cert.q = 0.5;
+                logs.push({ field: 'engagements_conformite.certifications', reason: 'no_recognized_certification' });
+            }
+        }
+    }
+
+    // ENGAGEMENTS: policies — q=1 only if policy IS active (not "en cours")
+    if (fields.engagements_conformite?.policies) {
+        const pol = fields.engagements_conformite.policies;
+        if (pol.q === 1 && Array.isArray(pol.value)) {
+            const inProgress = /en cours|en phase|prochainement|bientôt|prévu|planifié/i;
+            const allInProgress = pol.value.every((p: any) => inProgress.test(String(p)));
+            if (allInProgress && pol.value.length > 0) {
+                pol.q = 0.5;
+                logs.push({ field: 'engagements_conformite.policies', reason: 'all_policies_in_progress' });
+            }
+        }
+    }
+
+    // CONTENUS PEDAGOGIQUES: has_glossary, has_documentation — q=0 if explicitly "non"
+    ['has_glossary', 'has_documentation', 'has_faq'].forEach(field => {
+        const node = fields.contenus_pedagogiques?.[field] as any;
+        if (node && node.q >= 0.5 && node.value === false) {
+            node.q = 0;
+            logs.push({ field: `contenus_pedagogiques.${field}`, reason: 'value_explicitly_false' });
+        }
+    });
+
+    // OFFRE: pricing_indication — "sur devis" = 0.5 max
+    if (fields.offre?.pricing_indication) {
+        const pi = fields.offre.pricing_indication;
+        if (pi.q === 1) {
+            const val = String(pi.value || '').toLowerCase();
+            if (/sur devis|à définir|variable|selon|dépend/i.test(val) && !/\d/.test(val)) {
+                pi.q = 0.5;
+                logs.push({ field: 'offre.pricing_indication', reason: 'vague_pricing' });
+            }
+        }
+    }
+
+    // PROCESSUS: process_steps — q=1 only if 3+ concrete steps
+    if (fields.processus_methodes?.process_steps) {
+        const ps = fields.processus_methodes.process_steps;
+        if (ps.q === 1 && Array.isArray(ps.value) && ps.value.length < 3) {
+            ps.q = 0.5;
+            logs.push({ field: 'processus_methodes.process_steps', reason: `only_${ps.value.length}_steps` });
+        }
+    }
+
+    // OFFRE: services/products — q=1 only if 2+ items
+    ['services', 'products'].forEach(field => {
+        const node = fields.offre?.[field] as any;
+        if (node && node.q === 1 && Array.isArray(node.value) && node.value.length < 2) {
+            node.q = 0.5;
+            logs.push({ field: `offre.${field}`, reason: `only_${node.value.length}_item` });
+        }
+    });
+
+    return logs;
+}
+
+// --- API PUBLIQUE (ProPack) ---
 
 export interface ProPackFiles {
     asr: Record<string, unknown>;
