@@ -1009,6 +1009,39 @@ L'entonnoir de conversion est :
 - **`ENTREPRISES_FACTICES_A_SUPPRIMER.json`** (291 Ko) supprimé
 - **`.gitignore`** corrigé — patterns préfixés `/` pour ne s'appliquer qu'à la racine
 
+### Questionnaire AYO (fix UX critique)
+- **Questions de validation** — statique Oui/Non sans LLM pour les données scannées (lowConfidence)
+- **Validateur post-LLM** — `validateQuestionBlock()` force min 2 options, max 1 question par message
+- **Queues séparées** — `validationQueue` (statique) vs `enrichmentQueue` (LLM)
+- **`buildValidationQuestion()`** — génère des questions structurées avec labels humains par bloc/champ
+- **`BLOCK_LABELS` / `FIELD_LABELS`** — constantes module-level partagées
+- **AyoChat.tsx** — `isValidationQuestion` unifié, skip/multi-select désactivés sur validations
+
+### Qualité fichiers ASR (15 bugs corrigés)
+- **Parenthèses non fermées** — `fixUnmatchedBrackets()` ferme `(`, `[`, `{` ouverts
+- **Troncature audience** — `truncateOnSeparator()` coupe sur virgule, plus en plein mot
+- **`__SKIPPED__` filtré** — `cleanSkippedValues()` remplace par `false` (booléens) ou omet (strings)
+- **Intents non splittés** — `toArray()` ne coupe plus les questions contenant `?`
+- **`platform_types`** — dérivé de `delivery_mode` (plus de confusion avec `frameworks`)
+- **Double slash URLs** — normalisation dans manifest
+- **`legalName` vide** → champ omis de l'ASR
+- **`key_indicators` sans chiffre** → suffixe `: non déclaré`
+- **Score cap transparent** — `meta.raw_score`, `cap_applied`, `cap_reason` ajoutés dans l'ASR
+- **`contextualRelevance`** — rempli avec use_cases (high) + services (medium)
+- **`compliance.gdpr`** — déduit des policies (`"declared"` si privacy/confidentialité détecté)
+- **FAQ** — audience mentionnée uniquement dans les questions pertinentes
+- **Glossaire** — 1 entrée "Public cible" au lieu de 10 segments individuels, descriptions variées
+- **`geographies_served`** — note ajoutée si service en ligne
+
+### Unification code (/simplify)
+- **~80 lignes dupliquées supprimées** de `ayo-crypto.ts`
+- **Imports unifiés** : `toArray`, `cleanText`, `cleanVal`, `cleanArray`, `cleanSkippedValues`
+- **`isAssociation()`** partagée (remplace 4 duplications)
+- **`PHONE_REGEX`** partagée (remplace 3 duplications)
+- **`TERM_CORRECTIONS`** partagé (remplace `ASR_TERM_CORRECTIONS`)
+- **`TextEncoder` + `PLACEHOLDER_PATTERNS`** hoistés en module-level
+- **Variable morte `rawScore`** supprimée
+
 ### Build
 - `npm run build` ✅ — 16 pages générées, 0 erreur TypeScript
 
