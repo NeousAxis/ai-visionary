@@ -398,26 +398,34 @@ export const database = {
     /**
      * Save scan state for a URL
      */
-    saveScanState: async (id: string, data: any): Promise<void> => {
+    saveScanState: async (urlOrId: string, data: any): Promise<void> => {
         if (!isSupabaseConfigured()) {
-            console.log(`⚠️ DB Disabled: Skipping scan state save for ${id}`);
+            console.log(`⚠️ DB Disabled: Skipping scan state save for ${urlOrId}`);
             return;
         }
 
         try {
+            const url = data.url || urlOrId;
+            const normalizedUrl = database.normalizeUrl(url);
+
+            // Delete any existing scan state for this URL, then insert fresh
+            await supabase
+                .from('scan_states')
+                .delete()
+                .eq('url_normalized', normalizedUrl);
+
             const { error } = await supabase
                 .from('scan_states')
-                .upsert({
-                    id,
-                    url: data.url || data.normalizedUrl || '',
+                .insert({
+                    url,
                     state: data,
-                }, { onConflict: 'id' });
+                });
 
             if (error) {
                 console.error('❌ [Supabase] Scan State Save Error:', error);
                 return;
             }
-            console.log(`💾 [Supabase] Scan state saved for ID: ${id}`);
+            console.log(`💾 [Supabase] Scan state saved for URL: ${url}`);
         } catch (error) {
             console.error('❌ [Supabase] Scan State Save Error:', error);
         }
