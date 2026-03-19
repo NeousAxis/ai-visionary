@@ -169,7 +169,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             const validAccessValues = ["public", "private", "membersOnly", "restricted", "freemium"];
             return validAccessValues.includes(rawAccess) ? rawAccess : "public";
         })(),
-        serviceMode: toArray(data.contextual_signals?.service_mode?.value).length > 0 ? toArray(data.contextual_signals?.service_mode?.value) : serviceModes,
+        serviceMode: serviceModes,  // Always derive from delivery_mode (no legacy override)
         schedule: toArray(data.contextual_signals?.schedule_type?.value).length > 0 ? toArray(data.contextual_signals?.schedule_type?.value) : ["businessHours"]
     };
 
@@ -183,11 +183,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "@type": schemaType,
         "name": entityName,
     };
-    // Bug 10: additionalType from business_type, cleaned with fixUnmatchedBrackets
-    // Exclude default "Organization", empty, or "Activité non spécifiée"
-    const ADDITIONAL_TYPE_EXCLUDE = /^(organization|activité non spécifiée|activite non specifiee)$/i;
-    if (businessType && sanitizeFieldValue(businessType) !== null && !ADDITIONAL_TYPE_EXCLUDE.test(businessType.trim())) {
-        identity.additionalType = fixUnmatchedBrackets(businessType);
+    // Bug 10: additionalType from RAW business_type (before fallback to "Organization")
+    // Use the original scanned value, not the fallback
+    const ADDITIONAL_TYPE_EXCLUDE = /^(organization|organisation|activité non spécifiée|activite non specifiee|non spécifié|n\/a|undefined|null|)$/i;
+    const rawBTForType = sanitizedBT || rawBusinessTypeClean || "";
+    if (rawBTForType && !ADDITIONAL_TYPE_EXCLUDE.test(rawBTForType.trim())) {
+        identity.additionalType = fixUnmatchedBrackets(rawBTForType);
     }
 
     if (resolvedEntityUrl) identity.url = resolvedEntityUrl;
