@@ -610,7 +610,7 @@ function generateTestAsrJson(data: any, score: number, url: string): any {
 
     return {
         "@context": "https://ai-visionary.com/contexts/aio-v3.jsonld",
-        "type": "AYO_Singular_Record",
+        "type": "AI_Singular_Record",
         "meta": { "aio_score": Math.round(score), "version": "3.0-PRO", "tier": "PRO" },
         "identity": identity,
         "offer": {
