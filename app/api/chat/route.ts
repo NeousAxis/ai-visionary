@@ -839,8 +839,8 @@ GÉNÈRE CE JSON MAINTENANT :
             };
 
             blockKeys.forEach((key, index) => {
-                // Match by index (LLM returns {question_id, answer, confidence} ordered 1-18)
-                const answer = extractedAnswers[index];
+                // Match by question_id first (more robust), fallback to index
+                const answer = extractedAnswers.find((a: any) => a.question_id === index + 1) || extractedAnswers[index];
 
                 if (answer && answer.answer && answer.answer !== 'null' && answer.confidence !== 'unknown') {
                     const conf = answer.confidence === 'high' ? 90 : (answer.confidence === 'low' ? 70 : 0);
@@ -859,6 +859,22 @@ GÉNÈRE CE JSON MAINTENANT :
                 } else {
                     scanState.unknown_keys.push(key);
                     scanState.confidence[key] = 0;
+                }
+            });
+
+            // 🛡️ POST-LOOP SAFETY: Ensure critical fields with empty/absent values are in unknown_keys
+            // This catches edge cases where the LLM returns misaligned indices or skips questions
+            blockKeys.forEach((key) => {
+                const value = scanState.detected[key];
+                const conf = scanState.confidence[key] ?? 0;
+                const isEmpty = !value || (Array.isArray(value) && value.length === 0) || value === 'null' || value === '';
+                if (isEmpty && conf === 0) {
+                    // Ensure it's in unknown_keys and NOT in high/low confidence
+                    if (!scanState.unknown_keys.includes(key)) {
+                        scanState.unknown_keys.push(key);
+                    }
+                    scanState.high_confidence_keys = scanState.high_confidence_keys.filter(k => k !== key);
+                    scanState.low_confidence_keys = scanState.low_confidence_keys.filter(k => k !== key);
                 }
             });
 
