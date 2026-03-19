@@ -176,7 +176,7 @@ export const database = {
                 .from('analyses')
                 .select('*')
                 .eq('url_normalized', normalizedUrl)
-                .order('score', { ascending: false })
+                .order('created_at', { ascending: false })
                 .limit(10);
 
             if (error) {
