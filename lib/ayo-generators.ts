@@ -21,8 +21,80 @@ export function joinUrl(base: string, path: string): string {
     return `${trimmedBase}/${trimmedPath}`;
 }
 
+/**
+ * Ferme les parenthèses, crochets et accolades non fermés dans une chaîne.
+ * Ex: "Intelligence Artificielle (AIO" → "Intelligence Artificielle (AIO)"
+ */
+export function fixUnmatchedBrackets(str: string): string {
+    if (!str || typeof str !== 'string') return str || "";
+    const openers = ['(', '[', '{'];
+    const closers = [')', ']', '}'];
+    const stack: string[] = [];
+    for (const ch of str) {
+        const oi = openers.indexOf(ch);
+        if (oi !== -1) {
+            stack.push(closers[oi]);
+        } else {
+            const ci = closers.indexOf(ch);
+            if (ci !== -1 && stack.length > 0 && stack[stack.length - 1] === ch) {
+                stack.pop();
+            }
+        }
+    }
+    // Ferme dans l'ordre inverse (LIFO)
+    return str + stack.reverse().join('');
+}
+
+/**
+ * Tronque une chaîne à maxLen caractères en coupant sur le dernier séparateur
+ * (virgule) AVANT la limite, pour ne jamais couper en plein mot.
+ */
+export function truncateOnSeparator(str: string, maxLen: number): string {
+    if (!str || str.length <= maxLen) return str;
+    const separators = [', ', '; '];
+    let bestCut = -1;
+    for (const sep of separators) {
+        let idx = str.lastIndexOf(sep, maxLen);
+        if (idx > bestCut) bestCut = idx;
+    }
+    if (bestCut > 0) return str.substring(0, bestCut);
+    // Fallback : couper sur le dernier espace avant la limite
+    const spaceCut = str.lastIndexOf(' ', maxLen);
+    if (spaceCut > 0) return str.substring(0, spaceCut);
+    return str.substring(0, maxLen);
+}
+
+/**
+ * Nettoie les valeurs "__SKIPPED__" d'un objet/array de manière récursive.
+ * - Booléens (has_faq, has_glossary, has_documentation) → false
+ * - Strings "__SKIPPED__" → supprimées
+ * - Arrays contenant "__SKIPPED__" → filtrés
+ */
+export function cleanSkippedValues(obj: any, key?: string): any {
+    if (obj === "__SKIPPED__" || obj === "[SKIP] Non applicable") {
+        // Les champs booléens (has_*, json_ld_*, sitemap, https, robots_*, mobile_*, ayo_*) → false
+        if (key && /^(has_|json_ld_|sitemap|https|robots_|mobile_|ayo_)/.test(key)) return false;
+        // Les strings → undefined (sera filtré par le parent)
+        return undefined;
+    }
+    if (Array.isArray(obj)) {
+        return obj.filter(item => item !== "__SKIPPED__" && item !== "[SKIP] Non applicable");
+    }
+    if (typeof obj === 'object' && obj !== null) {
+        const result: any = {};
+        for (const [k, v] of Object.entries(obj)) {
+            const cleaned = cleanSkippedValues(v, k);
+            if (cleaned !== undefined) {
+                result[k] = cleaned;
+            }
+        }
+        return result;
+    }
+    return obj;
+}
+
 // --- NETTOYAGE ORTHOGRAPHIQUE DES DONNÉES CLIENT ---
-const TERM_CORRECTIONS: [RegExp, string][] = [
+export const TERM_CORRECTIONS: [RegExp, string][] = [
     [/\bCreative Common\b(?!s)/gi, "Creative Commons"],
     [/\bword ?press\b/gi, "WordPress"],
     [/\bshopify\b/gi, "Shopify"],
@@ -72,7 +144,11 @@ export function cleanText(s: string): string {
 export function toArray(val: any): string[] {
     if (!val) return [];
     if (Array.isArray(val)) return val;
-    if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
+    if (typeof val === 'string') {
+        // Ne pas splitter les questions (contiennent ?) — ce sont des phrases complètes
+        if (val.includes('?')) return [val.trim()].filter(Boolean);
+        return val.split(',').map(s => s.trim()).filter(Boolean);
+    }
     return [];
 }
 
@@ -84,6 +160,23 @@ export function cleanVal(val: any): string {
     if (!val) return "";
     return cleanText(String(val));
 }
+
+/**
+ * Détecte si un businessType (+ nom/url optionnels) correspond à une association / ONG.
+ * Centralise la logique dupliquée dans generators et crypto.
+ */
+export function isAssociation(businessType: string, entityName?: string, entityUrl?: string): boolean {
+    const bt = businessType.toLowerCase();
+    const nm = (entityName || "").toLowerCase();
+    const ur = (entityUrl || "").toLowerCase();
+    return bt.includes("association") || bt.includes("ong") || bt.includes("fondation")
+        || bt.includes("non-profit") || bt.includes("nonprofit")
+        || nm.startsWith("association ") || nm.includes("asso ")
+        || ur.includes(".org");
+}
+
+/** Regex validant un numéro de téléphone (chiffres, espaces, +, -, parens, points, min 6 chars) */
+export const PHONE_REGEX = /^[\d\s\+\-\(\)\.]{6,}$/;
 
 // --- SANITISATION DES VALEURS GARBAGE ("aucun", "non", "à tout le monde", etc.) ---
 
@@ -162,6 +255,11 @@ export function sanitizeAudience(val: string): string {
     if (/[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(trimmed) && trimmed.length > 60) return "";
     // If it's a full sentence (too long for audience segments)
     if (trimmed.length > 100 && !trimmed.includes(',')) return "";
+    // Bug fix: si la valeur semble tronquée (finit au milieu d'un mot, pas de ponctuation finale),
+    // couper proprement sur le dernier séparateur avant 160 chars
+    if (trimmed.length >= 155) {
+        return truncateOnSeparator(trimmed, 160);
+    }
     return trimmed;
 }
 
@@ -276,17 +374,13 @@ export function sanitizeExtract(ext: Record<string, any>): { cleaned: Record<str
 export function generateManifestJson(data: any, url: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
     const rawBT = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
-    const businessType = sanitizeBusinessType(rawBT || "", "Organization");
+    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBT || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
 
+    const isAssoManifest = isAssociation(businessType, name, url);
     const lowerMBT = businessType.toLowerCase();
-    const lowerMName = name.toLowerCase();
-    const lowerMUrl = (url || "").toLowerCase();
-    const isAssoManifest = lowerMBT.includes("association") || lowerMBT.includes("ong") || lowerMBT.includes("fondation") || lowerMBT.includes("non-profit") || lowerMBT.includes("nonprofit")
-        || lowerMName.startsWith("association ") || lowerMName.includes("asso ")
-        || lowerMUrl.includes(".org");
     const manifestEntityType = isAssoManifest ? "NonProfitOrganization" : (lowerMBT.includes("cabinet") || lowerMBT.includes("bureau") ? "ProfessionalService" : "Organization");
 
     const scope = services.length > 0 ? services.slice(0, 5) : ["Services professionnels"];
@@ -361,7 +455,7 @@ export function generateManifestJson(data: any, url: string): any {
 export function generateFaqJson(data: any, url: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Notre entreprise";
     const rawBTfaq = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
-    const businessType = sanitizeBusinessType(rawBTfaq || "");
+    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTfaq || ""));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceFaq = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
@@ -370,7 +464,7 @@ export function generateFaqJson(data: any, url: string): any {
     const pricing = sanitizeFieldValue(cleanVal(data.offre?.pricing_indication?.value)) || "";
     const email = data.identite?.contact_email?.value || "";
     const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
-    const phone = /^[\d\s\+\-\(\)\.]{6,}$/.test(rawPhone) ? rawPhone : "";
+    const phone = PHONE_REGEX.test(rawPhone) ? rawPhone : "";
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
     const legalName = sanitizeFieldValue(cleanVal(data.identite?.legal_name?.value)) || "";
@@ -386,19 +480,16 @@ export function generateFaqJson(data: any, url: string): any {
     const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
     const securityMeasures = sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value));
     const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value));
-    const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
-    const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
+    const rawHasFaq = data.contenus_pedagogiques?.has_faq?.value;
+    const hasFaq = (rawHasFaq === "__SKIPPED__" || rawHasFaq === "[SKIP] Non applicable") ? false : rawHasFaq;
+    const rawHasDoc = data.contenus_pedagogiques?.has_documentation?.value;
+    const hasDoc = (rawHasDoc === "__SKIPPED__" || rawHasDoc === "[SKIP] Non applicable") ? false : rawHasDoc;
 
-    const lowerBT = businessType.toLowerCase();
-    const lowerName = name.toLowerCase();
-    const lowerUrl = (url || "").toLowerCase();
-    const isAssociation = lowerBT.includes("association") || lowerBT.includes("ong") || lowerBT.includes("fondation") || lowerBT.includes("non-profit") || lowerBT.includes("nonprofit")
-        || lowerName.startsWith("association ") || lowerName.includes("asso ")
-        || lowerUrl.includes(".org");
-    const entityType = isAssociation ? "une association" : "une entreprise";
+    const isAssoFaq = isAssociation(businessType, name, url);
+    const entityType = isAssoFaq ? "une association" : "une entreprise";
     const nameArticle = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
     const locationStr = [city, country].filter(Boolean).join(", ");
-    const eAccord = isAssociation ? "e" : "";
+    const eAccord = isAssoFaq ? "e" : "";
 
     const qna: { q: string; a: string; category: string }[] = [];
 
@@ -409,7 +500,7 @@ export function generateFaqJson(data: any, url: string): any {
         : "";
     qna.push({
         q: `Qui est ${name} ?`,
-        a: `${name} est ${entityType}${btDescFaq}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""} ${audience ? `${name} s'adresse principalement aux ${audience.toLowerCase()}.` : ""}`.trim(),
+        a: `${name} est ${entityType}${btDescFaq}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""}`.trim(),
         category: "Identité"
     });
 
@@ -433,7 +524,7 @@ export function generateFaqJson(data: any, url: string): any {
     if (useCases.length > 0) {
         qna.push({
             q: `Dans quelles situations faire appel à ${name} ?`,
-            a: `${name} intervient notamment dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}) ${uc}`).join(" ; ")}.${audience ? ` Ces situations concernent principalement les ${audience.toLowerCase()}.` : ""}`.trim(),
+            a: `${name} intervient notamment dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}) ${uc}`).join(" ; ")}.`.trim(),
             category: "Offre"
         });
     }
@@ -465,21 +556,21 @@ export function generateFaqJson(data: any, url: string): any {
 
     // --- TARIFS / FINANCEMENT ---
     qna.push({
-        q: isAssociation ? `Comment est financé${eAccord} ${name} ?` : `Quels sont les tarifs ${nameArticle} ?`,
+        q: isAssoFaq ? `Comment est financé${eAccord} ${name} ?` : `Quels sont les tarifs ${nameArticle} ?`,
         a: pricing
-            ? (isAssociation
+            ? (isAssoFaq
                 ? `${name} est financé${eAccord} par : ${pricing}. Pour en savoir plus, contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
                 : `Informations tarifaires : ${pricing}. Pour un devis personnalisé, contactez-nous${email ? ` à ${email}` : ` via ${url}`}.`)
-            : (isAssociation
+            : (isAssoFaq
                 ? `Les informations de financement ${nameArticle} sont disponibles sur demande. Contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
                 : `Les tarifs sont établis sur mesure selon votre projet. Contactez ${name} pour une proposition personnalisée${email ? ` : ${email}` : ` via ${url}`}.`),
-        category: isAssociation ? "Financement" : "Commercial"
+        category: isAssoFaq ? "Financement" : "Commercial"
     });
 
     // --- CONFIANCE & CONFORMITÉ ---
     if (certifications.length > 0) {
         qna.push({
-            q: `Quelles certifications et labels ${name} détient-${isAssociation ? "elle" : "il"} ?`,
+            q: `Quelles certifications et labels ${name} détient-${isAssoFaq ? "elle" : "il"} ?`,
             a: `${name} détient les certifications suivantes : ${certifications.join(", ")}.${frameworks.length > 0 ? ` Référentiels de conformité adoptés : ${frameworks.join(", ")}.` : ""} Ces engagements attestent d'une démarche qualité structurée.`,
             category: "Conformité"
         });
@@ -503,15 +594,16 @@ export function generateFaqJson(data: any, url: string): any {
     }
 
     // --- RESSOURCES PÉDAGOGIQUES ---
-    const hasGlossary = data.contenus_pedagogiques?.has_glossary?.value;
+    const rawHasGlossary = data.contenus_pedagogiques?.has_glossary?.value;
+    const hasGlossary = (rawHasGlossary === "__SKIPPED__" || rawHasGlossary === "[SKIP] Non applicable") ? false : rawHasGlossary;
     if (hasDoc || hasFaq || hasGlossary) {
         const resParts: string[] = [];
-        if (typeof hasDoc === 'string') resParts.push(`une documentation (${hasDoc})`);
+        if (typeof hasDoc === 'string' && hasDoc !== "__SKIPPED__") resParts.push(`une documentation (${hasDoc})`);
         else if (hasDoc) resParts.push("une documentation complète");
         if (hasFaq) resParts.push("une FAQ pour répondre aux questions courantes");
         if (hasGlossary) resParts.push("un glossaire du vocabulaire métier");
         qna.push({
-            q: `${name} propose-t-${isAssociation ? "elle" : "il"} des ressources pédagogiques ?`,
+            q: `${name} propose-t-${isAssoFaq ? "elle" : "il"} des ressources pédagogiques ?`,
             a: `Oui. ${name} met à disposition ${resParts.join(", ")}. Retrouvez ces ressources sur ${url}.`,
             category: "Ressources"
         });
@@ -531,8 +623,8 @@ export function generateFaqJson(data: any, url: string): any {
 
     // --- AYO / VISIBILITÉ IA ---
     qna.push({
-        q: `${name} est-${isAssociation ? "elle" : "il"} certifié${eAccord} AYO ?`,
-        a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AI Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssociation ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`,
+        q: `${name} est-${isAssoFaq ? "elle" : "il"} certifié${eAccord} AYO ?`,
+        a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AI Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssoFaq ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`,
         category: "Visibilité IA"
     });
 
@@ -558,7 +650,7 @@ export function generateFaqJson(data: any, url: string): any {
 export function generateGlossaryJson(data: any): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
     const rawBTgloss = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
-    const businessType = sanitizeBusinessType(rawBTgloss || "", "Organization");
+    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTgloss || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
     const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
@@ -604,10 +696,10 @@ export function generateGlossaryJson(data: any): any {
     });
 
     const useCaseDescTemplates = [
-        (_uc: string) => `Contexte d'intervention clé ${nameArticleG}. Situation concrète dans laquelle un agent IA orienterait un utilisateur vers cette entité.`,
-        (_uc: string) => `Scénario opérationnel déclaré par ${name}. Signal de pertinence pour le matching entre requêtes utilisateurs et expertise disponible.`,
-        (_uc: string) => `Cas de figure récurrent adressé par ${name}. Enrichit la compréhension contextuelle de l'entité par les IA génératives.`,
-        (_uc: string) => `Application terrain des compétences ${nameArticleG}. Permet aux agents IA de recommander l'entité dans le bon contexte décisionnel.`,
+        (uc: string) => `${uc} — contexte d'intervention clé ${nameArticleG}. Situation concrète dans laquelle un agent IA orienterait un utilisateur vers cette entité.`,
+        (uc: string) => `${uc} — scénario opérationnel déclaré par ${name}. Signal de pertinence pour le matching entre requêtes utilisateurs et expertise disponible.`,
+        (uc: string) => `${uc} — cas de figure récurrent adressé par ${name}. Enrichit la compréhension contextuelle de l'entité par les IA génératives.`,
+        (uc: string) => `${uc} — application terrain des compétences ${nameArticleG}. Permet aux agents IA de recommander l'entité dans le bon contexte décisionnel.`,
     ];
     useCases.forEach((uc, i) => {
         if (typeof uc !== 'string') return;
@@ -645,12 +737,10 @@ export function generateGlossaryJson(data: any): any {
     });
 
     if (audience) {
+        // Bug fix: UNE SEULE entrée "Public cible" qui liste tous les segments,
+        // au lieu d'une entrée par segment individuel
         const segments = audience.split(',').map(s => s.trim()).filter(Boolean);
-        if (segments.length > 1) {
-            segments.forEach(seg => addTerm(seg, `Segment cible ${nameArticleG}. Ce public détermine les contextes de recommandation IA pertinents.`, "Audience"));
-        } else {
-            addTerm(audience, `Public cible principal ${nameArticleG}. Ce segment détermine les contextes de recommandation IA (recherche locale, matching expert, comparaison sectorielle).`, "Audience");
-        }
+        addTerm("Public cible", `${name} s'adresse aux ${segments.join(", ")}. Ces segments déterminent les contextes de recommandation IA pertinents (recherche locale, matching expert, comparaison sectorielle).`, "Audience");
     }
 
     addTerm("ASR (AI Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", "Écosystème AYO");
@@ -679,7 +769,7 @@ export function generateGlossaryJson(data: any): any {
 export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
     const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
-    const businessType = sanitizeBusinessType(rawBTec || "", "Activité non spécifiée");
+    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", "Activité non spécifiée"));
     const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
@@ -688,7 +778,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
     const email = data.identite?.contact_email?.value || "";
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
-    const phone = /^[\d\s\+\-\(\)\.]{6,}$/.test(rawPhoneExt) ? rawPhoneExt : "";
+    const phone = PHONE_REGEX.test(rawPhoneExt) ? rawPhoneExt : "";
     const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
     const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
     const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
@@ -703,12 +793,15 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             : [];
     const qualityAssurance = sanitizeFieldArray(qualityAssuranceRaw);
     const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value));
-    const hasFaq = data.contenus_pedagogiques?.has_faq?.value;
-    const hasDoc = data.contenus_pedagogiques?.has_documentation?.value;
-    const hasGlossaryEC = data.contenus_pedagogiques?.has_glossary?.value;
+    const rawHasFaqEC = data.contenus_pedagogiques?.has_faq?.value;
+    const hasFaq = (rawHasFaqEC === "__SKIPPED__" || rawHasFaqEC === "[SKIP] Non applicable") ? false : rawHasFaqEC;
+    const rawHasDocEC = data.contenus_pedagogiques?.has_documentation?.value;
+    const hasDoc = (rawHasDocEC === "__SKIPPED__" || rawHasDocEC === "[SKIP] Non applicable") ? false : rawHasDocEC;
+    const rawHasGlossaryEC = data.contenus_pedagogiques?.has_glossary?.value;
+    const hasGlossaryEC = (rawHasGlossaryEC === "__SKIPPED__" || rawHasGlossaryEC === "[SKIP] Non applicable") ? false : rawHasGlossaryEC;
 
-    const declaredKeywords = toArray(data.external_context?.keywords?.value);
-    const declaredIntents = toArray(data.external_context?.intents?.value);
+    const declaredKeywords = toArray(data.external_context?.keywords?.value).filter((k: any) => k !== "__SKIPPED__");
+    const declaredIntents = toArray(data.external_context?.intents?.value).filter((i: any) => i !== "__SKIPPED__");
 
     const addUnique = (arr: string[], val: string) => {
         if (typeof val !== 'string' || val.length < 2) return;
@@ -744,7 +837,10 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const intentKeywords: string[] = [];
     declaredIntents.slice(0, 15).forEach(i => {
         if (typeof i !== 'string') return;
-        if (i.includes(',')) {
+        // Ne PAS splitter les questions (contiennent ?) — ce sont des intents complets
+        if (i.includes('?')) {
+            addUnique(intentKeywords, i);
+        } else if (i.includes(',')) {
             i.split(',').map(s => s.trim()).filter(Boolean).forEach(sub => addUnique(intentKeywords, sub));
         } else {
             addUnique(intentKeywords, i);
@@ -774,6 +870,15 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
         geoContext.primary_market = `${city}${city && country ? ", " : ""}${country}`.trim();
     }
     if (geographies) geoContext.served_areas = geographies;
+    // Si delivery_mode est en ligne mais geographies ne mentionne pas "International", ajouter une note
+    const dmLower = deliveryMode.toLowerCase();
+    const isOnline = dmLower.includes("ligne") || dmLower.includes("online") || dmLower.includes("remote") || dmLower.includes("digital") || dmLower.includes("web");
+    if (isOnline) {
+        const geoLower = (geographies || "").toLowerCase();
+        if (!geoLower.includes("international") && !geoLower.includes("mondial") && !geoLower.includes("world")) {
+            geoContext.delivery_note = "Service disponible en ligne — portée potentiellement internationale";
+        }
+    }
 
     return {
         meta: {
@@ -787,7 +892,16 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
         },
         ecosystem_presence: {
             business_type: businessType,
-            platform_types: frameworks.length > 0 ? frameworks : ["web"],
+            platform_types: (() => {
+                const types: string[] = ["web"];
+                const dm = deliveryMode.toLowerCase();
+                if (dm.includes("mobile") || dm.includes("app")) types.push("mobile");
+                if (dm.includes("saas") || dm.includes("plateforme") || dm.includes("platform")) types.push("SaaS");
+                if (dm.includes("api")) types.push("API");
+                if (dm.includes("presen") || dm.includes("site") || dm.includes("atelier") || dm.includes("physique")) types.push("sur site");
+                if (dm.includes("visio") || dm.includes("remote") || dm.includes("ligne") || dm.includes("online") || dm.includes("digital")) types.push("en ligne");
+                return [...new Set(types)];
+            })(),
             geographic_context: geoContext,
             declared_by_client: true
         },

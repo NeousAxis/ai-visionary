@@ -1,9 +1,17 @@
 import nacl from 'tweetnacl';
-import { sanitizeFieldValue, sanitizeFieldArray } from './ayo-generators';
+import {
+    sanitizeFieldValue, sanitizeFieldArray,
+    toArray, cleanText, cleanVal, cleanArray,
+    cleanSkippedValues, isAssociation, PHONE_REGEX
+} from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
 const SECRET_KEY_BASE64 = process.env.AYO_SIGNING_KEY || '';
 const KEY_ID = process.env.AYO_KEY_ID || 'ayo-root-2026';
+
+// Module-level singletons (hoisted for performance)
+const TEXT_ENCODER = new TextEncoder();
+const PLACEHOLDER_PATTERNS = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|)$/i;
 
 /**
  * Canonizes a JSON object (Stable stringify) to ensure reproducible hash.
@@ -36,8 +44,7 @@ export async function signAsrContent(asrObject: any) {
     delete contentToSign['ayo:seal'];
 
     const canonicalString = canonicalize(contentToSign);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(canonicalString);
+    const data = TEXT_ENCODER.encode(canonicalString);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -58,50 +65,10 @@ export async function signAsrContent(asrObject: any) {
     return { ...contentToSign, "ayo:seal": seal };
 }
 
-// Safely convert any value to an array (handles strings, arrays, nullish)
-function toArray(val: any): string[] {
-    if (!val) return [];
-    if (Array.isArray(val)) return val;
-    if (typeof val === 'string') return val.split(',').map(s => s.trim()).filter(Boolean);
-    return [];
-}
-
-// --- NETTOYAGE ORTHOGRAPHIQUE (miroir de route.ts) ---
-const ASR_TERM_CORRECTIONS: [RegExp, string][] = [
-    [/\bCreative Common\b(?!s)/gi, "Creative Commons"],
-    [/\bword ?press\b/gi, "WordPress"], [/\bshopify\b/gi, "Shopify"],
-    [/\bsquarespace\b/gi, "Squarespace"], [/\bwebflow\b/gi, "Webflow"],
-    [/\brgpd\b/gi, "RGPD"], [/\bgdpr\b/gi, "GDPR"],
-    [/\biso ?(9001|14001|27001|22000|26000|45001)\b/gi, "ISO $1"],
-    [/\brse\b/g, "RSE"], [/\btva\b/g, "TVA"], [/\bseo\b/gi, "SEO"],
-    [/\blinkedin\b/gi, "LinkedIn"], [/\bpaypal\b/gi, "PayPal"],
-    [/\betc\.\.\./g, "etc."], [/\betc\.{2,}/g, "etc."],
-    // Nettoyage plateforme — retirer "de Wix", "de WordPress" etc. des mesures de sécurité
-    [/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, ""],
-];
-
-function cleanTextAsr(s: string): string {
-    if (!s || typeof s !== 'string') return s || "";
-    let cleaned = s.trim().replace(/\s{2,}/g, ' ');
-    for (const [pattern, replacement] of ASR_TERM_CORRECTIONS) {
-        cleaned = cleaned.replace(pattern, replacement as string);
-    }
-    // Trim final (suppression de "de Wix" peut laisser des espaces)
-    cleaned = cleaned.replace(/\s{2,}/g, ' ').trim();
-    if (cleaned.length > 0 && /^[a-zàâäéèêëïîôùûüÿç]/.test(cleaned)) {
-        cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-    }
-    return cleaned;
-}
-
-function cleanArrayAsr(val: any): string[] {
-    return toArray(val).map(s => cleanTextAsr(s));
-}
-
-function cleanValAsr(val: any): string {
-    if (!val) return "";
-    return cleanTextAsr(String(val));
-}
+// Aliases for backward compatibility within this file
+const cleanTextAsr = cleanText;
+const cleanArrayAsr = cleanArray;
+const cleanValAsr = cleanVal;
 
 /**
  * Generates Real ASR JSON based on Tier (LIGHT, PLATEFORME, PRO)
@@ -123,18 +90,15 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // --- V3 BLOCKS CONSTRUCTION ---
     // Sanitize business_type: reject LLM placeholder values AND user garbage ("aucun", "non", etc.)
-    const PLACEHOLDER_PATTERNS = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|)$/i;
     const rawBusinessTypeClean = cleanValAsr(data.identite?.business_type?.value);
     const sanitizedBT = sanitizeFieldValue(rawBusinessTypeClean);
     const businessType = (sanitizedBT && !PLACEHOLDER_PATTERNS.test(sanitizedBT.trim())) ? sanitizedBT : "Organization";
 
     // Smart @type: Use Schema.org types for associations/nonprofits
     const lowerBT = businessType.toLowerCase();
-    const lowerEntityName = (data.identite?.name?.value || "").toLowerCase();
-    const lowerEntityUrl = (entityUrl || data.identite?.url?.value || "").toLowerCase();
-    const isAssociationType = lowerBT.includes("association") || lowerBT.includes("ong") || lowerBT.includes("fondation") || lowerBT.includes("non-profit") || lowerBT.includes("nonprofit")
-        || lowerEntityName.startsWith("association ") || lowerEntityName.includes("asso ")
-        || lowerEntityUrl.includes(".org");
+    const entityNameRaw = data.identite?.name?.value || "";
+    const entityUrlRaw = entityUrl || data.identite?.url?.value || "";
+    const isAssociationType = isAssociation(businessType, entityNameRaw, entityUrlRaw);
     const schemaType = isAssociationType ? "NonProfitOrganization" : (lowerBT.includes("cabinet") || lowerBT.includes("bureau") ? "ProfessionalService" : "Organization");
 
     const address = {
@@ -226,7 +190,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "email": data.identite.contact_email.value });
         }
         const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
-        const validPhone = /^[\d\s\+\-\(\)\.]{6,}$/.test(rawPhone) ? rawPhone : "";
+        const validPhone = PHONE_REGEX.test(rawPhone) ? rawPhone : "";
         if (validPhone) {
             contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "telephone": validPhone });
         }
@@ -287,7 +251,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Indicators / KPIs
     const indicateurs: any = {};
     if (mode !== 'LIGHT') {
-        indicateurs.key_indicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
+        // Bug 10: Mark indicators without numeric values as "non déclaré"
+        const rawIndicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
+        indicateurs.key_indicators = rawIndicators.map((ind: string) => {
+            // Check if indicator contains at least one digit
+            if (/\d/.test(ind)) return ind;
+            // No number found — mark as incomplete
+            return `${ind} : non déclaré`;
+        });
         indicateurs.last_review_date = data.indicateurs?.last_review_date?.value || "";
     }
 
@@ -299,8 +270,26 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         contenus.has_documentation = data.contenus_pedagogiques?.has_documentation?.value || false;
     }
 
+    // Bug 11: Compute raw score & cap info from available data
+    // Recalculate whether a cap was applied by checking the same conditions as aio-score-engine
+    const scanHasJsonLd = data.structure_technique?.has_jsonld?.value ?? data.source?.scan?.has_jsonld ?? null;
+    const isAyaRegistered = data.source?.scan?.is_aya_registered === true;
+    const hasAsrFile = data.source?.scan?.has_asr_file === true || data.structure_technique?.has_asr?.value === true || isAyaRegistered;
+
+    // Detect if a cap was applied
+    let capApplied = false;
+    let capReason: string | null = null;
+
+    if (scanHasJsonLd === false && !isAyaRegistered && scoreToUse === 50) {
+        capApplied = true;
+        capReason = "Pas de JSON-LD structuré détecté — score plafonné à 50/100";
+    } else if (!hasAsrFile && scoreToUse === 90) {
+        capApplied = true;
+        capReason = "Pas de fichier ASR (AI Singular Record) — score plafonné à 90/100";
+    }
+
     // Meta
-    const meta = {
+    const meta: any = {
         "aio_score": Math.round(scoreToUse),
         "generated_at": realDate,
         "asr_id": realAsrId || `asr_${Date.now()}_${Math.random().toString(36).substring(7)}`,
@@ -312,6 +301,13 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "spec": "https://ai-visionary.com/specs/asr-v3"
     };
 
+    // Bug 11: Always include cap transparency info
+    meta.raw_score = Math.round(scoreToUse);
+    meta.cap_applied = capApplied;
+    if (capApplied) {
+        meta.cap_reason = capReason;
+    }
+
     const asrContent: any = {
         "@context": "https://ai-visionary.com/contexts/aio-v3.jsonld",
         "type": "AI_Singular_Record",
@@ -322,11 +318,28 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "engagements_conformite": mode !== 'LIGHT' ? engagements : undefined,
         "indicateurs": mode !== 'LIGHT' ? indicateurs : undefined,
         "contenus_pedagogiques": mode !== 'LIGHT' ? contenus : undefined,
-        "compliance": {
-            // Basic only for LIGHT
-            "gdpr": scoreToUse > 50 ? "compliant" : "unknown",
-            "policies": mode !== 'LIGHT' ? cleanArrayAsr(data.engagements_conformite?.policies?.value) : undefined
-        },
+        "compliance": (() => {
+            // Bug 15: Deduce GDPR status from policies content
+            const policiesArr = cleanArrayAsr(data.engagements_conformite?.policies?.value);
+            const policiesJoined = policiesArr.join(' ').toLowerCase();
+            const hasPrivacyPolicy = policiesJoined.includes('confidentialit') ||
+                policiesJoined.includes('privacy') ||
+                policiesJoined.includes('rgpd') ||
+                policiesJoined.includes('gdpr') ||
+                policiesJoined.includes('mentions confidentialité');
+            let gdprStatus: string;
+            if (scoreToUse > 50) {
+                gdprStatus = "compliant";
+            } else if (hasPrivacyPolicy) {
+                gdprStatus = "declared";
+            } else {
+                gdprStatus = "unknown";
+            }
+            return {
+                gdpr: gdprStatus,
+                policies: mode !== 'LIGHT' ? policiesArr : undefined
+            };
+        })(),
         "technical_signals": {
             "json_ld_present": true,
             "sitemap": data.structure_technique?.has_sitemap?.value ?? true,
@@ -341,6 +354,26 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // --- MODE SPECIFIC INJECTIONS ---
 
+    // Bug 14: Build contextualRelevance from use_cases and keywords (services as proxy)
+    const buildContextualRelevance = (): any[] => {
+        const relevanceItems: any[] = [];
+        // Add use_cases as high relevance
+        const useCases = sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value));
+        for (const uc of useCases.slice(0, 5)) {
+            if (uc && uc.length > 2) {
+                relevanceItems.push({ context: uc, relevance: "high" });
+            }
+        }
+        // Add top services/keywords as medium relevance
+        const services = sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value));
+        for (const svc of services.slice(0, 5)) {
+            if (svc && svc.length > 2) {
+                relevanceItems.push({ context: svc, relevance: "medium" });
+            }
+        }
+        return relevanceItems;
+    };
+
     if (mode === 'PRO') {
         // FULL BOARD
         asrContent.selectionConditions = selectionConditions;
@@ -349,7 +382,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const rawCtxRelevance = Array.isArray(data.recommandation?.contextual_relevance?.value)
             ? data.recommandation.contextual_relevance.value
             : [];
-        asrContent.contextualRelevance = rawCtxRelevance
+        const filteredRelevance = rawCtxRelevance
             .filter((cr: any) => {
                 if (!cr || typeof cr !== 'object') return false;
                 const intent = (cr.userIntent || "").toLowerCase();
@@ -364,6 +397,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 ...cr,
                 status: (cr.status && !cr.status.includes("/")) ? cr.status : "eligible"
             }));
+        // Bug 14: If contextualRelevance is empty after filtering, populate from use_cases/keywords
+        asrContent.contextualRelevance = filteredRelevance.length > 0 ? filteredRelevance : buildContextualRelevance();
 
         // Enrich compliance (cleaned)
         asrContent.compliance.policies = cleanArrayAsr(data.engagements_conformite?.policies?.value);
@@ -388,6 +423,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     else if (mode === 'PLATEFORME') {
         asrContent.selectionConditions = selectionConditions;
         asrContent.contextualSignals = contextualSignals;
+        // Bug 14: Populate contextualRelevance for PLATEFORME too
+        asrContent.contextualRelevance = buildContextualRelevance();
     }
     else {
         // LIGHT — volontairement incomplet
@@ -400,11 +437,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Let's sign it but with a "DEMO" issuer or just standard signing?
     // Let's sign it standard for technical validity, but the content itself is poor.
 
+    // Bug 3 + Bug 7: Sanitize all __SKIPPED__ values and remove empty string fields before signing
+    const sanitizedAsr = cleanSkippedValues(asrContent);
+
     try {
-        const signedAsr = await signAsrContent(asrContent);
+        const signedAsr = await signAsrContent(sanitizedAsr);
         return signedAsr;
     } catch (e) {
         console.error("Signing failed:", e);
-        return asrContent;
+        return sanitizedAsr;
     }
 }
