@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import { db, supabase } from '@/lib/db';
+import { db } from '@/lib/db';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -28,26 +28,19 @@ export async function GET(req: NextRequest) {
 
         logger.info('CLEAN_START', `Cleaning records for: ${targetUrl}`);
 
-        // Normalize URL and build variants for matching
-        const normalizedUrl = db.normalizeUrl(targetUrl);
-        const variants = [
-            `https://${normalizedUrl}`,
-            `https://www.${normalizedUrl}`,
-            `http://${normalizedUrl}`,
-            targetUrl,
-        ];
-
+        // Use db.getAyaEntityByUrl to find and delete
+        const entity = await db.getAyaEntityByUrl(targetUrl);
         let deleted = 0;
 
-        for (const variant of variants) {
-            const { data, error } = await supabase
-                .from('aya_registry')
-                .delete()
-                .eq('website', variant)
-                .select('entity_id');
-
-            if (!error && data) {
-                deleted += data.length;
+        if (entity?.entity_id) {
+            // Delete via Firestore using the entity_id as doc ID
+            try {
+                const { getFirestore } = require('firebase-admin/firestore');
+                const firestore = getFirestore();
+                await firestore.collection('aya_registry').doc(entity.entity_id).delete();
+                deleted = 1;
+            } catch (e) {
+                console.error('Delete error:', e);
             }
         }
 

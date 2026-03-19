@@ -1,9 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
 // Type definition for analysis records
 type AnalysisRecord = {
@@ -15,45 +11,83 @@ type AnalysisRecord = {
     timestamp: string;
 };
 
-// Check if Supabase is configured
-const isSupabaseConfigured = (): boolean => {
-    return !!(supabaseUrl && supabaseKey);
-};
+let isFirebaseInitialized = false;
+
+// Initialize Firebase Admin (singleton pattern)
+if (!getApps().length) {
+    try {
+        console.log('🔧 Initializing Firebase Admin...');
+
+        // Check for Env Vars (Soft Check)
+        const projectId = process.env.FIREBASE_PROJECT_ID;
+        const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+        if (projectId && clientEmail && privateKey) {
+            // Handle newline formats in private key
+            privateKey = privateKey.replace(/\\n/g, '\n').replace(/\\\\n/g, '\n');
+
+            const serviceAccount = {
+                projectId,
+                clientEmail,
+                privateKey
+            };
+
+            initializeApp({
+                credential: cert(serviceAccount as any)
+            });
+
+            isFirebaseInitialized = true;
+            console.log('✅ Firebase Admin initialized successfully');
+        } else {
+            console.warn('⚠️ Firebase Credentials Missing. Running in Stateless/Fallback Mode. (DB features disabled)');
+            console.log('debug: missing vars', { projectId: !!projectId, clientEmail: !!clientEmail, privateKey: !!privateKey });
+        }
+    } catch (error) {
+        console.error('❌ Firebase Admin initialization failed (Soft Fail):', error);
+        // Do not throw, just stay uninitialized
+    }
+} else {
+    isFirebaseInitialized = true;
+    console.log('✅ Firebase Admin already initialized');
+}
+
+// Helper to safely get firestore
+const getDb = () => {
+    if (!isFirebaseInitialized) return null;
+    try {
+        return getFirestore();
+    } catch (e) {
+        console.error("Error accessing Firestore:", e);
+        return null;
+    }
+}
 
 export const database = {
     /**
      * Save or update an analysis record
      */
     saveAnalysis: async (id: string, record: Partial<AnalysisRecord>): Promise<void> => {
-        if (!isSupabaseConfigured()) {
+        const dbInstance = getDb();
+        if (!dbInstance) {
             console.log(`⚠️ DB Disabled: Skipping save for ID ${id}`);
             return;
         }
 
         try {
+            const docRef = dbInstance.collection('analyses').doc(id);
+
             const dataToSave = {
-                id,
-                url: record.url,
-                email: record.email ?? null,
-                score: record.score ?? 0,
-                data: record.data ?? {},
-                created_at: new Date().toISOString(),
                 ...record,
+                timestamp: new Date().toISOString(),
+                id: id
             };
-            // Remove timestamp (Firestore legacy) — Supabase uses created_at/updated_at
-            delete (dataToSave as any).timestamp;
 
-            const { error } = await supabase
-                .from('analyses')
-                .upsert(dataToSave, { onConflict: 'id' });
-
-            if (error) {
-                console.error('❌ [Supabase] Save Error:', error);
-                return;
-            }
-            console.log(`💾 [Supabase] Analysis saved for ID: ${id}`);
+            await docRef.set(dataToSave, { merge: true });
+            console.log(`💾 [Firestore] Analysis saved for ID: ${id}`);
         } catch (error) {
-            console.error('❌ [Supabase] Save Error:', error);
+            console.error('❌ [Firestore] Save Error:', error);
+            // Don't throw to preserve flow
         }
     },
 
@@ -61,29 +95,23 @@ export const database = {
      * Retrieve an analysis record by ID
      */
     getAnalysis: async (id: string): Promise<AnalysisRecord | null> => {
-        if (!isSupabaseConfigured()) return null;
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
 
         try {
-            const { data, error } = await supabase
-                .from('analyses')
-                .select('*')
-                .eq('id', id)
-                .single();
+            const docRef = dbInstance.collection('analyses').doc(id);
+            const doc = await docRef.get();
 
-            if (error) {
-                if (error.code === 'PGRST116') {
-                    // No rows returned
-                    console.warn(`⚠️ [Supabase] No analysis found for ID: ${id}`);
-                    return null;
-                }
-                console.error('❌ [Supabase] Read Error:', error);
+            if (!doc.exists) {
+                console.warn(`⚠️ [Firestore] No analysis found for ID: ${id}`);
                 return null;
             }
 
-            console.log(`✅ [Supabase] Analysis retrieved for ID: ${id}`);
-            return data as AnalysisRecord;
+            const data = doc.data() as AnalysisRecord;
+            console.log(`✅ [Firestore] Analysis retrieved for ID: ${id}`);
+            return data;
         } catch (error) {
-            console.error('❌ [Supabase] Read Error:', error);
+            console.error('❌ [Firestore] Read Error:', error);
             return null;
         }
     },
@@ -108,53 +136,59 @@ export const database = {
 
     /**
      * Retrieve the latest analysis for a given URL
-     * Uses url_normalized GENERATED column for matching
      */
     getLatestAnalysisByUrl: async (url: string): Promise<AnalysisRecord | null> => {
-        if (!isSupabaseConfigured()) return null;
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
 
         try {
-            const normalizedUrl = database.normalizeUrl(url);
+            // Build ALL URL variants to search (www/no-www, http/https, trailing slash)
+            const normalizedSearch = database.normalizeUrl(url);
+            const allVariants = new Set([
+                url,
+                `https://${normalizedSearch}`,
+                `https://www.${normalizedSearch}`,
+                `http://${normalizedSearch}`,
+                `http://www.${normalizedSearch}`,
+                `${url}/`,
+                url.replace(/\/$/, ''),
+            ]);
 
-            // Query by normalized URL, order by score DESC to get the best result
-            const { data, error } = await supabase
-                .from('analyses')
-                .select('*')
-                .eq('url_normalized', normalizedUrl)
-                .order('score', { ascending: false })
-                .limit(10);
-
-            if (error) {
-                console.error('❌ [Supabase] Query By URL Error:', error);
-                return null;
-            }
-
-            if (!data || data.length === 0) {
-                console.log(`⚠️ [Supabase] No analysis found for URL: ${url}`);
-                return null;
-            }
-
-            // Pick the best result: highest score WITH actual data
+            // Search ALL variants and collect the BEST result (highest score with data)
             let bestResult: AnalysisRecord | null = null;
-            for (const row of data) {
-                const hasData = row.data?.fields && Object.keys(row.data.fields).some((k: string) => row.data.fields[k] && Object.keys(row.data.fields[k]).length > 0);
-                const score = row.score || 0;
 
-                if (hasData && score > (bestResult?.score || 0)) {
-                    bestResult = row as AnalysisRecord;
-                    console.log(`🔍 [Supabase] Better analysis found: score=${score}, id=${row.id}`);
+            for (const variant of allVariants) {
+                try {
+                    const snapshot = await dbInstance.collection('analyses')
+                        .where('url', '==', variant)
+                        .limit(10)
+                        .get();
+
+                    for (const doc of snapshot.docs) {
+                        const data = doc.data() as AnalysisRecord;
+                        if (!data.id) data.id = doc.id;
+                        const hasData = data.data?.fields && Object.keys(data.data.fields).some((k: string) => data.data.fields[k] && Object.keys(data.data.fields[k]).length > 0);
+                        const score = data.score || 0;
+
+                        if (hasData && score > (bestResult?.score || 0)) {
+                            bestResult = data;
+                            console.log(`🔍 [Firestore] Better analysis found: variant=${variant}, score=${score}, id=${data.id}`);
+                        }
+                    }
+                } catch (variantErr) {
+                    console.warn(`⚠️ [Firestore] Variant query failed for ${variant}:`, variantErr);
                 }
             }
 
             if (bestResult) {
-                console.log(`✅ [Supabase] Best analysis for URL ${url}: score=${bestResult.score}, id=${bestResult.id}`);
+                console.log(`✅ [Firestore] Best analysis for URL ${url}: score=${bestResult.score}, id=${bestResult.id}`);
                 return bestResult;
             }
 
-            console.log(`⚠️ [Supabase] No analysis with data found for URL: ${url}`);
+            console.log(`⚠️ [Firestore] No analysis found for URL: ${url}`);
             return null;
         } catch (error) {
-            console.error('❌ [Supabase] Query By URL Error:', error);
+            console.error('❌ [Firestore] Query By URL Error:', error);
             return null;
         }
     },
@@ -163,69 +197,54 @@ export const database = {
      * Retrieve the latest analysis for a given EMAIL
      */
     getLatestAnalysisByEmail: async (email: string): Promise<AnalysisRecord | null> => {
-        if (!isSupabaseConfigured()) return null;
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
 
         try {
-            const { data, error } = await supabase
-                .from('analyses')
-                .select('*')
-                .eq('email', email)
-                .order('created_at', { ascending: false })
-                .limit(10);
+            const snapshot = await dbInstance.collection('analyses')
+                .where('email', '==', email)
+                .limit(10)
+                .get();
 
-            if (error) {
-                console.error('❌ [Supabase] Query By EMAIL Error:', error);
+            if (snapshot.empty) {
+                console.log(`⚠️ [Firestore] No analysis found for EMAIL: ${email}`);
                 return null;
             }
 
-            if (!data || data.length === 0) {
-                console.log(`⚠️ [Supabase] No analysis found for EMAIL: ${email}`);
-                return null;
-            }
-
-            // Pick the doc with the HIGHEST score that has data
             let bestResult: AnalysisRecord | null = null;
-            for (const row of data) {
-                const hasData = row.data?.fields && Object.keys(row.data.fields).some((k: string) => row.data.fields[k] && Object.keys(row.data.fields[k]).length > 0);
-                const score = row.score || 0;
+            for (const doc of snapshot.docs) {
+                const data = doc.data() as AnalysisRecord;
+                if (!data.id) data.id = doc.id;
+                const score = data.score || 0;
+                const hasData = data.data?.fields && Object.keys(data.data.fields).some((k: string) => data.data.fields[k] && Object.keys(data.data.fields[k]).length > 0);
                 if (hasData && score > (bestResult?.score || 0)) {
-                    bestResult = row as AnalysisRecord;
+                    bestResult = data;
                 }
             }
 
             if (bestResult) {
-                console.log(`✅ [Supabase] Best analysis for EMAIL ${email}: score=${bestResult.score}, id=${bestResult.id}`);
+                console.log(`✅ [Firestore] Best analysis for EMAIL ${email}: score=${bestResult.score}, id=${bestResult.id}`);
                 return bestResult;
             }
 
-            // Fallback: return the most recent one
-            return data[0] as AnalysisRecord;
+            return snapshot.docs[0].data() as AnalysisRecord;
         } catch (error) {
-            console.error('❌ [Supabase] Query By EMAIL Error:', error);
+            console.error('❌ [Firestore] Query By EMAIL Error:', error);
             return null;
         }
     },
 
-    /**
-     * Update an AYA entity's recommendability data
-     */
     updateEntityRecommendability: async (entityId: string, data: any): Promise<void> => {
-        if (!isSupabaseConfigured()) {
+        const dbInstance = getDb();
+        if (!dbInstance) {
             console.log(`⚠️ DB Disabled: Skipping AYA update for ${entityId}`);
             return;
         }
         try {
-            const { error } = await supabase
-                .from('aya_registry')
-                .upsert({ entity_id: entityId, ...data }, { onConflict: 'entity_id' });
-
-            if (error) {
-                console.error('❌ [Supabase] AYA Update Error:', error);
-                return;
-            }
-            console.log(`💾 [Supabase] AYA Entity updated: ${entityId}`);
+            await dbInstance.collection('aya_registry').doc(entityId).set(data, { merge: true });
+            console.log(`💾 [Firestore] AYA Entity updated: ${entityId}`);
         } catch (error) {
-            console.error('❌ [Supabase] AYA Update Error:', error);
+            console.error('❌ [Firestore] AYA Update Error:', error);
         }
     },
 
@@ -233,24 +252,22 @@ export const database = {
      * Get all active entities from AYA Registry
      */
     getAyaEntities: async (limit: number = 20): Promise<any[]> => {
-        if (!isSupabaseConfigured()) return [];
+        const dbInstance = getDb();
+        if (!dbInstance) return [];
 
         try {
-            const { data, error } = await supabase
-                .from('aya_registry')
-                .select('*')
-                .eq('payment_completed', true)
-                .order('last_update', { ascending: false })
-                .limit(limit);
+            const snapshot = await dbInstance.collection('aya_registry')
+                .where('payment_completed', '==', true)
+                .limit(limit)
+                .get();
 
-            if (error) {
-                console.error('❌ [Supabase] Get AYA Entities Error:', error);
-                return [];
-            }
+            if (snapshot.empty) return [];
 
-            return data || [];
+            return snapshot.docs.map(doc => doc.data()).sort((a: any, b: any) =>
+                (b.last_update || '').localeCompare(a.last_update || '')
+            );
         } catch (error) {
-            console.error('❌ [Supabase] Get AYA Entities Error:', error);
+            console.error('❌ [Firestore] Get AYA Entities Error:', error);
             return [];
         }
     },
@@ -259,63 +276,68 @@ export const database = {
      * Retrieve an AYA Entity by its ID
      */
     getAyaEntityById: async (id: string): Promise<any | null> => {
-        if (!isSupabaseConfigured()) return null;
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
 
         try {
-            console.log(`🔍 [Supabase] Fetching AYA Entity ID: ${id}`);
-            const { data, error } = await supabase
-                .from('aya_registry')
-                .select('*')
-                .eq('entity_id', id)
-                .single();
+            console.log(`🔍 [Firestore] Fetching AYA Entity ID: ${id}`);
+            const doc = await dbInstance.collection('aya_registry').doc(id).get();
 
-            if (error) {
-                if (error.code === 'PGRST116') {
-                    console.warn(`⚠️ [Supabase] Entity not found: ${id}`);
-                    return null;
-                }
-                console.error('❌ [Supabase] Get Entity By ID Error:', error);
+            if (!doc.exists) {
+                console.warn(`⚠️ [Firestore] Entity not found: ${id}`);
                 return null;
             }
-
-            return data;
+            return doc.data();
         } catch (error) {
-            console.error('❌ [Supabase] Get Entity By ID Error:', error);
+            console.error('❌ [Firestore] Get Entity By ID Error:', error);
             return null;
         }
     },
 
     /**
-     * Retrieve an AYA Entity by its URL (Smart Search via normalized URL)
+     * Retrieve an AYA Entity by its URL (Smart Search)
      */
     getAyaEntityByUrl: async (url: string): Promise<any | null> => {
-        if (!isSupabaseConfigured()) return null;
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
 
         try {
             const normalizedTarget = database.normalizeUrl(url);
-            console.log(`🔍 [Supabase] Searching for AYA Entity with URL: ${normalizedTarget}`);
+            console.log(`🔍 [Firestore] Searching for AYA Entity with URL: ${normalizedTarget}`);
 
-            // Single query using website_normalized GENERATED column
-            const { data, error } = await supabase
-                .from('aya_registry')
-                .select('*')
-                .eq('website_normalized', normalizedTarget)
+            // 1. Try finding by 'website' field (Fastest)
+            const snapshot = await dbInstance.collection('aya_registry')
+                .where('website', '==', url)
                 .limit(1)
-                .single();
+                .get();
 
-            if (error) {
-                if (error.code === 'PGRST116') {
-                    // No rows returned
-                    return null;
-                }
-                console.error('❌ [Supabase] Query AYA By URL Error:', error);
-                return null;
+            if (!snapshot.empty) {
+                console.log(`✅ [Firestore] AYA Entity found by 'website' field.`);
+                return snapshot.docs[0].data();
             }
 
-            console.log(`✅ [Supabase] AYA Entity found by normalized URL.`);
-            return data;
+            // 2. Try URL variants instead of full collection scan
+            const variants = [
+                `https://${normalizedTarget}`,
+                `https://www.${normalizedTarget}`,
+                `http://${normalizedTarget}`,
+            ];
+
+            for (const variant of variants) {
+                if (variant === url) continue;
+                const variantSnapshot = await dbInstance.collection('aya_registry')
+                    .where('website', '==', variant)
+                    .limit(1)
+                    .get();
+                if (!variantSnapshot.empty) {
+                    console.log(`✅ [Firestore] AYA Entity found via variant: ${variant}`);
+                    return variantSnapshot.docs[0].data();
+                }
+            }
+
+            return null;
         } catch (error) {
-            console.error('❌ [Supabase] Query AYA By URL Error:', error);
+            console.error('❌ [Firestore] Query AYA By URL Error:', error);
             return null;
         }
     },
@@ -324,102 +346,90 @@ export const database = {
      * OTP MANAGEMENT (One Time Password)
      */
     saveOTP: async (email: string, code: string): Promise<void> => {
-        if (!isSupabaseConfigured()) return;
+        const dbInstance = getDb();
+        if (!dbInstance) return;
 
         try {
-            // Delete any existing OTP for this email first (one active per email)
-            await supabase
-                .from('otp_codes')
-                .delete()
-                .eq('email', email);
+            const docId = email.replace(/[^a-zA-Z0-9]/g, '_');
 
-            const { error } = await supabase
-                .from('otp_codes')
-                .insert({
-                    email,
-                    code,
-                    expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 mins validity
-                });
-
-            if (error) {
-                console.error('❌ [Supabase] OTP Save Error:', error);
-                return;
-            }
-            console.log(`🔐 [Supabase] OTP saved for ${email}`);
+            await dbInstance.collection('otps').doc(docId).set({
+                email: email,
+                code: code,
+                created_at: new Date().toISOString(),
+                expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString()
+            });
+            console.log(`🔐 [Firestore] OTP saved for ${email}`);
         } catch (e) {
-            console.error('Error saving OTP:', e);
+            console.error("Error saving OTP:", e);
         }
     },
 
     verifyOTP: async (email: string, code: string): Promise<boolean> => {
-        if (!isSupabaseConfigured()) return false;
+        const dbInstance = getDb();
+        if (!dbInstance) return false;
 
         try {
-            // Find the latest OTP for this email
-            const { data, error } = await supabase
-                .from('otp_codes')
-                .select('*')
-                .eq('email', email)
-                .eq('used', false)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
+            const docId = email.replace(/[^a-zA-Z0-9]/g, '_');
+            const docRef = dbInstance.collection('otps').doc(docId);
+            const doc = await docRef.get();
 
-            if (error || !data) {
-                console.log(`❌ [Supabase] No OTP found for ${email}`);
+            if (!doc.exists) {
+                console.log(`❌ [Firestore] No OTP found for ${email}`);
                 return false;
             }
+
+            const data = doc.data();
+            if (!data) return false;
 
             const now = new Date();
             const expires = new Date(data.expires_at);
 
             if (now > expires) {
-                console.log(`❌ [Supabase] OTP expired for ${email}`);
-                // Cleanup expired OTP
-                await supabase.from('otp_codes').delete().eq('id', data.id);
+                console.log(`❌ [Firestore] OTP expired for ${email}`);
+                await docRef.delete();
                 return false;
             }
 
             if (data.code === code) {
-                console.log(`✅ [Supabase] OTP Validated for ${email}`);
-                // Burn the code (One Time Use) — delete it
-                await supabase.from('otp_codes').delete().eq('id', data.id);
+                console.log(`✅ [Firestore] OTP Validated for ${email}`);
+                await docRef.delete();
                 return true;
             }
 
-            console.log(`❌ [Supabase] Invalid OTP for ${email}`);
+            console.log(`❌ [Firestore] Invalid OTP for ${email}`);
             return false;
         } catch (e) {
-            console.error('Error verifying OTP:', e);
+            console.error("Error verifying OTP:", e);
             return false;
         }
     },
 
     /**
-     * Save scan state for a URL
+     * Save scan state for a URL (NEW — added for multi-agent architecture)
+     * Uses normalized URL as doc ID for consistent lookup
      */
     saveScanState: async (id: string, data: any): Promise<void> => {
-        if (!isSupabaseConfigured()) {
+        const dbInstance = getDb();
+        if (!dbInstance) {
             console.log(`⚠️ DB Disabled: Skipping scan state save for ${id}`);
             return;
         }
 
         try {
-            const { error } = await supabase
-                .from('scan_states')
-                .upsert({
-                    id,
-                    url: data.url || data.normalizedUrl || '',
-                    state: data,
-                }, { onConflict: 'id' });
+            // Use normalized URL as stable document ID
+            const normalizedUrl = database.normalizeUrl(id);
+            const docId = normalizedUrl.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 128);
 
-            if (error) {
-                console.error('❌ [Supabase] Scan State Save Error:', error);
-                return;
-            }
-            console.log(`💾 [Supabase] Scan state saved for ID: ${id}`);
+            await dbInstance.collection('scan_states').doc(docId).set({
+                url: data.url || id,
+                normalized_url: normalizedUrl,
+                state: data,
+                created_at: new Date().toISOString(),
+            }, { merge: true });
+
+            console.log(`💾 [Firestore] Scan state saved for: ${normalizedUrl} (docId: ${docId})`);
         } catch (error) {
-            console.error('❌ [Supabase] Scan State Save Error:', error);
+            console.error('❌ [Firestore] Scan State Save Error:', error);
         }
     },
 
@@ -427,28 +437,38 @@ export const database = {
      * Get scan state by URL (normalized matching)
      */
     getScanState: async (url: string): Promise<any | null> => {
-        if (!isSupabaseConfigured()) return null;
+        const dbInstance = getDb();
+        if (!dbInstance) return null;
 
         try {
             const normalizedUrl = database.normalizeUrl(url);
+            const docId = normalizedUrl.replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 128);
 
-            const { data, error } = await supabase
-                .from('scan_states')
-                .select('*')
-                .eq('url_normalized', normalizedUrl)
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
+            // Primary: direct doc lookup by normalized ID
+            const doc = await dbInstance.collection('scan_states').doc(docId).get();
 
-            if (error) {
-                if (error.code === 'PGRST116') return null;
-                console.error('❌ [Supabase] Get Scan State Error:', error);
-                return null;
+            if (doc.exists) {
+                const docData = doc.data();
+                console.log(`✅ [Firestore] Scan state loaded for: ${normalizedUrl}`);
+                return docData?.state || null;
             }
 
-            return data?.state || null;
+            // Fallback: query by normalized_url field
+            const snapshot = await dbInstance.collection('scan_states')
+                .where('normalized_url', '==', normalizedUrl)
+                .limit(1)
+                .get();
+
+            if (!snapshot.empty) {
+                const docData = snapshot.docs[0].data();
+                console.log(`✅ [Firestore] Scan state loaded via query for: ${normalizedUrl}`);
+                return docData?.state || null;
+            }
+
+            console.warn(`⚠️ [Firestore] No scan state found for: ${normalizedUrl}`);
+            return null;
         } catch (error) {
-            console.error('❌ [Supabase] Get Scan State Error:', error);
+            console.error('❌ [Firestore] Get Scan State Error:', error);
             return null;
         }
     },
@@ -464,25 +484,17 @@ export const database = {
         message: string;
         data?: any;
     }): Promise<void> => {
-        if (!isSupabaseConfigured()) return;
+        const dbInstance = getDb();
+        if (!dbInstance) return;
 
         try {
-            const { error } = await supabase
-                .from('system_logs')
-                .insert({
-                    correlation_id: entry.correlation_id,
-                    level: entry.level,
-                    source: entry.source,
-                    step: entry.step,
-                    message: entry.message,
-                    data: entry.data ?? null,
-                });
-
-            if (error) {
-                console.error('❌ [Supabase] Log Persist Error:', error);
-            }
+            await dbInstance.collection('system_logs').add({
+                ...entry,
+                data: entry.data ?? null,
+                created_at: new Date().toISOString(),
+            });
         } catch (error) {
-            console.error('❌ [Supabase] Log Persist Error:', error);
+            console.error('❌ [Firestore] Log Persist Error:', error);
         }
     },
 };
