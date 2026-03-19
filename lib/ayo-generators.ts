@@ -574,7 +574,7 @@ export function generateFaqJson(data: any, url: string): any {
     if (useCases.length > 0) {
         qna.push({
             q: `Dans quelles situations faire appel à ${name} ?`,
-            a: `${name} intervient notamment dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}) ${uc}`).join(" ; ")}.`.trim(),
+            a: `${name} intervient notamment dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}. ${uc}`).join(" ; ")}.`.trim(),
             category: "Offre"
         });
     }
