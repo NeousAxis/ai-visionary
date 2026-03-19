@@ -346,6 +346,21 @@ export function sanitizePayloadDeep(obj: any): any {
     return obj;
 }
 
+/**
+ * Champs protégés : ne JAMAIS les supprimer via sanitizePayloadDeep
+ * s'ils contiennent une valeur non-placeholder.
+ * business_type est critique — des valeurs comme "Optimisation pour l'Intelligence Artificielle (AIO)"
+ * sont légitimes et ne doivent pas être traitées comme du garbage.
+ */
+const PROTECTED_FIELDS = new Set([
+    'business_type',
+    'name',
+    'contact_email',
+    'contact_phone',
+    'city',
+    'country',
+]);
+
 /** Sanitize the full extract data — remove all template placeholders */
 export function sanitizeExtract(ext: Record<string, any>): { cleaned: Record<string, any>; cleanedFields: string[] } {
     const cleanedFields: string[] = [];
@@ -355,6 +370,14 @@ export function sanitizeExtract(ext: Record<string, any>): { cleaned: Record<str
             for (const fieldName of Object.keys(block)) {
                 const field = block[fieldName];
                 if (field && typeof field === 'object' && 'value' in field) {
+                    // Champs protégés : on ne les nettoie que s'ils sont vides ou strictement placeholder
+                    if (PROTECTED_FIELDS.has(fieldName)) {
+                        const val = field.value;
+                        // Seules les valeurs strictement vides ou placeholder reconnues sont nettoyées
+                        if (typeof val === 'string' && val.trim() !== '' && !isTemplate(val)) {
+                            continue; // valeur légitime → on ne touche pas
+                        }
+                    }
                     const cleanedValue = sanitizePayloadDeep(field.value);
                     if (JSON.stringify(cleanedValue) !== JSON.stringify(field.value)) {
                         cleanedFields.push(`${blockName}.${fieldName}`);
