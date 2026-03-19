@@ -1933,6 +1933,31 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                 }
 
 
+                // 🔄 INJECT SCAN_STATE DATA: Enrich extractJson with detected values from scan
+                // The LLM extraction often misses fields like business_type, contact_email, keywords, intents
+                // The scan_state has these from the initial scan — inject them if missing in extractJson
+                try {
+                    const scanState = await db.getScanState(urlToScan);
+                    if (scanState?.detected) {
+                        const fields = extractJson.fields as any;
+                        for (const [key, val] of Object.entries(scanState.detected)) {
+                            const [bloc, field] = key.split('.');
+                            if (!bloc || !field || !fields[bloc]) continue;
+                            // Only inject if the field is empty/missing in extractJson
+                            const existing = fields[bloc][field];
+                            const isEmpty = !existing || existing.value === '' || existing.value === null ||
+                                (Array.isArray(existing.value) && existing.value.length === 0);
+                            if (isEmpty && val) {
+                                const conf = scanState.confidence?.[key] || 0;
+                                fields[bloc][field] = { value: val, q: conf >= 70 ? 1 : conf >= 40 ? 0.5 : 0, evidence: ["scan_detected"] };
+                                console.log(`🔄 INJECT from scan_state: ${key} = ${String(val).substring(0, 60)}`);
+                            }
+                        }
+                    }
+                } catch (scanErr) {
+                    console.warn('⚠️ scan_state injection failed:', scanErr instanceof Error ? scanErr.message : scanErr);
+                }
+
                 //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
                 logger.info('FINAL_SAVE_START', `Saving final analysis: ${sessionAsrId}, Score: ${scoreResult.total}`);
                 try {
