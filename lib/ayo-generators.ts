@@ -153,7 +153,7 @@ export function toArray(val: any): string[] {
 }
 
 export function cleanArray(val: any): string[] {
-    return toArray(val).map(s => cleanText(s));
+    return toArray(val).map(s => fixUnmatchedBrackets(cleanText(s)));
 }
 
 export function cleanVal(val: any): string {

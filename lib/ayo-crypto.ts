@@ -220,7 +220,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         identity.contactPoint = contactChannels.length > 0 ? contactChannels : [{ "@type": "ContactPoint", "contactType": "general" }];
 
         // Sector & industry detection — only if it's a real value (not placeholder/garbage)
-        if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) identity.industry = businessType;
+        if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) identity.industry = fixUnmatchedBrackets(businessType);
         if (data.identite?.founding_year?.value) identity.foundingDate = data.identite.founding_year.value;
     } else {
         identity.location = data.identite?.country?.value || "Inconnu";
@@ -238,7 +238,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // Sanitize audience: reject garbage values, full sentences, only keep short segments
         const rawAudience = sanitizeFieldValue(cleanValAsr(data.offre?.target_audience?.value));
         const isAudienceSentence = rawAudience && ((rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience));
-        offer.audience = isAudienceSentence ? "Grand public" : (rawAudience || "Grand public");
+        offer.audience = isAudienceSentence ? "Grand public" : fixUnmatchedBrackets(rawAudience || "Grand public");
         offer.pricingIndication = cleanValAsr(data.offre?.pricing_indication?.value);
     } else {
         offer.services = (offer.services || []).slice(0, 3);
