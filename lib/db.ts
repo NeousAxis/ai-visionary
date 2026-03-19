@@ -1,9 +1,28 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Check if Supabase is configured (must be checked before any DB operation)
+const isSupabaseConfigured = (): boolean => {
+    return !!(supabaseUrl && supabaseKey);
+};
+
+// Lazy-init: only create client if configured (prevents crash at build time)
+let _supabaseClient: ReturnType<typeof createClient> | null = null;
+const getSupabase = () => {
+    if (!_supabaseClient) {
+        if (!isSupabaseConfigured()) {
+            console.warn('⚠️ Supabase not configured — SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required');
+            return null;
+        }
+        _supabaseClient = createClient(supabaseUrl, supabaseKey);
+    }
+    return _supabaseClient;
+};
+
+// Export for modules that need direct access (admin/logs, debug/clean)
+export const supabase = isSupabaseConfigured() ? createClient(supabaseUrl, supabaseKey) : null as any;
 
 // Type definition for analysis records
 type AnalysisRecord = {
@@ -13,11 +32,6 @@ type AnalysisRecord = {
     score: number;
     data: any;
     timestamp: string;
-};
-
-// Check if Supabase is configured
-const isSupabaseConfigured = (): boolean => {
-    return !!(supabaseUrl && supabaseKey);
 };
 
 export const database = {
