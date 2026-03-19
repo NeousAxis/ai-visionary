@@ -255,12 +255,13 @@ export function sanitizeAudience(val: string): string {
     if (/[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(trimmed) && trimmed.length > 60) return "";
     // If it's a full sentence (too long for audience segments)
     if (trimmed.length > 100 && !trimmed.includes(',')) return "";
-    // Bug fix: si la valeur semble tronquée (finit au milieu d'un mot, pas de ponctuation finale),
-    // couper proprement sur le dernier séparateur avant 160 chars
-    if (trimmed.length >= 155) {
-        return truncateOnSeparator(trimmed, 160);
+    // Limite élargie à 300 chars pour ne pas tronquer les audiences riches
+    // (ex: "PME innovantes, acteurs engagés RSE/ESG, établissements publics")
+    if (trimmed.length >= 295) {
+        return fixUnmatchedBrackets(truncateOnSeparator(trimmed, 300));
     }
-    return trimmed;
+    // Toujours fermer les parenthèses/crochets non fermés
+    return fixUnmatchedBrackets(trimmed);
 }
 
 /**
@@ -539,7 +540,7 @@ export function generateFaqJson(data: any, url: string): any {
     if (services.length > 0) {
         qna.push({
             q: `Quels services propose ${name} ?`,
-            a: `${name} propose ${services.length > 1 ? "plusieurs services" : "un service principal"} : ${services.join(", ")}.${products.length > 0 ? ` L'offre inclut également : ${products.join(", ")}.` : ""}${audience ? ` Ces prestations s'adressent aux ${audience.toLowerCase()}.` : ""}`.trim(),
+            a: `${name} propose ${services.length > 1 ? "plusieurs services" : "un service principal"} : ${services.join(", ")}.${products.length > 0 ? ` L'offre inclut également : ${products.join(", ")}.` : ""}`.trim(),
             category: "Offre"
         });
     }
@@ -553,9 +554,12 @@ export function generateFaqJson(data: any, url: string): any {
     }
 
     if (audience) {
+        const segments = audience.split(',').map(s => s.trim()).filter(Boolean);
         qna.push({
             q: `À qui s'adresse ${name} ?`,
-            a: `L'offre ${nameArticle} est conçue pour les ${audience.toLowerCase()}.${useCases.length > 0 ? ` Les contextes d'intervention typiques incluent : ${useCases.slice(0, 3).join(", ")}.` : ""}`.trim(),
+            a: segments.length > 1
+                ? `L'offre ${nameArticle} cible ${segments.length} segments : ${segments.join(", ")}.`
+                : `L'offre ${nameArticle} est conçue pour les ${audience.toLowerCase()}.`,
             category: "Offre"
         });
     }
@@ -602,7 +606,7 @@ export function generateFaqJson(data: any, url: string): any {
     if (policies.length > 0 || securityMeasures.length > 0) {
         qna.push({
             q: `Quelles garanties de conformité offre ${name} ?`,
-            a: `${policies.length > 0 ? `Politiques en vigueur : ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Mesures de sécurité déployées : ${securityMeasures.join(", ")}. ` : ""}${frameworks.length > 0 ? `Référentiels suivis : ${frameworks.join(", ")}.` : ""}`.trim(),
+            a: `${policies.length > 0 ? `Politiques en vigueur : ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Mesures de sécurité déployées : ${securityMeasures.join(", ")}.` : ""}`.trim(),
             category: "Conformité"
         });
     }
@@ -640,7 +644,7 @@ export function generateFaqJson(data: any, url: string): any {
 
     qna.push({
         q: `Comment contacter ${name} ?`,
-        a: `Vous pouvez joindre ${name} ${contactParts.join(", ")}.`,
+        a: `Coordonnées : ${contactParts.join(", ")}.`,
         category: "Contact"
     });
 
@@ -767,7 +771,7 @@ export function generateGlossaryJson(data: any): any {
     }
 
     addTerm("ASR (AI Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", "Écosystème AYO");
-    addTerm("AIO (Artificial Intelligence Optimization)", "Score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Calculé sur 7 blocs pondérés : Identité (10), Offre (20), Processus (15), Conformité (15), Indicateurs (20), Pédagogie (10), Technique (10).", "Écosystème AYO");
+    addTerm("AIO (AI-readability Intelligence Optimization)", "Méthodologie et score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Le terme désigne à la fois la discipline (optimiser sa visibilité pour les IA) et le score qui la quantifie. Calculé sur 7 blocs pondérés : Identité (10), Offre (20), Processus (15), Conformité (15), Indicateurs (20), Pédagogie (10), Technique (10).", "Écosystème AYO");
     addTerm("AYA (AYO Authority Registry)", "Registre officiel des entités certifiées AYO. L'inscription AYA atteste qu'une entité a été analysée, scorée, et que son ASR est authentique, signé et à jour.", "Écosystème AYO");
     addTerm("Pack AYO PRO", "Ensemble de 5 fichiers sémantiques (ASR, manifest, FAQ, glossaire, contexte externe) livrés à une entité pour optimiser sa visibilité auprès des agents IA. Inclut 3 ans d'inscription au registre AYA.", "Écosystème AYO");
 

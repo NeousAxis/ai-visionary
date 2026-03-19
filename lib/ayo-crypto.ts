@@ -268,23 +268,51 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.security_measures = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value));
     }
 
-    // Indicators / KPIs
+    // Indicators / KPIs — Structured Absence Module
     const indicateurs: any = {};
     if (mode !== 'LIGHT') {
         // Bug 10: Mark indicators without numeric values as "non déclaré"
         const rawIndicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
-        // Bug 6: Only include key_indicators if non-empty
+        const todayISO = new Date().toISOString().split('T')[0];
+
         if (rawIndicators.length > 0) {
+            // Non-empty indicators: keep existing format + add data_maturity
             indicateurs.key_indicators = rawIndicators.map((ind: string) => {
-                // Check if indicator contains at least one digit
                 if (/\d/.test(ind)) return ind;
-                // No number found — mark as incomplete
                 return `${ind} : non déclaré`;
             });
+            indicateurs.data_maturity = {
+                level: rawIndicators.length > 2 ? 3 : 2,
+                label: rawIndicators.length > 2 ? "structured" : "emerging",
+                description: rawIndicators.length > 2
+                    ? "Système de mesure structuré avec plusieurs indicateurs"
+                    : "Début de suivi avec quelques indicateurs en place",
+                progression_status: rawIndicators.length > 2 ? "active" : "in_progress",
+                next_step: rawIndicators.length > 2
+                    ? "Maintenir et affiner les indicateurs existants"
+                    : "Ajouter des indicateurs complémentaires"
+            };
+        } else {
+            // Empty indicators: structured absence signal
+            indicateurs.data_availability = {
+                status: "not_available",
+                reason: "client_not_tracking_yet",
+                expected_update: null,
+                confidence_level: "low",
+                source: "client_declaration"
+            };
+            indicateurs.data_maturity = {
+                level: 1,
+                label: "initial",
+                description: "Aucun système de mesure actuellement en place",
+                progression_status: "to_be_defined",
+                next_step: "Mettre en place un premier indicateur simple"
+            };
         }
+
         // Bug 7: If last_review_date is empty or absent, fill with today's date (ISO)
         const rawReviewDate = (data.indicateurs?.last_review_date?.value || "").toString().trim();
-        indicateurs.last_review_date = rawReviewDate || new Date().toISOString().split('T')[0];
+        indicateurs.last_review_date = rawReviewDate || todayISO;
     }
 
     // Educational Content (NEW)
@@ -333,6 +361,32 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         meta.cap_reason = capReason;
     }
 
+    // --- Structured Absence: commitments, transparency, interpretation_signal ---
+    const rawIndicatorsForSignal = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
+    const hasCertifications = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value)).length > 0;
+    const hasPolicies = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)).length > 0;
+
+    const commitments = mode !== 'LIGHT' ? {
+        measurement_intent: true,
+        has_defined_targets: rawIndicatorsForSignal.length > 0,
+        engagement_level: hasCertifications ? "high" : (hasPolicies ? "medium" : "low"),
+        verification_possible: isAyaRegistered
+    } : undefined;
+
+    const transparency = mode !== 'LIGHT' ? {
+        data_declared_by_client: true,
+        data_verified: isAyaRegistered,
+        missing_data_explicit: true,
+        no_fabrication_policy: true
+    } : undefined;
+
+    const interpretationSignal = mode !== 'LIGHT' ? {
+        should_penalize_missing_indicators: false,
+        reason: rawIndicatorsForSignal.length > 0 ? "indicators_provided" : "absence_declared_and_structured",
+        trust_modifier: rawIndicatorsForSignal.length > 0 ? "positive" : "neutral",
+        recommendation_impact: rawIndicatorsForSignal.length > 0 ? "none" : "low"
+    } : undefined;
+
     const asrContent: any = {
         "@context": "https://ai-visionary.com/contexts/aio-v3.jsonld",
         "type": "AI_Singular_Record",
@@ -343,6 +397,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "engagements_conformite": mode !== 'LIGHT' ? engagements : undefined,
         "indicateurs": mode !== 'LIGHT' ? indicateurs : undefined,
         "contenus_pedagogiques": mode !== 'LIGHT' ? contenus : undefined,
+        "commitments": commitments,
+        "transparency": transparency,
+        "interpretation_signal": interpretationSignal,
         "compliance": (() => {
             // Bug 15: Deduce GDPR status from policies content
             const policiesArr = cleanArrayAsr(data.engagements_conformite?.policies?.value);
@@ -357,12 +414,18 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 gdprStatus = "compliant";
             } else if (hasPrivacyPolicy) {
                 gdprStatus = "declared";
+            } else if (hasPolicies) {
+                // Policies exist but GDPR would be "unknown" — upgrade to "declared"
+                gdprStatus = "declared";
             } else {
                 gdprStatus = "unknown";
             }
+            // data_maturity_level from indicators module
+            const dataMLevel = rawIndicatorsForSignal.length > 2 ? 3 : (rawIndicatorsForSignal.length > 0 ? 2 : 1);
             return {
                 gdpr: gdprStatus,
-                policies: mode !== 'LIGHT' ? policiesArr : undefined
+                policies: mode !== 'LIGHT' ? policiesArr : undefined,
+                data_maturity_level: mode !== 'LIGHT' ? dataMLevel : undefined
             };
         })(),
         "technical_signals": {
