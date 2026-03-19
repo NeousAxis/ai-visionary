@@ -9,8 +9,9 @@ const isSupabaseConfigured = (): boolean => {
 };
 
 // Lazy-init: only create client if configured (prevents crash at build time)
-let _supabaseClient: ReturnType<typeof createClient> | null = null;
-const getSupabase = () => {
+// Using 'any' type to avoid Supabase generics issues with untyped tables
+let _supabaseClient: any = null;
+const getSupabase = (): any => {
     if (!_supabaseClient) {
         if (!isSupabaseConfigured()) {
             console.warn('⚠️ Supabase not configured — SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required');
@@ -44,20 +45,56 @@ export const database = {
             return;
         }
 
-        try {
-            const dataToSave = {
-                id,
-                url: record.url,
-                email: record.email ?? null,
-                score: record.score ?? 0,
-                data: record.data ?? {},
-                created_at: new Date().toISOString(),
-                ...record,
-            };
-            // Remove timestamp (Firestore legacy) — Supabase uses created_at/updated_at
-            delete (dataToSave as any).timestamp;
+        const client = getSupabase();
+        if (!client) {
+            console.error('❌ [Supabase] Client not available for saveAnalysis');
+            return;
+        }
 
-            const { error } = await supabase
+        try {
+            // 🔥 MERGE STRATEGY: Read existing record first to avoid overwriting enriched data
+            // Bug fix: partial saves (e.g. email-only) were overwriting score/data with defaults
+            let existing: Partial<AnalysisRecord> = {};
+            const { data: existingRow, error: readErr } = await client
+                .from('analyses')
+                .select('*')
+                .eq('id', id)
+                .maybeSingle();
+
+            if (!readErr && existingRow) {
+                existing = existingRow as AnalysisRecord;
+                console.log(`🔄 [Supabase] Merging into existing record: id=${id}, existing score=${existing.score}`);
+            }
+
+            // Build merged record: existing values are preserved unless explicitly overridden
+            const dataToSave: any = {
+                id,
+                url: record.url ?? existing.url ?? null,
+                email: record.email !== undefined ? record.email : (existing.email ?? null),
+                score: record.score !== undefined ? record.score : (existing.score ?? 0),
+                data: record.data !== undefined ? record.data : (existing.data ?? {}),
+                updated_at: new Date().toISOString(),
+            };
+
+            // Only set created_at for NEW records (don't overwrite on update)
+            if (!existingRow) {
+                dataToSave.created_at = new Date().toISOString();
+            }
+
+            // Deep merge for data field: if both existing and new have data, merge fields
+            if (record.data && existing.data && typeof record.data === 'object' && typeof existing.data === 'object') {
+                dataToSave.data = {
+                    ...existing.data,
+                    ...record.data,
+                    // Deep merge 'fields' if both exist
+                    fields: {
+                        ...(existing.data.fields || {}),
+                        ...(record.data.fields || {}),
+                    },
+                };
+            }
+
+            const { error } = await client
                 .from('analyses')
                 .upsert(dataToSave, { onConflict: 'id' });
 
@@ -65,7 +102,7 @@ export const database = {
                 console.error('❌ [Supabase] Save Error:', error);
                 return;
             }
-            console.log(`💾 [Supabase] Analysis saved for ID: ${id}`);
+            console.log(`💾 [Supabase] Analysis saved for ID: ${id} (score=${dataToSave.score}, hasData=${!!dataToSave.data?.fields})`);
         } catch (error) {
             console.error('❌ [Supabase] Save Error:', error);
         }
@@ -76,9 +113,11 @@ export const database = {
      */
     getAnalysis: async (id: string): Promise<AnalysisRecord | null> => {
         if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('analyses')
                 .select('*')
                 .eq('id', id)
@@ -126,12 +165,14 @@ export const database = {
      */
     getLatestAnalysisByUrl: async (url: string): Promise<AnalysisRecord | null> => {
         if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
 
         try {
             const normalizedUrl = database.normalizeUrl(url);
 
             // Query by normalized URL, order by score DESC to get the best result
-            const { data, error } = await supabase
+            const { data: rawData, error } = await client
                 .from('analyses')
                 .select('*')
                 .eq('url_normalized', normalizedUrl)
@@ -143,6 +184,7 @@ export const database = {
                 return null;
             }
 
+            const data = rawData as any[];
             if (!data || data.length === 0) {
                 console.log(`⚠️ [Supabase] No analysis found for URL: ${url}`);
                 return null;
@@ -178,9 +220,11 @@ export const database = {
      */
     getLatestAnalysisByEmail: async (email: string): Promise<AnalysisRecord | null> => {
         if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
 
         try {
-            const { data, error } = await supabase
+            const { data: rawData, error } = await client
                 .from('analyses')
                 .select('*')
                 .eq('email', email)
@@ -192,6 +236,7 @@ export const database = {
                 return null;
             }
 
+            const data = rawData as any[];
             if (!data || data.length === 0) {
                 console.log(`⚠️ [Supabase] No analysis found for EMAIL: ${email}`);
                 return null;
@@ -228,8 +273,10 @@ export const database = {
             console.log(`⚠️ DB Disabled: Skipping AYA update for ${entityId}`);
             return;
         }
+        const client = getSupabase();
+        if (!client) return;
         try {
-            const { error } = await supabase
+            const { error } = await client
                 .from('aya_registry')
                 .upsert({ entity_id: entityId, ...data }, { onConflict: 'entity_id' });
 
@@ -248,9 +295,11 @@ export const database = {
      */
     getAyaEntities: async (limit: number = 20): Promise<any[]> => {
         if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
 
         try {
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('aya_registry')
                 .select('*')
                 .eq('payment_completed', true)
@@ -274,10 +323,12 @@ export const database = {
      */
     getAyaEntityById: async (id: string): Promise<any | null> => {
         if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
 
         try {
             console.log(`🔍 [Supabase] Fetching AYA Entity ID: ${id}`);
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('aya_registry')
                 .select('*')
                 .eq('entity_id', id)
@@ -304,13 +355,15 @@ export const database = {
      */
     getAyaEntityByUrl: async (url: string): Promise<any | null> => {
         if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
 
         try {
             const normalizedTarget = database.normalizeUrl(url);
             console.log(`🔍 [Supabase] Searching for AYA Entity with URL: ${normalizedTarget}`);
 
             // Single query using website_normalized GENERATED column
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('aya_registry')
                 .select('*')
                 .eq('website_normalized', normalizedTarget)
@@ -339,15 +392,17 @@ export const database = {
      */
     saveOTP: async (email: string, code: string): Promise<void> => {
         if (!isSupabaseConfigured()) return;
+        const client = getSupabase();
+        if (!client) return;
 
         try {
             // Delete any existing OTP for this email first (one active per email)
-            await supabase
+            await client
                 .from('otp_codes')
                 .delete()
                 .eq('email', email);
 
-            const { error } = await supabase
+            const { error } = await client
                 .from('otp_codes')
                 .insert({
                     email,
@@ -367,10 +422,12 @@ export const database = {
 
     verifyOTP: async (email: string, code: string): Promise<boolean> => {
         if (!isSupabaseConfigured()) return false;
+        const client = getSupabase();
+        if (!client) return false;
 
         try {
             // Find the latest OTP for this email
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('otp_codes')
                 .select('*')
                 .eq('email', email)
@@ -390,14 +447,14 @@ export const database = {
             if (now > expires) {
                 console.log(`❌ [Supabase] OTP expired for ${email}`);
                 // Cleanup expired OTP
-                await supabase.from('otp_codes').delete().eq('id', data.id);
+                await client.from('otp_codes').delete().eq('id', data.id);
                 return false;
             }
 
             if (data.code === code) {
                 console.log(`✅ [Supabase] OTP Validated for ${email}`);
                 // Burn the code (One Time Use) — delete it
-                await supabase.from('otp_codes').delete().eq('id', data.id);
+                await client.from('otp_codes').delete().eq('id', data.id);
                 return true;
             }
 
@@ -417,18 +474,20 @@ export const database = {
             console.log(`⚠️ DB Disabled: Skipping scan state save for ${urlOrId}`);
             return;
         }
+        const client = getSupabase();
+        if (!client) return;
 
         try {
             const url = data.url || urlOrId;
             const normalizedUrl = database.normalizeUrl(url);
 
             // Delete any existing scan state for this URL, then insert fresh
-            await supabase
+            await client
                 .from('scan_states')
                 .delete()
                 .eq('url_normalized', normalizedUrl);
 
-            const { error } = await supabase
+            const { error } = await client
                 .from('scan_states')
                 .insert({
                     url,
@@ -450,11 +509,13 @@ export const database = {
      */
     getScanState: async (url: string): Promise<any | null> => {
         if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
 
         try {
             const normalizedUrl = database.normalizeUrl(url);
 
-            const { data, error } = await supabase
+            const { data, error } = await client
                 .from('scan_states')
                 .select('*')
                 .eq('url_normalized', normalizedUrl)
@@ -487,9 +548,11 @@ export const database = {
         data?: any;
     }): Promise<void> => {
         if (!isSupabaseConfigured()) return;
+        const client = getSupabase();
+        if (!client) return;
 
         try {
-            const { error } = await supabase
+            const { error } = await client
                 .from('system_logs')
                 .insert({
                     correlation_id: entry.correlation_id,

@@ -1313,6 +1313,32 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 ayoState = AyoState.SCORING;
             }
 
+            // 💾 INTERMEDIATE SAVE: Persist questionnaire progress after each answer
+            // This prevents data loss if the flow is interrupted before FINAL_SAVE
+            if (sessionAsrId && stepsCompleted > 2 && queueIndex > 0) {
+                try {
+                    const userAnswersSoFar = messages
+                        .filter((m: any) => m.role === 'user')
+                        .slice(-3)
+                        .map((m: any) => m.content)
+                        .join(' | ');
+                    await db.saveAnalysis(sessionAsrId, {
+                        data: {
+                            questionnaire_progress: {
+                                step: stepsCompleted,
+                                queueIndex,
+                                nextBlock: nextBlockName,
+                                lastAnswers: userAnswersSoFar.substring(0, 500),
+                                timestamp: new Date().toISOString(),
+                            }
+                        }
+                    } as any);
+                    console.log(`💾 INTERMEDIATE SAVE: step=${stepsCompleted}, queueIdx=${queueIndex}, session=${sessionAsrId}`);
+                } catch (e) {
+                    console.warn('⚠️ Intermediate save failed (non-blocking):', e);
+                }
+            }
+
             // 🆕 HANDLER FOR CALIBRATION STEP
             if (ayoState === AyoState.CALIBRATION) {
                 console.log("🛠️ SENDING CALIBRATION QUESTION (Static)");
