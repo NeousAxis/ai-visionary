@@ -465,6 +465,11 @@ export function generateManifestJson(data: any, url: string): any {
             external_context: { url: "/.ayo/external_context.json", canonical: false, interpretable: true, priority: 4 },
             manifest: { url: "/.ayo/manifest.json", role: "index", priority: 0 }
         },
+        trustPolicy: {
+            evidence_level: "self_declared_structured",
+            third_party_audit: false,
+            interpretation_mode: "signals_only"
+        },
         interpretationPolicy: {
             rule: "no-extrapolation",
             description: "Toute interprétation doit se limiter strictement aux données déclarées dans les sources listées. Aucune inférence au-delà des faits déclarés n'est autorisée.",
@@ -574,7 +579,7 @@ export function generateFaqJson(data: any, url: string): any {
     if (useCases.length > 0) {
         qna.push({
             q: `Dans quelles situations faire appel à ${name} ?`,
-            a: `${name} intervient notamment dans les contextes suivants : ${useCases.map((uc, i) => `${i + 1}. ${uc}`).join(" ; ")}.`.trim(),
+            a: `${name} peut vous accompagner pour : ${useCases.join(", ")}.`.trim(),
             category: "Offre"
         });
     }
@@ -594,7 +599,7 @@ export function generateFaqJson(data: any, url: string): any {
     if (processSteps.length > 0) {
         qna.push({
             q: `Quelle est la méthodologie ${nameArticle} ?`,
-            a: `L'approche ${nameArticle} repose sur un processus structuré : ${processSteps.map((s, i) => `Étape ${i + 1} — ${s}`).join(". ")}.${deliveryMode ? ` Mode d'intervention : ${deliveryMode}.` : ""}${qualityAssurance ? ` Engagement qualité : ${qualityAssurance}.` : ""}`.trim(),
+            a: `Le processus se déroule en ${processSteps.length} étapes : ${processSteps.join(", puis ")}.${deliveryMode ? ` Mode d'intervention : ${deliveryMode}.` : ""}${qualityAssurance ? ` Engagement qualité : ${qualityAssurance}.` : ""}`.trim(),
             category: "Processus"
         });
     }
@@ -670,7 +675,7 @@ export function generateFaqJson(data: any, url: string): any {
 
     qna.push({
         q: `Comment contacter ${name} ?`,
-        a: `Coordonnées : ${contactParts.join(", ")}.`,
+        a: `Contactez ${name} ${contactParts.join(", ")}.`,
         category: "Contact"
     });
 
@@ -797,7 +802,8 @@ export function generateGlossaryJson(data: any): any {
     }
 
     addTerm("ASR (AI Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", "Écosystème AYO");
-    addTerm("AIO (AI-readability Intelligence Optimization)", "Méthodologie et score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Le terme désigne à la fois la discipline (optimiser sa visibilité pour les IA) et le score qui la quantifie. Calculé sur 7 blocs pondérés : Identité (10), Offre (20), Processus (15), Conformité (15), Indicateurs (20), Pédagogie (10), Technique (10).", "Écosystème AYO");
+    addTerm("AIO", "Artificial Intelligence Optimization — discipline qui consiste à optimiser la lisibilité d'une entité pour les IA génératives.", "Écosystème AYO");
+    addTerm("AIO Score", "Score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Calculé sur 7 blocs pondérés : Identité, Offre, Processus, Conformité, Indicateurs, Pédagogie, Technique.", "Écosystème AYO");
     addTerm("AYA (AYO Authority Registry)", "Registre officiel des entités certifiées AYO. L'inscription AYA atteste qu'une entité a été analysée, scorée, et que son ASR est authentique, signé et à jour.", "Écosystème AYO");
     addTerm("Pack AYO PRO", "Ensemble de 5 fichiers sémantiques (ASR, manifest, FAQ, glossaire, contexte externe) livrés à une entité pour optimiser sa visibilité auprès des agents IA. Inclut 3 ans d'inscription au registre AYA.", "Écosystème AYO");
 
@@ -866,28 +872,29 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
         if (!arr.some(existing => existing.toLowerCase().trim() === lower)) arr.push(val.trim());
     };
 
+    // Discovery keywords: qualité > quantité — max 10 keywords focalisés
+    // Priorité : déclarés d'abord, puis 2-3 produits clés, puis ville
+    // NE PAS ajouter tous les segments audience comme keywords individuels
+    const MAX_DISCOVERY_KEYWORDS = 10;
     const discoveryKeywords: string[] = [];
     declaredKeywords.slice(0, 15).forEach(k => {
-        if (typeof k !== 'string') return;
+        if (typeof k !== 'string' || discoveryKeywords.length >= MAX_DISCOVERY_KEYWORDS) return;
         if (k.includes(',')) {
-            k.split(',').map(s => s.trim()).filter(Boolean).forEach(sub => addUnique(discoveryKeywords, sub));
+            k.split(',').map(s => s.trim()).filter(Boolean).forEach(sub => {
+                if (discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, sub);
+            });
         } else {
             addUnique(discoveryKeywords, k);
         }
     });
-    // Products as keywords (short names only — long descriptions are NOT keywords)
-    products.slice(0, 10).forEach(p => {
-        if (typeof p === 'string' && p.length <= 50) addUnique(discoveryKeywords, p);
+    // Products as keywords (2-3 clés max, short names only)
+    products.slice(0, 3).forEach(p => {
+        if (typeof p === 'string' && p.length <= 50 && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, p);
     });
-    // Audience segments as keywords (split by comma, short segments only)
-    if (audience) {
-        audience.split(',').map((s: string) => s.trim()).filter(Boolean).forEach(seg => {
-            if (seg.length <= 50) addUnique(discoveryKeywords, seg);
-        });
-    }
-    if (city) addUnique(discoveryKeywords, city);
+    // Ville comme keyword géographique
+    if (city && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, city);
     // Business type as keyword (skip generic fallback "Organisation")
-    if (businessType && businessType !== "Organisation" && businessType.length <= 60) addUnique(discoveryKeywords, businessType);
+    if (businessType && businessType !== "Organisation" && businessType.length <= 60 && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, businessType);
 
     const intentKeywords: string[] = [];
     declaredIntents.slice(0, 15).forEach(i => {
@@ -962,6 +969,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
         },
         reputation_signals: {
             enabled: reputationEnabled,
+            trust_level: "self_declared_structured",
             trust_indicators: {
                 certifications: certifications,
                 quality_assurance: qualityAssurance,
@@ -982,7 +990,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             discovery_keywords: sanitizeKeywords(discoveryKeywords),
             intent_keywords: sanitizeKeywords(intentKeywords),
             audience_segments: audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
-            source: "declared + analysis"
+            source: "declared_plus_structured_normalization"
         },
         access_channels: {
             primary: primaryChannels,

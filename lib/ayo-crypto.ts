@@ -238,8 +238,30 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // Sanitize audience: reject garbage values, full sentences, only keep short segments
         const rawAudience = sanitizeFieldValue(cleanValAsr(data.offre?.target_audience?.value));
         const isAudienceSentence = rawAudience && ((rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience));
-        offer.audience = isAudienceSentence ? "Grand public" : fixUnmatchedBrackets(rawAudience || "Grand public");
-        offer.pricingIndication = cleanValAsr(data.offre?.pricing_indication?.value);
+        // Correction 2: audience as array instead of string
+        const audienceString = isAudienceSentence ? "Grand public" : fixUnmatchedBrackets(rawAudience || "Grand public");
+        offer.audience = audienceString.split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1));
+        if (offer.audience.length === 0) offer.audience = ["Grand public"];
+
+        // Correction 3: pricingIndication as structured object
+        const rawPricing = cleanValAsr(data.offre?.pricing_indication?.value);
+        if (rawPricing) {
+            const ayaMatch = rawPricing.match(/AYA[^:]*:\s*([^,]+)/i);
+            const proMatch = rawPricing.match(/PRO[^:]*:\s*([^,]+)/i);
+            if (ayaMatch || proMatch) {
+                const pricingObj: Record<string, string> = {};
+                if (ayaMatch) pricingObj.aya_subscription = ayaMatch[1].trim();
+                if (proMatch) pricingObj.pro_pack = proMatch[1].trim();
+                offer.pricingIndication = pricingObj;
+            } else {
+                offer.pricingIndication = rawPricing;
+            }
+        } else {
+            offer.pricingIndication = rawPricing;
+        }
     } else {
         offer.services = (offer.services || []).slice(0, 3);
     }
@@ -266,6 +288,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.frameworks = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value));
         engagements.policies = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value));
         engagements.security_measures = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value));
+        // Correction 5: If quality_assurance mentions crypto signature, ensure security_measures includes it
+        const qaJoined = (processus.quality_assurance || []).join(' ').toLowerCase();
+        if (qaJoined.includes('cryptographique') || qaJoined.includes('signature cryptographique')) {
+            const secMeasuresLower = (engagements.security_measures || []).map((s: string) => s.toLowerCase());
+            if (!secMeasuresLower.some((s: string) => s.includes('cryptographique'))) {
+                engagements.security_measures = [...(engagements.security_measures || []), "Signature cryptographique"];
+            }
+        }
     }
 
     // Indicators / KPIs — Structured Absence Module
@@ -317,6 +347,15 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const rawReviewDate = (data.indicateurs?.last_review_date?.value || "").toString().trim();
         const isValidDate = rawReviewDate && !NO_DATA_PHRASES.test(rawReviewDate) && rawReviewDate.length < 30;
         indicateurs.last_review_date = isValidDate ? rawReviewDate : todayISO;
+
+        // Correction 4: transparency inside indicateurs (not top-level)
+        const isAyaRegisteredForTransparency = data.source?.scan?.is_aya_registered === true;
+        indicateurs.transparency = {
+            data_declared_by_client: true,
+            data_verified: isAyaRegisteredForTransparency,
+            missing_data_explicit: true,
+            no_fabrication_policy: true
+        };
     }
 
     // Educational Content (NEW)
@@ -355,7 +394,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "protocol": "AYO-ASR",
         "tier": mode,
         "validity_period": mode === 'PRO' ? "3 years" : mode === 'PLATEFORME' ? "1 year" : "demo",
-        "spec": "https://ai-visionary.com/specs/asr-v3"
+        "spec": "https://ai-visionary.com/specs/asr-v3",
+        "trust_level": "self_declared_structured",
+        "evidence_level": "declared_signals_only"
     };
 
     // Bug 11: Always include cap transparency info
@@ -377,13 +418,6 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         verification_possible: isAyaRegistered
     } : undefined;
 
-    const transparency = mode !== 'LIGHT' ? {
-        data_declared_by_client: true,
-        data_verified: isAyaRegistered,
-        missing_data_explicit: true,
-        no_fabrication_policy: true
-    } : undefined;
-
     const interpretationSignal = mode !== 'LIGHT' ? {
         should_penalize_missing_indicators: false,
         reason: rawIndicatorsForSignal.length > 0 ? "indicators_provided" : "absence_declared_and_structured",
@@ -402,7 +436,6 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "indicateurs": mode !== 'LIGHT' ? indicateurs : undefined,
         "contenus_pedagogiques": mode !== 'LIGHT' ? contenus : undefined,
         "commitments": commitments,
-        "transparency": transparency,
         "interpretation_signal": interpretationSignal,
         "compliance": (() => {
             // Bug 15: Deduce GDPR status from policies content
