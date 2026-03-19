@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
+import { supabase } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
@@ -19,27 +20,30 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '100'), 500);
 
     try {
-        const { getFirestore } = require('firebase-admin/firestore');
-        const firestore = getFirestore();
-
-        let query: FirebaseFirestore.Query = firestore.collection('system_logs')
-            .orderBy('created_at', 'desc')
+        let query = supabase
+            .from('system_logs')
+            .select('*')
+            .order('created_at', { ascending: false })
             .limit(limit);
 
         if (correlationId) {
-            query = query.where('correlation_id', '==', correlationId);
+            query = query.eq('correlation_id', correlationId);
         }
         if (level) {
-            query = query.where('level', '==', level);
+            query = query.eq('level', level);
         }
         if (source) {
-            query = query.where('source', '==', source);
+            query = query.eq('source', source);
         }
 
-        const snapshot = await query.get();
-        const logs = snapshot.docs.map(doc => doc.data());
+        const { data: logs, error } = await query;
 
-        return NextResponse.json({ logs, count: logs.length });
+        if (error) {
+            console.error('[ADMIN_LOGS] Query error:', error.message);
+            return NextResponse.json({ error: 'Erreur interne', details: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json({ logs: logs || [], count: (logs || []).length });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         console.error('[ADMIN_LOGS] Query error:', message);
