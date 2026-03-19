@@ -1943,11 +1943,14 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                         for (const [key, val] of Object.entries(scanState.detected)) {
                             const [bloc, field] = key.split('.');
                             if (!bloc || !field || !fields[bloc]) continue;
-                            // Only inject if the field is empty/missing in extractJson
+                            // Inject if field is empty OR if scan value is longer (LLM often truncates)
                             const existing = fields[bloc][field];
                             const isEmpty = !existing || existing.value === '' || existing.value === null ||
                                 (Array.isArray(existing.value) && existing.value.length === 0);
-                            if (isEmpty && val) {
+                            const scanValStr = typeof val === 'string' ? val : '';
+                            const existingStr = typeof existing?.value === 'string' ? existing.value : '';
+                            const isScanLonger = scanValStr.length > existingStr.length + 5; // scan has significantly more data
+                            if ((isEmpty || isScanLonger) && val) {
                                 const conf = scanState.confidence?.[key] || 0;
                                 fields[bloc][field] = { value: val, q: conf >= 70 ? 1 : conf >= 40 ? 0.5 : 0, evidence: ["scan_detected"] };
                                 console.log(`🔄 INJECT from scan_state: ${key} = ${String(val).substring(0, 60)}`);
