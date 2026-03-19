@@ -1,54 +1,37 @@
-const admin = require('firebase-admin');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: '.env.local' });
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 const fs = require('fs');
 const crypto = require('crypto');
 
-// Load environment variables
-const envFile = fs.readFileSync('.env.local', 'utf-8');
-envFile.split('\n').forEach(line => {
-    const match = line.match(/^([^=]+)="?(.*?)"?$/);
-    if (match) {
-        process.env[match[1]] = match[2];
-    }
-});
-
-// Init Firebase
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
-        })
-    });
-}
-const db = admin.firestore();
-
-// 1. SUPPRIMER LES ANCIENNES ENTITÉS FACTICES
+// 1. SUPPRIMER LES ANCIENNES ENTITES FACTICES
 async function cleanOldFakeEntities() {
     console.log("🧹 Suppression des anciennes entreprises factices...");
     try {
         const trackerDataRaw = fs.readFileSync('ENTREPRISES_FACTICES_A_SUPPRIMER.json', 'utf-8');
         const trackerData = JSON.parse(trackerDataRaw);
 
-        const BATCH_SIZE = 400;
-        for (let i = 0; i < trackerData.length; i += BATCH_SIZE) {
-            const batch = db.batch();
-            const chunk = trackerData.slice(i, i + BATCH_SIZE);
+        const ids = trackerData.map(item => item.aya_entity_id);
 
-            for (const item of chunk) {
-                const ref = db.collection('aya_registry').doc(item.aya_entity_id);
-                batch.delete(ref);
-            }
-            await batch.commit();
-            console.log(`🗑️ Batch effacé : ${i + chunk.length} supprimés.`);
+        // Supabase delete with IN filter (batch by 100)
+        const BATCH_SIZE = 100;
+        for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+            const chunk = ids.slice(i, i + BATCH_SIZE);
+            const { error } = await supabase
+                .from('aya_registry')
+                .delete()
+                .in('aya_entity_id', chunk);
+
+            if (error) console.error(`⚠️ Batch delete error:`, error.message);
+            else console.log(`🗑️ Batch efface : ${i + chunk.length} supprimes.`);
         }
-        console.log("✅ Anciennes entreprises factices effacées de la base de données.");
+        console.log("✅ Anciennes entreprises factices effacees de la base de donnees.");
     } catch (e) {
         console.error("⚠️ Impossible de lire ou supprimer via l'ancien fichier tracker :", e.message);
     }
 }
 
-// 2. GÉNÉRER DES NOMS UNIQUES
+// 2. GENERER DES NOMS UNIQUES
 const prefixes = [
     "Montblanc", "Leman", "Rhone", "Cervin", "Helvetia", "Alpen", "Lombard", "Edelweiss", "Jura", "Gruyere",
     "Odin", "Acero", "Vertex", "Solstice", "Equinox", "Meridian", "Horizon", "Pinnacle", "Aura", "Nova",
@@ -73,9 +56,9 @@ const suffixes = [
     "Vision", "Concept", "Studio", "Architecture", "Engineering", "Construct", "Medical", "Pharma"
 ];
 
-const sectors = ['Construction', 'Santé', 'Finance', 'Technologie', 'Retail', 'Logistique', 'Marketing', 'Legal', 'Immobilier', 'Industrie'];
-const countries = ['CH', 'CH', 'CH', 'FR', 'FR', 'BE', 'LU', 'CA']; // Pondéré Suisse/France
-const types = ['company', 'company', 'company', 'association']; // Mostly companies
+const sectors = ['Construction', 'Sante', 'Finance', 'Technologie', 'Retail', 'Logistique', 'Marketing', 'Legal', 'Immobilier', 'Industrie'];
+const countries = ['CH', 'CH', 'CH', 'FR', 'FR', 'BE', 'LU', 'CA'];
+const types = ['company', 'company', 'company', 'association'];
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -85,7 +68,6 @@ function shuffleArray(array) {
     return array;
 }
 
-// Combinations possibles : 129 prefixes * 39 suffixes = 5031 entreprises possibles. Bien assez pour 1973 uniques.
 const allCombinations = [];
 for (const p of prefixes) {
     for (const s of suffixes) {
@@ -96,13 +78,12 @@ shuffleArray(allCombinations);
 
 function generate1973FakeEntities() {
     const TOTAL = 1973;
-    const names = allCombinations.slice(0, TOTAL); // Garantit 1973 noms 100% uniques
+    const names = allCombinations.slice(0, TOTAL);
 
     const entities = [];
     for (let i = 0; i < TOTAL; i++) {
         const suffixLegal = Math.random() > 0.5 ? 'SA' : (Math.random() > 0.5 ? 'Sarl' : 'GmbH');
         const name = `${names[i]} ${suffixLegal}`;
-        // Assainir le nom pour l'URL
         const cleanName = names[i].toLowerCase().replace(/[^a-z0-9]/g, '');
         const url = `https://www.${cleanName}.com`;
         const entityId = crypto.randomUUID();
@@ -144,7 +125,7 @@ async function run() {
     await cleanOldFakeEntities();
 
     // B. Generate
-    console.log("🚀 Génération de 1973 nouvelles entreprises (NOMS 100% UNIQUES)...");
+    console.log("🚀 Generation de 1973 nouvelles entreprises (NOMS 100% UNIQUES)...");
     const entities = generate1973FakeEntities();
 
     const trackerData = entities.map(e => ({
@@ -154,24 +135,21 @@ async function run() {
     }));
 
     fs.writeFileSync('ENTREPRISES_FACTICES_A_SUPPRIMER.json', JSON.stringify(trackerData, null, 2));
-    console.log("✅ Nouveau fichier de suivi réécrit : ENTREPRISES_FACTICES_A_SUPPRIMER.json");
+    console.log("✅ Nouveau fichier de suivi reecrit : ENTREPRISES_FACTICES_A_SUPPRIMER.json");
 
-    // C. Upload
-    const BATCH_SIZE = 400;
+    // C. Upload via Supabase upsert (batch by 100)
+    const BATCH_SIZE = 100;
     for (let i = 0; i < entities.length; i += BATCH_SIZE) {
-        const batch = db.batch();
         const chunk = entities.slice(i, i + BATCH_SIZE);
+        const { error } = await supabase
+            .from('aya_registry')
+            .upsert(chunk, { onConflict: 'aya_entity_id' });
 
-        chunk.forEach(entity => {
-            const ref = db.collection('aya_registry').doc(entity.aya_entity_id);
-            batch.set(ref, entity);
-        });
-
-        await batch.commit();
-        console.log(`📦 Batch inséré (aya_registry) : de ${i + 1} à ${Math.min(i + BATCH_SIZE, entities.length)}`);
+        if (error) console.error(`⚠️ Batch insert error:`, error.message);
+        else console.log(`📦 Batch insere (aya_registry) : de ${i + 1} a ${Math.min(i + BATCH_SIZE, entities.length)}`);
     }
 
-    console.log("🎉 SUCCESS: 1973 entreprises factices uniques ajoutées dans aya_registry.");
+    console.log("🎉 SUCCESS: 1973 entreprises factices uniques ajoutees dans aya_registry.");
 }
 
 run().catch(console.error);

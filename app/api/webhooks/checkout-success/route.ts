@@ -13,9 +13,7 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
 import { db } from '@/lib/db';
 // generateRealAsrJson available from '@/lib/ayo-crypto' if needed
 import { createLogger } from '@/lib/logger';
-import { getFirestore } from 'firebase-admin/firestore';
 import { computeAioScore } from '@/lib/aio-score-engine';
-import '@/lib/db'; // Ensure Firebase Admin is initialized
 import {
     sanitizeBusinessType, sanitizeExtract,
 } from '@/lib/ayo-generators';
@@ -265,10 +263,8 @@ export async function POST(req: Request) {
         // 3b. FALLBACK: Read from scan_states collection if analysis not found
         if (!dbAnalysis && analyzedUrl) {
             try {
-                const scanStateDocId = Buffer.from(analyzedUrl).toString('base64url').substring(0, 128);
-                const scanStateDoc = await getFirestore().collection('scan_states').doc(scanStateDocId).get();
-                if (scanStateDoc.exists) {
-                    const scanState = scanStateDoc.data();
+                const scanState = await db.getScanState(analyzedUrl);
+                if (scanState) {
                     logger.info('WEBHOOK_SCANSTATE_FALLBACK', `Found scan_state for ${analyzedUrl}`, { url: analyzedUrl });
                     // Reconstruct a minimal analysis from scan_state detected values
                     const fields: any = { identite: {}, offre: {}, processus_methodes: {}, engagements_conformite: {}, indicateurs: {}, contenus_pedagogiques: {}, structure_technique: {}, external_context: {}, contextual_signals: {}, recommandation: {} };

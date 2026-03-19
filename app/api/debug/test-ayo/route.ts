@@ -21,13 +21,11 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { computeAioScore } from '@/lib/aio-score-engine';
-import '@/lib/db';
 import {
     sanitizeExtract,
     generateManifestJson, generateFaqJson, generateGlossaryJson, generateExternalContextJsonLocal
 } from '@/lib/ayo-generators';
 import crypto from 'crypto';
-import { getFirestore } from 'firebase-admin/firestore';
 import { requireAdmin } from '@/lib/auth';
 
 export async function GET(req: Request) {
@@ -73,10 +71,8 @@ export async function GET(req: Request) {
         // Fallback: scan_states
         if (!dbAnalysis) {
             try {
-                const scanStateDocId = Buffer.from(analyzedUrl).toString('base64url').substring(0, 128);
-                const scanStateDoc = await getFirestore().collection('scan_states').doc(scanStateDocId).get();
-                if (scanStateDoc.exists) {
-                    const scanState = scanStateDoc.data();
+                const scanState = await db.getScanState(analyzedUrl);
+                if (scanState) {
                     const fields: any = { identite: {}, offre: {}, processus_methodes: {}, engagements_conformite: {}, indicateurs: {}, contenus_pedagogiques: {}, structure_technique: {}, external_context: {}, contextual_signals: {}, recommandation: {} };
                     if (scanState?.detected) {
                         for (const [key, val] of Object.entries(scanState.detected)) {

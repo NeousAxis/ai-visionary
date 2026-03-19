@@ -1,29 +1,12 @@
-const admin = require('firebase-admin');
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: '.env.local' });
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 const fs = require('fs');
 const crypto = require('crypto');
 
-const envFile = fs.readFileSync('.env.local', 'utf-8');
-envFile.split('\n').forEach(line => {
-    const match = line.match(/^([^=]+)="?(.*?)"?$/);
-    if (match) {
-        process.env[match[1]] = match[2];
-    }
-});
-
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n')
-        })
-    });
-}
-const db = admin.firestore();
-
 const adjectives = ['Global', 'Nexus', 'Optima', 'Prime', 'Apex', 'Core', 'Eon', 'Aegis', 'Vanguard', 'Aurora', 'Zenith', 'Quantum', 'Lumina'];
 const nouns = ['Solutions', 'Tech', 'Consulting', 'Health', 'Group', 'Dynamics', 'Partners', 'Systems', 'Ventures', 'Labs', 'Analytics'];
-const sectors = ['Construction', 'Santé', 'Finance', 'Technologie', 'Retail', 'Logistique', 'Marketing', 'Legal'];
+const sectors = ['Construction', 'Sante', 'Finance', 'Technologie', 'Retail', 'Logistique', 'Marketing', 'Legal'];
 const countries = ['CH', 'FR', 'BE', 'CA', 'LU'];
 const types = ['company', 'association', 'public_body'];
 
@@ -67,7 +50,7 @@ function generateFakeEntity() {
 }
 
 async function run() {
-    console.log("🚀 Regénération des 1973 entreprises factices dans aya_registry...");
+    console.log("🚀 Regeneration des 1973 entreprises factices dans aya_registry...");
 
     const TOTAL_ENTITIES = 1973;
     const entities = [];
@@ -85,21 +68,19 @@ async function run() {
 
     fs.writeFileSync('ENTREPRISES_FACTICES_A_SUPPRIMER.json', JSON.stringify(trackerData, null, 2));
 
-    const BATCH_SIZE = 400;
+    // Supabase upsert (batch by 100)
+    const BATCH_SIZE = 100;
     for (let i = 0; i < entities.length; i += BATCH_SIZE) {
-        const batch = db.batch();
         const chunk = entities.slice(i, i + BATCH_SIZE);
+        const { error } = await supabase
+            .from('aya_registry')
+            .upsert(chunk, { onConflict: 'aya_entity_id' });
 
-        chunk.forEach(entity => {
-            const ref = db.collection('aya_registry').doc(entity.aya_entity_id);
-            batch.set(ref, entity);
-        });
-
-        await batch.commit();
-        console.log(`📦 Batch inséré (aya_registry) : de ${i + 1} à ${Math.min(i + BATCH_SIZE, entities.length)}`);
+        if (error) console.error(`⚠️ Batch insert error:`, error.message);
+        else console.log(`📦 Batch insere (aya_registry) : de ${i + 1} a ${Math.min(i + BATCH_SIZE, entities.length)}`);
     }
 
-    console.log("🎉 SUCCESS: 1973 entreprises ajoutées dans aya_registry.");
+    console.log("🎉 SUCCESS: 1973 entreprises ajoutees dans aya_registry.");
 }
 
 run().catch(console.error);

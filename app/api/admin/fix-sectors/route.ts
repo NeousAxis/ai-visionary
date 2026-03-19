@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getFirestore } from 'firebase-admin/firestore';
-import '@/lib/db'; // Ensure Firebase Admin is initialized
+import { db } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
@@ -19,17 +18,16 @@ export async function POST(req: NextRequest) {
     const _logger = createLogger(generateCorrelationId(), 'admin');
 
     try {
-        const firestore = getFirestore();
-        const snapshot = await firestore.collection('aya_registry').get();
+        // Use getAyaEntities with a large limit to get all entities
+        const entities = await db.getAyaEntities(1000);
         const results: { id: string; name: string; old: string; new: string }[] = [];
 
-        for (const doc of snapshot.docs) {
-            const data = doc.data();
-            const name = data.display_name || data.legal_name || doc.id;
-            const currentSector = data.sector_macro || '';
+        for (const entity of entities) {
+            const name = entity.display_name || entity.legal_name || entity.entity_id || 'unknown';
+            const currentSector = entity.sector_macro || '';
 
             if (PLACEHOLDER_RE.test(currentSector.trim())) {
-                const ext = data.asr_payload?.data;
+                const ext = entity.asr_payload?.data;
                 const businessType = ext?.identite?.business_type?.value;
                 const firstService = Array.isArray(ext?.offre?.services?.value)
                     ? ext.offre.services.value[0]
@@ -42,18 +40,18 @@ export async function POST(req: NextRequest) {
                     newSector = firstService;
                 }
 
-                if (newSector) {
-                    await firestore.collection('aya_registry').doc(doc.id).update({
+                if (newSector && entity.entity_id) {
+                    await db.updateEntityRecommendability(entity.entity_id, {
                         sector_macro: newSector
                     });
-                    results.push({ id: doc.id, name, old: currentSector, new: newSector });
+                    results.push({ id: entity.entity_id, name, old: currentSector, new: newSector });
                 }
             }
         }
 
         return NextResponse.json({
             success: true,
-            total_entities: snapshot.size,
+            total_entities: entities.length,
             fixed: results.length,
             details: results
         });

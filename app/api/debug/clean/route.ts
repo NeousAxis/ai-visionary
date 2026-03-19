@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { db, supabase } from '@/lib/db';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -28,13 +28,8 @@ export async function GET(req: NextRequest) {
 
         logger.info('CLEAN_START', `Cleaning records for: ${targetUrl}`);
 
-        const dbInstance = (db as any).getDb?.() || null;
-        if (!dbInstance) {
-            return NextResponse.json({ error: 'DB not available' }, { status: 503 });
-        }
-
-        // Dynamic URL search (not hardcoded to a single domain)
-        const normalizedUrl = targetUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '');
+        // Normalize URL and build variants for matching
+        const normalizedUrl = db.normalizeUrl(targetUrl);
         const variants = [
             `https://${normalizedUrl}`,
             `https://www.${normalizedUrl}`,
@@ -45,15 +40,14 @@ export async function GET(req: NextRequest) {
         let deleted = 0;
 
         for (const variant of variants) {
-            // @ts-expect-error — Firestore dynamic access
-            const dbAccess = db.database ? db.database : db;
-            const getDb = dbAccess.getDb || (() => dbInstance);
-            const firestore = getDb() || dbInstance;
+            const { data, error } = await supabase
+                .from('aya_registry')
+                .delete()
+                .eq('website', variant)
+                .select('entity_id');
 
-            const docs = await firestore.collection('aya_registry').where('website', '==', variant).get();
-            for (const doc of docs.docs) {
-                await doc.ref.delete();
-                deleted++;
+            if (!error && data) {
+                deleted += data.length;
             }
         }
 

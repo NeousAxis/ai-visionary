@@ -6,7 +6,6 @@ import { generateText } from 'ai';
 import { Resend } from 'resend';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
-import { getFirestore } from 'firebase-admin/firestore';
 // registerOrUpdateEntity imported on-demand from '@/lib/aya/registry'
 import { getSystemPrompt } from '@/lib/ayo-system-prompt';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
@@ -872,17 +871,16 @@ GÉNÈRE CE JSON MAINTENANT :
                 unknown: scanState.unknown_keys.length
             });
 
-            // 🔧 Persist scan_state in Firestore (instead of embedding in chat messages)
+            // 🔧 Persist scan_state in DB (instead of embedding in chat messages)
             try {
-                const docId = scanStateDocId(urlToScan);
-                await getFirestore().collection('scan_states').doc(docId).set({
+                await db.saveScanState(urlToScan, {
                     ...scanState,
                     created_at: new Date().toISOString(),
                     url: urlToScan,
                 });
-                logger.info('SCAN_STATE_SAVED', `Saved scan_state to Firestore for ${urlToScan}`);
+                logger.info('SCAN_STATE_SAVED', `Saved scan_state for ${urlToScan}`);
             } catch (saveErr) {
-                console.error("⚠️ Failed to save scan_state to Firestore:", saveErr);
+                console.error("Failed to save scan_state:", saveErr);
             }
 
             // 2b. COMPUTE INITIAL SCORE (Bible 7-bloc engine)

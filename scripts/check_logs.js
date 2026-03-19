@@ -1,13 +1,15 @@
-const { initializeApp, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
-const sa = { projectId: process.env.FIREBASE_PROJECT_ID, clientEmail: process.env.FIREBASE_CLIENT_EMAIL, privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n') };
-initializeApp({ credential: cert(sa) });
-const fdb = getFirestore();
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
 (async () => {
-    const logs = await fdb.collection('system_logs').orderBy('timestamp', 'desc').limit(20).get();
-    logs.forEach(doc => {
-        const d = doc.data();
+    const { data: logs } = await supabase
+        .from('system_logs')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .limit(20);
+
+    (logs || []).forEach(d => {
         console.log(`[${d.level}] ${d.step}: ${d.message} | ${JSON.stringify(d.data || {}).substring(0, 200)}`);
     });
     process.exit(0);

@@ -14,7 +14,7 @@
  */
 
 import { scanUrlForAioSignals, type AioScanResult } from '../aio-scanner';
-import { getFirestore } from 'firebase-admin/firestore';
+import { db } from '../db';
 
 // --- URL NORMALIZATION ---
 
@@ -110,32 +110,27 @@ export async function performScan(targetUrl: string): Promise<ScannerResult> {
         detectedPolicies,
     };
 
-    // 3. Stocker dans Firestore
+    // 3. Stocker en DB
     try {
-        const docId = scanStateDocId(targetUrl);
-        const firestore = getFirestore();
-        await firestore.collection('scan_states').doc(docId).set({
+        await db.saveScanState(targetUrl, {
             url: targetUrl,
             normalizedUrl: normalizeScanStateUrl(targetUrl),
             scanResult: result,
             scannedAt: new Date().toISOString(),
-        }, { merge: true });
+        });
     } catch (e) {
-        console.error('[SCANNER] Erreur stockage Firestore:', e);
+        console.error('[SCANNER] Erreur stockage scan_state:', e);
     }
 
     return result;
 }
 
 /**
- * Charge un scan existant depuis Firestore.
+ * Charge un scan existant depuis la DB.
  */
 export async function loadScanState(url: string): Promise<any | null> {
     try {
-        const docId = scanStateDocId(url);
-        const firestore = getFirestore();
-        const doc = await firestore.collection('scan_states').doc(docId).get();
-        return doc.exists ? doc.data() : null;
+        return await db.getScanState(url);
     } catch {
         return null;
     }

@@ -8,8 +8,7 @@ import crypto from 'crypto';
  * Gestion centrale des enregistrements : Création, Mise à jour, Lecture.
  */
 
-// Note: Collection name is managed by db.ts ('aya_registry')
-// Reference: const COLLECTION_NAME = 'aya_registry';
+// Note: Table name is managed by db.ts ('aya_registry')
 
 export async function registerOrUpdateEntity(
     entityData: Partial<AyaEntity>,
@@ -109,10 +108,10 @@ export async function registerOrUpdateEntity(
 }
 
 /**
- * Fetch all active entities from the real Firestore database
+ * Fetch all active entities from the Supabase database
  */
 export async function getLiveEntities(): Promise<AyaEntity[]> {
-    console.log('🔍 AYA REGISTRY: Fetching live entities from Firestore...');
+    console.log('🔍 AYA REGISTRY: Fetching live entities from Supabase...');
     try {
         const entities = await db.getAyaEntities(500);
         return entities as AyaEntity[];

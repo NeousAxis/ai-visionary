@@ -1,10 +1,9 @@
-import { getFirestore } from 'firebase-admin/firestore';
-import { getApps } from 'firebase-admin/app';
+import { db } from './db';
 import crypto from 'crypto';
 
 // ============================================================
 // AYO Structured Logger — Centralized logging with correlation IDs
-// Writes to: console (structured for Vercel) + Firestore 'system_logs'
+// Writes to: console (structured for Vercel) + Supabase 'system_logs'
 // ============================================================
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'critical';
@@ -25,16 +24,6 @@ export function generateCorrelationId(): string {
     return `ayo_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
 }
 
-/** Get Firestore instance safely (returns null if not initialized) */
-function getDb() {
-    if (!getApps().length) return null;
-    try {
-        return getFirestore();
-    } catch {
-        return null;
-    }
-}
-
 /** Format log for Vercel console output */
 function formatConsoleLog(entry: LogEntry): string {
     const levelEmoji: Record<LogLevel, string> = {
@@ -46,15 +35,16 @@ function formatConsoleLog(entry: LogEntry): string {
     return `${levelEmoji[entry.level]} [AYO:${entry.correlation_id}] [${entry.source.toUpperCase()}] [${entry.step}] ${entry.message}`;
 }
 
-/** Write log entry to Firestore (non-blocking, best-effort) */
+/** Write log entry to Supabase via db.logPersist (non-blocking, best-effort) */
 async function persistLog(entry: LogEntry): Promise<void> {
-    const db = getDb();
-    if (!db) return;
-
     try {
-        await db.collection('system_logs').add({
-            ...entry,
-            _created: new Date().toISOString(),
+        await db.logPersist({
+            correlation_id: entry.correlation_id,
+            level: entry.level,
+            source: entry.source,
+            step: entry.step,
+            message: entry.message,
+            data: entry.data,
         });
     } catch {
         // Silent fail — logging should never break the app
@@ -94,7 +84,7 @@ export function log(
             console.log(formatted, data ? JSON.stringify(data) : '');
     }
 
-    // Async persist to Firestore (fire-and-forget)
+    // Async persist to Supabase (fire-and-forget)
     persistLog(entry).catch(() => {});
 }
 
