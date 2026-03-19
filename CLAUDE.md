@@ -1042,6 +1042,39 @@ L'entonnoir de conversion est :
 - **`TextEncoder` + `PLACEHOLDER_PATTERNS`** hoistés en module-level
 - **Variable morte `rawScore`** supprimée
 
+### Migration Supabase (Firestore → Supabase)
+- **Schéma SQL** : 6 tables (analyses, aya_registry, scan_states, system_logs, otp_codes, sessions)
+- **lib/db.ts** réécrit : client Supabase, même interface publique, lazy-init
+- **Merge strategy** : saveAnalysis() lit avant d'écrire (plus d'écrasement email→score=0)
+- **URL normalisée** : colonne GENERATED `url_normalized` (1 requête au lieu de 7)
+- **Tri** : `getLatestAnalysisByUrl` par `created_at DESC` (plus récent, pas meilleur score)
+- **7 routes API** migrées, 6 scripts migrés, firebase.json supprimé
+- **Injection scan_state** : avant FINAL_SAVE, les données détectées du scan sont injectées dans les champs vides d'extractJson
+
+### Module absence structurée (recommandation expert)
+- **indicateurs vides** → `data_availability` (status, reason) + `data_maturity` (level 0-5)
+- **commitments** : measurement_intent, has_defined_targets, engagement_level
+- **transparency** : data_declared_by_client, missing_data_explicit, no_fabrication_policy
+- **interpretation_signal** : should_penalize, trust_modifier, recommendation_impact
+- Principe : "absence structurée = signal neutre, absence vide = signal négatif"
+
+### Qualité fichiers ASR — round 2 (10 bugs supplémentaires)
+- **additionalType** ajouté dans identity avec fixUnmatchedBrackets
+- **contactPoint** avec email si disponible
+- **serviceMode** dérivé du delivery_mode réel
+- **contextualRelevance** rempli automatiquement
+- **compliance.gdpr** déduit des policies
+- **industry** avec fixUnmatchedBrackets
+- **cleanArray()** applique fixUnmatchedBrackets sur chaque élément
+- **sanitizeAudience** limite augmentée 160→300 chars
+- **FAQ** : réponses uniques par question, moins de répétition audience
+- **Glossaire** : AIO renommé "AI-readability Intelligence Optimization"
+- **Sanitizer** : PROTECTED_FIELDS (business_type, name, contact_email) préservés
+
+### Scripts utilitaires ajoutés
+- `scripts/e2e-test.js` — test E2E automatisé du questionnaire
+- `scripts/generate-perfect-pack.ts` — génération fichiers avec données complètes
+
 ### Build
 - `npm run build` ✅ — 16 pages générées, 0 erreur TypeScript
 
