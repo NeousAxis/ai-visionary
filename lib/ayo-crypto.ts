@@ -170,7 +170,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             return validAccessValues.includes(rawAccess) ? rawAccess : "public";
         })(),
         serviceMode: serviceModes,  // Always derive from delivery_mode (no legacy override)
-        schedule: toArray(data.contextual_signals?.schedule_type?.value).length > 0 ? toArray(data.contextual_signals?.schedule_type?.value) : ["businessHours"]
+        ...(toArray(data.contextual_signals?.schedule_type?.value).length > 0 ? { schedule: toArray(data.contextual_signals?.schedule_type?.value) } : {})
     };
 
     // Identity (Always present but stripped for LIGHT)

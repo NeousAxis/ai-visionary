@@ -425,6 +425,8 @@ export function generateManifestJson(data: any, url: string): any {
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBT || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
+    const dataFrameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
+    const dataPolicies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
 
     const isAssoManifest = isAssociation(businessType, name, url);
@@ -434,8 +436,18 @@ export function generateManifestJson(data: any, url: string): any {
     const scope = services.length > 0 ? services.slice(0, 5) : ["Services professionnels"];
     scope.push("AI Singular Record (ASR)");
 
+    // Build compliance frameworks from actual data instead of hardcoding
     const complianceSignals: string[] = [];
-    if (country && ["France", "Suisse", "Belgique", "Allemagne", "Italie", "Espagne"].includes(country)) complianceSignals.push("GDPR");
+    // 1. Use frameworks declared in the ASR data
+    if (dataFrameworks.length > 0) {
+        complianceSignals.push(...dataFrameworks);
+    } else {
+        // 2. Infer GDPR only if policies mention RGPD or Confidentialité
+        const policiesLower = dataPolicies.map((p: string) => p.toLowerCase()).join(' ');
+        if (policiesLower.includes('rgpd') || policiesLower.includes('confidentialit')) {
+            complianceSignals.push("GDPR");
+        }
+    }
     if (certifications.some(c => typeof c === 'string' && c.toLowerCase().includes("iso"))) complianceSignals.push("ISO");
 
     return {
@@ -444,7 +456,7 @@ export function generateManifestJson(data: any, url: string): any {
             type: manifestEntityType,
             ...(businessType !== "Organization" ? { additionalType: businessType } : {}),
             canonicalUrl: url,
-            verified: true,
+            verified: "self_declared",
             registry: "AYA"
         },
         authority: {
@@ -493,7 +505,7 @@ export function generateManifestJson(data: any, url: string): any {
         discovery: {
             sitemap: joinUrl(url, 'sitemap.xml'),
             asrEndpoint: joinUrl(url, '.ayo/'),
-            registryUrl: "https://www.ai-visionary.com/aya"
+            registryUrl: joinUrl(url, "aya")
         },
         api_access: {
             status: "open",
@@ -551,7 +563,17 @@ export function generateFaqJson(data: any, url: string): any {
     // --- IDENTITÉ ---
     // Si businessType est null/vide, ne pas générer "spécialisée dans [garbage]"
     const btDescFaq = businessType
-        ? ` spécialisée dans ${businessType.toLowerCase().startsWith("bureau") || businessType.toLowerCase().startsWith("cabinet") ? `le ${businessType.toLowerCase()}` : businessType.toLowerCase()}`
+        ? (() => {
+            const btLower = businessType.toLowerCase();
+            // "le bureau/cabinet X"
+            if (btLower.startsWith("bureau") || btLower.startsWith("cabinet")) return ` spécialisée dans le ${btLower}`;
+            // Already has article: "la formation", "le conseil", "les services"
+            if (/^(la |le |les |l')/.test(btLower)) return ` spécialisée dans ${btLower}`;
+            // Vowel-starting: "optimisation" → "l'optimisation"
+            if (/^[aeiouhéèêëàâäôöùûüîïœæ]/i.test(btLower)) return ` spécialisée dans l'${btLower}`;
+            // Consonant-starting: add "le" as generic article
+            return ` spécialisée dans le ${btLower}`;
+        })()
         : "";
     qna.push({
         q: `Qui est ${name} ?`,
@@ -686,21 +708,23 @@ export function generateFaqJson(data: any, url: string): any {
         category: "Visibilité IA"
     });
 
+    const mainEntity = qna.map(item => ({
+        "@type": "Question",
+        "name": item.q,
+        "about": item.category,
+        "acceptedAnswer": { "@type": "Answer", "text": item.a }
+    }));
+
     return {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "version": "AYO-FAQ-2.0",
         "entity": name,
         "url": url,
-        "numberOfQuestions": qna.length,
+        "numberOfQuestions": mainEntity.length,
         "categories": [...new Set(qna.map(q => q.category))],
         "inLanguage": "fr",
-        "mainEntity": qna.map(item => ({
-            "@type": "Question",
-            "name": item.q,
-            "about": item.category,
-            "acceptedAnswer": { "@type": "Answer", "text": item.a }
-        }))
+        "mainEntity": mainEntity
     };
 }
 
@@ -744,8 +768,8 @@ export function generateGlossaryJson(data: any): any {
     }
 
     const serviceDescTemplates = [
-        (_s: string) => `Prestation phare ${nameArticleG}${audience ? `, conçue pour les ${audience.toLowerCase()}` : ""}. Ce service constitue le cœur de l'offre déclarée dans l'ASR.`,
-        (_s: string) => `Service complémentaire proposé par ${name}${audience ? ` à destination des ${audience.toLowerCase()}` : ""}. Enrichit le périmètre d'intervention de l'entité.`,
+        (_s: string) => `Prestation phare ${nameArticleG}. Ce service constitue le cœur de l'offre déclarée dans l'ASR.`,
+        (_s: string) => `Service complémentaire proposé par ${name}. Enrichit le périmètre d'intervention de l'entité.`,
         (_s: string) => `Activité spécialisée ${nameArticleG}. Fait partie de l'offre vérifiable et documentée dans les actifs sémantiques.`,
     ];
     services.forEach((s, i) => {
@@ -948,7 +972,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             version: "2.0",
             status: "active",
             generated_at: new Date().toISOString().split('T')[0],
-            source: "ayo-chatbot",
+            source: "ayo-structured-analysis",
             entity: name,
             canonical_url: url || ""
         },
