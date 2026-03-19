@@ -272,7 +272,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const indicateurs: any = {};
     if (mode !== 'LIGHT') {
         // Bug 10: Mark indicators without numeric values as "non déclaré"
-        const rawIndicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
+        // Filter out "no data" phrases that users type instead of actual indicators
+        const NO_DATA_PHRASES = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
+        const rawIndicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value))
+            .filter((ind: string) => !NO_DATA_PHRASES.test(ind.trim()));
         const todayISO = new Date().toISOString().split('T')[0];
 
         if (rawIndicators.length > 0) {
@@ -310,9 +313,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             };
         }
 
-        // Bug 7: If last_review_date is empty or absent, fill with today's date (ISO)
+        // Bug 7: If last_review_date is empty, absent, or a "no data" phrase, fill with today's date
         const rawReviewDate = (data.indicateurs?.last_review_date?.value || "").toString().trim();
-        indicateurs.last_review_date = rawReviewDate || todayISO;
+        const isValidDate = rawReviewDate && !NO_DATA_PHRASES.test(rawReviewDate) && rawReviewDate.length < 30;
+        indicateurs.last_review_date = isValidDate ? rawReviewDate : todayISO;
     }
 
     // Educational Content (NEW)

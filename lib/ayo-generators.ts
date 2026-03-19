@@ -27,22 +27,46 @@ export function joinUrl(base: string, path: string): string {
  */
 export function fixUnmatchedBrackets(str: string): string {
     if (!str || typeof str !== 'string') return str || "";
+    // Clean trailing "..." (truncation markers)
+    let cleaned = str.replace(/\.{3,}$/g, '').replace(/\.{3,}\s*\)$/g, ')');
+    // Remove orphan closing brackets at the end (e.g. "Ernie...)")
+    // by tracking balance
     const openers = ['(', '[', '{'];
     const closers = [')', ']', '}'];
-    const stack: string[] = [];
-    for (const ch of str) {
+    // First pass: remove orphan closers (no matching opener)
+    const result: string[] = [];
+    const stack: number[] = []; // indices of unmatched openers
+    for (let i = 0; i < cleaned.length; i++) {
+        const ch = cleaned[i];
         const oi = openers.indexOf(ch);
         if (oi !== -1) {
-            stack.push(closers[oi]);
+            stack.push(result.length);
+            result.push(ch);
         } else {
             const ci = closers.indexOf(ch);
-            if (ci !== -1 && stack.length > 0 && stack[stack.length - 1] === ch) {
-                stack.pop();
+            if (ci !== -1) {
+                if (stack.length > 0) {
+                    stack.pop(); // matched
+                    result.push(ch);
+                }
+                // else: orphan closer, skip it
+            } else {
+                result.push(ch);
             }
         }
     }
-    // Ferme dans l'ordre inverse (LIFO)
-    return str + stack.reverse().join('');
+    // Second pass: close any remaining open brackets
+    let finalStr = result.join('');
+    const stack2: string[] = [];
+    for (const ch of finalStr) {
+        const oi = openers.indexOf(ch);
+        if (oi !== -1) stack2.push(closers[oi]);
+        else {
+            const ci = closers.indexOf(ch);
+            if (ci !== -1 && stack2.length > 0 && stack2[stack2.length - 1] === ch) stack2.pop();
+        }
+    }
+    return finalStr + stack2.reverse().join('');
 }
 
 /**
@@ -503,7 +527,9 @@ export function generateFaqJson(data: any, url: string): any {
     const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
     const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
     const securityMeasures = sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value));
-    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value));
+    const NO_DATA_PHRASES_FAQ = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
+    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
+        .filter((ind: string) => !NO_DATA_PHRASES_FAQ.test(ind.trim()));
     const rawHasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasFaq = (rawHasFaq === "__SKIPPED__" || rawHasFaq === "[SKIP] Non applicable") ? false : rawHasFaq;
     const rawHasDoc = data.contenus_pedagogiques?.has_documentation?.value;
@@ -819,7 +845,9 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             ? rawQAec.split(',').map((s: string) => s.trim()).filter(Boolean)
             : [];
     const qualityAssurance = sanitizeFieldArray(qualityAssuranceRaw);
-    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value));
+    const NO_DATA_PHRASES_EC = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
+    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
+        .filter((ind: string) => !NO_DATA_PHRASES_EC.test(ind.trim()));
     const rawHasFaqEC = data.contenus_pedagogiques?.has_faq?.value;
     const hasFaq = (rawHasFaqEC === "__SKIPPED__" || rawHasFaqEC === "[SKIP] Non applicable") ? false : rawHasFaqEC;
     const rawHasDocEC = data.contenus_pedagogiques?.has_documentation?.value;
