@@ -426,7 +426,7 @@ function generateGlossaryJson(data: any): any {
 
 function generateExternalContextJsonLocal(data: any, url?: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
-    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Activité non spécifiée");
+    const businessType = sanitizeBusinessType(cleanVal(data.identite?.business_type?.value), "Organisation");
     const useCases = cleanArray(data.offre?.use_cases?.value);
     const services = cleanArray(data.offre?.services?.value);
     const products = cleanArray(data.offre?.products?.value);

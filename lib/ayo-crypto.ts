@@ -2,7 +2,8 @@ import nacl from 'tweetnacl';
 import {
     sanitizeFieldValue, sanitizeFieldArray,
     toArray, cleanText, cleanVal, cleanArray,
-    cleanSkippedValues, isAssociation, PHONE_REGEX
+    cleanSkippedValues, isAssociation, PHONE_REGEX,
+    fixUnmatchedBrackets
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
@@ -109,11 +110,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // areaServed: use declared geography instead of hardcoded 5km radius
     const geoServed = cleanValAsr(data.processus_methodes?.geographies_served?.value);
+    const deliveryModeRaw = cleanValAsr(data.processus_methodes?.delivery_mode?.value);
+    const isOnlineDelivery = deliveryModeRaw && (deliveryModeRaw.toLowerCase().includes("en ligne") || deliveryModeRaw.toLowerCase().includes("online"));
+    const appendInternational = (name: string) => isOnlineDelivery && !name.toLowerCase().includes("international") ? `${name}, International` : name;
     const areaServed = geoServed
-        ? { "@type": "AdministrativeArea", "name": geoServed }
+        ? { "@type": "AdministrativeArea", "name": appendInternational(geoServed) }
         : (data.identite?.country?.value
-            ? { "@type": "Country", "name": cleanValAsr(data.identite.country.value) }
-            : { "@type": "AdministrativeArea", "name": cleanValAsr(data.identite?.city?.value) || "Non spécifié" });
+            ? { "@type": "Country", "name": appendInternational(cleanValAsr(data.identite.country.value)) }
+            : { "@type": "AdministrativeArea", "name": appendInternational(cleanValAsr(data.identite?.city?.value) || "Non spécifié") });
 
     // V3 Advanced Blocks (Only for PRO/PLATEFORME depending on strategy)
     // selectionConditions: build from actual data, not generic defaults
@@ -143,10 +147,19 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         : (pricingRaw ? (isAssociationType ? "subventioned_and_services" : "disclosed") : "on_request");
     const deliveryMode = cleanValAsr(data.processus_methodes?.delivery_mode?.value);
     const dmLower = deliveryMode.toLowerCase();
-    const serviceModes: string[] = [];
-    if (dmLower.includes("ligne") || dmLower.includes("visio") || dmLower.includes("remote") || dmLower.includes("web") || dmLower.includes("online")) serviceModes.push("remote");
-    if (dmLower.includes("site") || dmLower.includes("presen") || dmLower.includes("atelier")) serviceModes.push("onSite");
-    if (serviceModes.length === 0) serviceModes.push("onSite");
+    // Bug 8: Derive serviceMode from delivery_mode — use Schema.org values ["online", "onSite"]
+    const hasOnline = dmLower.includes("ligne") || dmLower.includes("visio") || dmLower.includes("remote") || dmLower.includes("web") || dmLower.includes("online");
+    const hasOnSite = dmLower.includes("site") || dmLower.includes("presen") || dmLower.includes("atelier");
+    const isHybrid = dmLower.includes("hybride") || (hasOnline && hasOnSite);
+    const serviceModes: string[] = isHybrid
+        ? ["onSite", "online"]
+        : hasOnline
+            ? ["online"]
+            : hasOnSite
+                ? ["onSite"]
+                : deliveryMode
+                    ? ["online"]  // default si delivery_mode present mais pas reconnu
+                    : ["online"]; // default si pas de delivery_mode
 
     const contextualSignals = {
         pricingLevel,
@@ -170,24 +183,30 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "@type": schemaType,
         "name": entityName,
     };
-    // Only include additionalType if it's a real value (not the default "Organization" or garbage)
-    if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) {
-        identity.additionalType = businessType;
+    // Bug 10: additionalType from business_type, cleaned with fixUnmatchedBrackets
+    // Exclude default "Organization", empty, or "Activité non spécifiée"
+    const ADDITIONAL_TYPE_EXCLUDE = /^(organization|activité non spécifiée|activite non specifiee)$/i;
+    if (businessType && sanitizeFieldValue(businessType) !== null && !ADDITIONAL_TYPE_EXCLUDE.test(businessType.trim())) {
+        identity.additionalType = fixUnmatchedBrackets(businessType);
     }
 
     if (resolvedEntityUrl) identity.url = resolvedEntityUrl;
     if (entityDescription) identity.description = entityDescription;
 
     if (mode !== 'LIGHT') {
-        identity.legalName = cleanValAsr(data.identite?.legal_name?.value);
-        identity.location = cleanValAsr(data.identite?.country?.value) || "Non spécifié";
+        const legalNameVal = cleanValAsr(data.identite?.legal_name?.value);
+        if (legalNameVal) identity.legalName = legalNameVal;
+        const locationVal = cleanValAsr(data.identite?.country?.value);
+        identity.location = locationVal || "Non spécifié";
         identity.address = address;
         identity.areaServed = areaServed;
 
         // Rich contactPoint with multiple channels
+        // Bug 9: Also look for email in data.email or data.identite.email as fallback
         const contactChannels: any[] = [];
-        if (data.identite?.contact_email?.value) {
-            contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "email": data.identite.contact_email.value });
+        const contactEmail = data.identite?.contact_email?.value || data.identite?.email?.value || data.email || "";
+        if (contactEmail) {
+            contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "email": contactEmail });
         }
         const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
         const validPhone = PHONE_REGEX.test(rawPhone) ? rawPhone : "";
@@ -253,13 +272,18 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     if (mode !== 'LIGHT') {
         // Bug 10: Mark indicators without numeric values as "non déclaré"
         const rawIndicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
-        indicateurs.key_indicators = rawIndicators.map((ind: string) => {
-            // Check if indicator contains at least one digit
-            if (/\d/.test(ind)) return ind;
-            // No number found — mark as incomplete
-            return `${ind} : non déclaré`;
-        });
-        indicateurs.last_review_date = data.indicateurs?.last_review_date?.value || "";
+        // Bug 6: Only include key_indicators if non-empty
+        if (rawIndicators.length > 0) {
+            indicateurs.key_indicators = rawIndicators.map((ind: string) => {
+                // Check if indicator contains at least one digit
+                if (/\d/.test(ind)) return ind;
+                // No number found — mark as incomplete
+                return `${ind} : non déclaré`;
+            });
+        }
+        // Bug 7: If last_review_date is empty or absent, fill with today's date (ISO)
+        const rawReviewDate = (data.indicateurs?.last_review_date?.value || "").toString().trim();
+        indicateurs.last_review_date = rawReviewDate || new Date().toISOString().split('T')[0];
     }
 
     // Educational Content (NEW)

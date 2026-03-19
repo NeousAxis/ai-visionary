@@ -299,14 +299,14 @@ function getPolicyDefinition(policy: string, entityName: string): string {
     return `Politique de conformité ${/^[aeiouhAEIOUHéÉàÀ]/.test(entityName) ? `d'${entityName}` : `de ${entityName}`} contribuant à la transparence et à la gouvernance de l'entité.`;
 }
 
-const BUSINESS_TYPE_PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|n\/a|undefined|null|)$/i;
+const BUSINESS_TYPE_PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|activité non spécifiée|n\/a|undefined|null|)$/i;
 export function sanitizeBusinessType(val: string, fallback: string = ""): string {
     if (!val || BUSINESS_TYPE_PLACEHOLDER_RE.test(val.trim())) return fallback;
     return val;
 }
 
 // --- SANITIZER: Remove ALL template/placeholder values AND confirmation phrases ---
-const TEMPLATE_RE = /^(Ex:|type schema\.?org|schema\.?org|organisation|organization|premium\/standard\/undisclosed|public\/membersOnly|eligible\/uncertain|✅\/⚠️\/❌|gym near me|Centre en ville|Recherche Salle|No City Found|undisclosed|non spécifié|n\/a)$/i;
+const TEMPLATE_RE = /^(Ex:|type schema\.?org|schema\.?org|organisation|organization|activité non spécifiée|premium\/standard\/undisclosed|public\/membersOnly|eligible\/uncertain|✅\/⚠️\/❌|gym near me|Centre en ville|Recherche Salle|No City Found|undisclosed|non spécifié|n\/a)$/i;
 const TEMPLATE_PARTIAL_RE = /^Ex:|eligible\/uncertain|✅\/⚠️\/❌|premium\/standard|public\/members/i;
 
 // Confirmation phrases that users say to acknowledge — NEVER valid field values
@@ -769,7 +769,7 @@ export function generateGlossaryJson(data: any): any {
 export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
     const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
-    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", "Activité non spécifiée"));
+    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", "Organisation"));
     const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
@@ -831,8 +831,8 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
         });
     }
     if (city) addUnique(discoveryKeywords, city);
-    // Business type as keyword
-    if (businessType && businessType.length <= 60) addUnique(discoveryKeywords, businessType);
+    // Business type as keyword (skip generic fallback "Organisation")
+    if (businessType && businessType !== "Organisation" && businessType.length <= 60) addUnique(discoveryKeywords, businessType);
 
     const intentKeywords: string[] = [];
     declaredIntents.slice(0, 15).forEach(i => {
