@@ -23,16 +23,23 @@ import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { computeAioScore } from '@/lib/aio-score-engine';
 import '@/lib/db';
 import {
-    sanitizeExtract, sanitizeBusinessType,
+    sanitizeExtract,
     generateManifestJson, generateFaqJson, generateGlossaryJson, generateExternalContextJsonLocal
 } from '@/lib/ayo-generators';
 import crypto from 'crypto';
 import { getFirestore } from 'firebase-admin/firestore';
+import { requireAdmin } from '@/lib/auth';
 
 export async function GET(req: Request) {
     // Only allow in development/preview
     if (process.env.NODE_ENV === 'production' && !process.env.VERCEL_ENV?.includes('preview')) {
         return NextResponse.json({ error: 'Test endpoint disabled in production' }, { status: 403 });
+    }
+
+    // Require admin auth
+    const auth = requireAdmin(req as any);
+    if (!auth.authorized) {
+        return auth.response!;
     }
 
     const { searchParams } = new URL(req.url);
@@ -88,7 +95,7 @@ export async function GET(req: Request) {
                         };
                         const scoreResult = computeAioScore(fakeExtract as any);
                         recalcScore = scoreResult.total;
-                    } catch {}
+                    } catch (e) { console.warn('Score recalc failed from scan_state:', e instanceof Error ? e.message : e); }
                     dbAnalysis = {
                         url: analyzedUrl,
                         email: customerEmail,
@@ -97,7 +104,7 @@ export async function GET(req: Request) {
                         extract: fields
                     };
                 }
-            } catch {}
+            } catch (e) { console.warn('scan_states fallback failed:', e instanceof Error ? e.message : e); }
         }
 
         if (!dbAnalysis) {
@@ -134,7 +141,7 @@ export async function GET(req: Request) {
             for (const [k, v] of Object.entries(scoreResult.blocks)) {
                 finalBlocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
             }
-        } catch {}
+        } catch (e) { console.warn('Final score recalc failed:', e instanceof Error ? e.message : e); }
 
         // 5. GENERATE ALL 5 PACK FILES — EXACT same functions as webhook (imported from @/lib/ayo-generators)
         const asrId = `asr_test_${crypto.randomUUID().replace(/-/g, '').substring(0, 16)}`;

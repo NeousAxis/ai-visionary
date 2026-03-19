@@ -60,7 +60,7 @@ export const QUESTIONNAIRE: BlocQuestion[] = [
         fieldTargets: ['services', 'products'],
         question: "Décrivez vos services ou produits principaux (3 à 5 maximum). Pour chacun, donnez un nom clair et une courte description.",
         relance: "Les IA ont besoin d'au moins 2-3 offres distinctes pour vous recommander. Pouvez-vous détailler ?",
-        skipIfScanDetected: (scan) => {
+        skipIfScanDetected: (_scan) => {
             // Skip si le scan a trouvé des services ET des produits dans le contenu
             return false; // On ne skip jamais cette question — trop importante
         },
@@ -120,7 +120,7 @@ export const QUESTIONNAIRE: BlocQuestion[] = [
         fieldTargets: ['policies', 'security_measures'],
         question: "Avez-vous des politiques formelles en place ? (confidentialité, CGV, charte éthique, mesures de sécurité...)",
         relance: "",
-        skipIfScanDetected: (scan) => {
+        skipIfScanDetected: (_scan) => {
             // Les politiques détectées par le scan (sitemap, robots.txt) ne comptent pas comme "politiques formelles"
             return false;
         },

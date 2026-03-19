@@ -129,7 +129,7 @@ export const database = {
             // Remove trailing slash
             normalized = normalized.replace(/\/$/, '');
             return normalized;
-        } catch (e) {
+        } catch (_e) {
             return url.toLowerCase().trim();
         }
     },

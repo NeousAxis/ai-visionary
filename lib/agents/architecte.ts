@@ -190,7 +190,6 @@ export function buildStructureRecommendations(
 
     // 1. ASR-Protocol — Toujours prioritaire si pas de fichier ASR
     const hasAsr = fields.structure_technique?.has_asr?.value === true;
-    const hasJsonLd = fields.structure_technique?.has_jsonld?.value === true;
     if (!hasAsr) {
         const techScore = scoreResult.blocks.structure_technique ?? 0;
         const techMax = 10;

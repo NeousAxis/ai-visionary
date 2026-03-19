@@ -10,7 +10,7 @@ export default function ComprendrePage() {
             {/* Header / Nav */}
             <nav className="container" style={{ padding: '2rem 1rem' }}>
                 <Link href="/" className="btn btn-secondary">
-                    ← Retour à l'accueil
+                    ← Retour à l&apos;accueil
                 </Link>
             </nav>
 
@@ -153,8 +153,8 @@ export default function ComprendrePage() {
                 <div className="container">
                     <h2 className="section-title">À retenir</h2>
                     <p className="final-phrase" style={{ fontSize: '1.5rem', fontStyle: 'italic', maxWidth: '800px', margin: '0 auto' }}>
-                        "Les IA ne citent pas ce qui est le plus visible.<br />
-                        Elles citent ce qu’elles peuvent comprendre sans se tromper."
+                        &quot;Les IA ne citent pas ce qui est le plus visible.<br />
+                        Elles citent ce qu&apos;elles peuvent comprendre sans se tromper.&quot;
                     </p>
                     <p style={{ marginTop: '2rem', color: 'var(--text-muted)' }}>
                         C’est exactement le rôle d’une déclaration structurée et scellée.

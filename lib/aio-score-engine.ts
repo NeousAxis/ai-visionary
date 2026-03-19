@@ -209,7 +209,7 @@ export function computeAioScore(extract: AyoExtract) {
     const auditBlocks: Record<string, any> = {};
 
     (Object.keys(WEIGHTS) as (keyof typeof WEIGHTS)[]).forEach((block) => {
-        const { score, raw } = blockScores[block];
+        const { score } = blockScores[block];
         const max = WEIGHTS[block];
         const ratio = score / max; // 0..1
 

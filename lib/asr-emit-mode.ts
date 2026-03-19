@@ -1,4 +1,4 @@
-import { ASR_Published, ASR_Seal } from './asr-seal-spec';
+import { ASR_Published } from './asr-seal-spec';
 
 /**
  * AYO EMIT MODE (Pipeline Runtime Mandatory)
@@ -28,7 +28,7 @@ export interface EmitResult {
  * 
  * Operational Rule: If EMIT fails, the ASR does not exist.
  */
-export function emitASR_Blueprint(asrObject: any, asrSchemaVersion: string, keyId: string): EmitResult {
+export function emitASR_Blueprint(_asrObject: any, _asrSchemaVersion: string, _keyId: string): EmitResult {
 
     // 1. Validation Schema
     // FAIL if schema invalid

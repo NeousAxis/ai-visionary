@@ -11,15 +11,13 @@ export const maxDuration = 60;
 const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
 
 import { db } from '@/lib/db';
-import { generateRealAsrJson } from '@/lib/ayo-crypto';
+// generateRealAsrJson available from '@/lib/ayo-crypto' if needed
 import { createLogger } from '@/lib/logger';
 import { getFirestore } from 'firebase-admin/firestore';
 import { computeAioScore } from '@/lib/aio-score-engine';
 import '@/lib/db'; // Ensure Firebase Admin is initialized
 import {
-    cleanText, cleanArray, cleanVal, toArray,
     sanitizeBusinessType, sanitizeExtract,
-    generateManifestJson, generateFaqJson, generateGlossaryJson, generateExternalContextJsonLocal
 } from '@/lib/ayo-generators';
 // 🤖 Agent Architecte — génération + QC des fichiers PRO
 import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
@@ -410,7 +408,6 @@ export async function POST(req: Request) {
 
         // 5. DELIVERY
         if (packType === 'AYA_SUB') {
-            const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
             await resend.emails.send({
                 from: 'AYO Registry <registry@ai-visionary.com>',
                 to: [customerEmail],

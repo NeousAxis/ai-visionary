@@ -30,7 +30,7 @@ function sanitizeDisplayText(text: string | undefined): string {
     const JSON_LEAK = /(","|"\w+":\s*[\[{"]|\}\]|^\s*\{|"\s*:\s*")/;
     if (!JSON_LEAK.test(text)) return text;
     // Strip JSON artifacts
-    let cleaned = text
+    const cleaned = text
         .replace(/"[a-zA-Z_]+"\s*:\s*[\[{"]/g, '')
         .replace(/[}\]]+\s*$/g, '')
         .replace(/[{}\[\]]+/g, '')
@@ -156,7 +156,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 try {
                     const errorJson = await response.json();
                     if (errorJson.error) errorDetails = errorJson.error;
-                } catch (e) {
+                } catch (_e) {
                     // Ignore parsing error, stick to status code
                 }
                 throw new Error(errorDetails);
@@ -217,9 +217,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
     };
 
     // State for local progression inside a block
-    const [activeBlock, setActiveBlock] = useState<QuestionBlock | null>(null);
-    const [currentQIndex, setCurrentQIndex] = useState(0);
-    const [stepCount, setStepCount] = useState(1); // 1..5
+    const [_stepCount, setStepCount] = useState(1); // 1..5
 
     // State for multiple selection (checkboxes)
     const [selectedMultiple, setSelectedMultiple] = useState<Record<string, string[]>>({});
@@ -337,7 +335,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     }
                     qcmData = parsed;
                 }
-            } catch (e) {
+            } catch (_e) {
                 // Not valid JSON, treat as text
             }
         }
@@ -403,21 +401,6 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 });
             };
 
-            // Helper function to submit multiple selections
-            const submitMultipleSelection = (questionId: string, questionText: string) => {
-                const selections = selectedMultiple[questionId] || [];
-                if (selections.length === 0) return;
-
-                const formattedAnswer = `${questionText} : ${selections.join(', ')}`;
-                // Clear the selection after submit
-                setSelectedMultiple(prev => {
-                    const newState = { ...prev };
-                    delete newState[questionId];
-                    return newState;
-                });
-                handleSubmit(undefined, formattedAnswer);
-            };
-
             return (
                 <div className="ay-qcm-container">
                     {/* BOUTON RETOUR - visible si au moins une réponse donnée */}
@@ -434,13 +417,13 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                     {qcmData.intro && (
                         <div className="mb-4 text-teal-800 markdown-intro prose prose-teal max-w-none">
                             <ReactMarkdown components={{
-                                strong: ({ node, ...props }) => <span className="font-bold text-teal-900 block mt-4 mb-2 text-lg uppercase" {...props} />,
-                                h1: ({ node, ...props }) => <h1 className="font-bold text-xl text-teal-900 mt-6 mb-3 uppercase tracking-wide" {...props} />,
-                                h2: ({ node, ...props }) => <h2 className="font-bold text-lg text-teal-900 mt-5 mb-2" {...props} />,
-                                h3: ({ node, ...props }) => <h3 className="font-bold text-base text-teal-900 mt-4 mb-2" {...props} />,
-                                ul: ({ node, ...props }) => <ul className="list-disc pl-5 my-2 space-y-1 text-slate-700" {...props} />,
-                                li: ({ node, ...props }) => <li className="pl-1 marker:text-teal-500" {...props} />,
-                                p: ({ node, ...props }) => <p className="mb-2 leading-relaxed text-slate-700" {...props} />
+                                strong: ({ node: _node, ...props }) => <span className="font-bold text-teal-900 block mt-4 mb-2 text-lg uppercase" {...props} />,
+                                h1: ({ node: _node, ...props }) => <h1 className="font-bold text-xl text-teal-900 mt-6 mb-3 uppercase tracking-wide" {...props} />,
+                                h2: ({ node: _node, ...props }) => <h2 className="font-bold text-lg text-teal-900 mt-5 mb-2" {...props} />,
+                                h3: ({ node: _node, ...props }) => <h3 className="font-bold text-base text-teal-900 mt-4 mb-2" {...props} />,
+                                ul: ({ node: _node, ...props }) => <ul className="list-disc pl-5 my-2 space-y-1 text-slate-700" {...props} />,
+                                li: ({ node: _node, ...props }) => <li className="pl-1 marker:text-teal-500" {...props} />,
+                                p: ({ node: _node, ...props }) => <p className="mb-2 leading-relaxed text-slate-700" {...props} />
                             }}>
                                 {qcmData.intro}
                             </ReactMarkdown>
@@ -597,7 +580,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                             {/* Validate Button */}
                                             <button
                                                 onClick={() => {
-                                                    let selections = currentSelections.filter(s => s !== '__AUTRE__');
+                                                    const selections = currentSelections.filter(s => s !== '__AUTRE__');
                                                     if (currentSelections.includes('__AUTRE__') && input.trim()) {
                                                         selections.push(input.trim());
                                                     }
@@ -715,7 +698,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 <div className="flex flex-col gap-4">
                     <ReactMarkdown
                         components={{
-                            a: ({ node, ...props }) => (
+                            a: ({ node: _node, ...props }) => (
                                 <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: msg.role === 'user' ? 'white' : 'blue', textDecoration: 'underline' }} />
                             )
                         }}
@@ -759,7 +742,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             <div className="markdown-content">
                 <ReactMarkdown
                     components={{
-                        a: ({ node, ...props }) => (
+                        a: ({ node: _node, ...props }) => (
                             <a {...props} target="_blank" rel="noopener noreferrer" style={{ color: msg.role === 'user' ? 'white' : 'blue', textDecoration: 'underline' }} />
                         )
                     }}

@@ -92,7 +92,7 @@ export async function generateSemanticAssets(extract: AyoExtract): Promise<Seman
         let assets: Record<string, unknown>;
         try {
             assets = JSON.parse(rawJson);
-        } catch (parseError) {
+        } catch (_parseError) {
             logger.error('SEMANTICS_JSON_INVALID', 'Gemini returned invalid JSON', {
                 rawLength: rawJson.length,
                 first200: rawJson.substring(0, 200),

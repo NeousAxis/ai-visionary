@@ -1,6 +1,6 @@
 
 import { db } from '../db';
-import { AyaEntity, AyaEntityStatus } from './schema';
+import { AyaEntity } from './schema';
 import crypto from 'crypto';
 
 /**
@@ -9,8 +9,7 @@ import crypto from 'crypto';
  */
 
 // Note: Collection name is managed by db.ts ('aya_registry')
-// This constant is kept for reference only
-const COLLECTION_NAME = 'aya_registry';
+// Reference: const COLLECTION_NAME = 'aya_registry';
 
 export async function registerOrUpdateEntity(
     entityData: Partial<AyaEntity>,
@@ -21,7 +20,7 @@ export async function registerOrUpdateEntity(
 
     // 1. Déterminer la validité (36 mois pour achat, 1 mois pour abo)
     const now = new Date();
-    let validUntil = new Date();
+    const validUntil = new Date();
 
     if (mode === 'purchase') {
         validUntil.setFullYear(now.getFullYear() + 3); // +3 ans

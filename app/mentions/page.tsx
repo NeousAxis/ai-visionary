@@ -10,7 +10,7 @@ export default function MentionsPage() {
         <main>
             <nav className="container" style={{ padding: '2rem 1rem' }}>
                 <Link href="/" className="btn btn-secondary">
-                    ← Retour à l'accueil
+                    ← Retour à l&apos;accueil
                 </Link>
             </nav>
 
@@ -22,7 +22,7 @@ export default function MentionsPage() {
                         <h2 style={{ fontSize: '1.2rem', marginBottom: '10px', color: 'var(--text-main)' }}>1. Éditeur du site</h2>
                         <p>
                             <strong>AI Visionary</strong><br />
-                            Service spécialisé en structuration de données pour l'intelligence artificielle (AIO).<br />
+                            Service spécialisé en structuration de données pour l&apos;intelligence artificielle (AIO).<br />
                             Basée à Genève, Suisse.<br />
                             Contact : <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a>
                         </p>
@@ -35,15 +35,15 @@ export default function MentionsPage() {
 
                         <h2 style={{ fontSize: '1.2rem', marginTop: '30px', marginBottom: '10px', color: 'var(--text-main)' }}>3. Propriété intellectuelle</h2>
                         <p>
-                            L'ensemble du contenu de ce site (textes, images, code, protocoles ASR, scoring AIO) est protégé par le droit d'auteur
+                            L&apos;ensemble du contenu de ce site (textes, images, code, protocoles ASR, scoring AIO) est protégé par le droit d&apos;auteur
                             et relève de la législation suisse et internationale sur la propriété intellectuelle.
                             Toute reproduction, même partielle, est soumise à autorisation préalable.
                         </p>
 
                         <h2 style={{ fontSize: '1.2rem', marginTop: '30px', marginBottom: '10px', color: 'var(--text-main)' }}>4. Responsabilité</h2>
                         <p>
-                            AI Visionary s'efforce de fournir des informations exactes et à jour. Toutefois, aucune garantie n'est donnée
-                            quant à l'exhaustivité ou l'exactitude des contenus. L'utilisation des services se fait sous la responsabilité de l'utilisateur.
+                            AI Visionary s&apos;efforce de fournir des informations exactes et à jour. Toutefois, aucune garantie n&apos;est donnée
+                            quant à l&apos;exhaustivité ou l&apos;exactitude des contenus. L&apos;utilisation des services se fait sous la responsabilité de l&apos;utilisateur.
                         </p>
 
                         <h2 style={{ fontSize: '1.2rem', marginTop: '30px', marginBottom: '10px', color: 'var(--text-main)' }}>5. Droit applicable</h2>

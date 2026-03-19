@@ -1,4 +1,4 @@
-import { ASR_Published, ASR_Seal } from './asr-seal-spec';
+// Types ASR_Published, ASR_Seal available from './asr-seal-spec'
 
 /**
  * AYO Automated Compliance Test (Pre-Seal)
@@ -40,7 +40,7 @@ export interface ComplianceReport {
  * @param asrObject The raw ASR object to be sealed
  * @param keyId The ID of the authority key to use for signing
  */
-export function runComplianceTestBlueprint(asrObject: any, keyId: string): ComplianceReport {
+export function runComplianceTestBlueprint(_asrObject: any, _keyId: string): ComplianceReport {
     // 1. Initialize Report
     const report: ComplianceReport = {
         result: 'FAIL', // Default to fail until all checks pass

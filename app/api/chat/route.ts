@@ -7,7 +7,7 @@ import { Resend } from 'resend';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
 import { getFirestore } from 'firebase-admin/firestore';
-import { registerOrUpdateEntity } from '@/lib/aya/registry'; // Logic Registry
+// registerOrUpdateEntity imported on-demand from '@/lib/aya/registry'
 import { getSystemPrompt } from '@/lib/ayo-system-prompt';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { sanitizeForPrompt } from '@/lib/sanitize';
@@ -17,21 +17,16 @@ import Stripe from 'stripe';
 
 // Multi-Agents imports
 import {
-    normalizeScanStateUrl,
     scanStateDocId,
     loadScanState,
     formatScanForGreffier,
-    classifyScanConfidence,
 } from '@/lib/agents/scanner';
 import {
-    buildStripeLinks,
-    buildPackPresentation,
     encodeClientReference,
-    STRIPE_TEST_LINKS,
+    STRIPE_LINKS,
 } from '@/lib/agents/vendeur';
 import {
     formatScoreMessage,
-    formatDeltaMessage,
     AyoState,
     deriveState,
     type ConversationSignals,
@@ -60,7 +55,11 @@ import {
 export const maxDuration = 30;
 
 // Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
+const resendApiKey = process.env.RESEND_API_KEY;
+if (!resendApiKey) {
+    console.warn('RESEND_API_KEY is not set — email features will be disabled');
+}
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 // Initialize Stripe lazily to avoid build-time crash when env var is missing
 let _stripe: Stripe | null = null;
@@ -99,12 +98,12 @@ export async function POST(req: Request) {
 
         if (googleKey) {
             googleKey = googleKey.trim();
-            console.log(`Using Gemini Key: ${googleKey.substring(0, 5)}...`);
+            // Gemini key loaded
             const google = createGoogleGenerativeAI({ apiKey: googleKey });
 
             try {
                 // 1. AUTO-DETECT AVAILABLE MODELS (Robust Way)
-                console.log("Auto-detecting available Gemini model...");
+                // Auto-detecting available Gemini model
                 const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
 
                 if (!modelsResponse.ok) {
@@ -132,17 +131,17 @@ export async function POST(req: Request) {
                         // API returns 'models/gemini-1.5-pro-001', we need 'gemini-1.5-pro-001' (sometimes with or without 'models/')
                         // The Google SDK usually expects just the ID, but let's be safe.
                         const modelId = bestModel.name.replace('models/', '');
-                        console.log(`✅ Auto-detected Best Model: ${modelId}`);
+                        // Model selected: logged via structured logger
                         modelToUse = google(modelId);
                     } else {
-                        console.warn("No specific '1.5' or 'pro' model found (excluding flash). Fallback to 'gemini-pro'.");
+                        // Fallback to gemini-pro
                         modelToUse = google('gemini-pro');
                     }
                 } else {
                     throw new Error("No models list returned.");
                 }
             } catch (e) {
-                console.error("Gemini Auto-Detect Failed:", e);
+                logger.warn('GEMINI_DETECT_FAIL', e instanceof Error ? e.message : 'Unknown');
                 // Ultimate Fallback: Try a known stable alias
                 modelToUse = google('gemini-pro');
             }
@@ -174,7 +173,7 @@ export async function POST(req: Request) {
                         console.log("♻️ RECOVERED SESSION ID FROM STRIPE LINK:", sessionAsrId);
                         break;
                     }
-                } catch (e) { }
+                } catch (_e) { }
             }
         }
         if (!sessionAsrId) {
@@ -278,7 +277,6 @@ export async function POST(req: Request) {
         if (lastMessage.content.startsWith("update_profile|")) {
             const parts = lastMessage.content.split('|');
             if (parts.length > 1 && parts[1].startsWith('http')) {
-                // @ts-ignore
                 userUrlMatch = [parts[1]]; // Mock Regex Match to trick downstream logic
                 detectedUrl = parts[1];
                 console.log(`🔄 RECOVERED URL FROM ACTION: ${detectedUrl}`);
@@ -288,7 +286,6 @@ export async function POST(req: Request) {
         if (lastMessage.content.startsWith("main_menu|")) {
             const parts = lastMessage.content.split('|');
             if (parts.length > 1 && parts[1].startsWith('http')) {
-                // @ts-ignore
                 userUrlMatch = [parts[1]];
                 detectedUrl = parts[1];
                 console.log(`🔄 RECOVERED URL FROM MAIN_MENU ACTION: ${detectedUrl}`);
@@ -313,7 +310,6 @@ export async function POST(req: Request) {
         // Check if client is in AYA registry
         let isExistingClient_sm = false;
         if (urlInLastMessage && !hasFinalScore) {
-            // @ts-ignore
             const existingClient = await db.getAyaEntityByUrl(urlInLastMessage);
             if (existingClient) isExistingClient_sm = true;
         }
@@ -360,7 +356,6 @@ export async function POST(req: Request) {
 
         if ((ayoState === AyoState.EXISTING_CLIENT || lastMessage.content === "EXISTING_CLIENT") && !isOtpFlow) {
             const ec_url = urlInLastMessage || detectedUrl || "";
-            // @ts-ignore
             const client = await db.getAyaEntityByUrl(ec_url);
 
             if (!client) {
@@ -392,41 +387,6 @@ export async function POST(req: Request) {
         const lowText = lastMessage.content.toLowerCase();
         if (lowText.includes("manage_subscription") || lowText.includes("résilier")) {
 
-            let portalUrl = "";
-            let messageText = `⚙️ **Gestion de votre Abonnement**\n\nAccédez à votre espace sécurisé pour gérer vos factures, votre moyen de paiement ou résilier votre abonnement en toute autonomie.`;
-
-            // STRIPE PORTAL GENERATION
-            if (process.env.STRIPE_SECRET_KEY && detectedUrl) {
-                try {
-                    console.log(`🔐 GENERATING PORTAL LINK for ${detectedUrl}...`);
-                    // 1. Get Client from DB to find Stripe ID
-                    // @ts-ignore
-                    const clientSub = await db.getAyaEntityByUrl(detectedUrl);
-                    let customerId = clientSub?.stripe_customer_id;
-
-                    // 2. Fallback: Search Stripe by Email if ID missing in DB
-                    if (!customerId && clientSub?.contact_email) {
-                        const customers = await getStripe().customers.list({ email: clientSub.contact_email, limit: 1 });
-                        if (customers.data.length > 0) {
-                            customerId = customers.data[0].id;
-                            console.log(`✅ FOUND Stripe Customer ID via Email: ${customerId}`);
-                        }
-                    }
-
-                    // 3. Create Portal Session
-                    if (customerId) {
-                        const session = await getStripe().billingPortal.sessions.create({
-                            customer: customerId,
-                            return_url: `https://www.ai-visionary.com`, // Return to home after management
-                        });
-                        portalUrl = session.url;
-                    } else {
-                        console.warn("⚠️ No Stripe Customer ID found for portal generation.");
-                    }
-                } catch (e) {
-                    console.error("🔥 Stripe Portal Error:", e);
-                }
-            }
             // 🛡️ SECURITY STEP: Don't give portal URL yet. Challenge with OTP first.
             // UNLESS already authenticated (Token in history? Hard in stateless).
 
@@ -437,7 +397,6 @@ export async function POST(req: Request) {
             let clientSec: any = null;
 
             // 1. Registry Lookup
-            // @ts-ignore
             clientSec = await db.getAyaEntityByUrl(detectedUrl);
             if (clientSec && clientSec.contact_email) {
                 emailToUse = clientSec.contact_email;
@@ -446,7 +405,6 @@ export async function POST(req: Request) {
             // 2. Analysis Fallback (If registry empty or no email)
             if (!emailToUse) {
                 console.log(`ℹ️ Email not in Registry, trying Analysis DB for ${detectedUrl}...`);
-                // @ts-ignore
                 const analysis = await db.getLatestAnalysisByUrl(detectedUrl);
                 if (analysis && analysis.email) {
                     emailToUse = analysis.email;
@@ -496,7 +454,6 @@ export async function POST(req: Request) {
             let targetEmail = "";
 
             // A. Registry
-            // @ts-ignore
             const clientSec = await db.getAyaEntityByUrl(targetUrl);
             if (clientSec && clientSec.contact_email) {
                 targetEmail = clientSec.contact_email;
@@ -504,7 +461,6 @@ export async function POST(req: Request) {
 
             // B. Analysis Fallback
             if (!targetEmail) {
-                // @ts-ignore
                 const analysis = await db.getLatestAnalysisByUrl(targetUrl);
                 if (analysis && analysis.email) {
                     targetEmail = analysis.email;
@@ -513,9 +469,11 @@ export async function POST(req: Request) {
 
             if (targetEmail) {
                 const code = Math.floor(100000 + Math.random() * 900000).toString();
-                // @ts-ignore
                 await db.saveOTP(targetEmail, code);
 
+                if (!resend) {
+                    return new Response(JSON.stringify({ error: 'Email service not configured' }), { status: 500 });
+                }
                 const { error } = await resend.emails.send({
                     from: 'AI Visionary Security <security@ai-visionary.com>',
                     to: [targetEmail],
@@ -554,7 +512,6 @@ export async function POST(req: Request) {
             const code = lastMessage.content.trim();
             console.log(`🔐 VERIFYING CODE: ${code} for ${detectedUrl}`);
 
-            // @ts-ignore
             const clientVerif = await db.getAyaEntityByUrl(detectedUrl);
             let emailToVerify = "";
 
@@ -562,13 +519,11 @@ export async function POST(req: Request) {
                 emailToVerify = clientVerif.contact_email;
             }
             if (!emailToVerify) {
-                // @ts-ignore
                 const analysis = await db.getLatestAnalysisByUrl(detectedUrl);
                 if (analysis && analysis.email) emailToVerify = analysis.email;
             }
 
             if (emailToVerify) {
-                // @ts-ignore
                 const isValid = await db.verifyOTP(emailToVerify, code);
 
                 if (isValid) {
@@ -1245,7 +1200,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     try {
                         const parsed = JSON.parse(m.content);
                         return parsed.scan_state !== undefined;
-                    } catch (e) {
+                    } catch (_e) {
                         return false;
                     }
                 });
@@ -1312,7 +1267,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             // 2. Unknown/missing data = À DEMANDER (le scan n'a rien trouvé)
             // 3. Blocs critiques manquants = TOUJOURS demander même si peu de données manquent
             const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) || lowConfidenceKeys.includes(b));
-            let combinedQueue = [...questionQueue];
+            const combinedQueue = [...questionQueue];
 
             // Prioritize Country (identite.country)
             const countryIndex = combinedQueue.indexOf("identite.country");
@@ -1352,12 +1307,6 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             console.log(`📋 QUEUE DEBUG: questionsAsked=${questionsAskedCount}, queueIdx=${queueIndex}, queueLen=${combinedQueue.length}, next=${nextBlockName}`);
 
             console.log(`➡️ PROGRESS: Turn=${stepsCompleted} | QueueIdx=${queueIndex} | NextBlock=${nextBlockName}`);
-
-            const isValidationQuestion = lowConfidenceKeys.includes(nextBlockName);
-            let detectedValueForValidation = "";
-            if (isValidationQuestion && detectedValues[nextBlockName]) {
-                detectedValueForValidation = detectedValues[nextBlockName];
-            }
 
             if (nextBlockName === "FINALISATION") {
                 console.log(`🏁 AYO STATE → ${AyoState.SCORING}: All blocks covered. Triggering FINAL_ANALYSIS...`);
@@ -1413,7 +1362,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
 
                 if (jsonMatch) {
                     // We found a JSON-like block
-                    let potentialJson = jsonMatch[0];
+                    const potentialJson = jsonMatch[0];
                     finalResponseText = potentialJson;
 
                     try {
@@ -1421,8 +1370,6 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
 
                         // 🔒 DETERMINISTIC ONLY: LLM cannot trigger FINAL_ANALYSIS.
                         // Only the queue-based progression (nextBlockName === "FINALISATION") can end the questionnaire.
-                        const jsonStringContent = JSON.stringify(parsedResponse).toLowerCase();
-
                         // SANITY CHECK: If LLM screwed up and sent empty questions array, fallback immediately
                         if (!parsedResponse.questions || parsedResponse.questions.length === 0) {
                             throw new Error("LLM returned empty questions array");
@@ -2041,7 +1988,6 @@ L'Abonnement AYA est conçu pour les entreprises qui veulent des résultats sans
                     // CHECK IF CLIENT IS EXISTING TO ADAPT BUTTON TEXT (Using detectedUrl)
                     let isExisting = false;
                     if (detectedUrl) {
-                        // @ts-ignore
                         const client = await db.getAyaEntityByUrl(detectedUrl);
                         if (client) isExisting = true;
                     }
@@ -2147,8 +2093,8 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                 logger.info('STRIPE_LINK', `Stripe link generated with aid=${sessionAsrId}, email=${userEmail}`);
 
                 const actionLink = selectedPlan === "PRO"
-                    ? `${STRIPE_TEST_LINKS.PRO}${stripeSuffix}`
-                    : `${STRIPE_TEST_LINKS.AYA_SUB}${stripeSuffix}`;
+                    ? `${STRIPE_LINKS.PRO}${stripeSuffix}`
+                    : `${STRIPE_LINKS.AYA_SUB}${stripeSuffix}`;
 
                 if (selectedPlan === "PRO") {
                     finalResponseText = `✅ **Email enregistré.**
@@ -2229,7 +2175,7 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
             detectedUrl = 'https://' + detectedUrl;
         }
 
-        let finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
+        const finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
 
         // -----------------------------------------------------------------------
         // FINAL FALLBACK: GENERIC CHAT (INTELLIGENT REPLIES)

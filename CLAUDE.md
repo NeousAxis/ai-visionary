@@ -2,7 +2,7 @@
 
 > **IMPORTANT** : Ce fichier est lu automatiquement par Claude Code à chaque nouvelle conversation.
 > Il contient TOUTE la connaissance nécessaire pour reprendre le travail sur ce projet.
-> Dernière mise à jour : 13 mars 2026
+> Dernière mise à jour : 19 mars 2026
 
 ---
 
@@ -15,9 +15,9 @@ Le produit principal est **AYO** (AI Your Org) — un chatbot IA qui diagnostiqu
 
 ### Le business model
 
-1. **Pack Light** (gratuit) — Diagnostic + 1 fichier ASR basique envoyé par email
+1. **Analyse Light** (gratuit) — Diagnostic AIO + score de visibilité IA (pas de fichier livré)
 2. **Abonnement AYA** (19 CHF/mois) — Inscription au Registre AYA (registre public d'entités certifiées) + ASR hébergé + mises à jour
-3. **Pack PRO** (499 CHF one-shot) — 5 fichiers sources complets + 3 ans de Registre AYA offerts
+3. **Pack PRO** (499 CHF one-shot) — 5 fichiers ASR complets (ASR-Protocol, manifest, faq, glossary, external_context) + 3 ans de Registre AYA offerts
 
 ### Concepts clés
 
@@ -977,6 +977,43 @@ L'entonnoir de conversion est :
 - Pages légales trop courtes
 - SEO absent
 - Pas de cycle de vie client (MAJ, expiration, renouvellement)
-- 22 `@ts-ignore` dans le code
+- ~~22 `@ts-ignore` dans le code~~ → Corrigé (branche fix/remediation, 19 mars 2026)
 - `ignoreBuildErrors: true`
 - Styles inline partout
+
+---
+
+## CHANGELOG — Branche `fix/remediation` (19 mars 2026)
+
+### Sécurité (Critique)
+- **Endpoint debug `/api/debug/test-ayo` protégé** avec `requireAdmin()` (était ouvert sans auth)
+- **Fuite clé API Gemini supprimée** — `console.log` exposant les 5 premiers caractères de la clé retiré (`app/api/chat/route.ts:130`)
+- **Liens Stripe TEST → env vars** — `STRIPE_LINK_PRO` et `STRIPE_LINK_AYA_SUB` remplacent les URLs hardcodées dans `lib/agents/vendeur.ts` et `lib/ayo-system-prompt.ts`
+- **Stripe Price IDs retirés de `.env.example`** — les valeurs réelles ne sont plus commitées
+- **Resend API** — initialisation conditionnelle (`null` si pas de clé) au lieu du placeholder `re_build_placeholder`
+
+### Qualité code
+- **17 `@ts-ignore` → `@ts-expect-error`** puis suppression des 15 directives devenues inutiles
+- **47 erreurs `react/no-unescaped-entities`** corrigées (apostrophes FR → `&apos;`)
+- **71 warnings `no-unused-vars`** corrigés (imports supprimés, params callback préfixés `_`)
+- **Config ESLint** mise à jour avec `argsIgnorePattern: "^_"`
+- **3 `catch {}` vides** remplacés par `catch (e) { console.warn(...) }` dans `test-ayo/route.ts`
+
+### Nettoyage dead code (/simplify)
+- **Supprimé** : `_portalUrl` + bloc Stripe Portal inutilisé (~30 lignes), `_messageText`, `_detectedValueForValidation`, `_jsonStringContent` (hot-path JSON.stringify inutile)
+- **Supprimé** : `_activeBlock`, `_currentQIndex` (useState causant des re-renders inutiles), `_submitMultipleSelection` (fonction morte)
+- **Supprimé** : `_hasJsonLd` (architecte.ts), `_services` (ayo-generators.ts), `_ayaLink` (checkout-success)
+
+### Organisation
+- **9 scripts** déplacés de la racine vers `/scripts/`
+- **`ENTREPRISES_FACTICES_A_SUPPRIMER.json`** (291 Ko) supprimé
+- **`.gitignore`** corrigé — patterns préfixés `/` pour ne s'appliquer qu'à la racine
+
+### Build
+- `npm run build` ✅ — 16 pages générées, 0 erreur TypeScript
+
+### Vulnérabilités npm (non corrigées — upstream)
+- `fast-xml-parser` (critical) — dépendance transitive, `npm audit fix` inefficace
+- `flatted` (high) — idem
+- `@tootallnate/once` (moderate) — dépendance de `firebase-admin`
+- `ajv` (moderate) — dépendance transitive

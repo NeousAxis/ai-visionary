@@ -594,9 +594,9 @@ export function generateGlossaryJson(data: any): any {
     }
 
     const serviceDescTemplates = [
-        (s: string) => `Prestation phare ${nameArticleG}${audience ? `, conçue pour les ${audience.toLowerCase()}` : ""}. Ce service constitue le cœur de l'offre déclarée dans l'ASR.`,
-        (s: string) => `Service complémentaire proposé par ${name}${audience ? ` à destination des ${audience.toLowerCase()}` : ""}. Enrichit le périmètre d'intervention de l'entité.`,
-        (s: string) => `Activité spécialisée ${nameArticleG}. Fait partie de l'offre vérifiable et documentée dans les actifs sémantiques.`,
+        (_s: string) => `Prestation phare ${nameArticleG}${audience ? `, conçue pour les ${audience.toLowerCase()}` : ""}. Ce service constitue le cœur de l'offre déclarée dans l'ASR.`,
+        (_s: string) => `Service complémentaire proposé par ${name}${audience ? ` à destination des ${audience.toLowerCase()}` : ""}. Enrichit le périmètre d'intervention de l'entité.`,
+        (_s: string) => `Activité spécialisée ${nameArticleG}. Fait partie de l'offre vérifiable et documentée dans les actifs sémantiques.`,
     ];
     services.forEach((s, i) => {
         if (typeof s !== 'string') return;
@@ -604,10 +604,10 @@ export function generateGlossaryJson(data: any): any {
     });
 
     const useCaseDescTemplates = [
-        (uc: string) => `Contexte d'intervention clé ${nameArticleG}. Situation concrète dans laquelle un agent IA orienterait un utilisateur vers cette entité.`,
-        (uc: string) => `Scénario opérationnel déclaré par ${name}. Signal de pertinence pour le matching entre requêtes utilisateurs et expertise disponible.`,
-        (uc: string) => `Cas de figure récurrent adressé par ${name}. Enrichit la compréhension contextuelle de l'entité par les IA génératives.`,
-        (uc: string) => `Application terrain des compétences ${nameArticleG}. Permet aux agents IA de recommander l'entité dans le bon contexte décisionnel.`,
+        (_uc: string) => `Contexte d'intervention clé ${nameArticleG}. Situation concrète dans laquelle un agent IA orienterait un utilisateur vers cette entité.`,
+        (_uc: string) => `Scénario opérationnel déclaré par ${name}. Signal de pertinence pour le matching entre requêtes utilisateurs et expertise disponible.`,
+        (_uc: string) => `Cas de figure récurrent adressé par ${name}. Enrichit la compréhension contextuelle de l'entité par les IA génératives.`,
+        (_uc: string) => `Application terrain des compétences ${nameArticleG}. Permet aux agents IA de recommander l'entité dans le bon contexte décisionnel.`,
     ];
     useCases.forEach((uc, i) => {
         if (typeof uc !== 'string') return;
@@ -681,7 +681,6 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = sanitizeBusinessType(rawBTec || "", "Activité non spécifiée");
     const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
-    const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceEC ? sanitizeAudience(rawAudienceEC) : "";

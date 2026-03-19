@@ -50,17 +50,17 @@ ADMIN_SECRETS*
 # claude code
 .claude/
 
-# debug/test scripts (root level)
-check*.js
-clean_db.js
-debug_*.js
-delete_ghost.*
-fix-*.js
-force_send_*.sh
-repro_*.sh
-run-*.js
-simulate_*.js
-test-*.js
-test-*.ts
-test-*.sh
-TEST_*.json
+# debug/test scripts (root level only)
+/check*.js
+/clean_db.js
+/debug_*.js
+/delete_ghost.*
+/fix-*.js
+/force_send_*.sh
+/repro_*.sh
+/run-*.js
+/simulate_*.js
+/test-*.js
+/test-*.ts
+/test-*.sh
+/TEST_*.json

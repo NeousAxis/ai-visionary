@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
         logger.info('OTP_SEND_START', `OTP request for ${url}`);
 
         // 1. Find Admin Email associated with this entity
-        // @ts-ignore
         const client = await db.getAyaEntityByUrl(url);
 
         if (!client) {
@@ -54,11 +53,10 @@ export async function POST(req: NextRequest) {
         const code = Math.floor(100000 + Math.random() * 900000).toString();
 
         // 3. Save to DB (expires in 10 mins)
-        // @ts-ignore
         await db.saveOTP(adminEmail, code);
 
         // 4. Send Email via Resend
-        const { data, error } = await resend.emails.send({
+        const { error } = await resend.emails.send({
             from: 'AI Visionary Security <security@ai-visionary.com>',
             to: [adminEmail],
             subject: `🔒 Votre code de sécurité : ${code}`,

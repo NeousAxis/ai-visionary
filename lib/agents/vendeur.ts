@@ -21,9 +21,9 @@ export const STRIPE_PRICES = {
     AYA_SUB: process.env.STRIPE_AYA_SUB_PRICE_ID || 'price_1SzazaPkCQYUm8hQJfrKc9EJ',
 } as const;
 
-export const STRIPE_TEST_LINKS = {
-    PRO: 'https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201',
-    AYA_SUB: 'https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202',
+export const STRIPE_LINKS = {
+    PRO: process.env.STRIPE_LINK_PRO || 'https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201',
+    AYA_SUB: process.env.STRIPE_LINK_AYA_SUB || 'https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202',
 } as const;
 
 export type PackType = 'LIGHT' | 'PRO' | 'AYA_SUB';
@@ -68,8 +68,8 @@ export function buildStripeLinks(url: string, email: string): { pro: string; aya
     } catch { /* ignore */ }
 
     return {
-        pro: `${STRIPE_TEST_LINKS.PRO}${suffix}`,
-        ayaSub: `${STRIPE_TEST_LINKS.AYA_SUB}${suffix}`,
+        pro: `${STRIPE_LINKS.PRO}${suffix}`,
+        ayaSub: `${STRIPE_LINKS.AYA_SUB}${suffix}`,
     };
 }
 

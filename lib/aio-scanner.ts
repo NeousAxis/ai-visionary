@@ -41,7 +41,7 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
             result.isAyaRegistered = true;
             result.scoreFactors.push(`✅ Entité présente dans le Registre de Confiance AYA.`);
         }
-    } catch (e) {
+    } catch (_e) {
         // Safe skip
     }
 
@@ -120,7 +120,7 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
                     ) {
                         meaningfulSchemaFound = true;
                     }
-                } catch (e) {
+                } catch (_e) {
                     // Ignore parse errors
                 }
             }
@@ -174,11 +174,11 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
                 result.hasAsrFile = true;
                 result.scoreFactors.push(`🏆 FICHIER ASR OFFICIEL DÉTECTÉ (${asrUrl.toString()}).`);
             }
-        } catch (e) {
+        } catch (_e) {
             // Ignore URL parse errors
         }
 
-    } catch (error) {
+    } catch (_error) {
         result.scoreFactors.push(`❌ Erreur technique lors du scan: Site inaccessible.`);
     }
 

@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
         });
 
         return NextResponse.redirect(session.url!);
-    } catch (e: any) {
+    } catch (_e: any) {
         return new Response('Erreur lors de la creation du paiement', { status: 500 });
     }
 }

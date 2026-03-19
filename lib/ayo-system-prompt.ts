@@ -89,10 +89,10 @@ PHASE 3 — RÉSULTAT & CONVERSION
 → Tu demandes l'email professionnel pour envoyer le rapport détaillé.
 → Tu proposes les options de certification :
 
-  👉 [💎 Abonnement AYA (19 CHF/mois)](https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202${stripeSuffix})
+  👉 [💎 Abonnement AYA (19 CHF/mois)](${process.env.STRIPE_LINK_AYA_SUB || 'https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202'}${stripeSuffix})
      (Registre AYA Actif + Priorité IA + Mises à jour incluses)
 
-  👉 [🚀 Pack PRO (499 CHF One-Shot)](https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201${stripeSuffix})
+  👉 [🚀 Pack PRO (499 CHF One-Shot)](${process.env.STRIPE_LINK_PRO || 'https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201'}${stripeSuffix})
      (Propriété Totale + Fichiers Sources + 3 ANS de Registre offerts)
 
 ═══ CONNAISSANCES ═══

@@ -22,9 +22,9 @@ export default function Home() {
               style={{ height: '180px', width: 'auto', margin: '0 auto' }}
             />
           </div>
-          <h1 className="headline">Devenez l'entreprise que l'IA recommande en priorité.</h1>
+          <h1 className="headline">Devenez l&apos;entreprise que l&apos;IA recommande en priorité.</h1>
           <div className="subheadline">
-            <p>Rendez votre entreprise visible pour les millions d'utilisateurs qui posent des questions à l'IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...).</p>
+            <p>Rendez votre entreprise visible pour les millions d&apos;utilisateurs qui posent des questions à l&apos;IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...).</p>
             <p className="tagline">Ne laissez pas les IA deviner qui vous êtes. Prenez le contrôle de votre recommandation.</p>
           </div>
           <div className="cta-group" style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '30px' }}>
@@ -50,10 +50,10 @@ export default function Home() {
             <div className="problem-intro">
               <h2 className="section-title" style={{ textAlign: 'left', marginBottom: '20px' }}>Pourquoi votre site web ne suffit plus.</h2>
               <p style={{ fontSize: '1.25rem', color: 'var(--primary-color)', fontWeight: 'bold', marginBottom: '20px', lineHeight: '1.4' }}>
-                "Les IA cherchent des professionnels à la place des moteurs de recherche."
+                &quot;Les IA cherchent des professionnels à la place des moteurs de recherche.&quot;
               </p>
               <p style={{ fontSize: '1.1rem', color: 'var(--text-body)', lineHeight: '1.6' }}>
-                Elles ne montrent que les entreprises qu’elles peuvent identifier sans ambiguïté. <br />
+                Elles ne montrent que les entreprises qu&apos;elles peuvent identifier sans ambiguïté. <br />
                 <span style={{ fontWeight: '600' }}>AYO permet à votre entreprise de rester visible dans ce nouveau monde.</span>
               </p>
             </div>
@@ -66,13 +66,13 @@ export default function Home() {
               </div>
 
               <div className="card" style={{ padding: '20px', borderLeft: '4px solid var(--accent-secondary)' }}>
-                <h4 style={{ color: 'var(--text-main)', marginBottom: '5px' }}>Risque d'Hallucination</h4>
+                <h4 style={{ color: 'var(--text-main)', marginBottom: '5px' }}>Risque d&apos;Hallucination</h4>
                 <p style={{ color: 'var(--text-muted)' }}>Mal documentés, vos services peuvent être mal interprétés par les modèles.</p>
               </div>
 
               <div className="card" style={{ padding: '20px', borderLeft: '4px solid var(--text-muted)' }}>
                 <h4 style={{ color: 'var(--text-main)', marginBottom: '5px' }}>Invisibilité Totale</h4>
-                <p style={{ color: 'var(--text-muted)' }}>La majorité des entreprises sont aujourd'hui invisibles pour les assistants conversationnels.</p>
+                <p style={{ color: 'var(--text-muted)' }}>La majorité des entreprises sont aujourd&apos;hui invisibles pour les assistants conversationnels.</p>
               </div>
             </div>
 
@@ -124,7 +124,7 @@ export default function Home() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-main)' }}>👉 Les mots clés ne vous rendront pas plus visible, désormais c'est la structure de vos informations qui vous rend "appréciable" pour les IA.</p>
+            <p style={{ fontSize: '1.3rem', fontWeight: 'bold', color: 'var(--text-main)' }}>👉 Les mots clés ne vous rendront pas plus visible, désormais c&apos;est la structure de vos informations qui vous rend &quot;appréciable&quot; pour les IA.</p>
           </div>
         </div>
       </section>
@@ -133,9 +133,9 @@ export default function Home() {
       <section id="ayo-trigger" className="section ayo-trigger-section" style={{ textAlign: "center", padding: "60px 20px" }}>
         <div className="container">
           <h2 className="section-title">Testez votre lisibilité IA maintenant.</h2>
-          <p className="section-subtitle">C'est gratuit, immédiat et sans engagement.</p>
+          <p className="section-subtitle">C&apos;est gratuit, immédiat et sans engagement.</p>
           <Link href="/diagnostic" className="btn btn-primary" style={{ fontSize: "1.2rem", padding: "15px 30px" }}>
-            → Démarrer l'audit AYO
+            → Démarrer l&apos;audit AYO
           </Link>
         </div>
       </section>
@@ -143,19 +143,19 @@ export default function Home() {
       {/* SECTION 3 — Solution */}
       <section id="solution" className="section solution-section">
         <div className="container">
-          <h2 className="section-title" style={{ textAlign: 'center', fontSize: '1.5rem', lineHeight: '1.4', maxWidth: '900px', margin: '0 auto 40px auto' }}>AYO structure les informations essentielles de votre activité pour qu’elles soient exploitables par les IA.</h2>
+          <h2 className="section-title" style={{ textAlign: 'center', fontSize: '1.5rem', lineHeight: '1.4', maxWidth: '900px', margin: '0 auto 40px auto' }}>AYO structure les informations essentielles de votre activité pour qu&apos;elles soient exploitables par les IA.</h2>
           <div className="grid-2" style={{ display: 'flex', justifyContent: 'center' }}>
             {/* Bloc AIO Unique */}
             <div className="card solution-card aio-card" style={{ maxWidth: '800px', width: '100%' }}>
-              <h3>AIO / ASR <span className="subtitle">L'infrastructure de visibilité</span></h3>
-              <p>AYO n’ajoute pas du marketing. Il ajoute les informations manquantes pour que les IA puissent vous recommander.</p>
+              <h3>AIO / ASR <span className="subtitle">L&apos;infrastructure de visibilité</span></h3>
+              <p>AYO n&apos;ajoute pas du marketing. Il ajoute les informations manquantes pour que les IA puissent vous recommander.</p>
 
               <div style={{ margin: '30px 0', padding: '20px', background: 'rgba(37, 99, 235, 0.05)', borderRadius: '12px', border: '1px solid rgba(37, 99, 235, 0.1)' }}>
                 <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-main)' }}>
-                  AIO (Artificial Intelligence Optimization) : L'art de structurer l'information.
+                  AIO (Artificial Intelligence Optimization) : L&apos;art de structurer l&apos;information.
                 </p>
                 <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                  "Un ASR (AI Singular Record) est une déclaration canonique, unique et structurée d’une entité, destinée à être lue, interprétée et utilisée par des IA sans ambiguïté ni extrapolation."
+                  &quot;Un ASR (AI Singular Record) est une déclaration canonique, unique et structurée d&apos;une entité, destinée à être lue, interprétée et utilisée par des IA sans ambiguïté ni extrapolation.&quot;
                 </p>
               </div>
               <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -165,7 +165,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h4 style={{ marginBottom: '10px', color: 'var(--accent-color)' }}>2. Autorité</h4>
-                  <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Nous créons un "Fichier Signature" unique qui prouve à l'IA que vous êtes la source officielle et fiable de l'information.</p>
+                  <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)' }}>Nous créons un &quot;Fichier Signature&quot; unique qui prouve à l&apos;IA que vous êtes la source officielle et fiable de l&apos;information.</p>
                 </div>
               </div>
               <p className="highlight" style={{ textAlign: 'center', marginTop: '30px', borderTop: '1px solid var(--border-light)', paddingTop: '20px' }}>
@@ -175,9 +175,9 @@ export default function Home() {
           </div>
           <div style={{ textAlign: "center", marginTop: "40px", maxWidth: "800px", margin: "40px auto 0" }}>
             <p style={{ fontSize: "1.4rem", fontWeight: "bold", lineHeight: "1.4", color: 'var(--text-main)' }}>
-              "Si une IA ne dispose pas d’informations suffisantes sur votre activité, <br />
+              &quot;Si une IA ne dispose pas d&apos;informations suffisantes sur votre activité, <br />
               elle vous écarte sans vous comparer. <br />
-              AYO corrige ça."
+              AYO corrige ça.&quot;
             </p>
           </div>
         </div>
@@ -197,8 +197,8 @@ export default function Home() {
             <span className="target-badge">Établissements publics</span>
           </div>
           <p className="target-text" style={{ fontSize: '1.2rem', marginTop: '30px', lineHeight: '1.6' }}>
-            "Aujourd’hui, la visibilité ne dépend plus du référencement, mais de la capacité des IA à vous identifier.<br />
-            <strong>AYO prépare votre entreprise à ce nouveau filtre.</strong>"
+            &quot;Aujourd&apos;hui, la visibilité ne dépend plus du référencement, mais de la capacité des IA à vous identifier.<br />
+            <strong>AYO prépare votre entreprise à ce nouveau filtre.</strong>&quot;
           </p>
         </div>
       </section>
@@ -211,10 +211,10 @@ export default function Home() {
               INFRASTRUCTURE
             </span>
             <h2 style={{ fontSize: '3.5rem', fontWeight: '800', marginTop: '25px', marginBottom: '20px', color: '#ffffff', textShadow: '0 4px 15px rgba(0,0,0,0.5)', lineHeight: 1.1 }}>
-              Devenez l'entreprise que l'IA recommande en priorité.
+              Devenez l&apos;entreprise que l&apos;IA recommande en priorité.
             </h2>
             <p style={{ fontSize: '1.3rem', color: '#e2e8f0', maxWidth: '750px', margin: '0 auto', lineHeight: '1.6', fontWeight: '500' }}>
-              Rendez votre entreprise visible pour les millions d'utilisateurs qui posent des questions à l'IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...).
+              Rendez votre entreprise visible pour les millions d&apos;utilisateurs qui posent des questions à l&apos;IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...).
             </p>
           </div>
 
@@ -223,7 +223,7 @@ export default function Home() {
               <div style={{ fontSize: '2.5rem', marginBottom: '20px' }}>🌐</div>
               <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '10px' }}>Connecteur Universel</h3>
               <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                AYA <strong>héberge et diffuse</strong> votre <strong>ASR</strong> (généré par AYO) directement auprès des IAs, garantissant qu'elles accèdent à votre vérité officielle en temps réel.
+                AYA <strong>héberge et diffuse</strong> votre <strong>ASR</strong> (généré par AYO) directement auprès des IAs, garantissant qu&apos;elles accèdent à votre vérité officielle en temps réel.
               </p>
             </div>
 
@@ -239,7 +239,7 @@ export default function Home() {
               <div style={{ fontSize: '2.5rem', marginBottom: '20px' }}>⚡️</div>
               <h3 style={{ color: 'white', fontSize: '1.2rem', marginBottom: '10px' }}>Priorité de Réponse</h3>
               <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                Quand un utilisateur demande <em>"Plombier urgence Lyon"</em>, les IAs privilégient les entités structurées (horaires, localisation précise) du registre AYA plutôt que les annuaires obsolètes.
+                Quand un utilisateur demande <em>&quot;Plombier urgence Lyon&quot;</em>, les IAs privilégient les entités structurées (horaires, localisation précise) du registre AYA plutôt que les annuaires obsolètes.
               </p>
             </div>
           </div>
@@ -269,7 +269,7 @@ export default function Home() {
               </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary w-full" style={{ width: '100%' }}>
-                  S'abonner (Sans engagement)
+                  S&apos;abonner (Sans engagement)
                 </Link>
               </div>
             </div>

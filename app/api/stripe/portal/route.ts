@@ -43,7 +43,6 @@ export async function POST(req: NextRequest) {
         logger.info('PORTAL_START', `Portal request for ${detectedUrl}`);
 
         // 1. Retrieve the Client Entity from DB
-        // @ts-ignore
         const client = await db.getAyaEntityByUrl(detectedUrl);
 
         if (!client) {

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const rateLimited = checkRateLimit(req, 'admin-fix', RATE_LIMITS.debug);
     if (rateLimited) return rateLimited;
 
-    const logger = createLogger(generateCorrelationId(), 'admin');
+    const _logger = createLogger(generateCorrelationId(), 'admin');
 
     try {
         const firestore = getFirestore();
