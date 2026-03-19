@@ -36,6 +36,7 @@ import {
 } from '@/lib/agents/analyste';
 import {
     buildContinuePrompt,
+    buildValidationQuestion,
 } from '@/lib/agents/greffier';
 import {
     validateEmail,
@@ -1262,12 +1263,13 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 "external_context.keywords", "external_context.intents"
             ];
 
-            // 🧮 ORDERED QUEUE:
-            // 1. Low confidence data = ACQUIS (pas de confirmation demandée au client)
-            // 2. Unknown/missing data = À DEMANDER (le scan n'a rien trouvé)
-            // 3. Blocs critiques manquants = TOUJOURS demander même si peu de données manquent
-            const questionQueue = allBlockNames.filter(b => unknownKeys.includes(b) || lowConfidenceKeys.includes(b));
-            const combinedQueue = [...questionQueue];
+            // 🧮 ORDERED QUEUE — SÉPARÉE EN 2 TYPES :
+            // 1. validationQueue = données scannées lowConfidence → question statique Oui/Non (pas de LLM)
+            // 2. enrichmentQueue = données inconnues → question LLM via Greffier
+            const validationQueue = allBlockNames.filter(b => lowConfidenceKeys.includes(b));
+            const enrichmentQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
+            // Validation d'abord, enrichissement ensuite
+            const combinedQueue = [...validationQueue, ...enrichmentQueue];
 
             // Prioritize Country (identite.country)
             const countryIndex = combinedQueue.indexOf("identite.country");
@@ -1330,10 +1332,49 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 });
             }
 
+            // 🛡️ VALIDATEUR POST-LLM : Vérifie que le JSON respecte les règles métier (mutation in-place)
+            function validateQuestionBlock(parsed: any): void {
+                if (!parsed.questions || !Array.isArray(parsed.questions)) return;
+
+                // Règle 1 : garder uniquement la première question (pas 2 en 1)
+                if (parsed.questions.length > 1) {
+                    console.warn(`⚠️ VALIDATOR: ${parsed.questions.length} questions reçues, on garde la première`);
+                    parsed.questions = [parsed.questions[0]];
+                }
+
+                const q = parsed.questions[0];
+                if (!q) return;
+
+                // Règle 2 : au moins 2 options, jamais seulement "Autre"
+                if (!q.options || q.options.length === 0) {
+                    q.options = ["Oui", "Non"];
+                    q.allowCustom = true;
+                    console.warn("⚠️ VALIDATOR: 0 options → fallback Oui/Non");
+                } else if (q.options.length === 1) {
+                    const singleOpt = q.options[0].toLowerCase();
+                    if (singleOpt.includes('autre') || singleOpt.includes('préciser')) {
+                        q.options = ["Oui", "Non"];
+                        q.allowCustom = true;
+                        console.warn("⚠️ VALIDATOR: seule option 'Autre' → fallback Oui/Non");
+                    }
+                }
+            }
+
             // ONLY GENERATE A NEW QUESTION IF WE ARE STILL IN QUESTIONING MODE
             if (ayoState === AyoState.QUESTIONNAIRE || ayoState === AyoState.OWNERSHIP || ayoState === AyoState.TRUTH_WARNING) {
 
-                // 🤖 AGENT GREFFIER — génère le prompt pour la prochaine question
+                // 🆕 VALIDATION STATIQUE : Si le prochain bloc est lowConfidence, question Oui/Non sans LLM
+                if (validationQueue.includes(nextBlockName)) {
+                    const fieldName = nextBlockName.split('.')[1] || nextBlockName;
+                    const detectedValue = detectedValues[nextBlockName] || 'Information détectée';
+                    finalResponseText = buildValidationQuestion(
+                        nextBlockName.split('.')[0],
+                        fieldName,
+                        detectedValue
+                    );
+                    console.log(`✅ VALIDATION STATIQUE pour ${nextBlockName} (pas de LLM)`);
+                } else {
+                // 🤖 AGENT GREFFIER — génère le prompt pour la prochaine question (ENRICHISSEMENT)
                 const scanInfo = contextScanResult ? formatScanForGreffier({
                     ...contextScanResult,
                     hasSitemap: contextScanResult.hasSitemap ?? (detectedValues['engagements_conformite.policies'] || '').toLowerCase().includes('sitemap'),
@@ -1367,6 +1408,9 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
 
                     try {
                         const parsedResponse = JSON.parse(potentialJson);
+
+                        // 🛡️ Valider les règles métier
+                        validateQuestionBlock(parsedResponse);
 
                         // 🔒 DETERMINISTIC ONLY: LLM cannot trigger FINAL_ANALYSIS.
                         // Only the queue-based progression (nextBlockName === "FINALISATION") can end the questionnaire.
@@ -1467,6 +1511,8 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                         });
                     }
                 }
+
+                } // fin du else (ENRICHISSEMENT LLM)
 
             }
         } // End of conditional questioning block (OWNERSHIP | TRUTH_WARNING | QUESTIONNAIRE | CALIBRATION)

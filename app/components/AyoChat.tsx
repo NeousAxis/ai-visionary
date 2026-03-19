@@ -435,33 +435,35 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             const questionId = q.id || `q_${idx}`;
                             const currentSelections = selectedMultiple[questionId] || [];
 
-                            // FILTER OUT "Autre" variants AND redundant "Les deux" options
-                            const filteredOptions = q.options.filter(opt => {
-                                const lower = opt.toLowerCase().trim();
-                                // Remove "Autre" variants via includes to catch "Autre, à préciser"
-                                if (lower.includes('autre') || lower.includes('other') || lower.includes('préciser')) return false;
-                                // Remove "Les deux" / combined options (redundant with checkboxes)
-                                if (lower.includes('les deux') || lower.includes('both') || lower.includes('tous') || lower.includes('toutes') || lower.includes('all')) return false;
-                                return true;
-                            });
-
-                            // DETECT OWNERSHIP QUESTION (must stay Yes/No without "Autre")
+                            // DETECT question types
                             const questionLower = q.text.toLowerCase();
                             const isOwnershipQuestion =
                                 questionLower.includes('appartient') ||
                                 questionLower.includes('autorisé') ||
                                 questionLower.includes('propriétaire') ||
                                 q.id === 'ownership_confirm';
+                            const isValidationQuestion =
+                                q.id?.startsWith('validation_') ||
+                                (questionLower.includes('est-ce exact') && !isOwnershipQuestion);
+
+                            // FILTER OUT "Autre" variants AND redundant "Les deux" options
+                            // Pour les questions de validation (Oui/Non), garder les options telles quelles
+                            const filteredOptions = isValidationQuestion ? q.options : q.options.filter(opt => {
+                                const lower = opt.toLowerCase().trim();
+                                if (lower.includes('autre') || lower.includes('other') || lower.includes('préciser')) return false;
+                                if (lower.includes('les deux') || lower.includes('both') || lower.includes('tous') || lower.includes('toutes') || lower.includes('all')) return false;
+                                return true;
+                            });
 
                             // DETECT questions that should NOT have the "Non applicable" skip button
                             const isTruthQuestion = q.id === 'truth_confirmation' || questionLower.includes('compris l\'importance');
                             const isCalibrationQuestion = q.id === 'activity_calibration' || questionLower.includes('décrire votre activité');
                             const isEmailQuestion = questionLower.includes('email') && (questionLower.includes('professionnel') || questionLower.includes('finaliser'));
-                            const showSkipButton = !isOwnershipQuestion && !isTruthQuestion && !isCalibrationQuestion && !isEmailQuestion;
+                            const showSkipButton = !isOwnershipQuestion && !isValidationQuestion && !isTruthQuestion && !isCalibrationQuestion && !isEmailQuestion;
 
                             // FORCE allowMultiple based on question keywords (LLM often forgets)
                             // BUT NOT for ownership question OR if explicitly set to false
-                            const forceMultiple = !isOwnershipQuestion && q.allowMultiple !== false && (
+                            const forceMultiple = !isOwnershipQuestion && !isValidationQuestion && q.allowMultiple !== false && (
                                 q.allowMultiple ||
                                 questionLower.includes('public') ||
                                 questionLower.includes('cible') ||

@@ -302,6 +302,11 @@ export function buildContinuePrompt(params: ContinuePromptParams): string {
    - "Conformité RGPD" mais pas de page détectée → "Fournissez le lien vers votre politique RGPD"
    - "Certification ISO" non trouvée → "Fournissez le lien ou numéro de certificat"
    - TOUTE déclaration non confirmée par le scan doit être prouvée par un lien.
+6. 📋 FORMAT DES OPTIONS :
+   - CHAQUE question DOIT avoir au minimum 2 options pertinentes. JAMAIS une seule option.
+   - JAMAIS proposer uniquement "Autre" comme option.
+   - UNE SEULE question par bloc "questions". JAMAIS 2 questions combinées.
+   - Si la question valide une donnée détectée → options OBLIGATOIRES : ["✅ Oui, c'est exact", "❌ Non, ce n'est pas exact"]
 
 ### CE QUE LE SCAN A TROUVÉ (FAIT AUTORITÉ — NE JAMAIS REPOSER CES QUESTIONS) :
 ${scanInfo}
@@ -309,7 +314,7 @@ ${scanInfo}
 
 ### ÉTAT DU DOSSIER :
 - Déjà collecté : ${highConfidenceData || 'Aucun'}
-- Données scannées (utilisables directement) : ${lowConfidenceData || 'Aucun'}
+- Données scannées (GÉRÉES SÉPARÉMENT — NE PAS POSER DE QUESTION DESSUS) : ${lowConfidenceData || 'Aucun'}
 
 ### MISSION :
 Poser la question pour OBTENIR les données MANQUANTES du bloc : **${nextBlockName}**.
@@ -337,4 +342,85 @@ Les données déjà collectées ou scannées sont ACQUISES — ne les redemande 
     }
   ]
 }`;
+}
+
+/**
+ * Génère une question de validation STATIQUE (sans LLM) pour les données scannées lowConfidence.
+ * Format : "Le scan a détecté X. Est-ce exact ?" avec options Oui/Non.
+ */
+// Labels humains pour les blocs et champs (module-level pour éviter recréation)
+const BLOCK_LABELS: Record<string, string> = {
+    'identite': 'Identité & Ancrage',
+    'offre': 'Clarté de l\'Offre',
+    'processus_methodes': 'Processus & Méthodes',
+    'engagements_conformite': 'Confiance & Conformité',
+    'indicateurs': 'Preuve Sociale & Métriques',
+    'contenus_pedagogiques': 'Pédagogie & Supports',
+    'external_context': 'Contexte Externe',
+};
+
+const FIELD_LABELS: Record<string, string> = {
+    'services': 'les services suivants',
+    'products': 'les produits suivants',
+    'target_audience': 'le public cible suivant',
+    'use_cases': 'le cas d\'usage suivant',
+    'pricing_indication': 'la tarification suivante',
+    'process_steps': 'les étapes suivantes',
+    'delivery_mode': 'que votre service est principalement',
+    'quality_assurance': 'que votre assurance qualité repose sur',
+    'certifications': 'les certifications suivantes',
+    'frameworks': 'les frameworks suivants',
+    'policies': 'les politiques suivantes',
+    'security_measures': 'les mesures de sécurité suivantes',
+    'key_indicators': 'les indicateurs suivants',
+    'has_faq': 'la présence d\'une FAQ',
+    'has_glossary': 'la présence d\'un glossaire',
+    'has_documentation': 'la présence de documentation',
+    'keywords': 'les mots-clés suivants',
+    'channels': 'les canaux suivants',
+    'intents': 'les intentions utilisateurs suivantes',
+    'city': 'que vous êtes basé à',
+    'country': 'que votre pays est',
+    'name': 'le nom',
+    'legal_name': 'le nom légal',
+    'business_type': 'le type d\'activité',
+    'geographies_served': 'la zone géographique servie',
+};
+
+export function buildValidationQuestion(
+    blockName: string,
+    fieldName: string,
+    detectedValue: string | string[],
+): string {
+    // Formater la valeur détectée
+    let displayValue: string;
+    if (Array.isArray(detectedValue)) {
+        if (detectedValue.length <= 3) {
+            displayValue = detectedValue.join(', ');
+        } else {
+            displayValue = detectedValue.slice(0, 3).join(', ') + ` et ${detectedValue.length - 3} autre(s)`;
+        }
+    } else {
+        displayValue = detectedValue.length > 150
+            ? detectedValue.substring(0, 147) + '...'
+            : detectedValue;
+    }
+
+    const fieldLabel = FIELD_LABELS[fieldName] || `l'information suivante pour "${fieldName}"`;
+    const blocLabel = BLOCK_LABELS[blockName.split('.')[0]] || blockName;
+
+    const questionBlock = {
+        type: "question_block",
+        intro: `Passons à la section : **${blocLabel}**`,
+        questions: [{
+            id: `validation_${blockName.replace('.', '_')}`,
+            text: `Le scan a détecté ${fieldLabel} : ${displayValue}.\nEst-ce exact ?`,
+            options: ["✅ Oui, c'est exact", "❌ Non, ce n'est pas exact"],
+            allowCustom: true,
+            allowMultiple: false,
+            customLabel: "Préciser ou corriger"
+        }]
+    };
+
+    return JSON.stringify(questionBlock);
 }
