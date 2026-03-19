@@ -113,7 +113,7 @@ async function main() {
     fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
     const files: [string, any][] = [
-        ['asr.json', asrJson],
+        ['ASR-Protocol.json', asrJson],
         ['manifest.json', manifestJson],
         ['faq.json', faqJson],
         ['glossary.json', glossaryJson],
