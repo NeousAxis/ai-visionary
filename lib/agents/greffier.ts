@@ -352,6 +352,7 @@ export function buildContinuePrompt(params: ContinuePromptParams): string {
    - allowCustom: true (pour que l'utilisateur puisse saisir son URL)
    - Si l'utilisateur ne fournit pas de preuve → le champ garde la valeur déclarée mais avec evidence: "none"
    - Si l'utilisateur fournit un lien → evidence: "link_provided" et le lien est stocké dans evidence_links
+   - ⚠️ ANTI-BOUCLE : NE JAMAIS reposer une question de preuve déjà posée. Si l'utilisateur répond "je n'ai pas de lien", répond du texte libre, ou dit "non", ACCEPTE sa réponse immédiatement et PASSE AU BLOC SUIVANT. 1 seul essai par champ.
 6. 📋 FORMAT DES OPTIONS :
    - CHAQUE question DOIT avoir au minimum 2 options pertinentes. JAMAIS une seule option.
    - JAMAIS proposer uniquement "Autre" comme option.

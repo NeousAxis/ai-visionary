@@ -1320,9 +1320,19 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             // 🎯 NEW ROBUST INDEXING (V3):
             // We count how many "question blocks" the assistant has ALREADY sent.
             // This is immune to user multiple messages or "pedagogical" interruptions.
-            const questionsAskedCount = assistantMessages.filter((m: any) =>
-                m.content.includes('"type": "question_block"') || m.content.includes('question_block')
-            ).length;
+            // Count UNIQUE question IDs only — repeated/looped questions don't consume queue slots
+            const seenQuestionIds = new Set<string>();
+            for (const m of assistantMessages) {
+                if (m.content.includes('question_block')) {
+                    const idMatch = m.content.match(/"id"\s*:\s*"([^"]+)"/);
+                    if (idMatch) {
+                        seenQuestionIds.add(idMatch[1]);
+                    } else {
+                        seenQuestionIds.add(`_anon_${seenQuestionIds.size}`);
+                    }
+                }
+            }
+            const questionsAskedCount = seenQuestionIds.size;
 
             let nextBlockName = "";
             let queueIndex = -1;
