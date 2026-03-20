@@ -499,93 +499,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                         )}
                                     </div>
 
-                                    {/* TEXT INPUT MODE — for email, phone, geographies, etc. */}
-                                    {/* Also for URL link fields ("Fournir un lien", "coller l'URL") */}
-                                    {(() => {
-                                        const isTextInputMode = q.inputType === 'text' || ((!q.options || q.options.length === 0) && q.allowCustom);
-                                        const isUrlOption = filteredOptions.some(opt => {
-                                            const lo = opt.toLowerCase();
-                                            return lo.includes('lien') || lo.includes('url') || lo.includes('coller');
-                                        });
-                                        return (isTextInputMode || isUrlOption) ? true : false;
-                                    })() ? (
-                                        <div className="flex flex-col gap-4">
-                                            {/* Render non-URL options as normal buttons first */}
-                                            {filteredOptions.filter(opt => {
-                                                const lo = opt.toLowerCase();
-                                                return !(lo.includes('lien') || lo.includes('url') || lo.includes('coller'));
-                                            }).length > 0 && (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                    {filteredOptions.filter(opt => {
-                                                        const lo = opt.toLowerCase();
-                                                        return !(lo.includes('lien') || lo.includes('url') || lo.includes('coller'));
-                                                    }).map((opt, i) => (
-                                                        <button
-                                                            key={i}
-                                                            onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
-                                                            disabled={isLoading}
-                                                            className="group flex items-center !gap-6 w-full !px-6 !py-5 !rounded-2xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
-                                                        >
-                                                            <span className="text-[16px] font-medium text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors leading-relaxed">
-                                                                {opt}
-                                                            </span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {/* Direct text/URL input field — styled like "Autre réponse" */}
-                                            <div className="group flex items-center w-full !px-5 !py-4 !rounded-2xl border-2 border-dashed border-slate-200 hover:border-[#4A919E]/50 bg-white transition-all duration-200">
-                                                <input
-                                                    type="text"
-                                                    placeholder={
-                                                        filteredOptions.some(opt => opt.toLowerCase().includes('lien') || opt.toLowerCase().includes('url'))
-                                                            ? "Collez votre URL ici..."
-                                                            : (q.customLabel || "Saisissez votre réponse...")
-                                                    }
-                                                    value={input}
-                                                    onChange={(e) => setInput(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && input.trim()) {
-                                                            handleSubmit(undefined, `${q.text} : ${input.trim()}`);
-                                                            setInput('');
-                                                        }
-                                                    }}
-                                                    disabled={isLoading}
-                                                    autoFocus
-                                                    className="flex-1 bg-transparent outline-none text-[15px] text-[#212E53] placeholder:text-slate-400 italic"
-                                                />
-                                                {input.trim() && (
-                                                    <button
-                                                        onClick={() => {
-                                                            handleSubmit(undefined, `${q.text} : ${input.trim()}`);
-                                                            setInput('');
-                                                        }}
-                                                        disabled={isLoading}
-                                                        className="ml-3 p-2 rounded-lg text-[#4A919E] hover:bg-[#4A919E]/10 transition-all"
-                                                        title="Envoyer"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                                                            <path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.414 4.926A1.5 1.5 0 0 0 5.135 9.25h6.115a.75.75 0 0 1 0 1.5H5.135a1.5 1.5 0 0 0-1.442 1.086l-1.414 4.926a.75.75 0 0 0 .826.95l14.095-5.637a.75.75 0 0 0 0-1.4L3.105 2.288Z" />
-                                                        </svg>
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            {/* Skip button */}
-                                            {showSkipButton && (
-                                                <button
-                                                    onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : [SKIP] Non applicable`)}
-                                                    disabled={isLoading}
-                                                    className="!px-6 !py-2.5 !rounded-lg text-[13px] font-medium text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 bg-transparent hover:bg-slate-50 transition-all duration-200 self-start"
-                                                >
-                                                    Non applicable
-                                                </button>
-                                            )}
-                                        </div>
-                                    ) :
-                                    /* CHECKBOX MODE - LARGE BUBBLE DESIGN */
-                                    forceMultiple ? (
+                                    {/* CHECKBOX MODE - LARGE BUBBLE DESIGN */}
+                                    {forceMultiple ? (
                                         <div className="flex flex-col gap-4">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {filteredOptions.map((opt, i) => {
@@ -715,7 +630,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                         /* BUTTON MODE (Single Select) - LARGE BUBBLE STYLE FORCED */
                                         <div className="flex flex-col gap-4">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {filteredOptions.map((opt, i) => (
+                                                {/* For inputType text: NO option buttons, user types in main chat input */}
+                                                {q.inputType !== 'text' && filteredOptions.map((opt, i) => (
                                                     <button
                                                         key={i}
                                                         onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
@@ -737,8 +653,6 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {!isOwnershipQuestion && q.allowCustom !== false && (
                                                     <button
                                                         onClick={() => {
-                                                            // CUSTOM LABEL HANDLING:
-                                                            // If label is "Activité...", prefix becomes "Activité : "
                                                             const cleanLabel = q.customLabel ? q.customLabel.replace(/\.\.\.$/, '').replace(/:$/, '').trim() : "Autre";
                                                             const prefix = `${cleanLabel} : `;
 
