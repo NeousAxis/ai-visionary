@@ -250,6 +250,35 @@ const MULTI_SELECT_FIELDS = [
     'indicateurs.key_indicators', 'external_context.keywords', 'external_context.intents',
 ];
 
+/**
+ * Champs critiques nécessitant une PREUVE vérifiable (lien, URL, document).
+ * Après la réponse déclarative de l'utilisateur, le Greffier doit demander un lien de preuve.
+ */
+export const EVIDENCE_REQUIRED_FIELDS: Record<string, string> = {
+    'engagements_conformite.certifications':
+        "Pouvez-vous fournir un lien vers la page de votre site mentionnant ces certifications, ou un lien direct vers les certificats ? (URL de page, lien PDF, numéro de certificat vérifiable...)\nSi vous n'avez pas de lien, répondez \"Je n'ai pas de lien à fournir\".",
+    'indicateurs.key_indicators':
+        "Où ces métriques sont-elles publiées ? (page de votre site, rapport annuel PDF, page 'À propos', dashboard public...)\nSi vous n'avez pas de lien, répondez \"Je n'ai pas de lien à fournir\".",
+    'indicateurs.testimonials':
+        "Avez-vous une page d'avis clients ou un profil Google Business / Trustpilot que nous pouvons référencer ? (URL directe)\nSi vous n'avez pas de lien, répondez \"Je n'ai pas de lien à fournir\".",
+    'engagements_conformite.security_measures':
+        "Disposez-vous d'une page décrivant vos mesures de sécurité, ou d'un rapport d'audit accessible ? (URL ou lien PDF)\nSi vous n'avez pas de lien, répondez \"Je n'ai pas de lien à fournir\".",
+    'engagements_conformite.policies':
+        "Quel est le lien direct vers votre page de politique de confidentialité / mentions légales ? (URL exacte)\nSi vous n'avez pas de lien, répondez \"Je n'ai pas de lien à fournir\".",
+    'processus_methodes.process_steps':
+        "Avez-vous une page décrivant votre méthodologie ou processus sur votre site ? (URL de la page)\nSi vous n'avez pas de lien, répondez \"Je n'ai pas de lien à fournir\".",
+};
+
+/** Vérifie si un champ donné nécessite une question de preuve */
+export function fieldRequiresEvidence(blockName: string): boolean {
+    return blockName in EVIDENCE_REQUIRED_FIELDS;
+}
+
+/** Retourne la question de preuve pour un champ donné, ou null */
+export function getEvidenceQuestion(blockName: string): string | null {
+    return EVIDENCE_REQUIRED_FIELDS[blockName] ?? null;
+}
+
 export interface ContinuePromptParams {
     nextBlockName: string;
     scanInfo: string;
@@ -298,10 +327,27 @@ export function buildContinuePrompt(params: ContinuePromptParams): string {
    - JAMAIS proposer "Compléter la liste", "Ajouter des éléments", "Confirmer la liste" comme option.
    - JAMAIS afficher de longues listes. Résume : "les X éléments détectés" + 2-3 exemples max.
    - JAMAIS demander de confirmer ce que le scan a déjà trouvé. Le scan fait autorité.
-5. 🔍 VÉRIFICATION : Si le client DÉCLARE quelque chose que le scan N'A PAS trouvé, EXIGE un lien ou une preuve :
+5. 🔍 VÉRIFICATION & DEMANDE DE PREUVES :
+   Si le client DÉCLARE quelque chose que le scan N'A PAS trouvé, EXIGE un lien ou une preuve.
    - "Conformité RGPD" mais pas de page détectée → "Fournissez le lien vers votre politique RGPD"
    - "Certification ISO" non trouvée → "Fournissez le lien ou numéro de certificat"
    - TOUTE déclaration non confirmée par le scan doit être prouvée par un lien.
+
+   📎 RÈGLE DE PREUVE SYSTÉMATIQUE — Pour les champs suivants, APRÈS la réponse déclarative, tu DOIS poser une QUESTION DE SUIVI demandant une preuve vérifiable :
+   - **certifications** → "Pouvez-vous fournir un lien vers la page de votre site mentionnant ces certifications, ou un lien direct vers les certificats ?"
+   - **key_indicators** (KPIs, métriques) → "Où ces métriques sont-elles publiées ? (page site, rapport annuel, page 'À propos'...)"
+   - **testimonials** (avis clients) → "Avez-vous une page d'avis clients ou un profil Google Business / Trustpilot que nous pouvons référencer ?"
+   - **security_measures** → "Disposez-vous d'une page décrivant vos mesures de sécurité, ou d'un rapport d'audit accessible ?"
+   - **policies** (RGPD, mentions légales) → "Quel est le lien direct vers votre page de politique de confidentialité / mentions légales ?"
+   - **process_steps** → "Avez-vous une page décrivant votre méthodologie ou processus sur votre site ?"
+
+   FORMAT DE LA QUESTION DE PREUVE :
+   - Question OUVERTE (pas Oui/Non)
+   - Propose des exemples concrets (URL de page, lien PDF, profil Google Business...)
+   - Options : ["Fournir un lien (coller l'URL)", "Je n'ai pas de lien à fournir", "Non applicable à mon activité"]
+   - allowCustom: true (pour que l'utilisateur puisse saisir son URL)
+   - Si l'utilisateur ne fournit pas de preuve → le champ garde la valeur déclarée mais avec evidence: "none"
+   - Si l'utilisateur fournit un lien → evidence: "link_provided" et le lien est stocké dans evidence_links
 6. 📋 FORMAT DES OPTIONS :
    - CHAQUE question DOIT avoir au minimum 2 options pertinentes. JAMAIS une seule option.
    - JAMAIS proposer uniquement "Autre" comme option.

@@ -36,6 +36,8 @@ import {
 import {
     buildContinuePrompt,
     buildValidationQuestion,
+    fieldRequiresEvidence,
+    EVIDENCE_REQUIRED_FIELDS,
 } from '@/lib/agents/greffier';
 import {
     validateEmail,
@@ -1350,6 +1352,35 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 ayoState = AyoState.SCORING;
             }
 
+            // 📎 EVIDENCE LINKS: Extract URLs from user answers for proof-required fields
+            // Scan recent user messages for links provided as evidence
+            const evidenceLinks: Record<string, { field: string; url: string; timestamp: string }[]> = {};
+            const urlEvidenceRegex = /https?:\/\/[^\s,)"'<>]+/gi;
+            const recentUserMessages = messages
+                .filter((m: any) => m.role === 'user')
+                .slice(-6); // Look at recent answers
+
+            for (const msg of recentUserMessages) {
+                const content = (msg as any).content || '';
+                const foundUrls = content.match(urlEvidenceRegex);
+                if (foundUrls && foundUrls.length > 0) {
+                    // Determine which field this evidence relates to based on the previous block
+                    const prevBlockIdx = Math.max(0, queueIndex - 1);
+                    const relatedBlock = combinedQueue[prevBlockIdx] || nextBlockName;
+                    if (!evidenceLinks[relatedBlock]) {
+                        evidenceLinks[relatedBlock] = [];
+                    }
+                    for (const url of foundUrls) {
+                        evidenceLinks[relatedBlock].push({
+                            field: relatedBlock,
+                            url: url,
+                            timestamp: new Date().toISOString(),
+                        });
+                    }
+                    console.log(`📎 EVIDENCE LINK detected for ${relatedBlock}: ${foundUrls.join(', ')}`);
+                }
+            }
+
             // 💾 INTERMEDIATE SAVE: Persist questionnaire progress after each answer
             // This prevents data loss if the flow is interrupted before FINAL_SAVE
             if (sessionAsrId && stepsCompleted > 2 && queueIndex > 0) {
@@ -1359,6 +1390,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                         .slice(-3)
                         .map((m: any) => m.content)
                         .join(' | ');
+                    const hasEvidenceLinks = Object.keys(evidenceLinks).length > 0;
                     await db.saveAnalysis(sessionAsrId, {
                         data: {
                             questionnaire_progress: {
@@ -1367,10 +1399,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                                 nextBlock: nextBlockName,
                                 lastAnswers: userAnswersSoFar.substring(0, 500),
                                 timestamp: new Date().toISOString(),
-                            }
+                            },
+                            ...(hasEvidenceLinks ? { evidence_links: evidenceLinks } : {}),
                         }
                     } as any);
-                    console.log(`💾 INTERMEDIATE SAVE: step=${stepsCompleted}, queueIdx=${queueIndex}, session=${sessionAsrId}`);
+                    console.log(`💾 INTERMEDIATE SAVE: step=${stepsCompleted}, queueIdx=${queueIndex}, session=${sessionAsrId}${hasEvidenceLinks ? ', with evidence_links' : ''}`);
                 } catch (e) {
                     console.warn('⚠️ Intermediate save failed (non-blocking):', e);
                 }
@@ -1998,6 +2031,30 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     console.warn('⚠️ scan_state injection failed:', scanErr instanceof Error ? scanErr.message : scanErr);
                 }
 
+                // 📎 FINAL EVIDENCE LINKS: Extract all URLs from user answers as proof evidence
+                const finalEvidenceLinks: Record<string, { field: string; url: string; timestamp: string }[]> = {};
+                const finalUrlRegex = /https?:\/\/[^\s,)"'<>]+/gi;
+                const allUserMsgs = messages.filter((m: any) => m.role === 'user');
+                for (const msg of allUserMsgs) {
+                    const content = (msg as any).content || '';
+                    const foundUrls = content.match(finalUrlRegex);
+                    if (foundUrls) {
+                        for (const url of foundUrls) {
+                            // Skip the original scanned URL
+                            if (url === urlToScan) continue;
+                            if (!finalEvidenceLinks['user_provided']) {
+                                finalEvidenceLinks['user_provided'] = [];
+                            }
+                            finalEvidenceLinks['user_provided'].push({
+                                field: 'user_provided',
+                                url,
+                                timestamp: new Date().toISOString(),
+                            });
+                        }
+                    }
+                }
+                const hasAnyEvidence = Object.keys(finalEvidenceLinks).length > 0;
+
                 //💾 SAVE COMPLETE ANALYSIS TO DB (Source of Truth for Webhook)
                 logger.info('FINAL_SAVE_START', `Saving final analysis: ${sessionAsrId}, Score: ${scoreResult.total}`);
                 try {
@@ -2010,7 +2067,8 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                             fields: extractJson.fields,
                             blocks: scoreResult.blocks,
                             scan: scanResult,
-                            analysis_blocks: structuredAnalysis // <--- NEW STRUCTURED DATA
+                            analysis_blocks: structuredAnalysis, // <--- NEW STRUCTURED DATA
+                            ...(hasAnyEvidence ? { evidence_links: finalEvidenceLinks } : {}),
                         }
                     });
                     logger.info('FINAL_SAVE_OK', `Analysis saved: ${sessionAsrId}`);
