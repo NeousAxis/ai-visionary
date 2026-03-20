@@ -411,12 +411,47 @@ const POLICY_DEFINITIONS: Record<string, string> = {
     'accessibilité': "Ensemble de bonnes pratiques visant à rendre un site web utilisable par tous, y compris les personnes en situation de handicap.",
 };
 
+/** Strip diacritics so "mentions legales" matches "mentions légales" */
+function stripAccents(s: string): string {
+    return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 function getPolicyDefinition(policy: string, entityName: string): string {
-    const lower = policy.toLowerCase().trim();
+    const lower = stripAccents(policy.toLowerCase().trim());
     for (const [key, def] of Object.entries(POLICY_DEFINITIONS)) {
-        if (lower.includes(key)) return def;
+        if (lower.includes(stripAccents(key))) return def;
     }
     return `Politique de conformité ${/^[aeiouhAEIOUHéÉàÀ]/.test(entityName) ? `d'${entityName}` : `de ${entityName}`} contribuant à la transparence et à la gouvernance de l'entité.`;
+}
+
+/**
+ * Security-measure-specific definitions for glossary.
+ * Each common security measure gets a unique, specific description.
+ */
+const SECURITY_DEFINITIONS: Record<string, string> = {
+    'charte ethique': "Document formalisant les engagements éthiques et déontologiques de l'entité, notamment en matière d'usage responsable de l'IA, de transparence algorithmique et de respect des droits des utilisateurs.",
+    'charte éthique': "Document formalisant les engagements éthiques et déontologiques de l'entité, notamment en matière d'usage responsable de l'IA, de transparence algorithmique et de respect des droits des utilisateurs.",
+    'mesures de securite informatique': "Ensemble de dispositifs techniques et organisationnels (pare-feu, chiffrement, contrôle d'accès, audits réguliers) déployés pour protéger les systèmes d'information contre les cybermenaces et les accès non autorisés.",
+    'mesures de sécurité informatique': "Ensemble de dispositifs techniques et organisationnels (pare-feu, chiffrement, contrôle d'accès, audits réguliers) déployés pour protéger les systèmes d'information contre les cybermenaces et les accès non autorisés.",
+    'donnees publiques uniquement': "Engagement à ne collecter et traiter que des données accessibles publiquement, sans recours à des données personnelles privées ni à des techniques d'extraction non consenties.",
+    'données publiques uniquement': "Engagement à ne collecter et traiter que des données accessibles publiquement, sans recours à des données personnelles privées ni à des techniques d'extraction non consenties.",
+    'chiffrement': "Technique de sécurité transformant les données en un format illisible sans clé de déchiffrement, assurant la confidentialité des informations stockées et transmises.",
+    'pare-feu': "Dispositif de sécurité réseau filtrant le trafic entrant et sortant selon des règles prédéfinies afin de bloquer les accès non autorisés.",
+    'firewall': "Dispositif de sécurité réseau filtrant le trafic entrant et sortant selon des règles prédéfinies afin de bloquer les accès non autorisés.",
+    'sauvegarde': "Procédure de copie régulière des données et systèmes permettant la restauration en cas d'incident, de panne ou de cyberattaque.",
+    'backup': "Procédure de copie régulière des données et systèmes permettant la restauration en cas d'incident, de panne ou de cyberattaque.",
+    'authentification': "Mécanisme de vérification de l'identité d'un utilisateur avant l'accès aux ressources, pouvant inclure des facteurs multiples (mot de passe, biométrie, token).",
+    'audit': "Évaluation systématique et documentée de la conformité et de l'efficacité des mesures de sécurité, réalisée périodiquement pour identifier les vulnérabilités.",
+    'anonymisation': "Processus irréversible de suppression des informations identifiantes dans un jeu de données, rendant impossible la ré-identification des personnes concernées.",
+    'pseudonymisation': "Technique de protection des données remplaçant les identifiants directs par des pseudonymes, réduisant les risques tout en permettant certains traitements.",
+};
+
+function getSecurityDefinition(measure: string, entityName: string): string {
+    const lower = stripAccents(measure.toLowerCase().trim());
+    for (const [key, def] of Object.entries(SECURITY_DEFINITIONS)) {
+        if (lower.includes(stripAccents(key))) return def;
+    }
+    return `Mesure de sécurité déployée par ${entityName} pour la protection des données et des systèmes. Signal de fiabilité technique dans le cadre de l'évaluation AIO.`;
 }
 
 const BUSINESS_TYPE_PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|activité non spécifiée|n\/a|undefined|null|)$/i;
@@ -925,7 +960,7 @@ export function generateGlossaryJson(data: any): any {
     securityMeasures.forEach(sm => {
         if (typeof sm !== 'string') return;
         const cleanSm = sm.replace(/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, "").trim();
-        addTerm(cleanSm, `Mesure de sécurité déployée par ${name} pour la protection des données et des systèmes. Signal de fiabilité technique.`, "Sécurité");
+        addTerm(cleanSm, getSecurityDefinition(cleanSm, name), "Sécurité");
     });
 
     if (audience) {
