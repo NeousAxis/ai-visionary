@@ -17,6 +17,7 @@ interface QuestionBlock {
         allowCustom?: boolean;
         allowMultiple?: boolean;
         customLabel?: string;
+        inputType?: 'text';
     }[];
 }
 
@@ -498,8 +499,90 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                         )}
                                     </div>
 
-                                    {/* CHECKBOX MODE - LARGE BUBBLE DESIGN */}
-                                    {forceMultiple ? (
+                                    {/* TEXT INPUT MODE — for email, phone, geographies, etc. */}
+                                    {/* Also for URL link fields ("Fournir un lien", "coller l'URL") */}
+                                    {(() => {
+                                        const isTextInputMode = q.inputType === 'text' || ((!q.options || q.options.length === 0) && q.allowCustom);
+                                        const isUrlOption = filteredOptions.some(opt => {
+                                            const lo = opt.toLowerCase();
+                                            return lo.includes('lien') || lo.includes('url') || lo.includes('coller');
+                                        });
+                                        return (isTextInputMode || isUrlOption) ? true : false;
+                                    })() ? (
+                                        <div className="flex flex-col gap-4">
+                                            {/* Render non-URL options as normal buttons first */}
+                                            {filteredOptions.filter(opt => {
+                                                const lo = opt.toLowerCase();
+                                                return !(lo.includes('lien') || lo.includes('url') || lo.includes('coller'));
+                                            }).length > 0 && (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {filteredOptions.filter(opt => {
+                                                        const lo = opt.toLowerCase();
+                                                        return !(lo.includes('lien') || lo.includes('url') || lo.includes('coller'));
+                                                    }).map((opt, i) => (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
+                                                            disabled={isLoading}
+                                                            className="group flex items-center !gap-6 w-full !px-6 !py-5 !rounded-2xl border border-slate-200 hover:border-[#4A919E] bg-white hover:bg-[#4A919E] transition-all duration-200 shadow-sm text-left relative overflow-hidden"
+                                                        >
+                                                            <span className="text-[16px] font-medium text-[#212E53] group-hover:text-white flex-1 relative z-10 transition-colors leading-relaxed">
+                                                                {opt}
+                                                            </span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Direct text/URL input field */}
+                                            <div className="flex gap-2 items-center">
+                                                <input
+                                                    type="text"
+                                                    placeholder={
+                                                        filteredOptions.some(opt => opt.toLowerCase().includes('lien') || opt.toLowerCase().includes('url'))
+                                                            ? "Collez votre URL ici..."
+                                                            : (q.customLabel || "Saisissez votre réponse...")
+                                                    }
+                                                    value={input}
+                                                    onChange={(e) => setInput(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && input.trim()) {
+                                                            handleSubmit(undefined, `${q.text} : ${input.trim()}`);
+                                                            setInput('');
+                                                        }
+                                                    }}
+                                                    disabled={isLoading}
+                                                    autoFocus
+                                                    className="flex-1 px-4 py-3 rounded-xl border border-slate-300 focus:border-[#4A919E] focus:ring-2 focus:ring-[#4A919E]/20 outline-none text-[15px] text-slate-800 placeholder:text-slate-400 transition-all"
+                                                />
+                                                <button
+                                                    onClick={() => {
+                                                        if (input.trim()) {
+                                                            handleSubmit(undefined, `${q.text} : ${input.trim()}`);
+                                                            setInput('');
+                                                        }
+                                                    }}
+                                                    disabled={isLoading || !input.trim()}
+                                                    className={`px-5 py-3 rounded-xl font-semibold text-[15px] text-white transition-all ${input.trim() ? 'bg-teal-600 hover:bg-teal-700 shadow-md' : 'bg-slate-300 cursor-not-allowed'}`}
+                                                >
+                                                    Envoyer
+                                                </button>
+                                            </div>
+
+                                            {/* Skip button */}
+                                            {showSkipButton && (
+                                                <button
+                                                    onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : [SKIP] Non applicable`)}
+                                                    disabled={isLoading}
+                                                    className="!px-6 !py-2.5 !rounded-lg text-[13px] font-medium text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 bg-transparent hover:bg-slate-50 transition-all duration-200 self-start"
+                                                >
+                                                    Non applicable
+                                                </button>
+                                            )}
+                                        </div>
+                                    ) :
+                                    /* CHECKBOX MODE - LARGE BUBBLE DESIGN */
+                                    forceMultiple ? (
                                         <div className="flex flex-col gap-4">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 {filteredOptions.map((opt, i) => {

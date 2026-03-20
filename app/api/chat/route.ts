@@ -1291,11 +1291,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
               'identite.city',
               'processus_methodes.geographies_served',
               'processus_methodes.process_steps',
-              'confiance_conformite.certifications',
-              'confiance_conformite.security_measures',
-              'preuve_sociale.key_indicators',
-              'preuve_sociale.testimonials',
-              'preuve_sociale.certifications_count',
+              'engagements_conformite.certifications',
+              'engagements_conformite.security_measures',
+              'indicateurs.key_indicators',
+              'indicateurs.testimonials',
+              'indicateurs.certifications_count',
             ];
 
             const validationQueue = allBlockNames.filter(b =>
@@ -1440,10 +1440,37 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 if (!q) return;
 
                 // Règle 2 : au moins 2 options, jamais seulement "Autre"
+                // SAUF pour les champs texte libre (email, téléphone, etc.)
+                const TEXT_INPUT_FIELDS = [
+                    'contact_email', 'contact_phone', 'geographies_served',
+                    'legal_name', 'city', 'process_steps', 'key_indicators',
+                ];
+                const qIdLower = (q.id || '').toLowerCase();
+                const qTextLower = (q.text || '').toLowerCase();
+                const isTextInputField = TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
+                    qTextLower.includes('email') || qTextLower.includes('téléphone') ||
+                    qTextLower.includes('phone') || qTextLower.includes('zone géographique') ||
+                    qTextLower.includes('nom légal') || qTextLower.includes('raison sociale') ||
+                    qTextLower.includes('collez') || qTextLower.includes('saisissez');
+
                 if (!q.options || q.options.length === 0) {
-                    q.options = ["Oui", "Non"];
-                    q.allowCustom = true;
-                    console.warn("⚠️ VALIDATOR: 0 options → fallback Oui/Non");
+                    if (isTextInputField) {
+                        // Champ texte libre : pas de Oui/Non, afficher un input texte directement
+                        q.options = [];
+                        q.allowCustom = true;
+                        q.inputType = "text";
+                        if (!q.customLabel) {
+                            if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
+                            else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Saisissez votre numéro...";
+                            else if (qTextLower.includes('géographi')) q.customLabel = "Saisissez la zone géographique...";
+                            else q.customLabel = "Saisissez votre réponse...";
+                        }
+                        console.warn("⚠️ VALIDATOR: 0 options + champ texte → inputType text (pas de Oui/Non)");
+                    } else {
+                        q.options = ["Oui", "Non"];
+                        q.allowCustom = true;
+                        console.warn("⚠️ VALIDATOR: 0 options → fallback Oui/Non");
+                    }
                 } else if (q.options.length === 1) {
                     const singleOpt = q.options[0].toLowerCase();
                     if (singleOpt.includes('autre') || singleOpt.includes('préciser')) {

@@ -60,9 +60,13 @@ export const QUESTIONNAIRE: BlocQuestion[] = [
         fieldTargets: ['services', 'products'],
         question: "Décrivez vos services ou produits principaux (3 à 5 maximum). Pour chacun, donnez un nom clair et une courte description.",
         relance: "Les IA ont besoin d'au moins 2-3 offres distinctes pour vous recommander. Pouvez-vous détailler ?",
-        skipIfScanDetected: (_scan) => {
-            // Skip si le scan a trouvé des services ET des produits dans le contenu
-            return false; // On ne skip jamais cette question — trop importante
+        skipIfScanDetected: (scan) => {
+            // Skip si le scan a trouvé des services dans le contenu textuel (highConfidence)
+            // La question de validation "Est-ce exact ?" sera posée via la validationQueue
+            const text = (scan.text || '').toLowerCase();
+            const hasServices = text.includes('service') || text.includes('prestation');
+            const hasProducts = text.includes('produit') || text.includes('solution');
+            return hasServices && hasProducts;
         },
     },
     {
