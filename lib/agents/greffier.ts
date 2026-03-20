@@ -464,7 +464,7 @@ export function buildValidationQuestion(
         type: "question_block",
         intro: `Passons à la section : **${blocLabel}**`,
         questions: [{
-            id: `validation_${blockName.replace('.', '_')}`,
+            id: `validation_${blockName.replace('.', '_')}_${fieldName}`,
             text: `Le scan a détecté ${fieldLabel} : ${displayValue}.\nEst-ce exact ?`,
             options: ["✅ Oui, c'est exact", "❌ Non, ce n'est pas exact"],
             allowCustom: true,
