@@ -1453,24 +1453,23 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     qTextLower.includes('nom légal') || qTextLower.includes('raison sociale') ||
                     qTextLower.includes('collez') || qTextLower.includes('saisissez');
 
-                if (!q.options || q.options.length === 0) {
-                    if (isTextInputField) {
-                        // Champ texte libre : pas de Oui/Non, afficher un input texte directement
-                        q.options = [];
-                        q.allowCustom = true;
-                        q.inputType = "text";
-                        if (!q.customLabel) {
-                            if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
-                            else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Saisissez votre numéro...";
-                            else if (qTextLower.includes('géographi')) q.customLabel = "Saisissez la zone géographique...";
-                            else q.customLabel = "Saisissez votre réponse...";
-                        }
-                        console.warn("⚠️ VALIDATOR: 0 options + champ texte → inputType text (pas de Oui/Non)");
-                    } else {
-                        q.options = ["Oui", "Non"];
-                        q.allowCustom = true;
-                        console.warn("⚠️ VALIDATOR: 0 options → fallback Oui/Non");
+                // Pour les champs texte libre, TOUJOURS forcer inputType text
+                // (même si le LLM a généré des options comme "contact@ai-visionary.com")
+                if (isTextInputField) {
+                    q.options = [];
+                    q.allowCustom = true;
+                    q.inputType = "text";
+                    if (!q.customLabel) {
+                        if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
+                        else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Saisissez votre numéro...";
+                        else if (qTextLower.includes('géographi')) q.customLabel = "Saisissez la zone géographique...";
+                        else q.customLabel = "Saisissez votre réponse...";
                     }
+                    console.warn("⚠️ VALIDATOR: champ texte → inputType text (pas de boutons)");
+                } else if (!q.options || q.options.length === 0) {
+                    q.options = ["Oui", "Non"];
+                    q.allowCustom = true;
+                    console.warn("⚠️ VALIDATOR: 0 options → fallback Oui/Non");
                 } else if (q.options.length === 1) {
                     const singleOpt = q.options[0].toLowerCase();
                     if (singleOpt.includes('autre') || singleOpt.includes('préciser')) {
