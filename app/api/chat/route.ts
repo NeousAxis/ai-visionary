@@ -1381,15 +1381,41 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 }
             }
 
-            // 💾 INTERMEDIATE SAVE: Persist questionnaire progress after each answer
+            // 💾 INTERMEDIATE SAVE: Persist questionnaire progress AND user answers after each answer
             // This prevents data loss if the flow is interrupted before FINAL_SAVE
             if (sessionAsrId && stepsCompleted > 2 && queueIndex > 0) {
                 try {
-                    const userAnswersSoFar = messages
-                        .filter((m: any) => m.role === 'user')
-                        .slice(-3)
-                        .map((m: any) => m.content)
-                        .join(' | ');
+                    // Collect ALL user answers since the scan (not just last 3)
+                    const scanMsgIdx = messages.findIndex((m: any) =>
+                        m.role === 'assistant' && (
+                            m.content.includes("INFORMATIONS DÉTECTÉES") ||
+                            m.content.includes("SCAN TERMINÉ") ||
+                            m.content.includes("ownership_confirm")
+                        )
+                    );
+                    const allUserAnswers: Record<string, string> = {};
+                    if (scanMsgIdx !== -1) {
+                        const msgsAfterScan = messages.slice(scanMsgIdx);
+                        let lastQuestionBlockField = '';
+                        for (const msg of msgsAfterScan) {
+                            if (msg.role === 'assistant') {
+                                // Extract the field name from question_block
+                                try {
+                                    const parsed = JSON.parse(msg.content);
+                                    if (parsed?.questions?.[0]?.id) {
+                                        lastQuestionBlockField = parsed.questions[0].id;
+                                    }
+                                } catch { /* not JSON */ }
+                            } else if (msg.role === 'user' && lastQuestionBlockField) {
+                                const answer = msg.content.trim();
+                                // Skip pure confirmations like "Oui c'est exact"
+                                if (!answer.match(/^(oui|non|ok|d'accord|exact|parfait|je confirme|c'est bon)/i) || answer.length > 30) {
+                                    allUserAnswers[lastQuestionBlockField] = answer;
+                                }
+                            }
+                        }
+                    }
+
                     const hasEvidenceLinks = Object.keys(evidenceLinks).length > 0;
                     await db.saveAnalysis(sessionAsrId, {
                         data: {
@@ -1397,13 +1423,13 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                                 step: stepsCompleted,
                                 queueIndex,
                                 nextBlock: nextBlockName,
-                                lastAnswers: userAnswersSoFar.substring(0, 500),
                                 timestamp: new Date().toISOString(),
                             },
+                            questionnaire_answers: allUserAnswers,
                             ...(hasEvidenceLinks ? { evidence_links: evidenceLinks } : {}),
                         }
                     } as any);
-                    console.log(`💾 INTERMEDIATE SAVE: step=${stepsCompleted}, queueIdx=${queueIndex}, session=${sessionAsrId}${hasEvidenceLinks ? ', with evidence_links' : ''}`);
+                    console.log(`💾 INTERMEDIATE SAVE: step=${stepsCompleted}, queueIdx=${queueIndex}, answers=${Object.keys(allUserAnswers).length}, session=${sessionAsrId}${hasEvidenceLinks ? ', with evidence_links' : ''}`);
                 } catch (e) {
                     console.warn('⚠️ Intermediate save failed (non-blocking):', e);
                 }
@@ -1444,17 +1470,25 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 const TEXT_INPUT_FIELDS = [
                     'contact_email', 'contact_phone', 'geographies_served',
                     'legal_name', 'city', 'process_steps', 'key_indicators',
+                    'services_details', 'target_audience_details', 'products_details',
+                    'use_cases_details', 'pricing_details', 'delivery_mode_details',
+                    'quality_assurance_details', 'certifications_details',
+                    'frameworks_details', 'security_measures_details', 'policies_details',
                 ];
                 const qIdLower = (q.id || '').toLowerCase();
                 const qTextLower = (q.text || '').toLowerCase();
                 const isUrlQuestion = qTextLower.includes('url') || qTextLower.includes('coller l') ||
                     qTextLower.includes('fournir un lien') || qTextLower.includes('lien vers') ||
                     (q.options || []).some((o: string) => o.toLowerCase().includes('coller l\'url') || o.toLowerCase().includes('fournir un lien'));
-                const isTextInputField = isUrlQuestion || TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
+                // Detect detail/description fields by suffix patterns (LLM often generates _details, _description, _specifics)
+                const isDetailField = qIdLower.match(/_(details|description|specifics|precisions|complement)$/);
+                const isTextInputField = isUrlQuestion || isDetailField || TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
                     qTextLower.includes('email') || qTextLower.includes('téléphone') ||
                     qTextLower.includes('phone') || qTextLower.includes('zone géographique') ||
                     qTextLower.includes('nom légal') || qTextLower.includes('raison sociale') ||
-                    qTextLower.includes('collez') || qTextLower.includes('saisissez');
+                    qTextLower.includes('collez') || qTextLower.includes('saisissez') ||
+                    qTextLower.includes('décrivez') || qTextLower.includes('détaillez') ||
+                    qTextLower.includes('précisez') || qTextLower.includes('expliquez');
 
                 // Pour les champs texte libre, TOUJOURS forcer inputType text
                 // (même si le LLM a généré des options comme "contact@ai-visionary.com")
@@ -1641,6 +1675,13 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             }
         } // End of conditional questioning block (OWNERSHIP | TRUTH_WARNING | QUESTIONNAIRE | CALIBRATION)
 
+        // 🛡️ BUG FIX: Safety net — if we're post-scan, pre-score, and no response was generated,
+        // it means the queue was exhausted but SCORING wasn't triggered properly.
+        // Force transition to SCORING to prevent empty responses.
+        if (!finalResponseText && hasScanInHistory && !hasFinalScore && ayoState !== AyoState.SCORING) {
+            console.warn(`⚠️ SAFETY NET: No response generated in state ${ayoState}. Forcing SCORING.`);
+            ayoState = AyoState.SCORING;
+        }
 
         if (ayoState === AyoState.SCORING) {
             try {
@@ -2060,6 +2101,86 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                 } catch (scanErr) {
                     console.warn('⚠️ scan_state injection failed:', scanErr instanceof Error ? scanErr.message : scanErr);
                 }
+
+                // 🔄 INJECT QUESTIONNAIRE ANSWERS: Recover answers from intermediate saves
+                // If the LLM extraction missed user-provided data, the progressive saves have it
+                try {
+                    const existingAnalysis = await db.getAnalysis(sessionAsrId);
+                    const savedAnswers = existingAnalysis?.data?.questionnaire_answers;
+                    if (savedAnswers && typeof savedAnswers === 'object') {
+                        const fields = extractJson.fields as any;
+                        // Map question IDs to field paths
+                        const QUESTION_TO_FIELD: Record<string, string> = {
+                            'q_identite_contact_email': 'identite.contact_email',
+                            'q_identite_contact_phone': 'identite.contact_phone',
+                            'q_identite_legal_name': 'identite.legal_name',
+                            'q_identite_city': 'identite.city',
+                            'q_identite_country': 'identite.country',
+                            'q_identite_name': 'identite.name',
+                            'q_identite_business_type': 'identite.business_type',
+                            'q_offre_services': 'offre.services',
+                            'q_offre_products': 'offre.products',
+                            'q_offre_target_audience': 'offre.target_audience',
+                            'q_offre_pricing_indication': 'offre.pricing_indication',
+                            'q_offre_use_cases': 'offre.use_cases',
+                            'q_processus_methodes_process_steps': 'processus_methodes.process_steps',
+                            'q_processus_methodes_delivery_mode': 'processus_methodes.delivery_mode',
+                            'q_processus_methodes_geographies_served': 'processus_methodes.geographies_served',
+                            'q_processus_methodes_quality_assurance': 'processus_methodes.quality_assurance',
+                            'q_engagements_conformite_certifications': 'engagements_conformite.certifications',
+                            'q_engagements_conformite_frameworks': 'engagements_conformite.frameworks',
+                            'q_engagements_conformite_policies': 'engagements_conformite.policies',
+                            'q_engagements_conformite_security_measures': 'engagements_conformite.security_measures',
+                            'q_indicateurs_key_indicators': 'indicateurs.key_indicators',
+                            'q_indicateurs_last_review_date': 'indicateurs.last_review_date',
+                            'q_contenus_pedagogiques_has_faq': 'contenus_pedagogiques.has_faq',
+                            'q_contenus_pedagogiques_has_glossary': 'contenus_pedagogiques.has_glossary',
+                            'q_contenus_pedagogiques_has_documentation': 'contenus_pedagogiques.has_documentation',
+                            'q_external_context_keywords': 'external_context.keywords',
+                            'q_external_context_intents': 'external_context.intents',
+                            'q_external_context_channels': 'external_context.channels',
+                        };
+
+                        let injectedCount = 0;
+                        for (const [qId, answer] of Object.entries(savedAnswers)) {
+                            const fieldPath = QUESTION_TO_FIELD[qId];
+                            if (!fieldPath || !answer || typeof answer !== 'string') continue;
+                            // Skip confirmation-only answers
+                            if (answer.match(/^(oui|non|ok|exact|parfait|je confirme|c'est bon)$/i)) continue;
+
+                            const [bloc, field] = fieldPath.split('.');
+                            if (!bloc || !field || !fields[bloc]) continue;
+
+                            const existing = fields[bloc][field];
+                            const isEmpty = !existing || existing.value === '' || existing.value === null ||
+                                (Array.isArray(existing.value) && existing.value.length === 0) ||
+                                (existing.q === 0);
+
+                            if (isEmpty) {
+                                fields[bloc][field] = { value: answer, q: 1, evidence: ["questionnaire_answer"] };
+                                console.log(`🔄 INJECT from questionnaire: ${fieldPath} = ${answer.substring(0, 60)}`);
+                                injectedCount++;
+                            }
+                        }
+                        if (injectedCount > 0) {
+                            console.log(`✅ Injected ${injectedCount} questionnaire answers into extract`);
+                        }
+                    }
+                } catch (qaErr) {
+                    console.warn('⚠️ Questionnaire answers injection failed:', qaErr instanceof Error ? qaErr.message : qaErr);
+                }
+
+                // 4c. RECOMPUTE SCORE after all injections (scan_state + questionnaire answers)
+                // The initial scoreResult was computed before injections, so we need to recalculate
+                const enrichedScoreResult = analyseScore(extractJson);
+                logger.info('ENRICHED_SCORE_RESULT', `Enriched score after injections: ${enrichedScoreResult.total}/100 (was ${scoreResult.total}/100)`, {
+                    blocks: enrichedScoreResult.blocks,
+                    capApplied: enrichedScoreResult.capApplied,
+                });
+                // Use enriched score for display and save
+                Object.assign(scoreResult, enrichedScoreResult);
+                // Update structured analysis with recomputed audit
+                structuredAnalysis = enrichedScoreResult.audit || structuredAnalysis;
 
                 // 📎 FINAL EVIDENCE LINKS: Extract all URLs from user answers as proof evidence
                 const finalEvidenceLinks: Record<string, { field: string; url: string; timestamp: string }[]> = {};
