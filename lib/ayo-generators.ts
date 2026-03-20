@@ -202,6 +202,101 @@ export function isAssociation(businessType: string, entityName?: string, entityU
 /** Regex validant un numéro de téléphone (chiffres, espaces, +, -, parens, points, min 6 chars) */
 export const PHONE_REGEX = /^[\d\s\+\-\(\)\.]{6,}$/;
 
+/**
+ * Bug 8: Nettoie les doubles ponctuations (ex: "demandées.." → "demandées.")
+ */
+export function cleanDoublePunctuation(s: string): string {
+    if (!s || typeof s !== 'string') return s || "";
+    return s
+        .replace(/([.!?;,:])\1+/g, '$1')  // "demandées.." → "demandées."
+        .replace(/\s([.!?;,:])/g, '$1')    // espace avant ponctuation
+        .replace(/([.!?])\s*([.!?])/g, '$1') // "text. ." → "text."
+        .trim();
+}
+
+/**
+ * Bug 4 & 9: Fusionne les noms d'IA (Gemini, Claude, Mistral, Llama, Ernie) dans un seul cas d'usage.
+ * Si un use_case mentionne "ChatGPT", tous les noms d'IA sont regroupés dans celui-ci.
+ */
+const AI_NAMES_RE = /\b(ChatGPT|Gemini|Claude|Mistral|Llama|Ernie|GPT[-\s]?4|Perplexity|Copilot)\b/i;
+const ALL_AI_NAMES = ["ChatGPT", "Gemini", "Claude", "Mistral", "Llama", "Ernie"];
+
+export function mergeAiNamesInUseCases(useCases: string[]): string[] {
+    if (!useCases || useCases.length === 0) return useCases;
+
+    // Find if any use case mentions an AI name
+    const aiUseCaseIndex = useCases.findIndex(uc => AI_NAMES_RE.test(uc));
+    if (aiUseCaseIndex === -1) return useCases;
+
+    // Collect all AI names mentioned across all use cases
+    const mentionedAiNames = new Set<string>();
+    const nonAiUseCases: string[] = [];
+    let primaryAiUseCase = "";
+
+    for (let i = 0; i < useCases.length; i++) {
+        const uc = useCases[i];
+        // Check if this use case is ONLY an AI name (e.g. "Gemini", "Claude")
+        const isOnlyAiName = ALL_AI_NAMES.some(name => uc.trim().toLowerCase() === name.toLowerCase());
+        if (isOnlyAiName) {
+            mentionedAiNames.add(uc.trim());
+            continue;
+        }
+        // Check if it mentions an AI name as part of a real use case
+        if (AI_NAMES_RE.test(uc)) {
+            if (!primaryAiUseCase) {
+                primaryAiUseCase = uc;
+                // Extract AI names mentioned in this use case
+                for (const name of ALL_AI_NAMES) {
+                    if (uc.toLowerCase().includes(name.toLowerCase())) {
+                        mentionedAiNames.add(name);
+                    }
+                }
+            } else {
+                // Secondary AI use case — extract names and skip
+                for (const name of ALL_AI_NAMES) {
+                    if (uc.toLowerCase().includes(name.toLowerCase())) {
+                        mentionedAiNames.add(name);
+                    }
+                }
+            }
+        } else {
+            nonAiUseCases.push(uc);
+        }
+    }
+
+    if (!primaryAiUseCase && mentionedAiNames.size > 0) {
+        // All were standalone AI names — create a merged use case
+        const aiList = ALL_AI_NAMES.filter(n => mentionedAiNames.has(n));
+        // Add any missing major AIs
+        for (const name of ALL_AI_NAMES) {
+            if (!aiList.includes(name)) aiList.push(name);
+        }
+        primaryAiUseCase = `Être visible et recommandé par les IA (${aiList.join(", ")})`;
+    } else if (primaryAiUseCase && mentionedAiNames.size > 0) {
+        // Ensure all AI names are in the primary use case
+        const allAiList = ALL_AI_NAMES.filter(n =>
+            mentionedAiNames.has(n) || primaryAiUseCase.toLowerCase().includes(n.toLowerCase())
+        );
+        // Add missing AI names that weren't mentioned
+        for (const name of ALL_AI_NAMES) {
+            if (!allAiList.includes(name)) allAiList.push(name);
+        }
+        // Replace the AI names part in the primary use case
+        const aiListStr = allAiList.join(", ");
+        // Try to find existing parenthetical with AI names and replace it
+        const parenMatch = primaryAiUseCase.match(/\([^)]*(?:ChatGPT|Gemini|Claude)[^)]*\)/i);
+        if (parenMatch) {
+            primaryAiUseCase = primaryAiUseCase.replace(parenMatch[0], `(${aiListStr})`);
+        } else {
+            // Append AI names
+            primaryAiUseCase = primaryAiUseCase.replace(/\.?\s*$/, ` (${aiListStr})`);
+        }
+    }
+
+    const result = primaryAiUseCase ? [primaryAiUseCase, ...nonAiUseCases] : nonAiUseCases;
+    return result;
+}
+
 // --- SANITISATION DES VALEURS GARBAGE ("aucun", "non", "à tout le monde", etc.) ---
 
 /**
@@ -450,6 +545,11 @@ export function generateManifestJson(data: any, url: string): any {
     }
     if (certifications.some(c => typeof c === 'string' && c.toLowerCase().includes("iso"))) complianceSignals.push("ISO");
 
+    // Bug 14: If user declared certifications (q > 0) but provided no proof, set count to 0
+    const certQ = data.engagements_conformite?.certifications?.q ?? 0;
+    const certCount = certifications.length;
+    const certCountFinal = (certCount === 0 && certQ > 0) ? 0 : certCount;
+
     return {
         entity: {
             name,
@@ -463,7 +563,8 @@ export function generateManifestJson(data: any, url: string): any {
             role: "declared-entity",
             scope,
             level: "PRO",
-            certifications_count: certifications.length
+            certifications_count: certCountFinal,
+            ...(certCount === 0 && certQ > 0 ? { certifications_declared_without_proof: true } : {})
         },
         permissions: {
             allow_scraping: ["GoogleBot", "GPTBot", "CCBot", "PerplexityBot", "ClaudeBot", "Bingbot", "ChatGPT-User", "Amazonbot"],
@@ -525,7 +626,7 @@ export function generateFaqJson(data: any, url: string): any {
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceFaq = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceFaq ? sanitizeAudience(rawAudienceFaq) : "";
-    const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
+    const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
     const pricing = sanitizeFieldValue(cleanVal(data.offre?.pricing_indication?.value)) || "";
     const email = data.identite?.contact_email?.value || "";
     const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
@@ -708,11 +809,13 @@ export function generateFaqJson(data: any, url: string): any {
         category: "Visibilité IA"
     });
 
+    // Bug 8: Clean double punctuation in all FAQ answers
+    // Bug 9: merge AI names in use_cases for FAQ text (already merged via useCases variable)
     const mainEntity = qna.map(item => ({
         "@type": "Question",
         "name": item.q,
         "about": item.category,
-        "acceptedAnswer": { "@type": "Answer", "text": item.a }
+        "acceptedAnswer": { "@type": "Answer", "text": cleanDoublePunctuation(item.a) }
     }));
 
     return {
@@ -734,7 +837,7 @@ export function generateGlossaryJson(data: any): any {
     const rawBTgloss = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTgloss || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
-    const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
+    const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
     const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
     const processSteps = sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value));
     const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
@@ -749,9 +852,13 @@ export function generateGlossaryJson(data: any): any {
 
     const terms: { term: string; def: string; category: string }[] = [];
     const seen = new Set<string>();
+    // Bug 11: AI names should NOT be separate glossary entries
+    const AI_NAME_GLOSSARY_RE = /^(ChatGPT|Gemini|Claude|Mistral|Llama|Ernie|GPT[-\s]?4|Perplexity|Copilot)$/i;
     const addTerm = (term: string, def: string, category: string) => {
         // Ne jamais ajouter un terme garbage comme DefinedTerm
         if (sanitizeFieldValue(term) === null) return;
+        // Bug 11: Skip standalone AI names as glossary terms
+        if (AI_NAME_GLOSSARY_RE.test(term.trim())) return;
         const key = term.toLowerCase().trim();
         if (key.length < 3 || seen.has(key)) return;
         const cleanTerm = term.replace(/Creative Common\b(?!s)/gi, "Creative Commons");
@@ -767,10 +874,13 @@ export function generateGlossaryJson(data: any): any {
         addTerm(businessType, `Domaine d'activité principal ${nameArticleG}. Cette classification détermine le positionnement sectoriel et les critères de recommandation par les agents IA.`, "Identité");
     }
 
+    // Bug 10: Each service MUST have a UNIQUE description — use the service name contextually
     const serviceDescTemplates = [
-        (_s: string) => `Prestation phare ${nameArticleG}. Ce service constitue le cœur de l'offre déclarée dans l'ASR.`,
-        (_s: string) => `Service complémentaire proposé par ${name}. Enrichit le périmètre d'intervention de l'entité.`,
-        (_s: string) => `Activité spécialisée ${nameArticleG}. Fait partie de l'offre vérifiable et documentée dans les actifs sémantiques.`,
+        (s: string) => `${s} est la prestation phare ${nameArticleG}. Ce service constitue le cœur de l'offre déclarée dans l'ASR et détermine le positionnement principal de l'entité.`,
+        (s: string) => `${s} : service complémentaire proposé par ${name}. Cette prestation enrichit le périmètre d'intervention et la couverture fonctionnelle de l'entité.`,
+        (s: string) => `${s} — activité spécialisée ${nameArticleG}. Ce volet de l'offre est documenté et vérifiable dans les actifs sémantiques AYO.`,
+        (s: string) => `${s} fait partie de l'expertise déclarée par ${name}. Ce service permet de répondre à des besoins spécifiques identifiés dans le cadre de l'analyse AIO.`,
+        (s: string) => `Prestation de ${s.toLowerCase()} assurée par ${name}. Ce service contribue à la diversification et à la complétude de l'offre globale de l'entité.`,
     ];
     services.forEach((s, i) => {
         if (typeof s !== 'string') return;
@@ -853,7 +963,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const name = cleanVal(data.identite?.name?.value) || "Entreprise";
     const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", "Organisation"));
-    const useCases = sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value));
+    const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceEC ? sanitizeAudience(rawAudienceEC) : "";
@@ -919,19 +1029,48 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     if (city && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, city);
     // Business type as keyword (skip generic fallback "Organisation")
     if (businessType && businessType !== "Organisation" && businessType.length <= 60 && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, businessType);
+    // Bug 12: Ensure minimum 8 discovery_keywords — complete with services and sector terms
+    const MIN_DISCOVERY_KEYWORDS = 8;
+    if (discoveryKeywords.length < MIN_DISCOVERY_KEYWORDS) {
+        // Add remaining services as keywords
+        const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
+        for (const svc of services) {
+            if (discoveryKeywords.length >= MIN_DISCOVERY_KEYWORDS) break;
+            if (typeof svc === 'string' && svc.length <= 60) addUnique(discoveryKeywords, svc);
+        }
+    }
+    if (discoveryKeywords.length < MIN_DISCOVERY_KEYWORDS) {
+        // Add use cases as keywords
+        for (const uc of useCases) {
+            if (discoveryKeywords.length >= MIN_DISCOVERY_KEYWORDS) break;
+            if (typeof uc === 'string' && uc.length <= 60) addUnique(discoveryKeywords, uc);
+        }
+    }
+    if (discoveryKeywords.length < MIN_DISCOVERY_KEYWORDS && country) {
+        addUnique(discoveryKeywords, country);
+    }
+    if (discoveryKeywords.length < MIN_DISCOVERY_KEYWORDS && name) {
+        addUnique(discoveryKeywords, name);
+    }
 
+    // Bug 13: Filter out generic intents like "Vendre des produits/services"
+    const GENERIC_INTENT_RE = /^(vendre des produits|vendre des services|vendre des produits\/services|acheter|vente de produits|vente de services)$/i;
     const intentKeywords: string[] = [];
     declaredIntents.slice(0, 15).forEach(i => {
         if (typeof i !== 'string') return;
+        if (GENERIC_INTENT_RE.test(i.trim())) return; // Skip generic intents
         // Ne PAS splitter les questions (contiennent ?) — ce sont des intents complets
         if (i.includes('?')) {
             addUnique(intentKeywords, i);
         } else if (i.includes(',')) {
-            i.split(',').map(s => s.trim()).filter(Boolean).forEach(sub => addUnique(intentKeywords, sub));
+            i.split(',').map(s => s.trim()).filter(Boolean).forEach(sub => {
+                if (!GENERIC_INTENT_RE.test(sub.trim())) addUnique(intentKeywords, sub);
+            });
         } else {
             addUnique(intentKeywords, i);
         }
     });
+    // Bug 13: Use real use_cases as intents instead of generic "Vendre des produits/services"
     useCases.slice(0, 10).forEach(uc => addUnique(intentKeywords, uc));
 
     const primaryChannels: string[] = ["Site web"];

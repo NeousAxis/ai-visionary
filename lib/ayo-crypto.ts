@@ -3,7 +3,7 @@ import {
     sanitizeFieldValue, sanitizeFieldArray,
     toArray, cleanText, cleanVal, cleanArray,
     cleanSkippedValues, isAssociation, PHONE_REGEX,
-    fixUnmatchedBrackets
+    fixUnmatchedBrackets, mergeAiNamesInUseCases
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
@@ -113,11 +113,19 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const deliveryModeRaw = cleanValAsr(data.processus_methodes?.delivery_mode?.value);
     const isOnlineDelivery = deliveryModeRaw && (deliveryModeRaw.toLowerCase().includes("en ligne") || deliveryModeRaw.toLowerCase().includes("online"));
     const appendInternational = (name: string) => isOnlineDelivery && !name.toLowerCase().includes("international") ? `${name}, International` : name;
+    // Bug 7: Deduplicate areaServed name — "Monde entier, International" → "International"
+    const deduplicateAreaName = (name: string): string => {
+        const INTL_SYNONYMS = /\b(monde entier|mondial[e]?|worldwide|global)\b/i;
+        if (INTL_SYNONYMS.test(name) && name.toLowerCase().includes("international")) {
+            return "International";
+        }
+        return name;
+    };
     const areaServed = geoServed
-        ? { "@type": "AdministrativeArea", "name": appendInternational(geoServed) }
+        ? { "@type": "AdministrativeArea", "name": deduplicateAreaName(appendInternational(geoServed)) }
         : (data.identite?.country?.value
-            ? { "@type": "Country", "name": appendInternational(cleanValAsr(data.identite.country.value)) }
-            : { "@type": "AdministrativeArea", "name": appendInternational(cleanValAsr(data.identite?.city?.value) || "Non spécifié") });
+            ? { "@type": "Country", "name": deduplicateAreaName(appendInternational(cleanValAsr(data.identite.country.value))) }
+            : { "@type": "AdministrativeArea", "name": deduplicateAreaName(appendInternational(cleanValAsr(data.identite?.city?.value) || "Non spécifié")) });
 
     // V3 Advanced Blocks (Only for PRO/PLATEFORME depending on strategy)
     // selectionConditions: build from actual data, not generic defaults
@@ -231,7 +239,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const offer: any = {
         "services": sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value)),
         "products": sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value)),
-        "use_cases": sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)),
+        "use_cases": mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value))),
     };
 
     if (mode !== 'LIGHT') {
@@ -240,10 +248,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const isAudienceSentence = rawAudience && ((rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience));
         // Correction 2: audience as array instead of string
         const audienceString = isAudienceSentence ? "Grand public" : fixUnmatchedBrackets(rawAudience || "Grand public");
+        // Bug 5: Limit audience to max 15 segments, filter hallucinated/generic segments
+        const HALLUCINATED_AUDIENCE_RE = /^(secteur de (la|l'|le|les)|secteur [a-zéèêëàâä])/i;
         offer.audience = audienceString.split(',')
             .map((s: string) => s.trim())
             .filter(Boolean)
-            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1));
+            .filter((s: string) => !HALLUCINATED_AUDIENCE_RE.test(s))
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
+            .slice(0, 15);
         if (offer.audience.length === 0) offer.audience = ["Grand public"];
 
         // Correction 3: pricingIndication as structured object
@@ -288,6 +300,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.frameworks = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value));
         engagements.policies = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value));
         engagements.security_measures = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value));
+        // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
+        const certQ = data.engagements_conformite?.certifications?.q ?? 0;
+        if (engagements.certifications.length === 0 && certQ > 0) {
+            engagements.certifications_declared = true;
+        }
         // Correction 5: If quality_assurance mentions crypto signature, ensure security_measures includes it
         const qaJoined = (processus.quality_assurance || []).join(' ').toLowerCase();
         if (qaJoined.includes('cryptographique') || qaJoined.includes('signature cryptographique')) {
@@ -308,20 +325,20 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             .filter((ind: string) => !NO_DATA_PHRASES.test(ind.trim()));
         const todayISO = new Date().toISOString().split('T')[0];
 
-        if (rawIndicators.length > 0) {
+        // Bug 6: Filter out indicators containing "non déclaré", "pas encore", "aucun" — those activate the absence module
+        const ABSENCE_INDICATOR_RE = /non déclaré|pas encore|aucun/i;
+        const validIndicators = rawIndicators.filter((ind: string) => /\d/.test(ind) || !ABSENCE_INDICATOR_RE.test(ind));
+        if (validIndicators.length > 0) {
             // Non-empty indicators: keep existing format + add data_maturity
-            indicateurs.key_indicators = rawIndicators.map((ind: string) => {
-                if (/\d/.test(ind)) return ind;
-                return `${ind} : non déclaré`;
-            });
+            indicateurs.key_indicators = validIndicators;
             indicateurs.data_maturity = {
-                level: rawIndicators.length > 2 ? 3 : 2,
-                label: rawIndicators.length > 2 ? "structured" : "emerging",
-                description: rawIndicators.length > 2
+                level: validIndicators.length > 2 ? 3 : 2,
+                label: validIndicators.length > 2 ? "structured" : "emerging",
+                description: validIndicators.length > 2
                     ? "Système de mesure structuré avec plusieurs indicateurs"
                     : "Début de suivi avec quelques indicateurs en place",
-                progression_status: rawIndicators.length > 2 ? "active" : "in_progress",
-                next_step: rawIndicators.length > 2
+                progression_status: validIndicators.length > 2 ? "active" : "in_progress",
+                next_step: validIndicators.length > 2
                     ? "Maintenir et affiner les indicateurs existants"
                     : "Ajouter des indicateurs complémentaires"
             };
@@ -343,9 +360,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             };
         }
 
-        // Bug 7: If last_review_date is empty, absent, or a "no data" phrase, fill with today's date
+        // Bug 7: If last_review_date is empty, absent, a "no data" phrase, or free-text (not ISO date), fill with today's date
         const rawReviewDate = (data.indicateurs?.last_review_date?.value || "").toString().trim();
-        const isValidDate = rawReviewDate && !NO_DATA_PHRASES.test(rawReviewDate) && rawReviewDate.length < 30;
+        // Validate as ISO date (YYYY-MM-DD) — reject free text like "tous les jours", "moins d'un mois", etc.
+        const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+        const isValidDate = rawReviewDate && !NO_DATA_PHRASES.test(rawReviewDate) && ISO_DATE_RE.test(rawReviewDate);
         indicateurs.last_review_date = isValidDate ? rawReviewDate : todayISO;
 
         // Correction 4: transparency inside indicateurs (not top-level)
@@ -361,9 +380,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Educational Content (NEW)
     const contenus: any = {};
     if (mode !== 'LIGHT') {
-        contenus.has_faq = data.contenus_pedagogiques?.has_faq?.value || false;
-        contenus.has_glossary = data.contenus_pedagogiques?.has_glossary?.value || false;
-        contenus.has_documentation = data.contenus_pedagogiques?.has_documentation?.value || false;
+        contenus.has_faq = Boolean(data.contenus_pedagogiques?.has_faq?.value && data.contenus_pedagogiques.has_faq.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_faq.value !== "[SKIP] Non applicable");
+        contenus.has_glossary = Boolean(data.contenus_pedagogiques?.has_glossary?.value && data.contenus_pedagogiques.has_glossary.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_glossary.value !== "[SKIP] Non applicable");
+        contenus.has_documentation = Boolean(data.contenus_pedagogiques?.has_documentation?.value && data.contenus_pedagogiques.has_documentation.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_documentation.value !== "[SKIP] Non applicable");
     }
 
     // Bug 11: Compute raw score & cap info from available data
