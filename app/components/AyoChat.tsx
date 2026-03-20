@@ -534,8 +534,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 </div>
                                             )}
 
-                                            {/* Direct text/URL input field */}
-                                            <div className="flex gap-2 items-center">
+                                            {/* Direct text/URL input field — styled like "Autre réponse" */}
+                                            <div className="group flex items-center w-full !px-5 !py-4 !rounded-2xl border-2 border-dashed border-slate-200 hover:border-[#4A919E]/50 bg-white transition-all duration-200">
                                                 <input
                                                     type="text"
                                                     placeholder={
@@ -553,20 +553,23 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     }}
                                                     disabled={isLoading}
                                                     autoFocus
-                                                    className="flex-1 px-4 py-3 rounded-xl border border-slate-300 focus:border-[#4A919E] focus:ring-2 focus:ring-[#4A919E]/20 outline-none text-[15px] text-slate-800 placeholder:text-slate-400 transition-all"
+                                                    className="flex-1 bg-transparent outline-none text-[15px] text-[#212E53] placeholder:text-slate-400 italic"
                                                 />
-                                                <button
-                                                    onClick={() => {
-                                                        if (input.trim()) {
+                                                {input.trim() && (
+                                                    <button
+                                                        onClick={() => {
                                                             handleSubmit(undefined, `${q.text} : ${input.trim()}`);
                                                             setInput('');
-                                                        }
-                                                    }}
-                                                    disabled={isLoading || !input.trim()}
-                                                    className={`px-5 py-3 rounded-xl font-semibold text-[15px] text-white transition-all ${input.trim() ? 'bg-teal-600 hover:bg-teal-700 shadow-md' : 'bg-slate-300 cursor-not-allowed'}`}
-                                                >
-                                                    Envoyer
-                                                </button>
+                                                        }}
+                                                        disabled={isLoading}
+                                                        className="ml-3 p-2 rounded-lg text-[#4A919E] hover:bg-[#4A919E]/10 transition-all"
+                                                        title="Envoyer"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                                            <path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.414 4.926A1.5 1.5 0 0 0 5.135 9.25h6.115a.75.75 0 0 1 0 1.5H5.135a1.5 1.5 0 0 0-1.442 1.086l-1.414 4.926a.75.75 0 0 0 .826.95l14.095-5.637a.75.75 0 0 0 0-1.4L3.105 2.288Z" />
+                                                        </svg>
+                                                    </button>
+                                                )}
                                             </div>
 
                                             {/* Skip button */}
