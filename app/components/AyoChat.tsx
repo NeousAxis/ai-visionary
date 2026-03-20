@@ -17,7 +17,6 @@ interface QuestionBlock {
         allowCustom?: boolean;
         allowMultiple?: boolean;
         customLabel?: string;
-        inputType?: 'text';
     }[];
 }
 
@@ -630,8 +629,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                         /* BUTTON MODE (Single Select) - LARGE BUBBLE STYLE FORCED */
                                         <div className="flex flex-col gap-4">
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                {/* For inputType text: NO option buttons, user types in main chat input */}
-                                                {q.inputType !== 'text' && filteredOptions.map((opt, i) => (
+                                                {filteredOptions.map((opt, i) => (
                                                     <button
                                                         key={i}
                                                         onClick={() => !isLoading && handleSubmit(undefined, `${q.text} : ${opt}`)}
@@ -653,6 +651,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                 {!isOwnershipQuestion && q.allowCustom !== false && (
                                                     <button
                                                         onClick={() => {
+                                                            // CUSTOM LABEL HANDLING:
+                                                            // If label is "Activité...", prefix becomes "Activité : "
                                                             const cleanLabel = q.customLabel ? q.customLabel.replace(/\.\.\.$/, '').replace(/:$/, '').trim() : "Autre";
                                                             const prefix = `${cleanLabel} : `;
 

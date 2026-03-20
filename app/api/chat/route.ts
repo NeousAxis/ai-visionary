@@ -1447,7 +1447,10 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 ];
                 const qIdLower = (q.id || '').toLowerCase();
                 const qTextLower = (q.text || '').toLowerCase();
-                const isTextInputField = TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
+                const isUrlQuestion = qTextLower.includes('url') || qTextLower.includes('coller l') ||
+                    qTextLower.includes('fournir un lien') || qTextLower.includes('lien vers') ||
+                    (q.options || []).some((o: string) => o.toLowerCase().includes('coller l\'url') || o.toLowerCase().includes('fournir un lien'));
+                const isTextInputField = isUrlQuestion || TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
                     qTextLower.includes('email') || qTextLower.includes('téléphone') ||
                     qTextLower.includes('phone') || qTextLower.includes('zone géographique') ||
                     qTextLower.includes('nom légal') || qTextLower.includes('raison sociale') ||
@@ -1460,7 +1463,8 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     q.allowCustom = true;
                     q.inputType = "text";
                     if (!q.customLabel) {
-                        if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
+                        if (isUrlQuestion) q.customLabel = "Collez l'URL ici...";
+                        else if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
                         else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Saisissez votre numéro...";
                         else if (qTextLower.includes('géographi')) q.customLabel = "Saisissez la zone géographique...";
                         else q.customLabel = "Saisissez votre réponse...";
