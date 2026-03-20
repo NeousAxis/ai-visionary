@@ -1280,8 +1280,29 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             // 🧮 ORDERED QUEUE — SÉPARÉE EN 2 TYPES :
             // 1. validationQueue = données scannées lowConfidence → question statique Oui/Non (pas de LLM)
             // 2. enrichmentQueue = données inconnues → question LLM via Greffier
-            const validationQueue = allBlockNames.filter(b => lowConfidenceKeys.includes(b));
-            const enrichmentQueue = allBlockNames.filter(b => unknownKeys.includes(b) && !lowConfidenceKeys.includes(b));
+
+            // Champs qui nécessitent TOUJOURS une réponse ouverte (jamais Oui/Non)
+            const ENRICHMENT_ONLY_FIELDS = [
+              'identite.contact_email',
+              'identite.contact_phone',
+              'identite.legal_name',
+              'identite.city',
+              'processus_methodes.geographies_served',
+              'processus_methodes.process_steps',
+              'confiance_conformite.certifications',
+              'confiance_conformite.security_measures',
+              'preuve_sociale.key_indicators',
+              'preuve_sociale.testimonials',
+              'preuve_sociale.certifications_count',
+            ];
+
+            const validationQueue = allBlockNames.filter(b =>
+              lowConfidenceKeys.includes(b) && !ENRICHMENT_ONLY_FIELDS.includes(b)
+            );
+            const enrichmentQueue = allBlockNames.filter(b =>
+              (unknownKeys.includes(b) && !lowConfidenceKeys.includes(b)) ||
+              (lowConfidenceKeys.includes(b) && ENRICHMENT_ONLY_FIELDS.includes(b))
+            );
             // Validation d'abord, enrichissement ensuite
             const combinedQueue = [...validationQueue, ...enrichmentQueue];
 
