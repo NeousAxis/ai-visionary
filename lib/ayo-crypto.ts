@@ -282,7 +282,28 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Process & Methods
     const processus: any = {};
     if (mode !== 'LIGHT') {
-        processus.process_steps = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value)));
+        // Bug fix: Filter out degraded process_steps (bare acronyms, too-short entries)
+        const ACRONYM_EXPANSIONS: Record<string, string> = {
+            "ASR": "Génération du fichier ASR (AI Singular Record)",
+            "JSON-LD": "Structuration des données en JSON-LD",
+            "SEO": "Optimisation du référencement (SEO)",
+            "AYO": "Activation du protocole AYO",
+            "AYA": "Inscription dans le registre AYA",
+            "KPI": "Définition des indicateurs clés (KPI)",
+        };
+        const BARE_ACRONYM_RE = /^[A-Z][A-Z0-9\-]{1,10}$/; // All caps, no spaces, 2-11 chars
+        processus.process_steps = filterGarbageEntries(
+            sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value))
+        )
+            .map((step: string) => {
+                const trimmed = step.trim();
+                // Replace known bare acronyms with their expanded form
+                if (ACRONYM_EXPANSIONS[trimmed]) return ACRONYM_EXPANSIONS[trimmed];
+                // Filter bare acronyms (all caps, no spaces)
+                if (BARE_ACRONYM_RE.test(trimmed)) return null;
+                return trimmed;
+            })
+            .filter((step: string | null): step is string => step !== null && step.length >= 10);
         processus.delivery_mode = sanitizeFieldValue(deliveryMode) || deliveryMode; // already cleaned above
         // geographies_served: fallback to country if empty, normalize case
         const sanitizedGeoServed = sanitizeFieldValue(geoServed);
@@ -332,8 +353,27 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const ABSENCE_INDICATOR_RE = /non déclaré|pas encore|aucun/i;
         const validIndicators = rawIndicators.filter((ind: string) => /\d/.test(ind) || !ABSENCE_INDICATOR_RE.test(ind));
         if (validIndicators.length > 0) {
-            // Non-empty indicators: keep existing format + add data_maturity
-            indicateurs.key_indicators = validIndicators;
+            // Bug fix: Structure key_indicators as exploitable objects (not bare labels)
+            indicateurs.key_indicators = validIndicators.map((ind: string) => {
+                // Try to extract a numeric value from the indicator string
+                const numMatch = ind.match(/([\d\s,.]+)\s*(€|%|k|m|users?|clients?|entreprises?|projets?|heures?|jours?)?/i);
+                const extractedValue = numMatch ? parseFloat(numMatch[1].replace(/\s/g, '').replace(',', '.')) : null;
+                const extractedUnit = numMatch?.[2]?.toLowerCase() || (extractedValue !== null ? "count" : "count");
+                // Build a snake_case name from the label
+                const nameSlug = ind.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9]+/g, '_')
+                    .replace(/^_|_$/g, '')
+                    .substring(0, 60);
+                return {
+                    name: nameSlug,
+                    label: ind,
+                    value: isNaN(extractedValue as number) ? null : extractedValue,
+                    unit: extractedUnit,
+                    last_updated: todayISO.substring(0, 7), // "YYYY-MM"
+                    source: "self_declared"
+                };
+            });
             indicateurs.data_maturity = {
                 level: validIndicators.length > 2 ? 3 : 2,
                 label: validIndicators.length > 2 ? "structured" : "emerging",
@@ -383,9 +423,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Educational Content (NEW)
     const contenus: any = {};
     if (mode !== 'LIGHT') {
-        contenus.has_faq = Boolean(data.contenus_pedagogiques?.has_faq?.value && data.contenus_pedagogiques.has_faq.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_faq.value !== "[SKIP] Non applicable");
-        contenus.has_glossary = Boolean(data.contenus_pedagogiques?.has_glossary?.value && data.contenus_pedagogiques.has_glossary.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_glossary.value !== "[SKIP] Non applicable");
-        contenus.has_documentation = Boolean(data.contenus_pedagogiques?.has_documentation?.value && data.contenus_pedagogiques.has_documentation.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_documentation.value !== "[SKIP] Non applicable");
+        // PRO pack always includes generated FAQ, glossary, and documentation files.
+        // These flags reflect Pack PRO deliverables, not just what exists on the client's website.
+        const isPro = mode === 'PRO';
+        contenus.has_faq = isPro || Boolean(data.contenus_pedagogiques?.has_faq?.value && data.contenus_pedagogiques.has_faq.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_faq.value !== "[SKIP] Non applicable");
+        contenus.has_glossary = isPro || Boolean(data.contenus_pedagogiques?.has_glossary?.value && data.contenus_pedagogiques.has_glossary.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_glossary.value !== "[SKIP] Non applicable");
+        contenus.has_documentation = isPro || Boolean(data.contenus_pedagogiques?.has_documentation?.value && data.contenus_pedagogiques.has_documentation.value !== "__SKIPPED__" && data.contenus_pedagogiques.has_documentation.value !== "[SKIP] Non applicable");
     }
 
     // Bug 11: Compute raw score & cap info from available data
