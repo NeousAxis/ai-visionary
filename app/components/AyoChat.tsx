@@ -462,7 +462,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             const isTruthQuestion = q.id === 'truth_confirmation' || questionLower.includes('compris l\'importance');
                             const isCalibrationQuestion = q.id === 'activity_calibration' || questionLower.includes('décrire votre activité');
                             const isEmailQuestion = questionLower.includes('email') && (questionLower.includes('professionnel') || questionLower.includes('finaliser'));
-                            const showSkipButton = !isOwnershipQuestion && !isValidationQuestion && !isTruthQuestion && !isCalibrationQuestion && !isEmailQuestion;
+                            const optionsHaveNonApplicable = (q.options || []).some((o: string) => o.toLowerCase().includes('non applicable'));
+                            const showSkipButton = !isOwnershipQuestion && !isValidationQuestion && !isTruthQuestion && !isCalibrationQuestion && !isEmailQuestion && !optionsHaveNonApplicable;
 
                             // FORCE allowMultiple based on question keywords (LLM often forgets)
                             // BUT NOT for ownership question OR if explicitly set to false
