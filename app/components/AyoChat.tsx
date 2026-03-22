@@ -463,7 +463,9 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             const isCalibrationQuestion = q.id === 'activity_calibration' || questionLower.includes('décrire votre activité');
                             const isEmailQuestion = questionLower.includes('email') && (questionLower.includes('professionnel') || questionLower.includes('finaliser'));
                             const optionsHaveNonApplicable = (q.options || []).some((o: string) => o.toLowerCase().includes('non applicable'));
-                            const showSkipButton = !isOwnershipQuestion && !isValidationQuestion && !isTruthQuestion && !isCalibrationQuestion && !isEmailQuestion && !optionsHaveNonApplicable;
+                            const isPackQuestion = q.id === 'pack_intention' || questionLower.includes('pack') || questionLower.includes('certification') && questionLower.includes('niveau') || questionLower.includes('abonnement') || questionLower.includes('sélectionnez votre');
+                            const isReadyQuestion = questionLower.includes('prêt') || questionLower.includes('générer');
+                            const showSkipButton = !isOwnershipQuestion && !isValidationQuestion && !isTruthQuestion && !isCalibrationQuestion && !isEmailQuestion && !optionsHaveNonApplicable && !isPackQuestion && !isReadyQuestion;
 
                             // FORCE allowMultiple based on question keywords (LLM often forgets)
                             // BUT NOT for ownership question OR if explicitly set to false
