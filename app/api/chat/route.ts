@@ -731,7 +731,7 @@ LES 25 QUESTIONS CRITIQUES :
 20. Politiques (Lien CGV ou mention légale)
 21. Indicateurs de succès (KPIs: Nombre de clients, tonnes CO2, CA, Résultats mesurables)
 22. Date de dernière mise à jour (Fraîcheur des données)
-23. Supports pédagogiques (Livre blanc, FAQ, Plateforme, Documentation)
+23. Supports pédagogiques (Livre blanc, FAQ, Plateforme, Documentation) — ATTENTION : ne confonds pas les EXEMPLES ou illustrations marketing (ex: "Quand un utilisateur demande 'Plombier urgence Lyon'...") avec de la vraie documentation. Un exemple cité pour illustrer un concept N'EST PAS de la documentation. Cherche des VRAIS guides, tutoriels, livres blancs, pages de type "Comment faire..."
 24. Mots-clés de recherche (Comment vos clients vous trouvent)
 25. Intentions de recherche typiques (Requêtes que vos clients tapent sur Google/IA)
 
