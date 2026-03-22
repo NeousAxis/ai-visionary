@@ -1502,6 +1502,20 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 const q = parsed.questions[0];
                 if (!q) return;
 
+                // Règle 0 : bloquer les questions parasites de confirmation/transition
+                const parasitePatterns = [
+                    'êtes-vous prêt', 'etes-vous pret', 'voulez-vous continuer',
+                    'souhaitez-vous poursuivre', 'confirmez-vous ces informations',
+                    'prêt à générer', 'pret a generer', 'générer votre fichier',
+                    'lancer la génération', 'passer à la génération'
+                ];
+                const qTextCheck = (q.text || '').toLowerCase();
+                if (parasitePatterns.some(p => qTextCheck.includes(p))) {
+                    console.warn(`⚠️ VALIDATOR: Question parasite détectée: "${q.text}". Suppression.`);
+                    parsed.questions = [];
+                    return;
+                }
+
                 // Règle 2 : au moins 2 options, jamais seulement "Autre"
                 // SAUF pour les champs texte libre (email, téléphone, etc.)
                 const TEXT_INPUT_FIELDS = [

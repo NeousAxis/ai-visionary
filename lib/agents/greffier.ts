@@ -331,6 +331,8 @@ export function buildContinuePrompt(params: ContinuePromptParams): string {
    - JAMAIS proposer "Compléter la liste", "Ajouter des éléments", "Confirmer la liste" comme option.
    - JAMAIS afficher de longues listes. Résume : "les X éléments détectés" + 2-3 exemples max.
    - JAMAIS demander de confirmer ce que le scan a déjà trouvé. Le scan fait autorité.
+   - JAMAIS poser de questions de transition/confirmation comme "Êtes-vous prêt ?", "Voulez-vous continuer ?", "Confirmez-vous ces informations ?", "Êtes-vous prêt à générer votre fichier ASR ?". POSE DIRECTEMENT la question suivante sur les DONNÉES.
+   - JAMAIS redemander si les informations sont exactes/vraies. Cette confirmation est faite UNE SEULE FOIS au début.
 5. 🔍 VÉRIFICATION & DEMANDE DE PREUVES :
    Si le client DÉCLARE quelque chose que le scan N'A PAS trouvé, EXIGE un lien ou une preuve.
    - "Conformité RGPD" mais pas de page détectée → "Fournissez le lien vers votre politique RGPD"
