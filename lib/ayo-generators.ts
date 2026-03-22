@@ -391,6 +391,64 @@ export function sanitizeKeywords(items: string[], maxLen: number = 80): string[]
     return items.filter(k => k.length <= maxLen && !/[a-zA-Z0-9-]+\.(com|org|net|io|fr|ch)/i.test(k));
 }
 
+// --- DATA QUALITY HELPERS ---
+
+/** Bug 1: Filter out garbage array entries like "Etc.", "etc.", "...", "" */
+const GARBAGE_ENTRY_RE = /^(etc\.?|\.{2,}|\s*)$/i;
+export function filterGarbageEntries(arr: string[]): string[] {
+    return arr.filter(s => !GARBAGE_ENTRY_RE.test(s.trim()));
+}
+
+/** Bug 2: Normalize ALL CAPS strings to Title Case. "MONDE" → "Monde entier", "FOO BAR" → "Foo bar" */
+export function normalizeCase(str: string): string {
+    if (!str || typeof str !== 'string') return str || "";
+    const trimmed = str.trim();
+    // Special case: "MONDE" → "International"
+    if (/^MONDE$/i.test(trimmed) && trimmed === trimmed.toUpperCase()) return "International";
+    // Only transform if the string is ALL CAPS (at least 4 chars, ignoring numbers/symbols)
+    const letters = trimmed.replace(/[^a-zA-ZÀ-ÿ]/g, '');
+    if (letters.length >= 4 && letters === letters.toUpperCase()) {
+        // Capitalize first letter, lowercase the rest
+        return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+    }
+    return trimmed;
+}
+
+/** Bug 3: Strip leading numbered prefixes like "1. ", "2. ", "10. " */
+export function stripNumberedPrefix(str: string): string {
+    if (!str || typeof str !== 'string') return str || "";
+    return str.replace(/^\d+\.\s+/, '').trim();
+}
+
+/** Bug 4: Truncate security_measures entries to max 100 chars, cut at last period or comma */
+export function truncateSecurity(str: string, maxLen: number = 100): string {
+    if (!str || str.length <= maxLen) return str;
+    const sub = str.substring(0, maxLen);
+    // Find last period or comma before the limit
+    const lastPeriod = sub.lastIndexOf('.');
+    const lastComma = sub.lastIndexOf(',');
+    const cutAt = Math.max(lastPeriod, lastComma);
+    if (cutAt > 0) return sub.substring(0, cutAt + 1).trim();
+    // Fallback: cut at last space
+    const lastSpace = sub.lastIndexOf(' ');
+    if (lastSpace > 0) return sub.substring(0, lastSpace).trim();
+    return sub.trim();
+}
+
+/** Bug 5: Filter out standalone AI model names from contextualRelevance */
+const AI_MODEL_NAMES_RE = /^(Gemini|Claude|Mistral|Llama|Ernie|ChatGPT|GPT|Perplexity)$/i;
+export function filterAiModelNames(arr: string[]): string[] {
+    return arr.filter(s => !AI_MODEL_NAMES_RE.test(s.trim()));
+}
+
+/** Bug 7: Filter out glossary terms where name is "Etc." or similar */
+export function isGarbageGlossaryTerm(term: string): boolean {
+    return GARBAGE_ENTRY_RE.test(term.trim());
+}
+
+/** Bug 8: Fix ASR glossary term description */
+const ASR_CANONICAL_DESCRIPTION = "AI Singular Record — fichier JSON-LD structuré et signé cryptographiquement constituant l'identité sémantique officielle d'une entité auprès des agents IA.";
+
 /**
  * Policy-specific definitions for glossary (not all policies are about "data protection")
  */
@@ -679,10 +737,12 @@ export function generateFaqJson(data: any, url: string): any {
     const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
     const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
     const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
-    const securityMeasures = sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value));
+    const securityMeasures = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
+        .map(truncateSecurity));
     const NO_DATA_PHRASES_FAQ = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
-    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
-        .filter((ind: string) => !NO_DATA_PHRASES_FAQ.test(ind.trim()));
+    const keyIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
+        .filter((ind: string) => !NO_DATA_PHRASES_FAQ.test(ind.trim()))
+        .map(normalizeCase));
     const rawHasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasFaq = (rawHasFaq === "__SKIPPED__" || rawHasFaq === "[SKIP] Non applicable") ? false : rawHasFaq;
     const rawHasDoc = data.contenus_pedagogiques?.has_documentation?.value;
@@ -881,7 +941,8 @@ export function generateGlossaryJson(data: any): any {
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
     const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
     const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
-    const securityMeasures = sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value));
+    const securityMeasures = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
+        .map(truncateSecurity));
 
     const nameArticleG = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
 
@@ -894,6 +955,8 @@ export function generateGlossaryJson(data: any): any {
         if (sanitizeFieldValue(term) === null) return;
         // Bug 11: Skip standalone AI names as glossary terms
         if (AI_NAME_GLOSSARY_RE.test(term.trim())) return;
+        // Bug 7: Skip "Etc.", "etc.", "..." garbage terms
+        if (isGarbageGlossaryTerm(term)) return;
         const key = term.toLowerCase().trim();
         if (key.length < 3 || seen.has(key)) return;
         const cleanTerm = term.replace(/Creative Common\b(?!s)/gi, "Creative Commons");
@@ -984,12 +1047,21 @@ export function generateGlossaryJson(data: any): any {
         description: `Vocabulaire métier officiel ${nameArticleG}, utilisé comme référence par les agents IA pour interpréter les données sémantiques de cette entité.`,
         inLanguage: "fr",
         numberOfTerms: terms.length,
-        hasDefinedTerm: terms.map(item => ({
-            "@type": "DefinedTerm",
-            name: item.term,
-            description: item.def,
-            inDefinedTermSet: item.category
-        }))
+        hasDefinedTerm: terms
+            .filter(item => !isGarbageGlossaryTerm(item.term))
+            .map(item => {
+                // Bug 8: Fix bare "ASR" term with generic description
+                let def = item.def;
+                if (/^ASR$/i.test(item.term.trim()) && !item.def.includes("JSON-LD")) {
+                    def = ASR_CANONICAL_DESCRIPTION;
+                }
+                return {
+                    "@type": "DefinedTerm",
+                    name: item.term,
+                    description: def,
+                    inDefinedTermSet: item.category
+                };
+            })
     };
 }
 
@@ -1021,8 +1093,9 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             : [];
     const qualityAssurance = sanitizeFieldArray(qualityAssuranceRaw);
     const NO_DATA_PHRASES_EC = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
-    const keyIndicators = sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
-        .filter((ind: string) => !NO_DATA_PHRASES_EC.test(ind.trim()));
+    const keyIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
+        .filter((ind: string) => !NO_DATA_PHRASES_EC.test(ind.trim()))
+        .map(normalizeCase));
     const rawHasFaqEC = data.contenus_pedagogiques?.has_faq?.value;
     const hasFaq = (rawHasFaqEC === "__SKIPPED__" || rawHasFaqEC === "[SKIP] Non applicable") ? false : rawHasFaqEC;
     const rawHasDocEC = data.contenus_pedagogiques?.has_documentation?.value;
@@ -1185,9 +1258,9 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             process_transparency: (processSteps.length > 0 || deliveryMode) ? "documented" : "undisclosed"
         },
         keywords_context: {
-            discovery_keywords: sanitizeKeywords(discoveryKeywords),
-            intent_keywords: sanitizeKeywords(intentKeywords),
-            audience_segments: audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : [],
+            discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords)),
+            intent_keywords: filterGarbageEntries(sanitizeKeywords(intentKeywords).map(stripNumberedPrefix)),
+            audience_segments: filterGarbageEntries(audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
             source: "declared_plus_structured_normalization"
         },
         access_channels: {

@@ -3,7 +3,8 @@ import {
     sanitizeFieldValue, sanitizeFieldArray,
     toArray, cleanText, cleanVal, cleanArray,
     cleanSkippedValues, isAssociation, PHONE_REGEX,
-    fixUnmatchedBrackets, mergeAiNamesInUseCases
+    fixUnmatchedBrackets, mergeAiNamesInUseCases,
+    filterGarbageEntries, normalizeCase, truncateSecurity, filterAiModelNames
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
@@ -109,7 +110,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     };
 
     // areaServed: use declared geography instead of hardcoded 5km radius
-    const geoServed = cleanValAsr(data.processus_methodes?.geographies_served?.value);
+    const geoServed = normalizeCase(cleanValAsr(data.processus_methodes?.geographies_served?.value));
     const deliveryModeRaw = cleanValAsr(data.processus_methodes?.delivery_mode?.value);
     const isOnlineDelivery = deliveryModeRaw && (deliveryModeRaw.toLowerCase().includes("en ligne") || deliveryModeRaw.toLowerCase().includes("online"));
     const appendInternational = (name: string) => isOnlineDelivery && !name.toLowerCase().includes("international") ? `${name}, International` : name;
@@ -237,9 +238,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // Offer
     const offer: any = {
-        "services": sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value)),
-        "products": sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value)),
-        "use_cases": mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value))),
+        "services": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value))),
+        "products": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value))),
+        "use_cases": filterGarbageEntries(mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)))),
     };
 
     if (mode !== 'LIGHT') {
@@ -250,12 +251,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const audienceString = isAudienceSentence ? "Grand public" : fixUnmatchedBrackets(rawAudience || "Grand public");
         // Bug 5: Limit audience to max 15 segments, filter hallucinated/generic segments
         const HALLUCINATED_AUDIENCE_RE = /^(secteur de (la|l'|le|les)|secteur [a-zéèêëàâä])/i;
-        offer.audience = audienceString.split(',')
+        offer.audience = filterGarbageEntries(audienceString.split(',')
             .map((s: string) => s.trim())
             .filter(Boolean)
             .filter((s: string) => !HALLUCINATED_AUDIENCE_RE.test(s))
             .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
-            .slice(0, 15);
+            .slice(0, 15));
         if (offer.audience.length === 0) offer.audience = ["Grand public"];
 
         // Correction 3: pricingIndication as structured object
@@ -281,25 +282,26 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Process & Methods
     const processus: any = {};
     if (mode !== 'LIGHT') {
-        processus.process_steps = sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value));
+        processus.process_steps = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value)));
         processus.delivery_mode = sanitizeFieldValue(deliveryMode) || deliveryMode; // already cleaned above
-        // geographies_served: fallback to country if empty
+        // geographies_served: fallback to country if empty, normalize case
         const sanitizedGeoServed = sanitizeFieldValue(geoServed);
         const sanitizedCountryFallback = sanitizeFieldValue(cleanValAsr(data.identite?.country?.value));
-        processus.geographies_served = sanitizedGeoServed || sanitizedCountryFallback || "";
+        processus.geographies_served = normalizeCase(sanitizedGeoServed || sanitizedCountryFallback || "");
         // quality_assurance: force array format (comma-separated string → array)
         const rawQA = cleanValAsr(data.processus_methodes?.quality_assurance?.value);
         const qaArray = rawQA ? rawQA.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
-        processus.quality_assurance = sanitizeFieldArray(qaArray);
+        processus.quality_assurance = filterGarbageEntries(sanitizeFieldArray(qaArray));
     }
 
     // Engagements & Compliance
     const engagements: any = {};
     if (mode !== 'LIGHT') {
-        engagements.certifications = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value));
-        engagements.frameworks = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value));
-        engagements.policies = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value));
-        engagements.security_measures = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value));
+        engagements.certifications = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value)));
+        engagements.frameworks = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value)));
+        engagements.policies = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)));
+        engagements.security_measures = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
+            .map(truncateSecurity));
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
         if (engagements.certifications.length === 0 && certQ > 0) {
@@ -321,8 +323,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // Bug 10: Mark indicators without numeric values as "non déclaré"
         // Filter out "no data" phrases that users type instead of actual indicators
         const NO_DATA_PHRASES = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
-        const rawIndicators = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value))
-            .filter((ind: string) => !NO_DATA_PHRASES.test(ind.trim()));
+        const rawIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value))
+            .filter((ind: string) => !NO_DATA_PHRASES.test(ind.trim()))
+            .map(normalizeCase));
         const todayISO = new Date().toISOString().split('T')[0];
 
         // Bug 6: Filter out indicators containing "non déclaré", "pas encore", "aucun" — those activate the absence module
@@ -499,19 +502,20 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // --- MODE SPECIFIC INJECTIONS ---
 
     // Bug 14: Build contextualRelevance from use_cases and keywords (services as proxy)
+    const AI_MODEL_RE = /^(Gemini|Claude|Mistral|Llama|Ernie|ChatGPT|GPT|Perplexity)$/i;
     const buildContextualRelevance = (): any[] => {
         const relevanceItems: any[] = [];
         // Add use_cases as high relevance
-        const useCases = sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value));
+        const useCases = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)));
         for (const uc of useCases.slice(0, 5)) {
-            if (uc && uc.length > 2) {
+            if (uc && uc.length > 2 && !AI_MODEL_RE.test(uc.trim())) {
                 relevanceItems.push({ context: uc, relevance: "high" });
             }
         }
         // Add top services/keywords as medium relevance
-        const services = sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value));
+        const services = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value)));
         for (const svc of services.slice(0, 5)) {
-            if (svc && svc.length > 2) {
+            if (svc && svc.length > 2 && !AI_MODEL_RE.test(svc.trim())) {
                 relevanceItems.push({ context: svc, relevance: "medium" });
             }
         }
@@ -535,6 +539,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 if (intent.includes("ex:") || intent.includes("exemple") || intent.includes("recherche salle sport")) return false;
                 if (status.includes("/") || status === "eligible/uncertain") return false;
                 if (!cr.userIntent || cr.userIntent.length < 5) return false;
+                // Bug 5: Filter out standalone AI model names as contextualRelevance entries
+                if (AI_MODEL_RE.test(cr.userIntent.trim())) return false;
                 return true;
             })
             .map((cr: any) => ({
