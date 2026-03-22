@@ -4,7 +4,8 @@ import {
     toArray, cleanText, cleanVal, cleanArray,
     cleanSkippedValues, isAssociation, PHONE_REGEX,
     fixUnmatchedBrackets, mergeAiNamesInUseCases,
-    filterGarbageEntries, normalizeCase, truncateSecurity, filterAiModelNames
+    filterGarbageEntries, normalizeCase, truncateSecurity, filterAiModelNames,
+    splitLongSecurityEntries
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
@@ -321,8 +322,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.certifications = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value)));
         engagements.frameworks = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value)));
         engagements.policies = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)));
-        engagements.security_measures = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
-            .map(truncateSecurity));
+        engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
+            .map(truncateSecurity)));
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
         if (engagements.certifications.length === 0 && certQ > 0) {
@@ -483,11 +484,19 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         verification_possible: isAyaRegistered
     } : undefined;
 
+    // Determine if indicators have concrete numeric values (not just labels)
+    const hasConcreteValues = rawIndicatorsForSignal.some((ind: string) => /\d/.test(ind));
     const interpretationSignal = mode !== 'LIGHT' ? {
         should_penalize_missing_indicators: false,
-        reason: rawIndicatorsForSignal.length > 0 ? "indicators_provided" : "absence_declared_and_structured",
-        trust_modifier: rawIndicatorsForSignal.length > 0 ? "positive" : "neutral",
-        recommendation_impact: rawIndicatorsForSignal.length > 0 ? "none" : "low"
+        reason: rawIndicatorsForSignal.length > 0
+            ? (hasConcreteValues ? "indicators_provided" : "indicators_declared_with_transparency")
+            : "absence_declared_and_structured",
+        trust_modifier: rawIndicatorsForSignal.length > 0
+            ? (hasConcreteValues ? "positive" : "neutral")
+            : "neutral",
+        recommendation_impact: rawIndicatorsForSignal.length > 0
+            ? (hasConcreteValues ? "none" : "low")
+            : "low"
     } : undefined;
 
     const asrContent: any = {

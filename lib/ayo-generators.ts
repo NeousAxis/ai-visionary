@@ -265,13 +265,19 @@ export function mergeAiNamesInUseCases(useCases: string[]): string[] {
     }
 
     if (!primaryAiUseCase && mentionedAiNames.size > 0) {
-        // All were standalone AI names — create a merged use case
+        // All were standalone AI names — create meaningful use cases instead of listing names
         const aiList = ALL_AI_NAMES.filter(n => mentionedAiNames.has(n));
-        // Add any missing major AIs
         for (const name of ALL_AI_NAMES) {
             if (!aiList.includes(name)) aiList.push(name);
         }
-        primaryAiUseCase = `Être visible et recommandé par les IA (${aiList.join(", ")})`;
+        const aiListStr = aiList.join(", ");
+        // Return 3 meaningful use cases instead of just one with AI names
+        return [
+            `Être visible et recommandé par les IA génératives (${aiListStr})`,
+            "Structurer les informations d'une entité pour les agents IA",
+            "Créer une identité sémantique exploitable par les assistants IA",
+            ...nonAiUseCases
+        ];
     } else if (primaryAiUseCase && mentionedAiNames.size > 0) {
         // Ensure all AI names are in the primary use case
         const allAiList = ALL_AI_NAMES.filter(n =>
@@ -433,6 +439,30 @@ export function truncateSecurity(str: string, maxLen: number = 100): string {
     const lastSpace = sub.lastIndexOf(' ');
     if (lastSpace > 0) return sub.substring(0, lastSpace).trim();
     return sub.trim();
+}
+
+/** Split security_measures entries longer than 80 chars into concise items at natural breakpoints */
+export function splitLongSecurityEntries(entries: string[]): string[] {
+    const result: string[] = [];
+    for (const entry of entries) {
+        if (entry.length <= 80) {
+            result.push(entry);
+            continue;
+        }
+        // Split at commas or periods, keep items that are meaningful (>3 chars)
+        const parts = entry.split(/[,.]/).map(s => s.trim()).filter(s => s.length > 3);
+        if (parts.length > 1) {
+            for (const part of parts) {
+                // Capitalize first letter
+                const capitalized = part.charAt(0).toUpperCase() + part.slice(1);
+                result.push(capitalized.length > 80 ? truncateSecurity(capitalized, 80) : capitalized);
+            }
+        } else {
+            // No natural breakpoint: truncate on word boundary at 80 chars
+            result.push(truncateSecurity(entry, 80));
+        }
+    }
+    return result;
 }
 
 /** Bug 5: Filter out standalone AI model names from contextualRelevance */
@@ -795,9 +825,12 @@ export function generateFaqJson(data: any, url: string): any {
     }
 
     if (useCases.length > 0) {
+        // Filter out "Etc." and reformulate naturally
+        const cleanUseCases = useCases.filter(uc => !/^etc\.?$/i.test(uc.trim()));
+        const activity = businessType && businessType !== "Organization" ? businessType.toLowerCase() : "son activité";
         qna.push({
             q: `Dans quelles situations faire appel à ${name} ?`,
-            a: `${name} peut vous accompagner pour : ${useCases.join(", ")}.`.trim(),
+            a: `${name} peut accompagner une entité qui souhaite ${cleanUseCases.length > 0 ? cleanUseCases.map(uc => uc.charAt(0).toLowerCase() + uc.slice(1)).join(", ") : `améliorer sa lisibilité auprès des IA, structurer ses informations en format sémantique et renforcer sa présence dans le registre AYA`}.`.trim(),
             category: "Offre"
         });
     }
@@ -862,9 +895,13 @@ export function generateFaqJson(data: any, url: string): any {
 
     // --- INDICATEURS ---
     if (keyIndicators.length > 0) {
+        // Check if indicators have concrete numeric values
+        const hasConcreteValuesFaq = keyIndicators.some(ind => /\d/.test(ind));
         qna.push({
             q: `Quels sont les indicateurs d'impact ${nameArticle} ?`,
-            a: `Les indicateurs clés ${nameArticle} incluent : ${keyIndicators.join(", ")}. Ces métriques témoignent de l'impact concret et de la qualité des interventions.`,
+            a: hasConcreteValuesFaq
+                ? `Les indicateurs clés ${nameArticle} incluent : ${keyIndicators.join(", ")}. Ces métriques témoignent de l'impact concret et de la qualité des interventions.`
+                : `${name} déclare suivre ${keyIndicators.length > 1 ? "les indicateurs suivants" : "l'indicateur suivant"} : ${keyIndicators.join(", ")}. La valeur publique n'est pas précisée dans les sources actuelles.`,
             category: "Indicateurs"
         });
     }
@@ -873,14 +910,25 @@ export function generateFaqJson(data: any, url: string): any {
     const rawHasGlossary = data.contenus_pedagogiques?.has_glossary?.value;
     const hasGlossary = (rawHasGlossary === "__SKIPPED__" || rawHasGlossary === "[SKIP] Non applicable") ? false : rawHasGlossary;
     if (hasDoc || hasFaq || hasGlossary) {
-        const resParts: string[] = [];
-        if (typeof hasDoc === 'string' && hasDoc !== "__SKIPPED__") resParts.push(`une documentation (${hasDoc})`);
-        else if (hasDoc) resParts.push("une documentation complète");
-        if (hasFaq) resParts.push("une FAQ pour répondre aux questions courantes");
-        if (hasGlossary) resParts.push("un glossaire du vocabulaire métier");
+        // When all 3 resources are available (PRO pack), use concise formulation tied to activity
+        const allThreeAvailable = hasFaq && hasGlossary && hasDoc;
+        const activityRef = businessType && businessType !== "Organization"
+            ? businessType.toLowerCase()
+            : "son activité";
+        let resourceAnswer: string;
+        if (allThreeAvailable) {
+            resourceAnswer = `Oui. ${name} met à disposition une FAQ, un glossaire métier et une documentation liée à ${activityRef}.`;
+        } else {
+            const resParts: string[] = [];
+            if (typeof hasDoc === 'string' && hasDoc !== "__SKIPPED__") resParts.push(`une documentation (${hasDoc})`);
+            else if (hasDoc) resParts.push("une documentation complète");
+            if (hasFaq) resParts.push("une FAQ pour répondre aux questions courantes");
+            if (hasGlossary) resParts.push("un glossaire du vocabulaire métier");
+            resourceAnswer = `Oui. ${name} met à disposition ${resParts.join(", ")}. Retrouvez ces ressources sur ${url}.`;
+        }
         qna.push({
             q: `${name} propose-t-${isAssoFaq ? "elle" : "il"} des ressources pédagogiques ?`,
-            a: `Oui. ${name} met à disposition ${resParts.join(", ")}. Retrouvez ces ressources sur ${url}.`,
+            a: resourceAnswer,
             category: "Ressources"
         });
     }
@@ -1002,12 +1050,23 @@ export function generateGlossaryJson(data: any): any {
     ];
     processSteps.forEach((step, i) => {
         if (typeof step !== 'string') return;
-        addTerm(step, processDescTemplates[i % processDescTemplates.length](step, i), "Processus");
+        // If the step is or contains "ASR", use the canonical ASR description
+        if (/^ASR$/i.test(step.trim()) || /^Génération du fichier ASR/i.test(step.trim())) {
+            addTerm(step, ASR_CANONICAL_DESCRIPTION, "Processus");
+        } else {
+            addTerm(step, processDescTemplates[i % processDescTemplates.length](step, i), "Processus");
+        }
     });
 
     certifications.forEach(c => {
         if (typeof c !== 'string') return;
-        addTerm(c, `Certification ou label officiel détenu par ${name}. Signal de confiance évalué dans le scoring AIO (bloc Confiance & Conformité, pondéré à 15/100).`, "Conformité");
+        const cLower = c.toLowerCase();
+        // "Conformité RGPD" / "GDPR" is a declarative signal, not a certification/label
+        if (cLower.includes('rgpd') || cLower.includes('gdpr') || cLower.includes('protection des données')) {
+            addTerm(c, `Signal déclaratif de conformité relatif à la protection des données personnelles. Élément pris en compte dans l'évaluation de la lisibilité et de la confiance.`, "Conformité");
+        } else {
+            addTerm(c, `Certification ou label officiel détenu par ${name}. Signal de confiance évalué dans le scoring AIO (bloc Confiance & Conformité, pondéré à 15/100).`, "Conformité");
+        }
     });
 
     frameworks.forEach(f => {
@@ -1258,7 +1317,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             process_transparency: (processSteps.length > 0 || deliveryMode) ? "documented" : "undisclosed"
         },
         keywords_context: {
-            discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords)),
+            discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords.map(stripNumberedPrefix))),
             intent_keywords: filterGarbageEntries(sanitizeKeywords(intentKeywords).map(stripNumberedPrefix)),
             audience_segments: filterGarbageEntries(audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
             source: "declared_plus_structured_normalization"
