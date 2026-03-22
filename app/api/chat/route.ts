@@ -1514,9 +1514,12 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 ];
                 const qIdLower = (q.id || '').toLowerCase();
                 const qTextLower = (q.text || '').toLowerCase();
-                const isUrlQuestion = qTextLower.includes('url') || qTextLower.includes('coller l') ||
-                    qTextLower.includes('fournir un lien') || qTextLower.includes('lien vers') ||
-                    (q.options || []).some((o: string) => o.toLowerCase().includes('coller l\'url') || o.toLowerCase().includes('fournir un lien'));
+                // URL questions: only if no good options already exist (evidence questions have "Je n'ai pas de lien" etc.)
+                const hasEvidenceOptions = (q.options || []).some((o: string) =>
+                    o.toLowerCase().includes('pas de lien') || o.toLowerCase().includes('non applicable'));
+                const isUrlQuestion = !hasEvidenceOptions && (
+                    qTextLower.includes('collez l') ||
+                    qTextLower.includes('coller l') || qTextLower.includes('saisissez l'));
                 // Detect detail/description fields by suffix patterns (LLM often generates _details, _description, _specifics)
                 const isDetailField = qIdLower.match(/_(details|description|specifics|precisions|complement)$/);
                 const isTextInputField = isUrlQuestion || isDetailField || TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
