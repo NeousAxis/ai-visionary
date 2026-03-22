@@ -313,7 +313,18 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // quality_assurance: force array format (comma-separated string → array)
         const rawQA = cleanValAsr(data.processus_methodes?.quality_assurance?.value);
         const qaArray = rawQA ? rawQA.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
-        processus.quality_assurance = filterGarbageEntries(sanitizeFieldArray(qaArray));
+        processus.quality_assurance = filterGarbageEntries(sanitizeFieldArray(qaArray))
+            .filter((entry: string) => {
+                // Remove marketing promises — keep only factual, verifiable signals
+                const lower = entry.toLowerCase();
+                const isMarketingPromise =
+                    lower.includes('recommandabilité') ||
+                    lower.includes('exhaustive') ||
+                    lower.includes('garantie') ||
+                    lower.includes('propriété intellectuelle') ||
+                    lower.includes('priorité ia');
+                return !isMarketingPromise;
+            });
     }
 
     // Engagements & Compliance

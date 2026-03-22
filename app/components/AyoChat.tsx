@@ -104,19 +104,22 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
         if (!overrideInput && Object.keys(selectedMultiple).length > 0) {
             // User pressed Enter in the text input while checkboxes are selected
             const questionId = Object.keys(selectedMultiple)[0];
-            const selections = selectedMultiple[questionId]?.filter(s => s !== '__AUTRE__') || [];
+            const currentSelections = selectedMultiple[questionId] || [];
+            const selections = currentSelections.filter(s => s !== '__AUTRE__');
 
-            if (selections.length > 0) {
-                // Combine checkbox selections + custom text
+            if (selections.length > 0 || (currentSelections.includes('__AUTRE__') && input.trim())) {
+                // Combine checkbox selections + custom text from "Autre"
                 const customText = input.trim();
                 const allAnswers = [...selections];
-                if (customText && !customText.startsWith("Autre :") || customText.includes(":")) {
-                    // Extract just the value after "Autre : " or "Label : "
+                if (currentSelections.includes('__AUTRE__') && customText) {
+                    // Extract just the value after "Label : " prefix
                     const colonIdx = customText.indexOf(':');
                     const cleanCustom = colonIdx >= 0 ? customText.substring(colonIdx + 1).trim() : customText;
                     if (cleanCustom) allAnswers.push(cleanCustom);
                 }
-                finalText = allAnswers.join(', ');
+                if (allAnswers.length > 0) {
+                    finalText = allAnswers.join(', ');
+                }
 
                 // Clear the multi-select state
                 setSelectedMultiple({});
