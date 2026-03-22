@@ -1534,10 +1534,17 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     q.allowCustom = true;
                     q.inputType = "text";
                     if (!q.customLabel) {
-                        if (isUrlQuestion) q.customLabel = "Collez l'URL ici...";
+                        // Priority: description fields > URL > other
+                        const isDescriptionQuestion = isDetailField ||
+                            qTextLower.includes('décri') || qTextLower.includes('détail') ||
+                            qTextLower.includes('processus') || qTextLower.includes('méthodologie') ||
+                            qTextLower.includes('expliquez') || qTextLower.includes('précisez') ||
+                            qIdLower.includes('process_steps') || qIdLower.includes('key_indicators');
+                        if (isDescriptionQuestion) q.customLabel = "Décrivez ici...";
                         else if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
                         else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Saisissez votre numéro...";
                         else if (qTextLower.includes('géographi')) q.customLabel = "Saisissez la zone géographique...";
+                        else if (isUrlQuestion && !isDescriptionQuestion) q.customLabel = "Collez l'URL ici...";
                         else q.customLabel = "Saisissez votre réponse...";
                     }
                     console.warn("⚠️ VALIDATOR: champ texte → inputType text (pas de boutons)");
