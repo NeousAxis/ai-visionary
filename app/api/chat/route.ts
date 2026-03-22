@@ -1308,6 +1308,16 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             // Validation d'abord, enrichissement ensuite
             const combinedQueue = [...validationQueue, ...enrichmentQueue];
 
+            // BUG FIX: Critical identity fields MUST always be in the queue even if scan missed them
+            // This prevents contact_email from being silently dropped
+            const MANDATORY_FIELDS = ['identite.contact_email', 'identite.legal_name', 'identite.contact_phone'];
+            for (const field of MANDATORY_FIELDS) {
+                if (!combinedQueue.includes(field) && !highConfidenceKeys.includes(field)) {
+                    combinedQueue.push(field);
+                    console.log(`📋 QUEUE FIX: Added mandatory field ${field} (was missing from both queues)`);
+                }
+            }
+
             // Prioritize Country (identite.country)
             const countryIndex = combinedQueue.indexOf("identite.country");
             if (countryIndex > 0) {
@@ -1326,7 +1336,10 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 if (m.content.includes('question_block')) {
                     const idMatch = m.content.match(/"id"\s*:\s*"([^"]+)"/);
                     if (idMatch) {
-                        seenQuestionIds.add(idMatch[1]);
+                        const qId = idMatch[1];
+                        // BUG FIX: Exclude fallback/error IDs from counting — they don't represent real questions
+                        if (qId === 'parsing_error_fallback' || qId.startsWith('q_fallback_')) continue;
+                        seenQuestionIds.add(qId);
                     } else {
                         seenQuestionIds.add(`_anon_${seenQuestionIds.size}`);
                     }
@@ -1410,12 +1423,26 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                         for (const msg of msgsAfterScan) {
                             if (msg.role === 'assistant') {
                                 // Extract the field name from question_block
+                                // BUG FIX: Use regex fallback when JSON.parse fails (LLM wraps JSON in text)
+                                let extractedId = '';
                                 try {
                                     const parsed = JSON.parse(msg.content);
                                     if (parsed?.questions?.[0]?.id) {
-                                        lastQuestionBlockField = parsed.questions[0].id;
+                                        extractedId = parsed.questions[0].id;
                                     }
-                                } catch { /* not JSON */ }
+                                } catch {
+                                    // Fallback: regex extraction when message isn't pure JSON
+                                    if (msg.content.includes('question_block')) {
+                                        const idMatch = msg.content.match(/"id"\s*:\s*"([^"]+)"/);
+                                        if (idMatch) {
+                                            extractedId = idMatch[1];
+                                        }
+                                    }
+                                }
+                                // Skip fallback/error question IDs — they carry no real data
+                                if (extractedId && extractedId !== 'parsing_error_fallback' && !extractedId.startsWith('q_fallback_')) {
+                                    lastQuestionBlockField = extractedId;
+                                }
                             } else if (msg.role === 'user' && lastQuestionBlockField) {
                                 const answer = msg.content.trim();
                                 // Skip pure confirmations like "Oui c'est exact"
@@ -1640,18 +1667,17 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                         // Re-serialize the sanitized response
                         finalResponseText = JSON.stringify(parsedResponse);
                     } catch (e) {
-                        console.warn("❌ JSON Parse Failed despite Regex match. Fallback to Text.", e);
-                        // If it fails to parse, it's garbage. We wrap the RAW text in a basic message block to display it cleanly.
-                        finalResponseText = JSON.stringify({
-                            type: "question_block", // Using question_block to display text + OK button
-                            intro: rawResponse.replace(jsonRegex, "").trim().substring(0, 200) + "...", // Keep intro text truncated
-                            questions: [{
-                                id: "parsing_error_fallback",
-                                text: "Pouvez-vous reformuler ? (Erreur technique IA)",
-                                options: ["Continuer"],
-                                allowCustom: true
-                            }]
-                        });
+                        console.warn("❌ JSON Parse Failed despite Regex match. Using deterministic fallback for:", nextBlockName, e);
+                        // BUG FIX: Instead of a generic error, generate the ACTUAL next question deterministically
+                        // This prevents wasting queue slots and re-asking the same broken question
+                        const fbFieldName = nextBlockName.split('.')[1] || nextBlockName;
+                        const fbBlockName = nextBlockName.split('.')[0] || nextBlockName;
+                        finalResponseText = buildValidationQuestion(
+                            fbBlockName,
+                            fbFieldName,
+                            'Information non disponible — merci de préciser'
+                        );
+                        console.log(`✅ DETERMINISTIC FALLBACK for ${nextBlockName} (no LLM needed)`);
                     }
                 } else if (rawResponse.match(/```json/)) {
                     // Fallback for markdown blocks if indices failed for some reason
@@ -1664,19 +1690,16 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                         ayoState = AyoState.SCORING;
                         finalResponseText = "";
                     } else {
-                        console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Forcing Text into JSON.`);
-                        // Fallback: Wrap text in a generic question block
-                        finalResponseText = JSON.stringify({
-                            type: "question_block",
-                            intro: "Continuons l'analyse...",
-                            questions: [{
-                                id: `q_fallback_${stepsCompleted}`,
-                                text: rawResponse.length < 200 ? rawResponse : `Concernant ${nextBlockName}, pourriez-vous préciser ?`,
-                                options: ["Oui", "Non", "Je ne sais pas"],
-                                allowCustom: true,
-                                customLabel: "Préciser..."
-                            }]
-                        });
+                        console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Using deterministic fallback for: ${nextBlockName}`);
+                        // BUG FIX: Generate the ACTUAL next question deterministically from the queue
+                        const fb2FieldName = nextBlockName.split('.')[1] || nextBlockName;
+                        const fb2BlockName = nextBlockName.split('.')[0] || nextBlockName;
+                        finalResponseText = buildValidationQuestion(
+                            fb2BlockName,
+                            fb2FieldName,
+                            'Information non disponible — merci de préciser'
+                        );
+                        console.log(`✅ DETERMINISTIC FALLBACK (no JSON) for ${nextBlockName}`);
                     }
                 }
 
@@ -2120,36 +2143,46 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     if (savedAnswers && typeof savedAnswers === 'object') {
                         const fields = extractJson.fields as any;
                         // Map question IDs to field paths
-                        const QUESTION_TO_FIELD: Record<string, string> = {
-                            'q_identite_contact_email': 'identite.contact_email',
-                            'q_identite_contact_phone': 'identite.contact_phone',
-                            'q_identite_legal_name': 'identite.legal_name',
-                            'q_identite_city': 'identite.city',
-                            'q_identite_country': 'identite.country',
-                            'q_identite_name': 'identite.name',
-                            'q_identite_business_type': 'identite.business_type',
-                            'q_offre_services': 'offre.services',
-                            'q_offre_products': 'offre.products',
-                            'q_offre_target_audience': 'offre.target_audience',
-                            'q_offre_pricing_indication': 'offre.pricing_indication',
-                            'q_offre_use_cases': 'offre.use_cases',
-                            'q_processus_methodes_process_steps': 'processus_methodes.process_steps',
-                            'q_processus_methodes_delivery_mode': 'processus_methodes.delivery_mode',
-                            'q_processus_methodes_geographies_served': 'processus_methodes.geographies_served',
-                            'q_processus_methodes_quality_assurance': 'processus_methodes.quality_assurance',
-                            'q_engagements_conformite_certifications': 'engagements_conformite.certifications',
-                            'q_engagements_conformite_frameworks': 'engagements_conformite.frameworks',
-                            'q_engagements_conformite_policies': 'engagements_conformite.policies',
-                            'q_engagements_conformite_security_measures': 'engagements_conformite.security_measures',
-                            'q_indicateurs_key_indicators': 'indicateurs.key_indicators',
-                            'q_indicateurs_last_review_date': 'indicateurs.last_review_date',
-                            'q_contenus_pedagogiques_has_faq': 'contenus_pedagogiques.has_faq',
-                            'q_contenus_pedagogiques_has_glossary': 'contenus_pedagogiques.has_glossary',
-                            'q_contenus_pedagogiques_has_documentation': 'contenus_pedagogiques.has_documentation',
-                            'q_external_context_keywords': 'external_context.keywords',
-                            'q_external_context_intents': 'external_context.intents',
-                            'q_external_context_channels': 'external_context.channels',
-                        };
+                        // BUG FIX: Map ALL possible question ID formats to field paths:
+                        // - q_bloc_field (LLM-generated)
+                        // - validation_bloc_field (buildValidationQuestion-generated)
+                        // - bloc_field (direct field reference from deterministic fallback)
+                        const QUESTION_TO_FIELD: Record<string, string> = {};
+                        const FIELD_ENTRIES: [string, string][] = [
+                            ['identite_contact_email', 'identite.contact_email'],
+                            ['identite_contact_phone', 'identite.contact_phone'],
+                            ['identite_legal_name', 'identite.legal_name'],
+                            ['identite_city', 'identite.city'],
+                            ['identite_country', 'identite.country'],
+                            ['identite_name', 'identite.name'],
+                            ['identite_business_type', 'identite.business_type'],
+                            ['offre_services', 'offre.services'],
+                            ['offre_products', 'offre.products'],
+                            ['offre_target_audience', 'offre.target_audience'],
+                            ['offre_pricing_indication', 'offre.pricing_indication'],
+                            ['offre_use_cases', 'offre.use_cases'],
+                            ['processus_methodes_process_steps', 'processus_methodes.process_steps'],
+                            ['processus_methodes_delivery_mode', 'processus_methodes.delivery_mode'],
+                            ['processus_methodes_geographies_served', 'processus_methodes.geographies_served'],
+                            ['processus_methodes_quality_assurance', 'processus_methodes.quality_assurance'],
+                            ['engagements_conformite_certifications', 'engagements_conformite.certifications'],
+                            ['engagements_conformite_frameworks', 'engagements_conformite.frameworks'],
+                            ['engagements_conformite_policies', 'engagements_conformite.policies'],
+                            ['engagements_conformite_security_measures', 'engagements_conformite.security_measures'],
+                            ['indicateurs_key_indicators', 'indicateurs.key_indicators'],
+                            ['indicateurs_last_review_date', 'indicateurs.last_review_date'],
+                            ['contenus_pedagogiques_has_faq', 'contenus_pedagogiques.has_faq'],
+                            ['contenus_pedagogiques_has_glossary', 'contenus_pedagogiques.has_glossary'],
+                            ['contenus_pedagogiques_has_documentation', 'contenus_pedagogiques.has_documentation'],
+                            ['external_context_keywords', 'external_context.keywords'],
+                            ['external_context_intents', 'external_context.intents'],
+                            ['external_context_channels', 'external_context.channels'],
+                        ];
+                        for (const [suffix, fieldPath] of FIELD_ENTRIES) {
+                            QUESTION_TO_FIELD[`q_${suffix}`] = fieldPath;           // q_identite_contact_email
+                            QUESTION_TO_FIELD[`validation_${suffix}`] = fieldPath;   // validation_identite_contact_email
+                            QUESTION_TO_FIELD[suffix] = fieldPath;                   // identite_contact_email (fallback)
+                        }
 
                         let injectedCount = 0;
                         for (const [qId, answer] of Object.entries(savedAnswers)) {
