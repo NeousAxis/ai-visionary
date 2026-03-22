@@ -1536,6 +1536,14 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 ];
                 const qIdLower = (q.id || '').toLowerCase();
                 const qTextLower = (q.text || '').toLowerCase();
+
+                // BUG FIX: Simple Oui/Non boolean questions must NEVER be detected as text input fields.
+                // Questions like has_faq, has_glossary, has_documentation are boolean presence checks,
+                // not URL or free-text fields. The LLM sometimes generates text containing "lien" or
+                // "url" in the question body, causing false positive detection.
+                const BOOLEAN_FIELD_PATTERNS = ['has_faq', 'has_glossary', 'has_documentation', 'has_sitemap', 'has_robots'];
+                const isBooleanField = BOOLEAN_FIELD_PATTERNS.some(p => qIdLower.includes(p));
+
                 // URL questions: only if no good options already exist (evidence questions have "Je n'ai pas de lien" etc.)
                 const hasEvidenceOptions = (q.options || []).some((o: string) =>
                     o.toLowerCase().includes('pas de lien') || o.toLowerCase().includes('non applicable') ||
@@ -1546,21 +1554,21 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 const hasOuiNonOptions = (q.options || []).length === 2 &&
                     (q.options || []).some((o: string) => o.toLowerCase() === 'oui') &&
                     (q.options || []).some((o: string) => o.toLowerCase() === 'non');
-                const isUrlIdPattern = qIdLower.match(/^(url_|lien_)|(_url|_lien)(_input)?$/);
-                const isUrlTextPattern = qTextLower.includes('url') || qTextLower.includes('lien');
-                const isUrlFollowUp = !hasEvidenceOptions && (isUrlIdPattern || (isUrlTextPattern && hasOuiNonOptions));
-                const isUrlQuestion = isUrlFollowUp || (!hasEvidenceOptions && (
+                const isUrlIdPattern = !isBooleanField && qIdLower.match(/^(url_|lien_)|(_url|_lien)(_input)?$/);
+                const isUrlTextPattern = !isBooleanField && (qTextLower.includes('url') || qTextLower.includes('lien'));
+                const isUrlFollowUp = !isBooleanField && !hasEvidenceOptions && (isUrlIdPattern || (isUrlTextPattern && hasOuiNonOptions));
+                const isUrlQuestion = !isBooleanField && (isUrlFollowUp || (!hasEvidenceOptions && (
                     qTextLower.includes('collez l') ||
-                    qTextLower.includes('coller l') || qTextLower.includes('saisissez l')));
+                    qTextLower.includes('coller l') || qTextLower.includes('saisissez l'))));
                 // Detect detail/description fields by suffix patterns (LLM often generates _details, _description, _specifics)
-                const isDetailField = qIdLower.match(/_(details|description|specifics|precisions|complement)$/);
-                const isTextInputField = isUrlQuestion || isDetailField || TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
+                const isDetailField = !isBooleanField && qIdLower.match(/_(details|description|specifics|precisions|complement)$/);
+                const isTextInputField = !isBooleanField && (isUrlQuestion || isDetailField || TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
                     qTextLower.includes('email') || qTextLower.includes('téléphone') ||
                     qTextLower.includes('phone') || qTextLower.includes('zone géographique') ||
                     qTextLower.includes('nom légal') || qTextLower.includes('raison sociale') ||
                     qTextLower.includes('collez') || qTextLower.includes('saisissez') ||
                     qTextLower.includes('décrivez') || qTextLower.includes('détaillez') ||
-                    qTextLower.includes('précisez') || qTextLower.includes('expliquez');
+                    qTextLower.includes('précisez') || qTextLower.includes('expliquez'));
 
                 // Pour les champs texte libre, TOUJOURS forcer inputType text
                 // (même si le LLM a généré des options comme "contact@ai-visionary.com")
@@ -2313,7 +2321,11 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     await db.saveAnalysis(sessionAsrId, {
                         id: sessionAsrId,
                         url: urlToScan,
-                        email: null, // Will be updated when user provides email
+                        // BUG FIX: Extract email from questionnaire answers to top-level column.
+                        // The contact_email field is captured during the Q&A flow and stored in
+                        // data.fields.identite.contact_email but was never promoted to the top-level
+                        // `email` column, leaving it null until the sales funnel email capture.
+                        email: extractJson?.fields?.identite?.contact_email?.value || detectedEmail || null,
                         score: scoreResult.total,
                         data: {
                             fields: extractJson.fields,
@@ -2364,20 +2376,26 @@ ${scoreResult.capApplied ? `\n⚠️ **Plafond appliqué** : ${scoreResult.capRe
 |||
 ${architecteText}
 |||
-${JSON.stringify({
-                        type: "question_block",
-                        intro: `💡 **PROCHAINE ÉTAPE** :
-${architecteRecommendations.summary}
-
-Choisissez votre niveau de certification :`,
-                        questions: [{
-                            id: "pack_intention",
-                            text: "Sélectionnez votre Pack pour activer votre recommandation :",
-                            options: ["🔄 Abonnement AYA — 19 CHF/mois", "🚀 Pack PRO — 499 CHF (Propriété)"],
-                            allowCustom: false,
-                            allowMultiple: false
-                        }]
-                    })}`;
+${(() => {
+                        // BUG FIX: Build pack question JSON separately to ensure clean serialization.
+                        // The pack question must be the last |||‐separated chunk so the client renders it
+                        // as an interactive question_block. Avoid special chars in intro that could trigger
+                        // the client-side sanitizeDisplayText JSON_LEAK detector.
+                        const packIntro = "PROCHAINE ETAPE\n\n" + architecteRecommendations.summary + "\n\nChoisissez votre niveau de certification :";
+                        const packQuestion = {
+                            type: "question_block",
+                            intro: packIntro,
+                            questions: [{
+                                id: "pack_intention",
+                                text: "Selectionnez votre Pack pour activer votre recommandation :",
+                                options: ["Abonnement AYA - 19 CHF/mois", "Pack PRO - 499 CHF (Propriete)"],
+                                allowCustom: false,
+                                allowMultiple: false
+                            }]
+                        };
+                        console.log("PACK_QUESTION_JSON:", JSON.stringify(packQuestion).substring(0, 200));
+                        return JSON.stringify(packQuestion);
+                    })()}`;
 
 
             } catch (err: unknown) {
