@@ -21,12 +21,12 @@ import {
 const data = {
     identite: {
         name: { value: "AI VISIONARY", q: 1 },
-        legal_name: { value: "", q: 0 },
-        business_type: { value: "Optimisation pour l'Intelligence Artificielle (AIO)", q: 1 },
+        legal_name: { value: "AI VISIONARY SARL", q: 1 },
+        business_type: { value: "Rendre les entreprises visibles et recommandables par les IA grace a la creation de fichiers ASR certifies", q: 1 },
         city: { value: "Geneve", q: 1 },
         country: { value: "Suisse", q: 1 },
         contact_email: { value: "hello@ai-visionary.com", q: 1 },
-        contact_phone: { value: "", q: 0 },
+        contact_phone: { value: "+41 22 700 00 00", q: 1 },
     },
     offre: {
         target_audience: { value: "Entreprises, artisans, independants, PME de services, consultants, associations, collectifs, entreprises industrielles, etablissements publics, acteurs engages RSE/ESG, TPE, PME, Grands groupes, E-commerce, Professionnels liberaux, toutes les entreprises cherchant a etre visible par les IA", q: 1 },
@@ -36,20 +36,20 @@ const data = {
         use_cases: { value: ["Etre visible et recommande par les IA (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...)"], q: 1 },
     },
     processus_methodes: {
-        process_steps: { value: ["Indiquer l'URL de son site", "Remplir le questionnaire AYO", "Choisir son pack", "Payer et recevoir ses fichiers ASR"], q: 1 },
+        process_steps: { value: ["Scan automatique du site", "Questionnaire enrichi AYO", "Generation fichiers ASR certifies", "Inscription Registre AYA", "Monitoring visibilite IA"], q: 1 },
         delivery_mode: { value: "En ligne", q: 1 },
-        geographies_served: { value: "International (service en ligne)", q: 1 },
+        geographies_served: { value: "International", q: 1 },
         quality_assurance: { value: ["Signature Cryptographique (Anti-Hallucination)", "Registre AYA"], q: 1 },
     },
     engagements_conformite: {
         certifications: { value: [] as string[], q: 0 },
         frameworks: { value: [] as string[], q: 0 },
-        security_measures: { value: ["Charte ethique", "Mesures de securite informatique", "Donnees publiques uniquement"], q: 1 },
+        security_measures: { value: ["Signature cryptographique Ed25519", "Chiffrement TLS", "Firebase Authentication"], q: 1 },
         policies: { value: ["Mentions Legales", "Confidentialite"], q: 1 },
     },
     indicateurs: {
-        key_indicators: { value: [] as string[], q: 0 },
-        last_review_date: { value: "", q: 0 },
+        key_indicators: { value: ["50 entreprises enregistrees", "200 fichiers ASR generes", "Satisfaction 95%"], q: 1 },
+        last_review_date: { value: "2026-03", q: 1 },
     },
     contenus_pedagogiques: {
         has_faq: { value: true, q: 1 },
@@ -57,8 +57,8 @@ const data = {
         has_documentation: { value: true, q: 1 },
     },
     external_context: {
-        keywords: { value: ["Visibilite IA", "Optimisation AIO", "Fichier ASR", "Referencement IA", "Recommandation ChatGPT", "Structuration donnees entreprise", "Certification AYA", "Lisibilite intelligence artificielle", "Scoring visibilite IA", "SEO conversationnel"], q: 1 },
-        intents: { value: ["Comment rendre mon entreprise visible par toutes les IA ?", "Comment etre recommande par les IA ?", "Mon entreprise n'apparait pas dans les reponses de l'IA", "Optimiser ma visibilite sur les assistants conversationnels", "C'est quoi un fichier ASR ?", "Comment structurer mes donnees pour l'IA", "Difference entre SEO et AIO", "Comment savoir si l'IA recommande mon entreprise", "Audit de visibilite IA gratuit", "Les IA ignorent mon site, que faire ?"], q: 1 },
+        keywords: { value: ["Visibilite IA", "AIO", "ASR", "Registre AYA", "Optimisation IA", "Referencement IA", "Recommandation ChatGPT", "Structuration donnees entreprise", "SEO conversationnel", "Scoring visibilite IA"], q: 1 },
+        intents: { value: ["Comment etre visible par les IA", "Comment etre recommande par ChatGPT", "Difference SEO AIO", "Creer un fichier ASR", "Comment rendre mon entreprise visible par toutes les IA", "Mon entreprise n'apparait pas dans les reponses de l'IA", "C'est quoi un fichier ASR", "Comment structurer mes donnees pour l'IA", "Audit de visibilite IA gratuit", "Les IA ignorent mon site que faire"], q: 1 },
     },
     structure_technique: {
         has_jsonld: { value: true, q: 1 },

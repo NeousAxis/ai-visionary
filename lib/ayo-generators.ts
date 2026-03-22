@@ -538,6 +538,11 @@ const SECURITY_DEFINITIONS: Record<string, string> = {
     'audit': "Évaluation systématique et documentée de la conformité et de l'efficacité des mesures de sécurité, réalisée périodiquement pour identifier les vulnérabilités.",
     'anonymisation': "Processus irréversible de suppression des informations identifiantes dans un jeu de données, rendant impossible la ré-identification des personnes concernées.",
     'pseudonymisation': "Technique de protection des données remplaçant les identifiants directs par des pseudonymes, réduisant les risques tout en permettant certains traitements.",
+    'signature cryptographique': "Mécanisme de vérification d'intégrité et d'authenticité des données utilisant des algorithmes de chiffrement asymétrique, garantissant qu'un document n'a pas été altéré depuis sa création.",
+    'ed25519': "Algorithme de signature numérique à courbe elliptique offrant un haut niveau de sécurité et de performance, utilisé pour garantir l'authenticité et l'intégrité des fichiers ASR.",
+    'authentication': "Mécanisme de vérification de l'identité d'un utilisateur ou d'un système avant l'accès aux ressources protégées, pouvant combiner plusieurs facteurs de sécurité.",
+    'firebase': "Plateforme de développement d'applications proposant des services d'authentification, de base de données et d'hébergement sécurisés, utilisée comme infrastructure de confiance.",
+    'tls': "Protocole de chiffrement des communications réseau assurant la confidentialité et l'intégrité des données échangées entre un client et un serveur.",
 };
 
 function getSecurityDefinition(measure: string, entityName: string): string {
@@ -774,7 +779,7 @@ export function generateFaqJson(data: any, url: string): any {
     const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
     const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
     const securityMeasures = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
-        .map(truncateSecurity));
+        .map(s => truncateSecurity(s)));
     const NO_DATA_PHRASES_FAQ = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
     const keyIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
         .filter((ind: string) => !NO_DATA_PHRASES_FAQ.test(ind.trim()))
@@ -996,7 +1001,7 @@ export function generateGlossaryJson(data: any): any {
     const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
     const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
     const securityMeasures = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
-        .map(truncateSecurity));
+        .map(s => truncateSecurity(s)));
 
     const nameArticleG = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
 

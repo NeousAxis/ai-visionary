@@ -334,7 +334,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.frameworks = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value)));
         engagements.policies = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)));
         engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
-            .map(truncateSecurity)));
+            .map(s => truncateSecurity(s))));
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
         if (engagements.certifications.length === 0 && certQ > 0) {
