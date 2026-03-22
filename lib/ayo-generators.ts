@@ -402,7 +402,13 @@ export function sanitizeKeywords(items: string[], maxLen: number = 80): string[]
 /** Bug 1: Filter out garbage array entries like "Etc.", "etc.", "...", "" */
 const GARBAGE_ENTRY_RE = /^(etc\.?|\.{2,}|\s*)$/i;
 export function filterGarbageEntries(arr: string[]): string[] {
-    return arr.filter(s => !GARBAGE_ENTRY_RE.test(s.trim()));
+    return arr.filter(s => {
+        const trimmed = s.trim();
+        if (GARBAGE_ENTRY_RE.test(trimmed)) return false;
+        // Filter out corrupted/truncated fragments (less than 3 chars, unless it's an acronym like "IA")
+        if (trimmed.length < 3 && !/^[A-Z]{2,}$/.test(trimmed)) return false;
+        return true;
+    });
 }
 
 /** Bug 2: Normalize ALL CAPS strings to Title Case. "MONDE" → "Monde entier", "FOO BAR" → "Foo bar" */
