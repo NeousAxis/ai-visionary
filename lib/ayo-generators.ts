@@ -449,8 +449,8 @@ export function splitLongSecurityEntries(entries: string[]): string[] {
             result.push(entry);
             continue;
         }
-        // Split at commas or periods, keep items that are meaningful (>3 chars)
-        const parts = entry.split(/[,.]/).map(s => s.trim()).filter(s => s.length > 3);
+        // Split at commas or periods, keep items that are meaningful (>10 chars)
+        const parts = entry.split(/[,.]/).map(s => s.trim()).filter(s => s.length > 10);
         if (parts.length > 1) {
             for (const part of parts) {
                 // Capitalize first letter
