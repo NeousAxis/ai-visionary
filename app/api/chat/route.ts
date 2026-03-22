@@ -1816,31 +1816,38 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 // Délégué à l'agent Contrôle Qualité (qcIsConfirmationOnly)
                 const isConfirmationOnly = qcIsConfirmationOnly;
 
+                // OPTIMIZED: Extract only Q&A pairs (question text + user answer), skip long JSON blocks
+                // This keeps the context compact to avoid Gemini timeouts on Vercel
                 let userAnswersContext = "";
-                if (scanMsgIndex !== -1) {
-                    // Capture ALL messages after the scan (questions + answers)
-                    // BUT FILTER OUT pure confirmation messages from users
-                    const subsequentMessages = messages.slice(scanMsgIndex).filter((m: any) => {
-                        if (m.role === 'user' && isConfirmationOnly(m.content)) {
-                            return false; // Skip "oui c'est correct" etc.
+                const startIdx = scanMsgIndex !== -1 ? scanMsgIndex : 0;
+                const postScanMessages = messages.slice(startIdx);
+                const qaPairs: string[] = [];
+                for (let i = 0; i < postScanMessages.length; i++) {
+                    const msg = postScanMessages[i];
+                    if (msg.role === 'user') {
+                        if (isConfirmationOnly(msg.content)) continue;
+                        // Find the question this answer responds to
+                        let questionText = "";
+                        if (i > 0 && postScanMessages[i-1].role === 'assistant') {
+                            const prevContent = postScanMessages[i-1].content;
+                            // Extract question text from question_block JSON
+                            const textMatch = prevContent.match(/"text"\s*:\s*"([^"]{5,150})"/);
+                            if (textMatch) questionText = textMatch[1];
                         }
-                        return true;
-                    });
-                    userAnswersContext = subsequentMessages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
-                } else {
-                    // SAFETY NET: If no scan marker found, include ALL user messages after the URL
-                    const urlMsgIdx = messages.findIndex((m: any) => m.role === 'user' && m.content.match(/https?:\/\/|www\./));
-                    if (urlMsgIdx !== -1) {
-                        const allAfterUrl = messages.slice(urlMsgIdx).filter((m: any) => {
-                            if (m.role === 'user' && isConfirmationOnly(m.content)) return false;
-                            return true;
-                        });
-                        userAnswersContext = allAfterUrl.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
-                    } else {
-                        userAnswersContext = messages.filter((m: any) => m.role === 'user' && !isConfirmationOnly(m.content)).map((m: any) => m.content).join('\n');
+                        const answer = msg.content.substring(0, 500); // Cap answer length
+                        if (questionText) {
+                            qaPairs.push(`Q: ${questionText}\nA: ${answer}`);
+                        } else {
+                            qaPairs.push(`USER: ${answer}`);
+                        }
                     }
                 }
-                console.log(`📋 USER CONTEXT LENGTH: ${userAnswersContext.length} chars (from msgIndex ${scanMsgIndex})`);
+                userAnswersContext = qaPairs.join('\n\n');
+                // Safety: cap total context to 8000 chars
+                if (userAnswersContext.length > 8000) {
+                    userAnswersContext = userAnswersContext.substring(0, 8000);
+                }
+                console.log(`📋 USER CONTEXT LENGTH: ${userAnswersContext.length} chars (${qaPairs.length} Q&A pairs, from msgIndex ${startIdx})`);
 
                 // 2. EXTRACTION (Semantic Perception via LLM)
                 const EXTRACTION_PROMPT = `
