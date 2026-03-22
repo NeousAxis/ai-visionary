@@ -1551,6 +1551,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                         else q.customLabel = "Saisissez votre réponse...";
                     }
                     console.warn("⚠️ VALIDATOR: champ texte → inputType text (pas de boutons)");
+                } else if (hasEvidenceOptions) {
+                    // Questions de preuve : garder les options + forcer allowCustom + bon label
+                    q.allowCustom = true;
+                    if (!q.customLabel) q.customLabel = "Autre méthode / Préciser...";
+                    console.warn("⚠️ VALIDATOR: question de preuve → options gardées + allowCustom");
                 } else if (!q.options || q.options.length === 0) {
                     q.options = ["Oui", "Non"];
                     q.allowCustom = true;
