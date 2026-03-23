@@ -199,4 +199,4 @@ Le score **AIO (AI-readability Intelligence Optimization)** mesure la lisibilite
 
 ---
 
-Basee a Geneve, Suisse | Fondee par Neous Axis | [AI Visionary](https://www.ai-visionary.com) | 2026
+Basé a Geneve, Suisse | Fondé par Neous Axis | [AI Visionary](https://www.ai-visionary.com) | 2026
