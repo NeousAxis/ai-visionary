@@ -10,7 +10,17 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     const entity = await db.getAyaEntityById(id);
 
     if (!entity) {
-        return notFound();
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                <div className="text-center max-w-md mx-auto p-8">
+                    <h1 className="text-2xl font-bold text-[#212E53] mb-4">Certificat non trouvé</h1>
+                    <p className="text-slate-600 mb-6">Ce certificat AYA n&apos;existe pas ou a été supprimé.</p>
+                    <Link href="/aya" className="inline-block px-6 py-3 bg-[#4A919E] text-white rounded-lg hover:bg-[#3a7a85] transition-colors">
+                        Voir le Registre AYA
+                    </Link>
+                </div>
+            </div>
+        );
     }
 
     const isValid = new Date(entity.valid_until) > new Date();
