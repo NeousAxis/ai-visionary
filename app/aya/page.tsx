@@ -48,17 +48,36 @@ export default function AyaPage() {
         return { certifiedCount: certified, indexedCount: indexed };
     }, [results]);
 
-    const displayedResults = results.filter((ent: any) => {
-        if (!query) return true;
-        const q = query.toLowerCase();
-        return (
-            (ent.display_name && ent.display_name.toLowerCase().includes(q)) ||
-            (ent.legal_name && ent.legal_name.toLowerCase().includes(q)) ||
-            (ent.website && ent.website.toLowerCase().includes(q)) ||
-            (ent.sector_macro && ent.sector_macro.toLowerCase().includes(q)) ||
-            (ent.country_legal && ent.country_legal.toLowerCase().includes(q))
-        );
-    });
+    const [sortBy, setSortBy] = useState<'default' | 'alpha' | 'score' | 'country'>('default');
+
+    const displayedResults = useMemo(() => {
+        let filtered = results.filter((ent: any) => {
+            if (!query) return true;
+            const q = query.toLowerCase();
+            return (
+                (ent.display_name && ent.display_name.toLowerCase().includes(q)) ||
+                (ent.legal_name && ent.legal_name.toLowerCase().includes(q)) ||
+                (ent.website && ent.website.toLowerCase().includes(q)) ||
+                (ent.sector_macro && ent.sector_macro.toLowerCase().includes(q)) ||
+                (ent.country_legal && ent.country_legal.toLowerCase().includes(q))
+            );
+        });
+
+        if (sortBy === 'alpha') {
+            filtered = [...filtered].sort((a, b) =>
+                (a.display_name || '').localeCompare(b.display_name || '', 'fr')
+            );
+        } else if (sortBy === 'score') {
+            filtered = [...filtered].sort((a, b) => (b.asr_score || 0) - (a.asr_score || 0));
+        } else if (sortBy === 'country') {
+            filtered = [...filtered].sort((a, b) =>
+                (a.country_legal || 'ZZ').localeCompare(b.country_legal || 'ZZ')
+            );
+        }
+        // 'default' = organic order from DB (certified first, then by created_at)
+
+        return filtered;
+    }, [results, query, sortBy]);
 
     const isCertified = (entity: any) => entity.payment_completed === true;
 
@@ -146,10 +165,30 @@ export default function AyaPage() {
             {/* RESULTS LIST */}
             <section className="section" style={{ background: 'white' }}>
                 <div className="container">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
                         <div>
                             <h2 className="section-title" style={{ fontSize: '2.2rem', marginBottom: '10px' }}>Index des entreprises</h2>
                             <p style={{ color: 'var(--text-muted)' }}>Entreprises analys&eacute;es pour leur lisibilit&eacute; IA — les certifi&eacute;es sont recommand&eacute;es en priorit&eacute;.</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {(['default', 'alpha', 'score', 'country'] as const).map((key) => {
+                                const labels: Record<string, string> = { default: 'Par d\u00e9faut', alpha: 'A → Z', score: 'Score', country: 'Pays' };
+                                const active = sortBy === key;
+                                return (
+                                    <button key={key} onClick={() => setSortBy(key)} style={{
+                                        padding: '6px 14px',
+                                        borderRadius: '20px',
+                                        border: active ? '1px solid var(--primary-color)' : '1px solid var(--border-light)',
+                                        background: active ? 'var(--bg-accent)' : 'white',
+                                        color: active ? 'var(--primary-color)' : 'var(--text-muted)',
+                                        fontSize: '0.8rem',
+                                        fontWeight: active ? 'bold' : 'normal',
+                                        cursor: 'pointer',
+                                    }}>
+                                        {labels[key]}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 

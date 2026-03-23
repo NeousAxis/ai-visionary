@@ -276,9 +276,11 @@ export const database = {
         const client = getSupabase();
         if (!client) return;
         try {
+            // Remove aya_entity_id from data (TypeScript schema uses aya_entity_id but Supabase column is entity_id)
+            const { aya_entity_id: _drop, ...cleanData } = data as any;
             const { error } = await client
                 .from('aya_registry')
-                .upsert({ entity_id: entityId, ...data }, { onConflict: 'entity_id' });
+                .upsert({ entity_id: entityId, ...cleanData }, { onConflict: 'entity_id' });
 
             if (error) {
                 console.error('❌ [Supabase] AYA Update Error:', error);
@@ -304,7 +306,7 @@ export const database = {
                 .from('aya_registry')
                 .select('*')
                 .order('payment_completed', { ascending: false })
-                .order('asr_score', { ascending: false })
+                .order('created_at', { ascending: true })
                 .limit(limit);
 
             if (error) {
