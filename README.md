@@ -37,7 +37,7 @@ AI Visionary cree une **identite semantique certifiee** pour votre entreprise gr
 | **AIO** | Artificial Intelligence Optimization — optimiser la visibilite de votre entreprise aupres des IA. |
 | **AIO Score** | Score de 0 a 100 mesurant la lisibilite de votre entreprise par les IA. |
 | **ASR** | AI Singular Record — votre identite numerique certifiee pour les IA. |
-| **AYA** | Le registre public des entites certifiees (AYO Authority Registry). |
+| **AYA** | Le registre public des entreprises certifiees (AYO Authority Registry). |
 
 ## Liens
 
