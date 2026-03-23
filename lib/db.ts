@@ -296,7 +296,7 @@ export const database = {
      * Get all entities from AYA Registry (certified + indexed)
      * Sorted: payment_completed=true first, then by score DESC
      */
-    getAyaEntities: async (limit: number = 500): Promise<any[]> => {
+    getAyaEntities: async (limit: number = 2000): Promise<any[]> => {
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
