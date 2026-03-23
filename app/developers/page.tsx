@@ -16,16 +16,16 @@ export default function DevelopersPage() {
                 { name: 'q', type: 'string', required: true, desc: 'Terme de recherche' },
                 { name: 'limit', type: 'integer', required: false, desc: 'Max r\u00e9sultats 1-200 (d\u00e9faut: 50)' },
             ],
-            example: '/api/aya/search?q=stripe',
+            example: '/api/aya/search?q=nestl\u00e9',
             response: `{
-  "query": "stripe",
+  "query": "nestl\u00e9",
   "count": 1,
   "results": [{
-    "name": "Stripe",
-    "domain": "stripe.com",
-    "country": "XX",
-    "sector": "Technologie & SaaS",
-    "aio_score": 74,
+    "name": "Nestl\u00e9",
+    "domain": "nestle.com",
+    "country": "CH",
+    "sector": "Restauration & Alimentation",
+    "aio_score": 72,
     "asr_status": "ASR_DERIVED",
     "certificate_url": "https://ai-visionary.com/aya/e/..."
   }]
@@ -38,17 +38,17 @@ export default function DevelopersPage() {
             params: [
                 { name: 'domain', type: 'string', required: true, desc: 'Domaine canonique (ex: stripe.com)' },
             ],
-            example: '/api/aya/entity/stripe.com',
+            example: '/api/aya/entity/nestle.com',
             response: `{
   "entity": {
-    "name": "Stripe",
-    "website": "https://stripe.com",
-    "country": "XX",
-    "sector": "Technologie & SaaS",
+    "name": "Nestl\u00e9",
+    "website": "https://www.nestle.com",
+    "country": "CH",
+    "sector": "Restauration & Alimentation",
     "certificate_url": "https://ai-visionary.com/aya/e/..."
   },
   "scoring": {
-    "aio_score": 74,
+    "aio_score": 72,
     "asr_status": "ASR_DERIVED"
   },
   "asr_derived": { ... },
@@ -89,7 +89,7 @@ export default function DevelopersPage() {
                 <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
                     <Link href="/" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.85rem' }}>&larr; AI Visionary</Link>
                     <h1 style={{ fontSize: '2.5rem', marginTop: '15px', marginBottom: '10px' }}>API AYA</h1>
-                    <p style={{ fontSize: '1.1rem', opacity: 0.8, marginBottom: '15px' }}>
+                    <p style={{ fontSize: '1.1rem', color: 'white', marginBottom: '15px' }}>
                         Int&eacute;grez le registre AYA dans vos agents IA. 889+ entreprises index&eacute;es, scores AIO, donn&eacute;es structur&eacute;es.
                     </p>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
