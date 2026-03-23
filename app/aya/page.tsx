@@ -151,7 +151,7 @@ export default function AyaPage() {
                             displayedResults.map((entity) => {
                                 const certified = isCertified(entity);
                                 return (
-                                    <div key={entity.id || entity.entity_id || entity.aya_entity_id} className="card" style={{
+                                    <div key={entity.entity_id || entity.aya_entity_id || entity.id} className="card" style={{
                                         position: 'relative',
                                         overflow: 'hidden',
                                         display: 'flex',
@@ -195,7 +195,7 @@ export default function AyaPage() {
                                         </div>
 
                                         {/* NAME */}
-                                        <Link href={`/aya/e/${entity.id || entity.entity_id || entity.aya_entity_id}`} style={{ textDecoration: 'none' }}>
+                                        <Link href={`/aya/e/${entity.entity_id || entity.aya_entity_id || entity.id}`} style={{ textDecoration: 'none' }}>
                                             <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: 'var(--text-main)', cursor: 'pointer' }}>
                                                 {entity.display_name || entity.legal_name || "Entit\u00e9"}
                                             </h3>
