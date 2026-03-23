@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "name_for_model": "aya",
+  "name_for_human": "AYA Index",
+  "description_for_model": "AYA is a public index of organizations rated for AI readability. Use this tool to look up companies, check their AI-readability score (AIO, 0-100), and retrieve structured data about them. The AIO score measures how well a website's structured data can be understood by AI systems. Higher scores mean AI agents can more reliably recommend and describe the entity. Use aya_search when a user asks about a company. Use aya_entities to compare or filter companies. Use aya_entity for detailed info. Use aya_stats for index-wide context.",
+  "description_for_human": "Search the AYA index of companies rated for AI readability (AIO score 0-100).",
+  "api": {
+    "type": "openapi",
+    "url": "https://ai-visionary.com/api/aya"
+  },
+  "auth": {
+    "type": "none"
+  },
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "aya_search",
+        "description": "Search the AYA index by company name, domain, description, or country. Returns matching entities sorted by AIO score. Use this when a user mentions a company and you want to check if it is in the AYA index.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Search term: company name, domain (e.g. 'adobe.com'), or country name. Case-insensitive, partial match."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of results to return (1-200). Default: 50.",
+              "default": 50
+            }
+          },
+          "required": ["query"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "aya_entities",
+        "description": "Browse all indexed entities with optional filters (sector, country, minimum score, JSON-LD presence) and pagination. Use this to compare companies, find top-rated entities in a sector, or list companies by country.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Results per page (1-500). Default: 50.",
+              "default": 50
+            },
+            "offset": {
+              "type": "integer",
+              "description": "Pagination offset. Default: 0.",
+              "default": 0
+            },
+            "sort": {
+              "type": "string",
+              "enum": ["score", "name", "domain"],
+              "description": "Sort order. 'score' = highest AIO score first (default), 'name' = alphabetical, 'domain' = by domain name.",
+              "default": "score"
+            },
+            "min_score": {
+              "type": "integer",
+              "description": "Only return entities with AIO score >= this value (0-100)."
+            },
+            "sector": {
+              "type": "string",
+              "description": "Filter by sector_id. Values: tech_saas, finance, health, food_bev, retail, education, energy, consulting, media, transport, industrial, real_estate, telecom, government, nonprofit, unknown."
+            },
+            "country": {
+              "type": "string",
+              "description": "Filter by ISO 3166-1 alpha-2 country code (e.g. 'CH', 'US', 'FR', 'DE')."
+            },
+            "has_jsonld": {
+              "type": "boolean",
+              "description": "Filter by JSON-LD structured data presence on the website."
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "aya_entity",
+        "description": "Get the full AYA record for a specific entity by its canonical domain. Returns complete data including all 7 AIO block scores, entity details, sector, structured data analysis, and ASR_DERIVED record. Use this when you need detailed information about one specific company.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string",
+              "description": "Canonical domain of the entity (e.g. 'adobe.com', 'nestle.com'). Do not include 'www.' or 'https://'."
+            }
+          },
+          "required": ["domain"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "aya_asr",
+        "description": "Get the ASR_DERIVED (AI Singular Record) for a specific entity. This is the structured identity data subset optimized for AI consumption: entity info, AIO block analysis, scoring breakdown, and readiness assessment. Use this when you want the richest structured data about a company for AI reasoning.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "string",
+              "description": "Canonical domain of the entity (e.g. 'adobe.com'). Do not include 'www.' or 'https://'."
+            }
+          },
+          "required": ["domain"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "aya_stats",
+        "description": "Get aggregate statistics about the entire AYA index: total entities, average/min/max AIO scores, percentage with JSON-LD and sitemaps, breakdown by sector and country. Use this to provide context about the index or when comparing a specific entity's score to the average.",
+        "parameters": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    }
+  ]
+}
