@@ -43,6 +43,7 @@ export {
     QUESTIONNAIRE,
     buildQuestionQueue,
     buildContinuePrompt,
+    buildEnrichmentQuestion,
     getGreffierPrompt,
     type BlocName,
     type BlocQuestion,

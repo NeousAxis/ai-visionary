@@ -18,7 +18,6 @@ import Stripe from 'stripe';
 import {
     scanStateDocId,
     loadScanState,
-    formatScanForGreffier,
 } from '@/lib/agents/scanner';
 import {
     encodeClientReference,
@@ -34,8 +33,8 @@ import {
     analyseScore,
 } from '@/lib/agents/analyste';
 import {
-    buildContinuePrompt,
     buildValidationQuestion,
+    buildEnrichmentQuestion,
     fieldRequiresEvidence,
     EVIDENCE_REQUIRED_FIELDS,
 } from '@/lib/agents/greffier';
@@ -1634,152 +1633,17 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     );
                     console.log(`✅ VALIDATION STATIQUE pour ${nextBlockName} (pas de LLM)`);
                 } else {
-                // 🤖 AGENT GREFFIER — génère le prompt pour la prochaine question (ENRICHISSEMENT)
-                const scanInfo = contextScanResult ? formatScanForGreffier({
-                    ...contextScanResult,
-                    hasSitemap: contextScanResult.hasSitemap ?? (detectedValues['engagements_conformite.policies'] || '').toLowerCase().includes('sitemap'),
-                    hasRobotsTxt: contextScanResult.hasRobotsTxt ?? (detectedValues['engagements_conformite.policies'] || '').toLowerCase().includes('robot'),
-                    detectedPolicies: contextScanResult.detectedPolicies ?? [],
-                }) : 'Scan non disponible';
+                // 🆕 ENRICHISSEMENT STATIQUE — plus de LLM pour les questions
+                const enFieldName = nextBlockName.split('.')[1] || nextBlockName;
+                const enBlockName = nextBlockName.split('.')[0] || nextBlockName;
+                finalResponseText = buildEnrichmentQuestion(
+                    enBlockName,
+                    enFieldName,
+                    detectedValues[nextBlockName]
+                );
+                console.log(`✅ ENRICHISSEMENT STATIQUE pour ${nextBlockName} (pas de LLM)`);
 
-                const CONTINUE_PROMPT = buildContinuePrompt({
-                    nextBlockName,
-                    scanInfo,
-                    highConfidenceData: highConfidenceData || 'Aucun',
-                    lowConfidenceData: lowConfidenceData || 'Aucun',
-                });
-
-                const continueResult = await generateText({
-                    model: modelToUse,
-                    temperature: 0, // Force determinism for protocol
-                    system: CONTINUE_PROMPT + "\n\n⚠️ IMPORTANT : RÉPONDS UNIQUEMENT AVEC LE JSON. PAS DE TEXTE AVANT OU APRÈS. TU NE DOIS JAMAIS RENVOYER UN TABLEAU DE QUESTIONS VIDE.\n⚠️ Le champ \"intro\" et le champ \"text\" doivent contenir UNIQUEMENT du texte humain lisible. JAMAIS de JSON, guillemets, crochets ou accolades dans ces champs.",
-                    messages: messages
-                });
-
-                const rawResponse = continueResult.text;
-                // ROBUST JSON EXTRACTION via REGEX (Handles text before/after)
-                const jsonRegex = /({[\s\S]*})/;
-                const jsonMatch = rawResponse.match(jsonRegex);
-
-                if (jsonMatch) {
-                    // We found a JSON-like block
-                    const potentialJson = jsonMatch[0];
-                    finalResponseText = potentialJson;
-
-                    try {
-                        const parsedResponse = JSON.parse(potentialJson);
-
-                        // 🛡️ Valider les règles métier
-                        validateQuestionBlock(parsedResponse);
-
-                        // 🔒 BUG FIX: After validator runs, if questions array is empty (e.g. parasite filtered
-                        // or LLM returned empty array), clear finalResponseText immediately.
-                        // Without this fix, finalResponseText still contains the raw JSON string set at line 1631
-                        // (e.g. '{"intro":"...","questions":[]}') and the safety net condition `!finalResponseText`
-                        // at the end of the block is never true, causing the API to return empty/dead responses.
-                        if (!parsedResponse.questions || parsedResponse.questions.length === 0) {
-                            console.warn("⚠️ BUG FIX: Validator emptied questions array. Clearing finalResponseText.");
-                            finalResponseText = "";
-                            throw new Error("LLM returned empty questions array after validation");
-                        }
-
-                        // 🧹 SANITIZER: Strip raw JSON fragments from user-facing text fields
-                        // The LLM sometimes leaks JSON syntax into the "intro" or question "text" fields.
-                        // Patterns: `","`, `"questions":[`, `"}]`, `"type":"`, `"id":"`, `[{"`
-                        const JSON_LEAK_PATTERNS = /(","|"\w+":\s*[\[{"]|\}\]|^\s*\{|"\s*:\s*")/;
-
-                        if (parsedResponse.intro && JSON_LEAK_PATTERNS.test(parsedResponse.intro)) {
-                            console.warn("⚠️ SANITIZER: Raw JSON detected in intro field. Cleaning...");
-                            // Extract only the human-readable part before JSON artifacts
-                            // Strategy: take text before first JSON-like pattern, or fallback to empty
-                            let cleanIntro = parsedResponse.intro
-                                // Remove anything that looks like JSON key-value pairs
-                                .replace(/"[a-zA-Z_]+"\s*:\s*[\[{"]/g, '')
-                                // Remove JSON array/object closures
-                                .replace(/[}\]]+\s*$/g, '')
-                                // Remove orphaned JSON punctuation
-                                .replace(/[{}\[\]]+/g, '')
-                                // Remove consecutive commas and orphaned quotes
-                                .replace(/"{2,}/g, '')
-                                .replace(/,{2,}/g, ',')
-                                // Remove trailing/leading commas and whitespace
-                                .replace(/^[\s,]+|[\s,]+$/g, '')
-                                .trim();
-
-                            // If cleaning left nothing meaningful, use a generic transition
-                            if (!cleanIntro || cleanIntro.length < 5) {
-                                cleanIntro = "Continuons l'analyse.";
-                            }
-                            parsedResponse.intro = cleanIntro;
-                        }
-
-                        // Sanitize question text fields too
-                        if (parsedResponse.questions && Array.isArray(parsedResponse.questions)) {
-                            parsedResponse.questions.forEach((q: any) => {
-                                if (q.text && JSON_LEAK_PATTERNS.test(q.text)) {
-                                    console.warn(`⚠️ SANITIZER: Raw JSON detected in question text (id=${q.id}). Cleaning...`);
-                                    q.text = q.text
-                                        .replace(/"[a-zA-Z_]+"\s*:\s*[\[{"]/g, '')
-                                        .replace(/[}\]]+\s*$/g, '')
-                                        .replace(/[{}\[\]]+/g, '')
-                                        .replace(/"{2,}/g, '')
-                                        .replace(/,{2,}/g, ',')
-                                        .replace(/^[\s,]+|[\s,]+$/g, '')
-                                        .trim();
-                                    if (!q.text || q.text.length < 5) {
-                                        q.text = `Concernant ${nextBlockName}, pourriez-vous préciser ?`;
-                                    }
-                                }
-                            });
-                        }
-
-                        // Re-serialize the sanitized response
-                        finalResponseText = JSON.stringify(parsedResponse);
-
-                        // 🛡️ BUG FIX: Final check — if after all sanitization the questions are still empty,
-                        // clear finalResponseText so safety net can trigger SCORING
-                        if (!parsedResponse.questions || parsedResponse.questions.length === 0) {
-                            console.warn("⚠️ BUG FIX: Questions empty after sanitization. Clearing response.");
-                            finalResponseText = "";
-                        }
-                    } catch (e) {
-                        console.warn("❌ JSON Parse Failed despite Regex match. Using deterministic fallback for:", nextBlockName, e);
-                        // BUG FIX: Instead of a generic error, generate the ACTUAL next question deterministically
-                        // This prevents wasting queue slots and re-asking the same broken question
-                        const fbFieldName = nextBlockName.split('.')[1] || nextBlockName;
-                        const fbBlockName = nextBlockName.split('.')[0] || nextBlockName;
-                        finalResponseText = buildValidationQuestion(
-                            fbBlockName,
-                            fbFieldName,
-                            'Information non disponible — merci de préciser'
-                        );
-                        console.log(`✅ DETERMINISTIC FALLBACK for ${nextBlockName} (no LLM needed)`);
-                    }
-                } else if (rawResponse.match(/```json/)) {
-                    // Fallback for markdown blocks if indices failed for some reason
-                    const jsonMatch = rawResponse.match(/```json([\s\S]*?)```/);
-                    if (jsonMatch) finalResponseText = jsonMatch[1];
-                } else {
-                    // 🔒 DETERMINISTIC ONLY: LLM cannot trigger FINAL_ANALYSIS.
-                    // Disabled to prevent premature questionnaire termination by LLM hallucination.
-                    if (false) { /* DISABLED: LLM-triggered finalization removed */
-                        ayoState = AyoState.SCORING;
-                        finalResponseText = "";
-                    } else {
-                        console.warn(`⚠️ LLM Failed to output JSON in Step ${stepsCompleted}. Using deterministic fallback for: ${nextBlockName}`);
-                        // BUG FIX: Generate the ACTUAL next question deterministically from the queue
-                        const fb2FieldName = nextBlockName.split('.')[1] || nextBlockName;
-                        const fb2BlockName = nextBlockName.split('.')[0] || nextBlockName;
-                        finalResponseText = buildValidationQuestion(
-                            fb2BlockName,
-                            fb2FieldName,
-                            'Information non disponible — merci de préciser'
-                        );
-                        console.log(`✅ DETERMINISTIC FALLBACK (no JSON) for ${nextBlockName}`);
-                    }
-                }
-
-                } // fin du else (ENRICHISSEMENT LLM)
+                } // fin du else (ENRICHISSEMENT STATIQUE)
 
             }
         } // End of conditional questioning block (OWNERSHIP | TRUTH_WARNING | QUESTIONNAIRE | CALIBRATION)
