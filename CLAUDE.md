@@ -352,6 +352,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 6 | ❌ Pas commencée | — | Modules sémantiques |
 | Session 7 | ❌ Pas commencée | — | Pages AYA + certificat (page /aya 404) |
 | Session 8 | ❌ Pas commencée | — | UI/SEO + tests E2E |
+| **Bot AYA** | ✅ **MVP TERMINÉ** | 2026-03-23 | 251 fichiers scrapés, 143 entités dans Supabase, API FastAPI, doc OpenAI tool. **PROBLÈME** : Registre AYA vide car filtre `payment_completed=true` exclut les entités bot. Voir section 17.5. |
 
 > **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
 
@@ -1118,3 +1119,116 @@ L'entonnoir de conversion est :
 - `flatted` (high) — idem
 - `@tootallnate/once` (moderate) — dépendance de `firebase-admin`
 - `ajv` (moderate) — dépendance transitive
+
+---
+
+## 17. BOT AYA — Index automatisé d'entreprises
+
+> Ajouté le 23 mars 2026
+
+### 17.1 Qu'est-ce que le Bot AYA ?
+
+Le Bot AYA est un **scraper automatisé** qui indexe des entreprises sans intervention humaine pour peupler le registre AYA avec des données structurées (ASR_DERIVED). L'objectif est d'atteindre **1'000–10'000 entreprises indexées** en 30 jours pour rendre l'API AYA utile aux agents IA.
+
+### 17.2 Architecture
+
+```
+domains.txt (liste URLs)
+    ↓
+scraper.py (fetch homepage + sitemap + pages clés)
+    ↓
+parser.py (extraction HTML, JSON-LD, emails, phones, secteur, pays)
+    ↓
+generator.py (AYA_PREINDEX + ASR_DERIVED + score AIO estimé)
+    ↓
+data/*.json (stockage fichiers, 1 par domaine)
+    ↓
+push_to_aya.py (insertion dans Supabase aya_registry)
+    ↓
+api/main.py (API FastAPI locale — recherche, filtres, stats)
+```
+
+### 17.3 Fichiers du Bot AYA
+
+| Fichier | Rôle | Lignes |
+|---------|------|--------|
+| `aya/parser.py` | Extraction HTML, JSON-LD, emails, phones, secteur (13 catégories), pays (TLD) | ~300 |
+| `aya/scraper.py` | Fetch HTTP (home, sitemap, 10 pages clés) | ~70 |
+| `aya/generator.py` | Génère AYA_PREINDEX + ASR_DERIVED + score AIO (7 blocs, hard caps) | ~250 |
+| `aya/run_pipeline.py` | Pipeline séquentiel (simple) | ~40 |
+| `aya/run_pipeline_fast.py` | Pipeline concurrent (ThreadPool, 10 workers) — **256 domaines en 3.5 min** | ~60 |
+| `aya/push_to_aya.py` | Push vers Supabase `aya_registry` avec `payment_completed=false`, `data_origin='AYA-BOT'` | ~120 |
+| `aya/api/main.py` | API FastAPI — 6 endpoints (search, entities, entity, asr, stats, root) | ~150 |
+| `aya/domains.txt` | 256 domaines (CH + FR + tech mondial) | 256 |
+| `aya/docs/api.md` | Documentation API complète | ~200 |
+| `aya/docs/tool_spec.json` | Spec OpenAI tool-compatible (5 tools) | ~100 |
+
+### 17.4 État actuel (23 mars 2026)
+
+- ✅ **251 fichiers JSON** générés dans `aya/data/` (2 MB)
+- ✅ **143 entités** poussées dans Supabase `aya_registry` (score >= 20)
+- ✅ Score moyen : 48.3/100
+- ✅ 56 entreprises suisses, 19 françaises
+- ✅ 13 secteurs détectés (tech, finance, santé, food, education, etc.)
+- ✅ API FastAPI fonctionnelle avec filtres par secteur, pays, score
+- ✅ Doc API + Tool spec OpenAI créés
+
+### 17.5 PROBLÈME CRITIQUE — Registre AYA vide sur le site
+
+**Symptôme** : La page `ai-visionary.com/aya` affiche "0 Entreprises enregistrées" malgré les 143 entités dans Supabase.
+
+**Cause** : La chaîne de filtrage exclut les entités du bot :
+
+```
+app/aya/page.tsx
+  → fetch('/api/aya/live')
+    → getLiveEntities() [lib/aya/registry.ts:113]
+      → db.getAyaEntities(500) [lib/db.ts:296]
+        → .eq('payment_completed', true)  ← FILTRE ICI
+```
+
+Les entités du bot ont `payment_completed = false` et `data_origin = 'AYA-BOT'`.
+
+**Options pour résoudre** :
+
+| Option | Description | Impact |
+|--------|-------------|--------|
+| **A — Vue séparée** | Créer une nouvelle page `/aya/index` pour les entités du bot, garder `/aya` pour les clients payants | Aucun impact sur l'existant |
+| **B — Modifier le filtre** | `db.getAyaEntities()` retourne TOUTES les entités (payantes + bot) avec un badge visuel pour distinguer | Change la page AYA existante |
+| **C — Deux sections** | La page `/aya` affiche 2 sections : "Certifiés AYA" (payants) + "Index AYA" (bot) | Meilleur compromis |
+
+**Décision requise de Cyril** : Quelle option choisir ? L'option C semble la plus stratégique — le registre paraît plus riche tout en valorisant les clients payants.
+
+### 17.6 Ce qui reste à faire
+
+| Tâche | Priorité | Effort |
+|-------|----------|--------|
+| **Résoudre le registre vide** (option A, B, ou C) | 🔴 Critique | 1h |
+| **Atteindre 1'000 domaines** — ajouter annuaires CH/FR | 🟡 Haute | 2h |
+| **Déployer l'API AYA** sur Render/Railway | 🟡 Haute | 1h |
+| **Connecter l'API aux IA** via tool_spec.json | 🟡 Haute | 2h |
+| **Enrichissement IA** (Gemini) pour secteur, description | 🟢 Moyenne | 3h |
+| **Scheduler automatique** (cron pour re-scraper) | 🟢 Moyenne | 2h |
+| **Base de données** (remplacer fichiers JSON par SQLite/Supabase) | 🟢 Basse | 2h |
+
+### 17.7 Commandes
+
+```bash
+cd aya
+
+# Scraping
+python run_pipeline_fast.py      # Concurrent (3.5 min pour 256 domaines)
+python run_pipeline.py           # Séquentiel (debug)
+
+# Push vers Supabase
+python push_to_aya.py --dry-run         # Preview
+python push_to_aya.py --min-score 20    # Push réel (score >= 20)
+
+# API locale
+uvicorn api.main:app --reload           # http://127.0.0.1:8000
+# Swagger UI : http://127.0.0.1:8000/docs
+
+# Dépendances
+pip install -r requirements.txt
+pip install supabase  # Pour push_to_aya.py
+```

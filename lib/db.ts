@@ -291,9 +291,10 @@ export const database = {
     },
 
     /**
-     * Get all active entities from AYA Registry
+     * Get all entities from AYA Registry (certified + indexed)
+     * Sorted: payment_completed=true first, then by score DESC
      */
-    getAyaEntities: async (limit: number = 20): Promise<any[]> => {
+    getAyaEntities: async (limit: number = 500): Promise<any[]> => {
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -302,8 +303,8 @@ export const database = {
             const { data, error } = await client
                 .from('aya_registry')
                 .select('*')
-                .eq('payment_completed', true)
-                .order('last_update', { ascending: false })
+                .order('payment_completed', { ascending: false })
+                .order('asr_score', { ascending: false })
                 .limit(limit);
 
             if (error) {
