@@ -7,7 +7,8 @@ import {
     filterGarbageEntries, normalizeCase, truncateSecurity, filterAiModelNames,
     splitLongSecurityEntries,
     sanitizeFormContaminationArray, sanitizeCertifications, cleanProcessStep,
-    cleanKeywordEntry
+    cleanKeywordEntry,
+    cleanFormResiduesArray
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
@@ -296,7 +297,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         };
         const BARE_ACRONYM_RE = /^[A-Z][A-Z0-9\-]{1,10}$/; // All caps, no spaces, 2-11 chars
         processus.process_steps = filterGarbageEntries(
-            sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value)))
+            cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value))))
         )
             .map((step: string) => {
                 // FIX 3: Strip leading numbers/dots from process_steps
@@ -334,11 +335,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Engagements & Compliance
     const engagements: any = {};
     if (mode !== 'LIGHT') {
-        engagements.certifications = filterGarbageEntries(sanitizeCertifications(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value))));
-        engagements.frameworks = filterGarbageEntries(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value))));
-        engagements.policies = filterGarbageEntries(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value))));
-        engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
-            .map(s => truncateSecurity(s))));
+        engagements.certifications = filterGarbageEntries(cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value)))));
+        engagements.frameworks = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value)))));
+        engagements.policies = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)))));
+        engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
+            .map(s => truncateSecurity(s)))));
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
         if (engagements.certifications.length === 0 && certQ > 0) {
@@ -360,9 +361,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // Bug 10: Mark indicators without numeric values as "non déclaré"
         // Filter out "no data" phrases that users type instead of actual indicators
         const NO_DATA_PHRASES = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
-        const rawIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value))
+        const rawIndicators = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value))
             .filter((ind: string) => !NO_DATA_PHRASES.test(ind.trim()))
-            .map(normalizeCase));
+            .map(normalizeCase)));
         const todayISO = new Date().toISOString().split('T')[0];
 
         // Bug 6: Filter out indicators containing "non déclaré", "pas encore", "aucun" — those activate the absence module
@@ -381,10 +382,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                     .replace(/[^a-z0-9]+/g, '_')
                     .replace(/^_|_$/g, '')
                     .substring(0, 60);
+                const finalValue = isNaN(extractedValue as number) ? null : extractedValue;
                 return {
                     name: nameSlug,
                     label: ind,
-                    value: isNaN(extractedValue as number) ? null : extractedValue,
+                    value: finalValue,
+                    ...(finalValue === null ? { status: "not_measured" } : {}),
                     unit: extractedUnit,
                     last_updated: todayISO.substring(0, 7), // "YYYY-MM"
                     source: "self_declared"

@@ -401,7 +401,7 @@ export function sanitizeKeywords(items: string[], maxLen: number = 80): string[]
 // Strips values containing questionnaire question text, doubt language, or bare "Oui"/"Non" responses
 
 /** Patterns that indicate a raw questionnaire question was injected as data */
-const FORM_QUESTION_RE = /^(Possédez-vous|Avez-vous|Disposez-vous|Utilisez-vous|Proposez-vous|Êtes-vous|Est-ce que|Combien de)/i;
+const FORM_QUESTION_RE = /^(Quelles?|Possédez-vous|Avez-vous|Disposez-vous|Utilisez-vous|Proposez-vous|Êtes-vous|Est-ce que|Combien de)/i;
 /** Parenthetical doubt markers that indicate unverified data */
 const DOUBT_MARKER_RE = /\((présumé|à vérifier|non confirmé|supposé|probable|estimé)\)/i;
 /** Raw form answer patterns like "question... : Oui" */
@@ -433,6 +433,46 @@ export function sanitizeFormContaminationArray(values: string[]): string[] {
 }
 
 /**
+ * FIX 6: Deep form residue sanitizer.
+ * Detects strings that look like raw form questions ("Quelles politiques avez-vous en place : Aucune")
+ * and either returns null (empty answer) or extracts just the answer part (real content).
+ *
+ * Pattern: question prefix (Quelles, Possédez-vous, Avez-vous, Disposez-vous) + ":" + answer
+ * If answer is "Aucune", "Non", "Pas de...", "Aucun" → return null (field should be empty)
+ * If answer has real content → extract just the answer (strip the question prefix)
+ */
+const FORM_RESIDUE_QUESTION_PREFIX_RE = /^(Quelles?|Possédez-vous|Avez-vous|Disposez-vous|Utilisez-vous|Proposez-vous|Êtes-vous|Est-ce que|Combien de)\b[^:]*\??\s*:\s*/i;
+const FORM_RESIDUE_EMPTY_ANSWER_RE = /^(Aucune?|Non|Pas de\b.*|Rien|Néant|N\/A|Pas encore|Aucune idée|Je ne sais pas)$/i;
+
+export function cleanFormResidues(text: string): string | null {
+    if (!text || typeof text !== 'string') return null;
+    const trimmed = text.trim();
+    if (trimmed.length === 0) return null;
+
+    // Check if the string matches the form question pattern
+    const match = trimmed.match(FORM_RESIDUE_QUESTION_PREFIX_RE);
+    if (match) {
+        // Extract the answer part after the colon
+        const answer = trimmed.slice(match[0].length).trim();
+        // If the answer is an empty/negative response, return null
+        if (!answer || FORM_RESIDUE_EMPTY_ANSWER_RE.test(answer)) return null;
+        // Otherwise return just the answer part (real content)
+        return answer;
+    }
+
+    return trimmed;
+}
+
+/**
+ * FIX 6: Array version of cleanFormResidues.
+ */
+export function cleanFormResiduesArray(values: string[]): string[] {
+    return values
+        .map(v => cleanFormResidues(v))
+        .filter((v): v is string => v !== null && v.length > 0);
+}
+
+/**
  * FIX 2: Special handling for certifications — if user only answered "Oui" without naming
  * specific certifications, return empty array.
  */
@@ -449,7 +489,10 @@ export function sanitizeCertifications(values: string[]): string[] {
  * "ASR. 2. Création..." → "Création..."
  */
 export function cleanProcessStep(step: string): string {
-    return step.replace(/^\d+[\.\)]\s*/g, '').replace(/^[A-Z]+\.\s*\d+[\.\)]\s*/g, '').trim();
+    let cleaned = step.replace(/^\d+[\.\)]\s*/g, '').replace(/^[A-Z]+\.\s*\d+[\.\)]\s*/g, '').trim();
+    // Fix French grammar: "Validation final" → "Validation finale"
+    cleaned = cleaned.replace(/\bValidation final\b/g, 'Validation finale');
+    return cleaned;
 }
 
 /**
@@ -728,9 +771,9 @@ export function generateManifestJson(data: any, url: string): any {
     const rawBT = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBT || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
-    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
-    const dataFrameworks = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
-    const dataPolicies = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
+    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const dataFrameworks = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const dataPolicies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
 
     const isAssoManifest = isAssociation(businessType, name, url);
@@ -843,22 +886,22 @@ export function generateFaqJson(data: any, url: string): any {
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
     const legalName = sanitizeFieldValue(cleanVal(data.identite?.legal_name?.value)) || "";
-    const processSteps = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value))).map(cleanProcessStep);
+    const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
     const geoServed = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
     const rawQAfaq = data.processus_methodes?.quality_assurance?.value;
     const qualityAssurance = sanitizeFieldValue(
         Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ') : cleanVal(rawQAfaq)
     ) || "";
-    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
-    const frameworks = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
-    const policies = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
-    const securityMeasures = filterGarbageEntries(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))
-        .map(s => truncateSecurity(s)));
+    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const frameworks = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
+    const securityMeasures = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))
+        .map(s => truncateSecurity(s))));
     const NO_DATA_PHRASES_FAQ = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
-    const keyIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
+    const keyIndicators = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
         .filter((ind: string) => !NO_DATA_PHRASES_FAQ.test(ind.trim()))
-        .map(normalizeCase));
+        .map(normalizeCase)));
     const rawHasFaq = data.contenus_pedagogiques?.has_faq?.value;
     const hasFaq = (rawHasFaq === "__SKIPPED__" || rawHasFaq === "[SKIP] Non applicable") ? false : rawHasFaq;
     const rawHasDoc = data.contenus_pedagogiques?.has_documentation?.value;
@@ -1067,16 +1110,16 @@ export function generateGlossaryJson(data: any): any {
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTgloss || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
-    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
-    const processSteps = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value))).map(cleanProcessStep);
+    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
     const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceGloss ? sanitizeAudience(rawAudienceGloss) : "";
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
-    const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
-    const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
-    const securityMeasures = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
-        .map(s => truncateSecurity(s)));
+    const policies = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
+    const frameworks = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
+    const securityMeasures = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
+        .map(s => truncateSecurity(s))));
 
     const nameArticleG = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
 
@@ -1226,10 +1269,10 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const email = data.identite?.contact_email?.value || "";
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhoneExt) ? rawPhoneExt : "";
-    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
-    const frameworks = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
-    const policies = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
-    const processSteps = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value))).map(cleanProcessStep);
+    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const frameworks = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
+    const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
     const geographies = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
     const rawQAec = data.processus_methodes?.quality_assurance?.value;
@@ -1240,9 +1283,9 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             : [];
     const qualityAssurance = sanitizeFieldArray(qualityAssuranceRaw);
     const NO_DATA_PHRASES_EC = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
-    const keyIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
+    const keyIndicators = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
         .filter((ind: string) => !NO_DATA_PHRASES_EC.test(ind.trim()))
-        .map(normalizeCase));
+        .map(normalizeCase)));
     const rawHasFaqEC = data.contenus_pedagogiques?.has_faq?.value;
     const hasFaq = (rawHasFaqEC === "__SKIPPED__" || rawHasFaqEC === "[SKIP] Non applicable") ? false : rawHasFaqEC;
     const rawHasDocEC = data.contenus_pedagogiques?.has_documentation?.value;
