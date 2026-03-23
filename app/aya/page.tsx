@@ -383,6 +383,11 @@ export default function AyaPage() {
             {/* FOOTER */}
             <footer className="footer" style={{ background: 'var(--text-main)', color: 'white', padding: '40px 0', textAlign: 'center' }}>
                 <div className="container">
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap', marginBottom: '15px' }}>
+                        <Link href="/developers" style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none' }}>API &amp; D&eacute;veloppeurs</Link>
+                        <Link href="/mentions" style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none' }}>Mentions</Link>
+                        <Link href="/confidentialite" style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', textDecoration: 'none' }}>Confidentialit&eacute;</Link>
+                    </div>
                     <p style={{ color: '#ffffff', opacity: 0.9, fontSize: '0.9rem', fontWeight: '500' }}>Registre AYA v1.0 &bull; Powered by AI Visionary &bull; &#127464;&#127469; Bas&eacute;e &agrave; Gen&egrave;ve</p>
                 </div>
             </footer>
