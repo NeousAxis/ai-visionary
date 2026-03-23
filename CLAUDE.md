@@ -2,7 +2,7 @@
 
 > **IMPORTANT** : Ce fichier est lu automatiquement par Claude Code à chaque nouvelle conversation.
 > Il contient TOUTE la connaissance nécessaire pour reprendre le travail sur ce projet.
-> Dernière mise à jour : 23 mars 2026
+> Dernière mise à jour : 23 mars 2026 (session en cours)
 
 ---
 
@@ -352,7 +352,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 6 | ❌ Pas commencée | — | Modules sémantiques |
 | Session 7 | ❌ Pas commencée | — | Pages AYA + certificat (page /aya 404) |
 | Session 8 | ❌ Pas commencée | — | UI/SEO + tests E2E |
-| **Bot AYA** | ✅ **LIVE** | 2026-03-23 | 256 domaines scrapés, 206 entités dans Supabase, page `/aya` live avec badges Certifié/Indexé. Noms corrigés (slogans filtrés). API FastAPI + doc OpenAI tool. Reste : atteindre 1'000 domaines, déployer API, connecter aux IA. |
+| **Bot AYA** | ✅ **LIVE** | 2026-03-23 | 1108 domaines scrapés, 889 entités dans Supabase, page `/aya` live avec badges Certifié/Indexé, pagination 50/page. Noms corrigés (slogans filtrés). API publique Vercel `/api/aya/*` + page `/developers` + ai-plugin.json. README.md GitHub mis à jour avec doc API. Tri shuffle (Fisher-Yates) sauf certifiés en premier. |
 
 > **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
 
@@ -698,19 +698,22 @@ Note : `ignoreBuildErrors: true` est activé dans `next.config.ts` — le build 
 - ✅ Barre de stats (total / certifiés / indexés)
 - ✅ Tri organique (`created_at DESC` — derniers arrivés en premier)
 - ✅ Bouton "Certifiées" pour filtrer les clients payants
-- ✅ 887 entités dans le registre (données bot AYA)
+- ✅ 889 entités dans le registre (données bot AYA)
+- ✅ Pagination 50 entités par page (18 pages)
+- ✅ Tri shuffle (Fisher-Yates) — certifiés en premier, puis mélange aléatoire (pas de regroupement alphabétique)
+- ✅ README.md GitHub avec documentation API complète
 
 **Ce qui manque** :
-- ❌ Pagination sur la page registre (charge tout d'un coup — limite 1000)
 - ❌ JSON-LD dans le HEAD des pages (pour que les bots IA les lisent)
 - ❌ Badge AYA téléchargeable
 - ❌ Affichage des 7 blocs de score individuels sur le certificat
 - ❌ Statut visuel (Actif / Expiring / Expiré)
+- ❌ Fix noms/secteurs incorrects (ex: zuerich.com → "home_leisure" au lieu de "Zurich Tourism")
 
 **Reste à faire (Sprint 8)** :
-- Pagination quand on dépassera 1'000 entités
 - Améliorer page certificat (JSON-LD, blocs score, statut)
 - Implémenter le cycle de vie (MAJ annuelle, expiration, renouvellement)
+- Fix données bot AYA : noms/secteurs incorrects pour certains domaines
 
 ---
 
@@ -1182,7 +1185,7 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 
 ### 17.4 État actuel (23 mars 2026)
 
-- ✅ **1'108 domaines** scrapés, **886 entités** dans Supabase `aya_registry` (score >= 20, 2 erreurs parser)
+- ✅ **1'108 domaines** scrapés, **889 entités** dans Supabase `aya_registry` (score >= 20)
 - ✅ **Page `/aya` live** sur ai-visionary.com — affiche toutes les entités (certifiées + indexées)
 - ✅ **Option B implémentée** — filtre `payment_completed=true` supprimé, badges visuels "ASR CERTIFIÉ" (vert) / "INDEXÉ" (gris)
 - ✅ **Noms d'entités corrigés** — 42 noms fixes (slogans, génériques, allemand, encodage, préfixes)
@@ -1190,8 +1193,9 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 - ✅ **Pipeline concurrent** — `run_pipeline_fast.py` (10 workers, 1108 domaines en ~12 min)
 - ✅ API FastAPI locale fonctionnelle avec filtres par secteur, pays, score
 - ✅ Doc API (`aya/docs/api.md`) + Tool spec OpenAI (`aya/docs/tool_spec.json`) créés
-- ✅ Tri organique (`created_at DESC` — derniers arrivés en premier)
+- ✅ **Tri shuffle (Fisher-Yates)** — certifiés en premier, puis mélange aléatoire (plus de regroupement alphabétique)
 - ✅ 5 modes de tri sur la page : Par défaut, Certifiées, A→Z, Score, Pays
+- ✅ **Pagination** — 50 entités par page (18 pages)
 - ✅ `.vercelignore` ajouté (exclut `/aya/` et `scripts/` du deploy Vercel)
 - ✅ `useMemo` pour les stats et le filtrage
 - ✅ Helper `getEntityId()` et constante `ENTITY_TYPE_LABELS` extraits
@@ -1199,6 +1203,7 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 - ✅ **Page `/developers`** — documentation API complète pour humains + bots
 - ✅ **Repo GitHub public** — https://github.com/NeousAxis/ai-visionary
 - ✅ **Clé Ed25519 rotée** — `AYO-KEY-2026-03`, ancienne clé compromise
+- ✅ **README.md GitHub** — mis à jour avec doc API AYA complète (endpoints, exemples, score AIO, integration agents IA)
 
 ### 17.5 Registre AYA — Problème résolu (Option B)
 
@@ -1240,6 +1245,9 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 | **Page /developers** — documentation API pour humains + bots | 🟡 Haute | 1h | ✅ **FAIT** |
 | **Sécurité repo** — rotation Ed25519, nettoyage secrets, repo public | 🟡 Haute | 2h | ✅ **FAIT** |
 | **Pagination page /aya** — 50 entités par page | 🟡 Haute | 1h | ✅ **FAIT** |
+| **Tri shuffle** — Fisher-Yates, certifiés en premier | 🟡 Haute | 1h | ✅ **FAIT** |
+| **README.md GitHub** — doc API complète | 🟡 Haute | 1h | ✅ **FAIT** |
+| **Fix noms/secteurs incorrects** — ex: zuerich.com → "home_leisure" + secteur faux | 🟡 Haute | 3h | ❌ |
 | **Enrichissement IA** (Gemini) pour secteur, description | 🟢 Moyenne | 3h | ❌ |
 | **Scheduler automatique** (cron pour re-scraper) | 🟢 Moyenne | 2h | ❌ |
 | **Réduire les "XX"** — 766 entités .com sans pays détecté | 🟢 Moyenne | 2h | ❌ |
