@@ -2461,9 +2461,9 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
 🌐 **external_context.json**
 📜 + **3 Ans de Registre AYA** inclus
 
-👉 **[Acheter mes fichiers ASR](${actionLink})**
+👉 [Acheter mes fichiers ASR](${actionLink})
 
-*Vous recevrez vos fichiers et votre certificat instantanément après validation.*`;
+*Vous serez redirigé vers notre plateforme de paiement sécurisée.*`;
                 } else {
                     finalResponseText = `✅ **Email enregistré.**
 
@@ -2475,7 +2475,7 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
 ⚡ **Priorité de recommandation** IA
 🔄 **Mises à jour illimitées**
 
-👉 **[Activer mon Abonnement maintenant](${actionLink})**
+👉 [Activer mon Abonnement maintenant](${actionLink})
 
 *Vous serez redirigé vers notre plateforme de paiement sécurisée.*`;
                 }
