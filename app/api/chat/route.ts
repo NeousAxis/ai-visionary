@@ -2310,30 +2310,22 @@ Veuillez réessayer ou contacter hello@ai-visionary.com.`;
 
             logger.info('SALES_FUNNEL', `User content: ${userContent.substring(0, 100)}`);
 
-            // 1. INTENTION DETECTION & PITCHES
+            // 1. INTENTION DETECTION & CONFIRMATION
             // 🔄 CASE: ABONNEMENT AYA (19 CHF / MOIS)
             if (userContent.includes("abonnement") || (userContent.includes("aya") && userContent.includes("19"))) {
                 console.log("🎯 Selection: Abonnement AYA");
                 if (userContent.includes("valider") || userContent.includes("confirmer")) {
-                    finalResponseText = `🔄 **Choix Validé : ABONNEMENT AYA (19 CHF/mois).**\nVous activez votre présence prioritaire dans le Registre AYA.\n\n👉 **Entrez votre email professionnel pour finaliser l'abonnement :**\nEX : hello@votre-domaine.com`;
+                    // Confirmation recue → demander l'email
+                    finalResponseText = `🔄 **Choix Valide : ABONNEMENT AYA (19 CHF/mois).**\nVous activez votre presence prioritaire dans le Registre AYA.\n\n👉 **Entrez votre email professionnel pour finaliser l'abonnement :**\nEX : hello@votre-domaine.com`;
                 } else {
+                    // Premiere selection → confirmation + explication + possibilite de changer
                     finalResponseText = JSON.stringify({
                         type: "question_block",
-                        intro: `**VISIBILITÉ IA-NATIVE (ABONNEMENT)**
-
-L'Abonnement AYA est conçu pour les entreprises qui veulent des résultats sans complexité technique.
-
-**Bénéfices Immédiats :**
-- ✅ **Registre AYA Actif** : Priorité absolue auprès des bots IA.
-- ✅ **Données Hébergées** : Nous portons vos fichiers ASR/FAQ sur nos infrastructures sécurisées.
-- ✅ **Anti-Hallucination** : Source de données officielle et signée.
-- ✅ **Évolutif** : Mises à jour incluses.
-
-**Tarif : 19 CHF / mois (Sans engagement)**`,
+                        intro: "VISIBILITE IA-NATIVE (ABONNEMENT)\n\nL'Abonnement AYA est concu pour les entreprises qui veulent des resultats sans complexite technique.\n\nBenefices Immediats -\nRegistre AYA Actif, Donnees Hebergees, Anti-Hallucination, Evolutif.\n\nTarif - 19 CHF / mois (Sans engagement)",
                         questions: [{
                             id: "confirm_subscription",
-                            text: "Votre décision finale :",
-                            options: ["Valider l'ABONNEMENT (19 CHF/mois)", "Upgrader vers la PROPRIÉTÉ (499 CHF)"],
+                            text: "Votre decision",
+                            options: ["Valider l'ABONNEMENT (19 CHF/mois)", "Changer pour le PACK PRO (499 CHF)"],
                             allowCustom: false
                         }]
                     });
