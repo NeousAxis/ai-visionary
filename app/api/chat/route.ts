@@ -35,8 +35,8 @@ import {
 import {
     buildValidationQuestion,
     buildEnrichmentQuestion,
-    fieldRequiresEvidence,
-    EVIDENCE_REQUIRED_FIELDS,
+    TEXT_INPUT_FIELD_NAMES,
+    BOOLEAN_FIELD_NAMES,
 } from '@/lib/agents/greffier';
 import {
     validateEmail,
@@ -77,6 +77,11 @@ function getStripe(): Stripe {
 
 import { AyoExtract } from '@/lib/aio-score-engine';
 
+// Cache resolved Gemini model ID to avoid hitting the models API on every request
+let cachedModelId: string | null = null;
+let cachedModelTimestamp = 0;
+const MODEL_CACHE_TTL = 3600000; // 1 hour
+
 export async function POST(req: Request) {
     // Rate limit: 15 requests/min per IP
     const rateLimited = checkRateLimit(req as any, 'chat', RATE_LIMITS.chat);
@@ -103,44 +108,39 @@ export async function POST(req: Request) {
             const google = createGoogleGenerativeAI({ apiKey: googleKey });
 
             try {
-                // 1. AUTO-DETECT AVAILABLE MODELS (Robust Way)
-                // Auto-detecting available Gemini model
-                const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
+                // 1. AUTO-DETECT AVAILABLE MODELS (Robust Way) — cached for 1 hour
+                if (!cachedModelId || Date.now() - cachedModelTimestamp > MODEL_CACHE_TTL) {
+                    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
 
-                if (!modelsResponse.ok) {
-                    throw new Error(`Failed to list models: ${modelsResponse.statusText}`);
-                }
-
-                const modelsData = await modelsResponse.json();
-
-                if (modelsData.models) {
-                    // Find best model: Prioritize GEMINI 2.0 FLASH (User Request)
-                    const bestModel = modelsData.models.find((m: any) =>
-                        m.supportedGenerationMethods.includes('generateContent') &&
-                        m.name.includes('flash') &&
-                        m.name.includes('2.0') // Priority 1: Gemini 2.0 Flash (Speed/Smart)
-                    ) || modelsData.models.find((m: any) =>
-                        m.supportedGenerationMethods.includes('generateContent') &&
-                        m.name.includes('pro') &&
-                        m.name.includes('1.5') // Priority 2: Gemini 1.5 Pro (Fallback)
-                    ) || modelsData.models.find((m: any) =>
-                        m.supportedGenerationMethods.includes('generateContent') &&
-                        m.name.includes('flash') // Priority 3: Any Flash
-                    );
-
-                    if (bestModel) {
-                        // API returns 'models/gemini-1.5-pro-001', we need 'gemini-1.5-pro-001' (sometimes with or without 'models/')
-                        // The Google SDK usually expects just the ID, but let's be safe.
-                        const modelId = bestModel.name.replace('models/', '');
-                        // Model selected: logged via structured logger
-                        modelToUse = google(modelId);
-                    } else {
-                        // Fallback to gemini-pro
-                        modelToUse = google('gemini-pro');
+                    if (!modelsResponse.ok) {
+                        throw new Error(`Failed to list models: ${modelsResponse.statusText}`);
                     }
-                } else {
-                    throw new Error("No models list returned.");
+
+                    const modelsData = await modelsResponse.json();
+
+                    if (modelsData.models) {
+                        // Find best model: Prioritize GEMINI 2.0 FLASH (User Request)
+                        const bestModel = modelsData.models.find((m: any) =>
+                            m.supportedGenerationMethods.includes('generateContent') &&
+                            m.name.includes('flash') &&
+                            m.name.includes('2.0') // Priority 1: Gemini 2.0 Flash (Speed/Smart)
+                        ) || modelsData.models.find((m: any) =>
+                            m.supportedGenerationMethods.includes('generateContent') &&
+                            m.name.includes('pro') &&
+                            m.name.includes('1.5') // Priority 2: Gemini 1.5 Pro (Fallback)
+                        ) || modelsData.models.find((m: any) =>
+                            m.supportedGenerationMethods.includes('generateContent') &&
+                            m.name.includes('flash') // Priority 3: Any Flash
+                        );
+
+                        cachedModelId = bestModel ? bestModel.name.replace('models/', '') : 'gemini-pro';
+                    } else {
+                        cachedModelId = 'gemini-pro';
+                    }
+                    cachedModelTimestamp = Date.now();
                 }
+
+                modelToUse = google(cachedModelId!);
             } catch (e) {
                 logger.warn('GEMINI_DETECT_FAIL', e instanceof Error ? e.message : 'Unknown');
                 // Ultimate Fallback: Try a known stable alias
@@ -1528,14 +1528,8 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
 
                 // Règle 2 : au moins 2 options, jamais seulement "Autre"
                 // SAUF pour les champs texte libre (email, téléphone, etc.)
-                const TEXT_INPUT_FIELDS = [
-                    'contact_email', 'contact_phone', 'geographies_served',
-                    'legal_name', 'city', 'process_steps', 'key_indicators',
-                    'services_details', 'target_audience_details', 'products_details',
-                    'use_cases_details', 'pricing_details', 'delivery_mode_details',
-                    'quality_assurance_details', 'certifications_details',
-                    'frameworks_details', 'security_measures_details', 'policies_details',
-                ];
+                // TEXT_INPUT_FIELD_NAMES derived from ENRICHMENT_TEMPLATES (imported)
+                // Plus additional detail suffix patterns handled below
                 const qIdLower = (q.id || '').toLowerCase();
                 const qTextLower = (q.text || '').toLowerCase();
 
@@ -1543,10 +1537,12 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 // Questions like has_faq, has_glossary, has_documentation are boolean presence checks,
                 // not URL or free-text fields. The LLM sometimes generates text containing "lien" or
                 // "url" in the question body, causing false positive detection.
-                const BOOLEAN_FIELD_PATTERNS = ['has_faq', 'has_glossary', 'has_documentation', 'has_sitemap', 'has_robots'];
+                // BOOLEAN_FIELD_NAMES derived from ENRICHMENT_TEMPLATES (imported)
+                // Plus extra patterns not in templates
+                const BOOLEAN_FIELD_PATTERNS_EXTRA = ['has_sitemap', 'has_robots'];
                 // Questions starting with "Avez-vous", "Disposez-vous", "Possédez-vous" are YES/NO questions
                 const isYesNoQuestion = qTextLower.match(/^(avez-vous|disposez-vous|possédez-vous|avez vous|disposez vous|possédez vous)/);
-                const isBooleanField = BOOLEAN_FIELD_PATTERNS.some(p => qIdLower.includes(p)) || !!isYesNoQuestion;
+                const isBooleanField = BOOLEAN_FIELD_NAMES.some(p => qIdLower.includes(p)) || BOOLEAN_FIELD_PATTERNS_EXTRA.some(p => qIdLower.includes(p)) || !!isYesNoQuestion;
 
                 // URL questions: only if no good options already exist (evidence questions have "Je n'ai pas de lien" etc.)
                 const hasEvidenceOptions = (q.options || []).some((o: string) =>
@@ -1566,7 +1562,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     qTextLower.includes('coller l') || qTextLower.includes('saisissez l'))));
                 // Detect detail/description fields by suffix patterns (LLM often generates _details, _description, _specifics)
                 const isDetailField = !isBooleanField && qIdLower.match(/_(details|description|specifics|precisions|complement)$/);
-                const isTextInputField = !isBooleanField && (isUrlQuestion || isDetailField || TEXT_INPUT_FIELDS.some(f => qIdLower.includes(f)) ||
+                const isTextInputField = !isBooleanField && (isUrlQuestion || isDetailField || TEXT_INPUT_FIELD_NAMES.some(f => qIdLower.includes(f)) ||
                     qTextLower.includes('email') || qTextLower.includes('téléphone') ||
                     qTextLower.includes('phone') || qTextLower.includes('zone géographique') ||
                     qTextLower.includes('nom légal') || qTextLower.includes('raison sociale') ||
@@ -1639,7 +1635,6 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 finalResponseText = buildEnrichmentQuestion(
                     enBlockName,
                     enFieldName,
-                    detectedValues[nextBlockName]
                 );
                 console.log(`✅ ENRICHISSEMENT STATIQUE pour ${nextBlockName} (pas de LLM)`);
 

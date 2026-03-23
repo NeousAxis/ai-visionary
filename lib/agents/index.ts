@@ -40,15 +40,10 @@ export {
 
 // Greffier
 export {
-    QUESTIONNAIRE,
-    buildQuestionQueue,
-    buildContinuePrompt,
     buildEnrichmentQuestion,
-    getGreffierPrompt,
-    type BlocName,
-    type BlocQuestion,
-    type GreffierContext,
-    type ContinuePromptParams,
+    ENRICHMENT_TEMPLATES,
+    TEXT_INPUT_FIELD_NAMES,
+    BOOLEAN_FIELD_NAMES,
 } from './greffier';
 
 // Analyste
