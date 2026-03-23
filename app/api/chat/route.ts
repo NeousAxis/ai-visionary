@@ -1542,7 +1542,9 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 // not URL or free-text fields. The LLM sometimes generates text containing "lien" or
                 // "url" in the question body, causing false positive detection.
                 const BOOLEAN_FIELD_PATTERNS = ['has_faq', 'has_glossary', 'has_documentation', 'has_sitemap', 'has_robots'];
-                const isBooleanField = BOOLEAN_FIELD_PATTERNS.some(p => qIdLower.includes(p));
+                // Questions starting with "Avez-vous", "Disposez-vous", "Possédez-vous" are YES/NO questions
+                const isYesNoQuestion = qTextLower.match(/^(avez-vous|disposez-vous|possédez-vous|avez vous|disposez vous|possédez vous)/);
+                const isBooleanField = BOOLEAN_FIELD_PATTERNS.some(p => qIdLower.includes(p)) || !!isYesNoQuestion;
 
                 // URL questions: only if no good options already exist (evidence questions have "Je n'ai pas de lien" etc.)
                 const hasEvidenceOptions = (q.options || []).some((o: string) =>
@@ -1596,16 +1598,21 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     q.allowCustom = true;
                     if (!q.customLabel) q.customLabel = "Autre méthode / Préciser...";
                     console.warn("⚠️ VALIDATOR: question de preuve → options gardées + allowCustom");
+                } else if (isYesNoQuestion && (!q.options || q.options.length < 2 || !q.options.some((o: string) => o.toLowerCase().includes('non')))) {
+                    // Questions Avez-vous/Disposez-vous DOIVENT avoir Oui + Non
+                    q.options = ["Oui", "Non"];
+                    q.allowCustom = true;
+                    console.warn("⚠️ VALIDATOR: question Oui/Non forcée (Avez-vous...)");
                 } else if (!q.options || q.options.length === 0) {
                     q.options = ["Oui", "Non"];
                     q.allowCustom = true;
                     console.warn("⚠️ VALIDATOR: 0 options → fallback Oui/Non");
                 } else if (q.options.length === 1) {
                     const singleOpt = q.options[0].toLowerCase();
-                    if (singleOpt.includes('autre') || singleOpt.includes('préciser')) {
+                    if (singleOpt.includes('autre') || singleOpt.includes('préciser') || singleOpt.includes('ajouter')) {
                         q.options = ["Oui", "Non"];
                         q.allowCustom = true;
-                        console.warn("⚠️ VALIDATOR: seule option 'Autre' → fallback Oui/Non");
+                        console.warn("⚠️ VALIDATOR: seule option → fallback Oui/Non");
                     }
                 }
             }
