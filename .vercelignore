@@ -1,0 +1,6 @@
+aya/
+scripts/
+*.py
+PLAN-ACTION-AYO-COMPLET.md
+ENTREPRISES_FACTICES_A_SUPPRIMER.json
+firebase-debug.log
