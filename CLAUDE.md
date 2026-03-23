@@ -55,7 +55,7 @@ Le produit principal est **AYO** (AI Your Org) — un chatbot IA qui diagnostiqu
 | React | 19.2.1 | Frontend |
 | TypeScript | ^5 | Typage |
 | Tailwind CSS | ^4 | Styles (+ beaucoup d'inline styles legacy) |
-| Firebase Admin | ^13.6.0 | Firestore (base de données) |
+| Supabase | @supabase/supabase-js | Base de données PostgreSQL |
 | Stripe | ^20.3.1 | Paiements (checkout + subscriptions) |
 | Resend | ^6.6.0 | Envoi d'emails transactionnels |
 | Vercel | — | Hosting + serverless + cron |
@@ -66,8 +66,8 @@ Le produit principal est **AYO** (AI Your Org) — un chatbot IA qui diagnostiqu
 
 ### Hébergement
 
-- **Frontend + API** : Vercel (serverless functions, maxDuration=60s)
-- **Base de données** : Firebase Firestore
+- **Frontend + API** : Vercel (serverless functions, maxDuration=120s)
+- **Base de données** : Supabase PostgreSQL (https://hxoywzhrvacdmtopureh.supabase.co)
 - **Emails** : Resend (hello@ai-visionary.com)
 - **Paiements** : Stripe (mode live, CHF)
 - **Domaine** : ai-visionary.com
@@ -75,10 +75,9 @@ Le produit principal est **AYO** (AI Your Org) — un chatbot IA qui diagnostiqu
 ### Variables d'environnement requises
 
 ```
-# Firebase
-FIREBASE_PROJECT_ID
-FIREBASE_CLIENT_EMAIL
-FIREBASE_PRIVATE_KEY
+# Supabase
+SUPABASE_URL=https://hxoywzhrvacdmtopureh.supabase.co
+SUPABASE_SERVICE_ROLE_KEY
 
 # Stripe
 STRIPE_SECRET_KEY
@@ -110,8 +109,8 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 | Fichier | Rôle | Lignes | État |
 |---------|------|--------|------|
-| `app/api/chat/route.ts` | **COEUR** — Chatbot AYO, tout le flux diagnostic | ~2750 | ⚠️ Bug "SET q=1", prompt à réécrire |
-| `app/api/webhooks/checkout-success/route.ts` | Webhook Stripe post-paiement → génère fichiers + email | ~477 | ⚠️ Bug Score 0 |
+| `app/api/chat/route.ts` | **COEUR** — Chatbot AYO, tout le flux diagnostic | ~2800 | ✅ Questionnaire statique, scoring strict |
+| `app/api/webhooks/checkout-success/route.ts` | Webhook Stripe post-paiement → génère fichiers + email | ~477 | ✅ Score corrigé |
 | `app/api/create-checkout/route.ts` | Création session Stripe Checkout | 137 | OK |
 | `app/api/light-report/route.ts` | Envoi Pack Light gratuit | 234 | ⚠️ Scores reconstructs artificiellement |
 | `app/api/auth/send-otp/route.ts` | Envoi OTP par email | 82 | OK |
@@ -138,7 +137,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 | `lib/ayo-semantics.ts` | Génération FAQ/Glossaire/Manifest via Gemini 1.5 Flash | 132 | ✅ JSON validation, timeout 30s, GEMINI_API_KEY unique |
 | `lib/ayo-categories.ts` | Taxonomie 25 secteurs d'activité | 40 | ✅ OK |
 | `lib/external-context.ts` | Génération external_context JSON | 64 | ✅ Fake rating supprimé, permissions simplifiées |
-| `lib/db.ts` | Firebase Admin Firestore operations | 418 | ✅ OK |
+| `lib/db.ts` | Supabase PostgreSQL operations (lazy-init, merge strategy) | 418 | ✅ Migré de Firestore |
 | `lib/auth.ts` | Middleware admin (ADMIN_SECRET, timing-safe) | — | ✅ OK |
 | `lib/logger.ts` | Logger structuré avec correlation IDs | — | ✅ OK |
 | `lib/rate-limit.ts` | Rate limiting in-memory par IP | — | ✅ Créé mais PAS encore appliqué |
@@ -156,7 +155,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 |---------|------|------|
 | `app/page.tsx` | Homepage — 9 sections, pricing, CTA (320 lignes) | ✅ Fonctionnel, styles inline |
 | `app/diagnostic/page.tsx` | Page chat AYO fullscreen (36 lignes) | ✅ OK, pas de SEO |
-| `app/aya/page.tsx` | **REGISTRE AYA PUBLIC** (205 lignes) | ✅ EXISTE — manque pagination/filtres |
+| `app/aya/page.tsx` | **REGISTRE AYA PUBLIC** (205 lignes) | ✅ OK — manque pagination/filtres |
 | `app/aya/e/[id]/page.tsx` | **CERTIFICAT AYA** — page détail (216 lignes) | ✅ EXISTE — manque JSON-LD, blocs score |
 | `app/certificate/[id]/page.tsx` | ~~Ancien certificat~~ | 🗑️ SUPPRIMÉ (Session 3 — B4) |
 | `app/ai-et-votre-entreprise/page.tsx` | Page marketing (179 lignes) | ✅ OK, styles inline |
@@ -178,8 +177,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 | Fichier | Notes |
 |---------|-------|
-| `vercel.json` | maxDuration=60s pour checkout-success et chat |
-| `firebase.json` | Config minimale, pas de security rules |
+| `vercel.json` | maxDuration=120s pour checkout-success et chat |
 | `next.config.ts` | ✅ `ignoreBuildErrors: false` + CSP header |
 | `app/robots.ts` | ✅ Disallow /admin/, /api/, /debug/, /certificate/ |
 | `app/sitemap.ts` | ⚠️ MOCK avec 2 entity IDs hardcodés |
@@ -194,7 +192,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 3. Scanner (aio-scanner.ts) analyse le site (HTML, JSON-LD, AYA, ASR)
 4. Score initial calculé par le moteur (aio-score-engine.ts) → 7 blocs
 5. AYO affiche le score initial
-6. AYO pose 5-18 questions (questionnaire via LLM)
+6. AYO pose 10-20 questions STATIQUES (templates prédéfinis, PAS de LLM)
 7. LLM extrait les réponses en JSON structuré (q values)
 8. Score enrichi recalculé
 9. AYO affiche le delta (avant/après)
@@ -223,27 +221,18 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 ---
 
-## 5. BUGS CONNUS CRITIQUES
+## 5. BUGS CORRIGÉS (Session 4)
 
-### Bug #1 — LLM force q=1 sur les réponses poubelle
-- **Où** : `app/api/chat/route.ts` ligne ~1982 → `"PRIORITIZE THIS INFO AND SET q=1"`
-- **Effet** : "aucun" → q=1, "non" → q=1
-- **Fix** : Supprimer "SET q=1", créer `lib/semantic-validator.ts`
-
-### Bug #2 — Score blocs ≠ Score final (hard cap invisible)
-- **Où** : `lib/aio-score-engine.ts` lignes 158-168
-- **Effet** : Blocs = 95 mais score final = 50 (cap invisible)
-- **Fix** : Retourner `raw_total` + `cap_reason`, afficher le plafond
-
-### Bug #3 — Score 0 dans l'email webhook
-- **Où** : `app/api/webhooks/checkout-success/route.ts`
-- **Effet** : Cascade Firestore ne trouve rien → "Entreprise Inconnue", score 0
-- **Fix** : Persister chaque réponse chat dans Firestore immédiatement
-
-### Bug #4 — Double appel webhook
-- **Où** : `PaymentHandler.tsx` + `PaymentSuccessModal.tsx`
-- **Effet** : Les deux appellent le webhook → double exécution possible
-- **Fix** : Fusionner en un seul composant
+| Bug | Statut | Correction |
+|-----|--------|-----------|
+| LLM force q=1 sur réponses vagues | ✅ Corrigé | Scoring strict : "oui" brut = q=0.5 max |
+| Hard cap invisible (blocs=95 total=50) | ✅ Corrigé | Cap à 78 sans preuves externes, affiché |
+| Score 0 dans l'email webhook | ✅ Corrigé | Données persistées progressivement dans Supabase |
+| Double appel webhook | ✅ Corrigé (Session 3) | PaymentHandler neutralisé |
+| Questions LLM aléatoires/incohérentes | ✅ Corrigé | Questions statiques (ENRICHMENT_TEMPLATES) |
+| Email non sauvé en top-level Supabase | ✅ Corrigé | Extraction contact_email → colonne email |
+| Boucle infinie questions preuve | ✅ Corrigé | Questions preuve supprimées |
+| "Plombier urgence Lyon" comme documentation | ✅ Corrigé | Scanner filtre les exemples marketing |
 
 ---
 
@@ -431,10 +420,10 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 - Pusher sur main sans accord explicite
 - Demander des preuves/URLs dans le questionnaire
 
-### Bugs connus restants
-- Page `/aya` = 404 (certificat AYA) → Session 7
-- Scoring intermittent timeout Gemini sur Vercel (~20% des cas)
-- Pack selection pas toujours affiché après le score
+### Bugs corrigés récemment
+- ✅ Page `/aya` existe (mais manque pagination/filtres) → Session 7
+- ✅ Scoring timeout → maxDuration=120s + fallback déterministe
+- ✅ Pack selection → sanitization caractères spéciaux dans intro
 
 ---
 
