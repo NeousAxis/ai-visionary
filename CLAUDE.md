@@ -691,24 +691,25 @@ Note : `ignoreBuildErrors: true` est activé dans `next.config.ts` — le build 
 
 **Ce qui fonctionne** :
 - ✅ Inscription AYA après paiement
-- ✅ Page registre avec recherche
+- ✅ Page registre avec recherche + 5 modes de tri (Par défaut, Certifiées, A→Z, Score, Pays)
 - ✅ Page certificat avec détails
-- ✅ Seules les entités payantes s'affichent
+- ✅ **Option B implémentée** — toutes les entités visibles (certifiées + indexées par bot)
+- ✅ Badges visuels : "ASR CERTIFIÉ" (vert) / "INDEXÉ" (gris)
+- ✅ Barre de stats (total / certifiés / indexés)
+- ✅ Tri organique (`created_at DESC` — derniers arrivés en premier)
+- ✅ Bouton "Certifiées" pour filtrer les clients payants
+- ✅ 887 entités dans le registre (données bot AYA)
 
 **Ce qui manque** :
-- ❌ Pagination sur la page registre (charge tout d'un coup)
-- ❌ Filtres avancés (par secteur, score, localisation)
-- ❌ Tri (par score, date, alphabétique)
+- ❌ Pagination sur la page registre (charge tout d'un coup — limite 1000)
 - ❌ JSON-LD dans le HEAD des pages (pour que les bots IA les lisent)
 - ❌ Badge AYA téléchargeable
 - ❌ Affichage des 7 blocs de score individuels sur le certificat
 - ❌ Statut visuel (Actif / Expiring / Expiré)
-- ❌ Doublon `app/certificate/[id]/page.tsx` à supprimer
 
 **Reste à faire (Sprint 8)** :
-- Améliorer page registre (pagination, filtres, tri)
+- Pagination quand on dépassera 1'000 entités
 - Améliorer page certificat (JSON-LD, blocs score, statut)
-- Supprimer le doublon certificate
 - Implémenter le cycle de vie (MAJ annuelle, expiration, renouvellement)
 
 ---
@@ -1125,7 +1126,7 @@ L'entonnoir de conversion est :
   - `_clean_title()` : extraction du vrai nom avant séparateur `|`, `-`, `—`
   - `_strip_prefix()` : "Welcome to L'Oréal" → "L'Oréal"
   - `_name_matches_domain()` : JSON-LD name validé contre le domaine
-- **206 entités** dans Supabase `aya_registry` (re-scrapé + re-poussé avec noms corrigés)
+- **887 entités** dans Supabase `aya_registry` (1108 scrapés, 887 avec score >= 20)
 
 ### Build
 - `npm run build` ✅ — 16 pages générées, 0 erreur TypeScript
@@ -1172,56 +1173,71 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 | `aya/scraper.py` | Fetch HTTP (home, sitemap, 10 pages clés) | ~70 |
 | `aya/generator.py` | Génère AYA_PREINDEX + ASR_DERIVED + score AIO (7 blocs, hard caps) | ~250 |
 | `aya/run_pipeline.py` | Pipeline séquentiel (simple) | ~40 |
-| `aya/run_pipeline_fast.py` | Pipeline concurrent (ThreadPool, 10 workers) — **256 domaines en 3.5 min** | ~60 |
+| `aya/run_pipeline_fast.py` | Pipeline concurrent (ThreadPool, 10 workers) — **1108 domaines en ~12 min** | ~60 |
 | `aya/push_to_aya.py` | Push vers Supabase `aya_registry` avec `payment_completed=false`, `data_origin='AYA-BOT'` | ~120 |
 | `aya/api/main.py` | API FastAPI — 6 endpoints (search, entities, entity, asr, stats, root) | ~150 |
-| `aya/domains.txt` | 256 domaines (CH + FR + tech mondial) | 256 |
+| `aya/domains.txt` | 1108 domaines (CH + FR + tech mondial) | 1108 |
 | `aya/docs/api.md` | Documentation API complète | ~200 |
 | `aya/docs/tool_spec.json` | Spec OpenAI tool-compatible (5 tools) | ~100 |
 
 ### 17.4 État actuel (23 mars 2026)
 
-- ✅ **256 domaines** scrapés, **206 entités** dans Supabase `aya_registry` (score >= 20)
+- ✅ **1'108 domaines** scrapés, **887 entités** dans Supabase `aya_registry` (score >= 20)
 - ✅ **Page `/aya` live** sur ai-visionary.com — affiche toutes les entités (certifiées + indexées)
 - ✅ **Option B implémentée** — filtre `payment_completed=true` supprimé, badges visuels "ASR CERTIFIÉ" (vert) / "INDEXÉ" (gris)
-- ✅ **Noms d'entités corrigés** — détection slogans, noms génériques ("Homepage", pays), extraction intelligente depuis `<title>` et JSON-LD
+- ✅ **Noms d'entités corrigés** — 42 noms fixes (slogans, génériques, allemand, encodage, préfixes)
 - ✅ **Liens certificat corrigés** — `entity_id` utilisé en priorité (au lieu de `entity.id` qui était null)
-- ✅ **Pipeline concurrent** — `run_pipeline_fast.py` (10 workers, 256 domaines en 3.3 min)
-- ✅ API FastAPI fonctionnelle avec filtres par secteur, pays, score
+- ✅ **Pipeline concurrent** — `run_pipeline_fast.py` (10 workers, 1108 domaines en ~12 min)
+- ✅ API FastAPI locale fonctionnelle avec filtres par secteur, pays, score
 - ✅ Doc API (`aya/docs/api.md`) + Tool spec OpenAI (`aya/docs/tool_spec.json`) créés
-- ✅ Tri : `payment_completed DESC` puis `asr_score DESC` (certifiés en premier)
+- ✅ Tri organique (`created_at DESC` — derniers arrivés en premier)
+- ✅ 5 modes de tri sur la page : Par défaut, Certifiées, A→Z, Score, Pays
+- ✅ `.vercelignore` ajouté (exclut `aya/` et `scripts/` du deploy Vercel)
+- ✅ `useMemo` pour les stats et le filtrage
+- ✅ Helper `getEntityId()` et constante `ENTITY_TYPE_LABELS` extraits
 
 ### 17.5 Registre AYA — Problème résolu (Option B)
 
 **Problème initial** : La page `/aya` affichait "0 Entreprises" car `db.getAyaEntities()` filtrait sur `payment_completed = true`.
 
 **Solution appliquée (Option B)** :
-- `lib/db.ts:303` — Filtre supprimé, tri par `payment_completed DESC` puis `asr_score DESC`
+- `lib/db.ts:303` — Filtre supprimé, tri organique `created_at DESC` (derniers arrivés en premier)
 - `app/aya/page.tsx` — Refonte complète avec badges visuels :
   - Clients payants : bordure verte + badge "ASR CERTIFIÉ"
   - Entités bot : bordure grise + badge "INDEXÉ"
   - Barre de stats en haut (total / certifiés / indexés)
+  - 5 boutons de tri : Par défaut, Certifiées, A→Z, Score, Pays
   - CTA "Passez à Certifié" pour convertir les indexés
 
 **Bugs corrigés dans la même session** :
-- `generator.py:detect_entity_name()` — slogans ("The best VPN for speed...") et noms génériques ("Homepage") filtrés
-- `generator.py:_clean_title()` — extraction du vrai nom depuis les `<title>` avec séparateurs (ex: "ge.ch – République et canton de Genève | ge.ch" → "République et canton de Genève")
-- `generator.py:_strip_prefix()` — "Welcome to L'Oréal" → "L'Oréal"
+- `generator.py:detect_entity_name()` — 42 noms corrigés :
+  - Slogans filtrés ("The best VPN...", "Pioneering sustainable...", "Manage your team...")
+  - Noms génériques filtrés ("Homepage", "Welcome", "Redirecting...", noms de pays)
+  - Descriptions allemandes filtrées ("Willkommen bei...", "Günstige...", "führend im...")
+  - Encodage corrigé (mojibake Crédit Agricole, caractères invisibles Orange)
+  - `_clean_title()` : split sur séparateurs + sélection du segment pertinent
+  - `_strip_prefix()` : "Welcome to L'Oréal" → "L'Oréal", "Willkommen bei der Helvetia..." → "Helvetia..."
+  - `_name_matches_domain()` : JSON-LD name validé contre le domaine
+  - `_clean_encoding()` : suppression zero-width chars, fix mojibake
+  - `KNOWN_BRANDS` : capitalisation correcte (DeepL, WordPress, PostFinance, etc.)
+  - Port `:443` nettoyé du canonical_domain
+  - Sous-domaines nettoyés (about.gitlab.com → gitlab.com)
 - `app/aya/page.tsx` — `entity_id` en priorité dans les liens (au lieu de `entity.id` qui est null pour les entités bot)
 
 ### 17.6 Ce qui reste à faire
 
-| Tâche | Priorité | Effort |
-|-------|----------|--------|
-| **Atteindre 1'000 domaines** — ajouter annuaires CH/FR | 🟡 Haute | 2h | 🔄 En cours |
-| **API AYA publique** — routes Next.js sur Vercel (pas de FastAPI externe) | 🟡 Haute | 1h | ❌ |
-| **Connecter l'API aux IA** via tool_spec.json | 🟡 Haute | 2h | ❌ |
-| **Affiner les noms restants** — quelques slogans en allemand persistent | 🟡 Moyenne | 1h | 🔄 En cours |
+| Tâche | Priorité | Effort | Statut |
+|-------|----------|--------|--------|
+| **Atteindre 1'000 domaines** | 🟡 Haute | 2h | ✅ **FAIT** (1108 domaines, 887 entités) |
+| **Affiner les noms** — slogans, génériques, allemand | 🟡 Haute | 2h | ✅ **FAIT** (42 noms corrigés) |
+| **API AYA publique** — routes Next.js sur Vercel | 🟡 Haute | 1h | ✅ **FAIT** (search, entity, stats, docs) |
+| **Connecter l'API aux IA** — ai-plugin.json + tool_spec + doc | 🟡 Haute | 2h | ✅ **FAIT** |
+| **Sécurité repo** — rotation Ed25519, nettoyage secrets, repo public | 🟡 Haute | 2h | ✅ **FAIT** |
+| **Pagination page /aya** — 50 entités par page | 🟡 Haute | 1h | ✅ **FAIT** |
 | **Enrichissement IA** (Gemini) pour secteur, description | 🟢 Moyenne | 3h | ❌ |
 | **Scheduler automatique** (cron pour re-scraper) | 🟢 Moyenne | 2h | ❌ |
-| **Pagination page /aya** — pour quand on dépassera 500 entités | 🟢 Basse | 1h | ❌ |
 
-> **Décision API (23 mars 2026)** : L'API AYA publique sera des routes Next.js `/api/aya/*` sur Vercel (gratuit, même infra). L'API FastAPI locale (`aya/api/main.py`) reste pour le dev/test. Pas besoin de Render/Railway/Koyeb.
+> **Décision API (23 mars 2026)** : L'API AYA publique est en routes Next.js `/api/aya/*` sur Vercel (gratuit, même infra). L'API FastAPI locale (`aya/api/main.py`) reste pour le dev/test.
 
 ### 17.7 Commandes
 
@@ -1229,7 +1245,7 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 cd aya
 
 # Scraping
-python run_pipeline_fast.py      # Concurrent (3.5 min pour 256 domaines)
+python run_pipeline_fast.py      # Concurrent (12 min pour 1108 domaines)
 python run_pipeline.py           # Séquentiel (debug)
 
 # Push vers Supabase
@@ -1244,3 +1260,45 @@ uvicorn api.main:app --reload           # http://127.0.0.1:8000
 pip install -r requirements.txt
 pip install supabase  # Pour push_to_aya.py
 ```
+
+### 17.8 API AYA Publique (Vercel)
+
+**Base URL** : `https://ai-visionary.com/api/aya`
+
+| Route | Méthode | Description |
+|-------|---------|-------------|
+| `/api/aya` | GET | Index JSON — liste des endpoints, description AIO, rate limit |
+| `/api/aya/docs` | GET | Page HTML de documentation pour humains et bots |
+| `/api/aya/search?q={query}&limit={n}` | GET | Recherche par nom/domaine/secteur/pays (max 200 résultats) |
+| `/api/aya/entity/{domain}` | GET | Détail entité + ASR_DERIVED + scoring + recommendability |
+| `/api/aya/stats` | GET | Statistiques : total, scores, répartition secteurs/pays |
+| `/api/aya/live` | GET | Toutes les entités (payload complet, utilisé par la page /aya) |
+
+**Découverte automatique pour agents IA** :
+- `/.well-known/ai-plugin.json` — Manifeste AI plugin (standard OpenAI GPT Store)
+- `aya/docs/tool_spec.json` — Spec compatible OpenAI function calling (5 tools)
+
+**Rate limit** : 30 req/min par IP, aucune auth requise.
+
+**Fichiers** :
+| Fichier | Rôle |
+|---------|------|
+| `app/api/aya/route.ts` | Index JSON des endpoints |
+| `app/api/aya/docs/route.ts` | Page HTML documentation |
+| `app/api/aya/search/route.ts` | Endpoint recherche |
+| `app/api/aya/entity/[domain]/route.ts` | Endpoint détail entité |
+| `app/api/aya/stats/route.ts` | Endpoint statistiques |
+| `app/api/aya/live/route.ts` | Endpoint liste complète |
+| `public/.well-known/ai-plugin.json` | Manifeste AI plugin |
+| `aya/docs/tool_spec.json` | Spec OpenAI function calling |
+
+### 17.9 Sécurité (23 mars 2026)
+
+- ✅ Clé Ed25519 **rotée** — ancienne `ayo-root-2026` compromise, nouvelle `AYO-KEY-2026-03`
+- ✅ Clé privée dans `AYO_SIGNING_PRIVATE_KEY` (env var Vercel + .env.local)
+- ✅ `verifyAsrSignature()` public + `signAsrContent()` privé (serveur only)
+- ✅ `ADMIN_SECRET` supprimé de `scripts/e2e-test.js`
+- ✅ Stripe price IDs / payment links — plus de fallbacks hardcodés
+- ✅ `.firebaserc` + `env.template` supprimés
+- ✅ Repo GitHub **public** (`NeousAxis/ai-visionary`)
+- ✅ `.vercelignore` — `/aya/` et `scripts/` exclus du deploy Vercel
