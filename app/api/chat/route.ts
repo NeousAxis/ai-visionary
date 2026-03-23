@@ -214,7 +214,15 @@ export async function POST(req: Request) {
         }
 
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
-        const hasFinalScore = assistantMessages.some((m: any) => m.content.includes("SCORE FINAL AIO"));
+        const hasFinalScore = assistantMessages.some((m: any) =>
+            m.content.includes("SCORE FINAL AIO") ||
+            m.content.includes("Score Final AIO") ||
+            m.content.includes("score final aio") ||
+            m.content.includes("SCORE FINAL") ||
+            m.content.includes("pack_intention") ||
+            m.content.includes("confirm_subscription") ||
+            m.content.includes("confirm_pro")
+        );
 
         // NEW: Check if we already sent a question_block (JSON format)
         const hasQuestionBlockSent = assistantMessages.some((m: any) =>
