@@ -1182,7 +1182,7 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 
 ### 17.4 État actuel (23 mars 2026)
 
-- ✅ **1'108 domaines** scrapés, **887 entités** dans Supabase `aya_registry` (score >= 20)
+- ✅ **1'108 domaines** scrapés, **886 entités** dans Supabase `aya_registry` (score >= 20, 2 erreurs parser)
 - ✅ **Page `/aya` live** sur ai-visionary.com — affiche toutes les entités (certifiées + indexées)
 - ✅ **Option B implémentée** — filtre `payment_completed=true` supprimé, badges visuels "ASR CERTIFIÉ" (vert) / "INDEXÉ" (gris)
 - ✅ **Noms d'entités corrigés** — 42 noms fixes (slogans, génériques, allemand, encodage, préfixes)
@@ -1192,9 +1192,13 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 - ✅ Doc API (`aya/docs/api.md`) + Tool spec OpenAI (`aya/docs/tool_spec.json`) créés
 - ✅ Tri organique (`created_at DESC` — derniers arrivés en premier)
 - ✅ 5 modes de tri sur la page : Par défaut, Certifiées, A→Z, Score, Pays
-- ✅ `.vercelignore` ajouté (exclut `aya/` et `scripts/` du deploy Vercel)
+- ✅ `.vercelignore` ajouté (exclut `/aya/` et `scripts/` du deploy Vercel)
 - ✅ `useMemo` pour les stats et le filtrage
 - ✅ Helper `getEntityId()` et constante `ENTITY_TYPE_LABELS` extraits
+- ✅ Pays normalisés en ISO (40+ mappings : "United States"→US, "Switzerland"→CH, etc.)
+- ✅ **Page `/developers`** — documentation API complète pour humains + bots
+- ✅ **Repo GitHub public** — https://github.com/NeousAxis/ai-visionary
+- ✅ **Clé Ed25519 rotée** — `AYO-KEY-2026-03`, ancienne clé compromise
 
 ### 17.5 Registre AYA — Problème résolu (Option B)
 
@@ -1228,14 +1232,17 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 
 | Tâche | Priorité | Effort | Statut |
 |-------|----------|--------|--------|
-| **Atteindre 1'000 domaines** | 🟡 Haute | 2h | ✅ **FAIT** (1108 domaines, 887 entités) |
+| **Atteindre 1'000 domaines** | 🟡 Haute | 2h | ✅ **FAIT** (1108 domaines, 886 entités) |
 | **Affiner les noms** — slogans, génériques, allemand | 🟡 Haute | 2h | ✅ **FAIT** (42 noms corrigés) |
+| **Normaliser les pays** — ISO codes (US, CH, FR...) | 🟡 Haute | 1h | ✅ **FAIT** (40+ mappings, "United States"→US) |
 | **API AYA publique** — routes Next.js sur Vercel | 🟡 Haute | 1h | ✅ **FAIT** (search, entity, stats, docs) |
 | **Connecter l'API aux IA** — ai-plugin.json + tool_spec + doc | 🟡 Haute | 2h | ✅ **FAIT** |
+| **Page /developers** — documentation API pour humains + bots | 🟡 Haute | 1h | ✅ **FAIT** |
 | **Sécurité repo** — rotation Ed25519, nettoyage secrets, repo public | 🟡 Haute | 2h | ✅ **FAIT** |
 | **Pagination page /aya** — 50 entités par page | 🟡 Haute | 1h | ✅ **FAIT** |
 | **Enrichissement IA** (Gemini) pour secteur, description | 🟢 Moyenne | 3h | ❌ |
 | **Scheduler automatique** (cron pour re-scraper) | 🟢 Moyenne | 2h | ❌ |
+| **Réduire les "XX"** — 766 entités .com sans pays détecté | 🟢 Moyenne | 2h | ❌ |
 
 > **Décision API (23 mars 2026)** : L'API AYA publique est en routes Next.js `/api/aya/*` sur Vercel (gratuit, même infra). L'API FastAPI locale (`aya/api/main.py`) reste pour le dev/test.
 
