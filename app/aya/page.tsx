@@ -48,19 +48,25 @@ export default function AyaPage() {
         return { certifiedCount: certified, indexedCount: indexed };
     }, [results]);
 
-    const [sortBy, setSortBy] = useState<'default' | 'alpha' | 'score' | 'country'>('default');
+    const [sortBy, setSortBy] = useState<'default' | 'alpha' | 'score' | 'country' | 'certified'>('default');
 
     const displayedResults = useMemo(() => {
         let filtered = results.filter((ent: any) => {
-            if (!query) return true;
-            const q = query.toLowerCase();
-            return (
-                (ent.display_name && ent.display_name.toLowerCase().includes(q)) ||
-                (ent.legal_name && ent.legal_name.toLowerCase().includes(q)) ||
-                (ent.website && ent.website.toLowerCase().includes(q)) ||
-                (ent.sector_macro && ent.sector_macro.toLowerCase().includes(q)) ||
-                (ent.country_legal && ent.country_legal.toLowerCase().includes(q))
-            );
+            // Text search
+            if (query) {
+                const q = query.toLowerCase();
+                const matches = (
+                    (ent.display_name && ent.display_name.toLowerCase().includes(q)) ||
+                    (ent.legal_name && ent.legal_name.toLowerCase().includes(q)) ||
+                    (ent.website && ent.website.toLowerCase().includes(q)) ||
+                    (ent.sector_macro && ent.sector_macro.toLowerCase().includes(q)) ||
+                    (ent.country_legal && ent.country_legal.toLowerCase().includes(q))
+                );
+                if (!matches) return false;
+            }
+            // Certified filter
+            if (sortBy === 'certified' && !ent.payment_completed) return false;
+            return true;
         });
 
         if (sortBy === 'alpha') {
@@ -74,7 +80,7 @@ export default function AyaPage() {
                 (a.country_legal || 'ZZ').localeCompare(b.country_legal || 'ZZ')
             );
         }
-        // 'default' = organic order from DB (certified first, then by created_at)
+        // 'default' and 'certified' = organic order from DB (created_at DESC)
 
         return filtered;
     }, [results, query, sortBy]);
@@ -171,8 +177,8 @@ export default function AyaPage() {
                             <p style={{ color: 'var(--text-muted)' }}>Entreprises analys&eacute;es pour leur lisibilit&eacute; IA — les certifi&eacute;es sont recommand&eacute;es en priorit&eacute;.</p>
                         </div>
                         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                            {(['default', 'alpha', 'score', 'country'] as const).map((key) => {
-                                const labels: Record<string, string> = { default: 'Par d\u00e9faut', alpha: 'A → Z', score: 'Score', country: 'Pays' };
+                            {(['default', 'certified', 'alpha', 'score', 'country'] as const).map((key) => {
+                                const labels: Record<string, string> = { default: 'Par d\u00e9faut', certified: 'Certifi\u00e9es', alpha: 'A \u2192 Z', score: 'Score', country: 'Pays' };
                                 const active = sortBy === key;
                                 return (
                                     <button key={key} onClick={() => setSortBy(key)} style={{

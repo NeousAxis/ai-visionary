@@ -305,8 +305,7 @@ export const database = {
             const { data, error } = await client
                 .from('aya_registry')
                 .select('*')
-                .order('payment_completed', { ascending: false })
-                .order('created_at', { ascending: true })
+                .order('created_at', { ascending: false })
                 .limit(limit);
 
             if (error) {
