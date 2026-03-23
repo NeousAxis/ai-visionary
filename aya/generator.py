@@ -61,10 +61,12 @@ GENERIC_NAMES = {
     "home", "homepage", "accueil", "welcome", "bienvenue",
     "start", "index", "main", "default", "page d'accueil",
     "untitled", "sans titre", "new tab", "nouvel onglet",
+    # Page-specific generics
+    "redirecting", "redirecting...", "newest questions",
+    "accueil passagers", "privatkunden", "global home page",
+    "news and perspectives",
 }
 
-# Country/region names used as JSON-LD "name" instead of actual company name
-# (e.g. swissinfo.ch has name="Switzerland" — not an entity name)
 COUNTRY_NAMES_NOT_ENTITY = {
     "switzerland", "suisse", "schweiz", "svizzera",
     "france", "germany", "deutschland", "italia", "italy",
@@ -76,21 +78,76 @@ COUNTRY_NAMES_NOT_ENTITY = {
 }
 
 SLOGAN_INDICATORS = [
+    # English
     "the best", "the leading", "the #1", "the number",
     "pioneering", "leading the", "transforming", "empowering",
-    "your partner", "votre partenaire", "la référence",
-    "for a safe", "for speed", "for the future",
-    "toute la ", "tout le ", "découvrez",
-    "welcome to ", "bienvenue chez ", "bienvenue sur ",
-    "we help", "we make", "we build", "we are",
+    "your partner", "for a safe", "for speed", "for the future",
+    "welcome to ", "we help", "we make", "we build", "we are",
     "enabling", "reimagining", "redefining", "unlocking",
+    "connect, protect", "manage your", "manage all",
+    "how to ", "smart data", "production-grade",
+    "world leader", "passwords, secrets",
+    "container orchestration", "workflow platform",
+    "data platform", "data capture", "ai revenue",
+    "ai platform", "marketing platform",
+    "for the entire",
+    # French
+    "votre partenaire", "la référence", "toute la ", "tout le ",
+    "découvrez", "bienvenue chez ", "bienvenue sur ",
+    "acheter et vendre",
+    # German
+    "günstige ", "willkommen", "führend", "für ki", "konzipiert",
+    "entdecken", "suchen auf", "die schweizer",
+    "trends und angebote", "im online shop",
 ]
+
+# Known brand names that can't be derived from domain capitalization
+KNOWN_BRANDS = {
+    "stackoverflow": "Stack Overflow",
+    "postfinance": "PostFinance",
+    "deepl": "DeepL",
+    "wordpress": "WordPress",
+    "hashicorp": "HashiCorp",
+    "bigcommerce": "BigCommerce",
+    "digitalocean": "DigitalOcean",
+    "1password": "1Password",
+    "mailchimp": "Mailchimp",
+    "cloudflare": "Cloudflare",
+    "snowflake": "Snowflake",
+    "gitlab": "GitLab",
+    "github": "GitHub",
+    "linkedin": "LinkedIn",
+    "youtube": "YouTube",
+    "woocommerce": "WooCommerce",
+    "sushizen": "SushiZen",
+}
+
+# Subdomain prefixes to strip when deriving name from domain
+SUBDOMAIN_PREFIXES = {"about", "www", "fr", "de", "en", "developer", "group", "jira", "docs", "blog"}
+
+
+def _clean_encoding(text: str) -> str:
+    """Fix encoding issues: invisible chars, mojibake, trailing dots."""
+    if not text:
+        return ""
+    # Remove zero-width characters
+    text = re.sub(r'[\u200b\u200c\u200d\u200e\u200f\ufeff]', '', text)
+    # Remove trailing dots (unless abbreviation like "S.A.")
+    text = re.sub(r'\.{2,}$', '', text)
+    # Strip leading dash
+    if text.startswith('- '):
+        text = text[2:]
+    return text.strip()
 
 
 def _strip_prefix(text: str) -> str:
     """Remove common prefixes like 'Welcome to ' and return the name part."""
     lower = text.lower().strip()
-    prefixes = ["welcome to ", "bienvenue chez ", "bienvenue sur ", "bienvenue à "]
+    prefixes = [
+        "welcome to ", "bienvenue chez ", "bienvenue sur ", "bienvenue à ",
+        "willkommen bei der ", "willkommen an der ", "willkommen bei ",
+        "willkommen an ", "willkommen auf ",
+    ]
     for prefix in prefixes:
         if lower.startswith(prefix):
             return text[len(prefix):].strip()
@@ -100,17 +157,29 @@ def _strip_prefix(text: str) -> str:
 def _is_slogan(text: str) -> bool:
     """Detect if text is a marketing slogan rather than a company name."""
     lower = text.lower().strip()
-    # Too long to be a name (> 60 chars is likely a slogan/description)
-    if len(lower) > 60:
+    # Empty or invisible text
+    if len(lower) <= 1:
+        return True
+    # Too long to be a name (> 50 chars)
+    if len(lower) > 50:
         return True
     # Contains slogan patterns
     for indicator in SLOGAN_INDICATORS:
         if indicator in lower:
             return True
-    # Starts with an article → likely a description
+    # Starts with an article → likely a description (if > 25 chars)
     if lower.startswith(("the ", "le ", "la ", "les ", "un ", "une ", "des ")):
-        # Exception: "The New York Times" etc. — allow if short
-        if len(lower) > 30:
+        if len(lower) > 25:
+            return True
+    # Starts with action verbs / adverbs
+    action_starters = ("manage ", "secure ", "acheter ", "discover ", "arbeit ", "finally")
+    if lower.startswith(action_starters):
+        return True
+    # "Name, tagline" pattern — comma followed by marketing words
+    if ',' in lower:
+        after_comma = lower.split(',', 1)[1].strip()
+        marketing = ["world leader", "your way", "since ", "seit ", "votre "]
+        if any(m in after_comma for m in marketing):
             return True
     return False
 
@@ -121,33 +190,46 @@ def _is_generic(text: str) -> bool:
     return lower in GENERIC_NAMES or lower in COUNTRY_NAMES_NOT_ENTITY
 
 
-def _clean_title(raw: str, domain: str = "") -> str:
-    """Extract company name from a <title> like 'Stripe | Payment processing'.
+def _clean_domain(domain: str) -> str:
+    """Normalize domain: strip port, strip known subdomain prefixes."""
+    domain = re.sub(r':\d+$', '', domain)  # "qonto.com:443" → "qonto.com"
+    parts = domain.split('.')
+    if len(parts) >= 3 and parts[0] in SUBDOMAIN_PREFIXES:
+        domain = '.'.join(parts[1:])
+    return domain
 
-    Strategy:
-    1. Split on separators (|, -, —, –, :, ·)
-    2. Filter out generic/slogan parts
-    3. Prefer the part that matches the domain
-    4. Otherwise take the longest meaningful part (names > slogans)
-    """
+
+def _clean_title(raw: str, domain: str = "") -> str:
+    """Extract company name from a <title> tag."""
     if not raw:
         return ""
-    # Split on ALL separators at once
-    parts = re.split(r'\s*[|–—·]\s*|\s+-\s+|\s*:\s+', raw)
+    raw = _clean_encoding(raw)
+    if not raw:
+        return ""
+
+    # Split on separators: |, –, —, ·, \, and " - "
+    parts = re.split(r'\s*[|–—·\\]\s*|\s+-\s+|\s*:\s+', raw)
     parts = [p.strip() for p in parts if p.strip()]
 
     if len(parts) <= 1:
+        # No separator — try comma split for "Name, tagline" pattern
+        if ',' in raw:
+            comma_parts = raw.split(',', 1)
+            first = comma_parts[0].strip()
+            second = comma_parts[1].strip()
+            if _is_slogan(second) or _is_generic(second):
+                if first and not _is_generic(first):
+                    return first[:120]
         result = raw.strip()
         if _is_generic(result):
             return ""
         return result[:120]
 
-    # Filter out generic and domain-echo parts (e.g. "ge.ch" in "ge.ch – République...")
+    # Filter out generic, domain-echo, and slogan parts
     candidates = []
     for p in parts:
         if _is_generic(p):
             continue
-        # Skip if it's just the domain itself (e.g. "ge.ch")
         if domain and p.lower().strip() == domain.lower().strip():
             continue
         if _is_slogan(p):
@@ -160,8 +242,8 @@ def _clean_title(raw: str, domain: str = "") -> str:
             for c in candidates:
                 if _name_matches_domain(c, domain):
                     return c[:120]
-        # Otherwise take the longest meaningful part (usually the real name)
-        return max(candidates, key=len)[:120]
+        # Otherwise take the shortest meaningful part (usually the name, not description)
+        return min(candidates, key=len)[:120]
 
     # All parts were filtered — try domain-matching among ALL parts
     if domain:
@@ -169,10 +251,10 @@ def _clean_title(raw: str, domain: str = "") -> str:
             if not _is_generic(p) and _name_matches_domain(p, domain):
                 return p[:120]
 
-    # Last resort: longest non-generic part
+    # Last resort: shortest non-generic part
     non_generic = [p for p in parts if not _is_generic(p)]
     if non_generic:
-        return max(non_generic, key=len)[:120]
+        return min(non_generic, key=len)[:120]
 
     return ""
 
@@ -180,7 +262,8 @@ def _clean_title(raw: str, domain: str = "") -> str:
 def _domain_to_name(domain: str) -> str:
     """Convert domain.com → Domain (capitalized, no TLD)."""
     name = domain.split(".")[0] if "." in domain else domain
-    # Handle compound domains: swissinfo → Swissinfo, protonvpn → Protonvpn
+    if name.lower() in KNOWN_BRANDS:
+        return KNOWN_BRANDS[name.lower()]
     return name.capitalize()
 
 
@@ -188,48 +271,39 @@ def _name_matches_domain(name: str, domain: str) -> bool:
     """Check if a candidate name is plausibly related to the domain."""
     name_lower = name.lower().replace(" ", "").replace("-", "")
     domain_base = domain.split(".")[0].lower().replace("-", "") if "." in domain else domain.lower()
-    # Direct match or containment
     if domain_base in name_lower or name_lower in domain_base:
         return True
-    # Partial overlap (at least 4 chars in common)
     for i in range(len(name_lower) - 3):
-        chunk = name_lower[i:i+4]
-        if chunk in domain_base:
+        if name_lower[i:i+4] in domain_base:
             return True
     return False
 
 
 def detect_entity_name(meta: dict, jsonld_payloads: list, domain: str) -> str:
-    """Extract entity name from JSON-LD, meta tags, or domain.
-
-    Priority:
-    1. JSON-LD 'name' field (if not a slogan/generic)
-    2. og:title / title (cleaned — before separator, not slogan/generic)
-    3. Domain name (capitalized)
-    """
+    """Extract entity name from JSON-LD, meta tags, or domain."""
+    # Clean domain first (strip port, subdomain)
+    domain = _clean_domain(domain)
     domain_fallback = _domain_to_name(domain)
 
-    # Try JSON-LD first — most reliable source
+    # Try JSON-LD first
     for payload in jsonld_payloads:
         items = payload if isinstance(payload, list) else [payload]
         for item in items:
             if isinstance(item, dict) and item.get("name"):
-                name = str(item["name"]).strip()
-                if _is_generic(name) or _is_slogan(name):
+                name = _clean_encoding(str(item["name"]).strip())
+                if not name or _is_generic(name) or _is_slogan(name):
                     continue
-                # Single-word name that doesn't match domain → suspicious
                 if " " not in name and not _name_matches_domain(name, domain):
                     continue
                 return name[:120]
 
-    # Then meta tags — clean before use
+    # Then meta tags
     for raw in [meta.get("og_title", ""), meta.get("title", "")]:
         if not raw:
             continue
         cleaned = _clean_title(raw, domain)
         if not cleaned or _is_generic(cleaned):
             continue
-        # If it's a slogan, try stripping "Welcome to" etc.
         if _is_slogan(cleaned):
             stripped = _strip_prefix(cleaned)
             if stripped != cleaned and not _is_generic(stripped) and not _is_slogan(stripped):
@@ -237,7 +311,6 @@ def detect_entity_name(meta: dict, jsonld_payloads: list, domain: str) -> str:
             continue
         return cleaned
 
-    # Fallback: domain name (e.g. swissinfo.ch → Swissinfo)
     return domain_fallback
 
 
