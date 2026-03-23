@@ -14,6 +14,7 @@ from parser import (
     extract_emails,
     extract_phones,
     extract_country_from_jsonld,
+    normalize_country,
     extract_city_from_jsonld,
     count_sitemap_urls,
     detect_sector,
@@ -403,7 +404,8 @@ def build_record(scraped: dict) -> dict:
     pedagogy_found = detect_keywords(all_text, PEDAGOGY_KEYWORDS)
 
     entity_name = detect_entity_name(meta, jsonld_payloads, scraped["canonical_domain"])
-    country = extract_country_from_jsonld(jsonld_payloads)
+    raw_country = extract_country_from_jsonld(jsonld_payloads)
+    country = normalize_country(raw_country)
     if not country:
         country = detect_country_from_tld(scraped["canonical_domain"])
     city = extract_city_from_jsonld(jsonld_payloads)
