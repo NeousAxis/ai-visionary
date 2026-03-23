@@ -1508,10 +1508,13 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     'souhaitez-vous poursuivre', 'confirmez-vous ces informations',
                     'prêt à générer', 'pret a generer', 'générer votre fichier',
                     'lancer la génération', 'passer à la génération',
-                    // BUG FIX: Block LLM parasite "feedback_quality" questions
                     'évaluez', 'evaluez', 'qualité de cet échange', 'qualite de cet echange',
                     'feedback', 'satisfaction', 'notez', 'noter cet échange',
-                    'noter cet echange', 'comment trouvez-vous'
+                    'noter cet echange', 'comment trouvez-vous',
+                    // Block vague "already detected" questions that don't list the data
+                    'ont été détectés. y a-t-il', 'ont été détectées. y a-t-il',
+                    'ont ete detectes', 'ont ete detectees',
+                    'd\'autres services importants', 'd\'autres produits importants',
                 ];
                 const qTextCheck = (q.text || '').toLowerCase();
                 const qIdCheck = (q.id || '').toLowerCase();
