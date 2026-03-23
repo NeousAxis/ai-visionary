@@ -12,8 +12,11 @@ import {
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
-const SECRET_KEY_BASE64 = process.env.AYO_SIGNING_KEY || '';
-const KEY_ID = process.env.AYO_KEY_ID || 'ayo-root-2026';
+const SECRET_KEY_BASE64 = process.env.AYO_SIGNING_PRIVATE_KEY || process.env.AYO_SIGNING_KEY || '';
+const KEY_ID = process.env.AYO_KEY_ID || 'AYO-KEY-2026-03';
+
+// Public key for verification (safe to commit — this is NOT a secret)
+const PUBLIC_KEY_BASE64 = 'Ol1YRyHMESzAIBYquUZJHyR1fDevd8oLcUmd98nUnCE=';
 
 // Module-level singletons (hoisted for performance)
 const TEXT_ENCODER = new TextEncoder();
@@ -43,7 +46,7 @@ function canonicalize(obj: any): string {
  */
 export async function signAsrContent(asrObject: any) {
     if (!SECRET_KEY_BASE64) {
-        throw new Error('AYO_SIGNING_KEY env var is not set — cannot sign ASR');
+        throw new Error('AYO_SIGNING_PRIVATE_KEY env var is not set — cannot sign ASR');
     }
 
     const contentToSign = JSON.parse(JSON.stringify(asrObject));
@@ -667,4 +670,54 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         console.error("Signing failed:", e);
         return sanitizedAsr;
     }
+}
+
+// ─── PUBLIC VERIFICATION (safe for client-side) ─────────────────────
+
+/**
+ * Verify an ASR signature using the public key.
+ * This function uses ONLY the public key and can safely run client-side.
+ */
+export async function verifyAsrSignature(asrObject: any): Promise<{ valid: boolean; error?: string }> {
+    const seal = asrObject?.['ayo:seal'];
+    if (!seal?.signature?.value || !seal?.payloadHash?.value) {
+        return { valid: false, error: 'Missing seal or signature' };
+    }
+
+    try {
+        const contentToVerify = JSON.parse(JSON.stringify(asrObject));
+        delete contentToVerify['ayo:seal'];
+
+        const canonicalString = canonicalize(contentToVerify);
+        const data = TEXT_ENCODER.encode(canonicalString);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+        // Verify hash matches
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const computedHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        if (computedHash !== seal.payloadHash.value) {
+            return { valid: false, error: 'Hash mismatch — content was tampered' };
+        }
+
+        // Verify Ed25519 signature
+        const signatureBytes = new Uint8Array(Buffer.from(seal.signature.value, 'base64'));
+        const publicKeyBytes = new Uint8Array(Buffer.from(PUBLIC_KEY_BASE64, 'base64'));
+        const valid = nacl.sign.detached.verify(new Uint8Array(hashBuffer), signatureBytes, publicKeyBytes);
+
+        return { valid };
+    } catch (e) {
+        return { valid: false, error: `Verification error: ${e}` };
+    }
+}
+
+/**
+ * Get the public key info for external verification.
+ */
+export function getPublicKeyInfo() {
+    return {
+        keyId: KEY_ID,
+        algorithm: 'ed25519',
+        publicKey: PUBLIC_KEY_BASE64,
+        issuer: 'AYO Trusted Authority',
+    };
 }

@@ -17,13 +17,13 @@
 // --- STRIPE CONFIG ---
 
 export const STRIPE_PRICES = {
-    PRO: process.env.STRIPE_PRO_PRICE_ID || 'price_1SlM9iPkCQYUm8hQKqOV8eqU',
-    AYA_SUB: process.env.STRIPE_AYA_SUB_PRICE_ID || 'price_1SzazaPkCQYUm8hQJfrKc9EJ',
+    PRO: process.env.STRIPE_PRO_PRICE_ID || '',
+    AYA_SUB: process.env.STRIPE_AYA_SUB_PRICE_ID || '',
 } as const;
 
 export const STRIPE_LINKS = {
-    PRO: process.env.STRIPE_LINK_PRO || 'https://buy.stripe.com/test_14A00l3vq1YA98FgLjcV201',
-    AYA_SUB: process.env.STRIPE_LINK_AYA_SUB || 'https://buy.stripe.com/test_8x228t6HCcDegB7amVcV202',
+    PRO: process.env.STRIPE_LINK_PRO || '',
+    AYA_SUB: process.env.STRIPE_LINK_AYA_SUB || '',
 } as const;
 
 export type PackType = 'LIGHT' | 'PRO' | 'AYA_SUB';

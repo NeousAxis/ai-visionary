@@ -14,9 +14,7 @@ export const dynamic = 'force-dynamic';
 // │ PACK PRO               │ 499 CHF       │ STRIPE_PRICE_PRO   │
 // └──────────────────────────────────────────────────────────────┘
 // packType côté frontend : 'AYA_SUB' → PACK PLATEFORME, 'PRO' → PACK PRO
-// Payment Links Stripe :
-//   PACK PLATEFORME : https://buy.stripe.com/cNidR860342e3KS7zC18c01
-//   PACK PRO        : https://buy.stripe.com/4gM4gydsvgP04OWf2418c00
+// Payment Links are configured via STRIPE_LINK_* env vars
 const PRICE_AYA = process.env.STRIPE_PRICE_AYA || process.env.STRIPE_PRICE_AYA_SUB || '';
 const PRICE_PRO = process.env.STRIPE_PRICE_PRO || '';
 

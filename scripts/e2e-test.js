@@ -13,7 +13,8 @@ const path = require('path');
 
 const API_URL = 'http://localhost:3002/api/chat';
 const DEBUG_URL = 'http://localhost:3002/api/debug/test-ayo';
-const ADMIN_SECRET = 'df3a1115bfc638441b779d4fbb4c7754068de895d858b1daef51d1d34293a240';
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+if (!ADMIN_SECRET) { console.error('ERROR: ADMIN_SECRET env var required'); process.exit(1); }
 const OUTPUT_DIR = '/Users/cyrilleger/Desktop/AYO_Pack_PRO_Test';
 
 // Reponses pour AI Visionary
