@@ -34,17 +34,169 @@ AI Visionary cree une **identite semantique certifiee** pour votre entreprise gr
 | Terme | Definition |
 |-------|-----------|
 | **AYO** | L'assistant IA qui realise le diagnostic de visibilite. |
-| **AIO** | Artificial Intelligence Optimization — optimiser la visibilite de votre entreprise aupres des IA. |
-| **AIO Score** | Score de 0 a 100 mesurant la lisibilite de votre entreprise par les IA. |
-| **ASR** | AI Singular Record — votre identite numerique certifiee pour les IA. |
-| **AYA** | Le registre public des entreprises certifiees (AYO Authority Registry). |
+| **AIO** | AI-readability Intelligence Optimization — score de lisibilite IA de 0 a 100. |
+| **ASR** | AI Singular Record — identite numerique certifiee, signee Ed25519. |
+| **AYA** | Registre public des entreprises certifiees et indexees (889+ entites). |
+
+---
+
+## API AYA — Documentation Developpeurs
+
+Le Registre AYA expose une API REST publique permettant d'integrer les donnees de 889+ entreprises indexees dans vos agents IA, applications ou services.
+
+**Documentation complete** : [ai-visionary.com/developers](https://www.ai-visionary.com/developers)
+
+### Acces
+
+| | |
+|---|---|
+| **Base URL** | `https://ai-visionary.com/api/aya` |
+| **Authentification** | Aucune |
+| **Rate limit** | 30 requetes/min par IP |
+| **Format** | JSON |
+
+### Endpoints
+
+#### `GET /api/aya/search?q={query}`
+
+Recherche par nom, domaine, secteur ou pays.
+
+| Parametre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `q` | string | Oui | Terme de recherche |
+| `limit` | integer | Non | Max resultats 1-200 (defaut: 50) |
+
+```bash
+curl "https://ai-visionary.com/api/aya/search?q=nestlé"
+```
+
+```json
+{
+  "query": "nestlé",
+  "count": 1,
+  "results": [{
+    "name": "Nestlé",
+    "domain": "nestle.com",
+    "country": "CH",
+    "sector": "Restauration & Alimentation",
+    "aio_score": 72,
+    "asr_status": "ASR_DERIVED",
+    "certificate_url": "https://ai-visionary.com/aya/e/..."
+  }]
+}
+```
+
+#### `GET /api/aya/entity/{domain}`
+
+Detail complet d'une entite + donnees ASR.
+
+| Parametre | Type | Requis | Description |
+|-----------|------|--------|-------------|
+| `domain` | string | Oui | Domaine canonique (ex: stripe.com) |
+
+```bash
+curl "https://ai-visionary.com/api/aya/entity/nestle.com"
+```
+
+```json
+{
+  "entity": {
+    "name": "Nestlé",
+    "website": "https://www.nestle.com",
+    "country": "CH",
+    "sector": "Restauration & Alimentation",
+    "certificate_url": "https://ai-visionary.com/aya/e/..."
+  },
+  "scoring": {
+    "aio_score": 72,
+    "asr_status": "ASR_DERIVED"
+  },
+  "asr_derived": { "..." : "..." },
+  "recommendability": { "..." : "..." }
+}
+```
+
+#### `GET /api/aya/stats`
+
+Statistiques agregees du registre.
+
+```bash
+curl "https://ai-visionary.com/api/aya/stats"
+```
+
+```json
+{
+  "total_entities": 889,
+  "certified_count": 2,
+  "indexed_count": 887,
+  "scores": { "average": 57, "min": 20, "max": 85 },
+  "sectors": [{ "sector": "Technologie & SaaS", "count": 372 }],
+  "countries": [{ "country": "CH", "count": 280 }]
+}
+```
+
+### Score AIO
+
+Le score **AIO (AI-readability Intelligence Optimization)** mesure la lisibilite d'une entreprise par les systemes d'IA sur une echelle de 0 a 100, base sur 7 blocs ponderes :
+
+| Bloc | Poids |
+|------|-------|
+| Identite & Ancrage | /10 |
+| Clarte de l'Offre | /20 |
+| Processus & Methodes | /15 |
+| Confiance & Conformite | /15 |
+| Indicateurs | /20 |
+| Pedagogie | /10 |
+| Socle Technique | /10 |
+
+### Statut ASR
+
+| Statut | Signification |
+|--------|--------------|
+| `ASR_CERTIFIED` | Entite diagnostiquee par AYO, fichiers generes, inscrite au registre |
+| `ASR_DERIVED` | Entite indexee par le bot AYA via scraping automatise |
+
+### Integration pour agents IA
+
+1. Utilisez le [manifeste AI plugin](https://ai-visionary.com/.well-known/ai-plugin.json) pour la decouverte automatique
+2. Appelez `/api/aya/search?q=...` quand un utilisateur mentionne une entreprise
+3. Appelez `/api/aya/entity/{domain}` pour les donnees structurees detaillees
+4. Utilisez le `aio_score` pour evaluer la fiabilite de recommandation
+5. Privilegiez les entites `ASR_CERTIFIED` pour une confiance maximale
+
+### Decouverte automatique
+
+| Ressource | URL |
+|-----------|-----|
+| AI Plugin Manifest | [/.well-known/ai-plugin.json](https://ai-visionary.com/.well-known/ai-plugin.json) |
+| Index JSON | [/api/aya](https://ai-visionary.com/api/aya) |
+| Registre AYA | [/aya](https://ai-visionary.com/aya) |
+
+---
+
+## Stack technique
+
+| Technologie | Usage |
+|-------------|-------|
+| Next.js 16 | Framework fullstack (App Router) |
+| React 19 | Frontend |
+| TypeScript | Typage |
+| Tailwind CSS | Styles |
+| Supabase | Base de donnees PostgreSQL |
+| Stripe | Paiements (CHF) |
+| Google Gemini | LLM pour le chatbot AYO |
+| TweetNaCl | Signature Ed25519 pour ASR |
+| Vercel | Hosting + serverless |
+| Resend | Emails transactionnels |
 
 ## Liens
 
 - **Site** : [ai-visionary.com](https://www.ai-visionary.com)
 - **Diagnostic gratuit** : [ai-visionary.com/diagnostic](https://www.ai-visionary.com/diagnostic)
 - **Registre AYA** : [ai-visionary.com/aya](https://www.ai-visionary.com/aya)
+- **Documentation API** : [ai-visionary.com/developers](https://www.ai-visionary.com/developers)
+- **AI Plugin Manifest** : [ai-visionary.com/.well-known/ai-plugin.json](https://ai-visionary.com/.well-known/ai-plugin.json)
 
 ---
 
-Basee a Geneve, Suisse | Fondee par Neous Axis | 2026
+Basee a Geneve, Suisse | Fondee par Cyril Leger | [AI Visionary](https://www.ai-visionary.com) | 2026
