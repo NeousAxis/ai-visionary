@@ -2,7 +2,7 @@
 
 > **IMPORTANT** : Ce fichier est lu automatiquement par Claude Code à chaque nouvelle conversation.
 > Il contient TOUTE la connaissance nécessaire pour reprendre le travail sur ce projet.
-> Dernière mise à jour : 19 mars 2026
+> Dernière mise à jour : 23 mars 2026
 
 ---
 
@@ -333,11 +333,11 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | **Session 1** | Sprint 1 | Logger + Dashboard Admin → que des fichiers NOUVEAUX, zéro modification de l'existant | ~2h | 🟢 Zéro | Non |
 | **Session 2** | Sprint 2 | Failles critiques → corrections chirurgicales (1 ligne ici, 1 ligne là) | ~2h | 🟡 Faible | Non |
 | **Session 3** | Sprint 3 + 4 | Failles hautes + moyennes → appliquer rate-limit, Zod, SSRF, CSP, protéger debug | ~4h | 🟡 Faible | Non |
-| **Session 4** | Sprint 5 | ⚠️ **REWRITE PROMPT CHAT** — Questionnaire universel, scoring transparent, semantic validator. C'est le CŒUR du produit. | ~4h | 🔴 Critique | **OUI — Cyril doit valider** |
-| **Session 5** | Sprint 6 | Fix webhook + Bug Score 0 + emails + fusion PaymentHandler | ~3h | 🟡 Moyen | Non |
-| **Session 6** | Sprint 7 | Modules sémantiques (ayo-semantics, external-context, ASR crypto) | ~3h | 🟡 Moyen | Non |
-| **Session 7** | Sprint 8 | Pages AYA + certificat + cycle de vie client (MAJ, renouvellements, crons) | ~3h | 🟡 Moyen | Non |
-| **Session 8** | Sprint 9 + 10 | UI/SEO/sitemap/robots + pages légales + tests + nettoyage | ~3h | 🟢 Faible | Non |
+| **Session 4** | Sprint 5 | ✅ **REWRITE QUESTIONNAIRE** — Questions statiques (ENRICHMENT_TEMPLATES), scoring strict, sanitizers fichiers, migration Supabase | ~8h | 🔴 Critique | Fait avec Cyril |
+| **Session 5** | Sprint 6 | ✅ Fix webhook + Bug Score 0 + emails + fusion PaymentHandler | ~3h | 🟡 Moyen | Non |
+| **Session 6** | Sprint 7 | ❌ Modules sémantiques — affiner les sanitizers, améliorer la qualité des 5 fichiers Pack PRO | ~3h | 🟡 Moyen | Non |
+| **Session 7** | Sprint 8 | ❌ Pages AYA + certificat + cycle de vie client (MAJ, renouvellements, crons) — page /aya 404 à créer | ~3h | 🟡 Moyen | Non |
+| **Session 8** | Sprint 9 + 10 | ❌ UI/SEO/sitemap/robots + pages légales + tests E2E automatisés + nettoyage | ~3h | 🟢 Faible | Non |
 
 **Protocole pour chaque session** :
 1. Vérifier la branche : `git checkout fix/remediation`
@@ -358,11 +358,11 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 1 | ✅ **TERMINÉE** | 2026-03-14 | Logger/rate-limit/validators/auth intégrés dans les 11 routes API. Build OK. |
 | Session 2 | ✅ **TERMINÉE** | 2026-03-14 | C1+C2 critiques, H1-H3 hautes, M1+M2+M6 moyennes. CSP, anti-SSRF, ignoreBuildErrors:false. ⚠️ AJOUTER env vars: SESSION_SECRET, STRIPE_PRICE_PRO sur Vercel (Essential supprimé — n'existe plus) |
 | Session 3 | ✅ **TERMINÉE** | 2026-03-15 | H9 double webhook fix, H10 JSON validation, H11 timeout 30s, M4 scanner aya_registry, M5 fake rating supprimé, M8 session_id validation, B2+B4 dead code supprimé, B6 env var unique, Essential→Plateforme, scripts debug supprimés, tsconfig exclude scripts/, Vercel deploy OK |
-| Session 4 | ❌ Pas commencée | — | ⚠️ Cyril doit être présent |
+| Session 4 | ✅ **TERMINÉE** | 2026-03-19→23 | Rewrite complet questionnaire : questions statiques (ENRICHMENT_TEMPLATES), migration Firestore→Supabase, scoring strict (cap 78), sanitizers fichiers (form contamination, marketing, Etc., MAJUSCULES), suppression questions de preuve, fix multi-select+Autre, ~400 lignes dead code supprimées (/simplify) |
 | Session 5 | ✅ **TERMINÉE** | 2026-03-15 | PaymentSuccessModal: stop calling webhook from browser (UX fix — users saw false "erreur technique"). Webhook: refuse empty generation, send apology email + return 422. Light-report: remove fake block scores. create-checkout: include analysisId in client_reference_id. |
-| Session 6 | ❌ Pas commencée | — | — |
-| Session 7 | ❌ Pas commencée | — | — |
-| Session 8 | ❌ Pas commencée | — | — |
+| Session 6 | ❌ Pas commencée | — | Modules sémantiques |
+| Session 7 | ❌ Pas commencée | — | Pages AYA + certificat (page /aya 404) |
+| Session 8 | ❌ Pas commencée | — | UI/SEO + tests E2E |
 
 > **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
 
@@ -380,15 +380,61 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 
 ---
 
-## 9. COLLECTIONS FIRESTORE
+## 9. BASE DE DONNÉES SUPABASE
 
-| Collection | Usage |
-|------------|-------|
+**URL** : `https://hxoywzhrvacdmtopureh.supabase.co`
+**Accès** : `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (dans `.env.local` et Vercel)
+
+| Table | Usage |
+|-------|-------|
 | `analyses` | Résultats de diagnostic AYO (scores, données extraites, email, URL) |
 | `aya_registry` | Entités AYA actives (certifiées, payées) |
 | `scan_states` | États intermédiaires du scan pour récupération |
-| `admin_logs` | Logs d'administration |
+| `system_logs` | Logs système |
 | `otp_codes` | Codes OTP temporaires pour authentification |
+| `sessions` | Sessions utilisateur |
+
+> **Migration Firestore → Supabase** effectuée mars 2026. Ne PAS utiliser Firebase/Firestore.
+
+---
+
+## ARCHITECTURE QUESTIONNAIRE (Mars 2026)
+
+### Questions STATIQUES (plus de LLM)
+- Toutes les questions définies dans `ENRICHMENT_TEMPLATES` (greffier.ts)
+- `buildValidationQuestion()` — données scan → Oui/Non confirmation
+- `buildEnrichmentQuestion()` — données manquantes → template statique
+- Gemini LLM utilisé UNIQUEMENT pour extraction/scoring, PAS pour les questions
+
+### Règles du validateur (route.ts)
+- "Avez-vous/Disposez-vous" → forcées en Oui/Non
+- Champs texte (email, phone, legal_name) → `inputType: "text"`, pas de boutons
+- `TEXT_INPUT_FIELD_NAMES` et `BOOLEAN_FIELD_NAMES` dérivés de ENRICHMENT_TEMPLATES
+- Parasites LLM (feedback, satisfaction) → bloqués
+
+### Scoring strict (aio-score-engine.ts)
+- Score cappé à 78 max sans preuves externes
+- Certifications vides → conformité max 8/15
+- KPIs sans chiffres → indicateurs max 8/20
+- "Oui" brut = q=0.5 max, jamais q=1
+
+### Sanitizers fichiers (ayo-crypto.ts, ayo-generators.ts)
+- Filtrer "Etc." de tous les tableaux
+- Supprimer questions formulaire dans données ("Possédez-vous..." → supprimé)
+- Nettoyer MAJUSCULES, numérotation parasite, guillemets échappés
+- quality_assurance : filtrer promesses marketing
+
+### NE JAMAIS FAIRE
+- Modifier le CSS/design sans accord de Cyril
+- Générer des questions via LLM (utiliser templates statiques)
+- Dire "c'est fait" sans test E2E vérifié sur le site live
+- Pusher sur main sans accord explicite
+- Demander des preuves/URLs dans le questionnaire
+
+### Bugs connus restants
+- Page `/aya` = 404 (certificat AYA) → Session 7
+- Scoring intermittent timeout Gemini sur Vercel (~20% des cas)
+- Pack selection pas toujours affiché après le score
 
 ---
 
