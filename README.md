@@ -47,4 +47,4 @@ AI Visionary cree une **identite semantique certifiee** pour votre entreprise gr
 
 ---
 
-Basee a Geneve, Suisse | Fondee par Cyril Leger | 2026
+Basee a Geneve, Suisse | Fondee par Neous Axis | 2026
