@@ -1,0 +1,234 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:29.507212+00:00",
+  "source": {
+    "input_url": "https://www.kuehne-nagel.com",
+    "canonical_domain": "kuehne-nagel.com",
+    "pages_scanned": [
+      "https://www.kuehne-nagel.com/",
+      "https://www.kuehne-nagel.com/services"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 287
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Kuehne+Nagel",
+    "website": "https://www.kuehne-nagel.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.6000000000000001,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Kuehne+Nagel",
+        "website": "https://www.kuehne-nagel.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Global Freight Forwarding and Supply Chain Management  | Kuehne+Nagel"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "consulting",
+          "delivery",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "With close to 85,000 employees at almost 1,300 sites in close to 100 countries, the Kuehne+Nagel Group is one of the world's leading logistics providers. Kuehne+Nagel is the logistics partner of choice for 400,000 customers worldwide. Using its global network, logistics expertise and data-based insi",
+        "og_description": "With more than 82,000 employees at almost 1,300 sites in close to 100 countries, the Kuehne+Nagel Group is one of the world's leading logistics providers."
+      },
+      "evidence": [
+        "consulting",
+        "delivery",
+        "product",
+        "products",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "iso",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "iso",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "documentation",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "documentation",
+        "glossary",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Kuehne+Nagel",
+        "url": "https://kuehne-nagel.com",
+        "sameAs": [
+          "https://www.facebook.com/Kuehne-Nagel-2008588809187415/",
+          "https://twitter.com/Kuehne_Nagel",
+          "https://www.youtube.com/channel/UCYgSjWHZ5KIUIpWK-0R-d6A",
+          "https://www.linkedin.com/company/kuehne-nagel"
+        ],
+        "logo": "https://assets.kuehne-nagel.com/f/311321/595x116/b7d7679a47/kuehne-nagel-logo-blue.png/m/0x0/filters:format(webp):quality(90)/"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:29.507223+00:00"
+  }
+}

@@ -1,0 +1,200 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:12.545069+00:00",
+  "source": {
+    "input_url": "https://www.ubereats.com",
+    "canonical_domain": "ubereats.com",
+    "pages_scanned": [
+      "https://www.ubereats.com/ch"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Uber Eats",
+    "website": "https://www.ubereats.com/ch",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "food",
+    "sector_label": "Restauration & Alimentation",
+    "confidence": 0.5,
+    "source": "keyword_match",
+    "evidence": [
+      "restaurant",
+      "food"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Uber Eats",
+        "website": "https://www.ubereats.com/ch",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Uber Eats | Order Restaurant Food, Groceries, and More for Delivery - Online Login"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "delivery",
+          "restaurant"
+        ],
+        "meta_description": "Get what you want delivered to you with Uber Eats. Find popular restaurants and shops nearby and order contactless delivery for restaurant takeout, groceries, and more!",
+        "og_description": "Get what you want delivered to you with Uber Eats. Find popular restaurants and shops nearby and order contactless delivery for restaurant takeout, groceries, and more!"
+      },
+      "evidence": [
+        "delivery",
+        "restaurant"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 30.3,
+    "final_score": 30,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 30,
+    "raw_score": 30.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.ubereats.com/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://ubereats.com/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:12.545076+00:00"
+  }
+}

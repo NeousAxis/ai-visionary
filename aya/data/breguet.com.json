@@ -1,0 +1,207 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:50.400537+00:00",
+  "source": {
+    "input_url": "https://www.breguet.com",
+    "canonical_domain": "breguet.com",
+    "pages_scanned": [
+      "https://www.breguet.com/fr",
+      "https://www.breguet.com/fr/contact",
+      "https://www.breguet.com/fr/services"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 2084
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Montres Breguet",
+    "website": "https://www.breguet.com/fr",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1905 1905",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "luxury",
+    "sector_label": "Luxe & Mode",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "luxe",
+      "mode",
+      "watch",
+      "montre"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Montres Breguet",
+        "website": "https://www.breguet.com/fr",
+        "email": "",
+        "phone": "1905 1905",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Montres Breguet | Montres de luxe Suisses - Depuis 1775"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "menu",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "services"
+        ],
+        "meta_description": "Montres Suisses de Luxe - Haute Horlogerie - Horlogerie de Prestige",
+        "og_description": "Montres Suisses de Luxe - Haute Horlogerie - Horlogerie de Prestige"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "menu",
+        "offre",
+        "produit"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 45.3,
+    "final_score": 45,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 45,
+    "raw_score": 45.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:49:50.400548+00:00"
+  }
+}

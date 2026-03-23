@@ -1,0 +1,334 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:50.620967+00:00",
+  "source": {
+    "input_url": "https://www.swiss21.org",
+    "canonical_domain": "swiss21.org",
+    "pages_scanned": [
+      "https://swiss21.org/",
+      "https://swiss21.org/swiss21/ueber-uns/",
+      "https://swiss21.org/crm/",
+      "https://swiss21.org",
+      "https://swiss21.org/preise/",
+      "https://swiss21.org/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "SWISS21",
+    "website": "https://swiss21.org/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "05.02.2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "analytics"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "SWISS21",
+        "website": "https://swiss21.org/",
+        "email": "",
+        "phone": "05.02.2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "SWISS21 – Das digitale Ökosystem für Schweizer KMU"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "Mit der All-in-One-Lösung von Swiss21 erleichtern Sie die Verwaltung Ihres Unternehmens. Rechnungen, Offerten, Buchhaltung, Löhne uvm. | Jetzt kostenlos testen.",
+        "og_description": "Mit der All-in-One-Lösung von Swiss21 erleichtern Sie die Verwaltung Ihres Unternehmens. Rechnungen, Offerten, Buchhaltung, Löhne uvm. | Jetzt kostenlos testen."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 42.3,
+    "final_score": 42,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 42,
+    "raw_score": 42.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://swiss21.org/#organization",
+            "name": "Swiss21.org",
+            "url": "https://rideauxthermiques.com",
+            "sameAs": [
+              "https://twitter.com/papispiero@gmail.com"
+            ],
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://swiss21.org/#logo",
+              "url": "https://swiss21.org/wp-content/uploads/2023/09/21.Swiss-logo-150x150.png",
+              "contentUrl": "https://swiss21.org/wp-content/uploads/2023/09/21.Swiss-logo-150x150.png",
+              "caption": "Swiss21.org",
+              "inLanguage": "de"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://swiss21.org/#website",
+            "url": "https://swiss21.org",
+            "name": "Swiss21.org",
+            "publisher": {
+              "@id": "https://swiss21.org/#organization"
+            },
+            "inLanguage": "de",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://swiss21.org/?s={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://swiss21.org/wp-content/uploads/2023/11/home_test-2-1536x436-1.webp",
+            "url": "https://swiss21.org/wp-content/uploads/2023/11/home_test-2-1536x436-1.webp",
+            "width": "1536",
+            "height": "436",
+            "inLanguage": "de"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://swiss21.org/#webpage",
+            "url": "https://swiss21.org/",
+            "name": "SWISS21 – Das digitale Ökosystem für Schweizer KMU",
+            "datePublished": "2021-03-23T08:15:48+01:00",
+            "dateModified": "2026-03-11T14:56:07+01:00",
+            "about": {
+              "@id": "https://swiss21.org/#organization"
+            },
+            "isPartOf": {
+              "@id": "https://swiss21.org/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://swiss21.org/wp-content/uploads/2023/11/home_test-2-1536x436-1.webp"
+            },
+            "inLanguage": "de"
+          },
+          {
+            "@type": "Person",
+            "@id": "https://swiss21.org/author/piero-papisabacus-ch/",
+            "name": "piero.papis@abacus.ch",
+            "url": "https://swiss21.org/author/piero-papisabacus-ch/",
+            "image": {
+              "@type": "ImageObject",
+              "@id": "https://secure.gravatar.com/avatar/2e92673e1f816942b0ac96dfcf365feb080200facf43510796368ba8d997d870?s=96&amp;d=mm&amp;r=g",
+              "url": "https://secure.gravatar.com/avatar/2e92673e1f816942b0ac96dfcf365feb080200facf43510796368ba8d997d870?s=96&amp;d=mm&amp;r=g",
+              "caption": "piero.papis@abacus.ch",
+              "inLanguage": "de"
+            },
+            "sameAs": [
+              "https://swiss21.org"
+            ],
+            "worksFor": {
+              "@id": "https://swiss21.org/#organization"
+            }
+          },
+          {
+            "headline": "SWISS21 – Das digitale Ökosystem für Schweizer KMU",
+            "description": "Mit der All-in-One-Lösung von Swiss21 erleichtern Sie die Verwaltung Ihres Unternehmens. Rechnungen, Offerten, Buchhaltung, Löhne uvm. | Jetzt kostenlos testen.",
+            "datePublished": "2021-03-23T08:15:48+01:00",
+            "dateModified": "2026-03-11T14:56:07+01:00",
+            "image": {
+              "@id": "https://swiss21.org/wp-content/uploads/2023/11/home_test-2-1536x436-1.webp"
+            },
+            "author": {
+              "@id": "https://swiss21.org/author/piero-papisabacus-ch/",
+              "name": "piero.papis@abacus.ch"
+            },
+            "@type": "Article",
+            "name": "SWISS21 – Das digitale Ökosystem für Schweizer KMU",
+            "@id": "https://swiss21.org/#schema-116904",
+            "isPartOf": {
+              "@id": "https://swiss21.org/#webpage"
+            },
+            "publisher": {
+              "@id": "https://swiss21.org/#organization"
+            },
+            "inLanguage": "de",
+            "mainEntityOfPage": {
+              "@id": "https://swiss21.org/#webpage"
+            }
+          },
+          {
+            "@type": "VideoObject",
+            "name": "SWISS21 – Das digitale Ökosystem für Schweizer KMU",
+            "description": "Auf YouTube findest du die angesagtesten Videos und Tracks. Außerdem kannst du eigene Inhalte hochladen und mit Freunden oder gleich der ganzen Welt teilen.",
+            "uploadDate": "2021-03-23T08:15:48+01:00",
+            "thumbnailUrl": "https://swiss21.org/wp-content/uploads/2023/11/home_test-2-1536x436-1.webp",
+            "embedUrl": "https://www.youtube.com/embed/vd0frXjMbxo",
+            "isFamilyFriendly": "True",
+            "@id": "https://swiss21.org/#schema-178921",
+            "isPartOf": {
+              "@id": "https://swiss21.org/#webpage"
+            },
+            "publisher": {
+              "@id": "https://swiss21.org/#organization"
+            },
+            "inLanguage": "de"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:50:50.620975+00:00"
+  }
+}

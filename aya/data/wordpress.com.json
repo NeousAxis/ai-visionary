@@ -1,0 +1,375 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:02.236503+00:00",
+  "source": {
+    "input_url": "https://www.wordpress.com",
+    "canonical_domain": "wordpress.com",
+    "pages_scanned": [
+      "https://wordpress.com/",
+      "https://wordpress.com/about/",
+      "https://wordpress.com/support/contact/",
+      "https://wordpress.com/pricing/",
+      "https://wordpress.com/pricing/",
+      "https://automattic.com/privacy/",
+      "https://wordpress.com/tos/"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Everything You Need to Build Your Website",
+    "website": "https://wordpress.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1-877-273-3049",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Everything You Need to Build Your Website",
+        "website": "https://wordpress.com/",
+        "email": "",
+        "phone": "1-877-273-3049",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "WordPress.com: Everything You Need to Build Your Website"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Create your WordPress website with built-in hosting, premium themes, and powerful tools. No technical setup required. Start building today—free plan available.",
+        "og_description": "Create your site. Share your voice. Earn online."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "our process",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://wordpress.com/#organization",
+            "url": "https://wordpress.com/",
+            "name": "WordPress.com",
+            "foundingDate": "2005-08-01",
+            "slogan": "Build a website, build a movement.",
+            "description": "Create a free website or build a blog with ease on WordPress.com. Dozens of free, customizable, mobile-ready designs and themes. Free hosting and support.",
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://wordpress.com/#logo",
+              "url": "https://s1.wp.com/home.logged-out/images/wpcom-logo.png",
+              "width": 512,
+              "height": 512,
+              "caption": "WordPress.com"
+            },
+            "image": {
+              "@id": "https://wordpress.com/#logo"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "60 29th Street #343",
+              "addressLocality": "San Francisco",
+              "addressRegion": "CA",
+              "postalCode": "94110",
+              "addressCountry": "US"
+            },
+            "founder": {
+              "@type": "Person",
+              "@id": "https://wordpress.com/schema.org/author/5#person",
+              "name": "Matt Mullenweg",
+              "description": "In 2002 I started contributing to Open Source software, and life has just gotten better from there. Co-founder of WordPress, founder Automattic.",
+              "image": {
+                "@type": "ImageObject",
+                "@id": "https://wordpress.com/schema.org/author/5#personimage",
+                "url": "https://secure.gravatar.com/avatar/33252cd1f33526af53580fcb1736172f06e6716f32afdd1be19ec3096d15dea5?s=96&d=retro&r=g",
+                "width": 96,
+                "height": 96,
+                "caption": "Matt Mullenweg"
+              }
+            },
+            "numberOfEmployees": 1452,
+            "sameAs": [
+              "https://x.com/wordpressdotcom",
+              "https://www.facebook.com/WordPresscom",
+              "https://www.instagram.com/wordpressdotcom/",
+              "https://www.linkedin.com/company/wordpress",
+              "https://www.youtube.com/WordPressdotcom",
+              "https://www.pinterest.com/wordpressdotcom/",
+              "https://en.wikipedia.org/wiki/WordPress.com"
+            ],
+            "parentOrganization": {
+              "@id": "https://automattic.com/#organization"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://wordpress.com/#website",
+            "url": "https://wordpress.com/",
+            "name": "WordPress.com",
+            "description": "WordPress.com is the best place for your personal blog or business site.",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://wordpress.com/go/?s1={search_term_string}",
+              "query-input": "required name=search_term_string"
+            },
+            "publisher": {
+              "@id": "https://wordpress.com/#organization"
+            },
+            "image": {
+              "@id": "https://wordpress.com/#logo"
+            },
+            "sameAs": [
+              "https://x.com/wordpressdotcom",
+              "https://www.facebook.com/WordPresscom",
+              "https://www.instagram.com/wordpressdotcom/",
+              "https://www.linkedin.com/company/wordpress",
+              "https://www.youtube.com/WordPressdotcom",
+              "https://www.pinterest.com/wordpressdotcom/",
+              "https://en.wikipedia.org/wiki/WordPress.com"
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://wordpress.com/#breadcrumbs",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 0,
+                "item": {
+                  "@type": "WebSite",
+                  "@id": "https://wordpress.com/#website-breadcrumb",
+                  "url": "https://wordpress.com/",
+                  "name": "Home"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://wordpress.com/#primaryimage",
+            "url": "https://wpcom.files.wordpress.com/2024/04/wp_favicon_512x512px.png?w=200",
+            "width": 200,
+            "height": 200,
+            "caption": "WordPress.com: Everything You Need to Build Your Website"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://wordpress.com/#webpage",
+            "url": "https://wordpress.com/",
+            "name": "WordPress.com: Everything You Need to Build Your Website",
+            "description": null,
+            "inLanguage": "en",
+            "isPartOf": {
+              "@id": "https://wordpress.com/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://wordpress.com/#primaryimage"
+            },
+            "publisher": {
+              "@id": "https://wordpress.com/#organization"
+            },
+            "about": {
+              "@id": "https://wordpress.com/#organization"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:58:02.236510+00:00"
+  }
+}

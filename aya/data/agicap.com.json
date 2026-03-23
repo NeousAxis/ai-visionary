@@ -1,0 +1,223 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:06.747191+00:00",
+  "source": {
+    "input_url": "https://www.agicap.com",
+    "canonical_domain": "agicap.com",
+    "pages_scanned": [
+      "https://agicap.com/en/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Cash flow management software",
+    "website": "https://agicap.com/en/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Cash flow management software",
+        "website": "https://agicap.com/en/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Cash flow management software | Agicap"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "software",
+          "solution"
+        ],
+        "meta_description": "Agicap, the number one cash management solution that allows you to manage your cash flow, pay your invoices, and follow-up with your account receivables.",
+        "og_description": "Agicap, the number one cash management solution that allows you to manage your cash flow, pay your invoices, and follow-up with your account receivables."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "gdpr",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "glossary",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 67.0,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.4,
+        "score": 4.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 67.0,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:55:06.747201+00:00"
+  }
+}

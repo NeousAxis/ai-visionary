@@ -1,0 +1,212 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:32.111615+00:00",
+  "source": {
+    "input_url": "https://www.cutiss.swiss",
+    "canonical_domain": "cutiss.swiss",
+    "pages_scanned": [
+      "https://cutiss.swiss/",
+      "https://cutiss.swiss/about-us/",
+      "https://cutiss.swiss/contact/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 16
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "CUTISS",
+    "website": "https://cutiss.swiss/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "info@cutiss.swiss",
+      "phone": "+41 44 244 36 60",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "health",
+    "sector_label": "Santé & Pharma",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "health",
+      "medical",
+      "pharma",
+      "clinical",
+      "patient"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "CUTISS",
+        "website": "https://cutiss.swiss/",
+        "email": "info@cutiss.swiss",
+        "phone": "+41 44 244 36 60",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "CUTISS – Unique personalized skin technology to treat skin defects"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "legal"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog"
+        ]
+      },
+      "evidence": [
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 43.4,
+    "final_score": 43,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.33,
+        "score": 6.7
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 43,
+    "raw_score": 43.4,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:50:32.111627+00:00"
+  }
+}

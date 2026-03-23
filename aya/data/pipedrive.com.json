@@ -1,0 +1,375 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:25.274532+00:00",
+  "source": {
+    "input_url": "https://www.pipedrive.com",
+    "canonical_domain": "pipedrive.com",
+    "pages_scanned": [
+      "https://www.pipedrive.com/",
+      "https://www.pipedrive.com/en/about",
+      "https://www.pipedrive.com",
+      "https://www.pipedrive.com/en/products",
+      "https://www.pipedrive.com/en/general-faq",
+      "https://www.pipedrive.com/en/legal",
+      "https://www.pipedrive.com/en/privacy",
+      "https://www.pipedrive.com/en/terms-of-service"
+    ],
+    "pages_scanned_count": 8,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 5,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Pipedrive",
+    "website": "https://www.pipedrive.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "101382096",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Pipedrive",
+        "website": "https://www.pipedrive.com/",
+        "email": "",
+        "phone": "101382096",
+        "country": "",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Sales CRM & Pipeline Management Software | Pipedrive"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Pipedrive is the easy-to-use, #1 user-rated CRM tool. Get more qualified leads and grow your business with our sales CRM. Sign up for a 14-day free trial.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "Organization",
+          "WebPage",
+          "FAQPage",
+          "Product"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 67.0,
+    "final_score": 67,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 67,
+    "raw_score": 67.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Pipedrive",
+            "item": "https://www.pipedrive.tools"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Sales CRM & Pipeline Management Software",
+            "item": "https://www.pipedrive.tools/en/home"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "https://www.pipedrive.com",
+        "logo": "https://cdn.lon-2.pipedriveassets.com/www-main-renderer/_next/static/media/logo_1920x1080.593db9da.jpg",
+        "name": "Pipedrive",
+        "description": "Sales CRM & Pipeline Management Software",
+        "foundingDate": "2010",
+        "keywords": "crm, sales crm, workflow automation, lead management software",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.5",
+          "ratingCount": "1585"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/company/pipedrive",
+          "https://x.com/pipedrive",
+          "https://www.instagram.com/pipedrive",
+          "https://www.facebook.com/pipedrive",
+          "https://www.youtube.com/@pipedrive"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Sales CRM and Pipeline Management Software | Pipedrive",
+        "significantLink": [
+          "https://www.pipedrive.com/en/products/sales",
+          "https://www.pipedrive.com/en/products/email-marketing-software",
+          "https://www.pipedrive.com/en/marketplace",
+          "https://www.pipedrive.com/en/pricing",
+          "https://www.pipedrive.com/en/crm-comparison"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Pipedrive?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p dir=\"ltr\" class=\"puco-text puco-text--size-s\">Pipedrive is a sales pipeline CRM designed to help small businesses manage leads, track sales activities and close more deals.</p>"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Pipedrive work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p dir=\"ltr\" class=\"puco-text puco-text--size-s\">In a nutshell, Pipedrive enables sales teams in small businesses to:</p>\n<ul><li dir=\"ltr\"><p dir=\"ltr\" class=\"puco-text puco-text--size-s\">Streamline processes and consolidate sales data in one unified CRM sales tool.</p></li><li dir=\"ltr\"><p dir=\"ltr\" class=\"puco-text puco-text--size-s\">Automate follow-ups and ensure timely responses to leads.</p></li><li dir=\"ltr\"><p dir=\"ltr\" class=\"puco-text puco-text--size-s\">Keep an eye on sales achievements and assess team performance for ongoing improvement.</p></li></ul>"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How to set up Pipedrive?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p dir=\"ltr\" class=\"puco-text puco-text--size-s\">Setting up Pipedrive is straightforward. To get up and running with our CRM <a href=\"https://www.pipedrive.com/en/features/pipeline-management\" class=\"puco-link puco-link--display-inline\" target=\"_blank\">pipeline management</a> tool, here’s a brief guide:</p>\n<ul><li dir=\"ltr\"><p dir=\"ltr\" class=\"puco-text puco-text--size-s\">Begin by importing existing data or building your leads database within Pipedrive’s sales CRM software. Explore our Marketplace integrations to infuse your pipeline with even more quality leads.</p></li><li dir=\"ltr\"><p dir=\"ltr\" class=\"puco-text puco-text--size-s\">Define your sales pipeline, create active deals, synchronize your business email and calendar and start scheduling your next activities.</p></li><li dir=\"ltr\"><p dir=\"ltr\" class=\"puco-text puco-text--size-s\">If collaboration is key, set up team access. Pipedrive offers granular permissions, allowing you to fine-tune who can view or modify your CRM data.</p></li><li dir=\"ltr\"><p dir=\"ltr\" class=\"puco-text puco-text--size-s\">As you progress, keep a close eye on your sales outcomes by creating real-time reports and dashboards. This will help you adapt and refine your strategies for even greater success.</p></li></ul>"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How will Pipedrive’s CRM solution help me improve sales?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p class=\"puco-text puco-text--size-s\">Pipedrive’s CRM sales pipeline makes customer relationship management a breeze by allowing you to track leads, spot opportunities, measure key activities, streamline sales workflows and focus on sales success.</p>\n<p class=\"puco-text puco-text--size-s\">Automated reminders and follow-ups increase your productivity, eliminating repetitive, time-consuming tasks. Real-time reports show your sales reps and sales managers which business processes to prioritize.</p>"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Will Pipedrive work for a big team?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p class=\"puco-text puco-text--size-s\">Yes! Pipedrive’s sales CRM software is well-suited for startups and larger teams alike.<br />Our pipeline CRM helps large sales and marketing teams streamline their customer interactions. Sales managers and their teams can benefit from a progress tracker, sales automation, procession forecasting, an activity-based planner and top security.</p>\n<p class=\"puco-text puco-text--size-s\">In addition, large teams have access to a dedicated account manager to help them make the most of Pipedrive. Your account manager can also help you onboard other team members to your sales CRM system and guide you on <a href=\"https://www.pipedrive.com/en/features/pipeline-management\" class=\"puco-link puco-link--display-inline\" target=\"_blank\">pipeline management</a> best practices.</p>"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "CRM Software",
+        "brand": "Pipedrive",
+        "image": "https://www-cms.pipedriveassets.com/Generic_logo.png",
+        "description": "Pipedrive is the easy-to-use, #1 user-rated CRM tool. Get more qualified leads and grow your business with our sales CRM. Sign up for a 14-day free trial.",
+        "offers": {
+          "@type": "Offer",
+          "name": "Pipedrive Pricing",
+          "priceCurrency": "eur",
+          "price": "0",
+          "availability": "OnlineOnly",
+          "url": "https://www.pipedrive.com/en/pricing"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.5",
+          "ratingCount": "1585"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:25.274542+00:00"
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:17.042990+00:00",
+  "source": {
+    "input_url": "https://www.svelte.dev",
+    "canonical_domain": "svelte.dev",
+    "pages_scanned": [
+      "https://svelte.dev/",
+      "https://svelte.dev/docs/svelte/faq"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Svelte • Web development for the rest of us",
+    "website": "https://svelte.dev/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Svelte • Web development for the rest of us",
+        "website": "https://svelte.dev/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Svelte • Web development for the rest of us"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "platform",
+          "product",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Web development for the rest of us",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso"
+        ]
+      },
+      "evidence": [
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": false,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": false,
+        "canonical_present": false,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 41.3,
+    "final_score": 41,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "structure_technique"
+    ],
+    "estimated_aio_score": 41,
+    "raw_score": 41.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:59:17.043002+00:00"
+  }
+}

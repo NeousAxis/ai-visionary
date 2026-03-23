@@ -1,0 +1,259 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:39.630544+00:00",
+  "source": {
+    "input_url": "https://www.tf1.fr",
+    "canonical_domain": "tf1.fr",
+    "pages_scanned": [
+      "https://www.tf1.fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "TF1+",
+    "website": "https://www.tf1.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "journal",
+      "podcast",
+      "streaming",
+      "agence"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "TF1+",
+        "website": "https://www.tf1.fr/",
+        "email": "",
+        "phone": "",
+        "country": "FR",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "TF1+ : des centaines de séries et films en streaming gratuitement"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application"
+        ],
+        "meta_description": "400 séries, 200 films, 200 divertissements… 0€. Qui dit mieux ? Profitez gratuitement de centaines de contenus, disponibles à tout moment, en illimité, sur tous les écrans.",
+        "og_description": "400 séries, 200 films, 200 divertissements… 0€. Qui dit mieux ? Profitez gratuitement de centaines de contenus, disponibles à tout moment, en illimité, sur tous les écrans."
+      },
+      "evidence": [
+        "app",
+        "application"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide"
+        ]
+      },
+      "evidence": [
+        "aide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "TF1+",
+        "countryOfOrigin": {
+          "@type": "Country",
+          "name": "France"
+        },
+        "inLanguage": "fr",
+        "isAccessibleForFree": "True",
+        "isFamilyFriendly": "True",
+        "url": "https://www.tf1.fr/",
+        "publisher": {
+          "@type": "Organization",
+          "name": "TF1+",
+          "alternateName": "",
+          "url": "https://www.tf1.fr",
+          "foundingDate": "2024-01-08",
+          "parentOrganization": {
+            "@type": "Organization",
+            "name": "Groupe TF1",
+            "foundingDate": "1987-04-16",
+            "url": "https://groupe-tf1.fr/fr",
+            "sameAs": [
+              "https://fr.wikipedia.org/wiki/Groupe_TF1",
+              "https://www.linkedin.com/company/groupetf1",
+              "https://x.com/GroupeTF1",
+              "https://www.wikidata.org/wiki/Q2412906"
+            ]
+          },
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.tf1.fr/_next/static/media/tf1plus_picto_colored.c157f37a.jpg",
+            "width": "1200",
+            "height": "630"
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "1 Quai du Point du Jour",
+            "addressLocality": "Boulogne-Billancourt",
+            "postalCode": "92100",
+            "addressCountry": "FR"
+          },
+          "sameAs": [
+            "https://www.facebook.com/tf1plus",
+            "https://x.com/tf1plus",
+            "https://www.instagram.com/tf1plus/",
+            "https://www.linkedin.com/company/groupetf1",
+            "https://fr.m.wikipedia.org/wiki/TF1%2B",
+            "https://www.wikidata.org/wiki/Q123485026",
+            "https://www.youtube.com/channel/UCqxKPoV4Oa8K-AmFrVFPZZg",
+            "https://www.tiktok.com/@tf1plus"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:39.630554+00:00"
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:24.864757+00:00",
+  "source": {
+    "input_url": "https://www.nuxt.com",
+    "canonical_domain": "nuxt.com",
+    "pages_scanned": [
+      "https://nuxt.com/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 293
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Nuxt",
+    "website": "https://nuxt.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "2016-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "cloud",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Nuxt",
+        "website": "https://nuxt.com/",
+        "email": "",
+        "phone": "2016-2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Nuxt: The Full-Stack Vue Framework"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Build fast, production-ready web apps with Vue. File-based routing, auto-imports, and server-side rendering — all configured out of the box.",
+        "og_description": "Build fast, production-ready web apps with Vue. File-based routing, auto-imports, and server-side rendering — all configured out of the box."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": false,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 37.3,
+    "final_score": 37,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 37,
+    "raw_score": 37.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:59:24.864766+00:00"
+  }
+}

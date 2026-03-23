@@ -1,0 +1,230 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:31.171989+00:00",
+  "source": {
+    "input_url": "https://www.dailymotion.com",
+    "canonical_domain": "dailymotion.com",
+    "pages_scanned": [
+      "https://www.dailymotion.com/",
+      "https://www.dailymotion.com/services",
+      "https://www.dailymotion.com/products",
+      "https://legal.dailymotion.com/fr/conditions-utilisation/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Dailymotion",
+    "website": "https://www.dailymotion.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "Gokhan.gokce.external@dailymotion.com",
+      "phone": "+44 (0) 203 797 6340",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "journal",
+      "press",
+      "presse",
+      "streaming",
+      "agence"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Dailymotion",
+        "website": "https://www.dailymotion.com/",
+        "email": "Gokhan.gokce.external@dailymotion.com",
+        "phone": "+44 (0) 203 797 6340",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Dailymotion"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "méthodologie"
+        ]
+      },
+      "evidence": [
+        "méthodologie"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "conditions",
+          "confidentialité",
+          "conformité",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "mentions légales",
+          "privacy",
+          "rgpd"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "conditions",
+        "confidentialité",
+        "conformité",
+        "cookies"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles"
+      ]
+    },
+    "structure_technique": {
+      "present": false,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": false,
+        "canonical_present": false,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 52.4,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.33,
+        "score": 6.7
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques"
+    ],
+    "blocks_missing": [
+      "indicateurs",
+      "structure_technique"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 52.4,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:53:31.172003+00:00"
+  }
+}

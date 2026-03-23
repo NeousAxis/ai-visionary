@@ -1,0 +1,231 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:28.402459+00:00",
+  "source": {
+    "input_url": "https://www.chroma.com",
+    "canonical_domain": "chroma.com",
+    "pages_scanned": [
+      "https://www.chroma.com/",
+      "https://www.chroma.com/contact/",
+      "https://www.chroma.com/products/",
+      "https://www.chroma.com/support/customer-support/faqs/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 7
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Chroma Technology Corp",
+    "website": "https://www.chroma.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "china@cn.chroma.com",
+      "phone": "1-800-824-7662",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "manufacturing",
+      "industrial",
+      "production",
+      "engineering",
+      "construction"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Chroma Technology Corp",
+        "website": "https://www.chroma.com/",
+        "email": "china@cn.chroma.com",
+        "phone": "1-800-824-7662",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Optical Filters, Custom & OEM Filter Design, Imaging Systems & Products - Chroma Technology Corp"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "consulting",
+          "delivery",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "consulting",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "conditions",
+          "cookies",
+          "iso",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "conditions",
+        "cookies",
+        "iso",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "glossary",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.4,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.33,
+        "score": 6.7
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 58.4,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:58:28.402467+00:00"
+  }
+}

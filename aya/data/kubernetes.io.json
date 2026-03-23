@@ -1,0 +1,219 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:35.094521+00:00",
+  "source": {
+    "input_url": "https://www.kubernetes.io",
+    "canonical_domain": "kubernetes.io",
+    "pages_scanned": [
+      "https://kubernetes.io/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 16
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Kubernetes",
+    "website": "https://kubernetes.io/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "cloud",
+      "api",
+      "platform",
+      "machine learning"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Kubernetes",
+        "website": "https://kubernetes.io/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Kubernetes"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Production-Grade Container Orchestration",
+        "og_description": "Kubernetes, also known as K8s, is an open source system for automating deployment, scaling, and management of containerized applications.\nIt groups containers that make up an application into logical units for easy management and discovery. Kubernetes builds upon 15 years of experience of running pr"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": false,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 42.3,
+    "final_score": 42,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 42,
+    "raw_score": 42.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "https://kubernetes.io",
+        "logo": "https://kubernetes.io/images/favicon.png",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://kubernetes.io/search/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:57:35.094533+00:00"
+  }
+}

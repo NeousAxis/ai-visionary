@@ -1,0 +1,225 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:12.511281+00:00",
+  "source": {
+    "input_url": "https://www.edf.fr",
+    "canonical_domain": "edf.fr",
+    "pages_scanned": [
+      "https://www.edf.fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "EDF",
+    "website": "https://www.edf.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "food",
+    "sector_label": "Restauration & Alimentation",
+    "confidence": 0.5,
+    "source": "keyword_match",
+    "evidence": [
+      "menu",
+      "réservation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "EDF",
+        "website": "https://www.edf.fr/",
+        "email": "",
+        "phone": "",
+        "country": "FR",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "EDF France | EDF FR"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "menu",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": ""
+      },
+      "evidence": [
+        "menu",
+        "service",
+        "services",
+        "solution",
+        "solutions"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide"
+        ]
+      },
+      "evidence": [
+        "aide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite",
+          "Organization",
+          "BreadcrumbList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 45.4,
+    "final_score": 45,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.33,
+        "score": 6.7
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 45,
+    "raw_score": 45.4,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.edf.fr/",
+        "name": "Groupe"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "https://www.edf.fr",
+        "name": "EDF",
+        "logo": "https://www.edf.fr/modules/custom/edf_structured_data/assets/img/logo_edf_carre.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": []
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:12.511303+00:00"
+  }
+}

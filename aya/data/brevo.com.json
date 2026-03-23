@@ -1,0 +1,261 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:50.342544+00:00",
+  "source": {
+    "input_url": "https://www.sendinblue.com",
+    "canonical_domain": "brevo.com",
+    "pages_scanned": [
+      "https://www.brevo.com/",
+      "https://www.brevo.com/company/about/",
+      "https://www.brevo.com/contact/",
+      "https://www.brevo.com/products/",
+      "https://www.brevo.com/pricing/",
+      "https://www.brevo.com/legal/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 6
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Brevo",
+    "website": "https://www.brevo.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "api",
+      "platform",
+      "developer",
+      "data",
+      "analytics"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Brevo",
+        "website": "https://www.brevo.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Brevo: Email & SMS Marketing, CRM & Automation Platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Brevo is the most intuitive all-in-one customer engagement platform: email and SMS marketing, automation, CRM, live chat, and transactional email. Try it free.",
+        "og_description": "Brevo is the most intuitive all-in-one customer engagement platform: email and SMS marketing, automation, CRM, live chat, and transactional email. Try it free."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "platform",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "glossary",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.0,
+    "final_score": 58,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 58,
+    "raw_score": 58.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "Brevo",
+            "url": "https://www.brevo.com/",
+            "logo": false,
+            "sameAs": [
+              "https://www.linkedin.com/company/brevo/",
+              "https://x.com/brevo_official",
+              "https://www.instagram.com/brevo/",
+              "https://www.youtube.com/@brevo_official",
+              "https://www.facebook.com/brevo.official"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "",
+              "contactType": "Customer Service"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "823 Congress Avenue Suite 300",
+              "addressLocality": "Austin",
+              "postalCode": "TX 78701",
+              "addressCountry": "United States"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:50.342552+00:00"
+  }
+}

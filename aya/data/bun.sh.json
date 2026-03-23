@@ -1,0 +1,235 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:14.872270+00:00",
+  "source": {
+    "input_url": "https://www.bun.sh",
+    "canonical_domain": "bun.sh",
+    "pages_scanned": [
+      "https://bun.sh/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 16909
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Bun",
+    "website": "https://bun.sh/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "alice@example.com",
+      "phone": "0.25.10 571.9",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "cloud",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Bun",
+        "website": "https://bun.sh/",
+        "email": "alice@example.com",
+        "phone": "0.25.10 571.9",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Bun — A fast all-in-one JavaScript runtime"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "solution"
+        ],
+        "meta_description": "Bundle, install, and run JavaScript & TypeScript — all in Bun. Bun is a new JavaScript runtime with a native bundler, transpiler, task runner, and npm client built-in.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog",
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 53.4,
+    "final_score": 53,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 53,
+    "raw_score": 53.4,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Bun",
+        "alternateName": "Bun",
+        "url": "https://bun.com"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Bun",
+        "url": "https://bun.com",
+        "logo": "https://bun.com/logo-square.png",
+        "alternateName": "Oven",
+        "sameAs": [
+          "https://twitter.com/bunjavascript",
+          "https://bun.com"
+        ],
+        "description": "A fast all-in-one JavaScript runtime and toolkit"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:14.872279+00:00"
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:14.358331+00:00",
+  "source": {
+    "input_url": "https://www.credit-agricole.fr",
+    "canonical_domain": "credit-agricole.fr",
+    "pages_scanned": [
+      "https://www.credit-agricole.fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1371
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "CrÃ©dit Agricole",
+    "website": "https://www.credit-agricole.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "press",
+      "presse",
+      "magazine",
+      "agence"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "CrÃ©dit Agricole",
+        "website": "https://www.credit-agricole.fr/",
+        "email": "",
+        "phone": "",
+        "country": "FR",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Banque & Assurances - CrÃ©dit Agricole"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "service",
+          "services",
+          "solution"
+        ],
+        "meta_description": "DÃ©couvrez les offres et services du CrÃ©dit Agricole : compte bancaire, assurance-vie, Ã©pargne, placement, retraite, habitation, prÃ©voyance, crÃ©dit conso ou auto, crÃ©dit immobilierâ¦",
+        "og_description": "DÃ©couvrez les offres et services du CrÃ©dit Agricole : compte bancaire, assurance-vie, Ã©pargne, placement, retraite, habitation, prÃ©voyance, crÃ©dit conso ou auto, crÃ©dit immobilierâ¦"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": false,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 56.7,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 56.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "name": "CrÃ©dit Agricole",
+        "logo": "https://www.credit-agricole.fr/content/dam/assetsca/master/public/commun/images/autre/images/NPC-logo_Agir_chaque_jour_CA_H_Desktop-1.svg",
+        "url": "https://www.credit-agricole.fr/particulier.html",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": null,
+          "addressLocality": null,
+          "addressCountry": null,
+          "addressRegion": null,
+          "postalCode": null
+        },
+        "telephone": null,
+        "sameAs": [
+          "[https://www.facebook.com/CreditAgricole/]",
+          "[https://www.instagram.com/creditagricole/]",
+          "[https://www.youtube.com/c/CreditAgricolemedia]",
+          "[https://www.tiktok.com/@creditagricole]",
+          "[https://www.linkedin.com/company/credit-agricole/posts/?feedView=all]"
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:14.358343+00:00"
+  }
+}

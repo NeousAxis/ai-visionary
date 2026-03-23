@@ -1,0 +1,220 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:33.680560+00:00",
+  "source": {
+    "input_url": "https://www.certina.com",
+    "canonical_domain": "certina.com",
+    "pages_scanned": [
+      "https://www.certina.com/ch-en",
+      "https://www.certina.com/ch-en/contact",
+      "https://www.certina.com/ch-en/faq"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 25
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Certina watches",
+    "website": "https://www.certina.com/ch-en",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+41 32 343 38 38",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "store",
+      "boutique",
+      "buy",
+      "delivery",
+      "product"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Certina watches",
+        "website": "https://www.certina.com/ch-en",
+        "email": "",
+        "phone": "+41 32 343 38 38",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Certina watches: Swiss watches since 1888"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "delivery",
+          "menu",
+          "product",
+          "products",
+          "service",
+          "services"
+        ],
+        "meta_description": "Since 1888, Certina has been dedicated to the fine art of Swiss watchmaking. Discover Certina's watches on the official Certina website.",
+        "og_description": ""
+      },
+      "evidence": [
+        "app",
+        "delivery",
+        "menu",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "conditions",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "conditions",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 63.6,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 63.6,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:49:33.680575+00:00"
+  }
+}

@@ -1,0 +1,246 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:31.524828+00:00",
+  "source": {
+    "input_url": "https://www.github.com",
+    "canonical_domain": "github.com",
+    "pages_scanned": [
+      "https://github.com/",
+      "https://github.com/about",
+      "https://github.com/a-propos",
+      "https://support.github.com/request/landing",
+      "https://github.com/services",
+      "https://github.com/products",
+      "https://github.com/pricing",
+      "https://github.com/faq",
+      "https://github.com/privacy",
+      "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service"
+    ],
+    "pages_scanned_count": 10,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "GitHub",
+    "website": "https://github.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "copyright@github.com",
+      "phone": "377 450 60 15",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "GitHub",
+        "website": "https://github.com/",
+        "email": "copyright@github.com",
+        "phone": "377 450 60 15",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "GitHub · Change is constant. GitHub keeps you ahead. · GitHub"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Join the world's most widely adopted, AI-powered developer platform where millions of developers, businesses, and the largest open source community build software that advances humanity.",
+        "og_description": "Join the world's most widely adopted, AI-powered developer platform where millions of developers, businesses, and the largest open source community build software that advances humanity."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "our process",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "our process",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 69.7,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.4,
+        "score": 4.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 69.7,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:57:31.524835+00:00"
+  }
+}

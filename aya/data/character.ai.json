@@ -1,0 +1,228 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:33.935307+00:00",
+  "source": {
+    "input_url": "https://www.character.ai",
+    "canonical_domain": "character.ai",
+    "pages_scanned": [
+      "https://character.ai/",
+      "https://policies.character.ai/about",
+      "https://support.character.ai/hc/en-us/categories/15097363725467-FAQs",
+      "https://policies.character.ai/privacy"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 3
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "AI Chat, Reimagined",
+    "website": "https://character.ai/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "api",
+      "platform",
+      "data",
+      "analytics",
+      "machine learning"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "AI Chat, Reimagined",
+        "website": "https://character.ai/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "character.ai | AI Chat, Reimagined–Your Words. Your World."
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services"
+        ],
+        "meta_description": "Chat with millions of AI Characters on the #1 AI chat app. Where will your next adventure take you?",
+        "og_description": "Chat with millions of AI Characters on the #1 AI chat app. Where will your next adventure take you?"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": false,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 66.0,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 66.0,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:58:33.935318+00:00"
+  }
+}

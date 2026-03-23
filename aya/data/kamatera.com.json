@@ -1,0 +1,348 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:49.468369+00:00",
+  "source": {
+    "input_url": "https://www.kamatera.com",
+    "canonical_domain": "kamatera.com",
+    "pages_scanned": [
+      "https://www.kamatera.com/",
+      "https://www.kamatera.com/wp-content/uploads/contact.png",
+      "https://www.kamatera.com/products/",
+      "https://www.kamatera.com/pricing/",
+      "https://www.kamatera.com/faq/",
+      "https://www.kamatera.com/privacy/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Kamatera",
+    "website": "https://www.kamatera.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "support@kamatera.com",
+      "phone": "+1 212 738 9658 24",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Kamatera",
+        "website": "https://www.kamatera.com/",
+        "email": "support@kamatera.com",
+        "phone": "+1 212 738 9658 24",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Fast, Flexible Cloud Solutions | VMs, VPS, IaaS | Kamatera"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Kamatera provides affordable, enterprise-grade cloud infrastructure products to organizations of all types and sizes.",
+        "og_description": "Kamatera provides affordable, enterprise-grade cloud infrastructure products to organizations of all types and sizes."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.kamatera.com/",
+            "url": "https://www.kamatera.com/",
+            "name": "Fast, Flexible Cloud Solutions | VMs, VPS, IaaS | Kamatera",
+            "isPartOf": {
+              "@id": "https://www.kamatera.com/#website"
+            },
+            "about": {
+              "@id": "https://www.kamatera.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.kamatera.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.kamatera.com/#primaryimage"
+            },
+            "thumbnailUrl": "/wp-content/uploads/logo.png",
+            "dateModified": "2025-08-18T13:09:30+00:00",
+            "description": "Kamatera provides affordable, enterprise-grade cloud infrastructure products to organizations of all types and sizes.",
+            "breadcrumb": {
+              "@id": "https://www.kamatera.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.kamatera.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://www.kamatera.com/#primaryimage",
+            "url": "/wp-content/uploads/logo.png",
+            "contentUrl": "/wp-content/uploads/logo.png",
+            "width": 100,
+            "height": 100
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.kamatera.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.kamatera.com/#website",
+            "url": "https://www.kamatera.com/",
+            "name": "Kamatera",
+            "description": "",
+            "publisher": {
+              "@id": "https://www.kamatera.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.kamatera.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.kamatera.com/#organization",
+            "name": "Kamatera Inc.",
+            "alternateName": "Kamatera",
+            "url": "https://www.kamatera.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.kamatera.com/#/schema/logo/image/",
+              "url": "https://www.kamatera.com/wp-content/uploads/logo.png",
+              "contentUrl": "https://www.kamatera.com/wp-content/uploads/logo.png",
+              "width": 100,
+              "height": 100,
+              "caption": "Kamatera Inc."
+            },
+            "image": {
+              "@id": "https://www.kamatera.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://x.com/Kamatera_Cloud",
+              "https://www.youtube.com/@Kamatera"
+            ],
+            "description": "Fast, Flexible Cloud Solutions"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:49.468378+00:00"
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:17.312204+00:00",
+  "source": {
+    "input_url": "https://www.leapsome.com",
+    "canonical_domain": "leapsome.com",
+    "pages_scanned": [
+      "https://www.leapsome.com/",
+      "https://www.leapsome.com/pricing",
+      "https://www.leapsome.com/legal/privacy",
+      "https://www.leapsome.com/legal/terms"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 1675
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Leapsome",
+    "website": "https://www.leapsome.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "privacy@leapsome.com",
+      "phone": "153 10115",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Leapsome",
+        "website": "https://www.leapsome.com/",
+        "email": "privacy@leapsome.com",
+        "phone": "153 10115",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Leapsome | AI-powered HR software and people platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution"
+        ],
+        "meta_description": "Discover the ultimate HR software platform your team will love. Streamline your processes and boost productivity. Get started today!",
+        "og_description": "Discover the ultimate HR software platform your team will love. Streamline your processes and boost productivity. Get started today!"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 71.7,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 71.7,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T17:00:17.312215+00:00"
+  }
+}

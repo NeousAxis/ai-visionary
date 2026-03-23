@@ -1,0 +1,217 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:46.058182+00:00",
+  "source": {
+    "input_url": "https://www.zuerich.com",
+    "canonical_domain": "zuerich.com",
+    "pages_scanned": [
+      "https://www.zuerich.com/en",
+      "https://www.zuerich.com/de/business/ueber-zuerich-tourismus",
+      "https://www.zuerich.com/de/zuerich-card-city-guide-app/zuerich-card/fragen-und-antworten-zur-zc",
+      "https://www.zuerich.com/de/allgemeine-geschaeftsbedingungen"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 9121
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Zürich Tourismus",
+    "website": "https://www.zuerich.com/en",
+    "country": "CH",
+    "city": "Zürich",
+    "languages": ["de", "en", "fr"],
+    "org_type": "TouristInformationCenter",
+    "contacts": {
+      "email": "",
+      "phone": "01.08.23 15.00",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tourism",
+    "sector_label": "Tourisme & Loisirs",
+    "confidence": 0.9,
+    "source": "manual_fix",
+    "evidence": [
+      "tourism",
+      "city guide",
+      "sightseeing",
+      "travel"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Zuerich",
+        "website": "https://www.zuerich.com/en",
+        "email": "",
+        "phone": "01.08.23 15.00",
+        "country": "",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "The Official Zurich City Guide | zuerich.com"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "menu",
+          "restaurant",
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "Discover the best day trips, as well as tips on cultural highlights, sightseeing attractions and things to do in the city of Zurich and surrounding region.",
+        "og_description": ""
+      },
+      "evidence": [
+        "app",
+        "menu",
+        "restaurant",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "guide"
+        ]
+      },
+      "evidence": [
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 52.0,
+    "final_score": 52,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 52,
+    "raw_score": 52.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:46.058192+00:00"
+  }
+}

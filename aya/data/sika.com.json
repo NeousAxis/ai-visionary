@@ -1,0 +1,227 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:25.153697+00:00",
+  "source": {
+    "input_url": "https://www.sika.com",
+    "canonical_domain": "sika.com",
+    "pages_scanned": [
+      "https://www.sika.com/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Sika Group",
+    "website": "https://www.sika.com/",
+    "country": "",
+    "city": "Baar (ZG)",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "+41 58 436 6800",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.5,
+    "source": "keyword_match",
+    "evidence": [
+      "api",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Sika Group",
+        "website": "https://www.sika.com/",
+        "email": "",
+        "phone": "+41 58 436 6800",
+        "country": "",
+        "city": "Baar (ZG)",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Sika Group"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "menu",
+          "product",
+          "products",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "menu",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 46.8,
+    "final_score": 47,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.33,
+        "score": 6.7
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 47,
+    "raw_score": 46.8,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@type": "Organization",
+        "@context": "https://schema.org/",
+        "url": "https://www.sika.com",
+        "name": "Sika Group",
+        "telephone": "+41 58 436 6800",
+        "logo": "/content/dam/media/sika-global/logo/Sika_NoClaim_pos_rgb_mobile.png",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Zugerstrasse 50",
+          "addressLocality": "Baar (ZG)",
+          "addressRegion": "Switzerland",
+          "postalCode": " CH-6340",
+          "addressCountry": "corp"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:25.153707+00:00"
+  }
+}

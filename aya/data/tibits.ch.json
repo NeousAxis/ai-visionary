@@ -1,0 +1,237 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:12.544435+00:00",
+  "source": {
+    "input_url": "https://www.tibits.ch",
+    "canonical_domain": "tibits.ch",
+    "pages_scanned": [
+      "https://www.tibits.ch/de/home",
+      "https://www.tibits.ch/de/about/die-idee",
+      "https://www.tibits.ch/fr/a-propos/notre-idee"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 1720
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "tibits",
+    "website": "https://www.tibits.ch/de/home",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "food",
+    "sector_label": "Restauration & Alimentation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "restaurant",
+      "cuisine",
+      "food",
+      "réservation",
+      "traiteur"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "tibits",
+        "website": "https://www.tibits.ch/de/home",
+        "email": "",
+        "phone": "",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "tibits - Vegetarisches und veganes Restaurant - tibits - Vegetarian Restaurant Bar Take Away Caterin"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "offre",
+          "produit",
+          "produits",
+          "restaurant"
+        ],
+        "meta_description": "Vegetarisches und veganes Restaurant, Take Away und Catering in Zürich, Bern, Basel, Luzern und Winterthur. Über 40 Salate und warme Gerichte aus alle Welt.",
+        "og_description": "Vegetarisches und veganes Restaurant, Take Away und Catering in Zürich, Bern, Basel, Luzern und Winterthur. Über 40 Salate und warme Gerichte aus alle Welt."
+      },
+      "evidence": [
+        "offre",
+        "produit",
+        "produits",
+        "restaurant"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "comment ça marche"
+        ]
+      },
+      "evidence": [
+        "comment ça marche"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": false,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "",
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 70.3,
+    "final_score": 70,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 70,
+    "raw_score": 70.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.contao.org",
+        "@graph": [
+          {
+            "@type": "Page",
+            "fePreview": false,
+            "groups": [],
+            "noSearch": false,
+            "pageId": 23,
+            "protected": false,
+            "title": "tibits - Vegetarisches und veganes Restaurant"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:12.544443+00:00"
+  }
+}

@@ -1,0 +1,292 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:48.974546+00:00",
+  "source": {
+    "input_url": "https://www.dormakaba.com",
+    "canonical_domain": "dormakaba.com",
+    "pages_scanned": [
+      "https://www.dormakaba.com/de-de",
+      "https://www.dormakaba.com/about",
+      "https://www.dormakaba.com/contact",
+      "https://www.dormakaba.com/pricing"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "dormakaba Deutschland",
+    "website": "https://www.dormakaba.com/de-de",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "ONEdormakaba@dormakaba.com",
+      "phone": "+52 631 313 7060",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "presse",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "dormakaba Deutschland",
+        "website": "https://www.dormakaba.com/de-de",
+        "email": "ONEdormakaba@dormakaba.com",
+        "phone": "+52 631 313 7060",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "dormakaba Deutschland | For every place that matters"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Von End-to-End-Zutrittslösungen bis hin zu branchenweit bewährten Produkten sind wir Ihr Partner für Tür- und Zutrittssysteme.",
+        "og_description": "Von End-to-End-Zutrittslösungen bis hin zu branchenweit bewährten Produkten sind wir Ihr Partner für Tür- und Zutrittssysteme."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@id": "https://www.dormakaba.com/#website",
+            "@type": "WebSite",
+            "inLanguage": "de-DE",
+            "name": "dormakaba",
+            "url": "https://www.dormakaba.com/de-de",
+            "publisher": {
+              "@id": "https://www.dormakaba.com/#identity"
+            }
+          },
+          {
+            "@id": "https://www.dormakaba.com/de-de#webpage",
+            "@type": "WebPage",
+            "description": "Von End-to-End-Zutrittslösungen bis hin zu branchenweit bewährten Produkten sind wir Ihr Partner für Tür- und Zutrittssysteme.",
+            "name": "dormakaba Deutschland | For every place that matters",
+            "url": "https://www.dormakaba.com/de-de",
+            "about": {
+              "@id": "https://www.dormakaba.com/#identity"
+            },
+            "isPartOf": {
+              "@id": "https://www.dormakaba.com/#website"
+            },
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.dormakaba.com/de-de"
+                ]
+              }
+            ],
+            "primaryImageOfPage": {
+              "@id": "https://www.dormakaba.com/#logo"
+            }
+          },
+          {
+            "@id": "https://www.dormakaba.com/#identity",
+            "@type": "Organization",
+            "description": "The trusted partner for smart and secure access solutions: products, solutions and services for doors, as well as access to buildings and rooms from a single source.",
+            "legalName": "dormakaba Holding",
+            "name": "dormakaba Holding",
+            "url": "https://www.dormakabagroup.com",
+            "areaServed": {
+              "@type": "Country",
+              "name": "Deutschland"
+            },
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+41 44 818 90 11",
+                "contactType": "customer service"
+              }
+            ]
+          },
+          {
+            "@id": "https://www.dormakaba.com/#logo",
+            "@type": "ImageObject",
+            "caption": "dormakaba Holding",
+            "contentUrl": "https://www.dormakabagroup.com/img/dormakaba-logo.gif",
+            "inLanguage": "de-DE",
+            "url": "https://www.dormakabagroup.com/img/dormakaba-logo.gif"
+          },
+          {
+            "@id": "https://www.dormakaba.com/#organization",
+            "@type": "Organization",
+            "logo": "https://www.dormakabagroup.com/img/dormakaba-logo.gif",
+            "name": "dormakaba Holding",
+            "url": "https://www.dormakabagroup.com"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:48.974555+00:00"
+  }
+}

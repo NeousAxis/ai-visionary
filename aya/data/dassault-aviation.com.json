@@ -1,0 +1,353 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:51.982158+00:00",
+  "source": {
+    "input_url": "https://www.dassault-aviation.com",
+    "canonical_domain": "dassault-aviation.com",
+    "pages_scanned": [
+      "https://www.dassault-aviation.com/en/",
+      "https://www.dassault-aviation.com/fr/services/lexique-bilingue/",
+      "https://www.dassault-aviation.com/fr/groupe/presse/press-kits/a-propos-de-dassault-aviation-et-linde/",
+      "https://www.dassault-aviation.com/wp-content/blogs.dir/1/files/2018/08/contact.jpg",
+      "https://www.dassault-aviation.com/fr/services/newsletter/",
+      "https://www.dassault-aviation.com/fr/services/lexique-bilingue/",
+      "https://www.dassault-aviation.com/fr/services/faq/",
+      "https://www.dassault-aviation.com/fr/services/lexique-bilingue/"
+    ],
+    "pages_scanned_count": 8,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 4
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Dassault Aviation, a major player to aeronautics",
+    "website": "https://www.dassault-aviation.com/en/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "contact-rgpd@dassault-aviation.com",
+      "phone": "04.03.2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "journal",
+      "press",
+      "presse"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Dassault Aviation, a major player to aeronautics",
+        "website": "https://www.dassault-aviation.com/en/",
+        "email": "contact-rgpd@dassault-aviation.com",
+        "phone": "04.03.2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Dassault Aviation, a major player to aeronautics"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "offre",
+          "product",
+          "products",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Dassault Aviation designs, manufactures and supports combat aircraft and business jets. Our brands: Rafale, Falcon, nEUROn.",
+        "og_description": "Dassault Aviation designs, manufactures and supports combat aircraft and business jets. Our brands: Rafale, Falcon, nEUROn."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "notre approche",
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "notre approche",
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "conformité",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "rgpd"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "conformité",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq",
+          "glossaire",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq",
+        "glossaire"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.7,
+    "final_score": 76,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 76,
+    "raw_score": 75.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.dassault-aviation.com/en/",
+            "url": "https://www.dassault-aviation.com/en/",
+            "name": "Dassault Aviation, a major player to aeronautics",
+            "isPartOf": {
+              "@id": "https://www.dassault-aviation.com/en/#website"
+            },
+            "about": {
+              "@id": "https://www.dassault-aviation.com/en/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.dassault-aviation.com/en/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.dassault-aviation.com/en/#primaryimage"
+            },
+            "thumbnailUrl": "https://images.dassault-aviation.com/f_auto,q_auto,g_center,dpr_auto/wp-auto-upload/2/files/2018/05/DA00031027_Si-1.jpg",
+            "datePublished": "2017-05-09T12:29:31+00:00",
+            "dateModified": "2026-03-12T11:06:33+00:00",
+            "description": "Dassault Aviation designs, manufactures and supports combat aircraft and business jets. Our brands: Rafale, Falcon, nEUROn.",
+            "breadcrumb": {
+              "@id": "https://www.dassault-aviation.com/en/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.dassault-aviation.com/en/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://www.dassault-aviation.com/en/#primaryimage",
+            "url": "https://images.dassault-aviation.com/f_auto,q_auto,g_center,dpr_auto/wp-auto-upload/2/files/2018/05/DA00031027_Si-1.jpg",
+            "contentUrl": "https://images.dassault-aviation.com/f_auto,q_auto,g_center,dpr_auto/wp-auto-upload/2/files/2018/05/DA00031027_Si-1.jpg",
+            "width": 1600,
+            "height": 1066,
+            "caption": "Dassault formation flight. nEUROn, Rafale and Falcon 8X."
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.dassault-aviation.com/en/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.dassault-aviation.com/en/#website",
+            "url": "https://www.dassault-aviation.com/en/",
+            "name": "Dassault Aviation",
+            "description": "Dassault Aviation designs, manufactures and supports combat aircraft &amp; business jets. Our brands: Rafale, Falcon, nEUROn.",
+            "publisher": {
+              "@id": "https://www.dassault-aviation.com/en/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.dassault-aviation.com/en/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.dassault-aviation.com/en/#organization",
+            "name": "Dassault Aviation",
+            "url": "https://www.dassault-aviation.com/en/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.dassault-aviation.com/en/#/schema/logo/image/",
+              "url": "https://www.dassault-aviation.com/wp-content/blogs.dir/2/files/2020/06/logo-DA-1200-630.jpg",
+              "contentUrl": "https://www.dassault-aviation.com/wp-content/blogs.dir/2/files/2020/06/logo-DA-1200-630.jpg",
+              "width": 1200,
+              "height": 630,
+              "caption": "Dassault Aviation"
+            },
+            "image": {
+              "@id": "https://www.dassault-aviation.com/en/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/DassaultAviation/",
+              "https://x.com/dassault_onair",
+              "https://www.instagram.com/dassaultaviation/",
+              "https://www.linkedin.com/company/dassault-aviation",
+              "https://www.youtube.com/user/TheDassaultAviation"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:51.982170+00:00"
+  }
+}

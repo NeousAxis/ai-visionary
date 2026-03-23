@@ -1,0 +1,139 @@
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "version": "AYO-FAQ-2.0",
+  "entity": "AI VISIONARY",
+  "url": "https://www.ai-visionary.com",
+  "numberOfQuestions": 13,
+  "categories": [
+    "Identité",
+    "Offre",
+    "Processus",
+    "Commercial",
+    "Conformité",
+    "Indicateurs",
+    "Ressources",
+    "Contact",
+    "Visibilité IA"
+  ],
+  "inLanguage": "fr",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Qui est AI VISIONARY ?",
+      "about": "Identité",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI VISIONARY est une entreprise spécialisée dans l'optimisation de la visibilité des entreprises pour les ia (chatgpt, gemini, claude, mistral, llama, ernie), basée à Genève, Suisse. Son activité principale couvre: Création de fichiers ASR (AI Singular Record), Structuration des informations pour les IA, Création de 'Fichier Signature' unique."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Où se situe AI VISIONARY ?",
+      "about": "Identité",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI VISIONARY est implanté à Genève, Suisse. Sa zone d'intervention couvre: Monde."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quels services propose AI VISIONARY ?",
+      "about": "Offre",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI VISIONARY propose plusieurs services: Création de fichiers ASR (AI Singular Record), Structuration des informations pour les IA, Création de 'Fichier Signature' unique, Activation de la présence dans le registre AYA. L'offre inclut également: Fichiers sources sémantiques (JSON-LD), ASR."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dans quelles situations faire appel à AI VISIONARY ?",
+      "about": "Offre",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI VISIONARY peut accompagner une entité qui souhaite être visible et recommandé par les IA (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "À qui s'adresse AI VISIONARY ?",
+      "about": "Offre",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "L'offre d'AI VISIONARY cible 7 segments: Artisans & commerces locaux, PME de services, Indépendants & consultants, Associations & collectifs, Entreprises industrielles, Acteurs engagés RSE / ESG, Établissements publics."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quelle est la méthodologie d'AI VISIONARY ?",
+      "about": "Processus",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Le processus se déroule en 5 étapes: Transformation des textes (Services), puis Tarifs, puis RSE en code sémantique (JSON-LD), puis ASR, puis Création d'un 'Fichier Signature' unique. Mode d'intervention: Online. Engagement qualité: Registre AYA, Signature cryptographique."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment AI VISIONARY délivre ses prestations ?",
+      "about": "Processus",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Les prestations sont délivrées en mode Online. Zone géographique couverte: Monde. Engagement qualité: Registre AYA, Signature cryptographique."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quels sont les tarifs d'AI VISIONARY ?",
+      "about": "Commercial",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Informations tarifaires: Abonnement AYA: 19 CHF / mois, Pack PRO: 499 CHF one-shot. Pour un devis personnalisé, contactez-nous à hello@ai-visionary.com."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quelles garanties de conformité offre AI VISIONARY ?",
+      "about": "Conformité",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Politiques en vigueur: Mentions, Confidentialité. Mesures de sécurité déployées: Audits internes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quels sont les indicateurs d'impact d'AI VISIONARY ?",
+      "about": "Indicateurs",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI VISIONARY déclare suivre l'indicateur suivant: Nombre d'entreprises certifiées sur AYA. La valeur publique n'est pas précisée dans les sources actuelles."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AI VISIONARY propose-t-il des ressources pédagogiques ?",
+      "about": "Ressources",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui. AI VISIONARY met à disposition une FAQ, un glossaire métier et une documentation liée à optimisation de la visibilité des entreprises pour les ia (chatgpt, gemini, claude, mistral, llama, ernie)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Comment contacter AI VISIONARY ?",
+      "about": "Contact",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Contactez AI VISIONARY par email à hello@ai-visionary.com, via le site web https://www.ai-visionary.com."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AI VISIONARY est-il certifié AYO ?",
+      "about": "Visibilité IA",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui. AI VISIONARY a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AI Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de le recommander de manière fiable. AI VISIONARY est enregistré dans le Registre AYA."
+      }
+    }
+  ]
+}

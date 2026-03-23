@@ -1,0 +1,1300 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:27.226734+00:00",
+  "source": {
+    "input_url": "https://www.petit-bateau.fr",
+    "canonical_domain": "petit-bateau.fr",
+    "pages_scanned": [
+      "https://www.petit-bateau.fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 40,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Petit Bateau",
+    "website": "https://www.petit-bateau.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "09 70 17 63 00",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "shop",
+      "boutique",
+      "cart",
+      "livraison",
+      "produit"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Petit Bateau",
+        "website": "https://www.petit-bateau.fr/",
+        "email": "",
+        "phone": "09 70 17 63 00",
+        "country": "FR",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Petit Bateau site officiel : mode bébé, enfant fille & garçon"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "menu",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "services"
+        ],
+        "meta_description": "Retrouvez tout l'univers Petit Bateau sur notre boutique officielle avec ses vêtements bébé, enfants et femme pour avoir un look élégant et confortable pour toutes les occasions !",
+        "og_description": "Retrouvez tout l'univers Petit Bateau sur notre boutique officielle avec ses vêtements bébé, enfants et femme pour avoir un look élégant et confortable pour toutes les occasions !"
+      },
+      "evidence": [
+        "menu",
+        "offre",
+        "produit",
+        "produits",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization",
+          "ItemList",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.1,
+    "final_score": 60,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 60,
+    "raw_score": 60.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org/",
+        "@type": "Organization",
+        "name": "Petit Bateau",
+        "url": "production-eu01-petitbateau.demandware.net",
+        "logo": "production-eu01-petitbateau.demandware.net/on/demandware.static/Sites-PB_FR-Site/-/default/dw8bea3a5f/images/logo-petit-bateau.svg",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "09 70 17 63 00",
+          "contactType": "customer service",
+          "areaServed": "FR",
+          "availableLanguage": "fr"
+        },
+        "sameAs": [
+          "<https://www.facebook.com/PetitBateau>",
+          "<https://www.instagram.com/petitbateau/>",
+          "<https://www.youtube.com/PetitBateau>",
+          "<https://www.pinterest.fr/petitbateau/>"
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "ItemList",
+        "itemListElement": [
+          {
+            "@type": "SiteNavigationElement",
+            "position": 1,
+            "name": "Nos nouveautés",
+            "url": "https://www.petit-bateau.fr/nouveautes/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 2,
+            "name": "Idées cadeau",
+            "url": "https://www.petit-bateau.fr/cadeau/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 3,
+            "name": "Bébé",
+            "url": "https://www.petit-bateau.fr/bebe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 4,
+            "name": "Fille",
+            "url": "https://www.petit-bateau.fr/fille/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 5,
+            "name": "Garçon",
+            "url": "https://www.petit-bateau.fr/garcon/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 6,
+            "name": "Femme",
+            "url": "https://www.petit-bateau.fr/femme/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 7,
+            "name": "Seconde Main",
+            "url": "https://www.petit-bateau.fr/seconde-main/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 8,
+            "name": "Parfum & Soin",
+            "url": "https://www.petit-bateau.fr/parfum-et-soin/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 9,
+            "name": "Les looks",
+            "url": "https://www.petit-bateau.fr/looks-petit-bateau/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 10,
+            "name": "Toutes les nouveautés",
+            "url": "https://www.petit-bateau.fr/nouveautes/toutes-les-nouveautes/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 11,
+            "name": "Pour qui ?",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-cadeaux/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 12,
+            "name": "Quel budget ?",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-par-budget/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 13,
+            "name": "Quelle thématique ?",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-thematiques/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 14,
+            "name": "Vêtements",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 15,
+            "name": "Sous-vêtements et nuit",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 16,
+            "name": "Vêtements",
+            "url": "https://www.petit-bateau.fr/fille/vetements/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 17,
+            "name": "Sous-vêtements et nuit",
+            "url": "https://www.petit-bateau.fr/fille/sous-vetements-et-nuit/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 18,
+            "name": "Vêtements",
+            "url": "https://www.petit-bateau.fr/garcon/vetements/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 19,
+            "name": "Sous-vêtements et nuit",
+            "url": "https://www.petit-bateau.fr/garcon/sous-vetements-et-nuit/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 20,
+            "name": "Vêtements",
+            "url": "https://www.petit-bateau.fr/femme/vetements/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 21,
+            "name": "Sous-vêtements et nuit",
+            "url": "https://www.petit-bateau.fr/femme/sous-vetements-et-nuit/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 22,
+            "name": "Naissance",
+            "url": "https://www.petit-bateau.fr/nouveautes/toutes-les-nouveautes/naissance/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 23,
+            "name": "Bébé",
+            "url": "https://www.petit-bateau.fr/nouveautes/toutes-les-nouveautes/bebe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 24,
+            "name": "Enfant",
+            "url": "https://www.petit-bateau.fr/nouveautes/toutes-les-nouveautes/enfant/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 25,
+            "name": "Femme",
+            "url": "https://www.petit-bateau.fr/nouveautes/toutes-les-nouveautes/femme/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 26,
+            "name": "Naissance",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-cadeaux/idee-cadeau-naissance/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 27,
+            "name": "Bébé",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-cadeaux/idee-cadeau-bebe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 28,
+            "name": "Enfant",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-cadeaux/idee-cadeau-enfant/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 29,
+            "name": "Femme",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-cadeaux/idee-cadeau-maman/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 30,
+            "name": "Idées cadeaux",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-cadeaux/idees-cadeaux-pour-toute-la-famille/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 31,
+            "name": "Moins de 30 €",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-par-budget/moins-de-30-euros/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 32,
+            "name": "Entre 30 € et 50 €",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-par-budget/moins-de-50-euros/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 33,
+            "name": "Plus de 50 €",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-par-budget/plus-de-50-euros/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 34,
+            "name": "La carte cadeau",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-par-budget/la-carte-cadeau/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 35,
+            "name": "La cagnotte en ligne",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-selections-par-budget/la-cagnotte-participative/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 36,
+            "name": "Parfum et soin",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-thematiques/le-parfum-pour-bebe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 37,
+            "name": "Les coffrets cadeaux",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-thematiques/lots-cadeaux/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 38,
+            "name": "Nos iconiques",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-thematiques/cadeau-ideal-bebe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 39,
+            "name": "Les pyjamas",
+            "url": "https://www.petit-bateau.fr/cadeau/nos-thematiques/cadeau-pyjama-bebe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 40,
+            "name": "Naissance",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/naissance/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 41,
+            "name": "Robes",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/robe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 42,
+            "name": "Cirés, vestes, combinaison pilote",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/cire-veste-combinaison-pilote/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 43,
+            "name": "T-shirts, blouses, chemises",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/blouse-t-shirt-chemise-polo-body-a-col/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 44,
+            "name": "Ensembles, combinaisons, salopettes",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/ensemble-combicourte-salopette/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 45,
+            "name": "Pantalons, leggings, shorts",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/legging-pantalon-bloomer-jogging-short/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 46,
+            "name": "Gilets, marinières, sweatshirts",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/mariniere-gilet-sweatshirt/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 47,
+            "name": "Maillots de bain, t-shirts anti-UV",
+            "url": "https://www.petit-bateau.fr/bebe/vetements/maillots-de-bain-t-shirt-anti-uv/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 48,
+            "name": "Bodies",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/body/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 49,
+            "name": "Pyjamas",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/pyjama/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 50,
+            "name": "Gigoteuses, literie, couvertures",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/gigoteuse-literie-couverture/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 51,
+            "name": "Chaussettes, collants",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/chaussons-chaussettes-collants/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 52,
+            "name": "Sortie de bain",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/sortie-de-bain/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 53,
+            "name": "Doudous",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/doudou/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 54,
+            "name": "Bavoirs, langes",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/bavoir-lange/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 55,
+            "name": "Casquettes, chapeaux, accessoires",
+            "url": "https://www.petit-bateau.fr/bebe/sous-vetements-et-nuit/accessoires-valise-de-maternite/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 56,
+            "name": "Robes, jupes",
+            "url": "https://www.petit-bateau.fr/fille/vetements/robe-jupe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 57,
+            "name": "Cirés, doudounes, vestes",
+            "url": "https://www.petit-bateau.fr/fille/vetements/cire-veste-coupe-vent/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 58,
+            "name": "T-shirts, blouses et débardeurs",
+            "url": "https://www.petit-bateau.fr/fille/vetements/t-shirt-blouse/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 59,
+            "name": "Pantalons, combinaisons, shorts",
+            "url": "https://www.petit-bateau.fr/fille/vetements/legging-pantalon-jean-short/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 60,
+            "name": "Bonnets, gants, accessoires",
+            "url": "https://www.petit-bateau.fr/fille/vetements/accessoires/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 61,
+            "name": "Gilets, marinières, sweatshirts",
+            "url": "https://www.petit-bateau.fr/fille/vetements/mariniere-pull-sweat-gilet/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 62,
+            "name": "Maillots de bain, t-shirts anti-UV",
+            "url": "https://www.petit-bateau.fr/fille/vetements/maillot-de-bain/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 63,
+            "name": "Pyjamas, chemises de nuit",
+            "url": "https://www.petit-bateau.fr/fille/sous-vetements-et-nuit/pyjama-pyjacourt-chemise-de-nuit/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 64,
+            "name": "Chemises à bretelle, t-shirts",
+            "url": "https://www.petit-bateau.fr/fille/sous-vetements-et-nuit/chemise-a-bretelles/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 65,
+            "name": "Culottes, shorties",
+            "url": "https://www.petit-bateau.fr/fille/sous-vetements-et-nuit/toutes-les-culottes/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 66,
+            "name": "Brassières, soutien-gorges",
+            "url": "https://www.petit-bateau.fr/fille/sous-vetements-et-nuit/brassiere-soutien-gorge/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 67,
+            "name": "Peignoirs et robe de chambre",
+            "url": "https://www.petit-bateau.fr/fille/sous-vetements-et-nuit/peignoir-de-bain-robe-de-chambre/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 68,
+            "name": "Chaussettes, collants",
+            "url": "https://www.petit-bateau.fr/fille/sous-vetements-et-nuit/chaussettes-collants/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 69,
+            "name": "T-shirts, polos, chemises",
+            "url": "https://www.petit-bateau.fr/garcon/vetements/t-shirt-sous-pull/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 70,
+            "name": "Pantalons, shorts",
+            "url": "https://www.petit-bateau.fr/garcon/vetements/pantalon-jean-jogging-short/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 71,
+            "name": "Cirés, doudounes, vestes",
+            "url": "https://www.petit-bateau.fr/garcon/vetements/cire-veste-coupe-vent/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 72,
+            "name": "Marinières, pulls, sweatshirts",
+            "url": "https://www.petit-bateau.fr/garcon/vetements/mariniere-sweat-gilet/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 73,
+            "name": "Bonnets, gants, accessoires",
+            "url": "https://www.petit-bateau.fr/garcon/vetements/accessoires/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 74,
+            "name": "Maillots de bain, t-shirts anti-UV",
+            "url": "https://www.petit-bateau.fr/garcon/vetements/maillot-de-bain/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 75,
+            "name": "Pyjamas",
+            "url": "https://www.petit-bateau.fr/garcon/sous-vetements-et-nuit/pyjama-pyjacourt/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 76,
+            "name": "Débardeurs, t-shirts",
+            "url": "https://www.petit-bateau.fr/garcon/sous-vetements-et-nuit/debardeur-tee-shirt/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 77,
+            "name": "Slips, boxers",
+            "url": "https://www.petit-bateau.fr/garcon/sous-vetements-et-nuit/tous-les-boxers-et-slips/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 78,
+            "name": "Peignoirs et robe de chambre",
+            "url": "https://www.petit-bateau.fr/garcon/sous-vetements-et-nuit/peignoir-de-bain-robe-de-chambre/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 79,
+            "name": "Chaussettes, chaussons",
+            "url": "https://www.petit-bateau.fr/garcon/sous-vetements-et-nuit/chaussettes/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 80,
+            "name": "Tee-shirts et débardeurs",
+            "url": "https://www.petit-bateau.fr/femme/vetements/t-shirt-debardeur/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 81,
+            "name": "Robes, pantalons",
+            "url": "https://www.petit-bateau.fr/femme/vetements/robe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 82,
+            "name": "Marinières, pulls, cardigans",
+            "url": "https://www.petit-bateau.fr/femme/vetements/mariniere-pull-cardigan/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 83,
+            "name": "Manteaux, doudounes, cirés",
+            "url": "https://www.petit-bateau.fr/femme/vetements/cire-veste-coupe-vent/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 84,
+            "name": "Accessoires",
+            "url": "https://www.petit-bateau.fr/femme/vetements/accessoires/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 85,
+            "name": "Maillots de bain",
+            "url": "https://www.petit-bateau.fr/femme/vetements/maillot-de-bain/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 86,
+            "name": "Culottes, soutiens-gorges",
+            "url": "https://www.petit-bateau.fr/femme/sous-vetements-et-nuit/culotte-soutien-gorge/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 87,
+            "name": "Pyjamas, nuisettes",
+            "url": "https://www.petit-bateau.fr/femme/sous-vetements-et-nuit/nuisette-pyjama/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 88,
+            "name": "Chemises à bretelle, débardeurs",
+            "url": "https://www.petit-bateau.fr/femme/sous-vetements-et-nuit/chemises-a-bretelles-debardeurs/"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw15e7cc73/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_T1_DESKTOP.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw15e7cc73/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_T1_DESKTOP.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw15e7cc73/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_T1_DESKTOP.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw090091f6/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_T1_MOBILE.jpg?sw=768&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw090091f6/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_T1_MOBILE.jpg?sw=768&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw090091f6/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_T1_MOBILE.jpg?sw=768&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw95dc85b1/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_PYJAMAS_DESKTOP.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw95dc85b1/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_PYJAMAS_DESKTOP.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw95dc85b1/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_PYJAMAS_DESKTOP.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1603514a/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_PYJAMAS_MOBILE.jpg?sw=768&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1603514a/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_PYJAMAS_MOBILE.jpg?sw=768&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1603514a/1_2026/03_MARS/CEREMONIE/SWIPER_PE26_MEA_CEREMONIES_PYJAMAS_MOBILE.jpg?sw=768&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwab92a468/PB/A0FID01F1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwab92a468/PB/A0FID01F1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwab92a468/PB/A0FID01F1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tout en couleur",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw4a0d5440/PB/A0FTC01F1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw4a0d5440/PB/A0FTC01F1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw4a0d5440/PB/A0FTC01F1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tenue de printemps",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwcf3dfed3/PB/A0F4J01J1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwcf3dfed3/PB/A0F4J01J1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwcf3dfed3/PB/A0F4J01J1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tenue des premiers jours",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw52b15ec5/PB/A0EBZ01J1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw52b15ec5/PB/A0EBZ01J1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw52b15ec5/PB/A0EBZ01J1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tout en couleur",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw4d0336b0/PB/A0BBJ01J1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw4d0336b0/PB/A0BBJ01J1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw4d0336b0/PB/A0BBJ01J1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tenue de printemps",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw0ecc9037/PB/A0FTN01F1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw0ecc9037/PB/A0FTN01F1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw0ecc9037/PB/A0FTN01F1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tenue des premiers jours",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwc64a6cd2/PB/A0FMI01F1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwc64a6cd2/PB/A0FMI01F1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwc64a6cd2/PB/A0FMI01F1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tout en couleur",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw9e651aa8/PB/A0DV100F1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw9e651aa8/PB/A0DV100F1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw9e651aa8/PB/A0DV100F1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tenue de printemps",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw3cfc4e38/PB/A0F4601J1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw3cfc4e38/PB/A0F4601J1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dw3cfc4e38/PB/A0F4601J1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tout en couleur",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwd43355e1/PB/A0F4K01J1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwd43355e1/PB/A0F4K01J1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwd43355e1/PB/A0F4K01J1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tenue de printemps",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwafe952cc/PB/A0F4W01J1.jpg?sw=325&sh=379&sm=fit",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwafe952cc/PB/A0F4W01J1.jpg?sw=325&sh=379&sm=fit",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Sites-PB_master/default/dwafe952cc/PB/A0F4W01J1.jpg?sw=325&sh=379&sm=fit",
+            "caption": "Tenue des premiers jours",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwc3b983f4/1_2026/03_MARS/CEREMONIE/visuel_gauche_bapteme.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwc3b983f4/1_2026/03_MARS/CEREMONIE/visuel_gauche_bapteme.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwc3b983f4/1_2026/03_MARS/CEREMONIE/visuel_gauche_bapteme.jpg?sw=1440&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwc3b983f4/1_2026/03_MARS/CEREMONIE/visuel_gauche_bapteme.jpg?sw=768&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwc3b983f4/1_2026/03_MARS/CEREMONIE/visuel_gauche_bapteme.jpg?sw=768&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwc3b983f4/1_2026/03_MARS/CEREMONIE/visuel_gauche_bapteme.jpg?sw=768&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw637d3d8c/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_bb.jpg",
+            "url": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw637d3d8c/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_bb.jpg",
+            "contentUrl": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw637d3d8c/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_bb.jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw05c5381e/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_fille.jpg",
+            "url": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw05c5381e/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_fille.jpg",
+            "contentUrl": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw05c5381e/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_fille.jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw13197181/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_ga.jpg",
+            "url": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw13197181/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_ga.jpg",
+            "contentUrl": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw13197181/1_2026/03_MARS/CEREMONIE/Bloc_3_img_cerem_ga.jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwd1939912/1_2026/LOOKS/BB_E26_L19.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwd1939912/1_2026/LOOKS/BB_E26_L19.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwd1939912/1_2026/LOOKS/BB_E26_L19.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwffae26a9/1_2026/LOOKS/GA_E26_L7.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwffae26a9/1_2026/LOOKS/GA_E26_L7.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwffae26a9/1_2026/LOOKS/GA_E26_L7.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwa7713466/1_2026/LOOKS/FI_E26_L7.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwa7713466/1_2026/LOOKS/FI_E26_L7.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwa7713466/1_2026/LOOKS/FI_E26_L7.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw68e2caa7/1_2026/LOOKS/BB_E26_L24.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw68e2caa7/1_2026/LOOKS/BB_E26_L24.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw68e2caa7/1_2026/LOOKS/BB_E26_L24.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwbf2d3e50/1_2026/LOOKS/BB_E26_L21.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwbf2d3e50/1_2026/LOOKS/BB_E26_L21.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwbf2d3e50/1_2026/LOOKS/BB_E26_L21.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1b7595df/1_2026/LOOKS/FI_E26_L6.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1b7595df/1_2026/LOOKS/FI_E26_L6.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1b7595df/1_2026/LOOKS/FI_E26_L6.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw059f9d2a/1_2026/LOOKS/GA_E26_L6.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw059f9d2a/1_2026/LOOKS/GA_E26_L6.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw059f9d2a/1_2026/LOOKS/GA_E26_L6.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw92a684a7/1_2026/LOOKS/BB_E26_L22.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw92a684a7/1_2026/LOOKS/BB_E26_L22.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw92a684a7/1_2026/LOOKS/BB_E26_L22.jpg?sw=1440&sfrm=jpg",
+            "caption": "",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw9bbb3984/LP_CADEAU/LP_CADEAU_E26/BLOC_slide_CARTE_CADEAU_2026_desktop.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw9bbb3984/LP_CADEAU/LP_CADEAU_E26/BLOC_slide_CARTE_CADEAU_2026_desktop.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw9bbb3984/LP_CADEAU/LP_CADEAU_E26/BLOC_slide_CARTE_CADEAU_2026_desktop.jpg?sw=1440&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1472000f/LP_CADEAU/LP_CADEAU_E26/BLOC_slide_CARTE_CADEAU_2026_mobile.jpg?sw=768&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1472000f/LP_CADEAU/LP_CADEAU_E26/BLOC_slide_CARTE_CADEAU_2026_mobile.jpg?sw=768&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw1472000f/LP_CADEAU/LP_CADEAU_E26/BLOC_slide_CARTE_CADEAU_2026_mobile.jpg?sw=768&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw14995abf/Seconde_main/BLOC_1IMAGE_SM_ete_desktop.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw14995abf/Seconde_main/BLOC_1IMAGE_SM_ete_desktop.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw14995abf/Seconde_main/BLOC_1IMAGE_SM_ete_desktop.jpg?sw=1440&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw11ec7708/1_2025/08_AOUT/BLOC_COM_MOBILE_seconde_main_mob.jpg",
+            "url": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw11ec7708/1_2025/08_AOUT/BLOC_COM_MOBILE_seconde_main_mob.jpg",
+            "contentUrl": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw11ec7708/1_2025/08_AOUT/BLOC_COM_MOBILE_seconde_main_mob.jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwcb178922/1_2025/08_AOUT/BLOC_COM_DESKTOP_cadeau_desk.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwcb178922/1_2025/08_AOUT/BLOC_COM_DESKTOP_cadeau_desk.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dwcb178922/1_2025/08_AOUT/BLOC_COM_DESKTOP_cadeau_desk.jpg?sw=1440&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw88d28dfc/1_2025/08_AOUT/BLOC_COM_MOBILE_cadeau_mob_.jpg",
+            "url": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw88d28dfc/1_2025/08_AOUT/BLOC_COM_MOBILE_cadeau_mob_.jpg",
+            "contentUrl": "https://www.petit-bateau.fr/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw88d28dfc/1_2025/08_AOUT/BLOC_COM_MOBILE_cadeau_mob_.jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw7a02366b/LP_NAISSANCE/BLOC_1IMAGE_offre_bienvenue.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw7a02366b/LP_NAISSANCE/BLOC_1IMAGE_offre_bienvenue.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw7a02366b/LP_NAISSANCE/BLOC_1IMAGE_offre_bienvenue.jpg?sw=1440&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw5ff561fc/LP_NAISSANCE/BLOC_1IMAGE_offre_bienvenue_mobile.jpg?sw=768&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw5ff561fc/LP_NAISSANCE/BLOC_1IMAGE_offre_bienvenue_mobile.jpg?sw=768&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw5ff561fc/LP_NAISSANCE/BLOC_1IMAGE_offre_bienvenue_mobile.jpg?sw=768&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw6ab0d012/1_2026/01_JANVIER/NEWCO/macaron_newco_body_nai.jpg?sw=1440&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw6ab0d012/1_2026/01_JANVIER/NEWCO/macaron_newco_body_nai.jpg?sw=1440&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw6ab0d012/1_2026/01_JANVIER/NEWCO/macaron_newco_body_nai.jpg?sw=1440&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw6ab0d012/1_2026/01_JANVIER/NEWCO/macaron_newco_body_nai.jpg?sw=768&sfrm=jpg",
+            "url": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw6ab0d012/1_2026/01_JANVIER/NEWCO/macaron_newco_body_nai.jpg?sw=768&sfrm=jpg",
+            "contentUrl": "https://www.petit-bateau.fr/dw/image/v2/BCKL_PRD/on/demandware.static/-/Library-Sites-SharedPetitBateauLibrary/default/dw6ab0d012/1_2026/01_JANVIER/NEWCO/macaron_newco_body_nai.jpg?sw=768&sfrm=jpg",
+            "caption": null,
+            "inLanguage": "fr-FR"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:27.226743+00:00"
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "layer": "external_context",
+    "version": "2.0",
+    "status": "active",
+    "generated_at": "2026-03-23",
+    "source": "ayo-structured-analysis",
+    "entity": "AI VISIONARY",
+    "canonical_url": "https://www.ai-visionary.com"
+  },
+  "ecosystem_presence": {
+    "business_type": "Optimisation de la visibilité des entreprises pour les IA (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie)",
+    "platform_types": [
+      "web",
+      "en ligne"
+    ],
+    "geographic_context": {
+      "primary_market": "Genève, Suisse",
+      "served_areas": "Monde",
+      "delivery_note": "Service disponible en ligne — portée potentiellement internationale"
+    },
+    "declared_by_client": true
+  },
+  "reputation_signals": {
+    "enabled": true,
+    "trust_level": "self_declared_structured",
+    "trust_indicators": {
+      "certifications": [],
+      "quality_assurance": [
+        "Registre AYA",
+        "Signature cryptographique"
+      ],
+      "key_metrics": [
+        "Nombre d'entreprises certifiées sur AYA"
+      ],
+      "compliance_frameworks": [
+        "RGPD"
+      ]
+    },
+    "sources": [
+      "quality_assurance_declared",
+      "performance_indicators",
+      "compliance_policies"
+    ],
+    "policy": "declared_metrics_only"
+  },
+  "content_signals": {
+    "has_faq": true,
+    "has_glossary": true,
+    "has_documentation": true,
+    "educational_content": "available",
+    "process_transparency": "documented"
+  },
+  "keywords_context": {
+    "discovery_keywords": [
+      "Visibilité IA",
+      "Optimisation AIO",
+      "Fichier ASR",
+      "Référencement IA",
+      "Recommandation ChatGPT",
+      "Structuration données entreprise",
+      "Certification AYA",
+      "Lisibilité intelligence artificielle",
+      "Scoring visibilité IA",
+      "SEO conversationnel"
+    ],
+    "intent_keywords": [
+      "Comment rendre mon entreprise visible par toutes les AI ?",
+      "Comment être recommandé par les IA ?",
+      "Mon entreprise n'apparaît pas dans les réponses de l'IA",
+      "Optimiser ma visibilité sur les assistants conversationnels",
+      "C'est quoi un fichier ASR ?",
+      "Comment structurer mes données pour l'IA",
+      "Différence entre SEO et AIO",
+      "Comment savoir si l'IA recommande mon entreprise",
+      "Audit de visibilité IA gratuit",
+      "Les IA ignorent mon site, que faire ?"
+    ],
+    "audience_segments": [
+      "Artisans & commerces locaux",
+      "PME de services",
+      "Indépendants & consultants",
+      "Associations & collectifs",
+      "Entreprises industrielles",
+      "Acteurs engagés RSE / ESG",
+      "Établissements publics"
+    ],
+    "source": "declared_plus_structured_normalization"
+  },
+  "access_channels": {
+    "primary": [
+      "Site web",
+      "En ligne"
+    ],
+    "secondary": [
+      "Email"
+    ],
+    "delivery_modes": [
+      "Online"
+    ]
+  },
+  "usage_permissions": {
+    "allow_listing": true,
+    "allow_comparison": true,
+    "allow_best_of": true,
+    "allow_intent_matching": true,
+    "allow_geographic_targeting": true,
+    "data_freshness": "quarterly_review"
+  },
+  "sunset_policy": {
+    "removable": true,
+    "retention": "3_years_aya_registration",
+    "review_cycle": "annual"
+  }
+}

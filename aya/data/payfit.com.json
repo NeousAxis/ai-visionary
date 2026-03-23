@@ -1,0 +1,484 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:28.848453+00:00",
+  "source": {
+    "input_url": "https://www.payfit.com",
+    "canonical_domain": "payfit.com",
+    "pages_scanned": [
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/",
+      "https://payfit.com/"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "PayFit",
+    "website": "https://payfit.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "PayFit",
+        "website": "https://payfit.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "UK Payroll Software for Seamless Automation | PayFit"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "product",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Simplify payroll with UK payroll software that automates tasks, saving time and reducing stress.",
+        "og_description": "Simplify payroll with UK payroll software that automates tasks, saving time and reducing stress."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "product",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.0,
+    "final_score": 73,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 73,
+    "raw_score": 73.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://payfit.com/#website",
+            "url": "https://payfit.com/",
+            "name": "Payfit.com",
+            "description": "PayFit combines best-in-class payroll software with expert support. Automate your payroll & HR admin and save time.",
+            "publisher": {
+              "@id": "https://payfit.com/#organization"
+            },
+            "copyrightHolder": {
+              "@id": "https://payfit.com/#organization"
+            },
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://payfit.com/#organization",
+            "name": "Payfit",
+            "legalName": "Payfit",
+            "url": "https://payfit.com/",
+            "sameAs": [
+              "https://www.linkedin.com/company/payfit-uk",
+              "https://fr-fr.facebook.com/PayFitUK/",
+              "https://twitter.com/PayFitUK"
+            ],
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://payfit.com/#/schema/logo/image/",
+              "url": "https://www.datocms-assets.com/50397/1640774984-payfitlogo.svg",
+              "contentUrl": "https://www.datocms-assets.com/50397/1640774984-payfitlogo.svg",
+              "width": "117",
+              "height": "36",
+              "caption": "Payfit",
+              "inLanguage": "en-GB"
+            },
+            "image": {
+              "@id": "https://payfit.com/#/schema/logo/image/"
+            },
+            "founders": [
+              {
+                "@type": "Person",
+                "name": "Florian Fournier",
+                "url": "https://fr.linkedin.com/in/florian-fournier-b093a2aa"
+              },
+              {
+                "@type": "Person",
+                "name": "Firmin Zocchetto",
+                "url": "https://fr.linkedin.com/in/firmin-zocchetto"
+              },
+              {
+                "@type": "Person",
+                "name": "Ghislain DE FONTENAY",
+                "url": "https://fr.linkedin.com/in/ghislain-de-fontenay-458297b8"
+              }
+            ],
+            "foundingDate": "2015-09-14",
+            "numberOfEmployees": "1050",
+            "slogan": "Run payroll in minutes, not days.",
+            "description": "PayFit is a payroll software for companies with up to 500 employees. Automate your payroll while eliminating spreadsheets and errors."
+          },
+          {
+            "@type": [
+              "WebPage",
+              "FAQPage"
+            ],
+            "@id": "https://payfit.com/",
+            "url": "https://payfit.com/",
+            "name": "UK Payroll Software for Seamless Automation | PayFit",
+            "description": "Simplify payroll with UK payroll software that automates tasks, saving time and reducing stress.",
+            "primaryImageOfPage": {
+              "@id": "https://payfit.com/#primaryimage"
+            },
+            "isPartOf": {
+              "@id": "https://payfit.com/#website"
+            },
+            "about": {
+              "@id": "https://payfit.com/#organization"
+            },
+            "breadcrumb": {
+              "@id": "https://payfit.com/#breadcrumb"
+            },
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": "https://payfit.com/"
+              }
+            ],
+            "inLanguage": "en-GB",
+            "mainEntity": [
+              {
+                "@id": "https://payfit.com/#TGEuIZjlQrudDEovd8geHg"
+              },
+              {
+                "@id": "https://payfit.com/#TM7a_Bc3RJ-NzROUUeWctw"
+              },
+              {
+                "@id": "https://payfit.com/#fQCkaQb6S_SCm0yJQocQSQ"
+              },
+              {
+                "@id": "https://payfit.com/#VFzqIqw4Q36fyonV1sYHag"
+              },
+              {
+                "@id": "https://payfit.com/#ewXGut1tQdKojSEq2N-ltA"
+              },
+              {
+                "@id": "https://payfit.com/#HzWqpnSXQIqKleodAumvZw"
+              }
+            ]
+          },
+          {
+            "@id": "https://payfit.com/#primaryimage",
+            "@type": "ImageObject",
+            "url": "https://www.datocms-assets.com/50397/1730883171-og-image-video-uk.jpg",
+            "contentUrl": "https://www.datocms-assets.com/50397/1730883171-og-image-video-uk.jpg",
+            "width": "3600",
+            "height": "1890",
+            "name": "UK payroll thatâs powerful enough for experts, simple enough for anyone."
+          },
+          {
+            "@id": "https://payfit.com/#breadcrumb",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://payfit.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "UK Payroll Software for Seamless Automation | PayFit",
+                "item": "https://payfit.com/"
+              }
+            ]
+          },
+          {
+            "@type": "Question",
+            "@id": "https://payfit.com/#TGEuIZjlQrudDEovd8geHg",
+            "position": 1,
+            "url": "https://payfit.com/#TGEuIZjlQrudDEovd8geHg",
+            "name": "What are the key features of payroll software for small businesses in the UK?",
+            "answerCount": 1,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Some essential features you should look out for in UK payroll software are automated payroll processing, which works out earnings, deductions, and net pay calculations for you; automatic HMRC RTI and pension submissions as well as auto-enrolment capabilities; and real-time reporting to generate reports on payroll expenses, tax liabilities, and other critical financial data instantly. \nThe ability to integrate with different point solutions and to sync up with accounting software, like Xero is also a plus. Among other features you should have an eye out for are an employee self-service portal, making it easier for your people to access payslips, tax documents, and update their personal details online. \nPayFit has all of these features and more.",
+              "inLanguage": "en-GB"
+            },
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Question",
+            "@id": "https://payfit.com/#TM7a_Bc3RJ-NzROUUeWctw",
+            "position": 2,
+            "url": "https://payfit.com/#TM7a_Bc3RJ-NzROUUeWctw",
+            "name": "How can cloud-based payroll software benefit medium-sized businesses?",
+            "answerCount": 1,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "If youâre a small or medium-sized business wanting to scale further, then putting technology like cloud-based payroll software in place is critical for operations. These systems can easily flex and scale as your business evolves and your headcount grows. Allowing you to process payroll for more employees in less time. \nIn addition to this, it makes accessing your employee data much easier from any location, at any time. It also provides a more secure and safe way of protecting your data with methods like built-in two-factor authentication.",
+              "inLanguage": "en-GB"
+            },
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Question",
+            "@id": "https://payfit.com/#fQCkaQb6S_SCm0yJQocQSQ",
+            "position": 3,
+            "url": "https://payfit.com/#fQCkaQb6S_SCm0yJQocQSQ",
+            "name": "How can payroll software help businesses comply with HMRC regulations?",
+            "answerCount": 1,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Keeping up with the current tax laws and regulations, especially in todayâs highly regulated environment, is a challenge, especially if youâre a scaling business. Payroll software like PayFit is designed to adhere to the high levels of compliance HMRC requires. Our developers ensure our software is always up-to-date with the latest payroll regulations, rates and thresholds, with no manual intervention needed, reducing your risk of incurring pricey penalties.",
+              "inLanguage": "en-GB"
+            },
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Question",
+            "@id": "https://payfit.com/#VFzqIqw4Q36fyonV1sYHag",
+            "position": 4,
+            "url": "https://payfit.com/#VFzqIqw4Q36fyonV1sYHag",
+            "name": "What payroll management tools are available for free in the UK?",
+            "answerCount": 1,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When it comes to UK payroll software, there are providers offering free payroll management tools. These tools, while geared towards very small businesses and early-day startups, only provide basic functionality, such as payslip generation and tax year reports. However, more advanced features such as calculation automation, real-time reporting and comprehensive compliance support may be missing.",
+              "inLanguage": "en-GB"
+            },
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Question",
+            "@id": "https://payfit.com/#ewXGut1tQdKojSEq2N-ltA",
+            "position": 5,
+            "url": "https://payfit.com/#ewXGut1tQdKojSEq2N-ltA",
+            "name": "What are the benefits of real-time data access in payroll software?",
+            "answerCount": 1,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "There are many benefits to investing in payroll software that provides real-time data access. For one, it makes running payroll so much easier as all numbers and figures update instantly. \nIn PayFit, for instance, once you plug in your pay variables, payslips will update instantly, meaning you can run payroll in just a couple of hours. Youâll also get immediate insights into what your business is spending on its people (think expenses, benefit packages and more) so you can better manage budgets. \nYour HR team can make better, more informed decisions while quickly identifying and correcting any errors that might affect payroll.",
+              "inLanguage": "en-GB"
+            },
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Question",
+            "@id": "https://payfit.com/#HzWqpnSXQIqKleodAumvZw",
+            "position": 6,
+            "url": "https://payfit.com/#HzWqpnSXQIqKleodAumvZw",
+            "name": "How does an employee self-service portal enhance payroll management?",
+            "answerCount": 1,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "If you want to enhance payroll management while reducing administrative tasks, opting for payroll software with an employee self-service (ESS) portal is a good idea. \nIt can help your HR team reduce administrative tasks by getting employees to request their own leave for approval and upload their own expenses. This enhances the autonomy of your employees by giving them access to their own pay data. \nPayFitâs portal not only allows employees to do these things but also to manage their performance with their manager.",
+              "inLanguage": "en-GB"
+            },
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": "PayFit",
+            "applicationCategory": "Payroll Software",
+            "operatingSystem": "Web-based",
+            "url": "https://payfit.com/",
+            "description": "HMRC-recognised, PayFit combines best-in-class payroll software with expert support. Automate your payroll & HR admin and save time.",
+            "offers": {
+              "@type": "Offer",
+              "url": "https://payfit.com/pricing/",
+              "priceCurrency": "GBP",
+              "price": "Variable"
+            },
+            "softwareVersion": "latest version",
+            "inLanguage": "en-GB",
+            "image": {
+              "@type": "ImageObject",
+              "@id": "https://payfit.com/#/schema/logo/image/"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:28.848462+00:00"
+  }
+}

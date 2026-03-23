@@ -1,0 +1,226 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:53.023177+00:00",
+  "source": {
+    "input_url": "https://www.blkb.ch",
+    "canonical_domain": "blkb.ch",
+    "pages_scanned": [
+      "https://www.blkb.ch/",
+      "https://services.blkb.ch/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 858
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Basellandschaftliche Kantonalbank",
+    "website": "https://www.blkb.ch/",
+    "country": "CH",
+    "city": "Liestal",
+    "languages": [],
+    "org_type": "BankOrCreditUnion",
+    "contacts": {
+      "email": "",
+      "phone": "13.1.2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "BankOrCreditUnion"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Basellandschaftliche Kantonalbank",
+        "website": "https://www.blkb.ch/",
+        "email": "",
+        "phone": "13.1.2026",
+        "country": "CH",
+        "city": "Liestal",
+        "org_type": "BankOrCreditUnion"
+      },
+      "evidence": [
+        "BLKB: Die zukunftsorientierte Bank der Schweiz"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "Willkommen bei der Basellandschaftlichen Kantonalbank BLKB - Ihrer zuverlässigen und innovativen Partnerin für Privat- und Firmengeschäfte.",
+        "og_description": "Willkommen bei der Basellandschaftlichen Kantonalbank BLKB - Ihrer zuverlässigen und innovativen Partnerin für Privat- und Firmengeschäfte."
+      },
+      "evidence": [
+        "service",
+        "services",
+        "software"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies"
+        ]
+      },
+      "evidence": [
+        "cookies"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog"
+        ]
+      },
+      "evidence": [
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "BankOrCreditUnion"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 61.6,
+    "final_score": 62,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 62,
+    "raw_score": 61.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BankOrCreditUnion",
+        "name": "Basellandschaftliche Kantonalbank",
+        "alternateName": "BLKB",
+        "url": "https://www.blkb.ch",
+        "address": {
+          "@type": "PostalAddress",
+          "addressRegion": "Basel-Landschaft",
+          "addressCountry": "CH",
+          "addressLocality": "Liestal",
+          "postalCode": "4410",
+          "streetAddress": "Rheinstrasse 7"
+        },
+        "telephone": "+41 61 925 94 94",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.blkb.ch/.resources/foundation/dist/images/logo-web.svg",
+          "width": "88.121",
+          "height": "21"
+        },
+        "sameAs": [
+          "https://www.linkedin.com/company/blkb/",
+          "https://www.facebook.com/blkb.ch",
+          "https://twitter.com/blkb_ch",
+          "https://www.instagram.com/blkb_ch/",
+          "https://www.tiktok.com/@blkb_mittendrin"
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:53.023184+00:00"
+  }
+}

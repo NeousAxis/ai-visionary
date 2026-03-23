@@ -1,0 +1,245 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:10.135700+00:00",
+  "source": {
+    "input_url": "https://www.posthog.com",
+    "canonical_domain": "posthog.com",
+    "pages_scanned": [
+      "https://posthog.com/",
+      "https://posthog.com/about",
+      "https://posthog.com/talk-to-a-human",
+      "https://posthog.com/services",
+      "https://posthog.com/products",
+      "https://posthog.com/pricing",
+      "https://posthog.com/faq",
+      "https://posthog.com/privacy",
+      "https://posthog.com/terms"
+    ],
+    "pages_scanned_count": 9,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "PostHog",
+    "website": "https://posthog.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "Brian@GetPostHog.com",
+      "phone": "0.00000125",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "PostHog",
+        "website": "https://posthog.com/",
+        "email": "Brian@GetPostHog.com",
+        "phone": "0.00000125",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "PostHog – We make dev tools for product engineers"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution"
+        ],
+        "meta_description": "All your developer tools in one place. PostHog gives engineers everything to build, test, measure, and ship successful products faster. Get started free.",
+        "og_description": "All your developer tools in one place. PostHog gives engineers everything to build, test, measure, and ship successful products faster. Get started free."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 68.7,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 68.7,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T17:00:10.135714+00:00"
+  }
+}

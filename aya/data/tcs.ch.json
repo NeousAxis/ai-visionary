@@ -1,0 +1,214 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:20.007665+00:00",
+  "source": {
+    "input_url": "https://www.tcs.ch",
+    "canonical_domain": "tcs.ch",
+    "pages_scanned": [
+      "https://www.tcs.ch/de/",
+      "https://www.tcs.ch/fr/contact-questions/contactcenter.php"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Touring Club Schweiz",
+    "website": "https://www.tcs.ch/de/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+41 58 827 22 20",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "travel",
+    "sector_label": "Tourisme & Transport",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "travel",
+      "voyage",
+      "hotel",
+      "vol",
+      "tourism"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Touring Club Schweiz",
+        "website": "https://www.tcs.ch/de/",
+        "email": "",
+        "phone": "+41 58 827 22 20",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Touring Club Schweiz: damit Sie immer weiterkommen"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "offre",
+          "prestation",
+          "product",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": "TCS - viel mehr als ein Pannendienst: der Club bietet zahlreiche auf die Mobilitätsbedürfnisse der Mitglieder zugeschnittene Vergünstigungen und exklusive Angebote."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "offre",
+        "prestation",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 48.0,
+    "final_score": 48,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.4,
+        "score": 4.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 48,
+    "raw_score": 48.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:49:20.007677+00:00"
+  }
+}

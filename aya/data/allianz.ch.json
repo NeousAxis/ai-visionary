@@ -1,0 +1,218 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:06.718499+00:00",
+  "source": {
+    "input_url": "https://www.allianz.ch",
+    "canonical_domain": "allianz.ch",
+    "pages_scanned": [
+      "https://www.allianz.ch/de/privatkunden.html",
+      "https://www.allianz.ch/de/privatkunden/services.html",
+      "https://www.allianz.ch/fr/clients-prives/services/contact/demande.html",
+      "https://www.allianz.ch/de/informationen/datenschutz.html"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 1665
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Allianz",
+    "website": "https://www.allianz.ch/de/privatkunden.html",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "Data-Privacy@Allianz-Suisse.ch",
+      "phone": "+41 58 358 71 11",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "magazine",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Allianz",
+        "website": "https://www.allianz.ch/de/privatkunden.html",
+        "email": "Data-Privacy@Allianz-Suisse.ch",
+        "phone": "+41 58 358 71 11",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Allianz | Versicherungen & Vorsorge in der Schweiz"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "menu",
+          "offre",
+          "platform",
+          "service",
+          "services",
+          "software",
+          "solution"
+        ],
+        "meta_description": "Mut heisst rein ins nächste Abenteuer. Wir sind immer und überall für Sie da. Mit dem richtigen Schutz für Sie, Ihre Siebensachen und Ihre Zukunft.",
+        "og_description": "Mut heisst rein ins nächste Abenteuer. Wir sind immer und überall für Sie da. Mit dem richtigen Schutz für Sie, Ihre Siebensachen und Ihre Zukunft."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "menu",
+        "offre",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "guide"
+        ]
+      },
+      "evidence": [
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.1,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 58.1,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:49:06.718508+00:00"
+  }
+}

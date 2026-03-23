@@ -1,0 +1,323 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:36.458890+00:00",
+  "source": {
+    "input_url": "https://www.gitlab.com",
+    "canonical_domain": "about.gitlab.com",
+    "pages_scanned": [
+      "https://about.gitlab.com/",
+      "https://gitlab.com/contact",
+      "https://gitlab.com/products",
+      "https://gitlab.com/privacy",
+      "https://gitlab.com/terms"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 17817
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "GitLab",
+    "website": "https://about.gitlab.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "platform",
+      "developer",
+      "devops"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "GitLab",
+        "website": "https://about.gitlab.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Finally, AI for the entire software lifecycle."
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Your intelligent orchestration platform for DevSecOps",
+        "og_description": "Your intelligent orchestration platform for DevSecOps"
+      },
+      "evidence": [
+        "app",
+        "application",
+        "cloud",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.0,
+    "final_score": 73,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 73,
+    "raw_score": 73.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@context": "https://schema.org",
+            "@id": "https://about.gitlab.com/#/schema/organization/#corporation",
+            "description": "GitLab is the most comprehensive AI-powered DevSecOps platform for software innovation. GitLab enables organizations to increase developer productivity, improve operational efficiency, reduce security and compliance risk, and accelerate digital transformation.",
+            "foundingDate": "2011",
+            "legalName": "GitLab Inc.",
+            "name": "GitLab",
+            "slogan": "Our mission is to change all creative work from read-only to read-write so that everyone can contribute.",
+            "tickerSymbol": "GTLB",
+            "url": "https://about.gitlab.com",
+            "@type": [
+              "Organization",
+              "Corporation"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "268 Bush Street #350",
+              "addressLocality": "San Francisco",
+              "addressRegion": "CA",
+              "postalCode": "94104",
+              "addressCountry": "US"
+            },
+            "founders": [
+              {
+                "@type": "Person",
+                "name": "Sid Sijbrandij"
+              },
+              {
+                "@type": "Person",
+                "name": "Dmitriy Zaporozhets"
+              }
+            ],
+            "knowsAbout": [
+              {
+                "@type": "Thing",
+                "name": "DevOps"
+              },
+              {
+                "@type": "Thing",
+                "name": "CI/CD"
+              },
+              {
+                "@type": "Thing",
+                "name": "DevSecOps"
+              },
+              {
+                "@type": "Thing",
+                "name": "GitOps"
+              },
+              {
+                "@type": "Thing",
+                "name": "DevOps Platform"
+              },
+              {
+                "@type": "Thing",
+                "name": "DevSecOps Platform"
+              },
+              {
+                "@type": "Thing",
+                "name": "AI Code Assistant"
+              },
+              {
+                "@type": "Thing",
+                "name": "Application Security Testing"
+              },
+              {
+                "@type": "Thing",
+                "name": "Enterprise Agile Planning"
+              },
+              {
+                "@type": "Thing",
+                "name": "Source Code Management"
+              },
+              {
+                "@type": "Thing",
+                "name": "AI-Assisted Software Development"
+              }
+            ],
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://res.cloudinary.com/about-gitlab-com/image/upload/v1750705064/crnigurqmalqj1uwhlg8.png"
+            },
+            "sameAs": [
+              "https://www.facebook.com/gitlab",
+              "https://en.wikipedia.org/wiki/GitLab",
+              "https://www.instagram.com/gitlab/",
+              "https://twitter.com/gitlab",
+              "https://www.linkedin.com/company/gitlab-com",
+              "https://www.youtube.com/channel/UCnMGQ8QHMAnVIsI3xJrihhg"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:57:36.458900+00:00"
+  }
+}

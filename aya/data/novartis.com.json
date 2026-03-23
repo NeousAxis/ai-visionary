@@ -1,0 +1,308 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:12.337254+00:00",
+  "source": {
+    "input_url": "https://www.novartis.com",
+    "canonical_domain": "novartis.com",
+    "pages_scanned": [
+      "https://www.novartis.com/",
+      "https://www.novartis.com/about",
+      "https://www.novartis.com/about/products",
+      "https://www.novartis.com/privacy"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 4639
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Novartis",
+    "website": "https://www.novartis.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1 2 3 4 5 6 7",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "health",
+    "sector_label": "Santé & Pharma",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "health",
+      "medical",
+      "pharma",
+      "clinical",
+      "patient"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Novartis",
+        "website": "https://www.novartis.com/",
+        "email": "",
+        "phone": "1 2 3 4 5 6 7",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Novartis"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service"
+        ],
+        "meta_description": "Working together, we can reimagine medicine to improve and extend people’s lives.",
+        "og_description": "Working together, we can reimagine medicine to improve and extend people’s lives."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "menu",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 59.3,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 59.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.novartis.com/",
+            "name": "Novartis",
+            "description": "Working together, we can reimagine medicine to improve and extend people’s lives.",
+            "sameAs": [
+              "https://www.twitter.com/novartis",
+              "https://www.linkedin.com/company/novartis",
+              "https://www.youtube.com/user/novartis",
+              "https://www.facebook.com/novartis",
+              "https://www.instagram.com/novartis"
+            ],
+            "url": "https://www.novartis.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.novartis.com/sites/novartis_com/files/novartis-logo-open-graph.jpg"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.novartis.com/home",
+            "description": "Working together, we can reimagine medicine to improve and extend people’s lives.",
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://www.novartis.com/"
+                }
+              ]
+            },
+            "author": {
+              "@type": "Organization",
+              "@id": "https://www.novartis.com/",
+              "name": "Novartis",
+              "url": "https://www.novartis.com/",
+              "sameAs": [
+                "https://www.twitter.com/novartis",
+                "https://www.linkedin.com/company/novartis",
+                "https://www.youtube.com/user/novartis",
+                "https://www.facebook.com/novartis",
+                "https://www.instagram.com/novartis"
+              ],
+              "logo": {
+                "@type": "ImageObject",
+                "representativeOfPage": "True",
+                "url": "https://www.novartis.com/sites/novartis_com/files/novartis-logo-open-graph.jpg"
+              }
+            },
+            "publisher": {
+              "@type": "Organization",
+              "@id": "https://www.novartis.com/",
+              "name": "Novartis",
+              "url": "https://www.novartis.com/",
+              "sameAs": [
+                "https://www.twitter.com/novartis",
+                "https://www.linkedin.com/company/novartis",
+                "https://www.youtube.com/user/novartis",
+                "https://www.facebook.com/novartis",
+                "https://www.instagram.com/novartis"
+              ],
+              "logo": {
+                "@type": "ImageObject",
+                "representativeOfPage": "True",
+                "url": "https://www.novartis.com/sites/novartis_com/files/novartis-logo-open-graph.jpg"
+              }
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.novartis.com/",
+            "name": "Novartis",
+            "url": "https://www.novartis.com/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://www.novartis.com/search?keyword={q}"
+              },
+              "query-input": "required name=q"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:12.337263+00:00"
+  }
+}

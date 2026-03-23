@@ -1,0 +1,342 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:06.347318+00:00",
+  "source": {
+    "input_url": "https://www.pagerduty.com",
+    "canonical_domain": "pagerduty.com",
+    "pages_scanned": [
+      "https://www.pagerduty.com/",
+      "https://www.pagerduty.com/company/",
+      "https://www.pagerduty.com/contact-us/",
+      "https://www.pagerduty.com/services/",
+      "https://www.pagerduty.com/platform/operations-cloud/",
+      "https://www.pagerduty.com/pricing/incident-management/",
+      "https://www.pagerduty.com/faq/",
+      "https://www.pagerduty.com/legal/",
+      "https://www.pagerduty.com/privacy-policy/"
+    ],
+    "pages_scanned_count": 9,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 15
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "PagerDuty",
+    "website": "https://www.pagerduty.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "contact@gdprlocal.com",
+      "phone": "+33 6 44 63 02 68",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "PagerDuty",
+        "website": "https://www.pagerduty.com/",
+        "email": "contact@gdprlocal.com",
+        "phone": "+33 6 44 63 02 68",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "PagerDuty: The AI-First Operations Platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Transform critical operations with PagerDuty's AI first Operations Platform. Harness agentic AI and automation to accelerate work and build resilience.",
+        "og_description": "Transform critical operations with PagerDuty's AI first Operations Platform. Harness agentic AI and automation to accelerate work and build resilience."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.7,
+    "final_score": 76,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 76,
+    "raw_score": 75.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.pagerduty.com/",
+            "url": "https://www.pagerduty.com/",
+            "name": "PagerDuty: The AI-First Operations Platform",
+            "isPartOf": {
+              "@id": "https://www.pagerduty.com/#website"
+            },
+            "about": {
+              "@id": "https://www.pagerduty.com/#organization"
+            },
+            "datePublished": "2023-10-10T19:38:59+00:00",
+            "dateModified": "2025-12-13T08:54:53+00:00",
+            "description": "Transform critical operations with PagerDuty's AI first Operations Platform. Harness agentic AI and automation to accelerate work and build resilience.",
+            "breadcrumb": {
+              "@id": "https://www.pagerduty.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.pagerduty.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.pagerduty.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.pagerduty.com/#website",
+            "url": "https://www.pagerduty.com/",
+            "name": "PagerDuty",
+            "description": "Build It | Ship It | Own It",
+            "publisher": {
+              "@id": "https://www.pagerduty.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.pagerduty.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.pagerduty.com/#organization",
+            "name": "PagerDuty",
+            "url": "https://www.pagerduty.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.pagerduty.com/#/schema/logo/image/",
+              "url": "https://cdn.pagerduty.com/wp-content/uploads/2022/11/PagerDuty-Green-logo.svg",
+              "contentUrl": "https://cdn.pagerduty.com/wp-content/uploads/2022/11/PagerDuty-Green-logo.svg",
+              "width": 1,
+              "height": 1,
+              "caption": "PagerDuty"
+            },
+            "image": {
+              "@id": "https://www.pagerduty.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://business.facebook.com/PagerDuty/",
+              "https://x.com/pagerduty",
+              "https://www.instagram.com/pagerduty/",
+              "https://www.linkedin.com/company/pagerduty"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:06.347326+00:00"
+  }
+}

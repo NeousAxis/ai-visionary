@@ -1,0 +1,260 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:53.659963+00:00",
+  "source": {
+    "input_url": "https://www.shopify.com",
+    "canonical_domain": "shopify.com",
+    "pages_scanned": [
+      "https://www.shopify.com/",
+      "https://www.shopify.com/about",
+      "https://www.shopify.com/contact",
+      "https://www.shopify.com/products",
+      "https://www.shopify.com/pricing",
+      "https://www.shopify.com/faq",
+      "https://www.shopify.com/legal",
+      "https://privacy.shopify.com/en",
+      "https://www.shopify.com/legal/terms"
+    ],
+    "pages_scanned_count": 9,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1081
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Shopify",
+    "website": "https://www.shopify.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "info@domain.com",
+      "phone": "9.9(8)-(10",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Shopify",
+        "website": "https://www.shopify.com/",
+        "email": "info@domain.com",
+        "phone": "9.9(8)-(10",
+        "country": "",
+        "city": "",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Shopify: The All-in-One Commerce Platform for Businesses - Shopify"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Try Shopify free and start a business or grow an existing one. Get more than ecommerce software with tools to manage every part of your business.",
+        "og_description": "Try Shopify free and start a business or grow an existing one. Get more than ecommerce software with tools to manage every part of your business."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Corporation"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 77.1,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 77.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Corporation",
+        "name": "Shopify",
+        "legalName": "Shopify Inc.",
+        "url": "https://www.shopify.com/",
+        "logo": "https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-primary-logo-456baa801ee66a0a435671082365958316831c9960c480451dd0330bcdae304f.svg",
+        "sameAs": [
+          "https://www.facebook.com/shopify/",
+          "https://x.com/Shopify",
+          "https://www.instagram.com/shopify/",
+          "https://www.youtube.com/shopify",
+          "https://www.linkedin.com/company/shopify/",
+          "https://github.com/Shopify",
+          "https://en.wikipedia.org/wiki/Shopify"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "Customer Support",
+          "url": "https://help.shopify.com/"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:57:53.659976+00:00"
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:27.669946+00:00",
+  "source": {
+    "input_url": "https://www.tagblatt.ch",
+    "canonical_domain": "tagblatt.ch",
+    "pages_scanned": [
+      "https://www.tagblatt.ch/",
+      "https://portal.tagblatt.ch/s/faq"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 116
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "St. Galler Tagblatt",
+    "website": "https://www.tagblatt.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "20. - 27.4.2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "NewsMediaOrganization"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "St. Galler Tagblatt",
+        "website": "https://www.tagblatt.ch/",
+        "email": "",
+        "phone": "20. - 27.4.2026",
+        "country": "CH",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "St. Galler Tagblatt | Nachrichten für die Ostschweiz"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "menu"
+        ],
+        "meta_description": "Das regionale Portal. Rund um die Uhr Nachrichten aus der Region, zu Sport, Politik, Wirtschaft und Unterhaltung.",
+        "og_description": "Das regionale Portal. Rund um die Uhr Nachrichten aus der Region, zu Sport, Politik, Wirtschaft und Unterhaltung."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso"
+        ]
+      },
+      "evidence": [
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog"
+        ]
+      },
+      "evidence": [
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "NewsMediaOrganization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.1,
+    "final_score": 60,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 60,
+    "raw_score": 60.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "name": "Startseite",
+              "@id": "https://www.tagblatt.ch/"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "NewsMediaOrganization",
+        "name": "St. Galler Tagblatt",
+        "url": "https://www.tagblatt.ch/",
+        "sameAs": [
+          "https://www.facebook.com/tagblatt",
+          "https://www.instagram.com/tagblatt_ch",
+          "https://www.twitter.com/tagblatt_ch",
+          "https://www.linkedin.com/company/11679772",
+          "https://de.wikipedia.org/wiki/St._Galler_Tagblatt",
+          "https://www.wikidata.org/wiki/Q689052"
+        ],
+        "masthead": "https://www.tagblatt.ch/impressum",
+        "foundingDate": 1839,
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.tagblatt.ch/static/sgt/publisher-logo.png",
+          "width": 150,
+          "height": 150
+        },
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+41-58-2005555",
+            "contactType": "customer service"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:27.669956+00:00"
+  }
+}

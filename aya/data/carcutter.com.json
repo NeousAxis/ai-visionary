@@ -1,0 +1,333 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:10.592336+00:00",
+  "source": {
+    "input_url": "https://www.meero.com",
+    "canonical_domain": "carcutter.com",
+    "pages_scanned": [
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/",
+      "https://www.carcutter.com/"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "CarCutter",
+    "website": "https://www.carcutter.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "shop",
+      "buy",
+      "marketplace",
+      "product"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "CarCutter",
+        "website": "https://www.carcutter.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Scalable, Consistent Vehicle Imagery Solution | CarCutter"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "product",
+          "products",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Forget mediocre visuals. CarCutter delivers fast, branded, AI-enhanced vehicle imagery at scale. Because great visuals sell more cars.",
+        "og_description": "Forget mediocre visuals. CarCutter delivers fast, branded, AI-enhanced vehicle imagery at scale. Because great visuals sell more cars."
+      },
+      "evidence": [
+        "api",
+        "product",
+        "products",
+        "solution",
+        "solutions"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "documentation",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.0,
+    "final_score": 73,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 73,
+    "raw_score": 73.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.carcutter.com/",
+            "url": "https://www.carcutter.com/",
+            "name": "Scalable, Consistent Vehicle Imagery Solution | CarCutter",
+            "isPartOf": {
+              "@id": "https://www.carcutter.com/#website"
+            },
+            "about": {
+              "@id": "https://www.carcutter.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.carcutter.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.carcutter.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://www.carcutter.com/wp-content/uploads/2025/06/CarCutter.jpg",
+            "datePublished": "2025-03-25T07:34:54+00:00",
+            "dateModified": "2026-03-12T14:46:41+00:00",
+            "description": "Forget mediocre visuals. CarCutter delivers fast, branded, AI-enhanced vehicle imagery at scale. Because great visuals sell more cars.",
+            "breadcrumb": {
+              "@id": "https://www.carcutter.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.carcutter.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://www.carcutter.com/#primaryimage",
+            "url": "https://www.carcutter.com/wp-content/uploads/2025/06/CarCutter.jpg",
+            "contentUrl": "https://www.carcutter.com/wp-content/uploads/2025/06/CarCutter.jpg",
+            "width": 1200,
+            "height": 675,
+            "caption": "CarCutter"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.carcutter.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "🏠︎"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.carcutter.com/#website",
+            "url": "https://www.carcutter.com/",
+            "name": "CarCutter",
+            "description": "Car images that make people *click*",
+            "publisher": {
+              "@id": "https://www.carcutter.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.carcutter.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.carcutter.com/#organization",
+            "name": "CarCutter",
+            "url": "https://www.carcutter.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.carcutter.com/#/schema/logo/image/",
+              "url": "https://www.carcutter.com/wp-content/uploads/2025/06/CarCutter.jpg",
+              "contentUrl": "https://www.carcutter.com/wp-content/uploads/2025/06/CarCutter.jpg",
+              "width": 1200,
+              "height": 675,
+              "caption": "CarCutter"
+            },
+            "image": {
+              "@id": "https://www.carcutter.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.linkedin.com/company/carcutter/mycompany/",
+              "https://www.youtube.com/@carcutter8835"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:10.592344+00:00"
+  }
+}

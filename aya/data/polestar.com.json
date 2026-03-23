@@ -1,0 +1,209 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:50.586368+00:00",
+  "source": {
+    "input_url": "https://www.polestar.com",
+    "canonical_domain": "polestar.com",
+    "pages_scanned": [
+      "https://www.polestar.com/de-ch/",
+      "https://www.polestar.com/de-ch/about",
+      "https://www.polestar.com/de-ch/auth/login?to=/de-ch/services/undefined",
+      "https://www.polestar.com/de-ch/legal",
+      "https://www.polestar.com/de-ch/legal/privacy/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 16
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Polestar â Elektrische Fahrzeuge",
+    "website": "https://www.polestar.com/de-ch/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "VideoObject",
+    "contacts": {
+      "email": "",
+      "phone": "2024 2023 2022 2021 2020 2019 2018 2017 2024",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.5,
+    "source": "keyword_match",
+    "evidence": [
+      "shop",
+      "store"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Polestar â Elektrische Fahrzeuge",
+        "website": "https://www.polestar.com/de-ch/",
+        "email": "",
+        "phone": "2024 2023 2022 2021 2020 2019 2018 2017 2024",
+        "country": "",
+        "city": "",
+        "org_type": "VideoObject"
+      },
+      "evidence": [
+        "Polestar â Elektrische Fahrzeuge | Polestar CH"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "service",
+          "services"
+        ],
+        "meta_description": "Wir sind eine Marke fÃ¼r elektrische Performance-Fahrzeug, die die Gesellschaft verbessern will.",
+        "og_description": "Wir sind eine Marke fÃ¼r elektrische Performance-Fahrzeug, die die Gesellschaft verbessern will."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies"
+        ]
+      },
+      "evidence": [
+        "cookies"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "VideoObject"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 50.7,
+    "final_score": 51,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 51,
+    "raw_score": 50.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Polestar 4 aus verschiedenen Blickwinkeln prÃ¤sentiert",
+        "description": "Polestar 4 in hellblauer Farbe mit glÃ¤nzender Beschichtung aus verschiedenen Blickwinkeln vor weiÃem Hintergrund gezeigt.",
+        "thumbnailUrl": "https://www.polestar.com/dato-assets/94392/1747654204-polestar-home-moments-of-motion-polestar4-thumb-d.jpg?fm=webp&only-imgix=true&fit=min&q=80&dpr=1",
+        "uploadDate": "2025-05-19T13:29:31+02:00",
+        "contentUrl": "https://www.polestar.com/dato-assets/94392/1753947772-polestar-home-moments-of-motion-polestar4-d.mp4",
+        "duration": "PT8S"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:50.586382+00:00"
+  }
+}

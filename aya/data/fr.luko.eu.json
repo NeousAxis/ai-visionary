@@ -1,0 +1,232 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:06.285273+00:00",
+  "source": {
+    "input_url": "https://www.luko.eu",
+    "canonical_domain": "fr.luko.eu",
+    "pages_scanned": [
+      "https://www.fr.luko.eu/",
+      "https://www.fr.luko.eu/aide/",
+      "https://www.fr.luko.eu/assurance-habitation/contrat/prix-assurance-habitation/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 840
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Assurance en ligne en toute confiance",
+    "website": "https://www.fr.luko.eu/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "953-811-338",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "realestate",
+    "sector_label": "Immobilier",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "immobilier",
+      "logement",
+      "appartement",
+      "maison",
+      "location"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Assurance en ligne en toute confiance",
+        "website": "https://www.fr.luko.eu/",
+        "email": "",
+        "phone": "953-811-338",
+        "country": "",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Assurance en ligne en toute confiance | Luko by Allianz Direct"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "offre",
+          "produit",
+          "service",
+          "services"
+        ],
+        "meta_description": "Luko by Allianz Direct est votre assureur en ligne : assurance habitation, assurance auto, assurance voyage. Votre protection au quotidien !",
+        "og_description": "Luko by Allianz Direct est votre assureur en ligne : assurance habitation, assurance auto, assurance voyage. Votre protection au quotidien !"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "offre",
+        "produit",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "BreadcrumbList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@type": "WebPage",
+                "@id": "https://www.fr.luko.eu/",
+                "name": "Assurance en ligne en toute confiance"
+              }
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:06.285283+00:00"
+  }
+}

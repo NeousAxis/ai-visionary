@@ -1,0 +1,294 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:02.252117+00:00",
+  "source": {
+    "input_url": "https://www.unine.ch",
+    "canonical_domain": "unine.ch",
+    "pages_scanned": [
+      "https://www.unine.ch/",
+      "https://www.unine.ch/contact"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Université de Neuchâtel",
+    "website": "https://www.unine.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "bureau.presse@unine.ch",
+      "phone": "+41 32 718 10 00",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "université",
+      "formation",
+      "student",
+      "étudiant",
+      "campus"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Université de Neuchâtel",
+        "website": "https://www.unine.ch/",
+        "email": "bureau.presse@unine.ch",
+        "phone": "+41 32 718 10 00",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Université de Neuchâtel"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "service",
+          "services"
+        ],
+        "meta_description": "Venez étudier à l'Université de Neuchâtel. Découvrez nos quatre facultés et nos nombreuses formations en bachelor et en master.",
+        "og_description": "Venez étudier à l'Université de Neuchâtel. Découvrez nos quatre facultés et nos nombreuses formations en bachelor et en master."
+      },
+      "evidence": [
+        "app",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 50.1,
+    "final_score": 50,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 50.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.unine.ch/",
+            "url": "https://www.unine.ch/",
+            "name": "Université de Neuchâtel",
+            "isPartOf": {
+              "@id": "https://www.unine.ch/#website"
+            },
+            "about": {
+              "@id": "https://www.unine.ch/#organization"
+            },
+            "datePublished": "2024-01-19T07:25:54+00:00",
+            "dateModified": "2026-03-19T07:15:36+00:00",
+            "description": "Venez étudier à l'Université de Neuchâtel. Découvrez nos quatre facultés et nos nombreuses formations en bachelor et en master.",
+            "breadcrumb": {
+              "@id": "https://www.unine.ch/#breadcrumb"
+            },
+            "inLanguage": "fr-FR",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.unine.ch/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.unine.ch/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.unine.ch/#website",
+            "url": "https://www.unine.ch/",
+            "name": "Université de Neuchâtel",
+            "description": "",
+            "publisher": {
+              "@id": "https://www.unine.ch/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.unine.ch/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "fr-FR"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.unine.ch/#organization",
+            "name": "Université de Neuchâtel",
+            "url": "https://www.unine.ch/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "fr-FR",
+              "@id": "https://www.unine.ch/#/schema/logo/image/",
+              "url": "https://www.unine.ch/wp-content/uploads/2024/09/unine-thumbnail.png",
+              "contentUrl": "https://www.unine.ch/wp-content/uploads/2024/09/unine-thumbnail.png",
+              "width": 1920,
+              "height": 1080,
+              "caption": "Université de Neuchâtel"
+            },
+            "image": {
+              "@id": "https://www.unine.ch/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/UniNeuchatel",
+              "https://www.instagram.com/unineuchatel",
+              "https://www.youtube.com/user/uninepromotion",
+              "https://www.linkedin.com/school/universit-de-neuchtel",
+              "https://open.spotify.com/show/0bJuJTRIxKDTFPVJWuepDX?si=fe9e4cf6e02b4115",
+              "https://www.tiktok.com/@unineuchatel"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:02.252132+00:00"
+  }
+}

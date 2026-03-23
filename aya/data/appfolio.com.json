@@ -1,0 +1,331 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:40.892066+00:00",
+  "source": {
+    "input_url": "https://www.appfolio.com",
+    "canonical_domain": "appfolio.com",
+    "pages_scanned": [
+      "https://www.appfolio.com/",
+      "https://www.appfolio.com/performance-platform",
+      "https://www.appfolio.com/resources/contact",
+      "https://www.appfolio.com/services",
+      "https://www.appfolio.com/pricing",
+      "https://www.appfolio.com/privacy",
+      "https://www.appfolio.com/terms"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 359
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "AppFolio",
+    "website": "https://www.appfolio.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "privacy@appfolio.com",
+      "phone": "866.648.1536",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "data",
+      "analytics"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "AppFolio",
+        "website": "https://www.appfolio.com/",
+        "email": "privacy@appfolio.com",
+        "phone": "866.648.1536",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "AppFolio: Move Beyond Property Management Software"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Ditch yesterday’s property management software. Learn how the AppFolio Performance Platform helps you deliver more value for residents, owners, and investors.",
+        "og_description": "Ditch yesterday’s property management software. Learn how the AppFolio Performance Platform helps you deliver more value for residents, owners, and investors."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "methodology",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "methodology",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "cookies",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "cookies",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "AppFolio Property Management Software",
+            "url": "https://www.appfolio.com/",
+            "description": "AppFolio property management software is trusted by thousands to get organized, efficient, and profitable. Automate and grow your business. Get a demo today!",
+            "sameAs": [
+              "https://www.facebook.com/appfolio/",
+              "https://www.instagram.com/appfolio/",
+              "https://x.com/appfolio"
+            ],
+            "logo": "https://www.appfolio.com/v3/img/shared/logo-appfolio.svg"
+          },
+          {
+            "@context": "https://schema.org/",
+            "@type": "WebApplication",
+            "browserRequirements": "Current release of Chrome, Firefox, or Safari. Microsoft Edge 13 and 14 requires Windows 10. Internet Explorer 11 requires Windows 7 or 8. Users of Internet Explorer 9 and 10 should upgrade to a newer browser, and IE9 users on Windows XP should consider using Firefox.",
+            "applicationCategory": "Property Management Software",
+            "availableOnDevice": "Android, iOS, Windows",
+            "countriesSupported": "United States",
+            "featureList": "https://www.appfolio.com/features",
+            "operatingSystem": "All",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "reviewCount": "454",
+              "ratingValue": "4.3",
+              "description": "AppFolio Property Manager is designed for property managers who want to automate, modernize, and grow their business. Whether you manage multifamily, single-family, student housing, HOA, condo, or commercial properties - or maybe you manage a mixed portfolio - our all-in-one cloud-based solution has features built specifically for you so you can streamline your workday and focus on your bottom line. Transparent Pricing. No Hidden Fees. Free Upgrades. Period. With AppFolio's cloud-based property management software you get everything you need to run a more successful business."
+            },
+            "name": "AppFolio Property Manager",
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager for Community Associations: $0.80 per unit/month.",
+                "price": "0.80",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager for Residential: $1.40 per unit/month.",
+                "price": "1.40",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager for Student Housing: $1.40 per unit/month.",
+                "price": "1.40",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager for Commercial: $1.50 per unit/month.",
+                "price": "1.50",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager Plus is for larger, growing organizations typically managing 1,000+ units across regions: AppFolio Property Manager Plus for residential is $3.00 per unit/month.",
+                "price": "3.00",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager Plus is for larger, growing organizations typically managing 1,000+ units across regions: AppFolio Property Manager Plus for commercial is $1.50 per unit/month.",
+                "price": "1.50",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager Plus is for larger, growing organizations typically managing 1,000+ units across regions: AppFolio Property Manager Plus for community associations is $0.85 per unit/month.",
+                "price": "0.85",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              },
+              {
+                "@type": "Offer",
+                "name": "AppFolio Property Manager Plus is for larger, growing organizations typically managing 1,000+ units across regions: AppFolio Property Manager Plus for student housing is $3.00 per unit/month.",
+                "price": "3.00",
+                "priceCurrency": "USD",
+                "url": "https://www.appfolio.com/pricing"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:40.892075+00:00"
+  }
+}

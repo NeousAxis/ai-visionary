@@ -1,0 +1,320 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:59.933034+00:00",
+  "source": {
+    "input_url": "https://www.lesaffre.com",
+    "canonical_domain": "lesaffre.com",
+    "pages_scanned": [
+      "https://www.lesaffre.com/",
+      "https://www.lesaffre.com/contact/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 7
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Lesaffre",
+    "website": "https://www.lesaffre.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "university",
+      "school",
+      "formation",
+      "student",
+      "research"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Lesaffre",
+        "website": "https://www.lesaffre.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Lesaffre : Global key player in fermentation"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "menu",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "A global player in the fermentation of microorganisms (yeasts, bacterias) for baking, taste, healthcare & biotechnology.",
+        "og_description": "A global player in the fermentation of microorganisms (yeasts, bacterias) for baking, taste, healthcare & biotechnology."
+      },
+      "evidence": [
+        "app",
+        "menu",
+        "product",
+        "products",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "help"
+        ]
+      },
+      "evidence": [
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 56.0,
+    "final_score": 56,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 56,
+    "raw_score": 56.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.lesaffre.com/",
+            "url": "https://www.lesaffre.com/",
+            "name": "Lesaffre",
+            "isPartOf": {
+              "@id": "https://www.lesaffre.com/#website"
+            },
+            "about": {
+              "@id": "https://www.lesaffre.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.lesaffre.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.lesaffre.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://www.lesaffre.com/wp-content/uploads/2024/02/rdi-welcome-768x470.jpg",
+            "datePublished": "2020-03-25T10:27:27+00:00",
+            "dateModified": "2025-02-21T16:08:46+00:00",
+            "description": false,
+            "breadcrumb": {
+              "@id": "https://www.lesaffre.com/#breadcrumb"
+            },
+            "inLanguage": "en-GB",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.lesaffre.com/"
+                ]
+              }
+            ],
+            "logo": "https://www.lesaffre.com/wp-content/uploads/2020/03/logo-lesaffre.png",
+            "address": {
+              "@type": "PostalAddress",
+              "postalCode": "59700",
+              "addressLocality": "Marcq-en-Barœul",
+              "country": "FR"
+            }
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-GB",
+            "@id": "https://www.lesaffre.com/#primaryimage",
+            "url": "https://www.lesaffre.com/wp-content/uploads/2024/02/rdi-welcome-scaled.jpg",
+            "contentUrl": "https://www.lesaffre.com/wp-content/uploads/2024/02/rdi-welcome-scaled.jpg",
+            "width": 2560,
+            "height": 1566
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.lesaffre.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Homepage"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.lesaffre.com/#website",
+            "url": "https://www.lesaffre.com/",
+            "name": "Lesaffre",
+            "description": "Acteur mondial de référence en fermentation",
+            "publisher": {
+              "@id": "https://www.lesaffre.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.lesaffre.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.lesaffre.com/#organization",
+            "name": "Lesaffre",
+            "url": "https://www.lesaffre.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-GB",
+              "@id": "https://www.lesaffre.com/#/schema/logo/image/",
+              "url": "https://www.lesaffre.com/wp-content/uploads/2020/03/logo-lesaffre.png",
+              "contentUrl": "https://www.lesaffre.com/wp-content/uploads/2020/03/logo-lesaffre.png",
+              "width": 500,
+              "height": 120,
+              "caption": "Lesaffre"
+            },
+            "image": {
+              "@id": "https://www.lesaffre.com/#/schema/logo/image/"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:59.933046+00:00"
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:42.327141+00:00",
+  "source": {
+    "input_url": "https://www.francetvinfo.fr",
+    "canonical_domain": "franceinfo.fr",
+    "pages_scanned": [
+      "https://www.franceinfo.fr/",
+      "https://www.franceinfo.fr/economie/services/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 919
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "franceinfo",
+    "website": "https://www.franceinfo.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "xxxx@xxx.xx",
+      "phone": "1 2 3 4 5 6",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "journal",
+      "press",
+      "magazine",
+      "podcast"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "franceinfo",
+        "website": "https://www.franceinfo.fr/",
+        "email": "xxxx@xxx.xx",
+        "phone": "1 2 3 4 5 6",
+        "country": "FR",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Franceinfo - Actualités en temps réel et info en direct"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "product",
+          "produit",
+          "produits",
+          "service",
+          "services"
+        ],
+        "meta_description": "Pour savoir ce qui se passe maintenant - Toutes les infos livrées minute par minute par la rédaction de Franceinfo. Photos, vidéos, tweets et vos interventions",
+        "og_description": "Pour savoir ce qui se passe maintenant - Toutes les infos livrées minute par minute par la rédaction de Franceinfo. Photos, vidéos, tweets et vos interventions"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "confidentialité",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "confidentialité",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 61.6,
+    "final_score": 62,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 62,
+    "raw_score": 61.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "name": "franceinfo",
+        "alternateName": "France Info",
+        "url": "https://www.franceinfo.fr",
+        "description": "Pour savoir ce qui se passe maintenant - Toutes les infos livr&amp;eacute;es minute par minute par la r&amp;eacute;daction de Franceinfo. Photos, vid&amp;eacute;os, tweets et vos interventions",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.franceinfo.fr/recherche/?request={query}",
+          "query-input": "required name=query"
+        },
+        "publisher": {
+          "@type": "NewsMediaOrganization",
+          "name": "Franceinfo",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.franceinfo.fr/assets/common/images/logos/logo-85e6e7f6.png",
+            "contentUrl": "https://www.franceinfo.fr/assets/common/images/logos/logo-85e6e7f6.png",
+            "width": 366,
+            "height": 60
+          },
+          "sameAs": [
+            "https://www.facebook.com/franceinfo",
+            "https://twitter.com/franceinfo",
+            "https://www.youtube.com/user/franceinfo",
+            "https://www.instagram.com/franceinfo/",
+            "https://www.snapchat.com/add/franceinfo"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:42.327155+00:00"
+  }
+}

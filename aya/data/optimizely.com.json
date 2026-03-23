@@ -1,0 +1,452 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:15.288982+00:00",
+  "source": {
+    "input_url": "https://www.optimizely.com",
+    "canonical_domain": "optimizely.com",
+    "pages_scanned": [
+      "https://www.optimizely.com/",
+      "https://www.optimizely.com/company/",
+      "https://www.optimizely.com/contact",
+      "https://support.optimizely.com/hc/en-us",
+      "https://www.optimizely.com/products",
+      "https://www.optimizely.com/plans/",
+      "https://www.optimizely.com/trust-center",
+      "https://www.optimizely.com/legal/privacy-notice/",
+      "https://www.optimizely.com/legal/terms"
+    ],
+    "pages_scanned_count": 9,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 6994
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Optimizely",
+    "website": "https://www.optimizely.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "DPO@optimizely.com",
+      "phone": "+1 603 594 0249",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Optimizely",
+        "website": "https://www.optimizely.com/",
+        "email": "DPO@optimizely.com",
+        "phone": "+1 603 594 0249",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "World's leading AI-powered digital experiences - Optimizely"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Empowering marketing and digital teams with everything they need to create content fast, test and personalize with ease, and prove impact on business outcomes.",
+        "og_description": "Empowering marketing and digital teams with everything they need to create content fast, test and personalize with ease, and prove impact on business outcomes."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "glossary",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 77.1,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 77.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Optimizely",
+        "alternateName": [
+          "Episerver",
+          "Idio",
+          "Optivo",
+          "Insite Software",
+          "Zaius",
+          "Welcome Software"
+        ],
+        "url": "https://www.optimizely.com/"
+      },
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "description": "Optimizely powers the entire marketing lifecycle, unlocking your team to create content with speed, launch experiments with confidence, and deliver experiences of the highest quality.",
+          "alternateName": [
+            "Episerver",
+            "Idio",
+            "Optivo",
+            "Insite Software",
+            "Zaius"
+          ],
+          "sameAs": [
+            "https://www.instagram.com/optimizely/",
+            "https://www.youtube.com/@Optimizely",
+            "https://www.linkedin.com/company/optimizely/"
+          ],
+          "url": "https://www.optimizely.com/",
+          "address": [
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "US",
+              "addressLocality": "New York",
+              "addressRegion": "NY",
+              "postalCode": "10003",
+              "streetAddress": "119 5th Ave 7th floor"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "US",
+              "addressLocality": "Minneapolis",
+              "addressRegion": "MN",
+              "postalCode": "55401",
+              "streetAddress": "729 N Washington Ave, Suite 600"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "US",
+              "addressLocality": "Austin",
+              "addressRegion": "Tx",
+              "postalCode": "78705",
+              "streetAddress": "3300 N. Interstate Highway 35, 7th floor"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "US",
+              "addressLocality": "Nashua",
+              "addressRegion": "NH",
+              "postalCode": "03063",
+              "streetAddress": "20 Trafalgar Sq Suite 200"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "SE",
+              "addressLocality": "Stockholm",
+              "postalCode": "11123",
+              "streetAddress": "Torsgatan 11, 3rd floor"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "SE",
+              "addressLocality": "Gothenburg",
+              "postalCode": "41109",
+              "streetAddress": "United Spaces, Ö. Hamngatan 16"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "UK",
+              "addressLocality": "London",
+              "postalCode": "SE19PG",
+              "streetAddress": "Cargo Works, 1-2 Hatfields"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "DE",
+              "addressLocality": "Berlin",
+              "postalCode": "10179",
+              "streetAddress": "Wallstraße 59"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "NL",
+              "addressLocality": "Amsterdam",
+              "postalCode": "1012RB",
+              "streetAddress": "Paleisstraat 1"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "NO",
+              "addressLocality": "Oslo",
+              "postalCode": "0278",
+              "streetAddress": "Karenslyst allé 2"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "DK",
+              "addressLocality": "Søborg",
+              "postalCode": "2860",
+              "streetAddress": "Automatikvej 1"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "SE",
+              "addressLocality": "Malmö",
+              "postalCode": "21122",
+              "streetAddress": "Regus, Adelgatan 21"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "SE",
+              "addressLocality": "Haparanda",
+              "postalCode": "95331",
+              "streetAddress": "Torggatan 41A"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "VN",
+              "addressLocality": "Hanoi",
+              "postalCode": "100000",
+              "streetAddress": "165 Thai Ha Street, Dong Da District, 7th floor"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "AU",
+              "addressLocality": "Sydney",
+              "postalCode": "NSW2060",
+              "streetAddress": "Suite 14.02/1, Pacific Hwy"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "AU",
+              "addressLocality": "Melbourne",
+              "postalCode": "VIC3000",
+              "streetAddress": "Level 6, 152 Elizbeth St, "
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "SG",
+              "addressLocality": "Singapore",
+              "postalCode": "048547",
+              "streetAddress": "Regus, 18 Robinson Road, Level 2"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "BD",
+              "addressLocality": "Dhaka",
+              "postalCode": "1212",
+              "streetAddress": "Floor 16, Gulshan Centre Point"
+            },
+            {
+              "@type": "PostalAddress",
+              "addressCountry": "AE",
+              "addressLocality": "Dubai",
+              "streetAddress": "Al Jaddi Street, Al Sufouh 2"
+            }
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "availableLanguage": "English",
+            "contactOption": "https://schema.org/TollFree",
+            "contactType": "customer service",
+            "telephone": "+1-603 594 0249"
+          },
+          "email": "info@optimizely.com",
+          "foundingDate": "1994-01-01",
+          "legalName": "Optimizely Inc.",
+          "logo": "https://www.optimizely.com/assets/images/favicon.svg",
+          "numberOfEmployees": {
+            "@type": "QuantitativeValue",
+            "maxValue": 1500,
+            "minValue": 1300
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": {
+            "@type": "ListItem",
+            "item": {
+              "@type": "Thing",
+              "@id": "https://www.optimizely.com/",
+              "name": "Start"
+            },
+            "position": 1
+          }
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:15.288993+00:00"
+  }
+}

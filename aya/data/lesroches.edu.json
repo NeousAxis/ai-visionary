@@ -1,0 +1,330 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:20.407709+00:00",
+  "source": {
+    "input_url": "https://www.lesroches.edu",
+    "canonical_domain": "lesroches.edu",
+    "pages_scanned": [
+      "https://lesroches.edu/",
+      "https://lesroches.edu/meet-les-roches/",
+      "https://lesroches.edu/meet-les-roches/contact/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Lesroches",
+    "website": "https://lesroches.edu/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "media@lesroches.ae",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "university",
+      "school",
+      "formation",
+      "training",
+      "course"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Lesroches",
+        "website": "https://lesroches.edu/",
+        "email": "media@lesroches.ae",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Les Roches one of the world's leading hospitality schools"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "consulting",
+          "menu",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "One of the worlds leading hospitality schools. Proven across eight decades, a Les Roches education is respected the world over, with 94%...",
+        "og_description": "One of the worlds leading hospitality schools. Proven across eight decades, a Les Roches education is respected the world over, with 94%..."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "consulting",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://lesroches.edu/",
+            "url": "https://lesroches.edu/",
+            "name": "Les Roches one of the world's leading hospitality schools",
+            "isPartOf": {
+              "@id": "https://lesroches.edu/#website"
+            },
+            "about": {
+              "@id": "https://lesroches.edu/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://lesroches.edu/#primaryimage"
+            },
+            "image": {
+              "@id": "https://lesroches.edu/#primaryimage"
+            },
+            "thumbnailUrl": "https://lesroches.edu/wp-content/uploads/2023/04/foreground-student-2.png",
+            "datePublished": "2023-02-20T09:46:34+00:00",
+            "dateModified": "2026-01-23T14:01:54+00:00",
+            "description": "One of the worlds leading hospitality schools. Proven across eight decades, a Les Roches education is respected the world over, with 94%...",
+            "breadcrumb": {
+              "@id": "https://lesroches.edu/#breadcrumb"
+            },
+            "inLanguage": "en",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://lesroches.edu/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en",
+            "@id": "https://lesroches.edu/#primaryimage",
+            "url": "https://lesroches.edu/wp-content/uploads/2023/04/foreground-student-2.png",
+            "contentUrl": "https://lesroches.edu/wp-content/uploads/2023/04/foreground-student-2.png",
+            "width": 716,
+            "height": 989
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://lesroches.edu/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://lesroches.edu/#website",
+            "url": "https://lesroches.edu/",
+            "name": "Les Roches",
+            "description": "Transform your future with a Hospitality degree",
+            "publisher": {
+              "@id": "https://lesroches.edu/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://lesroches.edu/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://lesroches.edu/#organization",
+            "name": "Les Roches International School of Hotel Management",
+            "url": "https://lesroches.edu/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en",
+              "@id": "https://lesroches.edu/#/schema/logo/image/",
+              "url": "https://lesroches.edu/wp-content/uploads/2016/04/lr_logo_2013_marbella-1.jpg",
+              "contentUrl": "https://lesroches.edu/wp-content/uploads/2016/04/lr_logo_2013_marbella-1.jpg",
+              "width": 909,
+              "height": 170,
+              "caption": "Les Roches International School of Hotel Management"
+            },
+            "image": {
+              "@id": "https://lesroches.edu/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://en-gb.facebook.com/lesroches/",
+              "https://x.com/LesRochesNews",
+              "https://www.instagram.com/lesrochesswitzerland/?hl=en",
+              "https://www.linkedin.com/school/les-roches-global-hospitality-education-bluche-switzerland/",
+              "https://www.youtube.com/channel/UCF-kMY8afscd8cat0pozyMw"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:20.407719+00:00"
+  }
+}

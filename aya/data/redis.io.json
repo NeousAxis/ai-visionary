@@ -1,0 +1,308 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:43.216042+00:00",
+  "source": {
+    "input_url": "https://www.redis.io",
+    "canonical_domain": "redis.io",
+    "pages_scanned": [
+      "https://redis.io/",
+      "https://redis.io/about/",
+      "https://redis.io/contact/",
+      "https://redis.io/services/",
+      "https://redis.io/pricing/",
+      "https://www.redis.io/faq",
+      "https://redis.io/legal/",
+      "https://redis.io/legal/privacy-policy/",
+      "https://redis.io/legal/"
+    ],
+    "pages_scanned_count": 9,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Redis",
+    "website": "https://redis.io/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "",
+      "phone": "+1 (628) 222-5789",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Redis",
+        "website": "https://redis.io/",
+        "email": "",
+        "phone": "+1 (628) 222-5789",
+        "country": "",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "Redis - The Real-time Data Platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Developers love Redis. Unlock the full potential of the Redis database with Redis Enterprise and start building blazing fast apps.",
+        "og_description": "Developers love Redis. Unlock the full potential of the Redis database with Redis Enterprise and start building blazing fast apps."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "methodology",
+          "our process",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "methodology",
+        "our process"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebPage",
+          "Organization",
+          "BreadcrumbList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 71.7,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 71.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "headline": "Redis - The Real-time Data Platform",
+        "description": "Developers love Redis. Unlock the full potential of the Redis database with Redis Enterprise and start building blazing fast apps.",
+        "inLanguage": "en",
+        "name": "Redis",
+        "author": {
+          "@type": "Person",
+          "name": "Redis",
+          "url": "https://redis.io/"
+        },
+        "copyrightHolder": {
+          "@type": "Person",
+          "name": "Redis"
+        },
+        "copyrightYear": 2026,
+        "creator": {
+          "@type": "Person",
+          "name": "Redis"
+        },
+        "datePublished": "2025-02-10T04:32:18.000Z",
+        "dateModified": "2026-03-10T00:16:45.000Z",
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://redis.io/_next/static/media/open-graph.13a19f38.png"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://redis.io/#organization",
+        "name": "Redis",
+        "legalName": "Redis",
+        "url": "https://redis.io/",
+        "logo": "https://redis.io/schema-icon.png",
+        "sameAs": [
+          "https://www.facebook.com/Redisinc",
+          "https://www.instagram.com/redisinc/",
+          "https://www.linkedin.com/company/redisinc/",
+          "https://x.com/Redisinc",
+          "https://www.youtube.com/c/redisinc"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "description": "Breadcrumbs list",
+        "name": "Breadcrumbs",
+        "itemListElement": [
+          {
+            "@context": "https://schema.org",
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://redis.io/"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:43.216055+00:00"
+  }
+}

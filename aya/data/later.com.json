@@ -1,0 +1,344 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:00.471389+00:00",
+  "source": {
+    "input_url": "https://www.later.com",
+    "canonical_domain": "later.com",
+    "pages_scanned": [
+      "https://later.com/",
+      "https://later.com/about/",
+      "https://later.com/pricing/",
+      "https://later.com/pricing/",
+      "https://later.com/privacy/",
+      "https://later.com/terms/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Later",
+    "website": "https://later.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "chiefprivacyofficer@Mavrck.co",
+      "phone": "126880561",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "data",
+      "analytics"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Later",
+        "website": "https://later.com/",
+        "email": "chiefprivacyofficer@Mavrck.co",
+        "phone": "126880561",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Later: Influencer Marketing and Social Media Management"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Influencer marketing built for creators and trusted by brands. Run campaigns, manage social media, and track performance with AI-powered insights.",
+        "og_description": "Influencer marketing built for creators and trusted by brands. Run campaigns, manage social media, and track performance with AI-powered insights."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.1,
+    "final_score": 75,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 75,
+    "raw_score": 75.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "url": "https://later.com/",
+        "logo": "https://later.com/images/brand/Later_Logo.png",
+        "name": "Later",
+        "@type": "Organization",
+        "brand": "Later",
+        "sameAs": [
+          "https://www.facebook.com/latermedia/",
+          "https://x.com/latermedia/",
+          "https://www.instagram.com/latermedia/",
+          "https://www.threads.net/@latermedia",
+          "https://www.linkedin.com/company/latergram-me/",
+          "https://www.pinterest.com/latermedia/",
+          "https://www.tiktok.com/@later.com/",
+          "https://www.youtube.com/latermedia/"
+        ],
+        "@context": "http://schema.org",
+        "legalName": "Victory Square Media Inc.",
+        "knowsAbout": "Influencer Marketing Programs, AI-powered Influencer Marketing Platform, Social Media Management, Link in Bio, Social Commerce, Social Listening, Affiliate Marketing, Creator Marketplace",
+        "description": "Influencer marketing built for creators and trusted by brands. Run campaigns, manage social media, and track performance with AI-powered insights.",
+        "foundingDate": "2014",
+        "SubOrganization": [
+          {
+            "url": "https://later.com/influencer-marketing-services/",
+            "logo": {
+              "url": "https://later.com/images/brand/Later_Logo.png",
+              "@type": "ImageObject"
+            },
+            "name": "Later Influencer Marketing Programs",
+            "@type": "Organization",
+            "brand": "Later",
+            "parentOrganization": {
+              "url": "https://later.com/"
+            }
+          },
+          {
+            "url": "https://later.com/influencer-marketing-platform/",
+            "logo": {
+              "url": "https://later.com/images/brand/Later_Logo.png",
+              "@type": "ImageObject"
+            },
+            "name": "Later Influencer Marketing Platform",
+            "@type": "Organization",
+            "brand": "Later",
+            "parentOrganization": {
+              "url": "https://later.com/"
+            }
+          },
+          {
+            "url": "https://later.com/influencer-creator-program/",
+            "logo": {
+              "url": "https://later.com/images/brand/Later_Logo.png",
+              "@type": "ImageObject"
+            },
+            "name": "Later for Creators",
+            "@type": "Organization",
+            "brand": "Later",
+            "parentOrganization": {
+              "url": "https://later.com/"
+            }
+          },
+          {
+            "url": "https://later.com/social-media-scheduler/",
+            "logo": {
+              "url": "https://later.com/images/brand/Later_Logo.png",
+              "@type": "ImageObject"
+            },
+            "name": "Later Social Media Management",
+            "@type": "Organization",
+            "brand": "Later",
+            "parentOrganization": {
+              "url": "https://later.com/"
+            }
+          },
+          {
+            "url": "https://later.com/social-media-listening/",
+            "logo": {
+              "url": "https://later.com/images/brand/Later_Logo.png",
+              "@type": "ImageObject"
+            },
+            "name": "Later Social Listening",
+            "@type": "Organization",
+            "brand": "Later",
+            "parentOrganization": {
+              "url": "https://later.com/"
+            }
+          },
+          {
+            "url": "https://later.com/link-in-bio/",
+            "logo": {
+              "url": "https://later.com/images/brand/Later_Logo.png",
+              "@type": "ImageObject"
+            },
+            "name": "Later Link in Bio",
+            "@type": "Organization",
+            "brand": "Later",
+            "parentOrganization": {
+              "url": "https://later.com/"
+            }
+          }
+        ],
+        "parentOrganization": {
+          "url": "https://later.com/",
+          "name": "Later",
+          "@type": "Corporation"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:00.471399+00:00"
+  }
+}

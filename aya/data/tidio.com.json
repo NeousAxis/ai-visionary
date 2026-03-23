@@ -1,0 +1,533 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:46.816353+00:00",
+  "source": {
+    "input_url": "https://www.tidio.com",
+    "canonical_domain": "tidio.com",
+    "pages_scanned": [
+      "https://www.tidio.com/",
+      "https://www.tidio.com/about/",
+      "https://www.tidio.com/contact/",
+      "https://www.tidio.com/pricing/",
+      "https://www.tidio.com/faq/",
+      "https://www.tidio.com/terms/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 4
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Tidio",
+    "website": "https://www.tidio.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebApplication",
+    "contacts": {
+      "email": "privacy@tidio.net",
+      "phone": "0 50 100 150 200 300 500 750 1 000",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "WebApplication"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Tidio",
+        "website": "https://www.tidio.com/",
+        "email": "privacy@tidio.net",
+        "phone": "0 50 100 150 200 300 500 750 1 000",
+        "country": "",
+        "city": "",
+        "org_type": "WebApplication"
+      },
+      "evidence": [
+        "AI Customer Service Agent, Customer Support Software | Tidio"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Scale customer service without losing the human touch. Align a trustworthy AI agent with live chat and helpdesk tools, trusted by 300k+ businesses worldwide",
+        "og_description": "Scale customer service without losing the human touch. Align a trustworthy AI agent with live chat and helpdesk tools, trusted by 300k+ businesses worldwide"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "",
+          "WebApplication"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 77.1,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 77.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.tidio.com/",
+            "url": "https://www.tidio.com/",
+            "name": "AI Customer Service Agent, Customer Support Software | Tidio",
+            "isPartOf": {
+              "@id": "https://www.tidio.com/#website"
+            },
+            "about": {
+              "@id": "https://www.tidio.com/#organization"
+            },
+            "datePublished": "2018-08-21T08:51:51+00:00",
+            "dateModified": "2025-11-05T19:28:16+00:00",
+            "description": "Scale customer service without losing the human touch. Align a trustworthy AI agent with live chat and helpdesk tools, trusted by 300k+ businesses worldwide",
+            "breadcrumb": {
+              "@id": "https://www.tidio.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.tidio.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.tidio.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Tidio"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.tidio.com/#website",
+            "url": "https://www.tidio.com/",
+            "name": "Tidio",
+            "description": "Free Beautiful Live Chat Software",
+            "publisher": {
+              "@id": "https://www.tidio.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.tidio.com/blog/search/?q={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.tidio.com/#organization",
+            "name": "Tidio",
+            "url": "https://www.tidio.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.tidio.com/#/schema/logo/image/",
+              "url": "https://www.tidio.com/wp-content/uploads/tidio-logo-square.png",
+              "contentUrl": "https://www.tidio.com/wp-content/uploads/tidio-logo-square.png",
+              "width": 696,
+              "height": 696,
+              "caption": "Tidio"
+            },
+            "image": {
+              "@id": "https://www.tidio.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/TidioCX/",
+              "https://x.com/tidiocx",
+              "https://www.youtube.com/channel/UCwAHN3_OptyMS_us7oxciqQ",
+              "https://www.instagram.com/tidiocx/",
+              "https://www.linkedin.com/company/tidio-ltd/",
+              "https://play.google.com/store/apps/details?id=com.tidiochat.app",
+              "https://apps.apple.com/us/app/tidio/id916822567",
+              "https://www.g2.com/products/tidio/reviews",
+              "https://www.capterra.com/p/144040/Tidio-Chat/",
+              "https://www.producthunt.com/products/tidio-2",
+              "https://www.trustpilot.com/review/www.tidio.com",
+              "https://wordpress.org/plugins/tidio-live-chat/",
+              "https://wordpress.com/plugins/tidio-live-chat",
+              "https://apps.shopify.com/tidio-chat",
+              "https://www.wikidata.org/wiki/Q133079799",
+              "https://www.google.com/search?kgmid=/g/11hds3thy3",
+              "https://www.google.com/search?kgmid=/g/11gxm8q990",
+              "https://www.softwareadvice.com/live-chat/tidio-chat-profile/",
+              "https://www.getapp.com/customer-service-support-software/a/tidio-chat/",
+              "https://www.infotech.com/software-reviews/products/tidio",
+              "https://www.softwarereviews.com/products/tidio",
+              "https://www.gartner.com/reviews/vendor/tidio",
+              "https://www.trustradius.com/products/tidio/reviews",
+              "https://slashdot.org/software/p/Tidio/",
+              "https://sourceforge.net/software/product/Tidio/",
+              "https://topbusinesssoftware.com/products/Tidio/reviews/",
+              "https://www.appvizer.com/customer/customer-support/tidio",
+              "https://www.reddit.com/r/Tidio/",
+              "https://www.bigcommerce.com/apps/tidio-chat/",
+              "https://tekpon.com/software/tidio/reviews/",
+              "https://appnavigator.io/app/tidio-chat/",
+              "https://www.selecthub.com/p/live-chat-software/tidio/",
+              "https://chromewebstore.google.com/detail/tidio-ai-copilot-for-zend/gceddchegnlgfhmaolidpjbjgdifalba",
+              "https://www.wikidata.org/wiki/Q136994735",
+              "https://www.google.com/search?kgmid=/g/11bw7fxszh",
+              "https://www.google.com/search?kgmid=/g/11ymp14x09",
+              "https://www.google.com/search?kgmid=/g/11m634qhq0"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Tidio",
+        "url": "https://www.tidio.com/",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": [
+          "https://www.wikidata.org/wiki/Q24963804",
+          "https://www.wikidata.org/wiki/Q1480561",
+          "https://www.wikidata.org/wiki/Q95988573",
+          "https://www.wikidata.org/wiki/Q11762161",
+          "https://www.wikidata.org/wiki/Q870780",
+          "https://www.wikidata.org/wiki/Q116961403",
+          "https://www.wikidata.org/wiki/Q1142726"
+        ],
+        "operatingSystem": "Web-based (browser)",
+        "browserRequirements": "Requires JavaScript",
+        "featureList": "https://www.tidio.com/features/",
+        "softwareHelp": [
+          {
+            "@type": "CreativeWork",
+            "name": "Tidio Help Center",
+            "url": "https://help.tidio.com/hc/en-us"
+          },
+          {
+            "@type": "CreativeWork",
+            "name": "Tidio Developer Documentation",
+            "url": "https://developers.tidio.com/"
+          }
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.6",
+          "reviewCount": "1879",
+          "bestRating": "5",
+          "worstRating": "1",
+          "ratingExplanation": "Source: https://www.g2.com/products/tidio/reviews, accessed on: 2025-04-04"
+        },
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "USD",
+          "lowPrice": "0",
+          "highPrice": 2999,
+          "offerCount": 5,
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Free",
+              "price": 0,
+              "priceCurrency": "USD"
+            },
+            {
+              "@type": "Offer",
+              "name": "Starter",
+              "price": 29,
+              "priceCurrency": "USD"
+            },
+            {
+              "@type": "Offer",
+              "name": "Growth",
+              "price": 59,
+              "priceCurrency": "USD"
+            },
+            {
+              "@type": "Offer",
+              "name": "Plus",
+              "price": 749,
+              "priceCurrency": "USD"
+            },
+            {
+              "@type": "Offer",
+              "name": "Enterprise",
+              "price": 2999,
+              "priceCurrency": "USD"
+            }
+          ]
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "Tidio",
+          "url": "https://www.tidio.com/"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Tidio",
+          "url": "https://www.tidio.com/"
+        },
+        "screenshot": [
+          "https://www.tidio.com/images/components/full-width-image/panel-desktop.png"
+        ],
+        "hasPart": [
+          {
+            "@type": "Product",
+            "name": "Lyro",
+            "url": "https://www.tidio.com/ai-agent/",
+            "description": "Tidio’s AI Agent, Lyro, is an AI customer service agent that resolves up to 64% of customer questions instantly. It understands customer intent, answers in natural language, and automates repetitive tasks.",
+            "image": "https://www.tidio.com/wp-content/uploads/tidio-og.png",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock",
+              "url": "https://www.tidio.com/pricing/"
+            }
+          },
+          {
+            "@type": "Product",
+            "name": "Flows",
+            "url": "https://www.tidio.com/flows/",
+            "description": "Tidio Flows is a visual, no-code automation and chatbot builder that lets you create custom chatbot workflows to engage visitors, automate support, qualify leads, and drive sales.",
+            "image": "https://www.tidio.com/wp-content/uploads/tidio-og.png",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock",
+              "url": "https://www.tidio.com/pricing/"
+            }
+          },
+          {
+            "@type": "Product",
+            "name": "Help Desk",
+            "url": "https://www.tidio.com/help-desk/",
+            "description": "Tidio Help Desk is help desk software for managing customer conversations across multiple channels and social platforms. It helps support teams streamline workflows, resolve issues faster, and automate repetitive tasks.",
+            "image": "https://www.tidio.com/wp-content/uploads/tidio-og.png",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock",
+              "url": "https://www.tidio.com/pricing/"
+            }
+          },
+          {
+            "@type": "Product",
+            "name": "Live Chat",
+            "url": "https://www.tidio.com/live-chat/",
+            "description": "Tidio Live Chat enables real-time messaging with website visitors to offer instant customer support, answer questions, and increase sales. It integrates with AI tools, ticketing, and CRM to streamline conversations across your website and inbox.",
+            "image": "https://www.tidio.com/wp-content/uploads/tidio-og.png",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock",
+              "url": "https://www.tidio.com/pricing/"
+            }
+          },
+          {
+            "@type": "Product",
+            "name": "Ticketing System",
+            "url": "https://www.tidio.com/ticketing/",
+            "description": "A tool for managing asynchronous support requests, tracking tickets, and organizing customer conversations.",
+            "image": "https://www.tidio.com/wp-content/uploads/tidio-og.png",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock",
+              "url": "https://www.tidio.com/pricing/"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:46.816369+00:00"
+  }
+}

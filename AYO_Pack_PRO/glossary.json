@@ -1,0 +1,131 @@
+{
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  "name": "Glossaire Officiel - AI VISIONARY",
+  "version": "AYO-GLOSSARY-2.0",
+  "description": "Vocabulaire métier officiel d'AI VISIONARY, utilisé comme référence par les agents IA pour interpréter les données sémantiques de cette entité.",
+  "inLanguage": "fr",
+  "numberOfTerms": 20,
+  "hasDefinedTerm": [
+    {
+      "@type": "DefinedTerm",
+      "name": "AI VISIONARY",
+      "description": "Organisation basée à Genève (Suisse), spécialisée dans optimisation de la visibilité des entreprises pour les ia (chatgpt, gemini, claude, mistral, llama, ernie). Entité vérifiée et enregistrée dans le registre AYA avec un ASR signé cryptographiquement.",
+      "inDefinedTermSet": "Identité"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Création de fichiers ASR (AI Singular Record)",
+      "description": "Création de fichiers ASR (AI Singular Record) est la prestation phare d'AI VISIONARY. Ce service constitue le cœur de l'offre déclarée dans l'ASR et détermine le positionnement principal de l'entité.",
+      "inDefinedTermSet": "Services"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Structuration des informations pour les IA",
+      "description": "Structuration des informations pour les IA : service complémentaire proposé par AI VISIONARY. Cette prestation enrichit le périmètre d'intervention et la couverture fonctionnelle de l'entité.",
+      "inDefinedTermSet": "Services"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Création de 'Fichier Signature' unique",
+      "description": "Création de 'Fichier Signature' unique — activité spécialisée d'AI VISIONARY. Ce volet de l'offre est documenté et vérifiable dans les actifs sémantiques AYO.",
+      "inDefinedTermSet": "Services"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Activation de la présence dans le registre AYA",
+      "description": "Activation de la présence dans le registre AYA fait partie de l'expertise déclarée par AI VISIONARY. Ce service permet de répondre à des besoins spécifiques identifiés dans le cadre de l'analyse AIO.",
+      "inDefinedTermSet": "Services"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Transformation des textes (Services)",
+      "description": "Phase 1 de la méthodologie d'AI VISIONARY. Étape structurante du parcours d'accompagnement.",
+      "inDefinedTermSet": "Processus"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Tarifs",
+      "description": "2ème étape du processus opérationnel. Élément clé du dispositif d'intervention d'AI VISIONARY.",
+      "inDefinedTermSet": "Processus"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "RSE en code sémantique (JSON-LD)",
+      "description": "Phase 3 de la méthodologie d'AI VISIONARY. Étape structurante du parcours d'accompagnement.",
+      "inDefinedTermSet": "Processus"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "ASR",
+      "description": "AI Singular Record — fichier JSON-LD structuré et signé cryptographiquement constituant l'identité sémantique officielle d'une entité auprès des agents IA.",
+      "inDefinedTermSet": "Processus"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Création d'un 'Fichier Signature' unique",
+      "description": "Phase 5 de la méthodologie d'AI VISIONARY. Étape structurante du parcours d'accompagnement.",
+      "inDefinedTermSet": "Processus"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "RGPD",
+      "description": "Référentiel de conformité adopté par AI VISIONARY. Témoigne d'une maturité organisationnelle évaluée dans le scoring AIO.",
+      "inDefinedTermSet": "Conformité"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Mentions",
+      "description": "Politique de conformité d'AI VISIONARY contribuant à la transparence et à la gouvernance de l'entité.",
+      "inDefinedTermSet": "Conformité"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Confidentialité",
+      "description": "Politique encadrant la collecte, le traitement et la protection des données personnelles des utilisateurs.",
+      "inDefinedTermSet": "Conformité"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Audits internes",
+      "description": "Évaluation systématique et documentée de la conformité et de l'efficacité des mesures de sécurité, réalisée périodiquement pour identifier les vulnérabilités.",
+      "inDefinedTermSet": "Sécurité"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Public cible",
+      "description": "AI VISIONARY s'adresse aux Artisans & commerces locaux, PME de services, Indépendants & consultants, Associations & collectifs, Entreprises industrielles, Acteurs engagés RSE / ESG, Établissements publics. Ces segments déterminent les contextes de recommandation IA pertinents (recherche locale, matching expert, comparaison sectorielle).",
+      "inDefinedTermSet": "Audience"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "ASR (AI Singular Record)",
+      "description": "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.",
+      "inDefinedTermSet": "Écosystème AYO"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "AIO",
+      "description": "Artificial Intelligence Optimization — discipline qui consiste à optimiser la lisibilité d'une entité pour les IA génératives.",
+      "inDefinedTermSet": "Écosystème AYO"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "AIO Score",
+      "description": "Score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Calculé sur 7 blocs pondérés : Identité, Offre, Processus, Conformité, Indicateurs, Pédagogie, Technique.",
+      "inDefinedTermSet": "Écosystème AYO"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "AYA (AYO Authority Registry)",
+      "description": "Registre officiel des entités certifiées AYO. L'inscription AYA atteste qu'une entité a été analysée, scorée, et que son ASR est authentique, signé et à jour.",
+      "inDefinedTermSet": "Écosystème AYO"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Pack AYO PRO",
+      "description": "Ensemble de 5 fichiers sémantiques (ASR, manifest, FAQ, glossaire, contexte externe) livrés à une entité pour optimiser sa visibilité auprès des agents IA. Inclut 3 ans d'inscription au registre AYA.",
+      "inDefinedTermSet": "Écosystème AYO"
+    }
+  ]
+}

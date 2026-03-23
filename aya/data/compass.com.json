@@ -1,0 +1,254 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:30.034795+00:00",
+  "source": {
+    "input_url": "https://www.compass.com",
+    "canonical_domain": "compass.com",
+    "pages_scanned": [
+      "https://www.compass.com/",
+      "https://www.compass.com/about/",
+      "https://www.compass.com/contact/",
+      "https://www.compass.com/legal/",
+      "https://www.compass.com/legal/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Compass",
+    "website": "https://www.compass.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "notices@compass.com",
+      "phone": "1-888-997-3525",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "realestate",
+    "sector_label": "Immobilier",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "real estate",
+      "property",
+      "apartment",
+      "house",
+      "location"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Compass",
+        "website": "https://www.compass.com/",
+        "email": "notices@compass.com",
+        "phone": "1-888-997-3525",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Real Estate, Homes for Sale & Apartments for Rent | Compass"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "platform",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Buy, sell, and rent smarter with Compass. Partner with a local real estate agent to find the home or apartment that’s right for you.",
+        "og_description": "Buy, sell, and rent smarter with Compass. Partner with a local real estate agent to find the home or apartment that’s right for you."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "platform",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "iso",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 56.7,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 56.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Compass",
+            "url": "https://www.compass.com/",
+            "alternateName": [
+              "Compass",
+              "Compass.com",
+              "Compass Real Estate"
+            ]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Compass",
+            "logo": "https://www.compass.com/ucfe-assets/public-media/compass_logo.svg",
+            "url": "https://www.compass.com/",
+            "sameAs": [
+              "https://www.facebook.com/compass",
+              "https://twitter.com/compass",
+              "https://www.instagram.com/compass/"
+            ],
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+1-212-913-9058",
+                "contactType": "customer service"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:30.034810+00:00"
+  }
+}

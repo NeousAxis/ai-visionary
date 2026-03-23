@@ -1,0 +1,251 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:55.294124+00:00",
+  "source": {
+    "input_url": "https://www.roquette.com",
+    "canonical_domain": "roquette.com",
+    "pages_scanned": [
+      "https://www.roquette.com/",
+      "https://www.roquette.com/about",
+      "https://www.roquette.com/",
+      "https://www.roquette.com/legal"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 18
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Roquette Frères",
+    "website": "https://www.roquette.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Roquette Frères",
+        "website": "https://www.roquette.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Roquette: Turning Nature’s Potential into Life’s Essentials"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Discover more about Roquette, a leading provider of plant-based ingredients, excipients and solutions to improve food, health, and bio-based products.",
+        "og_description": ""
+      },
+      "evidence": [
+        "app",
+        "delivery",
+        "menu",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "documentation",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite",
+          "WebPage",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 52.6,
+    "final_score": 53,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 53,
+    "raw_score": 52.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Roquette Frères",
+        "url": "https://www.roquette.com/"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Roquette",
+        "url": "https://www.roquette.com/",
+        "inLanguage": "eng",
+        "description": "Discover more about Roquette, a leading provider of plant-based ingredients, excipients and solutions to improve food, health, and bio-based products.",
+        "datePublished": "2025-06-20T13:05:58+00:00",
+        "dateModified": "2026-03-19T08:52:26+00:00",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Roquette Frères"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Roquette",
+        "url": "https://www.roquette.com/",
+        "logo": ""
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:55.294133+00:00"
+  }
+}

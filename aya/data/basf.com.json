@@ -1,0 +1,241 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:03:12.014972+00:00",
+  "source": {
+    "input_url": "https://www.basf.com",
+    "canonical_domain": "basf.com",
+    "pages_scanned": [
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr",
+      "https://www.basf.com/ch/fr"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 73
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "BASF",
+    "website": "https://www.basf.com/ch/fr",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "media",
+      "journal",
+      "press",
+      "presse",
+      "magazine"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "BASF",
+        "website": "https://www.basf.com/ch/fr",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "BASF – Suisse"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "product",
+          "produit",
+          "produits",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": ""
+      },
+      "evidence": [
+        "app",
+        "product",
+        "produit",
+        "produits",
+        "solution"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "confidentialité",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "confidentialité",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 32.7,
+    "final_score": 33,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.33,
+        "score": 6.7
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 33,
+    "raw_score": 32.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "",
+            "description": "",
+            "url": "https://www.basf.com/ch/fr",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.basf.com/assets/logo.v1.svg"
+            },
+            "sameAs": [
+              "https://www.linkedin.com/company/basf",
+              "https://de-de.facebook.com/BASF.Deutschland/",
+              "http://www.youtube.com/user/basf",
+              "https://instagram.com/basf_global/"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "url": "/ch/fr"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:03:12.014980+00:00"
+  }
+}

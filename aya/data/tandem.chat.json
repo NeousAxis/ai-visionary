@@ -1,0 +1,207 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:30.426770+00:00",
+  "source": {
+    "input_url": "https://www.tandem.chat",
+    "canonical_domain": "tandem.chat",
+    "pages_scanned": [
+      "https://tandem.chat/",
+      "https://tandemchat.notion.site/The-Tandem-Team-8cb4e5817ddc43e9922b788395681a5b",
+      "https://tandem.chat/a-propos",
+      "https://tandem.chat/contact",
+      "https://tandem.chat/services",
+      "https://tandem.chat/products",
+      "https://tandem.chat/pricing",
+      "https://tandemchat.notion.site/Tandem-FAQ-d699668c3c494193895f8a90633a0fd0",
+      "https://tandem.chat/legal",
+      "https://tandem.chat/privacy",
+      "https://tandem.chat/terms"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 5
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "A virtual office for remote teams",
+    "website": "https://tandem.chat/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.4,
+    "source": "keyword_match",
+    "evidence": [
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "A virtual office for remote teams",
+        "website": "https://tandem.chat/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Tandem | A virtual office for remote teams"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "service"
+        ],
+        "meta_description": "Re-discover the flow of working together in-person. Easily see who's available to talk, who's in a conversation, and who's busy. Start conversations as easily as tapping someone on the shoulder. Unlock spontaneous collaboration in your team. Interactive screen-sharing and online co-working.",
+        "og_description": "Re-discover the flow of working together in-person. Easily see who's available to talk, who's in a conversation, and who's busy. Start conversations as easily as tapping someone on the shoulder. Unlock spontaneous collaboration in your team. Interactive screen-sharing and online co-working."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": false,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 51.0,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 51.0,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:59:30.426780+00:00"
+  }
+}

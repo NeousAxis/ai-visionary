@@ -1,0 +1,221 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:58.439547+00:00",
+  "source": {
+    "input_url": "https://www.viac.ch",
+    "canonical_domain": "viac.ch",
+    "pages_scanned": [
+      "https://viac.ch/",
+      "https://viac.ch/en/about-us/",
+      "https://viac.ch/fr/lequipe/contact/",
+      "https://viac.ch/en/products/",
+      "https://viac.ch/know-how/faq/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 17
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Viac",
+    "website": "https://viac.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "support@viac.ch",
+      "phone": "0800 80 40 40",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "investment",
+      "fintech",
+      "trading",
+      "versicherung"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Viac",
+        "website": "https://viac.ch/",
+        "email": "support@viac.ch",
+        "phone": "0800 80 40 40",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "VIAC ist die führende digitale und kostengünstige Vorsorgeplattform für die Säule 3a und Freizügigke"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "platform",
+          "product",
+          "products",
+          "produit",
+          "produits",
+          "service",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Die preisgekrönte VIAC App für deine Säule 3a und Freizügigkeit bietet eine effiziente und kostengünstige Möglichkeit für das Wertschriftensparen mit Indexfonds und ETF. VIAC Life Plus ist die kostengünstige und flexible Absicherung gegen Todesfall und Invalidität.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "platform",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "faq",
+          "glossaire",
+          "glossary",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "faq",
+        "glossaire"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 51.4,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 51.4,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:48:58.439559+00:00"
+  }
+}

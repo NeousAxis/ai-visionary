@@ -1,0 +1,257 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:29.023758+00:00",
+  "source": {
+    "input_url": "https://www.jules.com",
+    "canonical_domain": "jules.com",
+    "pages_scanned": [
+      "https://www.jules.com/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "JULES",
+    "website": "https://www.jules.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "shop",
+      "store",
+      "cart",
+      "livraison",
+      "produit"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "JULES",
+        "website": "https://www.jules.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Jules | Vêtements homme et prêt-a-porter masculin"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "services"
+        ],
+        "meta_description": "Renouvelez votre garde-robe avec les différentes pièces mode de notre collection : modèles indémodables et costumes pour homme chics et tendance.",
+        "og_description": "Découvrez les nouveautés Jules Homme I➨ Achetez les dernières tendances de t shirts, pulls, chemises et pantalons pour être la pointe de la mode| Retours et livraison gratuits en magasin"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "offre",
+        "produit",
+        "produits"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "conformité",
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "conformité",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization",
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org/",
+        "@type": "Organization",
+        "name": "JULES",
+        "alternateName": "Jules - Mode Homme",
+        "url": "https://www.jules.com/",
+        "logo": "https://www.jules.com/on/demandware.static/-/Sites/fr_FR/dw42087894/logo-jules/logo-Jules-L.svg",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+33 3 59 55 38 75",
+          "contactType": "customer service",
+          "areaServed": [
+            "FR",
+            "BE"
+          ],
+          "availableLanguage": [
+            "fr"
+          ]
+        },
+        "sameAs": [
+          "https://www.facebook.com/Julescom/",
+          "https://www.instagram.com/jules/",
+          "https://www.youtube.com/user/julestvcom",
+          "https://www.linkedin.com/company/jules/",
+          "https://www.tiktok.com/@jules"
+        ]
+      },
+      {
+        "@context": "http://schema.org/",
+        "@type": "WebSite",
+        "name": "JULES",
+        "url": "https://www.jules.com/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.jules.com/fr-fr/recherche/?q={q}",
+          "query-input": "required name=q"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:29.023767+00:00"
+  }
+}

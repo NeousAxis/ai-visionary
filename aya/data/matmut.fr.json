@@ -1,0 +1,340 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:19.707084+00:00",
+  "source": {
+    "input_url": "https://www.matmut.fr",
+    "canonical_domain": "matmut.fr",
+    "pages_scanned": [
+      "https://www.matmut.fr/",
+      "https://www.matmut.fr/faq"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 5,
+      "sitemap_found": true,
+      "sitemap_url_count": 2577
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Matmut",
+    "website": "https://www.matmut.fr/",
+    "country": "FR",
+    "city": "Rouen",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "InsuranceAgency"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Matmut",
+        "website": "https://www.matmut.fr/",
+        "email": "",
+        "phone": "",
+        "country": "FR",
+        "city": "Rouen",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Matmut – Assurance auto, moto, habitation, santé, prévoyance"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "produit",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Découvrez nos assurances et réalisez un devis en ligne ou sur mobile : assurance auto, moto, habitation, mutuelle santé, prévoyance, épargne et crédit",
+        "og_description": "Découvrez nos assurances et réalisez un devis en ligne ou sur mobile : assurance auto, moto, habitation, mutuelle santé, prévoyance, épargne et crédit"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization",
+          "WebSite",
+          "WebSite",
+          "InsuranceAgency",
+          "Product"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.1,
+    "final_score": 75,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 75,
+    "raw_score": 75.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "name": "Matmut",
+        "url": "https://www.matmut.fr/",
+        "logo": "https://www.matmut.fr/images/logo-matmut-couleur.png",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+33 2 35 03 68 68",
+            "contactType": "customer service"
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Rouen",
+          "addressCountry": "FR",
+          "postalCode": "76100",
+          "streetAddress": "66 rue de Sotteville"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.matmut.fr/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://www.matmut.fr/recherche?query={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      [
+        {
+          "@context": "http://schema.org",
+          "@type": "WebSite",
+          "url": "https://www.matmut.fr",
+          "inLanguage": "fr",
+          "name": "Matmut",
+          "image": "https://www.matmut.fr/images/logo_matmut.svg",
+          "headline": "Découvrez nos assurances et réalisez un devis en ligne ou sur mobile : assurance auto, moto, habitation, mutuelle santé, prévoyance, épargne et crédit",
+          "publisher": {
+            "@type": "Organization",
+            "name": "Matmut",
+            "logo": "https://www.matmut.fr/images/logo_matmut.svg",
+            "url": "https://www.matmut.fr",
+            "addressLocality": "Rouen",
+            "addressCountry": "FR",
+            "sameAs": [
+              "https://x.com/Matmut",
+              "https://www.youtube.com/matmutmedia",
+              "https://www.facebook.com/MatmutAssurances",
+              "https://fr.linkedin.com/company/matmut"
+            ]
+          },
+          "keywords": ""
+        },
+        {
+          "@context": "http://schema.org",
+          "@type": "Organization",
+          "url": "https://www.matmut.fr",
+          "logo": "https://www.matmut.fr/images/logo_matmut.svg",
+          "addressLocality": "Rouen",
+          "addressCountry": "FR",
+          "sameAs": [
+            "https://x.com/Matmut",
+            "https://www.youtube.com/matmutmedia",
+            "https://www.facebook.com/MatmutAssurances",
+            "https://fr.linkedin.com/company/matmut"
+          ]
+        }
+      ],
+      {
+        "@context": "http://schema.org",
+        "@type": "InsuranceAgency",
+        "name": "Matmut",
+        "url": "https://www.matmut.fr/",
+        "image": "https://www.matmut.fr/images/logo-matmut-couleur.png",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+33 2 35 03 68 68",
+            "contactType": "customer service"
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Rouen",
+          "postalCode": "76100",
+          "streetAddress": "66 rue de Sotteville",
+          "addressCountry": "FR"
+        },
+        "sameAs": [
+          "https://x.com/Matmut",
+          "https://www.youtube.com/matmutmedia",
+          "https://www.facebook.com/MatmutAssurances",
+          "https://fr.linkedin.com/company/matmut"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "Matmut – Assurance auto, moto, habitation, santé, prévoyance",
+        "description": "Découvrez nos assurances et réalisez un devis en ligne ou sur mobile : assurance auto, moto, habitation, mutuelle santé, prévoyance, épargne et crédit",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "bestRating": "5",
+          "worstRating": "1",
+          "ratingValue": "4.27",
+          "reviewCount": "840"
+        },
+        "brand": {
+          "@type": "Brand",
+          "name": "Matmut"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:19.707092+00:00"
+  }
+}

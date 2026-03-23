@@ -1,0 +1,293 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:20.835810+00:00",
+  "source": {
+    "input_url": "https://www.pandadoc.com",
+    "canonical_domain": "pandadoc.com",
+    "pages_scanned": [
+      "https://www.pandadoc.com/",
+      "https://www.pandadoc.com/about/",
+      "https://www.pandadoc.com/contact/",
+      "https://www.pandadoc.com/pricing/",
+      "https://www.pandadoc.com/legal/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 19
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "PandaDoc",
+    "website": "https://www.pandadoc.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1 2-10 11-50 51-200 201-500 501-1000 1001",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "PandaDoc",
+        "website": "https://www.pandadoc.com/",
+        "email": "",
+        "phone": "1 2-10 11-50 51-200 201-500 501-1000 1001",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "PandaDoc – Create, Approve, Track & eSign Docs 40% Faster"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "PandaDoc streamlines proposals, quotes & other business document workflows - Trusted by 50K+ Clients - SOC 2, HIPAA & GDPR Compliant!",
+        "og_description": "PandaDoc streamlines proposals, quotes & other business document workflows - Trusted by 50K+ Clients - SOC 2, HIPAA & GDPR Compliant!"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "PandaDoc",
+            "email": "marketing@pandadoc.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://public-site.marketing.pandadoc-static.com/app/uploads/PandaDoc-logo-5.png"
+            },
+            "url": "https://www.pandadoc.com/",
+            "telephone": "(888) 865-8755",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "San Francisco, CA ",
+              "postalCode": "CA 94111",
+              "streetAddress": "101 California Street, Suite 3975"
+            },
+            "sameAs": [
+              "https://www.facebook.com/PandaDoc/",
+              "https://www.linkedin.com/company/pandadoc/",
+              "https://twitter.com/pandadoc",
+              "https://www.youtube.com/user/thePandaDoc"
+            ]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "url": "https://www.pandadoc.com/",
+            "name": "PandaDoc – Create, Approve, Track & eSign Docs 40% Faster",
+            "description": "PandaDoc streamlines proposals, quotes & other business document workflows - Trusted by 50K+ Clients - SOC 2, HIPAA & GDPR Compliant!",
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.pandadoc.com/search/{search_term_string}/",
+              "query": "required name=search_term_string"
+            },
+            "datePublished": "2018-08-23T08:15:55+00:00",
+            "dateModified": "2026-03-02T11:33:09+00:00"
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "url": "https://www.pandadoc.com/",
+            "name": "PandaDoc",
+            "inLanguage": "en-US",
+            "sameAs": [
+              "https://www.facebook.com/PandaDoc/",
+              "https://www.linkedin.com/company/pandadoc/",
+              "https://twitter.com/pandadoc",
+              "https://www.youtube.com/user/thePandaDoc"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:20.835823+00:00"
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:38.959195+00:00",
+  "source": {
+    "input_url": "https://www.finpension.ch",
+    "canonical_domain": "finpension.ch",
+    "pages_scanned": [
+      "https://finpension.ch/de/",
+      "https://finpension.ch/en/contact/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 3
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Startseite",
+    "website": "https://finpension.ch/de/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "041 500 22 26",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "investment",
+      "vorsorge",
+      "pension"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Startseite",
+        "website": "https://finpension.ch/de/",
+        "email": "",
+        "phone": "041 500 22 26",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "finpension: Die besten Finanz- und Vorsorgeprodukte der Schweiz"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "product",
+          "products",
+          "service"
+        ],
+        "meta_description": "Mit finpension digital Geld anlegen: Säule 3a, Freizügigkeit, 1e Lösung und Invest. Günstig ✓ keine versteckten Kosten ✓ schnell eröffnet ✓",
+        "og_description": "Mit finpension digital Geld anlegen: Säule 3a, Freizügigkeit, 1e Lösung und Invest. Günstig ✓ keine versteckten Kosten ✓ schnell eröffnet ✓"
+      },
+      "evidence": [
+        "app",
+        "product",
+        "products",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog"
+        ]
+      },
+      "evidence": [
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.7,
+    "final_score": 61,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 61,
+    "raw_score": 60.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://finpension.ch/de/",
+            "url": "https://finpension.ch/de/",
+            "name": "finpension: Die besten Finanz- und Vorsorgeprodukte der Schweiz",
+            "isPartOf": {
+              "@id": "https://finpension.ch/de/#website"
+            },
+            "about": {
+              "@id": "https://finpension.ch/de/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://finpension.ch/de/#primaryimage"
+            },
+            "image": {
+              "@id": "https://finpension.ch/de/#primaryimage"
+            },
+            "thumbnailUrl": "https://finpension.ch/app/uploads/2020/10/finpension-home-1600x960-1.png",
+            "datePublished": "2020-09-04T08:19:58+00:00",
+            "dateModified": "2026-03-05T12:30:25+00:00",
+            "description": "Mit finpension digital Geld anlegen: Säule 3a, Freizügigkeit, 1e Lösung und Invest. Günstig ✓ keine versteckten Kosten ✓ schnell eröffnet ✓",
+            "breadcrumb": {
+              "@id": "https://finpension.ch/de/#breadcrumb"
+            },
+            "inLanguage": "de-CH",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://finpension.ch/de/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "de-CH",
+            "@id": "https://finpension.ch/de/#primaryimage",
+            "url": "https://finpension.ch/app/uploads/2020/10/finpension-home-1600x960-1.png",
+            "contentUrl": "https://finpension.ch/app/uploads/2020/10/finpension-home-1600x960-1.png",
+            "width": 1600,
+            "height": 960
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://finpension.ch/de/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://finpension.ch/de/#website",
+            "url": "https://finpension.ch/de/",
+            "name": "finpension",
+            "description": "Vorfreuen auf Mehr",
+            "publisher": {
+              "@id": "https://finpension.ch/de/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://finpension.ch/de/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "de-CH"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://finpension.ch/de/#organization",
+            "name": "finpension",
+            "url": "https://finpension.ch/de/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "de-CH",
+              "@id": "https://finpension.ch/de/#/schema/logo/image/",
+              "url": "https://finpension.ch/app/uploads/2021/03/finpension_Logo_RGB_pos_blau.jpg",
+              "contentUrl": "https://finpension.ch/app/uploads/2021/03/finpension_Logo_RGB_pos_blau.jpg",
+              "width": 1061,
+              "height": 199,
+              "caption": "finpension"
+            },
+            "image": {
+              "@id": "https://finpension.ch/de/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/finpension",
+              "https://x.com/finpension",
+              "https://twitter.com/finpension",
+              "https://www.instagram.com/finpension/"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:49:38.959212+00:00"
+  }
+}

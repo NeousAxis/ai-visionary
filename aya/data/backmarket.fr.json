@@ -1,0 +1,339 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:37.764049+00:00",
+  "source": {
+    "input_url": "https://www.backmarket.fr",
+    "canonical_domain": "backmarket.fr",
+    "pages_scanned": [
+      "https://www.backmarket.fr/fr-fr"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 9
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Back Market",
+    "website": "https://www.backmarket.fr/fr-fr",
+    "country": "FR",
+    "city": "Paris",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "5 (1 002) 139",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "press",
+      "presse",
+      "video",
+      "streaming"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Back Market",
+        "website": "https://www.backmarket.fr/fr-fr",
+        "email": "",
+        "phone": "5 (1 002) 139",
+        "country": "FR",
+        "city": "Paris",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Passez au meilleur de la tech reconditionnée. | Back Market"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "offre",
+          "produit",
+          "produits",
+          "restaurant",
+          "service",
+          "services"
+        ],
+        "meta_description": "Profitez de produits reconditionnés sur Back Market, moins cher que le neuf ! Livraison standard offerte - Garantie 12 mois contractuelle minimum - Paiement sécurisé en 3 ou 4X",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "offre",
+        "produit",
+        "produits"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite",
+          "Organization",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 56.9,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 56.9,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org/",
+        "@type": "WebSite",
+        "name": "Back Market",
+        "url": "https://www.backmarket.fr/fr-fr",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://www.backmarket.fr/fr-fr/search?q={q}"
+            },
+            "query-input": "required name=q"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Back Market",
+        "url": "https://www.backmarket.fr/fr-fr",
+        "logo": "https://images.ctfassets.net/mmeshd7gafk1/5BDjAiB7WVkFJcE5MXLNy4/906aecd28464a3996c514d1b02a00983/SEO-Website-Thumbnail.png",
+        "description": "Back Market est une marketplace internationale pour l'achat d'appareils reconditionnés haut de gamme ou pour la vente et la reprise de dispositifs d'occasion tels que les smartphones, les ordinateurs, les tablettes, les consoles de jeux et plus encore.",
+        "founder": [
+          {
+            "@type": "Person",
+            "name": "Thibaud Hug de Larauze",
+            "gender": "Male",
+            "jobTitle": "Co-fondateur et PDG",
+            "image": "https://res.cloudinary.com/crunchbase-production/image/upload/c_thumb,h_170,w_170,f_auto,g_faces,z_0.7,b_white,q_auto:eco,dpr_1/enn8o0bkcrbmog0tbm98",
+            "sameAs": [
+              "https://fr.linkedin.com/in/thibaud-hug-de-larauze-a9a9b160",
+              "https://twitter.com/thibaudelarauze"
+            ]
+          },
+          {
+            "@type": "Person",
+            "name": "Quentin Le Brouster",
+            "gender": "Male",
+            "jobTitle": "Co-fondateur & CTO",
+            "image": "https://res.cloudinary.com/crunchbase-production/image/upload/c_thumb,h_170,w_170,f_auto,g_faces,z_0.7,b_white,q_auto:eco,dpr_1/ymvblntd67xfvkgdua7i",
+            "sameAs": "https://fr.linkedin.com/in/quentin-le-brouster-b1a02184"
+          },
+          {
+            "@type": "Person",
+            "name": "Vianney Vaute",
+            "gender": "Male",
+            "jobTitle": "Co-fondateur & CCO",
+            "image": "https://res.cloudinary.com/crunchbase-production/image/upload/c_thumb,h_170,w_170,f_auto,g_faces,z_0.7,b_white,q_auto:eco,dpr_1/fikykrgbg1s9whaynlru",
+            "sameAs": [
+              "https://fr.linkedin.com/in/vianney-vaute-03ba2b62",
+              "https://twitter.com/vinnyvandev"
+            ]
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "199 Rue Championnet",
+          "addressLocality": "Paris",
+          "addressRegion": "Ile de France",
+          "postalCode": "75018",
+          "addressCountry": "France"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "contact",
+          "telephone": "+33 1 70 77 24 93",
+          "email": "press@backmarket.com"
+        },
+        "sameAs": [
+          "https://www.twitter.com/backmarket",
+          "https://linkedin.com/company/back-market",
+          "https://www.facebook.com/BackMarketCom",
+          "https://www.instagram.com/backmarket",
+          "https://play.google.com/store/apps/details?id=com.backmarket",
+          "https://apps.apple.com/us/app/back-market-shop-online/id1458344336",
+          "https://fr.wikipedia.org/wiki/Back_Market",
+          "https://www.wikidata.org/wiki/Q56316472",
+          "https://www.bbb.org/us/ny/brooklyn/profile/online-retailer/back-market-inc-0121-176814",
+          "https://www.trustpilot.com/review/www.backmarket.com"
+        ]
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Pouvez-vous m'aider à recycler mon ancien téléphone ou d'autres appareils électroniques ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Notre Service Recyclage est là pour vous mettre en relation avec les bonnes personnes et vous simplifier cette démarche. Mais peut-être que votre article a encore de la valeur. Obtenez une estimation immédiate via notre Service Reprise. En plus, les frais d'expédition sont offerts."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Est-ce que je peux souscrire à un forfait mobile sur Back Market ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Back Market et Bouygues Telecom s'associent pour vous proposer une offre Mobile + Forfait avec des réductions et des forfaits exclusifs. Quelque chose de beau et malin. Comme vous."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Est-ce que je peux payer en plusieurs fois ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Oui. Oui. Et oui. Les appareils reconditionnés sont aussi performants que les neufs, tout en étant déjà moins chers. Et vous pouvez aussi profiter de facilités de paiement sur Back Market."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Est-ce que je peux souscrire à une assurance pour mon appareil ?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Casse, oxydation... on assure vos arrières, et vos appareils reconditionnés, avec notre assurance BackUp. Sélectionnez l'offre qui vous convient lors de la validation de votre commande sur Back Market. Après tout, plus vous pouvez utiliser votre appareil longtemps, mieux c'est pour la planète."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:37.764057+00:00"
+  }
+}

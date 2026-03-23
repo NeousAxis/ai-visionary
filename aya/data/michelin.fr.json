@@ -1,0 +1,215 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:49.266935+00:00",
+  "source": {
+    "input_url": "https://www.michelin.fr",
+    "canonical_domain": "michelin.fr",
+    "pages_scanned": [
+      "https://www.michelin.fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 29634
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "MICHELIN",
+    "website": "https://www.michelin.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "0800 904 555",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "travel",
+    "sector_label": "Tourisme & Transport",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "voyage",
+      "hotel",
+      "vol",
+      "tourism",
+      "tourisme"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "MICHELIN",
+        "website": "https://www.michelin.fr/",
+        "email": "",
+        "phone": "0800 904 555",
+        "country": "FR",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "MICHELIN : Explorez les pneus, produits et services | MICHELIN France"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "offre",
+          "produit",
+          "produits",
+          "restaurant",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Trouvez les meilleurs pneus et produits MICHELIN pour votre voiture, votre moto, et plus encore parmi notre large gamme de pneusâ¯! Explorez pour en savoir plus et apprendre des astuces.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "offre",
+        "produit"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 50.0,
+    "final_score": 50,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 50.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:53:49.266943+00:00"
+  }
+}

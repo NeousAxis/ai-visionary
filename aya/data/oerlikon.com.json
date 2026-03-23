@@ -1,0 +1,256 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:43.263893+00:00",
+  "source": {
+    "input_url": "https://www.oerlikon.com",
+    "canonical_domain": "oerlikon.com",
+    "pages_scanned": [
+      "https://www.oerlikon.com/de/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 45
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Oerlikon Group",
+    "website": "https://www.oerlikon.com/de/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "24.02.2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Oerlikon Group",
+        "website": "https://www.oerlikon.com/de/",
+        "email": "",
+        "phone": "24.02.2026",
+        "country": "",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Eine weltweit führende Anbieterin von innovativen Oberflächenlösungen | Oerlikon"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "product",
+          "service",
+          "services"
+        ],
+        "meta_description": "Oerlikon ist weltweit führend in den Bereichen Oberflächentechnologie, Hochleistungswerkstoffe, Beschichtungsanlagen und Spezialkomponenten.",
+        "og_description": "Willkommen bei Oerlikon - einem der weltweit führenden Hightech-Industriekonzerne."
+      },
+      "evidence": [
+        "app",
+        "product",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "Corporation"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 50.7,
+    "final_score": 51,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 51,
+    "raw_score": 50.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Corporate",
+            "item": "https://www.oerlikon.com/de/"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Corporation",
+        "name": "Oerlikon Group – Balzers, Metco, AM, Barmag, Neumag",
+        "legalName": "OC Oerlikon Corporation AG, Pfäffikon",
+        "description": "Willkommen bei Oerlikon - einem der weltweit führenden Hightech-Industriekonzerne.",
+        "url": "https://www.oerlikon.com/de/",
+        "logo": "https://www.oerlikon.com/ecoma/files/oerlikon.svg",
+        "brand": {
+          "@type": "Brand",
+          "name": "Oerlikon"
+        },
+        "tickerSymbol": "OERL",
+        "sameAs": [
+          "https://www.facebook.com/GroupOerlikon/",
+          "https://www.instagram.com/oerlikon.group/",
+          "http://www.linkedin.com/company/oerlikon",
+          "https://www.youtube.com/user/OerlikonGroup"
+        ],
+        "subOrganization": [
+          {
+            "@type": "Corporation",
+            "name": "Oerlikon Balzers",
+            "url": "https://www.oerlikon.com/balzers/global/de/"
+          },
+          {
+            "@type": "Corporation",
+            "name": "Oerlikon Metco",
+            "url": "https://www.oerlikon.com/metco/de/"
+          },
+          {
+            "@type": "Corporation",
+            "name": "Oerlikon AM",
+            "url": "https://www.oerlikon.com/am/de/"
+          },
+          {
+            "@type": "Corporation",
+            "name": "Oerlikon Riri",
+            "url": "https://www.riri.com/"
+          },
+          {
+            "@type": "Corporation",
+            "name": "HRSflow",
+            "url": "https://www.hrsflow.com/ww/de/"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:43.263902+00:00"
+  }
+}

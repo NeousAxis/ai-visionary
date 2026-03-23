@@ -1,0 +1,226 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:25.489319+00:00",
+  "source": {
+    "input_url": "https://www.lematin.ch",
+    "canonical_domain": "lematin.ch",
+    "pages_scanned": [
+      "https://www.lematin.ch/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Le Matin",
+    "website": "https://www.lematin.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "146 227 28",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "publicité"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Le Matin",
+        "website": "https://www.lematin.ch/",
+        "email": "",
+        "phone": "146 227 28",
+        "country": "CH",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Le Matin: toute l'actualité en Suisse et dans le monde"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "menu",
+          "service",
+          "services"
+        ],
+        "meta_description": "Informez-vous en continu sur les dernières news nationales et internationales, sur l'économie, la société, la santé, l'actu people et high-tech.",
+        "og_description": ""
+      },
+      "evidence": [
+        "app",
+        "menu",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 43.4,
+    "final_score": 43,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 43,
+    "raw_score": 43.4,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@id": "https://www.lematin.ch",
+              "name": "News"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "headline": "Le Matin: toute l'actualité en Suisse et dans le monde",
+        "description": "Informez-vous en continu sur les dernières news nationales et internationales, sur l'économie, la société, la santé, l'actu people et high-tech.",
+        "url": "https://www.lematin.ch",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.lematin.ch/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:25.489336+00:00"
+  }
+}

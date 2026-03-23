@@ -1,0 +1,345 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:34.371799+00:00",
+  "source": {
+    "input_url": "https://www.sygnum.com",
+    "canonical_domain": "sygnum.com",
+    "pages_scanned": [
+      "https://www.sygnum.com/",
+      "https://www.sygnum.com/contact-us/",
+      "https://www.sygnum.com/legal-notices/",
+      "https://www.sygnum.com/privacy-notice/",
+      "https://www.sygnum.com/terms-of-use/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 13
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Sygnum Bank",
+    "website": "https://www.sygnum.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+41 58 508 2000",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "presse",
+      "podcast"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Sygnum Bank",
+        "website": "https://www.sygnum.com/",
+        "email": "",
+        "phone": "+41 58 508 2000",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Sygnum Bank | Regulated Digital Asset Banking"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Sygnum is the world’s first regulated digital asset bank, offering secure crypto services including trading, custody, staking, and tokenization.",
+        "og_description": "Start investing in crypto with Sygnum Bank: the world's first digital asset bank. Apply to become a client now."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process"
+        ]
+      },
+      "evidence": [
+        "our process"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.sygnum.com/",
+            "url": "https://www.sygnum.com/",
+            "name": "Sygnum Bank | Regulated Digital Asset Banking",
+            "isPartOf": {
+              "@id": "https://www.sygnum.com/#website"
+            },
+            "about": {
+              "@id": "https://www.sygnum.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.sygnum.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.sygnum.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://www.sygnum.com/wp-content/uploads/2022/07/Home-page-featured-image.png",
+            "datePublished": "2022-01-31T10:47:37+00:00",
+            "dateModified": "2026-03-13T12:21:43+00:00",
+            "description": "Sygnum is the world’s first regulated digital asset bank, offering secure crypto services including trading, custody, staking, and tokenization.",
+            "breadcrumb": {
+              "@id": "https://www.sygnum.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.sygnum.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://www.sygnum.com/#primaryimage",
+            "url": "https://www.sygnum.com/wp-content/uploads/2022/07/Home-page-featured-image.png",
+            "contentUrl": "https://www.sygnum.com/wp-content/uploads/2022/07/Home-page-featured-image.png",
+            "width": 300,
+            "height": 300,
+            "caption": "Invest in crypto with a Swiss regulated Bank"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.sygnum.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.sygnum.com/#website",
+            "url": "https://www.sygnum.com/",
+            "name": "Sygnum Bank",
+            "description": "Sygnum is the world’s first digital asset bank, founded on Swiss and Singapore heritage. Sygnum empowers its customers to invest in the digital asset economy with complete trust.",
+            "publisher": {
+              "@id": "https://www.sygnum.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.sygnum.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.sygnum.com/#organization",
+            "name": "Sygnum Bank",
+            "url": "https://www.sygnum.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.sygnum.com/#/schema/logo/image/",
+              "url": "https://www.sygnum.com/wp-content/uploads/2022/07/Sygnum-Logo-Red-Icon_PNG-1.png",
+              "contentUrl": "https://www.sygnum.com/wp-content/uploads/2022/07/Sygnum-Logo-Red-Icon_PNG-1.png",
+              "width": 470,
+              "height": 127,
+              "caption": "Sygnum Bank"
+            },
+            "image": {
+              "@id": "https://www.sygnum.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://x.com/sygnumofficial",
+              "https://www.linkedin.com/company/sygnumofficial/"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:50:34.371857+00:00"
+  }
+}

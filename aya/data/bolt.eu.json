@@ -1,0 +1,226 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:55.513237+00:00",
+  "source": {
+    "input_url": "https://www.bolt.eu",
+    "canonical_domain": "bolt.eu",
+    "pages_scanned": [
+      "https://bolt.eu/de-ch/",
+      "https://bolt.eu/de-ch/legal/",
+      "https://bolt.eu/de-ch/privacy/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 19
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Bolt",
+    "website": "https://bolt.eu/de-ch/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "",
+      "phone": "06.08.2025",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Bolt",
+        "website": "https://bolt.eu/de-ch/",
+        "email": "",
+        "phone": "06.08.2025",
+        "country": "",
+        "city": "",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Entdecke die Dienste von Bolt | Die All-in-One-Mobilitäts-App | Bolt"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "restaurant",
+          "service"
+        ],
+        "meta_description": "Bestelle eine Fahrt, lass dir Essen liefern, miete ein Auto oder einen E-Scooter und buche Geschäftsfahrten. Verfügbar in über 600 Städten und 50 Ländern.",
+        "og_description": "Bestelle eine Fahrt, lass dir Essen liefern, miete ein Auto oder einen E-Scooter und buche Geschäftsfahrten. Verfügbar in über 600 Städten und 50 Ländern."
+      },
+      "evidence": [
+        "app",
+        "restaurant",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog"
+        ]
+      },
+      "evidence": [
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Corporation"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.7,
+    "final_score": 61,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 61,
+    "raw_score": 60.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@type": "Corporation",
+        "name": "Bolt",
+        "legalName": "Bolt Technology OÜ",
+        "url": "https://bolt.eu",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://bolt.eu/common-assets/icon.svg"
+        },
+        "@context": "https://schema.org",
+        "description": "Get a ride in minutes, order food and grocery delivery, rent a car or scooter, improve business travel and more. Available in 850+ cities and 50+ countries.",
+        "foundingDate": "2013",
+        "founders": {
+          "@type": "Person",
+          "name": "Markus Villig"
+        },
+        "sameAs": [
+          "https://www.facebook.com/Bolt/",
+          "https://www.x.com/Boltapp/",
+          "https://www.instagram.com/bolt/",
+          "https://www.linkedin.com/company/bolt-eu/",
+          "https://www.tiktok.com/@bolt"
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:55.513249+00:00"
+  }
+}

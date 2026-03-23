@@ -1,0 +1,240 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:46.821349+00:00",
+  "source": {
+    "input_url": "https://www.deliveroo.com",
+    "canonical_domain": "deliveroo.co.uk",
+    "pages_scanned": [
+      "https://deliveroo.co.uk/",
+      "https://deliveroo.co.uk/contact",
+      "https://deliveroo.co.uk/faq",
+      "https://deliveroo.co.uk/legal",
+      "https://deliveroo.co.uk/privacy",
+      "https://deliveroo.co.uk/terms"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Deliveroo.co.uk",
+    "website": "https://deliveroo.co.uk/",
+    "country": "GB",
+    "city": "",
+    "languages": [],
+    "org_type": "Website",
+    "contacts": {
+      "email": "corporate@deliveroo.co.uk",
+      "phone": "020 3080 6000 9",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "magazine",
+      "broadcast"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Deliveroo.co.uk",
+        "website": "https://deliveroo.co.uk/",
+        "email": "corporate@deliveroo.co.uk",
+        "phone": "020 3080 6000 9",
+        "country": "GB",
+        "city": "",
+        "org_type": "Website"
+      },
+      "evidence": [
+        "Deliveroo - Food, Groceries, Pharmacy, Gifts & More. Delivered In A Tap."
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "From food to flowers, gifts to groceries, we bring the best of your neighbourhood to your door. All in as little as 30 minutes. Download our app or order online.",
+        "og_description": "The best local restaurants and takeaways are here to deliver. Order on Deliveroo today!"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Website"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 76.6,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 76.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org/",
+        "@type": "Website",
+        "name": "Deliveroo.co.uk",
+        "description": "The best local restaurants and takeaways are here to deliver. Order on Deliveroo today!",
+        "url": "https://deliveroo.co.uk/"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:46.821365+00:00"
+  }
+}

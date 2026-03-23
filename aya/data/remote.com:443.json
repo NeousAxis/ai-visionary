@@ -1,0 +1,320 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:43.888020+00:00",
+  "source": {
+    "input_url": "https://www.remote.com",
+    "canonical_domain": "remote.com:443",
+    "pages_scanned": [
+      "https://remote.com:443",
+      "https://remote.com:443/about",
+      "https://remote.com:443/contact-us",
+      "https://remote.com:443/pricing"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 42946
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Remote",
+    "website": "https://remote.com:443",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "api",
+      "platform",
+      "developer",
+      "data",
+      "analytics"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Remote",
+        "website": "https://remote.com:443",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "Global HR Solutions & Employment Tools for Distributed Teams | Remote"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Hire international talent in minutes. Remote is the most disruptive global payroll, tax, HR and compliance solution for distributed teams.",
+        "og_description": "Hire international talent in minutes. Remote is the most disruptive global payroll, tax, HR and compliance solution for distributed teams."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "consulting",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "iso",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "186057898075",
+          "url": "https://remote.com",
+          "inLanguage": "en-us",
+          "name": "Homepage",
+          "description": "Hire international talent in minutes. Remote is the most disruptive global payroll, tax, HR and compliance solution for distributed teams.",
+          "dateCreated": "February 12, 2025",
+          "dateModified": "March 20, 2026",
+          "isPartOf": {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "@id": "1U31hVvDr9xMljrbwCBo9H",
+            "name": "Remote Europe Holding B.V",
+            "url": "https://remote.com",
+            "description": "Remote's website offers products such as Human Relations Information System (HRIS), employer of record (EOR), payroll, and contractor management. Remote's website also includes a job board where employers can list open roles for employees or contractors.",
+            "inLanguage": "en-us",
+            "publisher": {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "@id": "6ll0LTRqDNQf096vk7OesO",
+              "name": "Remote",
+              "foundingDate": "2019-01-01",
+              "knowsAbout": "Remote specializes in human relations (HR), human relations information system (HRIS), employer of record (EOR), payroll, and contractor management.",
+              "email": "help@remote.com",
+              "description": "Remote offers products such as Human Relations Information System (HRIS), employer of record (EOR), payroll, and contractor management.",
+              "logo": {
+                "@context": "https://schema.org",
+                "@type": "ImageObject",
+                "@id": "3GW3LxBcB50zZ61dUD0HOz",
+                "name": "Remote Logo",
+                "description": "Remote logo on a blue background.",
+                "contentUrl": "https://7405301.fs1.hubspotusercontent-na1.net/hubfs/7405301/Remote%202025/remote.svg",
+                "encodingFormat": "image/png",
+                "width": 1200,
+                "height": 630
+              },
+              "brand": {
+                "@context": "https://schema.org",
+                "@type": "Brand",
+                "@id": "3NAztscacdiyUTPV6CtfOx",
+                "name": "Remote",
+                "logo": {
+                  "@context": "https://schema.org",
+                  "@type": "ImageObject",
+                  "@id": "3GW3LxBcB50zZ61dUD0HOz",
+                  "name": "Remote Logo",
+                  "description": "Remote logo on a blue background.",
+                  "contentUrl": "https://7405301.fs1.hubspotusercontent-na1.net/hubfs/7405301/Remote%202025/remote.svg",
+                  "encodingFormat": "image/png",
+                  "width": 1200,
+                  "height": 630
+                }
+              },
+              "founder": [
+                {
+                  "@context": "https://schema.org",
+                  "@type": "Person",
+                  "@id": "13EZ9aQoOxchX5hy1Sc1Kc",
+                  "name": "Job van der Voort"
+                },
+                {
+                  "@context": "https://schema.org",
+                  "@type": "Person",
+                  "@id": "4SywP2X4lZcTzbwKFdAL1e",
+                  "name": "Marcelo Lebre"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "HomePage",
+              "item": "https://remote.com"
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:58:43.888028+00:00"
+  }
+}

@@ -1,0 +1,258 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:19.805254+00:00",
+  "source": {
+    "input_url": "https://www.rts.ch",
+    "canonical_domain": "rts.ch",
+    "pages_scanned": [
+      "https://www.rts.ch/",
+      "https://www.rts.ch/entreprise/contact/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Radio Télévision Suisse",
+    "website": "https://www.rts.ch/",
+    "country": "CH",
+    "city": "Genève",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "+41 32 322 11 64",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "NewsMediaOrganization"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Radio Télévision Suisse",
+        "website": "https://www.rts.ch/",
+        "email": "",
+        "phone": "+41 32 322 11 64",
+        "country": "CH",
+        "city": "Genève",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Radio Télévision Suisse | RTS"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "offre",
+          "service"
+        ],
+        "meta_description": "Le site de la Radio Télévision Suisse francophone RTS 1, RTS 2, RTS Première, RTS Espace 2, RTS Couleur 3 et RTS Option Musique | Accédez à toutes vos émissions radio et TV, informez-vous grâce à nos portails d'information et de sport, participez à nos concours et consultez nos programmes TV et radi",
+        "og_description": "Le site de la Radio Télévision Suisse francophone RTS 1, RTS 2, RTS Première, RTS Espace 2, RTS Couleur 3 et RTS Option Musique | Accédez à toutes vos émissions radio et TV, informez-vous grâce à nos portails d'information et de sport, participez à nos concours et consultez nos programmes TV et radi"
+      },
+      "evidence": [
+        "app",
+        "application",
+        "offre",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite",
+          "NewsMediaOrganization",
+          "BreadcrumbList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 59.6,
+    "final_score": 60,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 60,
+    "raw_score": 59.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.rts.ch/",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://www.rts.ch/services/recherche/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsMediaOrganization",
+        "@id": "https://www.rts.ch/#organization",
+        "mainEntityOfPage": "https://www.rts.ch/",
+        "name": "Radio Télévision Suisse",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "20 quai Ernest Ansermet",
+          "addressLocality": "Genève",
+          "addressRegion": "Genève",
+          "postalCode": "CP 234",
+          "addressCountry": "Suisse"
+        },
+        "sameAs": [
+          "https://www.facebook.com/rts.ch/",
+          "https://fr.wikipedia.org/wiki/Radio_télévision_suisse",
+          "https://twitter.com/RadioTeleSuisse",
+          "https://www.linkedin.com/company/radiotelevisionsuisse/",
+          "https://www.instagram.com/radiotelevisionsuisse/"
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@id": "https://www.rts.ch/",
+              "name": "Accueil"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:19.805263+00:00"
+  }
+}

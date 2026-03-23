@@ -1,0 +1,340 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:46.252191+00:00",
+  "source": {
+    "input_url": "https://www.kssg.ch",
+    "canonical_domain": "h-och.ch",
+    "pages_scanned": [
+      "https://www.h-och.ch/",
+      "https://www.h-och.ch/palliativzentrum/",
+      "https://www.h-och.ch/ueber-uns/organisation/departemente/legal-compliance/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 4330
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "HOCH Health Ostschweiz",
+    "website": "https://www.h-och.ch/",
+    "country": "CH",
+    "city": "St. Gallen",
+    "languages": [],
+    "org_type": "MedicalOrganization",
+    "contacts": {
+      "email": "dispo.medizin@h-och.ch",
+      "phone": "+41 55 285 40 62",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "health",
+    "sector_label": "Santé & Pharma",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "MedicalOrganization"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "HOCH Health Ostschweiz",
+        "website": "https://www.h-och.ch/",
+        "email": "dispo.medizin@h-och.ch",
+        "phone": "+41 55 285 40 62",
+        "country": "CH",
+        "city": "St. Gallen",
+        "org_type": "MedicalOrganization"
+      },
+      "evidence": [
+        "HOCH Health Ostschweiz"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api"
+        ],
+        "meta_description": "Die Gesundheitspartnerin in der Ostschweiz mit den Spitälern Kantonsspital St.Gallen (KSSG), Spital Altstätten, Spital Grabs, Spital Linth und Spital Wil.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "legal"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "MedicalOrganization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 48.3,
+    "final_score": 48,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 48,
+    "raw_score": 48.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "MedicalOrganization",
+        "@id": "https://www.h-och.ch/#org",
+        "name": "HOCH Health Ostschweiz",
+        "alternateName": [
+          "H-OCH",
+          "HOCH",
+          "KSSG",
+          "Kantons­spital St. Gallen",
+          "Spitalverbund Ostschweiz"
+        ],
+        "legalName": "HOCH Health Ostschweiz",
+        "description": "HOCH Health Ostschweiz ist der Verbund öffentlicher Spitäler und ambulanter Zentren im Kanton St. Gallen. Mit fünf Akutspitälern, spezialisierten Ambulatorien und rund 9000 Mitarbeitenden bietet HOCH umfassende Grund- und Spezialversorgung für rund 700 000 Menschen in der Ostschweiz.",
+        "url": "https://www.h-och.ch/",
+        "logo": "https://www.h-och.ch/assets/brand-logo.svg",
+        "image": "https://media.h-och.ch/image/?i=%2F2eym1u38kQt45CSbWheiCf%2F8fec553566c53a71157d868ed5abaf48%2FVisualisierung_Neubauprojekt_HOCH.jpg&w=1280&h=960",
+        "foundingDate": "2006-12-27",
+        "identifier": {
+          "@type": "PropertyValue",
+          "propertyID": "CHE-UID",
+          "value": "108.906.206"
+        },
+        "isicV4": "8610",
+        "numberOfEmployees": 9000,
+        "areaServed": "CH",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Rorschacher Strasse 95",
+          "postalCode": "9007",
+          "addressLocality": "St. Gallen",
+          "addressCountry": "CH"
+        },
+        "location": {
+          "@type": "Place",
+          "@id": "https://www.h-och.ch/#hq",
+          "name": "HOCH Health Ostschweiz – Hauptsitz",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Rorschacher Strasse 95",
+            "postalCode": "9007",
+            "addressLocality": "St. Gallen",
+            "addressCountry": "CH"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 47.429888,
+            "longitude": 9.387766
+          }
+        },
+        "telephone": "+41 71 494 11 11",
+        "email": "kontakt@h-och.ch",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "telephone": "+41 71 494 11 11",
+            "email": "kontakt@h-och.ch",
+            "areaServed": "CH"
+          }
+        ],
+        "sameAs": [
+          "https://www.instagram.com/hochhealthostschweiz/",
+          "https://www.linkedin.com/company/hochhealthostschweiz/",
+          "https://www.facebook.com/hochhealthostschweiz/",
+          "https://www.youtube.com/@hochhealthostschweiz"
+        ],
+        "subOrganization": [
+          "https://www.h-och.ch/ueber-uns/standorte/stgallen/#hospital",
+          "https://www.h-och.ch/ueber-uns/standorte/altstaetten/#hospital",
+          "https://www.h-och.ch/ueber-uns/standorte/grabs/#hospital",
+          "https://www.h-och.ch/ueber-uns/standorte/linth/#hospital",
+          "https://www.h-och.ch/ueber-uns/standorte/wil/#hospital",
+          "https://www.h-och.ch/ueber-uns/standorte/flawil/#clinic",
+          "https://www.h-och.ch/ueber-uns/standorte/rorschach/#clinic",
+          "https://www.h-och.ch/ueber-uns/standorte/ambulatorium-rorschach/#clinic",
+          "https://www.h-och.ch/ueber-uns/standorte/sargans/#clinic"
+        ],
+        "department": [
+          "https://www.h-och.ch/adipositaszentrum/#org",
+          "https://www.h-och.ch/akutgeriatrie/#org",
+          "https://www.h-och.ch/chirurgie/#org",
+          "https://www.h-och.ch/allgemeine-innere-medizin-hausarztmedizin-notfallmedizin/#org",
+          "https://www.h-och.ch/anaesthesiologie/#org",
+          "https://www.h-och.ch/angiologie/#org",
+          "https://www.h-och.ch/augenklinik/#org",
+          "https://www.h-och.ch/beckenbodenzentrum/#org",
+          "https://www.h-och.ch/brustzentrum/#org",
+          "https://www.h-och.ch/comprehensive-cancer-centre/#org",
+          "https://www.h-och.ch/pflege-therapeutische-dienste/#org",
+          "https://www.h-och.ch/dermatologie-venerologie-allergologie/#org",
+          "https://www.h-och.ch/endokrinologie-diabetologie-osteologie-stoffwechselerkrankungen/#org",
+          "https://www.h-och.ch/endometriosezentrum/#org",
+          "https://www.h-och.ch/ergo-und-physiotherapie/#org",
+          "https://www.h-och.ch/gastroenterologie-hepatologie/#org",
+          "https://www.h-och.ch/gefaesschirurgie/#org",
+          "https://www.h-och.ch/gefaesszentrum/#org",
+          "https://www.h-och.ch/gynaekologie-geburtshilfe/#org",
+          "https://www.h-och.ch/gynaekologisches-krebszentrum/#org",
+          "https://www.h-och.ch/hals-nasen-ohrenklinik/#org",
+          "https://www.h-och.ch/herzchirurgie/#org",
+          "https://www.h-och.ch/infektiologie-infektionspraevention-reisemedizin/#org",
+          "https://www.h-och.ch/intensivmedizin/#org",
+          "https://www.h-och.ch/wundzentrum/#org",
+          "https://www.h-och.ch/kardiologie/#org",
+          "https://www.h-och.ch/lungenzentrum/#org",
+          "https://www.h-och.ch/medizinische-onkologie-und-haematologie/#org",
+          "https://www.h-och.ch/musikermedizin/#org",
+          "https://www.h-och.ch/muskelzentrum-als-clinic/#org",
+          "https://www.h-och.ch/nephrologie-transplantationsmedizin/#org",
+          "https://www.h-och.ch/radiologie-nuklearmedizin/#org",
+          "https://www.h-och.ch/neurochirurgie/#org",
+          "https://www.h-och.ch/neurologie/#org",
+          "https://www.h-och.ch/notfallzentren/#org",
+          "https://www.h-och.ch/operative-intensivmedizin/#org",
+          "https://www.h-och.ch/orthopaedie-traumatologie/#org",
+          "https://www.h-och.ch/ostschweizer-zentrum-fuer-seltene-krankheiten/#org",
+          "https://www.h-och.ch/palliativzentrum/#org",
+          "https://www.h-och.ch/pathologie/#org",
+          "https://www.h-och.ch/plastische-chirurgie-handchirurgie/#org",
+          "https://www.h-och.ch/pneumologie-schlafmedizin/#org",
+          "https://www.h-och.ch/psychosomatik-konsiliarpsychiatrie/#org",
+          "https://www.h-och.ch/radio-onkologie/#org",
+          "https://www.h-och.ch/rechtsmedizin/#org",
+          "https://www.h-och.ch/rheumatologie/#org",
+          "https://www.h-och.ch/sarkomzentrum/#org",
+          "https://www.h-och.ch/schmerzzentrum/#org",
+          "https://www.h-och.ch/sozial-und-austrittsberatung/#org",
+          "https://www.h-och.ch/spitalpharmazie/#org",
+          "https://www.h-och.ch/stroke-center/#org",
+          "https://www.h-och.ch/thoraxchirurgie/#org",
+          "https://www.h-och.ch/urologie/#org",
+          "https://www.h-och.ch/varizenzentrum/#org",
+          "https://www.h-och.ch/wirbelsaeulenzentrum/#org",
+          "https://www.h-och.ch/zentrum-fuer-bewegungsstoerungen/#org",
+          "https://www.h-och.ch/integrative-medizin/#org",
+          "https://www.h-och.ch/zentrum-fuer-schlafmedizin/#org"
+        ],
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://www.h-och.ch/suche?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        },
+        "mainEntityOfPage": "https://www.h-och.ch/"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:46.252198+00:00"
+  }
+}

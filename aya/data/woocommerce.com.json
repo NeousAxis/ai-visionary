@@ -1,0 +1,390 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:01.440448+00:00",
+  "source": {
+    "input_url": "https://www.woocommerce.com",
+    "canonical_domain": "woocommerce.com",
+    "pages_scanned": [
+      "https://woocommerce.com/",
+      "https://woocommerce.com/about/",
+      "https://woocommerce.com/contact-us/",
+      "https://woocommerce.com/products/shipping/",
+      "https://woocommerce.com/products/",
+      "https://woocommerce.com/posts/woocommerce-pricing/",
+      "https://automattic.com/privacy/"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 29
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "WooCommerce",
+    "website": "https://woocommerce.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "press@woocommerce.com",
+      "phone": "1-877-273-3049",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "shop",
+      "store",
+      "buy",
+      "cart",
+      "checkout"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "WooCommerce",
+        "website": "https://woocommerce.com/",
+        "email": "press@woocommerce.com",
+        "phone": "1-877-273-3049",
+        "country": "",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "WooCommerce"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "WooCommerce is the open-source ecommerce platform that helps merchants and developers build successful businesses for the long term.",
+        "og_description": "WooCommerce is a customizable, open-source ecommerce platform built on WordPress."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "cloud",
+        "delivery",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "",
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 77.1,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 77.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://woocommerce.com/",
+            "url": "https://woocommerce.com/",
+            "name": "WooCommerce",
+            "isPartOf": {
+              "@id": "https://woocommerce.com/#website"
+            },
+            "about": {
+              "@id": "https://woocommerce.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://woocommerce.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://woocommerce.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://woocommerce.com/wp-content/uploads/2025/02/woo-take-control-of-your-success.jpg",
+            "datePublished": "2023-03-30T13:27:27+00:00",
+            "dateModified": "2026-03-11T11:31:23+00:00",
+            "description": "WooCommerce is the open-source ecommerce platform that helps merchants and developers build successful businesses for the long term.",
+            "breadcrumb": {
+              "@id": "https://woocommerce.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://woocommerce.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://woocommerce.com/#primaryimage",
+            "url": "https://woocommerce.com/wp-content/uploads/2025/02/woo-take-control-of-your-success.jpg",
+            "contentUrl": "https://woocommerce.com/wp-content/uploads/2025/02/woo-take-control-of-your-success.jpg",
+            "width": 2400,
+            "height": 1260
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://woocommerce.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Homepage"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://woocommerce.com/#website",
+            "url": "https://woocommerce.com/",
+            "name": "WooCommerce",
+            "description": "The most customizable ecommerce platform for building your online business. Get started today for free.",
+            "publisher": {
+              "@id": "https://woocommerce.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://woocommerce.com/search/?q={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://woocommerce.com/#organization",
+            "name": "WooCommerce",
+            "url": "https://woocommerce.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://woocommerce.com/#/schema/logo/image/",
+              "url": "https://woocommerce.com/wp-content/uploads/2025/07/Woo_logo_color.svg",
+              "contentUrl": "https://woocommerce.com/wp-content/uploads/2025/07/Woo_logo_color.svg",
+              "width": 183,
+              "height": 47,
+              "caption": "WooCommerce"
+            },
+            "image": {
+              "@id": "https://woocommerce.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/woocommerce",
+              "https://x.com/woocommerce",
+              "https://www.instagram.com/woocommerce"
+            ],
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "merchantReturnLink": "https://woocommerce.com/refund-policy/"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "headline": "WooCommerce",
+        "url": "https://woocommerce.com",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://woocommerce.com/"
+        },
+        "thumbnailUrl": "https://woocommerce.com/wp-content/uploads/2025/02/woo-take-control-of-your-success.jpg?w=150&h=150&crop=1",
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://woocommerce.com/wp-content/uploads/2025/02/woo-take-control-of-your-success.jpg"
+        },
+        "articleSection": "Blog",
+        "author": [
+          {
+            "@type": "Person",
+            "name": "mcliwanow"
+          }
+        ],
+        "creator": [
+          "mcliwanow"
+        ],
+        "publisher": {
+          "@type": "Organization",
+          "name": "WooCommerce",
+          "logo": "https://woocommerce.com/wp-content/uploads/2021/05/WooCommerce_logo.svg.png"
+        },
+        "keywords": [],
+        "dateCreated": "2023-03-30T13:27:27Z",
+        "datePublished": "2023-03-30T13:27:27Z",
+        "dateModified": "2026-03-11T11:31:23Z"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:58:01.440460+00:00"
+  }
+}

@@ -1,0 +1,291 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:01.441860+00:00",
+  "source": {
+    "input_url": "https://www.rapyuta-robotics.com",
+    "canonical_domain": "rapyuta-robotics.com",
+    "pages_scanned": [
+      "https://www.rapyuta-robotics.com/",
+      "https://www.rapyuta-robotics.com/about/",
+      "https://www.rapyuta-robotics.com/contact-us/",
+      "https://www.rapyuta-robotics.com/privacy-policy/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 155
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Rapyuta Robotics",
+    "website": "https://www.rapyuta-robotics.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "privacy@rapyuta-robotics.com",
+      "phone": "2010-2014",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Rapyuta Robotics",
+        "website": "https://www.rapyuta-robotics.com/",
+        "email": "privacy@rapyuta-robotics.com",
+        "phone": "2010-2014",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Rapyuta Robotics | Making Robots More Accessible"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "We’re the fastest way to go from idea to solution. Build on top of a state-of-the-art field tested platform that allows you to build, deliver, monitor, and scale your robotics application. Take a holistic approach including people, processes, and technology.",
+        "og_description": "We’re the fastest way to go from idea to solution. Build on top of a state-of-the-art field tested platform that allows you to build, deliver, monitor, and scale your robotics application. Take a holistic approach including people, processes, and technology."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://www.rapyuta-robotics.com/#/schema/WebSite",
+            "url": "https://www.rapyuta-robotics.com/",
+            "name": "Rapyuta Robotics",
+            "description": "Making Robots More Accessible",
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://www.rapyuta-robotics.com/search/{search_term_string}/"
+              },
+              "query-input": "required name=search_term_string"
+            },
+            "publisher": {
+              "@id": "https://www.rapyuta-robotics.com/#/schema/Organization"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.rapyuta-robotics.com/",
+            "url": "https://www.rapyuta-robotics.com/",
+            "name": "Rapyuta Robotics | Making Robots More Accessible",
+            "description": "We’re the fastest way to go from idea to solution. Build on top of a state&#x2d;of&#x2d;the&#x2d;art field tested platform that allows you to build, deliver, monitor, and scale your robotics application. Take a holistic approach including people, processes, and technology.",
+            "inLanguage": "en-US",
+            "isPartOf": {
+              "@id": "https://www.rapyuta-robotics.com/#/schema/WebSite"
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "@id": "https://www.rapyuta-robotics.com/#/schema/BreadcrumbList",
+              "itemListElement": {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Rapyuta Robotics"
+              }
+            },
+            "potentialAction": {
+              "@type": "ReadAction",
+              "target": "https://www.rapyuta-robotics.com/"
+            },
+            "about": {
+              "@id": "https://www.rapyuta-robotics.com/#/schema/Organization"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.rapyuta-robotics.com/#/schema/Organization",
+            "name": "Rapyuta Robotics",
+            "url": "https://www.rapyuta-robotics.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.rapyuta-robotics.com/wp-content/uploads/2022/03/rr-favicon2022.png",
+              "contentUrl": "https://www.rapyuta-robotics.com/wp-content/uploads/2022/03/rr-favicon2022.png",
+              "width": 512,
+              "height": 512
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:01.441867+00:00"
+  }
+}

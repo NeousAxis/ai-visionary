@@ -1,0 +1,246 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:56:08.885010+00:00",
+  "source": {
+    "input_url": "https://www.em-lyon.com",
+    "canonical_domain": "em-lyon.com",
+    "pages_scanned": [
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr",
+      "https://em-lyon.com/fr"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "emlyon business school",
+    "website": "https://em-lyon.com/fr",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+33 4 12 05 87 20",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "university",
+      "school",
+      "école",
+      "formation",
+      "étudiant"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "emlyon business school",
+        "website": "https://em-lyon.com/fr",
+        "email": "",
+        "phone": "+33 4 12 05 87 20",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "emlyon business school | Grande école de commerce et de management"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "consulting",
+          "menu",
+          "offre",
+          "product",
+          "service"
+        ],
+        "meta_description": "emlyon business school, une grande école de commerce proposant le Programme Grande Ecole, des MS, MSc in, un MBA ainsi que de la formation continue.",
+        "og_description": "emlyon business school, une grande école de commerce proposant le Programme Grande Ecole, des MS, MSc in, un MBA ainsi que de la formation continue."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "consulting",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 59.3,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 59.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "EducationalOrganization",
+            "additionalType": "CollegeOrUniversity",
+            "description": "Ecole de commerce et de Management",
+            "name": "emlyon business school",
+            "sameAs": "https://fr.wikipedia.org/wiki/EM_Lyon_Business_School",
+            "url": "https://em-lyon.com/fr",
+            "telephone": "04 78 33 78 00",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "04 78 33 78 00",
+              "email": "contact@em-lyon.com",
+              "contactType": "Accueil"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:56:08.885017+00:00"
+  }
+}

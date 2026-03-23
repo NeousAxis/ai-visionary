@@ -1,0 +1,571 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:56:58.618047+00:00",
+  "source": {
+    "input_url": "https://www.heroku.com",
+    "canonical_domain": "heroku.com",
+    "pages_scanned": [
+      "https://www.heroku.com/",
+      "https://www.heroku.com/about/",
+      "https://www.heroku.com/contact/",
+      "https://www.heroku.com/products/",
+      "https://www.heroku.com/pricing/",
+      "https://www.heroku.com/what/",
+      "https://www.salesforce.com/company/legal/privacy/?bc=DB"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 8
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Heroku",
+    "website": "https://www.heroku.com/",
+    "country": "US",
+    "city": "San Francisco",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "heroku-abuse@salesforce.com",
+      "phone": "+1-800-931-7365",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Heroku",
+        "website": "https://www.heroku.com/",
+        "email": "heroku-abuse@salesforce.com",
+        "phone": "+1-800-931-7365",
+        "country": "US",
+        "city": "San Francisco",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "The AI PaaS for Deploying, Managing, and Scaling Apps"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Heroku is an AI platform as a service (AI PaaS) that enables developers to build, run, and scale applications entirely in the cloud.",
+        "og_description": "Heroku is an AI platform as a service (AI PaaS) that enables developers to build, run, and scale applications entirely in the cloud."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "methodology",
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "methodology",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebPage",
+          "LocalBusiness"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.0,
+    "final_score": 78,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 78,
+    "raw_score": 78.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "headline": "Heroku",
+        "url": "https://www.heroku.com",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://www.heroku.com/"
+        },
+        "thumbnailUrl": "",
+        "image": {
+          "@type": "ImageObject",
+          "url": ""
+        },
+        "articleSection": "Uncategorized",
+        "author": [
+          {
+            "@type": "Person",
+            "name": "Heroku"
+          }
+        ],
+        "creator": [
+          "Heroku"
+        ],
+        "publisher": {
+          "@type": "Organization",
+          "name": "Heroku",
+          "logo": "https://www.heroku.com/wp-content/uploads/2025/01/Heroku-Logo-KO-RGB.png"
+        },
+        "keywords": [],
+        "dateCreated": "2014-05-02T17:59:26Z",
+        "datePublished": "2014-05-02T17:59:26Z",
+        "dateModified": "2026-02-25T19:56:02Z"
+      },
+      [
+        {
+          "@context": "https://schema.org/",
+          "@type": "LocalBusiness",
+          "@id": "LocalBusiness",
+          "url": "https://www.heroku.com/",
+          "name": "Heroku",
+          "description": "",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "415 Mission Street Suite 300",
+            "addressLocality": "San Francisco",
+            "addressRegion": "CA",
+            "postalCode": "94105",
+            "addressCountry": "United States"
+          },
+          "telephone": "+14159017000",
+          "openingHours": [
+            "Mo-Fr 08:00-17:00"
+          ],
+          "image": "https://www.heroku.com/wp-content/uploads/2025/01/Heroku-Logo-Light-RGB.png",
+          "additionalType": "",
+          "priceRange": "",
+          "servesCuisine": "",
+          "areaServed": [],
+          "founder": [],
+          "employee": [],
+          "makesOffer": {
+            "@type": "Offer",
+            "@id": "#service",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "",
+              "url": "",
+              "areaServed": []
+            }
+          },
+          "sameAs": [
+            "https://x.com/heroku",
+            "https://www.linkedin.com/company/heroku"
+          ],
+          "hasMenu": "",
+          "hasMap": "",
+          "review": []
+        },
+        {
+          "@context": "https://schema.org/",
+          "@graph": [
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#products",
+              "name": "Products",
+              "url": "https://www.heroku.com/products/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#heroku-platform",
+              "name": "Heroku Platform",
+              "url": "https://www.heroku.com/platform/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#heroku-ai",
+              "name": "Heroku AI",
+              "url": "https://www.heroku.com/ai/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#heroku-data-services",
+              "name": "Heroku Data Services",
+              "url": "https://www.heroku.com/managed-data-services/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#heroku-enterprise",
+              "name": "Heroku Enterprise",
+              "url": "https://www.heroku.com/enterprise/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#heroku-success",
+              "name": "Heroku Success",
+              "url": "https://www.heroku.com/support/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#heroku-elements-marketplace",
+              "name": "Heroku Elements Marketplace",
+              "url": "https://elements.heroku.com/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#developers",
+              "name": "Developers",
+              "url": "https://www.heroku.com/developers/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#dev-center",
+              "name": "Dev Center",
+              "url": "https://devcenter.heroku.com/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#languages",
+              "name": "Languages",
+              "url": "https://www.heroku.com/languages/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#python",
+              "name": "Python",
+              "url": "https://www.heroku.com/python/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#net",
+              "name": ".NET",
+              "url": "https://www.heroku.com/dotnet/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#java",
+              "name": "Java",
+              "url": "https://www.heroku.com/java/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#node-js",
+              "name": "Node.js",
+              "url": "https://www.heroku.com/nodejs/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#go",
+              "name": "Go",
+              "url": "https://www.heroku.com/go/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#php",
+              "name": "PHP",
+              "url": "https://www.heroku.com/php/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#ruby",
+              "name": "Ruby",
+              "url": "https://www.heroku.com/ruby/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#scala",
+              "name": "Scala",
+              "url": "https://www.heroku.com/java?lang=scala"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#clojure",
+              "name": "Clojure",
+              "url": "https://www.heroku.com/java?lang=clojure"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#customers",
+              "name": "Customers",
+              "url": "https://www.heroku.com/customers/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#customer-stories",
+              "name": "Customer Stories",
+              "url": "https://www.heroku.com/case-studies/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#community-stories",
+              "name": "Community Stories",
+              "url": "https://www.heroku.com/community-stories/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#pricing",
+              "name": "Pricing",
+              "url": "https://www.heroku.com/pricing/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#blog",
+              "name": "Blog",
+              "url": "https://www.heroku.com/blog/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#what-is-heroku",
+              "name": "What is Heroku?",
+              "url": "https://www.heroku.com/what/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#events",
+              "name": "Events",
+              "url": "https://www.heroku.com/events/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#partners",
+              "name": "Partners",
+              "url": "https://www.heroku.com/partnering/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#compliance-center",
+              "name": "Compliance Center",
+              "url": "https://www.heroku.com/compliance/"
+            },
+            {
+              "@context": "https://schema.org/",
+              "@type": "SiteNavigationElement",
+              "@id": "https://www.heroku.com/#help-center",
+              "name": "Help Center",
+              "url": "https://help.heroku.com/"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org/",
+          "@type": "WebSite",
+          "@id": "https://www.heroku.com#website",
+          "headline": "Heroku",
+          "name": "Heroku",
+          "description": "Heroku is an AI platform as a service (AI PaaS) that enables developers to build, run, and scale applications entirely in the cloud.",
+          "url": "https://www.heroku.com",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.heroku.com?s={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@context": "https://schema.org/",
+          "@type": "Corporation",
+          "@id": "https://www.heroku.com#Organization",
+          "name": "Heroku",
+          "url": "https://www.heroku.com",
+          "sameAs": [
+            "https://x.com/heroku",
+            "https://github.com/heroku",
+            "https://www.linkedin.com/company/heroku"
+          ],
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.heroku.com/wp-content/uploads/2025/01/Heroku-Logo-Light-RGB.png",
+            "width": "1196",
+            "height": "336"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "telephone": "",
+            "url": "https://www.heroku.com/contact/"
+          }
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:56:58.618056+00:00"
+  }
+}

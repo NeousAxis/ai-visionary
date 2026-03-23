@@ -1,0 +1,280 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:04:11.487415+00:00",
+  "source": {
+    "input_url": "https://www.gsk.com",
+    "canonical_domain": "gsk.com",
+    "pages_scanned": [
+      "https://www.gsk.com/en-gb/",
+      "https://www.gsk.com/about",
+      "https://www.gsk.com/a-propos",
+      "https://www.gsk.com/contact",
+      "https://www.gsk.com/services",
+      "https://www.gsk.com/products",
+      "https://www.gsk.com/pricing",
+      "https://www.gsk.com/faq",
+      "https://www.gsk.com/legal",
+      "https://www.gsk.com/privacy",
+      "https://www.gsk.com/terms"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1994
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "GSK",
+    "website": "https://www.gsk.com/en-gb/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "2001-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "media",
+      "press",
+      "magazine",
+      "podcast",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "GSK",
+        "website": "https://www.gsk.com/en-gb/",
+        "email": "",
+        "phone": "2001-2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Home | GSK"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "product",
+          "products",
+          "service"
+        ],
+        "meta_description": "At GSK, we unite science, technology and talent to get ahead of disease together",
+        "og_description": "At GSK, we unite science, technology and talent to get ahead of disease together"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "faq",
+          "help"
+        ]
+      },
+      "evidence": [
+        "faq",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Corporation",
+            "@id": "https://www.gsk.com/en-gb/#corporation",
+            "name": "GSK plc",
+            "legalName": "GlaxoSmithKline plc",
+            "url": "https://www.gsk.com/en-gb/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.gsk.com/nuxtassets/images/gif_logo_opt.gif"
+            },
+            "description": "At GSK, we unite science, technology and talent to get ahead of disease together",
+            "tickerSymbol": [
+              "LON:GSK",
+              "NYSE:GSK"
+            ],
+            "sameAs": [
+              "https://www.linkedin.com/company/glaxosmithkline",
+              "https://twitter.com/GSK",
+              "https://bsky.app/profile/gsk.bsky.social/",
+              "https://www.instagram.com/gsk/",
+              "https://www.facebook.com/GSK",
+              "https://www.youtube.com/gsk"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "79 New Oxford Street",
+              "addressLocality": "London",
+              "postalCode": "WC1A 1DG",
+              "addressCountry": "GB"
+            },
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "contactType": "corporate enquiries",
+                "url": "https://www.gsk.com/en-gb/contact-us/"
+              },
+              {
+                "@type": "ContactPoint",
+                "contactType": "media relations",
+                "url": "https://www.gsk.com/en-gb/media/media-contacts/"
+              },
+              {
+                "@type": "ContactPoint",
+                "contactType": "investor relations",
+                "url": "https://www.gsk.com/en-gb/investors/investor-contacts/"
+              }
+            ],
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.gsk.com/en-gb/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:04:11.487433+00:00"
+  }
+}

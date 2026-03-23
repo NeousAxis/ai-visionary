@@ -1,0 +1,265 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:06.903712+00:00",
+  "source": {
+    "input_url": "https://www.on-running.com",
+    "canonical_domain": "on.com",
+    "pages_scanned": [
+      "https://www.on.com/en-ch/",
+      "https://www.on.com/en-ch/explore/about-on",
+      "https://www.on.com/en-ch/a-propos",
+      "https://www.on.com/en-ch/contact",
+      "https://www.on.com/en-ch/services",
+      "https://www.on.com/en-ch/shop",
+      "https://www.on.com/en-ch/pricing",
+      "https://www.on.com/en-ch/faq",
+      "https://www.on.com/en-ch/legal",
+      "https://www.on.com/en-ch/privacy",
+      "https://www.on.com/en-ch/terms"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 5
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "On",
+    "website": "https://www.on.com/en-ch/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.6000000000000001,
+    "source": "keyword_match",
+    "evidence": [
+      "shop",
+      "store",
+      "product"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "On",
+        "website": "https://www.on.com/en-ch/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "On | Swiss Performance Running Shoes & Clothing"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "cloud",
+          "product",
+          "products",
+          "service"
+        ],
+        "meta_description": "Born in the Swiss Alps, On running shoes feature the first patented cushioning system which is activated only when you need it - during the landing.",
+        "og_description": "Born in the Swiss Alps, On running shoes feature the first patented cushioning system which is activated only when you need it - during the landing."
+      },
+      "evidence": [
+        "app",
+        "cloud",
+        "product",
+        "products",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "help"
+        ]
+      },
+      "evidence": [
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "",
+        "name": "On | Swiss Performance Running Shoes & Clothing",
+        "alternateName": "On Running",
+        "description": "Born in the Swiss Alps, On running shoes feature the first patented cushioning system which is activated only when you need it - during the landing.",
+        "publisher": {
+          "@type": "Organization",
+          "name": "On",
+          "legalName": "On AG",
+          "url": "https://www.on.com/",
+          "logo": "https://www.on.com/favicon.ico",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Förrlibuckstrasse 190",
+            "addressLocality": "Zürich",
+            "postalCode": "8005",
+            "addressCountry": "CH"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+41 44 225 15 77",
+            "contactType": "customer service"
+          },
+          "sameAs": [
+            "https://www.facebook.com/on",
+            "https://www.instagram.com/on/",
+            "https://www.linkedin.com/company/on-ag",
+            "https://www.strava.com/clubs/on-226387",
+            "https://www.xing.com/pages/onag",
+            "https://x.com/on_running",
+            "https://www.youtube.com/@On-Running",
+            "https://pinterest.com/onrunning/",
+            "https://www.tiktok.com/@onrunning",
+            "https://en.wikipedia.org/wiki/On_(company)",
+            "https://de.wikipedia.org/wiki/On_AG",
+            "https://es.wikipedia.org/wiki/On_(empresa)",
+            "https://fa.wikipedia.org/wiki/%D8%A2%D9%86_%D8%B1%D8%A7%D9%86%DB%8C%D9%86%DA%AF",
+            "https://fr.wikipedia.org/wiki/On_(entreprise)",
+            "https://id.wikipedia.org/wiki/On_(Perusahaan)",
+            "https://hu.wikipedia.org/wiki/On_AG",
+            "https://pt.wikipedia.org/wiki/On_(empresa)",
+            "https://uk.wikipedia.org/wiki/On_(%D0%B1%D1%80%D0%B5%D0%BD%D0%B4)",
+            "https://zh.wikipedia.org/wiki/On_(%E9%81%8B%E5%8B%95%E9%9E%8B)",
+            "https://www.google.com/search?kgmid=/g/11dxprv1lg"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:50:06.903722+00:00"
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:24.539815+00:00",
+  "source": {
+    "input_url": "https://www.feldschloesschen.ch",
+    "canonical_domain": "feldschloesschen.ch",
+    "pages_scanned": [
+      "https://feldschloesschen.ch/",
+      "https://feldschloesschen.ch/pages/kontakt",
+      "https://feldschloesschen.ch/products",
+      "https://feldschloesschen.ch/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 12
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Feldschlösschen Getränke Shop",
+    "website": "https://feldschloesschen.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "info@feldschloesschen.ch",
+      "phone": "+41 848 125 000",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.4,
+    "source": "keyword_match",
+    "evidence": [
+      "shop"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Feldschlösschen Getränke Shop",
+        "website": "https://feldschloesschen.ch/",
+        "email": "info@feldschloesschen.ch",
+        "phone": "+41 848 125 000",
+        "country": "CH",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Feldschlösschen"
+      ]
+    },
+    "offre": {
+      "present": false,
+      "fields": {
+        "keywords_detected": [],
+        "meta_description": "Entdecke Feldschlössche! Hier findest du nicht nur spannende News über uns sondern auch deine Feldschlösschen Biere, und eine Vielzahl anderer Getränke und exklusive Fanartikel. Bestelle bequem online und lasse dir alles direkt nach Hause liefern. Erlebe die Vielfalt und Qualität von Feldschlösschen",
+        "og_description": "Entdecke Feldschlössche! Hier findest du nicht nur spannende News über uns sondern auch deine Feldschlösschen Biere, und eine Vielzahl anderer Getränke und exklusive Fanartikel. Bestelle bequem online und lasse dir alles direkt nach Hause liefern. Erlebe die Vielfalt und Qualität von Feldschlösschen"
+      },
+      "evidence": []
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 43.6,
+    "final_score": 44,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "offre",
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 44,
+    "raw_score": 43.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://feldschloesschen.ch"
+          }
+        ]
+      },
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Feldschlösschen Getränke Shop",
+          "url": "https://feldschloesschen.ch",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://feldschloesschen.ch/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Feldschlösschen Getränke Shop",
+          "logo": "https://feldschloesschen.ch/cdn/shop/files/Logo_gross_offset_rgb_NEGATIVgoldrahmen.png?v=1744013092&width=1272",
+          "sameAs": [
+            "https://www.facebook.com/feldschloesschen/",
+            "https://www.instagram.com/feldschloesschen/",
+            "https://www.linkedin.com/company/feldschlosschen-getranke-ag/",
+            "https://www.youtube.com/user/FeldschloesschenAG"
+          ],
+          "url": "https://feldschloesschen.ch"
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:24.539823+00:00"
+  }
+}

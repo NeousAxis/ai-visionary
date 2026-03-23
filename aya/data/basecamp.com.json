@@ -1,0 +1,296 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:32.896290+00:00",
+  "source": {
+    "input_url": "https://www.basecamp.com",
+    "canonical_domain": "basecamp.com",
+    "pages_scanned": [
+      "https://basecamp.com/",
+      "https://basecamp.com/about",
+      "https://basecamp.com/about",
+      "https://basecamp.com/pricing",
+      "https://basecamp.com/support",
+      "https://37signals.com/policies/privacy",
+      "https://37signals.com/policies/terms"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 199
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Basecamp",
+    "website": "https://basecamp.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "david@basecamp.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Basecamp",
+        "website": "https://basecamp.com/",
+        "email": "david@basecamp.com",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "Basecamp — Project management software, online collaboration"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Trusted by millions, Basecamp puts everything you need to get work done in one place. Itâs the calm, organized way to manage projects, work with clients, and communicate company-wide.",
+        "og_description": "Trusted by millions, Basecamp puts everything you need to get work done in one place. Itâs the calm, organized way to manage projects, work with clients, and communicate company-wide."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "guide",
+        "help",
+        "tutorial"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebPage",
+          "WebSite",
+          "ItemList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "/"
+        },
+        "name": "Basecamp",
+        "headline": "Project management software, online collaboration",
+        "description": "Trusted by millions, Basecamp puts everything you need to get work done in one place. Itâs the calm, organized way to manage projects, work with clients, and communicate company-wide.",
+        "url": "https://basecamp.com/",
+        "image": "https://basecamp.com/assets/images/opengraph/basecamp.png?v=1.0.6"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Basecamp",
+        "url": "https://basecamp.com"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": [
+          {
+            "@type": "SiteNavigationElement",
+            "position": 1,
+            "name": "Pricing",
+            "url": "https://basecamp.com/pricing"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 2,
+            "name": "Customers",
+            "url": "https://basecamp.com/customers"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 3,
+            "name": "Learn",
+            "url": "https://basecamp.com/learn"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 4,
+            "name": "Apps",
+            "url": "https://basecamp.com/apps"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 5,
+            "name": "Shape Up",
+            "url": "https://basecamp.com/shapeup"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:32.896301+00:00"
+  }
+}

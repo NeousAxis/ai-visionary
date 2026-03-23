@@ -1,0 +1,290 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:56.852585+00:00",
+  "source": {
+    "input_url": "https://www.bigcommerce.com",
+    "canonical_domain": "bigcommerce.com",
+    "pages_scanned": [
+      "https://www.bigcommerce.com/",
+      "https://www.bigcommerce.com/company/",
+      "https://www.bigcommerce.com/contact/",
+      "https://www.bigcommerce.com/services/",
+      "https://www.bigcommerce.com/enterprise-pricing/",
+      "https://www.bigcommerce.com/essentials/pricing/faq/",
+      "https://www.commerce.com/privacy/",
+      "https://www.commerce.com/terms/"
+    ],
+    "pages_scanned_count": 8,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "BigCommerce",
+    "website": "https://www.bigcommerce.com/",
+    "country": "",
+    "city": "Austin",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "privacy@commerce.com",
+      "phone": "+1-512-758-7588",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "BigCommerce",
+        "website": "https://www.bigcommerce.com/",
+        "email": "privacy@commerce.com",
+        "phone": "+1-512-758-7588",
+        "country": "",
+        "city": "Austin",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Commerce built for momentum. | BigCommerce"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Power modern buying experiences across brands, regions, and channels — all from a single, scalable foundation. Learn more.",
+        "og_description": "Power modern buying experiences across brands, regions, and channels — all from a single, scalable foundation. Learn more."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Corporation",
+          "WebSite",
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 76.6,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 76.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Corporation",
+        "name": "BigCommerce",
+        "description": "BigCommerce’s mission is to help merchants sell more at every stage of growth, from small startups, to mid-market businesses, to large enterprises. As a leading Open SaaS solution, BigCommerce empowers merchants to build, innovate and grow their businesses online. Simply put, we focus on being the best commerce platform so our customers can focus on what matters most: growing their businesses.",
+        "logo": "https://www-cdn.bigcommerce.com/assets/logos/bc-logo-dark.svg?mtime=20160329000432",
+        "parentOrganization": "BigCommerce",
+        "url": "https://www.bigcommerce.com",
+        "sameAs": [
+          "http://www.facebook.com/Bigcommerce",
+          "https://x.com/Bigcommerce/",
+          "http://www.linkedin.com/company/bigcommerce",
+          "http://www.youtube.com/BigcommerceDotCom",
+          "http://pinterest.com/bigcommerce/",
+          "https://www.instagram.com/bigcommerce/"
+        ],
+        "slogan": "Ecommerce for a New Era",
+        "legalName": "BigCommerce Holdings, INC.",
+        "leiCode": "549300MOVEFQ78DMPG58",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Austin",
+          "addressRegion": "TX",
+          "postalCode": "78726",
+          "streetAddress": "11305 4 Points Building 2, Suite 100"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "BigCommerce",
+        "url": "https://www.bigcommerce.com/",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": "https://www.bigcommerce.com/search?search={query}",
+            "query-input": "required name=query"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": "https://www.bigcommerce.com/",
+        "url": "https://www.bigcommerce.com/",
+        "name": "BigCommerce"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:57:56.852594+00:00"
+  }
+}

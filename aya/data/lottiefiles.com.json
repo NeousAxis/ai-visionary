@@ -1,0 +1,251 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:40.879724+00:00",
+  "source": {
+    "input_url": "https://www.lottiefiles.com",
+    "canonical_domain": "lottiefiles.com",
+    "pages_scanned": [
+      "https://lottiefiles.com",
+      "https://lottiefiles.com",
+      "https://lottiefiles.com",
+      "https://lottiefiles.com"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "LottieFiles",
+    "website": "https://lottiefiles.com",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "LottieFiles",
+        "website": "https://lottiefiles.com",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "LottieFiles: Download Free lightweight animations for website & apps."
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "software"
+        ],
+        "meta_description": "Effortlessly bring the smallest, free, ready-to-use motion graphics for the web, app, social, and designs. Create, edit, test, collaborate, and ship Lottie animations in no time!",
+        "og_description": "Effortlessly bring the smallest, free, ready-to-use motion graphics for the web, app, social, and designs. Create, edit, test, collaborate, and ship Lottie animations in no time!"
+      },
+      "evidence": [
+        "app",
+        "menu",
+        "platform",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 71.0,
+    "final_score": 71,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 71,
+    "raw_score": 71.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "LottieFiles",
+            "@id": "https://lottiefiles.com#organization",
+            "url": "https://lottiefiles.com",
+            "logo": "https://stp-v4-cdn.lottiefiles.com/lottiefiles_logo_6e1e830a69.svg",
+            "sameAs": [
+              "https://www.facebook.com/LottieFiles/",
+              "https://twitter.com/lottiefiles",
+              "https://www.instagram.com/lottie.files/",
+              "https://www.youtube.com/c/LottieFiles",
+              "https://www.linkedin.com/company/lottiefiles",
+              "https://lottiefiles.com/dribbble",
+              "https://lottiefiles.com/discord"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "name": "LottieFiles",
+            "url": "https://lottiefiles.com"
+          },
+          {
+            "@type": "WebPage",
+            "name": "LottieFiles: Download Free lightweight animations for website & apps.",
+            "description": "Effortlessly bring the smallest, free, ready-to-use motion graphics for the web, app, social, and designs. Create, edit, test, collaborate, and ship Lottie animations in no time!",
+            "primaryImageOfPage": "https://stp-v4-cdn.lottiefiles.com/t_T_Wh_OP_1_Y_Rph_K4_Rl_HC_Zj_LR_Ie_I5qk_Y6_Wbb2h_A_Hio_NX_0164244cad.png"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:40.879734+00:00"
+  }
+}

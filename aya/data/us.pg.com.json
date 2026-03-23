@@ -1,0 +1,277 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:04:05.795473+00:00",
+  "source": {
+    "input_url": "https://www.pg.com",
+    "canonical_domain": "us.pg.com",
+    "pages_scanned": [
+      "https://us.pg.com/",
+      "https://www.pg.com/404/",
+      "https://www.pg.com/404/",
+      "https://www.pg.com/404/",
+      "https://www.pg.com/404/",
+      "https://us.pg.com/brands/",
+      "https://www.pg.com/404/",
+      "https://www.pg.com/404/",
+      "https://www.pg.com/404/",
+      "https://privacypolicy.pg.com/en-US/",
+      "https://www.pg.com/404/"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Procter & Gamble",
+    "website": "https://us.pg.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "MYDataprivacy@shared.pg.com",
+      "phone": "+593 3922255",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Procter & Gamble",
+        "website": "https://us.pg.com/",
+        "email": "MYDataprivacy@shared.pg.com",
+        "phone": "+593 3922255",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Procter & Gamble"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "",
+        "og_description": "P&G is improving everyday life as a Force for Growth and a Force for Good — for you, for the world, and for generations to come."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 68.4,
+    "final_score": 68,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 68,
+    "raw_score": 68.4,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "name": "Procter & Gamble",
+        "legalName": "The Procter & Gamble Company",
+        "url": "https://us.pg.com/",
+        "sameAs": [
+          "https://www.facebook.com/proctergamble/",
+          "https://twitter.com/proctergamble/",
+          "https://www.youtube.com/channel/UCDzq6J0KoGCbps96JQuXWRg/",
+          "https://www.instagram.com/proctergamble/",
+          "https://www.linkedin.com/company/procter-and-gamble/"
+        ],
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://images.ctfassets.net/oggad6svuzkv/4JSezOuLv9CCXfHEBpfGxp/528d1ca0496e3401cd60467235b6441f/P_G_Logo_RGB.png"
+        },
+        "contactPoint": {
+          "@type": "contactPoint",
+          "telephone": "+1 513-983-1100",
+          "contactType": "customer service",
+          "areaServed": "US",
+          "sameAs": [
+            "https://www.facebook.com/proctergamble/",
+            "https://twitter.com/proctergamble/",
+            "https://www.youtube.com/channel/UCDzq6J0KoGCbps96JQuXWRg/",
+            "https://instagram.com/proctergamble/",
+            "https://www.linkedin.com/company/procter-and-gamble/"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:04:05.795482+00:00"
+  }
+}

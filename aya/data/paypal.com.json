@@ -1,0 +1,283 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:56:57.018257+00:00",
+  "source": {
+    "input_url": "https://www.paypal.com",
+    "canonical_domain": "paypal.com",
+    "pages_scanned": [
+      "https://www.paypal.com/ch/home",
+      "https://www.paypal.com/webapps/mpp/about",
+      "https://www.paypal.com/ch/cshelp/personal",
+      "https://www.paypal.com/business",
+      "https://www.paypal.com/de/home",
+      "https://www.paypal.com/us/legalhub/paypal/privacy-full",
+      "https://www.paypal.com/workingcapital/error?type=404"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 4,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "PayPal",
+    "website": "https://www.paypal.com/ch/home",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "Aginfo@ag.nv.gov",
+      "phone": "01.01.2027",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "PayPal",
+        "website": "https://www.paypal.com/ch/home",
+        "email": "Aginfo@ag.nv.gov",
+        "phone": "01.01.2027",
+        "country": "",
+        "city": "",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Digitale Geldbörse, Geldverwaltung und mehr | PayPal CH"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "PayPal ist der schnellere und sicherere Weg, Geld zu senden und zu empfangen oder eine Online-Zahlung zu tätigen. Leg heute los.",
+        "og_description": "PayPal ist der schnellere und sicherere Weg, Geld zu senden und zu empfangen oder eine Online-Zahlung zu tätigen. Leg heute los."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "help"
+        ]
+      },
+      "evidence": [
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Corporation",
+          "WebSite",
+          "WebPage",
+          "Article"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.1,
+    "final_score": 73,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 73,
+    "raw_score": 73.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://www.schema.org",
+        "@type": "Corporation",
+        "@id": "https://www.paypal.com/ch/#corporation",
+        "url": "https://www.paypal.com/ch/",
+        "logo": "https://www.paypalobjects.com/webstatic/i/logo/rebrand/ppcom.png",
+        "name": "PayPal"
+      },
+      {
+        "@context": "https://schema.org",
+        "@id": "https://www.paypal.com/ch/#website",
+        "@type": "WebSite",
+        "inLanguage": "ch",
+        "url": "https://www.paypal.com/ch/",
+        "name": "PayPal"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "@id": "https://www.paypal.com/ch/home#webpage",
+        "name": "Digitale Geldbörse, Geldverwaltung und mehr",
+        "inLanguage": "ch",
+        "image": {
+          "@type": "ImageObject",
+          "@id": "https://www.paypalobjects.com/webstatic/icon/pp258.png#primaryimage",
+          "url": "https://www.paypalobjects.com/webstatic/icon/pp258.png"
+        },
+        "isPartOf": {
+          "@id": "https://www.paypal.com/ch/#website"
+        },
+        "primaryImageOfPage": {
+          "@id": "https://www.paypalobjects.com/webstatic/icon/pp258.png#primaryimage"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "@id": "https://www.paypal.com/ch/home#article",
+        "isPartOf": {
+          "@id": "https://www.paypal.com/ch/home#website"
+        },
+        "mainEntityOfPage": "https://www.paypal.com/ch/home#website",
+        "image": {
+          "@id": "https://www.paypalobjects.com/webstatic/icon/pp258.png#primaryimage"
+        },
+        "headline": "Digitale Geldbörse, Geldverwaltung und mehr",
+        "description": "PayPal ist der schnellere und sicherere Weg, Geld zu senden und zu empfangen oder eine Online-Zahlung zu tätigen. Leg heute los.",
+        "publisher": {
+          "@id": "https://www.paypal.com/ch/#corporation"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:56:57.018270+00:00"
+  }
+}

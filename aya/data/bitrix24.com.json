@@ -1,0 +1,301 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:25.774273+00:00",
+  "source": {
+    "input_url": "https://www.bitrix24.com",
+    "canonical_domain": "bitrix24.com",
+    "pages_scanned": [
+      "https://www.bitrix24.com/",
+      "https://www.bitrix24.com/about/",
+      "https://www.bitrix24.com/privacy/",
+      "https://www.bitrix24.com/terms/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 3
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Alaio Inc.",
+    "website": "https://www.bitrix24.com/",
+    "country": "US",
+    "city": "Alexandria",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "info@legal-counsels.com",
+      "phone": "21.3.1 (3",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "SoftwareApplication"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Alaio Inc.",
+        "website": "https://www.bitrix24.com/",
+        "email": "info@legal-counsels.com",
+        "phone": "21.3.1 (3",
+        "country": "US",
+        "city": "Alexandria",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Bitrix24 - Free online workspace for your business: CRM, tasks, online meetings, and more."
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "An all-in-one free platform to manage your team and run your sales, Bitrix24 is designed to be seamlessly integrated into all your business processes and help you manage them with the highest precision and efficiency.",
+        "og_description": "An all-in-one free platform to manage your team and run your sales, Bitrix24 is designed to be seamlessly integrated into all your business processes and help you manage them with the highest precision and efficiency."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "documentation",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization",
+          "SoftwareApplication"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.0,
+    "final_score": 78,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 78,
+    "raw_score": 78.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Alaio Inc.",
+        "url": "https://www.bitrix24.com",
+        "logo": "https://www.bitrix24.com/images/bitrix24-logo-en.svg",
+        "email": "info@bitrix24.com",
+        "telephone": "+1-703-740-8301",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "700 North Fairfax St., Suite 614-B",
+          "addressLocality": "Alexandria",
+          "addressRegion": "VA",
+          "postalCode": "22314",
+          "addressCountry": "US"
+        },
+        "brand": {
+          "@type": "Brand",
+          "name": "Bitrix24",
+          "url": "https://www.bitrix24.com",
+          "logo": "https://www.bitrix24.com/images/bitrix24-logo-en.svg"
+        },
+        "sameAs": [
+          "https://www.facebook.com/bitrix24/",
+          "https://www.youtube.com/user/Bitrix24",
+          "https://www.instagram.com/bitrix24/",
+          "https://www.linkedin.com/company/bitrix24/",
+          "https://t.me/Bitrix24Talks",
+          "https://www.pinterest.com/bitrix24/",
+          "https://x.com/bitrix24",
+          "https://www.reddit.com/r/Bitrix24Official/"
+        ]
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": [
+          "SoftwareApplication",
+          "WebApplication"
+        ],
+        "name": "Bitrix24",
+        "image": "https://www.bitrix24.com/bitrix/templates/bitrix24_2017/images/header/bitrix24-logo-en.svg",
+        "url": "https://www.bitrix24.com/prices/",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Alaio Inc.",
+          "url": "https://www.bitrix24.com"
+        },
+        "applicationCategory": "BusinessApplication",
+        "downloadUrl": "https://www.bitrix24.com/apps/mobile-app.php",
+        "operatingSystem": "Windows, MacOS, Android, iOS, Linux",
+        "screenshot": "https://www.bitrix24.com/images/content_en/apps/mobile_app/mobile_3.jpg",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.4",
+          "bestRating": "4.8",
+          "worstRating": "3.1",
+          "ratingCount": "539"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:25.774285+00:00"
+  }
+}

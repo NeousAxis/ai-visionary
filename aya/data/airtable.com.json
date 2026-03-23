@@ -1,0 +1,285 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:20.855927+00:00",
+  "source": {
+    "input_url": "https://www.airtable.com",
+    "canonical_domain": "airtable.com",
+    "pages_scanned": [
+      "https://www.airtable.com/",
+      "https://www.airtable.com/about",
+      "https://www.airtable.com/a-propos",
+      "https://www.airtable.com/contact",
+      "https://www.airtable.com/services",
+      "https://www.airtable.com/products",
+      "https://airtable.com/pricing",
+      "https://www.airtable.com/legal",
+      "https://www.airtable.com/company/privacy",
+      "https://www.airtable.com/terms"
+    ],
+    "pages_scanned_count": 10,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Airtable",
+    "website": "https://www.airtable.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "AirtableEURep@mhc.ie",
+      "phone": "94111. 10",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Airtable",
+        "website": "https://www.airtable.com/",
+        "email": "AirtableEURep@mhc.ie",
+        "phone": "94111. 10",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Airtable: Build Enterprise-ready AI Workflows, Apps & Agents - Airtable"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "500,000+ brands use Airtable to enable real-time collaboration, automate repetitive tasks & manual work, and streamline business processes in minutes. Join them.",
+        "og_description": "500,000+ brands use Airtable to enable real-time collaboration, automate repetitive tasks & manual work, and streamline business processes in minutes. Join them."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 71.7,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 71.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.airtable.com/about#organization",
+            "url": "https://www.airtable.com/about",
+            "name": "Airtable",
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://www.airtable.com/#logo",
+              "url": "https://images.ctfassets.net/wl95ljfippl8/30nOgPmcoEISnvmpW6ddVW/94a53c7940401c11031dcf7dae6abc00/Group_884.png"
+            },
+            "sameAs": [
+              "https://en.wikipedia.org/wiki/Airtable",
+              "https://www.linkedin.com/company/airtable",
+              "https://www.facebook.com/airtableapp",
+              "https://twitter.com/airtable",
+              "https://www.youtube.com/c/AirtableApp",
+              "https://www.instagram.com/airtable/"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.airtable.com/#website",
+            "url": "https://www.airtable.com/",
+            "name": "Airtable",
+            "publisher": {
+              "@id": "https://www.airtable.com/about#organization"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.airtable.com/#webpage",
+            "url": "https://www.airtable.com/",
+            "name": "Airtable: Build Enterprise-ready AI Workflows, Apps & Agents - Airtable",
+            "isPartOf": {
+              "@id": "https://www.airtable.com/#website"
+            },
+            "description": "500,000+ brands use Airtable to enable real-time collaboration, automate repetitive tasks & manual work, and streamline business processes in minutes. Join them."
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:57:20.855937+00:00"
+  }
+}

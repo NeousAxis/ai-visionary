@@ -1,0 +1,235 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:27.980246+00:00",
+  "source": {
+    "input_url": "https://www.laregione.ch",
+    "canonical_domain": "laregione.ch",
+    "pages_scanned": [
+      "https://www.laregione.ch/",
+      "https://www.laregione.ch/faq/abbonamenti",
+      "https://www.laregione.ch/disclaimer/privacy-policy-app"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 118
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "laRegione",
+    "website": "https://www.laregione.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "abbonamenti@laregione.ch",
+      "phone": "+41 91 821 11 15",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "video",
+      "marketing"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "laRegione",
+        "website": "https://www.laregione.ch/",
+        "email": "abbonamenti@laregione.ch",
+        "phone": "+41 91 821 11 15",
+        "country": "CH",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "laRegione: Notizie online sempre aggiornate dal Ticino e dalla Svizzera"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "menu",
+          "offre",
+          "software"
+        ],
+        "meta_description": "Notizie di cronaca, politica, economia, sport, arte e musica con foto e video, sempre aggiornate, con approfondimenti. Il giornale online della Svizzera italiana.",
+        "og_description": "Notizie di cronaca, politica, economia, sport, arte e musica con foto e video, sempre aggiornate, con approfondimenti. Il giornale online della Svizzera italiana."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "menu",
+        "offre",
+        "software"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso",
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 61.6,
+    "final_score": 62,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 62,
+    "raw_score": 61.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "laRegione",
+          "url": "https://www.laregione.ch",
+          "logo": "https://www.laregione.ch/img/laregione.ch/appicons/logo.png",
+          "sameAs": [
+            "https://www.facebook.com/laregione/",
+            "https://www.instagram.com/laregione/"
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "url": "https://www.laregione.ch",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://www.laregione.ch/cerca/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:27.980256+00:00"
+  }
+}

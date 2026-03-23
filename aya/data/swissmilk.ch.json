@@ -1,0 +1,239 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:41.117051+00:00",
+  "source": {
+    "input_url": "https://www.swissmilk.ch",
+    "canonical_domain": "swissmilk.ch",
+    "pages_scanned": [
+      "https://www.swissmilk.ch/de/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 11332
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Swissmilk",
+    "website": "https://www.swissmilk.ch/de/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "01.09.2022 9000",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "podcast",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Swissmilk",
+        "website": "https://www.swissmilk.ch/de/",
+        "email": "",
+        "phone": "01.09.2022 9000",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Schweizer Milch & saisonale Rezepte | Swissmilk"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "service",
+          "services"
+        ],
+        "meta_description": "Entdecke DAS Online-Kochbuch für saisonale Rezepte mit Schweizer Milch und Milchprodukten, Küchentipps, alles zu gesunder Ernährung, Wettbewerbe und mehr.",
+        "og_description": "Entdecke DAS Online-Kochbuch für saisonale Rezepte mit Schweizer Milch und Milchprodukten, Küchentipps, alles zu gesunder Ernährung, Wettbewerbe und mehr."
+      },
+      "evidence": [
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso"
+        ]
+      },
+      "evidence": [
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog"
+        ]
+      },
+      "evidence": [
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "",
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.7,
+    "final_score": 61,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 61,
+    "raw_score": 60.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "url": "https://www.swissmilk.ch/",
+            "logo": "https://api.swissmilk.ch/wp-content/uploads/2019/07/swissmilklogo500.jpg",
+            "name": "Swissmilk",
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+41 31 359 57 28",
+                "email": "marketing@swissmilk.ch",
+                "contactType": "customer service"
+              }
+            ],
+            "sameAs": [
+              "https://www.facebook.com/swissmilk",
+              "https://twitter.com/SMP_PSL",
+              "https://www.instagram.com/swissmilk_official/",
+              "https://www.youtube.com/user/SwissmilkVideoportal"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Swissmilk",
+            "url": "https://www.swissmilk.ch/de/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.swissmilk.ch/de/meta/suche/?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:41.117059+00:00"
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:56:05.598112+00:00",
+  "source": {
+    "input_url": "https://www.sorbonne-universite.fr",
+    "canonical_domain": "sorbonne-universite.fr",
+    "pages_scanned": [
+      "https://www.sorbonne-universite.fr/",
+      "https://www.sorbonne-universite.fr/bu/utiliser-nos-services",
+      "https://sante.sorbonne-universite.fr/faq"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 2
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Sorbonne Université",
+    "website": "https://www.sorbonne-universite.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "bibnum@sorbonne-universite.fr",
+      "phone": "01 71 11 96 22",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "université",
+      "école",
+      "formation",
+      "étudiant",
+      "campus"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Sorbonne Université",
+        "website": "https://www.sorbonne-universite.fr/",
+        "email": "bibnum@sorbonne-universite.fr",
+        "phone": "01 71 11 96 22",
+        "country": "FR",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Sorbonne Université| Sorbonne université"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "service",
+          "services"
+        ],
+        "meta_description": "",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "méthodologie",
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "méthodologie",
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "conditions",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "conditions",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "documentation",
+          "faq",
+          "guide",
+          "tutoriel"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.8,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.33,
+        "score": 6.7
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.4,
+        "score": 4.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 57.8,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:56:05.598121+00:00"
+  }
+}

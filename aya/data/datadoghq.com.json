@@ -1,0 +1,288 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:34.586292+00:00",
+  "source": {
+    "input_url": "https://www.datadog.com",
+    "canonical_domain": "datadoghq.com",
+    "pages_scanned": [
+      "https://www.datadoghq.com/",
+      "https://www.datadoghq.com/about/leadership/",
+      "https://www.datadoghq.com/product/",
+      "https://www.datadoghq.com/pricing/",
+      "https://www.datadoghq.com/legal/",
+      "https://www.datadoghq.com/privacy/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 14
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Datadog",
+    "website": "https://www.datadoghq.com/",
+    "country": "US",
+    "city": "New York",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "support@datadoghq.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Datadog",
+        "website": "https://www.datadoghq.com/",
+        "email": "support@datadoghq.com",
+        "phone": "",
+        "country": "US",
+        "city": "New York",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Cloud Monitoring as a Service | Datadog"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "See inside any stack, any app, at any scale, anywhere.",
+        "og_description": "See metrics from all of your apps, tools & services in one place with Datadog’s cloud monitoring as a service solution. Try it for free."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.6,
+    "final_score": 79,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 79,
+    "raw_score": 78.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@id": "https://www.datadoghq.com",
+        "@type": "Organization",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "New York",
+          "addressRegion": "NY",
+          "postalCode": "10018",
+          "streetAddress": "620 8th Avenue"
+        },
+        "telephone": "866 329-4466",
+        "email": "info@datadoghq.com",
+        "founder": [
+          "Olivier Pomel",
+          "Alexis Lê-Quôc"
+        ],
+        "foundingDate": "2010-10-27",
+        "foundingLocation": "New York, NY, USA",
+        "image": {
+          "@type": "ImageObject",
+          "height": "847",
+          "url": "https://imgix.datadoghq.com/img/about/presskit/logo-v/dd_vertical_purple.png",
+          "width": "847"
+        },
+        "logo": {
+          "@type": "ImageObject",
+          "height": "847",
+          "url": "https://imgix.datadoghq.com/img/about/presskit/logo-v/dd_vertical_purple.png",
+          "width": "847"
+        },
+        "name": "Datadog",
+        "sameAs": [
+          "https://twitter.com/datadoghq",
+          "www.instagram.com/datadoghq/",
+          "https://en.wikipedia.org/wiki/Datadog",
+          "https://www.facebook.com/datadoghq/",
+          "https://www.linkedin.com/company/datadog",
+          "https://github.com/DataDog",
+          "https://www.youtube.com/channel/UCPO2QgTCReBAThZca6MB9jg"
+        ],
+        "url": "https://www.datadoghq.com/"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:34.586303+00:00"
+  }
+}

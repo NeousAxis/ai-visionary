@@ -1,0 +1,245 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:37.485691+00:00",
+  "source": {
+    "input_url": "https://www.bfmtv.com",
+    "canonical_domain": "bfmtv.com",
+    "pages_scanned": [
+      "https://www.bfmtv.com/",
+      "https://www.bfmtv.com/pratique/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "BFM",
+    "website": "https://www.bfmtv.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "08 1960-1974",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "food",
+    "sector_label": "Restauration & Alimentation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "menu",
+      "cuisine",
+      "food",
+      "repas",
+      "chef"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "BFM",
+        "website": "https://www.bfmtv.com/",
+        "email": "",
+        "phone": "08 1960-1974",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Actualités en continu et info en direct et replay - BFM"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution"
+        ],
+        "meta_description": "BFM - 1ère sur l'info. Retrouvez toute l'actualité en direct, en photo et en vidéo sur l'info politique, sociale, économique, sportive, internationale et locale.",
+        "og_description": "BFM - 1ère sur l'info. Retrouvez toute l'actualité en direct, en photo et en vidéo sur l'info politique, sociale, économique, sportive, internationale et locale."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conformité",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conformité",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 56.7,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 56.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org/",
+        "@type": "WebSite",
+        "name": "BFM",
+        "url": "https://www.bfmtv.com/",
+        "publisher": {
+          "@type": "Organization",
+          "name": "BFMTV",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.bfmtv.com/assets/v20/images/BFMTV_richSnippets_rectangulaire.5d1957bc4417569da1d093056f864dc6.png",
+            "contentUrl": "https://www.bfmtv.com/assets/v20/images/BFMTV_richSnippets_rectangulaire.5d1957bc4417569da1d093056f864dc6.png",
+            "width": {
+              "@type": "QuantitativeValue",
+              "value": 200
+            },
+            "height": {
+              "@type": "QuantitativeValue",
+              "value": 200
+            }
+          },
+          "sameAs": [
+            "https://www.facebook.com/BFMTV",
+            "https://x.com/BFMTV"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:37.485699+00:00"
+  }
+}

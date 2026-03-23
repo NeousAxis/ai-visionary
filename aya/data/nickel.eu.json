@@ -1,0 +1,226 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:21.175581+00:00",
+  "source": {
+    "input_url": "https://www.nickel.eu",
+    "canonical_domain": "nickel.eu",
+    "pages_scanned": [
+      "https://nickel.eu/fr",
+      "https://nickel.eu/fr/contact",
+      "https://nickel.eu/fr/services"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Nickel",
+    "website": "https://nickel.eu/fr",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "01 76 49 00 00",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.5,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "assurance"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Nickel",
+        "website": "https://nickel.eu/fr",
+        "email": "",
+        "phone": "01 76 49 00 00",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Nickel | Le compte pour tous ouvert chez votre buraliste"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "prestation",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "1 Compte + 1 Carte Bancaire + 1 RIB ouvert en 5 minutes chez votre buraliste. Ouvert à tous sans conditions et sans minimum de revenus : les interdits bancaires sont les bienvenus. Pas de découvert, pas d'AGIOS, pas de mauvaises surprises.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "prestation",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "comment ça marche"
+        ]
+      },
+      "evidence": [
+        "comment ça marche"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 67.0,
+    "final_score": 67,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 67,
+    "raw_score": 67.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Nickel",
+        "url": "https://nickel.eu/fr",
+        "description": "Compte sans banque ouvert à tous sans conditions et sans minimum de revenus même aux interdits bancaires pour 25 € par an.",
+        "sameAs": [
+          "https://www.facebook.com/NickelFr/",
+          "https://www.instagram.com/nickelfrance/",
+          "https://www.tiktok.com/discover/nickel"
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:21.175589+00:00"
+  }
+}

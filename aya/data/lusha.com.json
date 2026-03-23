@@ -1,0 +1,333 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:01.872934+00:00",
+  "source": {
+    "input_url": "https://www.lusha.com",
+    "canonical_domain": "lusha.com",
+    "pages_scanned": [
+      "https://www.lusha.com/",
+      "https://www.lusha.com/about/",
+      "https://www.lusha.com/wp-content/uploads/2021/08/contact.svg",
+      "https://www.lusha.com/pricing/",
+      "https://www.lusha.com/",
+      "https://www.lusha.com/privacy-center/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 12
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Lusha",
+    "website": "https://www.lusha.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1-10 11-50 51-100 101-200 201-500 501-1",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "podcast",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Lusha",
+        "website": "https://www.lusha.com/",
+        "email": "",
+        "phone": "1-10 11-50 51-100 101-200 201-500 501-1",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Lusha | Verified B2B Data and Buying Signals for GTM Teams"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Build workflows with accurate B2B contact & company data with live signals for lead generation, enrichment, outreach, and automation.",
+        "og_description": "Build workflows with accurate B2B contact & company data with live signals for lead generation, enrichment, outreach, and automation."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "delivery",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "methodology",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "methodology",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "glossary",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.lusha.com/",
+            "url": "https://www.lusha.com/",
+            "name": "Lusha | Verified B2B Data and Buying Signals for GTM Teams",
+            "isPartOf": {
+              "@id": "https://www.lusha.com/#website"
+            },
+            "about": {
+              "@id": "https://www.lusha.com/#organization"
+            },
+            "datePublished": "2026-02-01T12:56:30+00:00",
+            "dateModified": "2026-03-17T09:15:56+00:00",
+            "description": "Build workflows with accurate B2B contact & company data with live signals for lead generation, enrichment, outreach, and automation.",
+            "breadcrumb": {
+              "@id": "https://www.lusha.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.lusha.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.lusha.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.lusha.com/#website",
+            "url": "https://www.lusha.com/",
+            "name": "Lusha",
+            "description": "Search less. Sell more.",
+            "publisher": {
+              "@id": "https://www.lusha.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.lusha.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.lusha.com/#organization",
+            "name": "Lusha",
+            "url": "https://www.lusha.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.lusha.com/#/schema/logo/image/",
+              "url": "https://www.lusha.com/wp-content/uploads/2021/02/lusha-face-logo-purple.svg",
+              "contentUrl": "https://www.lusha.com/wp-content/uploads/2021/02/lusha-face-logo-purple.svg",
+              "width": 26,
+              "height": 27,
+              "caption": "Lusha"
+            },
+            "image": {
+              "@id": "https://www.lusha.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/LushaData/",
+              "https://x.com/lushadata",
+              "https://www.instagram.com/lushaforsales",
+              "https://www.linkedin.com/company/lushadata",
+              "https://www.youtube.com/channel/UCZNqzgRZFBub6WJxeaQcxUQ"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:01.872944+00:00"
+  }
+}

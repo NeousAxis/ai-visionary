@@ -1,0 +1,279 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:25.362176+00:00",
+  "source": {
+    "input_url": "https://www.boulanger.com",
+    "canonical_domain": "boulanger.com",
+    "pages_scanned": [
+      "https://www.boulanger.com/",
+      "https://www.boulanger.com/services"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Boulanger",
+    "website": "https://www.boulanger.com/",
+    "country": "",
+    "city": "Lesquin, France",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "0 800 30 30 11",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "cart",
+      "livraison",
+      "marketplace",
+      "produit"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Boulanger",
+        "website": "https://www.boulanger.com/",
+        "email": "",
+        "phone": "0 800 30 30 11",
+        "country": "",
+        "city": "Lesquin, France",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Boulanger © - Électroménager & Multimédia"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Profitez de tous les services Boulanger © ! Livraison Offerte* - Retrait 1h en Magasin* - Retrait Drive* - Garantie 2 ans* - SAV 7j/7",
+        "og_description": "Profitez de tous les services Boulanger © ! Livraison Offerte* - Retrait 1h en Magasin* - Retrait Drive* - Garantie 2 ans* - SAV 7j/7"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "glossaire",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "glossaire",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "WebSite",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.1,
+    "final_score": 58,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 58,
+    "raw_score": 58.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@id": "https://www.boulanger.com",
+              "name": "Boulanger"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "name": "Boulanger",
+        "url": "https://www.boulanger.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.boulanger.com/resultats?tr={search_term}#searchinputmode=googleSearch",
+          "query-input": "required name=search_term"
+        }
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "name": "Boulanger",
+        "url": "https://www.boulanger.com/",
+        "logo": "https://www.boulanger.com/content/static/bcom/desktop/service/img/logo_boulanger.png",
+        "sameAs": [
+          "https://www.instagram.com/boulanger",
+          "https://www.pinterest.fr/boulangerfr",
+          "https://www.youtube.com/user/@Boulanger-Officiel",
+          "https://fr.linkedin.com/company/boulanger",
+          "https://apps.apple.com/fr/app/boulanger/id401920975",
+          "https://play.google.com/store/apps/details?id=fr.boulanger.application&amp;hl=fr"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Lesquin, France",
+          "postalCode": "59810",
+          "streetAddress": "Avenue de la Motte"
+        },
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "3010",
+            "contactType": "customer service",
+            "areaServed": "FR",
+            "availableLanguage": [
+              "French"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:25.362185+00:00"
+  }
+}

@@ -1,0 +1,443 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:06.200320+00:00",
+  "source": {
+    "input_url": "https://www.unisg.ch",
+    "canonical_domain": "unisg.ch",
+    "pages_scanned": [
+      "https://www.unisg.ch/en/",
+      "https://www.unisg.ch/en/location-map-and-arrival/",
+      "https://www.unisg.ch/en/university/about-us/advisory-offices/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 8
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "University of St.Gallen",
+    "website": "https://www.unisg.ch/en/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "+41 71 224 20 12",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "university",
+      "school",
+      "école",
+      "formation",
+      "training"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "University of St.Gallen",
+        "website": "https://www.unisg.ch/en/",
+        "email": "",
+        "phone": "+41 71 224 20 12",
+        "country": "CH",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "University of St.Gallen | unisg.ch"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "platform",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "University of St.Gallen – School of Management, Economics, Law, Social Sciences, International Affairs and Computer Science.",
+        "og_description": "University of St.Gallen – School of Management, Economics, Law, Social Sciences, International Affairs and Computer Science."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "platform",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "iso",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite",
+          "ItemList",
+          "ItemList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 77.1,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 77.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      [
+        {
+          "@context": "https://www.schema.org",
+          "@type": "WebSite",
+          "url": "https://www.unisg.ch/",
+          "name": "University of St.Gallen | unisg.ch"
+        },
+        {
+          "@context": "https://www.schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@id": "https://www.unisg.ch/en/",
+                "name": "HSG - Uni SG"
+              }
+            }
+          ]
+        }
+      ],
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "University of St.Gallen | unisg.ch",
+        "itemListElement": [
+          {
+            "@type": "NewsArticle",
+            "accessMode": [
+              "textual",
+              "visual"
+            ],
+            "isAccessibleForFree": true,
+            "datePublished": "2026-03-20T12:00:00.000+01:00",
+            "dateModified": "2026-03-20T14:35:00.000+01:00",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://www.unisg.ch/en/newsroom/hsg-founder-of-the-year-2026-i-hate-repetition/"
+            },
+            "headline": "HSG Founder of the Year 2026: “I hate repetition”",
+            "description": "The University of St.Gallen (HSG) honours alumnus and serial entrepreneur Tobias Reichmuth as “HSG Founder of the Year 2026”. Reichmuth has founded various companies in areas ranging from climate change financing and cryptofinance to longevity. In this interview, he talks about what drives him in his entrepreneurial activities, what lessons he wants to pass on to young founders, and whether money really does make you happy.",
+            "articleSection": "Campus",
+            "author": {
+              "@type": "Organization",
+              "name": "University of St. Gallen",
+              "url": "https://unisg.ch"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "University of St. Gallen"
+            }
+          },
+          {
+            "@type": "NewsArticle",
+            "accessMode": [
+              "textual",
+              "visual"
+            ],
+            "isAccessibleForFree": true,
+            "datePublished": "2026-03-20T11:55:00.000+01:00",
+            "dateModified": "2026-03-20T12:33:00.000+01:00",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://www.unisg.ch/en/newsroom/tobias-reichmuth-of-maximon-is-hsg-founder-of-the-year-2026/"
+            },
+            "headline": "Tobias Reichmuth of Maximon is “HSG Founder of the Year 2026”",
+            "description": "Tobias Reichmuth is “HSG Founder of the Year 2026”. Many will also recognise the start-up investor from The Lion’s Den Switzerland. His incubator company Maximon aims to help people maintain good health for longer. He focuses on prevention to stop diseases from developing in the first place.",
+            "articleSection": "People",
+            "author": {
+              "@type": "Organization",
+              "name": "University of St. Gallen",
+              "url": "https://unisg.ch"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "University of St. Gallen"
+            }
+          },
+          {
+            "@type": "NewsArticle",
+            "accessMode": [
+              "textual",
+              "visual"
+            ],
+            "isAccessibleForFree": true,
+            "datePublished": "2026-03-20T10:00:00.000+01:00",
+            "dateModified": "2026-03-20T10:42:00.000+01:00",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://www.unisg.ch/en/newsdetail/news/from-apps-to-drones-europes-start-up-scene-discusses-new-strategic-technologies-in-stgallen/"
+            },
+            "headline": "From apps to drones: Europe’s start-up scene discusses new strategic technologies in St.Gallen",
+            "description": "At the START Summit in St.Gallen, the focus is shifting: instead of apps and platforms, drones, robotics and dual-use technologies are taking centre stage. Driven by geopolitical pressure, Europe’s start-up scene is seeking answers to the question of technological sovereignty.",
+            "articleSection": "Background",
+            "author": {
+              "@type": "Organization",
+              "name": "University of St. Gallen",
+              "url": "https://unisg.ch"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "University of St. Gallen"
+            }
+          },
+          {
+            "@type": "NewsArticle",
+            "accessMode": [
+              "textual",
+              "visual"
+            ],
+            "isAccessibleForFree": true,
+            "datePublished": "2026-03-18T08:00:00.000+01:00",
+            "dateModified": "2026-03-20T11:04:00.000+01:00",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://www.unisg.ch/en/newsroom/at-start-summit-you-can-get-to-know-over-100-start-ups-in-just-two-hours/"
+            },
+            "headline": "“At START Summit, you can get to know over 100 start-ups in just two hours”",
+            "description": "Thousands of start-up founders and investors attend START Summit in St. Gallen every year. But what is this conference, organised by HSG students, really all about – deals, networking or the legendary after-party? We asked around.",
+            "articleSection": "Campus",
+            "author": {
+              "@type": "Organization",
+              "name": "University of St. Gallen",
+              "url": "https://unisg.ch"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "University of St. Gallen"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "University of St.Gallen | unisg.ch",
+        "itemListElement": [
+          {
+            "@type": "Event",
+            "name": "Personality in Residence: Hartmut Rosa",
+            "startDate": "2026-03-23T00:00",
+            "endDate": "2026-03-23T00:00",
+            "url": "https://www.hsg-square.ch/en/program/personality-in-residence/hartmut-rosa/",
+            "location": {
+              "@type": "Place",
+              "name": "SQUARE",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "St.Gallen",
+                "postalCode": "9010",
+                "streetAddress": "Guisanstrasse 20"
+              }
+            },
+            "organizer": {
+              "@type": "Organization",
+              "name": "University of St.Gallen",
+              "url": "https://www.unisg.ch"
+            }
+          },
+          {
+            "@type": "Event",
+            "name": "Artist in Residence: Tim Mälzer",
+            "startDate": "2026-03-24T00:00",
+            "endDate": "2026-03-26T00:00",
+            "url": "https://www.hsg-square.ch/en/program/personality-in-residence/tim-maelzer/",
+            "location": {
+              "@type": "Place",
+              "name": "SQUARE",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "St.Gallen",
+                "postalCode": "9010",
+                "streetAddress": "Guisanstrasse 20"
+              }
+            },
+            "organizer": {
+              "@type": "Organization",
+              "name": "University of St.Gallen",
+              "url": "https://www.unisg.ch"
+            }
+          },
+          {
+            "@type": "Event",
+            "name": "St.Gallen Strategy Days",
+            "startDate": "2026-03-26T00:00",
+            "endDate": "2026-03-27T00:00",
+            "description": "Zweitägige globale Strategiesimulation",
+            "url": "https://www.hsg-square.ch/en/strategy-days/",
+            "location": {
+              "@type": "Place",
+              "name": "SQUARE",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "St.Gallen",
+                "postalCode": "9010",
+                "streetAddress": "Guisanstrasse 20"
+              }
+            },
+            "organizer": {
+              "@type": "Organization",
+              "name": "University of St.Gallen",
+              "url": "https://www.unisg.ch"
+            }
+          },
+          {
+            "@type": "Event",
+            "name": "Virtual Q&A Session Master in International Law (MIL)",
+            "startDate": "2026-03-31T00:00",
+            "endDate": "2026-03-31T00:00",
+            "description": "Discover the MIL!",
+            "url": "https://www.unisg.ch/en/studying/get-in-touch/infodays/discover-the-mil-virtual-qa-session/",
+            "location": {
+              "@type": "Place",
+              "name": "Online"
+            },
+            "organizer": {
+              "@type": "Organization",
+              "name": "University of St.Gallen",
+              "url": "https://www.unisg.ch"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:06.200334+00:00"
+  }
+}

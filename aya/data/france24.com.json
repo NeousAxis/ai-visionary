@@ -1,0 +1,916 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:46.985728+00:00",
+  "source": {
+    "input_url": "https://www.france24.com",
+    "canonical_domain": "france24.com",
+    "pages_scanned": [
+      "https://www.france24.com/en/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "FRANCE 24",
+    "website": "https://www.france24.com/en/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "00-01-08-16",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "broadcast",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "FRANCE 24",
+        "website": "https://www.france24.com/en/",
+        "email": "",
+        "phone": "00-01-08-16",
+        "country": "",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "France 24 - International breaking news, top stories and headlines"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Breaking news and world news from France 24 on Business, Sports, Culture. Video news. News from the US, Europe, Asia Pacific, Africa, Middle East, America",
+        "og_description": "Breaking news and world news from France 24 on Business, Sports, Culture. Video news. News from the US, Europe, Asia Pacific, Africa, Middle East, America"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "ItemList",
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@id": "https://www.france24.com/en/",
+              "name": "_F24 EN - HOMEPAGE"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Middle East war live: Trump delays strikes on Iranian energy targets, citing progress on unspecified 'talks'",
+            "url": "https://www.france24.com/en/middle-east/20260323-live-iran-trump-strike-iea-worst-energy-crisis"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Trump cites progress in Iran talks as Tehran denies negotiations are under way",
+            "url": "https://www.france24.com/en/middle-east/20260323-trump-cites-progress-in-iran-talks-as-tehran-denies-negotiations-are-under-way"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Ex-model questioned in France over scout with Epstein links",
+            "url": "https://www.france24.com/en/live-news/20260323-ex-model-questioned-in-france-over-scout-with-epstein-links"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "UK sending air defence systems to Gulf: PM",
+            "url": "https://www.france24.com/en/live-news/20260323-uk-sending-air-defence-systems-to-gulf-pm"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Trump administration seeks to ease oil fears but industry wary",
+            "url": "https://www.france24.com/en/live-news/20260323-middle-east-war-to-dominate-houston-s-davos-of-energy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "name": "Latest news",
+            "url": "https://www.france24.com/en/video/20200507-embed-news-1"
+          },
+          {
+            "@type": "ListItem",
+            "position": 7,
+            "name": "Which cargo ships are managing to pass through the Strait of Hormuz?",
+            "url": "https://www.france24.com/en/middle-east/20260320-what-cargo-ships-are-passing-hormuz-strait"
+          },
+          {
+            "@type": "ListItem",
+            "position": 8,
+            "name": "Former French Socialist prime minister Lionel Jospin dies aged 88",
+            "url": "https://www.france24.com/en/france/20260323-former-french-socialist-pm-lionel-jospin-dies-at-88"
+          },
+          {
+            "@type": "ListItem",
+            "position": 9,
+            "name": "Former French rugby star Serge Blanco wins bid for Biarritz mayor",
+            "url": "https://www.france24.com/en/france/20260323-former-french-rugby-star-serge-blanco-wins-bid-for-biarritz-mayor"
+          },
+          {
+            "@type": "ListItem",
+            "position": 10,
+            "name": "Four tips for detecting images generated by AI",
+            "url": "https://www.france24.com/en/tv-shows/the-observers/20260323-four-tips-detecting-images-generated-ai"
+          },
+          {
+            "@type": "ListItem",
+            "position": 11,
+            "name": "Emmanuel Grégoire elected Paris mayor, succeeding fellow left-winger Anne Hidalgo",
+            "url": "https://www.france24.com/en/france/20260322-socialist-frontrunner-emmanuel-gr%C3%A9goire-elected-paris-mayor-rachida-dati"
+          },
+          {
+            "@type": "ListItem",
+            "position": 12,
+            "name": "London police probe ‘anti-Semitic arson attack’ after Jewish charity ambulances set ablaze",
+            "url": "https://www.france24.com/en/europe/20260323-london-police-probe-anti-semitic-arson-attack-after-jewish-charity-ambulances-set-ablaze"
+          },
+          {
+            "@type": "ListItem",
+            "position": 13,
+            "name": "Iran threatens to ‘completely close’ Hormuz Strait, Israel strikes Lebanon bridges",
+            "url": "https://www.france24.com/en/middle-east/20260322-live-trump-threatens-to-strike-iran-s-power-plants-if-strait-of-hormuz-does-not-open-within-48-hours"
+          },
+          {
+            "@type": "ListItem",
+            "position": 14,
+            "name": "Streamlining the kill chain: how AI is changing modern warfare",
+            "url": "https://www.france24.com/en/middle-east/20260321-streamlining-the-kill-chain-how-ai-is-changing-modern-warfare-iran"
+          },
+          {
+            "@type": "ListItem",
+            "position": 15,
+            "name": "‘Very difficult evening’: Netanyahu vows to keep striking Iran after attack on southern Israel",
+            "url": "https://www.france24.com/en/middle-east/20260321-middle-east-war-live-trump-mulls-winding-down-iran-war-as-us-sends-thousands-more-marines"
+          },
+          {
+            "@type": "ListItem",
+            "position": 16,
+            "name": "Mojtaba Khamenei says Iran dealt its enemies a 'dizzying blow' in written message",
+            "url": "https://www.france24.com/en/asia-pacific/20260320-supreme-leader-says-iran-dealt-enemies-dizzying-blow"
+          },
+          {
+            "@type": "ListItem",
+            "position": 17,
+            "name": "French far right wins towns, loses in cities as mayoral vote kicks off race to succeed Macron",
+            "url": "https://www.france24.com/en/france/20260322-le-pen-s-far-right-suffers-setbacks-in-french-mayoral-elections-ex-pm-philippe-wins-key-race"
+          },
+          {
+            "@type": "ListItem",
+            "position": 18,
+            "name": "Earth hit record heat levels in 2025 as UN says warming will last thousands of years",
+            "url": "https://www.france24.com/en/environment/20260323-earth-heat-record-2025-un-warns-warming-thousands-years"
+          },
+          {
+            "@type": "ListItem",
+            "position": 19,
+            "name": "West Bank settler violence surges as Israeli strikes on Gaza kill four Palestinians",
+            "url": "https://www.france24.com/en/middle-east/20260322-west-bank-settler-violence-gaza-strikes-palestinians-killed"
+          },
+          {
+            "@type": "ListItem",
+            "position": 20,
+            "name": "Slovenia's liberal PM Golob claims victory over conservatives in neck-and-neck vote",
+            "url": "https://www.france24.com/en/europe/20260323-slovenia-election-too-close-to-call-liberals-conservatives-neck-and-neck"
+          },
+          {
+            "@type": "ListItem",
+            "position": 21,
+            "name": "Socialist incumbent defeats far-right challenger in key Marseille mayoral election",
+            "url": "https://www.france24.com/en/france/20260322-socialist-incumbent-defeats-far-right-challenger-in-key-marseille-mayoral-election"
+          },
+          {
+            "@type": "ListItem",
+            "position": 22,
+            "name": "Italy’s justice referendum becomes key test for PM Meloni’s leadership",
+            "url": "https://www.france24.com/en/europe/20260322-italy-s-justice-referendum-becomes-key-test-for-pm-meloni-s-leadership"
+          },
+          {
+            "@type": "ListItem",
+            "position": 23,
+            "name": "The week in pictures: Strikes on Iran, the Oscars and the UEFA Champions League",
+            "url": "https://www.france24.com/en/middle-east/20260322-the-week-in-pictures-strikes-on-iran-oscars-and-the-uefa-champions-league"
+          },
+          {
+            "@type": "ListItem",
+            "position": 24,
+            "name": "On 10th anniversary of Brussels terror attacks, authorities vow to have learnt the 'right lessons'",
+            "url": "https://www.france24.com/en/europe/20260322-on-10th-anniversary-of-brussels-terror-attacks-authorities-vow-to-have-learnt-right-lessons"
+          },
+          {
+            "@type": "ListItem",
+            "position": 25,
+            "name": "Lebanon : Israel strikes key bridge, stoking fears of ground invasion",
+            "url": "https://www.france24.com/en/video/20260323-lebanon-israel-strikes-key-bridge-stoking-fears-of-ground-invasion"
+          },
+          {
+            "@type": "ListItem",
+            "position": 26,
+            "name": "Who is Emmanuel Grégoire, Paris's next mayor?",
+            "url": "https://www.france24.com/en/video/20260323-who-is-emmanuel-gr%C3%A9goire-paris-s-next-mayor"
+          },
+          {
+            "@type": "ListItem",
+            "position": 27,
+            "name": "UK police probe anti-Semitic attack on Jewish ambulances",
+            "url": "https://www.france24.com/en/video/20260323-uk-police-probe-anti-semitic-attack-on-jewish-ambulances"
+          },
+          {
+            "@type": "ListItem",
+            "position": 28,
+            "name": "Pilot, co-pilot killed in runway collision at New York airport",
+            "url": "https://www.france24.com/en/video/20260323-pilot-co-pilot-killed-in-runway-collision-at-new-york-airport"
+          },
+          {
+            "@type": "ListItem",
+            "position": 29,
+            "name": "France’s municipal elections : Emmanuel Grégoire elected Paris mayor",
+            "url": "https://www.france24.com/en/video/20260322-france-s-municipal-elections-emmanuel-gr%C3%A9goire-elected-paris-mayor"
+          },
+          {
+            "@type": "ListItem",
+            "position": 30,
+            "name": "Strait of Hormuz: Trump’s ultimatum to Iran",
+            "url": "https://www.france24.com/en/strait-of-hormuz-trump-s-ultimatum-to-iran"
+          },
+          {
+            "@type": "ListItem",
+            "position": 31,
+            "name": "Action film star Chuck Norris dies, aged 86",
+            "url": "https://www.france24.com/en/video/20260320-action-film-star-chuck-norris-dies-aged-86"
+          },
+          {
+            "@type": "ListItem",
+            "position": 32,
+            "name": "'Not our war': Palestinians caught in the crossfire of Middle East war",
+            "url": "https://www.france24.com/en/video/20260320-not-our-war-palestinians-caught-in-the-crossfire-of-middle-east-war"
+          },
+          {
+            "@type": "ListItem",
+            "position": 33,
+            "name": "Why isn't there more international coverage of Israeli strikes on Lebanon?",
+            "url": "https://www.france24.com/en/tv-shows/scoop/20260321-why-isn-t-there-more-international-coverage-of-israeli-strikes-in-lebanon"
+          },
+          {
+            "@type": "ListItem",
+            "position": 34,
+            "name": "Red Command: Brazil's most powerful criminal organisation",
+            "url": "https://www.france24.com/en/tv-shows/focus/20260323-red-command-brazil-s-most-powerful-criminal-organisation"
+          },
+          {
+            "@type": "ListItem",
+            "position": 35,
+            "name": "Planet is storing more heat than it can release, UN warns",
+            "url": "https://www.france24.com/en/tv-shows/down-to-earth/20260323-planet-is-storing-more-heat-than-it-can-release-un-warns"
+          },
+          {
+            "@type": "ListItem",
+            "position": 36,
+            "name": "'I'm proud when we can turn our diversity into strength': Author Jens Christian Grøndahl",
+            "url": "https://www.france24.com/en/tv-shows/perspective/20260323-i-m-proud-when-we-can-turn-our-diversity-into-strength-author-jens-christian-gr%C3%B8ndahl"
+          },
+          {
+            "@type": "ListItem",
+            "position": 37,
+            "name": "'A big confusion': All sides claim victory after French municipal elections",
+            "url": "https://www.france24.com/en/tv-shows/press-review/20260323-a-big-confusion-all-sides-claim-victory-after-french-municipal-elections"
+          },
+          {
+            "@type": "ListItem",
+            "position": 38,
+            "name": "Mariana Da Cruz and Morenike on blending genres, identity and artificial intelligence",
+            "url": "https://www.france24.com/en/tv-shows/arts24/20260323-mariana-da-cruz-and-morenike-on-blending-genres-identity-and-artificial-intelligence"
+          },
+          {
+            "@type": "ListItem",
+            "position": 39,
+            "name": "Is this the beginning of the end for the Metaverse?",
+            "url": "https://www.france24.com/en/tv-shows/tech-24/20260323-is-this-the-beginning-of-the-end-for-the-metaverse"
+          },
+          {
+            "@type": "ListItem",
+            "position": 40,
+            "name": "The West Bank, up against the wall: Illegal Palestinian workers face exploitation and danger",
+            "url": "https://www.france24.com/en/tv-shows/reporters/20260320-israel-west-bank-up-against-the-wall-plight-of-would-be-palestinian-workers"
+          },
+          {
+            "@type": "ListItem",
+            "position": 41,
+            "name": "French Socialists split over alliance with hard-left party in mayoral runoffs",
+            "url": "https://www.france24.com/en/france/20260319-french-socialists-split-over-alliance-with-hard-left-party-in-mayoral-runoffs"
+          },
+          {
+            "@type": "ListItem",
+            "position": 42,
+            "name": "Why Hungary's Viktor Orban is vilifying Ukraine before crucial elections",
+            "url": "https://www.france24.com/en/europe/20260318-why-viktor-orban-is-vilifying-ukraine-before-crucial-parliamentary-elections"
+          },
+          {
+            "@type": "ListItem",
+            "position": 43,
+            "name": "Shark nets planned for €100 million Club Med resort threaten endangered species in South Africa",
+            "url": "https://www.france24.com/en/africa/20260314-shark-nets-%E2%82%AC100-million-club-med-resort-threaten-south-african-endangered-species-scientists-warn"
+          },
+          {
+            "@type": "ListItem",
+            "position": 44,
+            "name": "The race for Paris: How the capital’s housing crisis could determine the city’s next mayor",
+            "url": "https://www.france24.com/en/france/20260311-race-for-paris-how-the-capital-housing-crisis-could-determine-the-city-next-mayor-municipal-elections"
+          },
+          {
+            "@type": "ListItem",
+            "position": 45,
+            "name": "‘I’m glad he’s dead’: Trump reacts to death of ex-FBI chief Robert Mueller, 81",
+            "url": "https://www.france24.com/en/americas/20260321-i-m-glad-he-s-dead-trump-reacts-to-death-of-ex-fbi-chief-robert-mueller-81"
+          },
+          {
+            "@type": "ListItem",
+            "position": 46,
+            "name": "King Harold's 200-mile march to the Battle of Hastings was a 'myth', historian says",
+            "url": "https://www.france24.com/en/europe/20260321-king-harold-200-mile-march-to-the-battle-of-hastings-was-myth-historian-says"
+          },
+          {
+            "@type": "ListItem",
+            "position": 47,
+            "name": "Iran strikes Israeli town in retaliation for Natanz attack amid escalating conflict",
+            "url": "https://www.france24.com/en/middle-east/20260321-iran-strikes-israeli-nuclear-town-in-retaliation-for-natanz-attack-amid-escalating-conflict"
+          },
+          {
+            "@type": "ListItem",
+            "position": 48,
+            "name": "Trump rules out Iran ceasefire, missile debris hits Jerusalem's Old City",
+            "url": "https://www.france24.com/en/middle-east/20260320-middle-east-war-live-israel-strikes-tehran-persian-new-year-energy-markets"
+          },
+          {
+            "@type": "ListItem",
+            "position": 49,
+            "name": "FRANCE 24 English – LIVE – International Breaking News & Top stories - 24/7 stream",
+            "url": "https://www.france24.com/en/video/20200519-embed-live-1"
+          },
+          {
+            "@type": "ListItem",
+            "position": 50,
+            "name": "Video of Iranian soldier being targeted in Tehran strike is AI-generated",
+            "url": "https://www.france24.com/en/tv-shows/truth-or-fake/20260319-video-of-iranian-soldier-being-targeted-in-a-tehran-strike-is-ai-generated"
+          },
+          {
+            "@type": "ListItem",
+            "position": 51,
+            "name": "Are US soldiers really 'refusing orders' to fight in Iran war?",
+            "url": "https://www.france24.com/en/tv-shows/truth-or-fake/20260318-are-us-soldiers-really-refusing-orders-to-fight-in-iran-war"
+          },
+          {
+            "@type": "ListItem",
+            "position": 52,
+            "name": "Social media abuzz with viral rumours of Netanyahu's death",
+            "url": "https://www.france24.com/en/social-media-abuzz-with-viral-rumours-of-benjamin-netanyahu-s-death"
+          },
+          {
+            "@type": "ListItem",
+            "position": 53,
+            "name": "Iran trolls Trump with AI-generated LEGO propaganda video",
+            "url": "https://www.france24.com/en/iran-trolls-trump-with-ai-generated-lego-propaganda-video"
+          },
+          {
+            "@type": "ListItem",
+            "position": 54,
+            "name": "No, Iran didn't publish a 'list' of 11 American cities to target",
+            "url": "https://www.france24.com/en/americas/20260320-iran-did-not-publish-list-american-cities-target"
+          },
+          {
+            "@type": "ListItem",
+            "position": 55,
+            "name": "To return to Gaza, Palestinian refugees first have to face Israeli-backed militias",
+            "url": "https://www.france24.com/en/tv-shows/the-observers/20260318-get-back-gaza-palestinian-refugees-israeli-backed-militias-rafah"
+          },
+          {
+            "@type": "ListItem",
+            "position": 56,
+            "name": "‘Sleeping in our car is the only option’: Displaced Lebanese face skyrocketing rents",
+            "url": "https://www.france24.com/en/middle-east/20260316-sleeping-car-displaced-lebanese-skyrocketing-rents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 57,
+            "name": "Survivors of Assad's prisons speak out about rape and torture",
+            "url": "https://www.france24.com/en/syrian-women-assad-jails/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 58,
+            "name": "The church by the airport: Inside Russia’s suspected spy activities in Sweden",
+            "url": "https://www.france24.com/en/europe/20250704-the-church-by-the-airport-inside-russia-s-suspected-spy-activities-in-sweden"
+          },
+          {
+            "@type": "ListItem",
+            "position": 59,
+            "name": "Searching for radioactive waste in the depths of the Atlantic",
+            "url": "https://www.france24.com/en/environment/20250607-searching-radioactive-waste-depths-atlantic-france-nuclear"
+          },
+          {
+            "@type": "ListItem",
+            "position": 60,
+            "name": "'We'll make it home together': A friendship between two deported women in Ravensbrück camp",
+            "url": "https://www.france24.com/en/we-ll-make-it-home-together-a-friendship-between-two-deported-women-in-ravensbr%C3%BCck-camp-1"
+          },
+          {
+            "@type": "ListItem",
+            "position": 61,
+            "name": "‘Unwavering friendship’: The true story of nine women who escaped a Nazi death march",
+            "url": "https://www.france24.com/en/europe/20250429-true-story-nine-women-who-escaped-nazi-death-march-ravensbruck"
+          },
+          {
+            "@type": "ListItem",
+            "position": 62,
+            "name": "Pope Francis, first Latin American pontiff and champion of the forgotten",
+            "url": "https://www.france24.com/en/europe/20250421-pope-francis-first-latin-american-pontiff-dies-after-double-pneumonia-battle"
+          },
+          {
+            "@type": "ListItem",
+            "position": 63,
+            "name": "Haiti’s independence ransom: Macron offers ‘truth’, Haitians want reparations",
+            "url": "https://www.france24.com/en/americas/20250417-haiti-independence-ransom-macron-offers-truth-haitians-want-reparations-slavery"
+          },
+          {
+            "@type": "ListItem",
+            "position": 64,
+            "name": "Saved from destruction: Paris show offers glimpse of Gaza’s archaeological treasures",
+            "url": "https://www.france24.com/en/culture/20250403-saved-from-destruction-paris-exhibition-offers-glimpse-of-gaza-archaeological-treasures"
+          },
+          {
+            "@type": "ListItem",
+            "position": 65,
+            "name": "Lithium: The white gold of the energy transition",
+            "url": "https://www.france24.com/en/lithium-the-white-gold-of-the-energy-transition"
+          },
+          {
+            "@type": "ListItem",
+            "position": 66,
+            "name": "'The Bibi Files': Documentary reveals the police interrogations behind Netanyahu’s graft trial",
+            "url": "https://www.france24.com/en/middle-east/20240910-the-bibi-files-documentary-reveals-the-police-interrogations-behind-netanyahu-s-graft-trial"
+          },
+          {
+            "@type": "ListItem",
+            "position": 67,
+            "name": "Flights, petrol cars and cruise ships: Amsterdam bans fossil fuel ads",
+            "url": "https://www.france24.com/en/tv-shows/down-to-earth/20260320-flights-petrol-cars-and-cruise-ships-amsterdam-bans-fossil-fuel-ads"
+          },
+          {
+            "@type": "ListItem",
+            "position": 68,
+            "name": "Scientists discover entire ecosystem hidden under ice of Antarctica",
+            "url": "https://www.france24.com/en/tv-shows/down-to-earth/20260318-scientists-discover-entire-ecosystem-hidden-under-ice-of-antarctica"
+          },
+          {
+            "@type": "ListItem",
+            "position": 69,
+            "name": "BTS fans take over central Seoul for K-pop kings' big comeback",
+            "url": "https://www.france24.com/en/bts-fans-take-over-central-seoul-for-k-pop-kings-big-comeback"
+          },
+          {
+            "@type": "ListItem",
+            "position": 70,
+            "name": "Chuck Norris, roundhouse-kicking action star, has died at age 86",
+            "url": "https://www.france24.com/en/chuck-norris-roundhouse-kicking-action-star-has-died-at-age-86"
+          },
+          {
+            "@type": "ListItem",
+            "position": 71,
+            "name": "Ligue 1: Lille defeat Marseille thanks to Giroud and close in on third place",
+            "url": "https://www.france24.com/en/tv-shows/sports/20260323-ligue-1-lille-defeat-marseille-thanks-to-olivier-giroud-and-close-in-on-3rd-place"
+          },
+          {
+            "@type": "ListItem",
+            "position": 72,
+            "name": "Ligue 1: Lens Run Riot Against Angers (5-1) to Reclaim Top Spot",
+            "url": "https://www.france24.com/en/sport/20260321-ligue-1-lens-run-riot-against-angers-5-1-to-reclaim-top-spot"
+          },
+          {
+            "@type": "ListItem",
+            "position": 73,
+            "name": "Lyon crash out of Europa League",
+            "url": "https://www.france24.com/en/tv-shows/sports/20260320-lyon-crash-out-of-europa-league"
+          },
+          {
+            "@type": "ListItem",
+            "position": 74,
+            "name": "FIFA insists World Cup will proceed as planned despite Iran uncertainty",
+            "url": "https://www.france24.com/en/sport/20260319-fifa-insists-world-cup-will-proceed-as-planned-despite-iran-uncertainty"
+          },
+          {
+            "@type": "ListItem",
+            "position": 75,
+            "name": "'Harm at a population level': World Happiness Report flags social media's negative impact",
+            "url": "https://www.france24.com/en/technology/20260320-world-happiness-report-highlights-negative-impact-social-media-youth"
+          },
+          {
+            "@type": "ListItem",
+            "position": 76,
+            "name": "US tech giants on Iran's list of potential targets in Gulf countries",
+            "url": "https://www.france24.com/en/us-tech-giants-on-iran-s-list-of-potential-targets-in-gulf-countries"
+          },
+          {
+            "@type": "ListItem",
+            "position": 77,
+            "name": "‘Radical acceleration’ in AI military targeting raises oversight fears",
+            "url": "https://www.france24.com/en/tv-shows/a-propos/20260310-radical-acceleration-in-targenting-cycle-through-ai-points-to-lack-of-human-oversight"
+          },
+          {
+            "@type": "ListItem",
+            "position": 78,
+            "name": "Dr. Andrew Smith: Elections are won by 'constructing a vision that articulates political values'",
+            "url": "https://www.france24.com/en/dr-andrew-smith-elections-are-won-by-constructing-a-vision-that-articulates-political-values"
+          },
+          {
+            "@type": "ListItem",
+            "position": 79,
+            "name": "After strong showing in France's major cities, will left even qualify for 2027 presidential runoff?",
+            "url": "https://www.france24.com/en/after-strong-showing-in-france-s-major-cities-will-left-even-qualify-for-2027-presidential-runoff"
+          },
+          {
+            "@type": "ListItem",
+            "position": 80,
+            "name": "A strike on a health care centre in Sudan killed at least 64 people, WHO says",
+            "url": "https://www.france24.com/en/africa/20260322-a-strike-on-a-health-care-centre-in-sudan-killed-at-least-64-people-who-says"
+          },
+          {
+            "@type": "ListItem",
+            "position": 81,
+            "name": "Iran war jolts energy markets: What cost for South Africa?",
+            "url": "https://www.france24.com/en/tv-shows/eye-on-africa/20260320-iran-strikes-gulf-oil-gas-sites-as-war-jolts-energy-markets-what-cost-for-south-africa"
+          },
+          {
+            "@type": "ListItem",
+            "position": 82,
+            "name": "Senegal not losing AFCON title without a fight",
+            "url": "https://www.france24.com/en/senegal-not-losing-without-a-fight"
+          },
+          {
+            "@type": "ListItem",
+            "position": 83,
+            "name": "Senegal calls for inquiry after being stripped of AFCON title",
+            "url": "https://www.france24.com/en/senegal-calls-for-inquiry-after-being-stripped-of-afcon-title"
+          },
+          {
+            "@type": "ListItem",
+            "position": 84,
+            "name": "'Growing mistrust and disagreement' over Trump declaring war with Iran",
+            "url": "https://www.france24.com/en/growing-mistrust-and-disagreement-over-trump-declaring-war-with-iran"
+          },
+          {
+            "@type": "ListItem",
+            "position": 85,
+            "name": "Israel destroys five out of six bridges linking south Lebanon to rest of country",
+            "url": "https://www.france24.com/en/israel-destroys-five-out-of-six-bridges-linking-south-lebanon-to-rest-of-country"
+          },
+          {
+            "@type": "ListItem",
+            "position": 86,
+            "name": "Trump U-turn on Hormuz could be due to 'pressure' from Gulf nations",
+            "url": "https://www.france24.com/en/trump-u-turn-on-hormuz-could-be-due-to-pressure-from-gulf-nations"
+          },
+          {
+            "@type": "ListItem",
+            "position": 87,
+            "name": "Trump backtracks on Iran's deadline to reopen Strait of Hormuz",
+            "url": "https://www.france24.com/en/trump-backtracks-on-iran-s-deadline-to-reopen-strait-of-hormuz"
+          },
+          {
+            "@type": "ListItem",
+            "position": 88,
+            "name": "ICE agents deployed in US airports to ease security lines amid shutdown",
+            "url": "https://www.france24.com/en/ice-agents-deployed-in-us-airports-to-ease-security-lines-amid-shutdown"
+          },
+          {
+            "@type": "ListItem",
+            "position": 89,
+            "name": "Plane collides with firefighting truck at New York City's LaGuardia airport",
+            "url": "https://www.france24.com/en/plane-collides-with-firefighting-truck-at-new-york-city-s-laguardia-airport"
+          },
+          {
+            "@type": "ListItem",
+            "position": 90,
+            "name": "EU restricts Hungary's access to classified intelligence over alleged leaks to Russia",
+            "url": "https://www.france24.com/en/eu-restricts-hungary-s-access-to-classified-intelligence-over-alleged-leaks-to-russia"
+          },
+          {
+            "@type": "ListItem",
+            "position": 91,
+            "name": "Italy divided over Meloni government, referendum exit polls show",
+            "url": "https://www.france24.com/en/italy-divided-over-meloni-government-referendum-exit-polls-show"
+          },
+          {
+            "@type": "ListItem",
+            "position": 92,
+            "name": "Jewish charity ambulances set ablaze in London in suspected hate crime",
+            "url": "https://www.france24.com/en/jewish-charity-ambulances-set-ablaze-in-london-in-suspected-hate-crime"
+          },
+          {
+            "@type": "ListItem",
+            "position": 93,
+            "name": "Japan's PM walks tightrope in high-stakes Washington visit",
+            "url": "https://www.france24.com/en/tv-shows/access-asia/20260320-japan-s-pm-walks-tightrope-in-high-stakes-washington-visit"
+          },
+          {
+            "@type": "ListItem",
+            "position": 94,
+            "name": "Mumbai celebrates local new year",
+            "url": "https://www.france24.com/en/video/20260319-mumbai-celebrates-local-new-year"
+          },
+          {
+            "@type": "ListItem",
+            "position": 95,
+            "name": "Iranian women's football team return home after asylum tussle",
+            "url": "https://www.france24.com/en/asia-pacific/20260318-iran-women-s-football-team-return-home-after-asylum-tussle"
+          },
+          {
+            "@type": "ListItem",
+            "position": 96,
+            "name": "Transforming Payments in the DRC: A Leap Towards a Digital Future",
+            "url": "https://www.france24.com/en/sponsored-content/20250923-transforming-payments-in-the-drc-a-leap-towards-a-digital-future"
+          },
+          {
+            "@type": "ListItem",
+            "position": 97,
+            "name": "Africa's $88 billion solutions: How ATAF fights illicit financial flows",
+            "url": "https://www.france24.com/en/sponsored-content/20250108-africa-s-88-billion-solutions-how-ataf-fights-illicit-financial-flows"
+          },
+          {
+            "@type": "ListItem",
+            "position": 98,
+            "name": "Burundi: innovative solutions to fight stunting in children",
+            "url": "https://www.france24.com/en/sponsored-content/20240122-burundi-innovative-solutions-to-fight-stunting-in-children"
+          },
+          {
+            "@type": "ListItem",
+            "position": 99,
+            "name": "Child malnutrition in Burundi: concrete actions to help children",
+            "url": "https://www.france24.com/en/sponsored-content/20231215-child-malnutrition-in-burundi-concrete-actions-to-help-children"
+          },
+          {
+            "@type": "ListItem",
+            "position": 100,
+            "name": "Interview of Anthony Ginter, President & CEO - WEO",
+            "url": "https://www.france24.com/en/sponsored-content/20230911-interview-of-anthony-ginter-president-ceo-weo"
+          },
+          {
+            "@type": "ListItem",
+            "position": 101,
+            "name": "Art Explora Festival",
+            "url": "https://www.artexplora.org/es/festival/ville/barcelone"
+          },
+          {
+            "@type": "ListItem",
+            "position": 102,
+            "name": "Paris Africa Book Fair",
+            "url": "https://www.salondulivreafricaindeparis.com/english"
+          },
+          {
+            "@type": "ListItem",
+            "position": 103,
+            "name": "Reporters without borders",
+            "url": "https://donate.rsf.org?cid=213&lang=en_EN&reserved_origine=FAGFMM&utm_source=fmm&utm_medium=display&utm_campaign=FR_FUNDRAISING_EN_CFA_GAZA-FMM__ALL"
+          }
+        ],
+        "itemListOrder": "https://schema.org/ItemListOrderAscending",
+        "numberOfItems": 103
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://www.france24.com/en/#website",
+        "name": "FRANCE 24",
+        "alternateName": [
+          "FRANCE 24 English",
+          "France24",
+          "F24"
+        ],
+        "url": "https://www.france24.com/en/",
+        "description": "Breaking news and world news from France 24 on Business, Sports, Culture. Video news. News from the US, Europe, Asia Pacific, Africa, Middle East, America",
+        "publisher": {
+          "@type": "NewsMediaOrganization",
+          "@id": "https://www.france24.com/en/#organization",
+          "name": "FRANCE 24",
+          "alternateName": [
+            "FRANCE 24 English",
+            "France24",
+            "F24"
+          ],
+          "url": "https://www.france24.com/en/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://static.france24.com/meta_og_twcards/jsonld_publisher.png",
+            "contentUrl": "https://static.france24.com/meta_og_twcards/jsonld_publisher.png",
+            "width": 800,
+            "height": 800
+          },
+          "ethicsPolicy": "https://www.france24.com/en/ethics-charter",
+          "diversityPolicy": "https://www.francemediasmonde.com/en/home/our-commitments/diversity-and-inclusion/",
+          "diversityStaffingReport": "https://recrutement.francemm.com/differents-ensemble/",
+          "masthead": "https://www.francemediasmonde.com/en/home/the-group/governance/",
+          "ownershipFundingInfo": "https://www.francemediasmonde.com/en/home/the-group/financing/",
+          "publishingPrinciples": "https://www.francemediasmonde.com/en/home/our-missions/",
+          "missionCoveragePrioritiesPolicy": "https://www.francemediasmonde.com/en/home/our-commitments/",
+          "sameAs": [
+            "https://www.france24.com/en/author/france-24/",
+            "https://www.youtube.com/channel/UCQfwfsi5VrQ8yKZ-UWmAEFg",
+            "https://www.facebook.com/FRANCE24.English/",
+            "https://x.com/France24_en",
+            "https://bsky.app/profile/en.france24.com",
+            "https://www.instagram.com/france24_en",
+            "https://www.threads.com/@france24_en",
+            "https://t.me/France24_en",
+            "https://www.whatsapp.com/channel/0029Vb8Bb1L3QxS9r45uwJ3q",
+            "https://www.tiktok.com/@France24_en",
+            "https://www.linkedin.com/company/france-24/",
+            "https://profile.google.com/cp/CgkvbS8wNG44ZDk",
+            "https://news.google.com/publications/CAAqJggKIiBDQklTRWdnTWFnNEtER1p5WVc1alpUSTBMbU52YlNnQVAB"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:46.985735+00:00"
+  }
+}

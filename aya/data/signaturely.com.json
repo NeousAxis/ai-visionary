@@ -1,0 +1,354 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:13.930497+00:00",
+  "source": {
+    "input_url": "https://www.signaturely.com",
+    "canonical_domain": "signaturely.com",
+    "pages_scanned": [
+      "https://signaturely.com/",
+      "https://signaturely.com/about-us/",
+      "https://signaturely.com/contact-us/",
+      "https://signaturely.com/pricing/",
+      "https://signaturely.com/legal-contract-management/",
+      "https://signaturely.com/privacy/",
+      "https://signaturely.com/terms/"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 6
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Free, Legally Binding Electronic Signatures",
+    "website": "https://signaturely.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "06.04.2011",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Free, Legally Binding Electronic Signatures",
+        "website": "https://signaturely.com/",
+        "email": "",
+        "phone": "06.04.2011",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Free, Legally Binding Electronic Signatures | Signaturely"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Upload a document now and get it legally signed in minutes. Signaturely is a free electronic signature software that makes signatures super simple.",
+        "og_description": "Upload a document now and get it legally signed in minutes. Signaturely is a free electronic signature software that makes signatures super simple."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://signaturely.com/",
+            "url": "https://signaturely.com/",
+            "name": "Free, Legally Binding Electronic Signatures | Signaturely",
+            "isPartOf": {
+              "@id": "https://signaturely.com/#website"
+            },
+            "about": {
+              "@id": "https://signaturely.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://signaturely.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://signaturely.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://signaturely.com/wp-content/uploads/2020/06/Signaturely.png",
+            "datePublished": "2020-04-14T16:00:34+00:00",
+            "dateModified": "2026-02-23T14:37:05+00:00",
+            "description": "Upload a document now and get it legally signed in minutes. Signaturely is a free electronic signature software that makes signatures super simple.",
+            "breadcrumb": {
+              "@id": "https://signaturely.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://signaturely.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://signaturely.com/#primaryimage",
+            "url": "https://signaturely.com/wp-content/uploads/2020/06/Signaturely.png",
+            "contentUrl": "https://signaturely.com/wp-content/uploads/2020/06/Signaturely.png",
+            "width": 1800,
+            "height": 945
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://signaturely.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://signaturely.com/#website",
+            "url": "https://signaturely.com/",
+            "name": "Signaturely",
+            "description": "The easiest way to get  documents signed",
+            "publisher": {
+              "@id": "https://signaturely.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://signaturely.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://signaturely.com/#organization",
+            "name": "Signaturely",
+            "alternateName": "Signaturely LLC",
+            "url": "https://signaturely.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://signaturely.com/#/schema/logo/image/",
+              "url": "https://signaturely.com/wp-content/uploads/2020/05/signaturely-logo.png",
+              "contentUrl": "https://signaturely.com/wp-content/uploads/2020/05/signaturely-logo.png",
+              "width": 512,
+              "height": 512,
+              "caption": "Signaturely"
+            },
+            "image": {
+              "@id": "https://signaturely.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/signaturely/",
+              "https://x.com/SignaturelyHQ"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:13.930509+00:00"
+  }
+}

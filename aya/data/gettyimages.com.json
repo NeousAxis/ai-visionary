@@ -1,0 +1,276 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:48.648955+00:00",
+  "source": {
+    "input_url": "https://www.gettyimages.com",
+    "canonical_domain": "gettyimages.com",
+    "pages_scanned": [
+      "https://www.gettyimages.com/",
+      "https://www.gettyimages.com/faq"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Getty Images",
+    "website": "https://www.gettyimages.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "115888569",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "luxury",
+    "sector_label": "Luxe & Mode",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "luxe",
+      "fashion",
+      "mode",
+      "premium",
+      "exclusive"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Getty Images",
+        "website": "https://www.gettyimages.com/",
+        "email": "",
+        "phone": "115888569",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Royalty-Free Stock Photos, Creative Images & Vectors | News, Fashion, and Entertainment imagery - Ge"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "product",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Discover Getty Images' unrivaled collection of royalty-free images to find the perfect stock photo, vector, or illustration that resonates with your customers.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "product",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "faq",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization",
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 67.0,
+    "final_score": 67,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 67,
+    "raw_score": 67.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@id": "https://www.gettyimages.com/",
+        "@type": "Organization",
+        "name": "Getty Images",
+        "url": "https://www.gettyimages.com/",
+        "logo": "https://www.gettyimages.com/landing/assets/static/getty_images_no_trademark-5e584aa9f38443a9fd11.svg",
+        "subOrganization": {
+          "@type": "Organization",
+          "name": "iStock",
+          "url": "https://www.istockphoto.com/",
+          "@id": "https://www.istockphoto.com/"
+        },
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+18004624379",
+            "contactType": "customer support",
+            "contactOption": "TollFree",
+            "areaServed": "US",
+            "availableLanguage": [
+              "English",
+              "Spanish"
+            ]
+          },
+          {
+            "@type": "ContactPoint",
+            "telephone": "+13123444500",
+            "contactType": "sales",
+            "contactOption": "Toll Free",
+            "areaServed": "US",
+            "availableLanguage": [
+              "English",
+              "Spanish"
+            ]
+          }
+        ],
+        "description": "Getty Images is a British-American visual media company and a supplier of stock images and illustrations, stock videos, editorial photography, video and music for business and consumers, with a library of over 500 million assets.",
+        "keywords": "stock photos, stock videos, stock music, stock illustrations, news photos, news videos",
+        "sameAs": [
+          "https://www.wikidata.org/wiki/Q1520122",
+          "https://www.instagram.com/gettyimages/",
+          "https://www.linkedin.com/company/getty-images",
+          "https://www.facebook.com/gettyimages",
+          "https://twitter.com/GettyImages",
+          "https://www.youtube.com/user/gettyimages"
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.gettyimages.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.gettyimages.com/search/2/image?phrase={search_term_string}&esource=sitesearch",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:48.648966+00:00"
+  }
+}

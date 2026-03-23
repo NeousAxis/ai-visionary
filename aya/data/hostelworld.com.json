@@ -1,0 +1,382 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:45.917225+00:00",
+  "source": {
+    "input_url": "https://www.hostelworld.com",
+    "canonical_domain": "hostelworld.com",
+    "pages_scanned": [
+      "https://www.hostelworld.com/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/",
+      "https://www.hostelworld.com/hostels/"
+    ],
+    "pages_scanned_count": 10,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Hostels Worldwide",
+    "website": "https://www.hostelworld.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1999-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "travel",
+    "sector_label": "Tourisme & Transport",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "travel",
+      "hotel",
+      "booking",
+      "vol"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Hostels Worldwide",
+        "website": "https://www.hostelworld.com/",
+        "email": "",
+        "phone": "1999-2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Hostels Worldwide - Online Bookings, Ratings and Reviews"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "product",
+          "products"
+        ],
+        "meta_description": "Online confirmed bookings for backpacker hostels around the world. City guides, sightseeing, entertainment and backpacking information for hostels and backpacker tours around the world.",
+        "og_description": "Online confirmed bookings for backpacker hostels around the world. City guides, sightseeing, entertainment and backpacking information for hostels and backpacker tours around the world."
+      },
+      "evidence": [
+        "app",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "legal",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "legal",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@id": "https://www.hostelworld.com/#website",
+            "@type": "WebSite",
+            "description": "Hostelworld.com",
+            "inLanguage": "en",
+            "name": "Hostelworld",
+            "url": "https://www.hostelworld.com/",
+            "alternateName": [
+              "HW",
+              "Hostel World"
+            ],
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.hostelworld.com/find/keywordsuggestions?search_keywords={search_term_string}&internalsearch=yes"
+                },
+                "query-input": "required name=search_term_string"
+              }
+            ],
+            "publisher": {
+              "@id": "https://www.hostelworld.com/#/schema/organization/#hostelworld"
+            },
+            "workTranslation": [
+              {
+                "@id": "https://www.hostelworld.com/#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/fr#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/de#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/es#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/it#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/pt#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/br#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/sv#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/pl#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/fi#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/da#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/nl#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/no#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/cs#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/ru#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/tr#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/zh#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/ja#website"
+              },
+              {
+                "@id": "https://www.hostelworld.com/ko#website"
+              }
+            ]
+          },
+          {
+            "@id": "https://www.hostelworld.com/#webpage",
+            "@type": "WebPage",
+            "description": "Hostelworld.com",
+            "name": "Hostels Worldwide - Online Bookings, Ratings and Reviews",
+            "url": "https://www.hostelworld.com/",
+            "isPartOf": {
+              "@id": "https://www.hostelworld.com/#website"
+            },
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.hostelworld.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@id": "https://www.hostelworld.com/#/schema/organization/#hostelworld",
+            "@type": "Organization",
+            "logo": "https://a.hwstatic.com/image/upload/f_auto,q_auto/hw/logos/hw_logo.svg",
+            "name": "Hostelworld",
+            "url": "https://www.hostelworld.com/",
+            "sameAs": [
+              "https://www.facebook.com/hostelworld",
+              "https://twitter.com/hostelworld",
+              "https://www.youtube.com/user/hostelworld",
+              "https://www.instagram.com/hostelworld/",
+              "https://www.linkedin.com/company/hostelworld-com",
+              "https://www.crunchbase.com/organization/hostelworld-com"
+            ]
+          },
+          {
+            "@id": "https://www.hostelworld.com/#/schema/software-application/e95fe49",
+            "applicationCategory": "TravelApplication",
+            "downloadUrl": "https://play.google.com/store/apps/details?id=com.hostelworld.app",
+            "name": "Hostelworld",
+            "operatingSystem": "ANDROID",
+            "@type": [
+              "SoftwareApplication",
+              "MobileApplication"
+            ],
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.2",
+              "ratingCount": 8963
+            },
+            "offers": {
+              "@type": "Offer",
+              "availability": "https://schema.org/InStock",
+              "price": 0,
+              "priceCurrency": "EUR",
+              "priceValidUntil": "2027-12-30T00:00:00.000Z"
+            }
+          },
+          {
+            "@id": "https://www.hostelworld.com/#/schema/software-application/2415fc4",
+            "applicationCategory": "TravelApplication",
+            "downloadUrl": "https://itunes.apple.com/app/hostelworld-book-hostels-budget/id348890820?mt=8",
+            "name": "Hostelworld",
+            "operatingSystem": "IOS",
+            "@type": [
+              "SoftwareApplication",
+              "MobileApplication"
+            ],
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4+",
+              "ratingCount": 1140
+            },
+            "offers": {
+              "@type": "Offer",
+              "availability": "https://schema.org/InStock",
+              "price": 0,
+              "priceCurrency": "EUR",
+              "priceValidUntil": "2027-12-30T00:00:00.000Z"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:45.917237+00:00"
+  }
+}

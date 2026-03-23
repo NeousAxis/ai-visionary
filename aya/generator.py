@@ -181,9 +181,14 @@ def _is_slogan(text: str) -> bool:
 
 
 def _is_generic(text: str) -> bool:
-    """Check if text is a generic page name or a bare country/region name."""
+    """Check if text is a generic page name, country name, or technical slug."""
     lower = text.lower().strip()
-    return lower in GENERIC_NAMES or lower in COUNTRY_NAMES_NOT_ENTITY
+    if lower in GENERIC_NAMES or lower in COUNTRY_NAMES_NOT_ENTITY:
+        return True
+    # Technical slugs with underscores (e.g. "home_leisure", "main_page")
+    if "_" in lower and " " not in lower:
+        return True
+    return False
 
 
 def _clean_domain(domain: str) -> str:
@@ -286,7 +291,9 @@ def detect_entity_name(meta: dict, jsonld_payloads: list, domain: str) -> str:
         items = payload if isinstance(payload, list) else [payload]
         for item in items:
             if isinstance(item, dict) and item.get("name"):
-                name = _clean_encoding(str(item["name"]).strip())
+                raw_name = _clean_encoding(str(item["name"]).strip())
+                # Clean separators in JSON-LD names too (e.g. "Éclore | Transition écologique")
+                name = _clean_title(raw_name, domain) if ("|" in raw_name or " - " in raw_name or " — " in raw_name) else raw_name
                 if not name or _is_generic(name) or _is_slogan(name):
                     continue
                 if " " not in name and not _name_matches_domain(name, domain):

@@ -1,0 +1,293 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:59.091703+00:00",
+  "source": {
+    "input_url": "https://www.airbyte.com",
+    "canonical_domain": "airbyte.com",
+    "pages_scanned": [
+      "https://airbyte.com/",
+      "https://airbyte.com/pricing",
+      "https://airbyte.com/company/terms"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 10974
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Airbyte",
+    "website": "https://airbyte.com/",
+    "country": "US",
+    "city": "San Francisco",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "legal@airbyte.io",
+      "phone": "1-800-778-7879",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Airbyte",
+        "website": "https://airbyte.com/",
+        "email": "legal@airbyte.io",
+        "phone": "1-800-778-7879",
+        "country": "US",
+        "city": "San Francisco",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Airbyte | Open-Source Data Integration Platform | ELT Tool"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Explore Airbyte, your go-to data integration platform and ELT tool. Seamlessly integrate, transform, and load data with our powerful, user-friendly solution.",
+        "og_description": "Explore Airbyte, your go-to data integration platform and ELT tool. Seamlessly integrate, transform, and load data with our powerful, user-friendly solution."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.0,
+    "final_score": 78,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 78,
+    "raw_score": 78.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Airbyte",
+        "legalName": "Airbyte, Inc.",
+        "url": "https://airbyte.com",
+        "description": "Airbyte is an open-source data integration engine that helps to sync data from applications to warehouses.",
+        "logo": "https://assets-global.website-files.com/605e01bc25f7e19a82e74788/624d9c4d42aedff08cec8046_Airbyte_logo_color_dark%402x.png",
+        "sameAs": [
+          "https://www.crunchbase.com/organization/airbyte-b3bb",
+          "https://www.facebook.com/AirbyteHQ",
+          "https://www.linkedin.com/company/airbytehq/",
+          "https://github.com/airbytehq/airbyte",
+          "https://twitter.com/airbytehq",
+          "https://www.ycombinator.com/companies/airbyte",
+          "https://www.producthunt.com/products/airbyte",
+          "https://www.g2.com/products/airbyte/reviews"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "San Francisco",
+          "addressRegion": "California",
+          "addressCountry": "US"
+        },
+        "knowsAbout": [
+          "https://en.wikipedia.org/wiki/Data_integration",
+          "https://en.wikipedia.org/wiki/Data_engineering",
+          "https://en.wikipedia.org/wiki/Extract,_transform,_load",
+          "https://en.wikipedia.org/wiki/Data_warehouse"
+        ],
+        "numberOfEmployees": "101-250",
+        "founders": [
+          {
+            "@type": "Person",
+            "name": "John Lafleur",
+            "sameAs": [
+              "https://www.crunchbase.com/person/john-lafleur",
+              "https://twitter.com/JeanLafleur",
+              "https://www.linkedin.com/in/jeanhenrilafleur"
+            ],
+            "jobTitle": "Co-founder & COO",
+            "description": "John Lafleur is the Co-Founder and COO of Airbyte. He previously worked at CodinGame as a Board Member."
+          },
+          {
+            "@type": "Person",
+            "name": "Michel Tricot",
+            "sameAs": [
+              "https://www.crunchbase.com/person/michel-tricot",
+              "https://www.linkedin.com/in/micheltricot",
+              "https://twitter.com/micheltricot"
+            ],
+            "jobTitle": "Co-founder & CEO",
+            "description": "Michel Tricot is the Co-Founder and CEO of Airbyte. He previously worked at rideOS as a Founding Member and Director of Engineering."
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:59.091713+00:00"
+  }
+}

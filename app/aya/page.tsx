@@ -13,6 +13,18 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
 
 const getEntityId = (e: any): string => e.entity_id || e.aya_entity_id || e.id || '';
 
+/** Deterministic shuffle based on entity_id — looks random but stable across renders */
+function deterministicShuffle<T>(arr: T[], getId: (item: T) => string): T[] {
+    const hash = (s: string) => {
+        let h = 0;
+        for (let i = 0; i < s.length; i++) {
+            h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+        }
+        return h;
+    };
+    return [...arr].sort((a, b) => hash(getId(a)) - hash(getId(b)));
+}
+
 export default function AyaPage() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
@@ -85,7 +97,15 @@ export default function AyaPage() {
                 (a.country_legal || 'ZZ').localeCompare(b.country_legal || 'ZZ')
             );
         }
-        // 'default' and 'certified' = organic order from DB (created_at DESC)
+        // 'default': certified first (by created_at DESC), then shuffled non-certified
+        // 'certified': only certified, organic order
+        if (sortBy === 'default') {
+            const certified = filtered.filter((e: any) => e.payment_completed);
+            const indexed = filtered.filter((e: any) => !e.payment_completed);
+            // Keep certified in created_at DESC order (real customers first)
+            // Shuffle indexed entities so they don't appear grouped alphabetically
+            filtered = [...certified, ...deterministicShuffle(indexed, getEntityId)];
+        }
 
         return filtered;
     }, [results, query, sortBy]);

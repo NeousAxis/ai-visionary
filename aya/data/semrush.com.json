@@ -1,0 +1,258 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:49.439767+00:00",
+  "source": {
+    "input_url": "https://www.semrush.com",
+    "canonical_domain": "semrush.com",
+    "pages_scanned": [
+      "https://www.semrush.com/",
+      "https://www.semrush.com/company/",
+      "https://www.semrush.com/pricing/",
+      "https://www.semrush.com/company/legal/terms-of-service/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 22
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Semrush",
+    "website": "https://www.semrush.com/",
+    "country": "US",
+    "city": "Boston",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "legal@semrush.com",
+      "phone": "+1.800.815.9959",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Semrush",
+        "website": "https://www.semrush.com/",
+        "email": "legal@semrush.com",
+        "phone": "+1.800.815.9959",
+        "country": "US",
+        "city": "Boston",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Semrush: Your Unfair Advantage for Growing Brand Visibility"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Semrush is the leading platform to grow and measure brand visibility across AI search, SEO, PPC, social, and more.",
+        "og_description": "Semrush is the leading platform to grow and measure brand visibility across AI search, SEO, PPC, social, and more."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Corporation"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 80.0,
+    "final_score": 80,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 80,
+    "raw_score": 80.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "Corporation",
+        "name": "Semrush",
+        "description": "Semrush - online visibility management and content marketing SaaS platform",
+        "logo": "https://www.semrush.com/__static__/semrush-logo-700.jpg",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "USA",
+          "addressLocality": "Boston",
+          "addressRegion": "MA",
+          "postalCode": "02199",
+          "streetAddress": "800 Boylston Street, Suite 2475"
+        },
+        "email": "mailto:mail@semrush.com",
+        "telephone": "+1-800-815-9959",
+        "url": "https://www.semrush.com/",
+        "sameAs": [
+          "https://x.com/semrush",
+          "https://www.facebook.com/Semrush",
+          "https://www.linkedin.com/company/semrush",
+          "https://instagram.com/semrush/",
+          "https://www.youtube.com/user/SemrushHQ",
+          "https://www.pinterest.com/semrush/"
+        ],
+        "tickerSymbol": "NYSE:SEMR"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:49.439775+00:00"
+  }
+}

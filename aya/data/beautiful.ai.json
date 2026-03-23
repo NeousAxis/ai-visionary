@@ -1,0 +1,485 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:02.025254+00:00",
+  "source": {
+    "input_url": "https://www.beautiful.ai",
+    "canonical_domain": "beautiful.ai",
+    "pages_scanned": [
+      "https://www.beautiful.ai/",
+      "https://www.beautiful.ai/about",
+      "https://www.beautiful.ai/pricing"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 1220
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Beautiful.ai",
+    "website": "https://www.beautiful.ai/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "support@beautiful.ai",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "platform",
+      "data",
+      "analytics",
+      "artificial intelligence"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Beautiful.ai",
+        "website": "https://www.beautiful.ai/",
+        "email": "support@beautiful.ai",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Best AI Presentation Maker for Professional Decks | Beautiful.ai - Generate High-Quality Slides With"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "The AI presentation maker built for speed and polish. Beautiful.ai helps you create professional, client-ready slide decks in minutes. Try it free for 14 days - Make slides with the #1 AI slide generator on the market for teams and individuals.",
+        "og_description": "The AI presentation maker built for speed and polish. Beautiful.ai helps you create professional, client-ready slide decks in minutes. Try it free for 14 days - Make slides with the #1 AI slide generator on the market for teams and individuals."
+      },
+      "evidence": [
+        "app",
+        "platform",
+        "product",
+        "products",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "gdpr",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "gdpr",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization",
+          "Service",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Beautiful.ai",
+        "url": "https://www.beautiful.ai",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://cdn.prod.website-files.com/59deb588800ae30001ec19c9/668f0182cf53c0bb99d207ed_BAI%20logo%3Dfull%20color%20black-p-500.webp",
+          "width": 600,
+          "height": 60
+        },
+        "description": "Beautiful.ai simplifies presentation design with smart, easy-to-use tools that save time and boost creativity.",
+        "foundingDate": "2016-01-01",
+        "founders": [
+          {
+            "@type": "Person",
+            "name": "Jason Lapp"
+          }
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "Customer Service",
+          "email": "support@beautiful.ai",
+          "telephone": "+1-800-123-4567",
+          "areaServed": "Worldwide",
+          "availableLanguage": [
+            "English"
+          ]
+        },
+        "sameAs": [
+          "https://www.facebook.com/beautifulai",
+          "https://www.twitter.com/beautifulai",
+          "https://www.linkedin.com/company/beautifulai"
+        ],
+        "review": {
+          "@type": "Review",
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": "5",
+            "bestRating": "5"
+          },
+          "reviewBody": "Creating beautiful presentation decks without spending a lot of time focused on the design and layout of the slide itself is huge. We’ve saved hours, if not days, worth of time because of how easy it is to create professional-looking presentations.",
+          "author": {
+            "@type": "Person",
+            "name": "Shawn P"
+          }
+        }
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "Service",
+        "serviceType": "AI Presentation Maker for Teams",
+        "name": "Beautiful.ai — Best AI Presentation Maker for Professional Decks",
+        "url": "https://www.beautiful.ai",
+        "provider": {
+          "@type": "Organization",
+          "name": "Beautiful.ai",
+          "brand": "Beautiful.ai",
+          "url": "https://www.beautiful.ai"
+        },
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": "Worldwide"
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "AI Presentation Services",
+          "itemListElement": [
+            {
+              "@type": "OfferCatalog",
+              "name": "AI Creation & Generation",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "AI Presentation Maker",
+                    "description": "Generate a whole presentation from a prompt with AI."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "AI Slide Generator",
+                    "description": "Create single slides on demand within an existing deck."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "AI Writing Assistant for Slides",
+                    "description": "Generate, rewrite, and summarize slide content."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "AI Image Generation for Presentations",
+                    "description": "Produce AI-generated images, icons, and graphics for slides."
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "OfferCatalog",
+              "name": "Design Automation & Templates",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Smart Slides (AI-powered Slide Design)",
+                    "description": "Automatic layout, spacing, and design rules for professional results."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Branded Themes & Customizable Templates",
+                    "description": "Brand kit support—fonts, colors, logos, and layouts that stay on brand."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Ready-to-Use Presentation Templates",
+                    "description": "Templates for pitch decks, QBRs, marketing, education, and more."
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "OfferCatalog",
+              "name": "Collaboration & Enterprise",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Shared Slides & Deck Libraries",
+                    "description": "Edit once, update everywhere with permissions for approved librarians."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Real-Time Collaboration",
+                    "description": "Team editing, review, and alignment across departments."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Enterprise Features",
+                    "description": "Governance, brand consistency, and scale for large organizations."
+                  }
+                }
+              ]
+            },
+            {
+              "@type": "OfferCatalog",
+              "name": "Integrations, Export & Offline",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Tool Integrations",
+                    "description": "PowerPoint, Google Slides, Slack, Dropbox, Webex, Salesforce, Monday, ChatGPT."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Export to Multiple Formats",
+                    "description": "Export to PPT, PPTX, PDF, and JPEG for interoperable workflows."
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "itemOffered": {
+                    "@type": "Service",
+                    "name": "Offline Presenting",
+                    "description": "Present downloaded decks offline via the desktop player."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How much does Beautiful.ai’s AI presentation maker cost?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Plans start at $12 per month (billed annually) with options for individuals, small teams, startups, and enterprises. A 14-day free trial provides unlimited access to generate content, edit layouts, customize themes, and share presentations."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is Beautiful.ai different from free AI PowerPoint generators?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Beautiful.ai combines artificial intelligence, automation, and professional design rules to create polished, work-ready presentations. Smart Slides automate layout, spacing, fonts, colors, and charts, reducing manual edits common with basic AI slideshow makers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Beautiful.ai use artificial intelligence in slide design and content creation?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The platform uses generative AI and machine intelligence to turn prompts into full decks or single slides, generate images and icons, and power an AI writing assistant for drafting, refining, and summarizing text. Intelligent slides adapt layouts, spacing, fonts, and colors automatically."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I add my own images, videos, or AI-generated graphics to a slide deck?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Upload your own logos, photos, videos, and brand assets, and combine them with Beautiful.ai’s library of templates, stock images, icons, posters, and fonts to customize any presentation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I share my presentations offline?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Download and present offline with the desktop player. Export options include PowerPoint (PPT, PPTX), Google Slides, PDFs, and JPEGs, ensuring compatibility across workflows."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Beautiful.ai use ChatGPT or other AI chatbots?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Beautiful.ai’s AI-powered slide design is driven by advanced large language models (powered by Anthropic) with chatbot-style interfaces to generate content, draft slides in seconds, and refine text or visuals—natively inside the platform."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:02.025264+00:00"
+  }
+}

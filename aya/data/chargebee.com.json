@@ -1,0 +1,670 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:51.834149+00:00",
+  "source": {
+    "input_url": "https://www.chargebee.com",
+    "canonical_domain": "chargebee.com",
+    "pages_scanned": [
+      "https://www.chargebee.com/",
+      "https://www.chargebee.com/company/",
+      "https://www.chargebee.com/contact",
+      "https://www.chargebee.com/pricing",
+      "https://www.chargebee.com/faq",
+      "https://www.chargebee.com/privacy",
+      "https://www.chargebee.com/company/terms/"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Chargebee",
+    "website": "https://www.chargebee.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "20852-8765",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Chargebee",
+        "website": "https://www.chargebee.com/",
+        "email": "",
+        "phone": "20852-8765",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Chargebee: SaaS for Effective Revenue Growth Management"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Unlock hyper-growth with Chargebee's Software-as-a-Service. Streamline revenue operations & grow your business efficiently. Join the trajectory to success now.",
+        "og_description": "Unlock hyper-growth with Chargebee's Software-as-a-Service. Streamline revenue operations & grow your business efficiently. Join the trajectory to success now."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "http://www.chargebee.com#webpage",
+            "@headline": "Chargebee is a company that provides a leading end-to-end revenue management platform for businesses employing a subscription model.",
+            "url": "http://www.chargebee.com",
+            "isPartOf": {
+              "@id": "http://www.chargebee.com/#website"
+            },
+            "mainEntity": {
+              "@id": "https://www.chargebee.com/#organization"
+            },
+            "lastReviewed": "2023-08-07",
+            "relatedLink": [
+              "https://www.wikidata.org/wiki/Q322948",
+              "https://www.wikidata.org/wiki/Q1254596",
+              "https://www.wikidata.org/wiki/Q17000263"
+            ],
+            "significantLink": "https://www.chargebee.com/schedule-a-demo/",
+            "description": "Unlock hyper-growth with Chargebee's Software-as-a-Service. Streamline revenue operations & grow your business effeciently. Join the trajectory to success now!",
+            "disambiguatingDescription": "Unlock hyper-growth with Chargebee's Software-as-a-Service. Streamline revenue operations & grow your business effeciently. Join the trajectory to success now!",
+            "mainEntityOfPage": "http://www.chargebee.com",
+            "about": [
+              {
+                "@type": "Thing",
+                "name": "saas",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Software_as_a_service",
+                  "https://www.google.com/search?q=saas&kgmid=/m/011x4gq1"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "pricing",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Pricing",
+                  "https://www.google.com/search?q=pricing&kgmid=/m/01jsvy"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "revenue management",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Revenue_management",
+                  "https://www.google.com/search?q=revenue+management&kgmid=/m/027r_gv"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "churn",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Churn_rate",
+                  "https://www.google.com/search?q=churn&kgmid=/m/0775fh"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "revops",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/DevOps",
+                  "https://www.google.com/search?q=revops&kgmid=/m/0c3tq11"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "software",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Software",
+                  "https://www.google.com/search?q=software&kgmid=/m/01mf0"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "metrics",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Performance_indicator",
+                  "https://www.google.com/search?q=metrics&kgmid=/m/036jhj"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "self-service",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Self-service",
+                  "https://www.google.com/search?q=self-service&kgmid=/m/0f0ltm"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "retention",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Customer_retention",
+                  "https://www.google.com/search?q=retention&kgmid=/m/03gt7nm"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "growth management",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Growth_management",
+                  "https://www.google.com/search?q=growth+management&kgmid=/m/0127g9"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "revenue model",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Revenue_model",
+                  "https://www.google.com/search?q=revenue+model&kgmid=/m/09gk67m"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "strategy",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Strategy",
+                  "https://www.google.com/search?q=strategy&kgmid=/m/07b7r"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "finance",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Finance",
+                  "https://www.google.com/search?q=finance&kgmid=/m/02_7t"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "net revenue",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Net_income",
+                  "https://www.google.com/search?q=net+revenue&kgmid=/m/09xs_"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "subscription",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Subscription_business_model",
+                  "https://www.google.com/search?q=subscription&kgmid=/m/01m748"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "freemium",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Freemium",
+                  "https://www.google.com/search?q=freemium&kgmid=/m/026516v"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "tool",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Tool",
+                  "https://www.google.com/search?q=tool&kgmid=/m/07k1x"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "profitability",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Profit_(economics)",
+                  "https://www.google.com/search?q=profitability&kgmid=/m/04n7m2q"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "cloud",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Cloud_computing",
+                  "https://www.google.com/search?q=cloud&kgmid=/m/02y_9m3"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "revenue",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Revenue",
+                  "https://www.google.com/search?q=revenue&kgmid=/m/01kr9k"
+                ]
+              }
+            ],
+            "mentions": [
+              {
+                "@type": "Thing",
+                "name": "customer churn",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Customer_attrition",
+                  "https://www.google.com/search?q=customer+churn&kgmid=/m/026bn1c"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "as a service",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Software_as_a_service",
+                  "https://www.google.com/search?q=as+a+service&kgmid=/m/011x4gq1"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "customer lifetime value",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Customer_lifetime_value",
+                  "https://www.google.com/search?q=customer+lifetime+value&kgmid=/m/02fxcb"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "cloud services",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Cloud_computing",
+                  "https://www.google.com/search?q=cloud+services&kgmid=/m/02y_9m3"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "customer relationships",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Customer_relationship_management",
+                  "https://www.google.com/search?q=customer+relationships&kgmid=/m/0bhb89j"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "attrition",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Churn_rate",
+                  "https://www.google.com/search?q=attrition&kgmid=/m/0775fh"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "lifetime value",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Customer_lifetime_value",
+                  "https://www.google.com/search?q=lifetime+value&kgmid=/m/02fxcb"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "strategy",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Strategic_management",
+                  "https://www.google.com/search?q=strategy&kgmid=/m/01jqpl"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "customer success",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Customer_success",
+                  "https://www.google.com/search?q=customer+success&kgmid="
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "sales",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Sales",
+                  "https://www.google.com/search?q=sales&kgmid=/m/04f759m"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "revenue management",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Revenue_management",
+                  "https://www.google.com/search?q=revenue+management&kgmid=/m/027r_gv"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "software as a service",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Software_as_a_service",
+                  "https://www.google.com/search?q=software+as+a+service&kgmid=/m/011x4gq1"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "return on investment",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Return_on_investment",
+                  "https://www.google.com/search?q=return+on+investment&kgmid=/m/0h3p28z"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "subscriber",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Subscription_business_model",
+                  "https://www.google.com/search?q=subscriber&kgmid=/m/01m748"
+                ]
+              },
+              {
+                "@type": "Thing",
+                "name": "analytics",
+                "sameAs": [
+                  "https://en.wikipedia.org/wiki/Analytics",
+                  "https://www.google.com/search?q=analytics&kgmid=/m/02gcn9"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "http://www.chargebee.com/#website",
+            "publisher": {
+              "@id": "https://www.chargebee.com/#organization"
+            },
+            "url": "http://www.chargebee.com.com/",
+            "name": "ChargeBee",
+            "alternateName": "Chargebee",
+            "description": "Launched in 2011, Chargebee's website serves as a subscription management hub, offering businesses automated solutions for enhancing their recurring revenue streams. From efficient recurring revenue management to seamless revenue recognition and customer retention, Chargebee's online platform empowers subscription-based enterprises seeking to drive growth.",
+            "disambiguatingDescription": "Chargebee's website empowers subscription-based enterprises aiming to achieve robust growth.",
+            "identifier": "http://www.productontology.org/doc/Software_as_a_service",
+            "image": "https://www.chargebee.com/static/resources/schema/revenue-growth-management.svg",
+            "mainEntityOfPage": "https://en.wikipedia.org/wiki/Software_as_a_service",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.chargebee.com/?s={search_term_string}"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.chargebee.com/#organization",
+            "name": "Chargebee",
+            "legalName": "Chargebee Inc.",
+            "address": "340 S Lemon Ave 1537, Walnut, California, 91789, United States",
+            "email": "support@chargebee.com",
+            "knowsAbout": "Subscription Billing, Recurring Revenue, Customer Retention, Accounts Receivables, Revenue Recognition",
+            "disambiguatingDescription": "Chargebee, legally known as Chargebee Inc., is a software company. Chargebee develops revenue growth management software for SaaS, SaaS-like, Subscription eCommerce, and recurring Membership Services businesses. Chargebeeâs revenue growth management platform consists of subscription billing software, revenue recognition software, customer retention software, and accounts receivable management software",
+            "description": "Chargebee Inc. is a company that provides revenue growth management software. It was founded in 2011 by a group of visionary founders who wanted to build a solution for businesses that needed help with subscription and recurring billing. The Chargebee platform powers the entire recurring revenue lifecycle, from subscription billing and invoicing to cash, accounting, renewal, and more, and businesses use it to acquire, grow, retain, and manage subscriber relationships. The company is headquartered in San Francisco, California. Chargebee serves customers worldwide and is trusted by leading companies to manage their full recurring revenue lifecycle. The company is backed by respected investors who believe in the magic of subscriptions and the world they can create. Chargebee is committed to helping businesses adapt to changing market conditions by providing valuable automated billing, invoicing, payments, and compliance capabilities while providing up-to-date key metrics and insights to help businesses make informed decisions.Chargebeeâs Revenue Growth Management platform comprises four powerful software products, offering a comprehensive RGM solution. Chargebee Billing is a subscription billing software that powers end-to-end recurring billing, subscription management, and auto-invoicing for SaaS and eCommerce businesses. The software allows businesses to manage subscriptions, billing, and invoicing at scale, as well as accept recurring payments with Chargebee's extensive network of 30+ payment gateway providers and multi-currency support. Chargebee's billing software also offers customizable billing cycles, product and pricing models, entitlements, and a seamless checkout experience. Chargebee's billing software is designed to help businesses streamline their billing workflows and simplify automatic payment processing without losing focus on growing their business. Additionally, Chargebee Billing integrates seamlessly with systems across a companyâs tech stack, including CRM, ERP, accounting systems, and more.Chargebee RevRec is a revenue recognition software that helps SaaS businesses streamline the accounting and bookkeeping process for revenue recognition in a highly automated and controlled manner. As customer contracts are identified, Chargebee RevRec begins an end-to-end, automated revenue recognition workflow based on ASC 606's and IFRS 15's five-step model. Chargebee RevRec is designed to help businesses automate revenue recognition workflows and ensure compliance with GAAP accounting standards. It is a part of Chargebee's revenue growth management platform that powers the end-to-end recurring revenue lifecycle.Chargebee Receivables is an intelligent Accounts Receivable (AR) management and collection automation software that helps businesses view, track, and collect unpaid customer invoices. It provides complete visibility into receivables data and helps businesses improve their cash flow management processes by automating accounts receivable workflows. Chargebee Retention is a customer retention management software for high-growth subscription businesses. It is designed to help businesses reduce voluntary churn and accelerate subscription growth by deploying high-performing, personalized retention experiences. Chargebee Retention tracks multiple outcomes for customers, including cancels, deflects, saves, and more, and provides a view of retention performance through a dynamic funnel. The software allows businesses to build personalized cancel experiences and reduce voluntary churn by connecting seamlessly with Chargebee's billing solution. Chargebee Retention also offers essential features to tackle voluntary churns, such as personalized cancel experiences, deflection funnels, and watchlists. The software is a revenue-generating service that saves customers from canceling and generates positive ROI.Chargebee serves a diverse range of audiences across industries. Its solutions are tailored for SaaS (Software-as-a-Service) businesses, SaaS-like companies, Subscription eCommerce ventures, and Membership Services providers. Additionally, Chargebee caters to organizations seeking efficient revenue growth management, subscription billing, revenue recognition, customer retention, and accounts receivable management solutions.Chargebees Headquarters is in Walnut, California, with additional offices in Chennai, India, Amsterdam, Netherlands, and Salt Lake City, US.Chargebee Inc was founded in 2011 by Krish Subramanian, KP Saravanan, Thiyagarajan T, and Rajaraman Santhanam as a 123 change. Starting in a garage in Chennai, India, the founders aimed to simplify subscription billing for businesses. By 2012, they had launched their first product, a subscription billing, and recurring revenue management software.Over time, Chargebee transitioned from merely automating billing operations to managing end-to-end subscription workflows and enabling revenue growth for a range of subscription-based businesses, including SaaS, eCommerce, e-learning, IoT, and publications. As such, it evolved into a revenue growth management platform.Notable milestones in Chargebee's history include acquiring its first customers in the UK and USA in 2013 and achieving product-market fit in 2016. Subsequent years saw international expansion, with offices opening in Amsterdam and Salt Lake City, Utah in 2019, and Australia in 2021.In 2020, Chargebee launched the Champions of Change global user conference and opened data centers in Australia and Europe. 2021 marked a significant achievement as the company reached Unicorn Status following a Series G funding round led by Sapphire Ventures. The same year, Chargebee acquired RevLock (which became Chargebee RevRec), was recognized as a Great Place to Work, and began expanding its product offerings.In 2022, the company's most recent funding round was led by Sequoia and Tiger Global. This was also the year Chargebee started offering its services to businesses in India, acquired numberz (now Chargebee Receivables) & Brightback (now Chargebee Retention), and was certified as a Great Place to Work in the US.Chargebee has consistently added new capabilities and features to its offerings, including advanced billing experimentation tools, analytics, reporting tools, and integrations with payment gateways and tax management solutions. By providing expert guidance and best practices for subscription businesses, Chargebee has maintained its leadership position in several categories, as reflected in the G2 Spring 2023 report.",
+            "url": "https://www.chargebee.com/company/",
+            "sameAs": [
+              "https://www.linkedin.com/company/chargebee/",
+              "https://twitter.com/chargebee",
+              "https://www.facebook.com/chargebee",
+              "https://www.youtube.com/@Chargebee",
+              "https://www.softwareadvice.com/accounting/chargebee-profile/",
+              "https://www.getapp.com/finance-accounting-software/a/chargebee/",
+              "https://www.gartner.com/reviews/market/subscription-and-recurring-billing-management-solutions/vendor/chargebee/product/chargebee",
+              "https://www.g2.com/products/chargebee/reviews",
+              "https://www.trustradius.com/products/chargebee/reviews",
+              "https://www.crunchbase.com/organization/chargebee",
+              "https://www.google.com/maps/place/Chargebee+Subscription+Billing+%26+Management/@34.0118766,-117.8596896,15z/data=!4m6!3m5!1s0x80c32bbc8e8807bf:0x22e81b1f54651c09!8m2!3d34.0118766!4d-117.8596896!16s%2Fg%2F1q66nr86l?entry=ttu",
+              "https://www.google.com/search?kgmid=/g/1q66nr86l&kponly",
+              "https://pitchbook.com/profiles/company/55782-55",
+              "https://www.bloomberg.com/profile/company/0941835D:US#xj4y7vzkg",
+              "https://www.cbinsights.com/company/chargebee",
+              "https://www.datanyze.com/companies/chargebee/354622732",
+              "https://theorg.com/org/chargebee"
+            ],
+            "subjectOf": [
+              "https://research.contrary.com/reports/chargebee"
+            ],
+            "additionalType": "http://www.productontology.org/doc/Software_developer",
+            "image": "https://www.chargebee.com/static/resources/founders/founders.jpeg",
+            "logo": "https://www.chargebee.com/static/resources/schema/brand-guidelines-logo3.svg",
+            "foundingDate": "2011-06-15",
+            "foundingLocation": {
+              "@type": "City",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Chennai",
+                "postalCode": "600001",
+                "addressCountry": "India"
+              }
+            },
+            "areaServed": "Worldwide",
+            "founder": [
+              {
+                "@type": "Person",
+                "@id": "https://www.chargebee.com/company/#krish-subramanian",
+                "url": "https://www.chargebee.com/company/",
+                "name": "Krish Subramanian",
+                "knowsAbout": "System platforms, Subscription Billing",
+                "description": "Krish Subramanian is Co-founder and CEO of Chargebee.From bootstrapped beginnings, with two decades of technology experience to back him, Krish turned Chargebee, his first company, into a global unicorn. Problem-solving is Krishâs talent, and he most enjoys tackling the challenges of customer-facing operations, pricing optimization and the start-up space.",
+                "image": {
+                  "@type": "ImageObject",
+                  "@id": "https://www.chargebee.com/static/resources/founders/krish.png",
+                  "url": "https://www.chargebee.com/static/resources/founders/krish.png"
+                },
+                "sameAs": [
+                  "https://www.linkedin.com/in/krishs/",
+                  "https://twitter.com/cbkrish",
+                  "https://theorg.com/org/chargebee/org-chart/krish-subramaniam"
+                ]
+              },
+              {
+                "@type": "Person",
+                "@id": "https://www.chargebee.com/company/#rajaraman-santhanam",
+                "url": "https://www.chargebee.com/company",
+                "name": "Rajaraman Santhanam",
+                "knowsAbout": "Technology, Software Engineering",
+                "description": "Rajaraman Santhanam is Co-founder and COO of Chargebee. A former Product Engineer with 20 yearsâ experience, âRamanâ designed the first version of Chargebee and is responsible for the day-to-day operations of the company.",
+                "image": {
+                  "@type": "ImageObject",
+                  "@id": "https://www.chargebee.com/static/resources/founders/rajaraman.png",
+                  "url": "https://www.chargebee.com/static/resources/founders/rajaraman.png"
+                },
+                "sameAs": [
+                  "https://twitter.com/rajaraman_rr",
+                  "https://www.linkedin.com/in/rajaramansanthanam/",
+                  "https://theorg.com/org/chargebee/org-chart/rajaraman-santhanam"
+                ]
+              },
+              {
+                "@type": "Person",
+                "@id": "https://www.chargebee.com/company/#saravanan-kp",
+                "url": "https://www.chargebee.com/company",
+                "name": "Saravanan KP",
+                "knowsAbout": "Technology, Software Engineering",
+                "description": "KP Saravanan is Co-founder and CTO of Chargebee. He was building software as a service products long before SaaS got its cool acronym and strongly believes that product requirements drive technology choices.",
+                "image": {
+                  "@type": "ImageObject",
+                  "@id": "https://www.chargebee.com/static/resources/founders/kps.png",
+                  "url": "https://www.chargebee.com/static/resources/founders/kps.png"
+                },
+                "sameAs": [
+                  "https://www.crunchbase.com/person/kp-saravanan",
+                  "https://www.linkedin.com/in/saravanan-kp-09792838/",
+                  "https://theorg.com/org/chargebee/org-chart/saravanan-kp"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:51.834158+00:00"
+  }
+}

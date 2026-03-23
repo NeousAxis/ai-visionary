@@ -1,0 +1,308 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:12.113120+00:00",
+  "source": {
+    "input_url": "https://www.ornikar.com",
+    "canonical_domain": "ornikar.com",
+    "pages_scanned": [
+      "https://www.ornikar.com/",
+      "https://www.ornikar.com/",
+      "https://www.ornikar.com/a-propos",
+      "https://www.ornikar.com/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Ornikar",
+    "website": "https://www.ornikar.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1 811 573",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.6000000000000001,
+    "source": "keyword_match",
+    "evidence": [
+      "école",
+      "formation",
+      "campus"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Ornikar",
+        "website": "https://www.ornikar.com/",
+        "email": "",
+        "phone": "1 811 573",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Ornikar : L'auto-école et l'assurance auto nouvelle génération"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "offre",
+          "service",
+          "services",
+          "solution"
+        ],
+        "meta_description": "Avec Ornikar, passez votre permis 30% moins cher puis assurez-vous à partir de 9 euros par mois, en tout sérénité.",
+        "og_description": "Avec Ornikar, passez votre permis 30% moins cher puis assurez-vous à partir de 9 euros par mois, en tout sérénité."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "offre",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 70.3,
+    "final_score": 70,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 70,
+    "raw_score": 70.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "Ornikar",
+            "legalName": "Ornikar",
+            "foundingDate": "2013-12",
+            "founders": [
+              {
+                "@type": "Person",
+                "name": "Benjamin Gaignault"
+              },
+              {
+                "@type": "Person",
+                "name": "Flavien Le Rendu"
+              }
+            ],
+            "url": "https://www.ornikar.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://cdn.prod.website-files.com/684ff3bd1da9316c56aafea9/68946612757cc02fc9679fda_ornikar-logo.png"
+            },
+            "sameAs": [
+              "https://www.facebook.com/ornikar",
+              "https://x.com/ornikar",
+              "https://www.instagram.com/ornikar/",
+              "https://www.youtube.com/channel/UCMBNOyJPLv5GmFr-TRL4DVw",
+              "https://www.tiktok.com/@ornikar",
+              "https://www.linkedin.com/company/ornikar"
+            ],
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "contactType": "customer support",
+                "areaServed": "FR",
+                "availableLanguage": [
+                  "French"
+                ]
+              }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "170 boulevard de la Villette",
+              "addressLocality": "Paris",
+              "postalCode": "75019",
+              "addressCountry": "France"
+            },
+            "areaServed": "France",
+            "description": "Ornikar est la première auto‑école en ligne de France, proposant une formation complète au code de la route, des leçons de conduite, une assurance auto ainsi que des stages de récupération de points.",
+            "numberOfEmployees": "250",
+            "department": [
+              {
+                "@type": "Organization",
+                "name": "Auto-école en ligne",
+                "description": "Formation au Code de la route et au permis de conduire en ligne"
+              },
+              {
+                "@type": "Organization",
+                "name": "Assurance auto",
+                "description": "Service d'assurance automobile en ligne, flexible et personnalisable"
+              },
+              {
+                "@type": "Organization",
+                "name": "Stage de récupération de points",
+                "description": "Inscriptions aux stages agréés pour récupérer des points de permis"
+              }
+            ]
+          },
+          {
+            "@type": "Product",
+            "name": "Formation au permis de conduire Ornikar",
+            "sameAs": "https://www.trustedshops.fr/evaluation/info_X12ADF3C4F14ED060472977E1D70CFA55.html",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.77",
+              "ratingCount": "3988",
+              "worstRating": "1",
+              "bestRating": "5"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:12.113138+00:00"
+  }
+}

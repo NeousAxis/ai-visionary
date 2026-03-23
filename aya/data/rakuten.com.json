@@ -1,0 +1,193 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:03:26.569879+00:00",
+  "source": {
+    "input_url": "https://www.rakuten.com",
+    "canonical_domain": "rakuten.com",
+    "pages_scanned": [
+      "https://www.rakuten.com/geogating/sorry?old=/",
+      "https://www.rakuten.com/geogating/sorry?old=/about",
+      "https://www.rakuten.com/geogating/sorry?old=/a-propos",
+      "https://www.rakuten.com/geogating/sorry?old=/contact",
+      "https://www.rakuten.com/geogating/sorry?old=/services",
+      "https://www.rakuten.com/geogating/sorry?old=/products",
+      "https://www.rakuten.com/geogating/sorry?old=/pricing",
+      "https://www.rakuten.com/geogating/sorry?old=/faq",
+      "https://www.rakuten.com/geogating/sorry?old=/legal",
+      "https://www.rakuten.com/geogating/sorry?old=/privacy",
+      "https://www.rakuten.com/geogating/sorry?old=/terms"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Rakuten",
+    "website": "https://www.rakuten.com/geogating/sorry?old=/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.4,
+    "source": "keyword_match",
+    "evidence": [
+      "shop"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Rakuten",
+        "website": "https://www.rakuten.com/geogating/sorry?old=/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Rakuten: Shop. Get Cash Back. Repeat."
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "service",
+          "services"
+        ],
+        "meta_description": "Feel the joy of Cash Back! Start your shopping at Rakuten - Shop as usual - Get Cash Back. Shop at over 3500 stores and get paid.",
+        "og_description": "Since 1999, we've paid our members over $4.6 Billion in Cash Back. Join now for an extra 10% Cash Back boost. Shop 3,500+ stores using coupons or cash back!"
+      },
+      "evidence": [
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 27.0,
+    "final_score": 27,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.4,
+        "score": 4.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 27,
+    "raw_score": 27.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T17:03:26.569890+00:00"
+  }
+}

@@ -1,0 +1,288 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T10:00:47.612188+00:00",
+  "source": {
+    "input_url": "https://www.rippling.com",
+    "canonical_domain": "rippling.com",
+    "pages_scanned": [
+      "https://www.rippling.com/",
+      "https://www.rippling.com/about",
+      "https://www.rippling.com/contact",
+      "https://www.rippling.com/products",
+      "https://www.rippling.com/pricing",
+      "https://www.rippling.com/legal"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 6585
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Rippling",
+    "website": "https://www.rippling.com/",
+    "country": {
+      "@type": "Country",
+      "name": "US"
+    },
+    "city": "San Francisco",
+    "languages": [],
+    "org_type": "Product",
+    "contacts": {
+      "email": "",
+      "phone": "1-800-984-6395",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "api",
+      "platform",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Rippling",
+        "website": "https://www.rippling.com/",
+        "email": "",
+        "phone": "1-800-984-6395",
+        "country": {
+          "@type": "Country",
+          "name": "US"
+        },
+        "city": "San Francisco",
+        "org_type": "Product"
+      },
+      "evidence": [
+        "Rippling: #1 Workforce Management System | HR, IT, Finance"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Rippling eliminates the friction from running a business, combining HR, IT, and Finance apps on a unified data platform.",
+        "og_description": "Rippling eliminates the friction from running a business, combining HR, IT, and Finance apps on a unified data platform."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Product",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.6,
+    "final_score": 79,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 79,
+    "raw_score": 78.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": 10490
+        },
+        "description": "All-in-one HR, IT, and Finance platform",
+        "name": "Rippling"
+      },
+      {
+        "@type": "Organization",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": {
+            "@type": "Country",
+            "name": "US"
+          },
+          "addressLocality": "San Francisco",
+          "postalCode": "94105",
+          "streetAddress": "430 California Street, 11th Floor"
+        },
+        "logo": "https://rippling2.imgix.net/RipplingGoogleAvatar_250.png",
+        "name": "Rippling",
+        "sameAs": [
+          "https://twitter.com/rippling",
+          "https://www.linkedin.com/company/rippling/",
+          "https://www.facebook.com/ripplingapp/",
+          "https://www.youtube.com/@ripplinghq",
+          "https://www.instagram.com/ripplinghq/",
+          "https://www.crunchbase.com/organization/rippling",
+          "https://theorg.com/org/rippling",
+          "https://www.g2.com/products/rippling/reviews",
+          "https://www.ycombinator.com/companies/rippling",
+          "https://www.trustpilot.com/review/rippling.com",
+          "https://play.google.com/store/apps/details?id=com.people.rippling&hl=en_US",
+          "https://apps.apple.com/us/app/rippling-hr-it-finance/id1231325957",
+          "https://www.glassdoor.com/Reviews/Rippling-Reviews-E2521509.htm",
+          "https://www.bloomberg.com/profile/company/1500171D:US",
+          "https://en.wikipedia.org/wiki/Rippling_(company)"
+        ],
+        "url": "https://www.rippling.com/"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T10:00:47.612197+00:00"
+  }
+}

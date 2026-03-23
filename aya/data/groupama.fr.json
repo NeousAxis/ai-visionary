@@ -1,0 +1,251 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:23.330847+00:00",
+  "source": {
+    "input_url": "https://www.groupama.fr",
+    "canonical_domain": "groupama.fr",
+    "pages_scanned": [
+      "https://www.groupama.fr/",
+      "https://www.groupama.fr/contact/",
+      "https://www.groupama.fr/",
+      "https://www.groupama.fr/faq/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 1626
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Groupama",
+    "website": "https://www.groupama.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "07 008 346",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "banque",
+      "crédit",
+      "assurance",
+      "patrimoine",
+      "prévoyance"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Groupama",
+        "website": "https://www.groupama.fr/",
+        "email": "",
+        "phone": "07 008 346",
+        "country": "FR",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Groupama - Assurance particuliers & professionnels"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Assurances auto, habitation, santé, prévoyance, loisirs... Et aussi nos assurances pour les pros et les agriculteurs. Tarifs gratuits en ligne en quelques minutes.",
+        "og_description": "Assurances auto, habitation, santé, prévoyance, loisirs... Et aussi nos assurances pour les pros et les agriculteurs. Tarifs gratuits en ligne en quelques minutes."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization",
+          "Product"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.1,
+    "final_score": 75,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 75,
+    "raw_score": 75.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Groupama",
+        "url": "https://www.groupama.fr/",
+        "logo": "https://www.groupama.fr/fstrz/r/s/www.groupama.fr/logo.png",
+        "sameAs": [
+          "https://www.facebook.com/groupama/",
+          "https://twitter.com/groupama",
+          "https://www.youtube.com/channel/UCcVU-JnuCbANGOl4vGcGpEg",
+          "https://www.groupama.fr/",
+          "https://fr.linkedin.com/company/groupama",
+          "https://www.instagram.com/groupama/?hl=fr"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "Groupama, assureur dans vos régions : vos devis d'assurance ici",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.69",
+          "reviewCount": "8938"
+        },
+        "brand": {
+          "@type": "Brand",
+          "name": "Groupama"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:23.330855+00:00"
+  }
+}

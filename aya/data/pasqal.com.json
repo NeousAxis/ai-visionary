@@ -1,0 +1,352 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:22.031157+00:00",
+  "source": {
+    "input_url": "https://www.pasqal.com",
+    "canonical_domain": "pasqal.com",
+    "pages_scanned": [
+      "https://www.pasqal.com/",
+      "https://www.pasqal.com/about-us/",
+      "https://www.pasqal.com/fr/a-propos/",
+      "https://www.pasqal.com/contact-us/",
+      "https://www.pasqal.com/faq/",
+      "https://www.pasqal.com/legal/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 17
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Pasqal",
+    "website": "https://www.pasqal.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "events@insights.pasqal.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Pasqal",
+        "website": "https://www.pasqal.com/",
+        "email": "events@insights.pasqal.com",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Home - Pasqal"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Enabled by Nobel Prize-winning technology and a full-stack approach, Pasqal delivers cutting-edge quantum solutions worldwide",
+        "og_description": "Enabled by Nobel Prize-winning technology and a full-stack approach, Pasqal delivers cutting-edge quantum solutions worldwide"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "methodology",
+          "méthodologie"
+        ]
+      },
+      "evidence": [
+        "methodology",
+        "méthodologie"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.pasqal.com/",
+            "url": "https://www.pasqal.com/",
+            "name": "Home - Pasqal",
+            "isPartOf": {
+              "@id": "https://www.pasqal.com/#website"
+            },
+            "about": {
+              "@id": "https://www.pasqal.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.pasqal.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.pasqal.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://www.pasqal.com/wp-content/uploads/2025/06/2410_Pasqal_QPU-Lifestyle-3D_9-Lights_DarkGreen-RVB-edited.jpg?w=1024&h=576&quality=80&strip=all",
+            "datePublished": "2025-01-06T06:49:16+00:00",
+            "dateModified": "2026-03-19T14:20:57+00:00",
+            "description": "Enabled by Nobel Prize-winning technology and a full-stack approach, Pasqal delivers cutting-edge quantum solutions worldwide",
+            "breadcrumb": {
+              "@id": "https://www.pasqal.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.pasqal.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://www.pasqal.com/#primaryimage",
+            "url": "https://www.pasqal.com/wp-content/uploads/2025/06/2410_Pasqal_QPU-Lifestyle-3D_9-Lights_DarkGreen-RVB-edited.jpg?w=1024&h=576&quality=80&strip=all",
+            "contentUrl": "https://www.pasqal.com/wp-content/uploads/2025/06/2410_Pasqal_QPU-Lifestyle-3D_9-Lights_DarkGreen-RVB-edited.jpg?w=1024&h=576&quality=80&strip=all",
+            "width": 3182,
+            "height": 1790,
+            "caption": "2410_Pasqal_QPU-Lifestyle-3D_9-Lights_DarkGreen-RVB"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.pasqal.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.pasqal.com/#website",
+            "url": "https://www.pasqal.com/",
+            "name": "Pasqal",
+            "description": "",
+            "publisher": {
+              "@id": "https://www.pasqal.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.pasqal.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.pasqal.com/#organization",
+            "name": "Pasqal",
+            "url": "https://www.pasqal.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.pasqal.com/#/schema/logo/image/",
+              "url": "https://www.pasqal.com/wp-content/uploads/2024/12/Logo.svg?w=152&h=45&quality=80&strip=all",
+              "contentUrl": "https://www.pasqal.com/wp-content/uploads/2024/12/Logo.svg?w=152&h=45&quality=80&strip=all",
+              "width": 152,
+              "height": 45,
+              "caption": "Pasqal"
+            },
+            "image": {
+              "@id": "https://www.pasqal.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://x.com/pasqal_quantum",
+              "https://www.linkedin.com/company/pasqal/",
+              "https://www.instagram.com/pasqal.quantum/",
+              "https://www.youtube.com/@pasqal.quantum"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:22.031165+00:00"
+  }
+}

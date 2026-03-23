@@ -1,0 +1,269 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:23.392121+00:00",
+  "source": {
+    "input_url": "https://www.zoho.com",
+    "canonical_domain": "zoho.com",
+    "pages_scanned": [
+      "https://www.zoho.com/",
+      "https://www.zoho.com/contactus.html",
+      "https://www.zoho.com/privacy.html"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 494
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Zoho",
+    "website": "https://www.zoho.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "abuse@zohocorp.com",
+      "phone": "+1 (833) 957-3953",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Zoho",
+        "website": "https://www.zoho.com/",
+        "email": "abuse@zohocorp.com",
+        "phone": "+1 (833) 957-3953",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Zoho | Cloud Software Suite for Businesses"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "A unique and powerful software suite for businesses of all sizes. With 55+ applications, Zoho is trusted by 130 million+ users for their end-to-end business needs.",
+        "og_description": "A unique and powerful software suite for businesses of all sizes. With 55+ applications, Zoho is trusted by 130 million+ users for their end-to-end business needs."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.1,
+    "final_score": 75,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 75,
+    "raw_score": 75.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Zoho",
+        "url": "https://www.zoho.com",
+        "description": "Run your entire business with Zoho's suite of online productivity tools and SaaS applications. Over 45 million users trust us worldwide.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.zoho.com/search-results.html?query={search_term_string}",
+          "query-input": "required name=search_term_string"
+        },
+        "sameAs": [
+          "https://en.wikipedia.org/wiki/Zoho_Office_Suite",
+          "https://www.youtube.com/user/zoho",
+          "https://twitter.com/zoho",
+          "https://www.facebook.com/zoho"
+        ],
+        "sourceOrganization": {
+          "@type": "Organization",
+          "name": "Zoho Corporation",
+          "description": "Zoho Corporation offers web-based business apps, network and IT infrastructure management applications",
+          "url": "https://www.zohocorp.com",
+          "founder": {
+            "@type": "Person",
+            "name": "Sridhar Vembu"
+          },
+          "sameAs": [
+            "https://www.linkedin.com/company/zohocorp/",
+            "https://en.wikipedia.org/wiki/Zoho_Corporation"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:23.392135+00:00"
+  }
+}

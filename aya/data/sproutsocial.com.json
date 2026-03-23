@@ -1,0 +1,297 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:57.690139+00:00",
+  "source": {
+    "input_url": "https://www.sproutsocial.com",
+    "canonical_domain": "sproutsocial.com",
+    "pages_scanned": [
+      "https://sproutsocial.com/",
+      "https://sproutsocial.com/about/",
+      "https://sproutsocial.com/pricing/",
+      "https://sproutsocial.com/faq/",
+      "https://sproutsocial.com/legal/",
+      "https://sproutsocial.com/legal/privacy-policy/",
+      "https://sproutsocial.com/legal/terms/"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 84
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Sprout Social",
+    "website": "https://sproutsocial.com/",
+    "country": "US",
+    "city": "Chicago",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "DPO@sproutsocial.com",
+      "phone": "1-866-878-3231",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Sprout Social",
+        "website": "https://sproutsocial.com/",
+        "email": "DPO@sproutsocial.com",
+        "phone": "1-866-878-3231",
+        "country": "US",
+        "city": "Chicago",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Sprout Social: Social Media Management Tool"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "consulting",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Maximize your social ROI with Sprout Social, trusted by 30k+ brands. Power everything from publishing and engagement to analytics and influencer marketing. Try 30 days free.",
+        "og_description": "Maximize your social ROI with Sprout Social, trusted by 30k+ brands. Power everything from publishing and engagement to analytics and influencer marketing. Try 30 days free."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "consulting",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "glossary",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 80.0,
+    "final_score": 80,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 80,
+    "raw_score": 80.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sprout Social",
+        "legalName": "Sprout Social, Inc.",
+        "url": "https://sproutsocial.com/",
+        "logo": "https://brandfolder.sproutsocial.com/VXTUTVL1/at/8vwz9b7w83rhgfc8xvm8t8/lgo_sprout_lockup.png",
+        "foundingDate": "2010",
+        "founders": [
+          {
+            "@type": "Person",
+            "name": "Justyn Howard"
+          },
+          {
+            "@type": "Person",
+            "name": "Gil Lara"
+          },
+          {
+            "@type": "Person",
+            "name": "Aaron Rankin"
+          },
+          {
+            "@type": "Person",
+            "name": "Peter Soung"
+          }
+        ],
+        "alternateName": "SproutSocial",
+        "sameAs": [
+          "https://en.wikipedia.org/wiki/Sprout_Social",
+          "https://www.wikidata.org/wiki/Q17082977",
+          "https://www.facebook.com/SproutSocialInc",
+          "https://www.instagram.com/sproutsocial/",
+          "https://www.linkedin.com/company/sprout-social-inc-",
+          "https://www.tiktok.com/@sproutsocial",
+          "https://x.com/SproutSocial",
+          "https://www.youtube.com/user/SproutSocial"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "131 S. Dearborn St., Ste. 700",
+          "addressLocality": "Chicago",
+          "addressRegion": "IL",
+          "postalCode": "60603",
+          "addressCountry": "USA"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "telephone": "[+1-866-878-3231]",
+          "email": "info@sproutsocial.com"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:57.690150+00:00"
+  }
+}

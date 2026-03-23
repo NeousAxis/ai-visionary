@@ -1,0 +1,231 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:05.817235+00:00",
+  "source": {
+    "input_url": "https://www.teleperformance.com",
+    "canonical_domain": "tp.com",
+    "pages_scanned": [
+      "https://www.tp.com/en-us/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1141
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "TP",
+    "website": "https://www.tp.com/en-us/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "TP",
+        "website": "https://www.tp.com/en-us/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Home | Global Leader in Digital Business Services & AI | TP"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "consulting",
+          "delivery",
+          "platform",
+          "restaurant",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "TP is a global leader in digital business services, combining advanced AI technology with human empathy to deliver simpler, faster, and safer solutions for the world’s leading brands.",
+        "og_description": "TP is a global leader in digital business services, combining advanced AI technology with human empathy to deliver simpler, faster, and safer solutions for the world’s leading brands."
+      },
+      "evidence": [
+        "app",
+        "consulting",
+        "delivery",
+        "platform",
+        "restaurant"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "glossary",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Corporation"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Corporation",
+        "name": "TP",
+        "alternateName": "Teleperformance",
+        "url": "https://www.tp.com/en-us/",
+        "logo": "https://www.tp.com/media/vzwfxxfo/vector.svg",
+        "sameAs": [
+          "https://www.linkedin.com/company/teleperformance/",
+          "https://twitter.com/Teleperformance",
+          "https://www.facebook.com/TeleperformanceGlobal/?brand_redir=181484278532115",
+          "https://www.instagram.com/teleperformance_group/"
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:05.817245+00:00"
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:39.288874+00:00",
+  "source": {
+    "input_url": "https://www.europe1.fr",
+    "canonical_domain": "europe1.fr",
+    "pages_scanned": [
+      "https://www.europe1.fr/",
+      "https://www.europe1.fr/services",
+      "https://www.europe1.fr/f-a-q"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 443
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Europe 1",
+    "website": "https://www.europe1.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "NewsMediaOrganization",
+    "contacts": {
+      "email": "",
+      "phone": "01 80 20 39 21",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "NewsMediaOrganization"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Europe 1",
+        "website": "https://www.europe1.fr/",
+        "email": "",
+        "phone": "01 80 20 39 21",
+        "country": "FR",
+        "city": "",
+        "org_type": "NewsMediaOrganization"
+      },
+      "evidence": [
+        "Actualités du jour | Europe 1"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "service",
+          "services"
+        ],
+        "meta_description": "Ecoutez Europe 1 en direct et retrouvez toute l’actualité politique, économique et internationale, ainsi que les replays de vos émissions",
+        "og_description": "Ecoutez Europe 1 en direct et retrouvez toute l’actualité politique, économique et internationale, ainsi que les replays de vos émissions"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "NewsMediaOrganization",
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.1,
+    "final_score": 60,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 60,
+    "raw_score": 60.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "NewsMediaOrganization",
+        "name": "Europe 1",
+        "url": "https://www.europe1.fr",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.europe1.fr/themes/europe1/europe1-logo.svg",
+          "width": 337,
+          "height": 103,
+          "encodingFormat": "image/svg+xml"
+        },
+        "sameAs": [
+          "https://www.facebook.com/Europe1",
+          "https://x.com/Europe1",
+          "https://www.instagram.com/europe1/",
+          "https://www.tiktok.com/@europe1",
+          "https://www.youtube.com/@Europe1",
+          "https://www.dailymotion.com/Europe1fr",
+          "https://www.snapchat.com/p/58969a37-ae39-4bda-92fc-44cbaa3daa73/63122662191104",
+          "https://www.linkedin.com/company/europe-1/"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Europe 1",
+        "alternateName": "Ecoutez Europe 1 en direct et retrouvez toute l’actualité politique, économique et internationale, ainsi que les replays de vos émissions.",
+        "url": "https://www.europe1.fr",
+        "image": "https://www.europe1.fr/themes/europe1/europe1-logo.svg",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.europe1.fr/rechercher/{search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:39.288887+00:00"
+  }
+}

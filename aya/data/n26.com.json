@@ -1,0 +1,315 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:56:52.986126+00:00",
+  "source": {
+    "input_url": "https://www.n26.com",
+    "canonical_domain": "n26.com",
+    "pages_scanned": [
+      "https://n26.com/en-ch",
+      "https://n26.com/en-de/plans",
+      "https://n26.com/en-eu/legal-documents/account"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 7
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "N26",
+    "website": "https://n26.com/en-ch",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "investment",
+      "trading",
+      "insurance",
+      "wealth"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "N26",
+        "website": "https://n26.com/en-ch",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "N26 Switzerland | The Mobile Bank"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "delivery",
+          "product",
+          "service",
+          "services",
+          "solution"
+        ],
+        "meta_description": "All your finances in one app. Get your free bank account with a debit Mastercard in minutes. Enjoy 100% mobile banking trusted by millions.",
+        "og_description": "N26 is the Mobile Bank. Free bank account and Mastercard that you can manage directly from your phone. Open your bank account online in minutes."
+      },
+      "evidence": [
+        "app",
+        "delivery",
+        "product",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "iso",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization",
+          "WebSite",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "https://n26.com",
+        "logo": "https://n26.com/logo-112x112.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "N26",
+        "url": "https://n26.com/en-ch"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is N26 a bank? ",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "N26 is the first 100% mobile bank to be granted and operate with a full German banking license from BaFin. That means the money in your bank account is fully protected up to €100,000 by the German Deposit Protection Scheme. We currently operate in 24 markets worldwide and have over 8 million customers.\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is N26 secure?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "N26 has been granted a full German banking license from the German regulator BaFin. By law, each customer’s funds are protected up to €100,000 by the German Deposit Protection Scheme. With 3D Secure, Mastercard Identity Check, and fingerprint and face recognition, the security of our customer's online payments is always guaranteed.\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is N26 protecting my money and personal data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "As a bank, N26 is supervised by the Federal Financial Supervisory Authority (BaFin). Our clients' funds are guaranteed up to €100,000 by the German Deposit Protection Scheme. In addition, the N26 app has many features to ensure the security of its users' bank accounts and data.\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What documents do I need to open a bank account? ",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In order to open a bank account with N26, you must have a government-issued ID. Don’t worry, there’s no fussy paperwork or long wait times involved — just present your valid ID during a quick call and you’ll be up and running. It’s worth noting that you’ll also need a smartphone to use your account, and must live in an eligible country where N26 operates. \n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How much does it cost to open a bank account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The standard N26 bank account is free and doesn’t charge any opening or maintenance fees. The N26 Smart bank account costs €4.90 per month. To open an N26 account, no deposit or minimum income is required."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How long does it take to open a bank account with N26? ",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can open your mobile N26 account online in minutes from your phone or the N26 website — no paperwork or waiting times. But best of all: Once your N26 bank account is active, you can start using it right away. This means you can start spending with your virtual card as soon as your account is set up, and you don't have to wait for your physical card to arrive.\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is the bank account with N26 a euro account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, the currency of your bank account from N26 is in euros. But we don’t charge any fees for payments in foreign currencies.\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Who is behind N26?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "N26 is an online bank that was founded in Berlin in 2013 by Valentin Stalf and Maximilian Tayenthal. In 2016, N26 received a full German banking license from the German regulator BaFin. This means that the deposits in your euro account are protected up to €100,000 by the German Deposit Protection Scheme.\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": " How can I contact N26 if I need help or have a question? ",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "As an N26 customer, you can contact our customer support seven days a week from 7 a.m. to 11 p.m. The easiest way to do this is via chat directly in your N26 app. If you have an N26 Smart account, you also benefit from phone support. Our customer support team speaks five languages: German, English, Spanish, French and Italian."
+            }
+          }
+        ],
+        "name": "FAQ Page",
+        "url": "https://n26.com/en-ch/undefined"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:56:52.986136+00:00"
+  }
+}

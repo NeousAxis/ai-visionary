@@ -1,0 +1,287 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:08.081993+00:00",
+  "source": {
+    "input_url": "https://www.webflow.com",
+    "canonical_domain": "webflow.com",
+    "pages_scanned": [
+      "https://webflow.com/",
+      "https://webflow.com/company/about",
+      "https://webflow.com/pricing",
+      "https://webflow.com/legal/privacy",
+      "https://webflow.com/legal/terms"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 6
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Webflow",
+    "website": "https://webflow.com/",
+    "country": "US",
+    "city": "San Francisco",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "contact@webflow.com",
+      "phone": "1 2 3 4 5 6 7 8 9 10",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Webflow",
+        "website": "https://webflow.com/",
+        "email": "contact@webflow.com",
+        "phone": "1 2 3 4 5 6 7 8 9 10",
+        "country": "US",
+        "city": "San Francisco",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Webflow: Create a custom website | Visual website builder"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Create custom, responsive websites with the power of code — visually. Design and build your site with a flexible CMS and top-tier hosting. Try Webflow for free.",
+        "og_description": "Create custom, responsive websites with the power of code — visually. Design and build your site with a flexible CMS and top-tier hosting. Try Webflow for free."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "glossary",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 80.0,
+    "final_score": 80,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 80,
+    "raw_score": 80.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Webflow",
+        "url": "https://webflow.com",
+        "logo": "https://cdn.prod.website-files.com/6009ec8cda7f305645c9d91b/651f2091caa28de325c11530_BlogHeader_Introducing-webflow-2-2400x1260.webp",
+        "sameAs": [
+          "https://www.facebook.com/webflow",
+          "https://twitter.com/webflow",
+          "https://www.linkedin.com/company/webflow-inc-",
+          "https://en.wikipedia.org/wiki/Webflow",
+          "https://www.instagram.com/webflow",
+          "https://www.youtube.com/webflow"
+        ],
+        "founder": [
+          {
+            "@type": "Person",
+            "name": "Vlad Magdalin",
+            "url": "https://www.linkedin.com/in/vladmagdalin"
+          },
+          {
+            "@type": "Person",
+            "name": "Bryant Chou",
+            "url": "https://www.linkedin.com/in/bryantchou"
+          },
+          {
+            "@type": "Person",
+            "name": "Sergie Magdalin",
+            "url": "https://www.linkedin.com/in/sergiemagdalin"
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "398 11th St",
+          "addressLocality": "San Francisco",
+          "addressRegion": "CA",
+          "postalCode": "94103",
+          "addressCountry": "US"
+        },
+        "description": "Build responsive websites with Webflow, a no-code website builder. Design, build, and launch completely custom websites without writing code.",
+        "foundingDate": "2013",
+        "keywords": "web design, CMS, website templates, responsive design, website builder"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:58:08.082003+00:00"
+  }
+}

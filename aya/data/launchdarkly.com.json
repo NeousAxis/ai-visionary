@@ -1,0 +1,340 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:04.330452+00:00",
+  "source": {
+    "input_url": "https://www.launchdarkly.com",
+    "canonical_domain": "launchdarkly.com",
+    "pages_scanned": [
+      "https://launchdarkly.com/",
+      "https://launchdarkly.com/contact-us/",
+      "https://launchdarkly.com/services/",
+      "https://launchdarkly.com/pricing/",
+      "https://launchdarkly.com/how-it-works/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "LaunchDarkly",
+    "website": "https://launchdarkly.com/",
+    "country": "US",
+    "city": "Oakland",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "devops"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "LaunchDarkly",
+        "website": "https://launchdarkly.com/",
+        "email": "",
+        "phone": "",
+        "country": "US",
+        "city": "Oakland",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "LaunchDarkly: Feature Flags, Feature Management, and Experimentation"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Maximize the value of every software feature through automation and feature management.",
+        "og_description": "Maximize the value of every software feature through automation and feature management."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "consulting",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "gdpr",
+          "iso",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "gdpr",
+        "iso",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebPage",
+          "BreadcrumbList",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.1,
+    "final_score": 73,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 73,
+    "raw_score": 73.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "WebPage",
+        "url": "https://launchdarkly.com/",
+        "headline": "LaunchDarkly: Feature Flags, Feature Management, and Experimentation",
+        "inLanguage": "en",
+        "mainEntityOfPage": "https://launchdarkly.com/",
+        "description": "Maximize the value of every software feature through automation and feature management.",
+        "name": "LaunchDarkly: Feature Flags, Feature Management, and Experimentation",
+        "author": {
+          "@type": "Person",
+          "name": "LaunchDarkly"
+        },
+        "copyrightHolder": {
+          "@type": "Person",
+          "name": "LaunchDarkly"
+        },
+        "copyrightYear": "2024",
+        "creator": {
+          "@type": "Person",
+          "name": "LaunchDarkly"
+        },
+        "publisher": {
+          "@type": "Person",
+          "name": "LaunchDarkly"
+        },
+        "datePublished": "2019-01-18T10:30:00+01:00",
+        "dateModified": "2026-03-20",
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://images.prismic.io/launchdarkly-marketingsite/aQOv6LpReVYa32df_homepage-og-image-oct-2025.png?ixlib=gatsbyFP&auto=format%2Ccompress&fit=max"
+        }
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "BreadcrumbList",
+        "description": "Breadcrumbs list",
+        "name": "Breadcrumbs",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "item": {
+              "@id": "https://launchdarkly.com",
+              "name": "Homepage"
+            },
+            "position": 1
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "LaunchDarkly",
+        "url": "https://launchdarkly.com",
+        "logo": "https://images.prismic.io/launchdarkly-marketingsite/60dde0ce-fed5-4026-9f64-92a9ad373f42_launchdarkly-logo-banner.png",
+        "sameAs": [
+          "https://www.linkedin.com/company/launchdarkly",
+          "https://x.com/launchdarkly",
+          "https://discord.com/invite/launchdarklycommunity",
+          "https://www.youtube.com/@LaunchDarkly",
+          "https://www.instagram.com/launchdarkly/"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+1-415-579-3275",
+          "contactType": "Corporate Headquarters",
+          "areaServed": "Worldwide",
+          "availableLanguage": [
+            "English"
+          ]
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "1999 Harrison St Suite 1100",
+          "addressLocality": "Oakland",
+          "addressRegion": "CA",
+          "postalCode": "94612",
+          "addressCountry": "US"
+        },
+        "founders": [
+          {
+            "@type": "Person",
+            "name": "Edith Harbaugh"
+          },
+          {
+            "@type": "Person",
+            "name": "John Kodumal"
+          }
+        ],
+        "foundingDate": "2014",
+        "numberOfEmployees": "600",
+        "description": "LaunchDarkly is a feature management platform that empowers development teams to safely deliver and control software through feature flags.",
+        "legalName": "Catamorphic Co.",
+        "slogan": "Ship faster, safer, and smarter.",
+        "ethicsPolicy": "https://launchdarkly.com/policies/code-of-conduct/",
+        "award": [
+          "2024 DEVIES Award for Enterprise Development and Integration Solutions",
+          "2023 Software & Information Industry Association (SIIA) CODiE Awards Best DevOps Tool"
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:04.330459+00:00"
+  }
+}

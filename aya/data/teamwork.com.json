@@ -1,0 +1,558 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:33.134275+00:00",
+  "source": {
+    "input_url": "https://www.teamwork.com",
+    "canonical_domain": "teamwork.com",
+    "pages_scanned": [
+      "https://www.teamwork.com/",
+      "https://www.teamwork.com/about/",
+      "https://www.teamwork.com/contact/",
+      "https://www.teamwork.com/",
+      "https://www.teamwork.com/products/",
+      "https://www.teamwork.com/pricing/",
+      "https://www.teamwork.com/legal/",
+      "https://www.teamwork.com/legal/privacy-notice/"
+    ],
+    "pages_scanned_count": 8,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 7,
+      "sitemap_found": true,
+      "sitemap_url_count": 1212
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Kyle Duford",
+    "website": "https://www.teamwork.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "FAQPage",
+    "contacts": {
+      "email": "dpo@teamwork.com",
+      "phone": "+1 303 300 5318",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Kyle Duford",
+        "website": "https://www.teamwork.com/",
+        "email": "dpo@teamwork.com",
+        "phone": "+1 303 300 5318",
+        "country": "",
+        "city": "",
+        "org_type": "FAQPage"
+      },
+      "evidence": [
+        "Project, Resource & Financial Management Software for Busy Teams"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Combining powerful resource and financial management with easy project management, Teamwork.com is the only project, financial and resource management platform built for managing resources and client projects, profitably.",
+        "og_description": "Combining powerful resource and financial management with easy project management, Teamwork.com is the only project, financial and resource management platform built for managing resources and client projects, profitably."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog",
+          "documentation",
+          "faq",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "",
+          "FAQPage",
+          "VideoObject",
+          "VideoObject",
+          "VideoObject",
+          "VideoObject",
+          "VideoObject"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.1,
+    "final_score": 75,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 75,
+    "raw_score": 75.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Product",
+            "@id": "https://www.teamwork.com/#product",
+            "name": "Teamwork.com Project Management & Resource Management Software",
+            "image": "https://img2.storyblok.com/fit-in/1200x900/filters:format(webp)/f/99519/1185x905/ac807f40a7/project-health-1.png",
+            "description": "The trusted project management & resource management tool for client work. Teamwork.com lets you to manage resources, deliver projects on time and on budget - all from one organized place.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Teamwork.com"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.4",
+              "bestRating": "5",
+              "worstRating": "1",
+              "ratingCount": "1009"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.teamwork.com/#organization",
+            "name": "Teamwork.com",
+            "alternateName": "Teamwork",
+            "legalName": "Teamwork Crew Ltd.",
+            "url": "https://www.teamwork.com/",
+            "sameAs": [
+              "https://www.facebook.com/TeamworkHQ",
+              "https://x.com/teamworkdotcom",
+              "https://reddit.com/r/teamworkdotcom",
+              "https://www.instagram.com/teamworkdotcom/",
+              "https://www.youtube.com/user/TeamworkPM",
+              "https://www.wikidata.org/wiki/Q22909287",
+              "https://en.wikipedia.org/wiki/Teamwork_(project_management)",
+              "https://www.linkedin.com/company/teamwork-com/",
+              "https://github.com/teamwork",
+              "https://developer.teamwork.com",
+              "https://www.g2.com/products/teamwork-teamwork/reviews",
+              "https://www.capterra.com/p/120390/Teamwork-Projects/",
+              "https://www.getapp.com/collaboration-software/a/teamwork-projects/",
+              "https://www.trustpilot.com/review/teamwork.com"
+            ],
+            "knowsAbout": [
+              "project management",
+              "project management software",
+              "Resource management software",
+              "resource management",
+              "resource scheduling",
+              "time tracking software",
+              "project management methodologies",
+              "workflow management",
+              "team project management",
+              "resource scheduling software",
+              "Resource planning",
+              "Resource planning software",
+              "capacity planning",
+              "capacity planning software",
+              "capacity management",
+              "task management",
+              "task management software",
+              "work management",
+              "work management software"
+            ],
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://www.teamwork.com/#logo",
+              "url": "https://www.teamwork.com/images/logo.png"
+            },
+            "description": "Teamwork.com Project & Resource Management Software is a platform for delivering client work built with project management & resource management at its core. Over 20,000 teams around the world use Teamwork.com's software to manage their daily workflows for improved automation, productivity, capacity planning and profitability. Teamwork.comâs complete solution includes tracking, managing, billing, project planning and resource planning.",
+            "disambiguatingDescription": "Project management & resource management is at the heart of Teamwork.com's Project & Resource Management Software, which provides a platform for delivering client work. Teamwork.com's software is used by over 20,000 teams around the world to manage their daily workflows for better resource manageent, increased automation, efficiency, and profitability. Tracking, managing, paying, resource planning and project planning are all included in Teamwork.com's whole solution, which also includes add-ons like Desk (help desk software), Spaces (document management), and Chat.",
+            "mainEntityOfPage": "https://en.wikipedia.org/wiki/Software_as_a_service",
+            "owns": {
+              "@id": "https://www.teamwork.com/#product"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+1 844 819 8453",
+              "email": "sales@teamwork.com",
+              "contactType": "sales"
+            },
+            "areaServed": "Worldwide",
+            "foundingDate": "2007-01-01",
+            "founders": [
+              {
+                "@type": "Person",
+                "name": "Peter Coppinger"
+              },
+              {
+                "@type": "Person",
+                "name": "Dan Mackey"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.teamwork.com/#website",
+            "url": "https://www.teamwork.com",
+            "name": "Teamwork.com",
+            "publisher": {
+              "@id": "https://www.teamwork.com/#organization"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.teamwork.com/#webpage",
+            "name": "Project Management Software & Resource Management Software",
+            "url": "https://www.teamwork.com/",
+            "description": "The trusted project management software & resource management software for client work. Teamwork.com lets you to manage resources, deliver projects on time and on budget - all from one organized place.",
+            "isPartOf": {
+              "@id": "https://www.teamwork.com/#website"
+            },
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.teamwork.com/"
+                ]
+              },
+              {
+                "@type": "InteractAction",
+                "target": [
+                  "https://www.teamwork.com/signup"
+                ]
+              }
+            ],
+            "mainEntity": {
+              "@id": "https://www.teamwork.com/#product"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://www.teamwork.com/#app",
+            "name": "Teamwork.com Project Management & Resource Management App",
+            "operatingSystem": "Windows, macOS, iOS, Android, Web",
+            "applicationCategory": "ProjectManagementApplication, ResourceManagementSoftware",
+            "applicationSubCategory": "Project and Resource Management, Client project delivery, Team collaboration",
+            "downloadUrl": "https://www.teamwork.com/downloads/",
+            "featureList": [
+              "Project management",
+              "Project planning",
+              "Resource management",
+              "Resource planning",
+              "Resource scheduling",
+              "Time tracking",
+              "Client management",
+              "Gantt charts",
+              "Client collaboration",
+              "Capacity planning",
+              "Resource allocation"
+            ],
+            "softwareVersion": "Latest",
+            "screenshot": "https://img2.storyblok.com/fit-in/1200x900/filters:format(webp)/f/99519/1185x905/ac807f40a7/project-health-1.png",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.4",
+              "ratingCount": "1009",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "USD",
+              "price": "0.00",
+              "category": "free",
+              "url": "https://www.teamwork.com/pricing/"
+            },
+            "description": "Teamwork.com is a powerful project and resource management software solution designed to help teams plan projects, allocate resources, track time, and deliver client work efficiently. It combines project planning, task tracking, capacity management, and collaboration into one integrated platform.",
+            "publisher": {
+              "@id": "https://www.teamwork.com/#organization"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How is Teamwork.com different from other project management tools?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Teamwork.com goes beyond traditional project management tools by combining project delivery, resource forecasting, time tracking, cost control, and profitability reporting in a single platform. Instead of relying on spreadsheets or disconnected apps, Teamwork.com helps eliminate data silos, improve staffing decisions, reduce errors, and ensure projects are delivered on time and within budget."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What types of businesses use Teamwork.com to manage projects?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Teamwork.com is trusted by agencies, IT service providers, consulting firms, accounting and finance teams, architectural and engineering companies (AEC), and other professional services businesses. These teams use Teamwork.com to improve client collaboration, manage billable hours, schedule resources efficiently, and track project profitability from start to finish."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Iâm looking for resource management software â why should I choose Teamwork.com?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Teamwork.com offers powerful resource management and capacity planning features built directly into your project workflows. Gain both short-term and long-term visibility into team availability, prevent overbooking, and optimize workload distribution. With real-time data on utilization rates and team capacity, Teamwork.com helps you match the right people to the right tasksâboosting productivity and profit margins."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Teamwork.com help with resource allocation and planning?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Teamwork.com makes it easy to plan for current and future work with tools like project forecasting, tentative project scenarios, and placeholder resources. Instantly identify capacity risks, view utilization trends, and reassign work as needed. This enables more strategic workforce planning, smarter resource allocation, and full visibility into how your teamâs availability impacts overall project profitability."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Teamwork.com support teams globally?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Teamwork.com supports teams around the world in managing client projects, tracking billable hours, and planning resources more effectively. In the United States, the United Kingdom, Australia, Canada, and across Europe, thousands of professional services teams use Teamwork.com to streamline project delivery, coordinate their teams, and maintain clear visibility across projects, workloads, and profitability.Built for agencies, consulting firms, IT services, and other client-focused businesses, Teamwork.com helps teams collaborate with clients, manage resources efficiently, and keep projects on schedule no matter where their teams are located."
+            }
+          }
+        ]
+      },
+      {
+        "@context": "http://schema.org/",
+        "@id": "https://fast.wistia.net/embed/iframe/0x6zqv4fwq",
+        "@type": "VideoObject",
+        "name": "Kyle Duford - The Brand Leader",
+        "description": "",
+        "thumbnailUrl": "https://embed-ssl.wistia.com/deliveries/c4382e0a75bd8b09dbb641bcbe9a2940ab46f414.jpg?image_crop_resized=960x540",
+        "uploadDate": "2023-07-05T11:45:35+00:00",
+        "duration": "PT31S",
+        "embedUrl": "https://fast.wistia.net/embed/iframe/0x6zqv4fwq",
+        "contentUrl": "http://embed.wistia.com/deliveries/ceb33d74381c75c501a5506bdfc74f0aa4054829.bin",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Teamwork.com",
+          "url": "https://www.teamwork.com"
+        }
+      },
+      {
+        "@context": "http://schema.org/",
+        "@id": "https://fast.wistia.net/embed/iframe/uvm3x6fgxv",
+        "@type": "VideoObject",
+        "name": "Invanity Marketing",
+        "description": "",
+        "thumbnailUrl": "https://embed-ssl.wistia.com/deliveries/25d1595521f5829e5f7ff30350b7ef4b.jpg?image_crop_resized=960x540",
+        "uploadDate": "2025-06-19T16:06:53+00:00",
+        "duration": "PT1M45S",
+        "embedUrl": "https://fast.wistia.net/embed/iframe/uvm3x6fgxv",
+        "contentUrl": null,
+        "publisher": {
+          "@type": "Organization",
+          "name": "Teamwork.com",
+          "url": "https://www.teamwork.com"
+        }
+      },
+      {
+        "@context": "http://schema.org/",
+        "@id": "https://fast.wistia.net/embed/iframe/25td8cb24g",
+        "@type": "VideoObject",
+        "name": "OIC Advisors",
+        "description": "",
+        "thumbnailUrl": "https://embed-ssl.wistia.com/deliveries/5fdd0c05388570e3aac72d28476c594c.jpg?image_crop_resized=960x540",
+        "uploadDate": "2024-08-09T15:56:25+00:00",
+        "duration": "PT1M30S",
+        "embedUrl": "https://fast.wistia.net/embed/iframe/25td8cb24g",
+        "contentUrl": "http://embed.wistia.com/deliveries/6954e4ea69c0ac582314e3aa339c9957cde9f056.bin",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Teamwork.com",
+          "url": "https://www.teamwork.com"
+        }
+      },
+      {
+        "@context": "http://schema.org/",
+        "@id": "https://fast.wistia.net/embed/iframe/weo3cofz7t",
+        "@type": "VideoObject",
+        "name": "ThreeSixtyEight Testimonial 4K",
+        "description": "\n",
+        "thumbnailUrl": "https://embed-ssl.wistia.com/deliveries/1e2532e2d12c89c7cd3c3ff95f559e864af7fd5c.jpg?image_crop_resized=960x540",
+        "uploadDate": "2022-11-11T11:42:54+00:00",
+        "duration": "PT2M58S",
+        "embedUrl": "https://fast.wistia.net/embed/iframe/weo3cofz7t",
+        "contentUrl": "http://embed.wistia.com/deliveries/92260e3af78462da2c29e775f969b6da0f4406ff.bin",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Teamwork.com",
+          "url": "https://www.teamwork.com"
+        }
+      },
+      {
+        "@context": "http://schema.org/",
+        "@id": "https://fast.wistia.net/embed/iframe/xer6cg3m1q",
+        "@type": "VideoObject",
+        "name": "How to Build Client Projects Fast Using AI",
+        "description": "<p>Agencies and PSAs can streamline client work and boost profitability by using AI-powered tools like Teamwork.com to automate project setup, optimize resource scheduling, and ensure accurate Time Tracking and budget management.\nAre you tired of excessive admin tasks slowing down your client delivery? This demo shows how professional services firms and agencies can use Teamwork.com to connect projects, resources, time, and profitability, making client work more efficient. The platform uses the AI Project Wizard to turn scattered briefs into fully built projects in clicks, drastically reducing setup time. The Smart Scheduler and Resource Planner ensure optimal staff allocation based on availability, improving billable utilization. Key features for successful agency operations include: - Streamlined Time Tracking with automated reminders. - Proactive Budget Management with instant spending alerts. - Powerful Utilization and Project Health Reports. - AI Forecaster for instant profitability predictions. Find out more about AI-powered agency operations here: https://www.teamwork.com/product/ai/</p>\n",
+        "thumbnailUrl": "https://embed-ssl.wistia.com/deliveries/3824ec39899700f4bd582512dbde398e8ce70d00.jpg?image_crop_resized=960x540",
+        "uploadDate": "2025-10-30T10:55:40+00:00",
+        "duration": "PT2M34S",
+        "embedUrl": "https://fast.wistia.net/embed/iframe/xer6cg3m1q",
+        "contentUrl": "http://embed.wistia.com/deliveries/ae7fc969fded9006c9cc318a32ee37f3e468a4c8.bin",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Teamwork.com",
+          "url": "https://www.teamwork.com"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:33.134288+00:00"
+  }
+}

@@ -1,0 +1,1542 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:43.951613+00:00",
+  "source": {
+    "input_url": "https://www.zh.ch",
+    "canonical_domain": "zh.ch",
+    "pages_scanned": [
+      "https://www.zh.ch/de.html"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Startseite",
+    "website": "https://www.zh.ch/de.html",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "GovernmentOrganization",
+    "contacts": {
+      "email": "",
+      "phone": "+41 43 259 11 11",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "government",
+    "sector_label": "Administration & Public",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "GovernmentOrganization"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Startseite",
+        "website": "https://www.zh.ch/de.html",
+        "email": "",
+        "phone": "+41 43 259 11 11",
+        "country": "CH",
+        "city": "",
+        "org_type": "GovernmentOrganization"
+      },
+      "evidence": [
+        "Startseite | Kanton Zürich"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "menu"
+        ],
+        "meta_description": "Offizielle Website des Kantons Zürich.",
+        "og_description": "Offizielle Website des Kantons Zürich."
+      },
+      "evidence": [
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "GovernmentOrganization",
+          "BreadcrumbList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 33.1,
+    "final_score": 33,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 33,
+    "raw_score": 33.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "GovernmentOrganization",
+        "name": "Deutsch",
+        "url": "https://www.zh.ch",
+        "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "telephone": "+41 43 259 11 11",
+            "contactType": "customer service"
+          }
+        ],
+        "location": [
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Sicherheitsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5430796",
+              "latitude": "47.378084"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 11 11"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Bildungsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5433293",
+              "latitude": "47.37883910000001"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 23 09"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatskanzlei",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542956745903888",
+              "latitude": "47.378183333352304"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 11 11"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Direktion der Justiz und des Innern",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429777",
+              "latitude": "47.3781855"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 25 79"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Finanzdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5430796",
+              "latitude": "47.378084"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 1"
+            },
+            "telephone": "+41 43 259 11 11"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Volkswirtschaftsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429643",
+              "latitude": "47.3780847"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 26 11"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Baudirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.543272",
+              "latitude": "47.3787507"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 28 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Gesundheitsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5437047",
+              "latitude": "47.3790886"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Stampfenbachstrasse 30"
+            },
+            "telephone": "+41 43 259 24 05"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Parlamentsdienste des Kantonsrates",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.547742099999999",
+              "latitude": "47.3729535"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Hirschengraben 40"
+            },
+            "telephone": "+41 43 259 20 08"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Finanzkontrolle",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5435757",
+              "latitude": "47.3810772"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Weinbergstrasse 49"
+            },
+            "telephone": "+41 43 259 33 67"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Migrationsamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.546548699999999",
+              "latitude": "47.4036804"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Berninastrasse 45"
+            },
+            "telephone": "+41 43 259 88 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Beglaubigungen & Gewerbebewilligungen",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5430723",
+              "latitude": "47.3779394"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 8"
+            },
+            "telephone": "+41 43 259 21 19"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Sicherheitsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429643",
+              "latitude": "47.3780847"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 21 24"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Sicherheitsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429643",
+              "latitude": "47.3780847"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 21 24"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Sportamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.543190899999999",
+              "latitude": "47.3778426"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 8"
+            },
+            "telephone": "+41 43 259 52 52"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Kantonales Sozialamt Zürich",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.528325268393779",
+              "latitude": "47.38282839037308"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Röntgenstrasse 16/22"
+            },
+            "telephone": "+41 43 259 24 51"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Strassenverkehrsamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5126136",
+              "latitude": "47.353506"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Uetlibergstrasse 301"
+            },
+            "telephone": "+41 43 257 00 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Passbüro",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.529064",
+              "latitude": "47.387691"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Sihlquai 253"
+            },
+            "telephone": "+41 43 259 73 73"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Militär und Zivilschutz",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5172005",
+              "latitude": "47.3608902"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Uetlibergstrasse 113 "
+            },
+            "telephone": "+41 43 259 71 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Fachstelle für Schulbeurteilung",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.531849",
+              "latitude": "47.3820613"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Zollstrasse 36"
+            },
+            "telephone": "+41 43 259 79 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Jugend und Berufsberatung",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.534459154626798",
+              "latitude": "47.38405292145961"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Ausstellungsstrasse 88"
+            },
+            "telephone": "+41 43 259 96 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Mittelschul- und Berufsbildungsamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5347583",
+              "latitude": "47.3836896"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Ausstellungsstrasse 80"
+            },
+            "telephone": "+41 43 259 77 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Hochschulamt ",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.543272",
+              "latitude": "47.3787507"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 23 48"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Volksschulamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.541839182751776",
+              "latitude": "47.38079036234176"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walchestrasse 21"
+            },
+            "telephone": "+41 43 259 22 51"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatskanzlei",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542956745903888",
+              "latitude": "47.378183333352304"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 59 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatskanzlei",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542956745903888",
+              "latitude": "47.378183333352304"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 20 34"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatskanzlei",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542968074125982",
+              "latitude": "47.378179585852784"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 20 19"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatskanzlei",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542956745903888",
+              "latitude": "47.378183333352304"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 20 05"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Oberjugendanwaltschaft",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.7182804",
+              "latitude": "47.4980041"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Zürcherstrasse 15"
+            },
+            "telephone": "+41 43 258 41 70"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Fachstelle Kultur",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429777",
+              "latitude": "47.3781855"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 25 52"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Statthalterämter und Bezirksratskanzleien",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.7898829",
+              "latitude": "47.3685003"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Hörnlistrasse 71"
+            }
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Fachstelle Integration",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542971699999999",
+              "latitude": "47.3781973"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 25 31"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Direktion der Justiz und des Innern",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429777",
+              "latitude": "47.3781855"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 25 79"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Oberstaatsanwaltschaft des Kantons Zürich",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.518222",
+              "latitude": "47.381977"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Güterstrasse 33"
+            },
+            "telephone": "+41 43 258 22 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Statistisches Amt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5280481",
+              "latitude": "47.3697559"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Schöntalstrasse 5"
+            },
+            "telephone": "+41 43 259 75 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Gemeindeamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.522712199999999",
+              "latitude": "47.3896541"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Wilhelmstrasse 10"
+            },
+            "telephone": "+41 43 259 83 30"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Handelsregisteramt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5280481",
+              "latitude": "47.3697559"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Schöntalstrasse 5 "
+            },
+            "telephone": "+41 43 259 74 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Fachstelle Gleichstellung",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5428828",
+              "latitude": "47.3782601"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 25 72"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Justizvollzug und Wiedereingliederung",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.4903087",
+              "latitude": "47.3907102"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Hohlstrasse 552"
+            },
+            "telephone": "+41 43 258 34 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Kantonale Opferhilfestelle",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5430796",
+              "latitude": "47.378084"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 25 41"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatsarchiv",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.547105499999999",
+              "latitude": "47.3973245"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Winterthurerstrasse 170"
+            },
+            "telephone": "+41 43 258 50 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Finanzdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5430796",
+              "latitude": "47.378084"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 1"
+            },
+            "telephone": "+41 43 259 33 04"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Kanton Zürich - Steueramt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.4847605",
+              "latitude": "47.3942385"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Bändliweg 21"
+            },
+            "telephone": "+41 43 259 40 50"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "kdmz",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5114541",
+              "latitude": "47.3630029"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Räffelstrasse 32"
+            },
+            "telephone": "+41 43 259 99 30"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Finanzverwaltung",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5425785",
+              "latitude": "47.3789552"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 1 "
+            },
+            "telephone": "+41 43 259 33 33"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Personalamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5425785",
+              "latitude": "47.3789552"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 1"
+            },
+            "telephone": "+41 43 259 33 13"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Volkswirtschaftsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429643",
+              "latitude": "47.3780847"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 26 11"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Zürcher Verkehrsverbund ZVV",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.544796900000001",
+              "latitude": "47.4113088"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Hofwiesenstrasse 370"
+            },
+            "telephone": "+41 43 257 48 48"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Raumentwicklung",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5437687",
+              "latitude": "47.3784401"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Stampfenbachstrasse 12"
+            },
+            "telephone": "+41 43 259 30 22"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Immobilienamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5328274",
+              "latitude": "47.3803311"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Zollstrasse 36"
+            },
+            "telephone": "+41 43 259 22 11"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Baudirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.543272",
+              "latitude": "47.3787507"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 28 08"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Hochbauamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.535452531809252",
+              "latitude": "47.38034791360785"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Zollstrasse 36"
+            },
+            "telephone": "+41 43 259 28 42"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Tiefbauamt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.543296",
+              "latitude": "47.378705"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 31 51"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": " Amt für Abfall, Wasser, Energie und Luft",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.543272",
+              "latitude": "47.3787507"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 32 02"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Landschaft und Natur",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5433146",
+              "latitude": "47.3787273"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 27 31"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Kantonales Labor ",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5587676",
+              "latitude": "47.3711057"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Fehrenstrasse 15"
+            },
+            "telephone": "+41 43 244 71 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Kantonale Ethikkommission ",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.539871699999999",
+              "latitude": "47.3845811"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Stampfenbachstrasse 121"
+            },
+            "telephone": "+41 43 259 79 70"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Veterinäramt",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.541769",
+              "latitude": "47.383952"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Waltersbachstrasse 5"
+            },
+            "telephone": "+41 43 259 41 41"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Kantonale Heilmittelkontrolle",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5484798",
+              "latitude": "47.3803727"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Haldenbachstrasse 12 "
+            },
+            "telephone": "+41 43 258 61 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Gesundheitsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5437047",
+              "latitude": "47.3790886"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Stampfenbachstrasse 30"
+            },
+            "telephone": "+41 43 259 24 05"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Gesundheitsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5437047",
+              "latitude": "47.3790886"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Stampfenbachstrasse 30 "
+            },
+            "telephone": "+41 43 259 51 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatskanzlei",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542956745903888",
+              "latitude": "47.378183333352304"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 11 11"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Staatskanzlei, Digitale Verwaltung",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542956745903888",
+              "latitude": "47.378183333352304"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10 "
+            },
+            "telephone": "+41 43 259 59 30"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Kantonspolizei Zürich",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5197942",
+              "latitude": "47.3812086"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Güterstrasse 33"
+            },
+            "telephone": "+41 58 648 48 48"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Informatik",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.541325984766846",
+              "latitude": "47.38411845041334"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Waltersbachstrasse 5"
+            },
+            "telephone": "+41 43 259 19 00"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Arbeit",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542004",
+              "latitude": "47.380588"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walchestrasse 19 "
+            },
+            "telephone": "+41 43 259 60 60"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Wirtschaft",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.542004",
+              "latitude": "47.380588"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walchestrasse 19 "
+            },
+            "telephone": "+41 43 259 30 30"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Bildungsdirektion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5433293",
+              "latitude": "47.37883910000001"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Walcheplatz 2"
+            },
+            "telephone": "+41 43 259 23 09"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Amt für Mobilität",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5429414",
+              "latitude": "47.3781848"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 30 61"
+          },
+          {
+            "@type": "GovernmentOffice",
+            "parentOrganization": {
+              "name": "Deutsch"
+            },
+            "name": "Fachstelle Religion",
+            "logo": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "image": "https://www.zh.ch/content/dam/zhweb/bilder-dokumente/cc.svg",
+            "geo": {
+              "@type": "GeoCoordinates",
+              "longitude": "8.5430796",
+              "latitude": "47.378084"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Neumühlequai 10"
+            },
+            "telephone": "+41 43 259 25 55"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Kanton Zürich",
+            "item": "https://www.zh.ch/de.html"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:43.951626+00:00"
+  }
+}

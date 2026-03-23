@@ -1,0 +1,703 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:54.112553+00:00",
+  "source": {
+    "input_url": "https://www.protonmail.com",
+    "canonical_domain": "proton.me",
+    "pages_scanned": [
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me",
+      "https://proton.me"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Proton",
+    "website": "https://proton.me",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Proton",
+        "website": "https://proton.me",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Proton: Privacy by default"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "cloud",
+          "menu",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Over 100 million people use Proton to stay private and secure online. Get a free Proton account and take back your privacy.",
+        "og_description": "Over 100 million people use Proton to stay private and secure online. Get a free Proton account and take back your privacy."
+      },
+      "evidence": [
+        "app",
+        "cloud",
+        "menu",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works"
+        ]
+      },
+      "evidence": [
+        "how it works"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.0,
+    "final_score": 73,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.3,
+        "score": 3.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 73,
+    "raw_score": 73.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org/",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://proton.me/",
+            "url": "https://proton.me/",
+            "name": "Proton: Privacy by default",
+            "description": "Over 100 million people use Proton to stay private and secure online. Get a free Proton account and take back your privacy.",
+            "isPartOf": {
+              "@id": "https://proton.me/#website"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "significantLink": [
+              "https://proton.me/mail",
+              "https://proton.me/calendar",
+              "https://proton.me/drive",
+              "https://proton.me/pass",
+              "https://protonvpn.com",
+              "https://simplelogin.io",
+              "https://proton.me/business",
+              "https://proton.me/blog",
+              "https://proton.me/support",
+              "https://proton.me/about"
+            ]
+          },
+          {
+            "@type": "Corporation",
+            "@id": "https://proton.me/#corporation",
+            "additionalType": "http://www.productontology.org/id/Technology_company",
+            "name": "Proton",
+            "legalName": "Proton AG",
+            "url": "https://proton.me",
+            "logo": "https://proton.me/images/social/proton-logo-square.png",
+            "slogan": "Privacy by default",
+            "foundingDate": "2014-07-18",
+            "description": "Proton provides easy-to-use encrypted email, calendar, cloud storage, password manager, and VPN services, built on the principle of your data, your rules.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "Switzerland",
+              "addressRegion": "Geneva",
+              "addressLocality": "Plan-les-Ouates",
+              "postalCode": "1228",
+              "streetAddress": "Route de la Galaise 32"
+            },
+            "sameAs": [
+              "https://www.linkedin.com/company/protonprivacy/",
+              "https://x.com/ProtonPrivacy",
+              "https://www.facebook.com/Proton",
+              "https://www.instagram.com/protonprivacy/",
+              "https://www.wikidata.org/wiki/Q30537036",
+              "https://en.wikipedia.org/wiki/Proton_(Swiss_company)",
+              "https://www.google.com/search?kgmid=/g/11g8vthvmc"
+            ],
+            "employee": {
+              "@type": "Person",
+              "name": "Andy Yen",
+              "jobTitle": "Chief Executive Officer",
+              "sameAs": [
+                "https://x.com/andyyen",
+                "https://www.linkedin.com/in/andy-yen-03a9676/",
+                "https://www.wikidata.org/wiki/Q23759707"
+              ]
+            },
+            "owns": [
+              {
+                "@id": "https://proton.me/#Proton_Mail"
+              },
+              {
+                "@id": "https://proton.me/#Proton_Calendar"
+              },
+              {
+                "@id": "https://proton.me/#Proton_Drive"
+              },
+              {
+                "@id": "https://proton.me/#Proton_Pass"
+              },
+              {
+                "@id": "https://proton.me/#Wallet"
+              },
+              {
+                "@id": "https://proton.me/#Proton_Authenticator"
+              },
+              {
+                "@id": "https://proton.me/#Proton_VPN"
+              },
+              {
+                "@id": "https://proton.me/#Proton_SimpleLogin"
+              },
+              {
+                "@id": "https://proton.me/#Lumo"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://proton.me/#website",
+            "url": "https://proton.me",
+            "name": "Proton",
+            "mainEntity": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "about": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "publisher": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "copyrightNotice": "© Proton AG. All rights reserved.",
+            "copyrightYear": "2026",
+            "isAccessibleForFree": "True",
+            "inLanguage": [
+              "en",
+              "fr",
+              "de",
+              "es",
+              "it",
+              "pl",
+              "nl",
+              "ru",
+              "tr",
+              "pt"
+            ]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://proton.me/#Proton_Authenticator",
+            "additionalType": "http://www.productontology.org/doc/Authenticator",
+            "name": "Proton Authenticator",
+            "description": "Protect your accounts with Proton Authenticator, an end-to-end encrypted, open source, and ad-free two-factor authentication (2FA) app available across devices",
+            "keywords": "authenticator app,authentication app,authenticator,free,open source,no ads,unlimited,,two factor authentication,2fa",
+            "url": "https://proton.me/authenticator",
+            "applicationCategory": "SecurityApplication",
+            "applicationSubCategory": "Authenticator",
+            "isAccessibleForFree": "True",
+            "operatingSystem": [
+              "Android",
+              "iOS",
+              "macOS",
+              "Windows",
+              "Linux"
+            ],
+            "image": "https://proton.me/images/social/proton-authenticator-logo.png",
+            "sameAs": "https://www.wikidata.org/wiki/Q135580507",
+            "downloadUrl": [
+              "https://proton.me/authenticator/download",
+              "https://apps.apple.com/app/proton-authenticator/id6741758667",
+              "https://play.google.com/store/apps/details?id=proton.android.authenticator"
+            ],
+            "subjectOf": {
+              "@id": "https://proton.me/authenticator"
+            },
+            "mainEntityOfPage": {
+              "@id": "https://proton.me/authenticator"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://proton.me/#Proton_Calendar",
+            "additionalType": "http://www.productontology.org/id/Digital_calendar",
+            "name": "Proton Calendar",
+            "description": "Proton Calendar helps you stay on top of your schedule while encrypting and protecting your calendar data. Available on Web, Android and iOS.",
+            "keywords": "digital calendar,calendar app,diary app,free,open source,no ads,private calendar,secure calendar,encrypted calendar",
+            "applicationCategory": "CommunicationApplication",
+            "applicationSubCategory": "Calendar Application",
+            "isAccessibleForFree": "True",
+            "operatingSystem": [
+              "Android",
+              "iOS"
+            ],
+            "image": "https://proton.me/images/social/proton-calendar-logo.png",
+            "sameAs": "https://www.wikidata.org/wiki/Q114414130",
+            "downloadUrl": [
+              "https://proton.me/calendar/download",
+              "https://play.google.com/store/apps/details?id=me.proton.android.calendar",
+              "https://apps.apple.com/app/apple-store/id1514709943"
+            ],
+            "subjectOf": {
+              "@id": "https://proton.me/calendar"
+            },
+            "url": "https://proton.me/calendar",
+            "mainEntityOfPage": {
+              "@id": "https://proton.me/calendar"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://proton.me/#Proton_Drive",
+            "additionalType": [
+              "http://www.productontology.org/id/File_hosting_service",
+              "http://www.productontology.org/id/Mobile_cloud_storage"
+            ],
+            "name": "Proton Drive",
+            "description": "End-to-end encrypted file storage that lets you securely back up your files on the cloud, access them anywhere, and share them with anyone. Based in Switzerland.",
+            "keywords": "cloud storage,mobile cloud storage,file hosting service,file transfer service,cloud drive,file sharing,free,photo storage,video storage,secure cloud storage,encrypted cloud storage,private cloud storage",
+            "applicationCategory": "SecurityApplication",
+            "applicationSubCategory": "Cloud Storage Application",
+            "isAccessibleForFree": "True",
+            "operatingSystem": [
+              "Windows",
+              "Android",
+              "iOS"
+            ],
+            "image": "https://proton.me/images/social/proton-drive-logo.png",
+            "sameAs": "https://www.wikidata.org/wiki/Q30537036",
+            "downloadUrl": [
+              "https://proton.me/drive/download",
+              "https://apps.apple.com/app/id1509667851",
+              "https://play.google.com/store/apps/details?id=me.proton.android.drive"
+            ],
+            "subjectOf": {
+              "@id": "https://proton.me/drive"
+            },
+            "url": "https://proton.me/drive",
+            "mainEntityOfPage": {
+              "@id": "https://proton.me/drive"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://proton.me/#Lumo",
+            "additionalType": "http://www.productontology.org/doc/Chatbot",
+            "name": "Lumo",
+            "alternateName": "Lumo by Proton",
+            "description": "Lumo is a classic chatbot system designed to provide users with a secure and privacy-focused conversational experience.",
+            "keywords": "Lumo, Lumo by Proton, Lumo chatbot, AI chatbot, AI agent",
+            "applicationCategory": "ChatbotApplication",
+            "isAccessibleForFree": "True",
+            "image": "https://lumo.proton.me/images/social/lumo-by-proton.png",
+            "sameAs": [
+              "https://x.com/asklumo"
+            ],
+            "subjectOf": {
+              "@id": "https://lumo.proton.me"
+            },
+            "url": "https://lumo.proton.me",
+            "mainEntityOfPage": {
+              "@id": "https://lumo.proton.me"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://proton.me/#Proton_Mail",
+            "additionalType": "http://www.productontology.org/id/Webmail",
+            "name": "Proton Mail",
+            "alternateName": "ProtonMail",
+            "description": "Proton Mail is the world’s largest secure email service with over 100 million users. Available on Web, iOS, Android, and desktop. Protected by Swiss privacy law.",
+            "keywords": "webmail,email app,email account,free,open source,no ads,private email,secure email,encrypted email",
+            "applicationCategory": "CommunicationApplication",
+            "applicationSubCategory": "Webmail Application",
+            "isAccessibleForFree": "True",
+            "operatingSystem": [
+              "Windows",
+              "macOS",
+              "Linux",
+              "Android",
+              "iOS"
+            ],
+            "image": "https://proton.me/images/social/proton-mail-logo.png",
+            "sameAs": [
+              "https://www.google.com/search?kgmid=/m/0113fkjd",
+              "https://proton.me/mail",
+              "https://en.wikipedia.org/wiki/ProtonMail",
+              "https://www.wikidata.org/wiki/Q17355735"
+            ],
+            "downloadUrl": [
+              "https://proton.me/mail/download",
+              "https://apps.apple.com/app/apple-store/id979659905",
+              "https://play.google.com/store/apps/details?id=ch.protonmail.android"
+            ],
+            "subjectOf": {
+              "@id": "https://proton.me/mail"
+            },
+            "url": "https://proton.me/mail",
+            "mainEntityOfPage": {
+              "@id": "https://proton.me/mail"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://proton.me/#Proton_Pass",
+            "additionalType": "http://www.productontology.org/id/Password_manager",
+            "name": "Proton Pass",
+            "description": "Proton Pass is an open source, end-to-end encrypted, no ads password manager. Create and securely store passwords, email aliases, 2FA codes, and notes on all your devices.",
+            "keywords": "password manager,password generator,free,open source,no ads,unlimited,biometric login,vault,2fa",
+            "applicationCategory": "SecurityApplication",
+            "applicationSubCategory": "Password Manager",
+            "isAccessibleForFree": "True",
+            "operatingSystem": [
+              "Windows",
+              "macOS",
+              "Linux",
+              "Android",
+              "iOS"
+            ],
+            "image": "https://proton.me/images/social/proton-pass-logo.png",
+            "sameAs": "https://www.wikidata.org/wiki/Q118744792",
+            "downloadUrl": [
+              "https://proton.me/pass/download",
+              "https://apps.apple.com/us/app/proton-pass-password-manager/id6443490629",
+              "https://play.google.com/store/apps/details?id=proton.android.pass",
+              "https://addons.mozilla.org/en-US/firefox/addon/proton-pass/",
+              "https://chrome.google.com/webstore/detail/proton-pass-free-password/ghmbeldphafepmbegfdlkpapadhbakde"
+            ],
+            "subjectOf": {
+              "@id": "https://proton.me/pass"
+            },
+            "url": "https://proton.me/pass",
+            "mainEntityOfPage": {
+              "@id": "https://proton.me/pass"
+            },
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.8",
+              "ratingCount": "32401"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://proton.me/#Proton_VPN",
+            "additionalType": "http://www.productontology.org/id/Virtual_private_network",
+            "name": "Proton VPN",
+            "description": "Proton VPN is a security focused free VPN service, developed by CERN and MIT scientists. Use the web anonymously, unblock websites and encrypt your connection.",
+            "keywords": "vpn,secure vpn,private,vpn,encrypted vpn,free,no ads, vpn service",
+            "applicationCategory": [
+              "SecurityApplication",
+              "CommunicationApplication"
+            ],
+            "applicationSubCategory": "VPN Application",
+            "isAccessibleForFree": "True",
+            "operatingSystem": [
+              "Windows",
+              "macOS",
+              "Linux",
+              "Android",
+              "iOS"
+            ],
+            "image": "https://proton.me/images/social/proton-vpn-logo.png",
+            "sameAs": "https://www.wikidata.org/wiki/Q55157581",
+            "downloadUrl": [
+              "https://proton.me/vpn/download",
+              "https://proton.me/vpn/download-windows",
+              "https://proton.me/vpn/download-macos",
+              "https://proton.me/vpn/download-linux",
+              "https://proton.me/vpn/download-ios",
+              "https://proton.me/vpn/download-android",
+              "https://apps.apple.com/app/apple-store/id1437005085",
+              "https://play.google.com/store/apps/details?id=ch.protonvpn.android"
+            ],
+            "subjectOf": {
+              "@id": "https://protonvpn.com"
+            },
+            "url": "https://protonvpn.com",
+            "mainEntityOfPage": {
+              "@id": "https://protonvpn.com"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://proton.me/#Wallet",
+            "name": "Proton Wallet",
+            "description": "Our end-to-end encrypted wallet gives you control of your Bitcoin and makes it easy to transact with anyone. Available on web, iOS, and Android.",
+            "keywords": "bitcoin wallet, btc wallet, crypto wallet, proton wallet, hot wallet",
+            "applicationCategory": "FinanceApplication",
+            "isAccessibleForFree": "True",
+            "operatingSystem": [
+              "Android",
+              "iOS"
+            ],
+            "image": "https://proton.me/images/social/proton-wallet-trademark.png",
+            "sameAs": [
+              "https://apps.apple.com/app/apple-store/id6479609548",
+              "https://play.google.com/store/apps/details?id=me.proton.wallet.android"
+            ],
+            "downloadUrl": [
+              "https://apps.apple.com/app/apple-store/id6479609548",
+              "https://play.google.com/store/apps/details?id=me.proton.wallet.android"
+            ],
+            "subjectOf": {
+              "@id": "https://proton.me/wallet"
+            },
+            "url": "https://proton.me/wallet",
+            "mainEntityOfPage": {
+              "@id": "https://proton.me/wallet"
+            },
+            "copyrightHolder": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "creator": {
+              "@id": "https://proton.me/#corporation"
+            },
+            "maintainer": {
+              "@id": "https://proton.me/#corporation"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:49:54.112561+00:00"
+  }
+}

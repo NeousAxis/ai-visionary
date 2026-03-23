@@ -1,0 +1,208 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:56:06.281055+00:00",
+  "source": {
+    "input_url": "https://www.essec.edu",
+    "canonical_domain": "essec.edu",
+    "pages_scanned": [
+      "https://www.essec.edu/fr/",
+      "https://www.essec.edu/fr/pages/contacts/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 2
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "ESSEC Business School",
+    "website": "https://www.essec.edu/fr/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+212 (0)5 37 82 40 00",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "université",
+      "school",
+      "école",
+      "formation",
+      "étudiant"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "ESSEC Business School",
+        "website": "https://www.essec.edu/fr/",
+        "email": "",
+        "phone": "+212 (0)5 37 82 40 00",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Accueil || ESSEC Business School"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "solution"
+        ],
+        "meta_description": "Bienvenue à l'ESSEC Business School, une école de commerce reconnue pour son excellence, sa communauté étudiante et ses programmes engagés vers l'innovation.  Un engagement en faveur de l'innovation, de l'entreprenariat et de la responsabilité sociale.  || ESSEC Business School",
+        "og_description": "Bienvenue à l'ESSEC Business School, une école de commerce reconnue pour son excellence, sa communauté étudiante et ses programmes engagés vers l'innovation.  Un engagement en faveur de l'innovation, de l'entreprenariat et de la responsabilité sociale.  || ESSEC Business School"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "offre",
+        "produit",
+        "produits"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "méthodologie"
+        ]
+      },
+      "evidence": [
+        "méthodologie"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions"
+        ]
+      },
+      "evidence": [
+        "conditions"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide"
+        ]
+      },
+      "evidence": [
+        "aide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 68.3,
+    "final_score": 50,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.4,
+        "score": 4.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 50,
+    "raw_score": 68.3,
+    "cap_applied": true,
+    "cap_reason": "no_jsonld_no_aya",
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T16:56:06.281065+00:00"
+  }
+}

@@ -1,0 +1,258 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:30.678570+00:00",
+  "source": {
+    "input_url": "https://www.ovhcloud.com",
+    "canonical_domain": "ovhcloud.com",
+    "pages_scanned": [
+      "https://www.ovhcloud.com/fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "OVHcloud",
+    "website": "https://www.ovhcloud.com/fr/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "abuse@ovh.net",
+      "phone": "1999-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "cloud",
+      "api",
+      "platform",
+      "devops",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "OVHcloud",
+        "website": "https://www.ovhcloud.com/fr/",
+        "email": "abuse@ovh.net",
+        "phone": "1999-2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Cloud Computing & HÃ©bergement Web | OVHcloud France"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "offre",
+          "platform",
+          "product",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "OVHcloud c'est plus de 80 services au meilleur ratio performance/prix, ouverts et rÃ©versibles : noms de domaine, vps, serveurs dÃ©diÃ©s, cloud IaaS & PaaS",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "cookies",
+          "iso"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog",
+          "documentation",
+          "glossaire",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 52.0,
+    "final_score": 52,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 52,
+    "raw_score": 52.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Corporation",
+            "name": "OVHcloud France",
+            "sameAs": [
+              "https://twitter.com/ovhcloud",
+              "https://www.linkedin.com/company/ovh",
+              "https://en.wikipedia.org/wiki/OVH",
+              "https://www.wikidata.org/wiki/Q568183",
+              "https://github.com/ovh"
+            ],
+            "url": "https://www.ovhcloud.com/fr/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.ovhcloud.com/themes/contrib/ovh_theme_patternlab/images/logos/OVHcloud_logo.svg"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "name": "OVHcloud France",
+            "url": "https://www.ovhcloud.com/fr/",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "query-input": "required name=query_string",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://www.ovhcloud.com/fr/search-result/{query_string}",
+                "inLanguage": "fr"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:30.678582+00:00"
+  }
+}

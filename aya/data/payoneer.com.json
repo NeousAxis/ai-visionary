@@ -1,0 +1,396 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:37.435131+00:00",
+  "source": {
+    "input_url": "https://www.payoneer.com",
+    "canonical_domain": "payoneer.com",
+    "pages_scanned": [
+      "https://www.payoneer.com/",
+      "https://www.payoneer.com/about/",
+      "https://www.payoneer.com/resources/",
+      "https://www.payoneer.com/legal/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Payoneer",
+    "website": "https://www.payoneer.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "2005-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Payoneer",
+        "website": "https://www.payoneer.com/",
+        "email": "",
+        "phone": "2005-2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Global Payment Solutions & Online Payment Services | Payoneer"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Payoneer is your trusted global payment solution, offering secure online and international payments. Discover the best online payment system today.",
+        "og_description": "Payoneer is your trusted global payment solution, offering secure online and international payments. Discover the best online payment system today."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "consulting",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Place",
+            "@id": "https://www.payoneer.com/#place",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "195 Broadway, 27th floor",
+              "addressLocality": "New York",
+              "addressRegion": "NY",
+              "postalCode": "10007",
+              "addressCountry": "USA"
+            }
+          },
+          {
+            "@type": [
+              "FinancialService",
+              "Organization"
+            ],
+            "@id": "https://www.payoneer.com/#organization",
+            "name": "Payoneer",
+            "url": "https://www.payoneer.com",
+            "sameAs": [
+              "https://www.facebook.com/Payoneer",
+              "https://twitter.com/Payoneer"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "195 Broadway, 27th floor",
+              "addressLocality": "New York",
+              "addressRegion": "NY",
+              "postalCode": "10007",
+              "addressCountry": "USA"
+            },
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://www.payoneer.com/#logo",
+              "url": "https://www.payoneer.com/wp-content/uploads/payoneer-dark-logo.svg",
+              "contentUrl": "https://www.payoneer.com/wp-content/uploads/payoneer-dark-logo.svg",
+              "caption": "Payoneer",
+              "inLanguage": "en-US",
+              "width": "",
+              "height": ""
+            },
+            "legalName": "Payoneer Global Inc.",
+            "location": {
+              "@id": "https://www.payoneer.com/#place"
+            },
+            "image": {
+              "@id": "https://www.payoneer.com/#logo"
+            },
+            "telephone": "+1 646-658-3695"
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.payoneer.com/#website",
+            "url": "https://www.payoneer.com",
+            "name": "Payoneer",
+            "publisher": {
+              "@id": "https://www.payoneer.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.payoneer.com/?s={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.payoneer.com/wp-content/uploads/ayn-stablecoin.svg",
+            "url": "https://www.payoneer.com/wp-content/uploads/ayn-stablecoin.svg",
+            "width": "200",
+            "height": "200",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.payoneer.com/#webpage",
+            "url": "https://www.payoneer.com/",
+            "name": "Global Payment Solutions &amp; Online Payment Services | Payoneer",
+            "datePublished": "2023-02-12T10:50:03+03:00",
+            "dateModified": "2026-02-26T14:23:18+03:00",
+            "about": {
+              "@id": "https://www.payoneer.com/#organization"
+            },
+            "isPartOf": {
+              "@id": "https://www.payoneer.com/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.payoneer.com/wp-content/uploads/ayn-stablecoin.svg"
+            },
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "VideoObject",
+            "contentUrl": "https://www.payoneer.com/wp-content/uploads/freelancer-video.mp4",
+            "name": "Global Payment Solutions &amp; Online Payment Services | Payoneer",
+            "description": "Payoneer is your trusted global payment solution, offering secure online and international payments. Discover the best online payment system today.",
+            "uploadDate": "2023-02-12T10:50:03+03:00",
+            "thumbnailUrl": "https://www.payoneer.com/wp-content/uploads/freenlancers-opportunities-1.jpg.webp",
+            "hasPart": [],
+            "isFamilyFriendly": "True",
+            "@id": "https://www.payoneer.com/#schema-158296",
+            "isPartOf": {
+              "@id": "https://www.payoneer.com/#webpage"
+            },
+            "publisher": {
+              "@id": "https://www.payoneer.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "mainEntityOfPage": {
+              "@id": "https://www.payoneer.com/#webpage"
+            }
+          },
+          {
+            "@type": "VideoObject",
+            "contentUrl": "https://www.payoneer.com/wp-content/uploads/business-video.mp4",
+            "name": "Global Payment Solutions &amp; Online Payment Services | Payoneer",
+            "description": "Payoneer is your trusted global payment solution, offering secure online and international payments. Discover the best online payment system today.",
+            "uploadDate": "2023-02-12T10:50:03+03:00",
+            "thumbnailUrl": "https://www.payoneer.com/wp-content/uploads/business-video-poster-1.jpg.webp",
+            "hasPart": [],
+            "isFamilyFriendly": "True",
+            "@id": "https://www.payoneer.com/#schema-158297",
+            "isPartOf": {
+              "@id": "https://www.payoneer.com/#webpage"
+            },
+            "publisher": {
+              "@id": "https://www.payoneer.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "mainEntityOfPage": {
+              "@id": "https://www.payoneer.com/#webpage"
+            }
+          },
+          {
+            "@type": "VideoObject",
+            "contentUrl": "https://www.payoneer.com/wp-content/uploads/marketplace-video.mp4",
+            "name": "Global Payment Solutions &amp; Online Payment Services | Payoneer",
+            "description": "Payoneer is your trusted global payment solution, offering secure online and international payments. Discover the best online payment system today.",
+            "uploadDate": "2023-02-12T10:50:03+03:00",
+            "thumbnailUrl": "https://www.payoneer.com/wp-content/uploads/marketplace-video-poster-1.jpg.webp",
+            "hasPart": [],
+            "isFamilyFriendly": "True",
+            "@id": "https://www.payoneer.com/#schema-158298",
+            "isPartOf": {
+              "@id": "https://www.payoneer.com/#webpage"
+            },
+            "publisher": {
+              "@id": "https://www.payoneer.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "mainEntityOfPage": {
+              "@id": "https://www.payoneer.com/#webpage"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:37.435145+00:00"
+  }
+}

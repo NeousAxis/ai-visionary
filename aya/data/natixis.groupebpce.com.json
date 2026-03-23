@@ -1,0 +1,324 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:19.636391+00:00",
+  "source": {
+    "input_url": "https://www.natixis.com",
+    "canonical_domain": "natixis.groupebpce.com",
+    "pages_scanned": [
+      "https://natixis.groupebpce.com/",
+      "https://natixis.groupebpce.com/wp-content/uploads/2022/08/about.jpg",
+      "https://natixis.groupebpce.com/page-404/",
+      "https://natixis.groupebpce.com/wp-content/uploads/2022/08/contact.png",
+      "https://natixis.groupebpce.com/page-404/",
+      "https://natixis.groupebpce.com/page-404/",
+      "https://natixis.groupebpce.com/page-404/",
+      "https://natixis.groupebpce.com/wp-content/uploads/2022/08/faq.pdf",
+      "https://natixis.groupebpce.com/articles/legal-entity-identifiers-leis/",
+      "https://natixis.groupebpce.com/page-404/",
+      "https://natixis.groupebpce.com/page-404/"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 13
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Natixis",
+    "website": "https://natixis.groupebpce.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "0 0 612 792",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "podcast",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Natixis",
+        "website": "https://natixis.groupebpce.com/",
+        "email": "",
+        "phone": "0 0 612 792",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Internet website of Natixis CIB and Natixis IM business lines"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "platform",
+          "product",
+          "products",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Welcome to the common website of Natixis CIB and Natixis IM",
+        "og_description": "Welcome to the common website of Natixis CIB and Natixis IM"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "platform",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "iso",
+          "legal"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "help"
+        ]
+      },
+      "evidence": [
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 59.3,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 59.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "/",
+            "url": "/",
+            "name": "Internet website of Natixis CIB and Natixis IM business lines",
+            "isPartOf": {
+              "@id": "/#website"
+            },
+            "about": {
+              "@id": "/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "/#primaryimage"
+            },
+            "image": {
+              "@id": "/#primaryimage"
+            },
+            "thumbnailUrl": "https://natixis.groupebpce.com/wp-content/uploads/2022/08/id_gfs_-_banniere_internet_2022-02-09_11-11-18_51.jpg",
+            "datePublished": "2022-05-03T15:07:27+00:00",
+            "dateModified": "2026-03-18T17:13:23+00:00",
+            "description": "Welcome to the common website of Natixis CIB and Natixis IM",
+            "breadcrumb": {
+              "@id": "/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "/#primaryimage",
+            "url": "https://natixis.groupebpce.com/wp-content/uploads/2022/08/id_gfs_-_banniere_internet_2022-02-09_11-11-18_51.jpg",
+            "contentUrl": "https://natixis.groupebpce.com/wp-content/uploads/2022/08/id_gfs_-_banniere_internet_2022-02-09_11-11-18_51.jpg",
+            "width": 1280,
+            "height": 420
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "/#website",
+            "url": "/",
+            "name": "Groupe BPCE’s global business lines: Corporate &amp; Investment Banking and Asset &amp; Wealth Management",
+            "description": "Groupe BPCE’s global business lines: Corporate &amp; Investment Banking and Asset &amp; Wealth Management",
+            "publisher": {
+              "@id": "/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "/#organization",
+            "name": "Groupe BPCE’s global business lines: Corporate &amp; Investment Banking and Asset &amp; Wealth Management",
+            "url": "/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "/#/schema/logo/image/",
+              "url": "/wp-content/uploads/2022/08/logobpce_2022-01-13_17-12-21_714.png",
+              "contentUrl": "/wp-content/uploads/2022/08/logobpce_2022-01-13_17-12-21_714.png",
+              "width": 290,
+              "height": 80,
+              "caption": "Groupe BPCE’s global business lines: Corporate &amp; Investment Banking and Asset &amp; Wealth Management"
+            },
+            "image": {
+              "@id": "/#/schema/logo/image/"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:19.636399+00:00"
+  }
+}

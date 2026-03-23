@@ -1,0 +1,336 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:04.687548+00:00",
+  "source": {
+    "input_url": "https://www.wingtra.com",
+    "canonical_domain": "wingtra.com",
+    "pages_scanned": [
+      "https://wingtra.com/",
+      "https://wingtra.com/product-configurator-hints/about-add-ons/",
+      "https://wingtra.com",
+      "https://wingtra.com/legal/",
+      "https://wingtra.com/privacy-policy/",
+      "https://wingtra.com/legal/terms-conditions-software/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 563
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Wingtra",
+    "website": "https://wingtra.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "support@wingtra.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Wingtra",
+        "website": "https://wingtra.com/",
+        "email": "support@wingtra.com",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Get survey data in hours with Wingtra"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "From flight planning to CAD and GIS-ready output—the only aerial survey solution that keeps it all in one, connected toolchain.",
+        "og_description": "From flight planning to CAD and GIS-ready output—the only aerial survey solution that keeps it all in one, connected toolchain."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "",
+          "Organization",
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.7,
+    "final_score": 76,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 76,
+    "raw_score": 75.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://wingtra.com/#/schema/WebSite",
+            "url": "https://wingtra.com/",
+            "name": "Wingtra",
+            "alternateName": "Wingtra AG",
+            "description": "Drone for fast and accurate survey data every time",
+            "inLanguage": "en-US",
+            "publisher": {
+              "@id": "https://wingtra.com/#/schema/Organization"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://wingtra.com/",
+            "url": "https://wingtra.com/",
+            "name": "Get survey data in hours with Wingtra",
+            "description": "From flight planning to CAD and GIS-ready output—the only aerial survey solution that keeps it all in one, connected toolchain.",
+            "inLanguage": "en-US",
+            "isPartOf": {
+              "@id": "https://wingtra.com/#/schema/WebSite"
+            },
+            "potentialAction": {
+              "@type": "ReadAction",
+              "target": "https://wingtra.com/"
+            },
+            "about": {
+              "@id": "https://wingtra.com/#/schema/Organization"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://wingtra.com/#/schema/Organization",
+            "name": "Wingtra AG",
+            "url": "https://wingtra.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://wingtra.com/wp-content/uploads/wingtra-logo-350x100-1.png",
+              "contentUrl": "https://wingtra.com/wp-content/uploads/wingtra-logo-350x100-1.png",
+              "width": 350,
+              "height": 100,
+              "contentSize": "10536"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://wingtra.com/#organization",
+        "name": "Wingtra",
+        "url": "https://wingtra.com/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://wingtra.com/wp-content/uploads/wingtra-logo-350x100-1-210x60.png",
+          "width": 210,
+          "height": 60
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "sales",
+          "contactOption": [
+            "HearingImpairedSupported",
+            "TollFree"
+          ],
+          "availableLanguage": "English"
+        },
+        "sameAs": [
+          "https://www.facebook.com/WingtraOne",
+          "https://www.instagram.com/wingtra_official/",
+          "https://www.youtube.com/c/Wingtra",
+          "https://x.com/Wingtra",
+          "https://www.linkedin.com/company/9490361",
+          "https://en.wikipedia.org/wiki/Wingtra_WingtraOne"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": "https://wingtra.com/#website",
+        "url": "https://wingtra.com/",
+        "name": "Wingtra",
+        "publisher": {
+          "@id": "https://wingtra.com/#organization"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:04.687555+00:00"
+  }
+}

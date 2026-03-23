@@ -1,0 +1,632 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:06.518114+00:00",
+  "source": {
+    "input_url": "https://www.imd.org",
+    "canonical_domain": "imd.org",
+    "pages_scanned": [
+      "https://www.imd.org/",
+      "https://www.imd.org/about/about-us/",
+      "https://www.imd.org/settings/privacy/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 12
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Imd",
+    "website": "https://www.imd.org/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+41 21 618 0111",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "education",
+    "sector_label": "Éducation & Formation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "school",
+      "formation",
+      "training",
+      "course",
+      "student"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Imd",
+        "website": "https://www.imd.org/",
+        "email": "",
+        "phone": "+41 21 618 0111",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "IMD Business School for Management and Leadership Courses"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "menu",
+          "platform",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Discover IMD Executive Education – Top ranked Business School providing Leadership training, MBA, Executive MBA (EMBA), executive coaching and much more",
+        "og_description": "Discover IMD Executive Education – Top ranked Business School providing Leadership training, MBA, Executive MBA (EMBA), executive coaching and much more"
+      },
+      "evidence": [
+        "app",
+        "application",
+        "menu",
+        "platform",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process"
+        ]
+      },
+      "evidence": [
+        "our process"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "documentation",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.imd.org/#breadcrumblist",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "@id": "https://www.imd.org#listItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://www.imd.org",
+                "nextItem": {
+                  "@type": "ListItem",
+                  "@id": "https://www.imd.org/#listItem",
+                  "name": "Homepage"
+                }
+              },
+              {
+                "@type": "ListItem",
+                "@id": "https://www.imd.org/#listItem",
+                "position": 2,
+                "name": "Homepage",
+                "previousItem": {
+                  "@type": "ListItem",
+                  "@id": "https://www.imd.org#listItem",
+                  "name": "Home"
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.imd.org/#breadcrumblist",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "@id": "https://www.imd.org#listItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://www.imd.org/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is IMD Business School?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "IMD (International Institute for Management Development) is an independent, non-profit business school based in Lausanne, Switzerland. Founded in 1946, IMD is ranked #1 in the world for custom executive education programs (Financial Times, 2025) and consistently ranks among the world's top business schools. IMD offers 80+ executive education programs, MBA, EMBA, and Masters degrees, as well as custom corporate learning solutions for organizations worldwide."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where is IMD Business School located?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "IMD Business School is located at Chemin de Bellerive 23, Lausanne, Switzerland (Canton Vaud). The campus is situated on the shores of Lake Geneva. IMD also has a presence in Singapore and Shenzen (China) and offers programs globally."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What programs does IMD offer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "IMD offers a comprehensive range of programs including: degree programs (MBA, Executive MBA, MSc in Sustainable Management &amp; Technology, Executive Master in Sustainable Business Transformation, Executive Master in AI &amp; Digital Business Transformation); 80+ open-enrollment executive education programs across leadership, strategy, digital transformation, sustainability, finance, innovation, and more; online and Sprint programs; executive certificates and diplomas; and custom corporate programs designed for organizations."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How is IMD Business School ranked?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "IMD Business School is ranked #1 in the world for custom executive education programs by the Financial Times in 2025. IMD consistently appears in the top tier of global business school rankings across executive education, MBA, and EMBA categories."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is IMD Business School accredited?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, IMD Business School holds triple accreditation — the gold standard in business education — from AACSB, EQUIS, and AMBA. This places IMD among a small elite of business schools worldwide that have achieved all three major international accreditations."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is the IMD World Competitiveness Ranking?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The IMD World Competitiveness Ranking is an annual report published by IMD's World Competitiveness Center that evaluates and ranks the competitiveness of 69 global economies. It is one of the most widely cited economic competitiveness benchmarks in the world, used by governments, businesses, and researchers to understand the economic performance and business environment of countries."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How large is the IMD alumni network?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "IMD has a global alumni network of more than 145,000 executives who have participated in IMD programs across the school's history. The IMD Alumni Association connects this network through clubs, events, and communities organized by geography, program, and industry."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is the difference between IMD's MBA and EMBA programs?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "IMD's MBA is a full-time, one-year degree program designed for professionals typically with 3–10 years of experience who want to accelerate their careers or make a significant career transition. The Executive MBA (EMBA) is designed for senior professionals and executives with significant work experience who wish to continue working while earning their degree. Both programs are based in Lausanne, Switzerland and are known for their intensive, practice-oriented approach."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does IMD offer online programs?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, IMD offers a range of online programs including online executive education programs, Sprint programs (short, focused online courses in areas like Generative AI, Digital Transformation, and Resilient Leadership), and online executive certificates in Leadership, Strategy, and Digital Acceleration. These programs allow executives to develop skills flexibly without leaving their roles."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is I by IMD?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "I by IMD is IMD's thought leadership platform, providing first-person business intelligence, research, articles, podcasts, and insights from IMD faculty, researchers, and industry leaders. It covers topics including leadership, strategy, digital transformation, sustainability, geopolitics, and innovation."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.imd.org/#organization",
+            "name": "IMD Business School",
+            "description": "IMD is an independent Swiss business school offering world-class Executive Education, MBA, Executive MBA, leadership development and much more.",
+            "url": "https://www.imd.org/",
+            "email": "Info@imd.org",
+            "telephone": "+41216180111",
+            "numberOfEmployees": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 500
+            },
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.imd.org/wp-content/uploads/2023/02/IMD-Logo-Blue-on-Transparent-safe-space-RGB-112x60-1.png",
+              "@id": "https://www.imd.org/#organizationLogo",
+              "width": 112,
+              "height": 60
+            },
+            "image": {
+              "@id": "https://www.imd.org/#organizationLogo"
+            },
+            "sameAs": [
+              "https://www.facebook.com/imdbschool/",
+              "https://twitter.com/IMD_Bschool",
+              "https://www.instagram.com/imdbusinessschool",
+              "https://www.youtube.com/user/IMD",
+              "https://ch.linkedin.com/school/imd-business-school/",
+              "https://en.wikipedia.org/wiki/International_Institute_for_Management_Development"
+            ]
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.imd.org/#webpage",
+            "url": "https://www.imd.org/",
+            "name": "IMD Business School for Management and Leadership Courses",
+            "description": "Discover IMD Executive Education – Top ranked Business School providing Leadership training, MBA, Executive MBA (EMBA), executive coaching and much more",
+            "inLanguage": "en-US",
+            "isPartOf": {
+              "@id": "https://www.imd.org/#website"
+            },
+            "about": {
+              "@id": "https://www.imd.org/#organization"
+            },
+            "breadcrumb": {
+              "@id": "https://www.imd.org/#breadcrumblist"
+            },
+            "datePublished": "2021-12-21T19:06:24+01:00",
+            "dateModified": "2026-03-09T13:29:01+01:00"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.imd.org/#webpage",
+            "url": "https://www.imd.org/",
+            "name": "IMD Business School for Management and Leadership Courses",
+            "description": "Discover IMD Executive Education – Top ranked Business School providing Leadership training, MBA, Executive MBA (EMBA), executive coaching and much more",
+            "inLanguage": "en-US",
+            "isPartOf": {
+              "@id": "https://www.imd.org/#website"
+            },
+            "breadcrumb": {
+              "@id": "https://www.imd.org/#breadcrumblist"
+            },
+            "datePublished": "2021-12-21T19:06:24+01:00",
+            "dateModified": "2026-03-19T11:32:08+01:00"
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.imd.org/#website",
+            "url": "https://www.imd.org/",
+            "name": "IMD business school for management and leadership courses",
+            "alternateName": "IMD",
+            "inLanguage": "en-US",
+            "publisher": {
+              "@id": "https://www.imd.org/#organization"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://www.imd.org/search/?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.imd.org/#website",
+            "url": "https://www.imd.org/",
+            "name": "IMD business school for management and leadership courses",
+            "alternateName": "IMD",
+            "inLanguage": "en-US",
+            "publisher": {
+              "@id": "https://www.imd.org/#organization"
+            }
+          },
+          {
+            "@type": [
+              "CollegeOrUniversity",
+              "Organization"
+            ],
+            "@id": "https://www.imd.org/#organization",
+            "name": "IMD Business School",
+            "alternateName": [
+              "IMD",
+              "International Institute for Management Development",
+              "IMD Lausanne"
+            ],
+            "description": "IMD is a top-ranked, independent Swiss business school founded in 1946, offering world-class executive education, MBA, Executive MBA, Masters degrees, leadership development, and custom corporate programs. Ranked #1 in the world for custom executive education programs (Financial Times, 2025), IMD develops leaders and organizations that contribute to a more prosperous, sustainable, and inclusive world.",
+            "url": "https://www.imd.org/",
+            "email": "Info@imd.org",
+            "telephone": "+41216180111",
+            "foundingDate": "1946",
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://www.imd.org/#organizationLogo",
+              "url": "https://www.imd.org/wp-content/uploads/2023/02/IMD-Logo-Blue-on-Transparent-safe-space-RGB-112x60-1.png",
+              "width": 112,
+              "height": 60
+            },
+            "image": {
+              "@id": "https://www.imd.org/#organizationLogo"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Chemin de Bellerive 23",
+              "addressLocality": "Lausanne",
+              "addressRegion": "Vaud",
+              "postalCode": "1001",
+              "addressCountry": "CH"
+            },
+            "geo": {
+              "@type": "GeoCoordinates",
+              "latitude": 46.5133,
+              "longitude": 6.6327
+            },
+            "numberOfEmployees": {
+              "@type": "QuantitativeValue",
+              "minValue": 0,
+              "maxValue": 500
+            },
+            "sameAs": [
+              "https://www.facebook.com/imdbschool/",
+              "https://twitter.com/IMD_Bschool",
+              "https://www.instagram.com/imdbusinessschool",
+              "https://www.youtube.com/user/IMD",
+              "https://ch.linkedin.com/school/imd-business-school/",
+              "https://en.wikipedia.org/wiki/International_Institute_for_Management_Development",
+              "https://www.wikidata.org/wiki/Q641565"
+            ],
+            "award": [
+              "Ranked #1 in the world for custom executive education programs — Financial Times, 2025",
+              "Consistently ranked among the world's top business schools for executive education"
+            ],
+            "knowsAbout": [
+              "Leadership Development",
+              "Executive Education",
+              "Business Strategy",
+              "Digital Transformation",
+              "Organizational Management",
+              "MBA Programs",
+              "Sustainable Business",
+              "World Competitiveness",
+              "Family Business",
+              "Corporate Governance",
+              "Innovation Management",
+              "Geopolitics and Business",
+              "Supply Chain Leadership",
+              "Finance for Executives"
+            ],
+            "hasCredential": [
+              {
+                "@type": "EducationalOccupationalCredential",
+                "name": "Master of Business Administration (MBA)",
+                "url": "https://www.imd.org/degree/mba/"
+              },
+              {
+                "@type": "EducationalOccupationalCredential",
+                "name": "Executive MBA (EMBA)",
+                "url": "https://www.imd.org/emba/executive-mba/"
+              },
+              {
+                "@type": "EducationalOccupationalCredential",
+                "name": "MSc in Sustainable Management & Technology",
+                "url": "https://www.imd.org/msc/master-degree/sustainable-management-technology/"
+              },
+              {
+                "@type": "EducationalOccupationalCredential",
+                "name": "Executive Master in Sustainable Business Transformation",
+                "url": "https://www.imd.org/sustainability/executive-master/sustainable-business-transformation/"
+              },
+              {
+                "@type": "EducationalOccupationalCredential",
+                "name": "Executive Master in AI & Digital Business Transformation",
+                "url": "https://www.imd.org/digital-transformation/executive-master/ai-digital-business-transformation/"
+              }
+            ],
+            "alumni": {
+              "@type": "Organization",
+              "name": "IMD Alumni Association",
+              "url": "https://www.imd.org/alumni/imd-alumni-association/",
+              "description": "A global network of more than 145,000 IMD alumni across industries and countries."
+            },
+            "hasPart": [
+              {
+                "@type": "EducationalOrganization",
+                "name": "IMD World Competitiveness Center",
+                "url": "https://www.imd.org/centers/wcc/world-competitiveness-center/",
+                "description": "Publisher of the IMD World Competitiveness Ranking, covering 69 global economies annually."
+              },
+              {
+                "@type": "EducationalOrganization",
+                "name": "IMD Global Family Business Center",
+                "url": "https://www.imd.org/centers/gfbc/imd-family-business-center/"
+              },
+              {
+                "@type": "EducationalOrganization",
+                "name": "IMD Global Board Center",
+                "url": "https://www.imd.org/centers/board/imd-board-center/"
+              },
+              {
+                "@type": "EducationalOrganization",
+                "name": "IMD Future Readiness Center",
+                "url": "https://www.imd.org/centers/cfr/imd-center-for-future-readiness/"
+              },
+              {
+                "@type": "EducationalOrganization",
+                "name": "IMD Center for Digital and AI Transformation",
+                "url": "https://www.imd.org/centers/digital-ai-transformation-center/"
+              }
+            ],
+            "offers": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Course",
+                  "name": "Executive Education Programs",
+                  "description": "80+ open enrollment executive education programs covering leadership, strategy, digital transformation, sustainability, finance, innovation, and more.",
+                  "url": "https://www.imd.org/programs-solutions/executive-programs/"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Course",
+                  "name": "Custom Programs & Solutions for Organizations",
+                  "description": "Tailored leadership and management development programs designed for corporate clients, co-created with IMD faculty.",
+                  "url": "https://www.imd.org/solutions-for-organizations/"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Course",
+                  "name": "Online Executive Programs",
+                  "description": "Flexible online programs and Sprint courses allowing executives to develop skills remotely.",
+                  "url": "https://www.imd.org/online-programs/"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "EducationalOccupationalCredential",
+                  "name": "Executive Certificates & Diplomas",
+                  "description": "Stackable credentials including certificates in AI & Digital Business Excellence, Sustainable Business, Leadership, Strategy, and Board Governance.",
+                  "url": "https://www.imd.org/programs-solutions/certification/"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:06.518122+00:00"
+  }
+}

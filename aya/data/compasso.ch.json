@@ -1,0 +1,191 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:17.066720+00:00",
+  "source": {
+    "input_url": "https://www.compasso.ch",
+    "canonical_domain": "compasso.ch",
+    "pages_scanned": [
+      "https://www.compasso.ch/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 4
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Compasso // Berufliche Integration",
+    "website": "https://www.compasso.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "info@compasso.ch",
+      "phone": "+41 44 225 80 30",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.5,
+    "source": "keyword_match",
+    "evidence": [
+      "versicherung",
+      "pension"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Compasso // Berufliche Integration",
+        "website": "https://www.compasso.ch/",
+        "email": "info@compasso.ch",
+        "phone": "+41 44 225 80 30",
+        "country": "CH",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Compasso // Berufliche Integration – Informationsportal für Arbeitgebende"
+      ]
+    },
+    "offre": {
+      "present": false,
+      "fields": {
+        "keywords_detected": [],
+        "meta_description": "Sie suchen Informationen zum Umgang mit Mitarbeitenden, die eine veränderte Leistungsfähigkeit zeigen? Sie wollen einen Menschen mit Handicap einstellen?",
+        "og_description": ""
+      },
+      "evidence": []
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 18.6,
+    "final_score": 19,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 19,
+    "raw_score": 18.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.compasso.ch/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.compasso.ch/?searchterm=&cHash=488ad59fa23cca0fecd5b52cc57641bc{search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:17.066745+00:00"
+  }
+}

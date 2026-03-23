@@ -1,0 +1,360 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:50.907214+00:00",
+  "source": {
+    "input_url": "https://www.richardmille.com",
+    "canonical_domain": "richardmille.com",
+    "pages_scanned": [
+      "https://www.richardmille.com/",
+      "https://www.richardmille.com/dispatch/the-brand",
+      "https://www.richardmille.com/contact",
+      "https://www.richardmille.com/page/servicing"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 7,
+      "sitemap_found": true,
+      "sitemap_url_count": 291
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "RM 07-01 Coloured Ceramics⋅ Richard Mille",
+    "website": "https://www.richardmille.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "VideoObject",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "manufacturing",
+      "factory",
+      "materials",
+      "machine"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "RM 07-01 Coloured Ceramics⋅ Richard Mille",
+        "website": "https://www.richardmille.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "VideoObject"
+      },
+      "evidence": [
+        "Richard Mille | A racing machine on the wrist"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "menu",
+          "platform",
+          "service",
+          "services"
+        ],
+        "meta_description": "Official website of Richard Mille, the swiss watchmaking brand that combines the best in technical innovation, in architecture and in fine watchmaking heritage. Discover the brand, its universe and the collections.",
+        "og_description": "Official website of Richard Mille, the swiss watchmaking brand that combines the best in technical innovation, in architecture and in fine watchmaking heritage. Discover the brand, its universe and the collections."
+      },
+      "evidence": [
+        "app",
+        "menu",
+        "platform",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "conditions",
+          "legal"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "conditions",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "documentation"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "VideoObject",
+          "VideoObject",
+          "VideoObject",
+          "VideoObject",
+          "VideoObject",
+          "VideoObject",
+          "BreadcrumbList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "RM 07-01 Coloured Ceramics⋅ Richard Mille - New models",
+        "description": "New models",
+        "thumbnailUrl": "https://media.richardmille.com/wp-content/uploads/2026/03/18122107/0702CC3COVER.jpg?dpr=1&width=2000",
+        "uploadDate": "2026-03-18 13:02:32",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Richard Mille",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.richardmille.com/apple-icon-152x152.png",
+            "width": "300",
+            "height": "23"
+          }
+        },
+        "contentUrl": "https://video.richardmille.com/mobile/https://media.richardmille.com/wp-content/uploads/2026/03/18150233/RM-07-01-CC3_packshot_169-header_1.mp4",
+        "duration": "P10S"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "RM 41-01⋅ Richard Mille - New model",
+        "description": "New model",
+        "thumbnailUrl": "https://media.richardmille.com/wp-content/uploads/2026/02/17170839/4101cover-dk.jpg?dpr=1&width=2000",
+        "uploadDate": "2026-02-19 14:37:32",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Richard Mille",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.richardmille.com/apple-icon-152x152.png",
+            "width": "300",
+            "height": "23"
+          }
+        },
+        "contentUrl": "https://video.richardmille.com/mobile/https://media.richardmille.com/wp-content/uploads/2026/02/19163733/RM41-01_packshot_169-header.mp4",
+        "duration": "P10S"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "RMB01⋅ Richard Mille - special project",
+        "description": "special project",
+        "thumbnailUrl": "https://bo.richardmille.com/wp-content/uploads/2025/06/Cover-RMB1.jpg?dpr=1&width=2000",
+        "uploadDate": "2025-07-03 15:45:02",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Richard Mille",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.richardmille.com/apple-icon-152x152.png",
+            "width": "300",
+            "height": "23"
+          }
+        },
+        "contentUrl": "https://video.richardmille.com/mobile/https://media.richardmille.com/wp-content/uploads/2025/07/03194503/RMB01_packshot_169_header-2.mp4",
+        "duration": "P10S"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Sapphire⋅ Richard Mille -  ",
+        "description": " ",
+        "thumbnailUrl": "https://media.richardmille.com/wp-content/uploads/2024/11/12161042/cover56.jpg?dpr=1&width=2000",
+        "uploadDate": "2025-01-14 11:18:13",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Richard Mille",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.richardmille.com/apple-icon-152x152.png",
+            "width": "300",
+            "height": "23"
+          }
+        },
+        "contentUrl": "https://video.richardmille.com/mobile/https://media.richardmille.com/wp-content/uploads/2025/01/14131814/crystalclear_header_2.mp4",
+        "duration": "P10S"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Ladies' collection⋅ Richard Mille - Watches",
+        "description": "Watches",
+        "thumbnailUrl": "https://media.richardmille.com/wp-content/uploads/2020/10/12144708/HP-ladies-collection_cover.jpg?dpr=1&width=2000",
+        "uploadDate": "2023-06-13 08:32:06",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Richard Mille",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.richardmille.com/apple-icon-152x152.png",
+            "width": "300",
+            "height": "23"
+          }
+        },
+        "contentUrl": "https://video.richardmille.com/mobile/https://media.richardmille.com/wp-content/uploads/2023/06/13123207/header-collection-women-04_1.mp4",
+        "duration": "P10S"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Richard Mille universe⋅ Richard Mille - The Brand",
+        "description": "Video homepage - The brand history",
+        "thumbnailUrl": "https://media.richardmille.com/wp-content/uploads/2020/10/12144723/HP_the-brand_cover.jpg?dpr=1&width=2000",
+        "uploadDate": "2020-08-12 12:54:04",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Richard Mille",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.richardmille.com/apple-icon-152x152.png",
+            "width": "300",
+            "height": "23"
+          }
+        },
+        "contentUrl": "https://video.richardmille.com/mobile/https://media.richardmille.com/wp-content/uploads/2020/08/12165405/the-brand-history-rm-homepage.mp4",
+        "duration": "P10S"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Richard Mille",
+            "item": "https://www.richardmille.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Index",
+            "item": "https://www.richardmille.com/index"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:49:50.907227+00:00"
+  }
+}

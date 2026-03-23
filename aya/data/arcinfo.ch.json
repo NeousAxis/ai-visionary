@@ -1,0 +1,240 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:52:26.623408+00:00",
+  "source": {
+    "input_url": "https://www.arcinfo.ch",
+    "canonical_domain": "arcinfo.ch",
+    "pages_scanned": [
+      "https://www.arcinfo.ch/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 58
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "ArcInfo",
+    "website": "https://www.arcinfo.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "",
+      "phone": "02.02.2026 11",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "journal",
+      "press",
+      "publicité"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "ArcInfo",
+        "website": "https://www.arcinfo.ch/",
+        "email": "",
+        "phone": "02.02.2026 11",
+        "country": "CH",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "ArcInfo - l'actualité neuchâteloise, suisse et internationale"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "menu",
+          "offre",
+          "prestation",
+          "product",
+          "service",
+          "services"
+        ],
+        "meta_description": "Arcinfo.ch: les articles du journal et toute l'actualité en continu des cantons de Neuchâtel et du Jura, de Suisse et du Monde",
+        "og_description": "Arcinfo.ch: les articles du journal et toute l'actualité en continu des cantons de Neuchâtel et du Jura, de Suisse et du Monde"
+      },
+      "evidence": [
+        "app",
+        "menu",
+        "offre",
+        "prestation",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "confidentialité"
+        ]
+      },
+      "evidence": [
+        "confidentialité"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.1,
+    "final_score": 60,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 60,
+    "raw_score": 60.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "WebPage",
+        "headline": "Accueil ArcInfo semaine (matin - après-midi - soirée)",
+        "url": "https://www.arcinfo.ch/",
+        "publisher": {
+          "@type": "NewsMediaOrganization",
+          "name": "Arcinfo",
+          "url": "https://www.arcinfo.ch/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.arcinfo.ch/_nuxt/5c6a719766aa9effb2bde1fbee0e4264.svg",
+            "width": 135,
+            "height": 32
+          },
+          "email": "clientele@arcinfo.ch",
+          "telephone": "+41 32 723 53 00",
+          "sameAs": [
+            "https://www.facebook.com/arcinfofanpage",
+            "https://twitter.com/arcinfo",
+            "https://www.instagram.com/arcinfoch/",
+            "https://www.linkedin.com/company/arcinfo/"
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Neuchâtel",
+            "addressRegion": "NE",
+            "postalCode": "2000",
+            "streetAddress": "Avenue du Vignoble, 3"
+          }
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:52:26.623419+00:00"
+  }
+}

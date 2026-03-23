@@ -1,0 +1,267 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:16.768014+00:00",
+  "source": {
+    "input_url": "https://www.drivy.com",
+    "canonical_domain": "fr.getaround.com",
+    "pages_scanned": [
+      "https://fr.getaround.com/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 12697
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Getaround",
+    "website": "https://fr.getaround.com/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "2010-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "press",
+      "presse",
+      "agence",
+      "publicité"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Getaround",
+        "website": "https://fr.getaround.com/",
+        "email": "",
+        "phone": "2010-2026",
+        "country": "FR",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Location Voiture et Autopartage - Getaround"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "service",
+          "services"
+        ],
+        "meta_description": "Louez la voiture d’un particulier en libre-service près de vous. Assurance & 200km/jour inclus. Finies les files d’attente: ouvrez la voiture avec notre app, en France et en Europe",
+        "og_description": "Louez la voiture d’un particulier en libre-service près de vous. Assurance & 200km/jour inclus. Finies les files d’attente: ouvrez la voiture avec notre app, en France et en Europe"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "comment ça marche"
+        ]
+      },
+      "evidence": [
+        "comment ça marche"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "confidentialité",
+          "cookies"
+        ]
+      },
+      "evidence": [
+        "confidentialité",
+        "cookies"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite",
+          "Organization",
+          "AutoRental"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 77.1,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 77.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Getaround",
+        "alternateName": "Getaround: Location Voiture et Autopartage",
+        "description": "Louez la voiture d’un particulier en libre-service près de vous. Assurance &amp; 200km/jour inclus. Finies les files d’attente: ouvrez la voiture avec notre app, en France et en Europe",
+        "datePublished": "2019-10-01T07:00:00+05:30",
+        "dateModified": "2020-09-23T07:00:00+08:30",
+        "url": "https://fr.getaround.com/"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Getaround",
+        "url": "https://fr.getaround.com/",
+        "description": "En tant que plateforme d&#39;autopartage leader, notre mission est d&#39;apporter une bouffée d&#39;air frais aux citadins en proposant un accès 24h/24 et 7j/7 à des voitures en libre-service proches de vous. Avec Getaround, réservez simplement une voiture, ouvrez la avec votre smartphone, et partez.",
+        "logo": "https://fr.getaround.com/packs/images/app/assets/images/shared/getaround-logo.245e368962541c3c.svg",
+        "sameAs": [
+          "https://www.facebook.com/getaround.fr",
+          "https://twitter.com/getaroundFR",
+          "https://www.instagram.com/getaround_europe/",
+          "https://www.youtube.com/getaround",
+          "https://www.linkedin.com/company/getaround"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "AutoRental",
+        "name": "Getaround France",
+        "description": "Louez la voiture d’un particulier en libre-service près de vous. Assurance & 200km/jour inclus. Finies les files d’attente: ouvrez la voiture avec notre app, en France et en Europe",
+        "image": "https://fr.getaround.com/packs/images/app/assets/images/shared/getaround-logo.245e368962541c3c.svg",
+        "url": "https://fr.getaround.com/",
+        "priceRange": "$",
+        "openingHours": "Mo-Su 00:00-24:00",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "France"
+        },
+        "telephone": "(+33) 1 76 24 02 91",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 4.7,
+          "reviewCount": 66982,
+          "worstRating": 1,
+          "bestRating": 5,
+          "author": {
+            "@type": "Organization",
+            "name": "Apple Store",
+            "url": "https://itunes.apple.com/FR/app/drivy/id492238016?mt=8&l=fr"
+          }
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:16.768023+00:00"
+  }
+}

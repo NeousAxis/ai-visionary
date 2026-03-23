@@ -1,0 +1,370 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:29.331078+00:00",
+  "source": {
+    "input_url": "https://www.qdrant.tech",
+    "canonical_domain": "qdrant.tech",
+    "pages_scanned": [
+      "https://qdrant.tech/",
+      "https://qdrant.tech/pricing/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 556
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Qdrant",
+    "website": "https://qdrant.tech/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "99.5 99.9",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "cloud",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Qdrant",
+        "website": "https://qdrant.tech/",
+        "email": "",
+        "phone": "99.5 99.9",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Qdrant - Vector Search Engine"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "products",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Qdrant is an Open-Source Vector Search Engine written in Rust. It provides fast and scalable vector similarity search service with convenient API.",
+        "og_description": "Qdrant is an Open-Source Vector Search Engine written in Rust. It provides fast and scalable vector similarity search service with convenient API."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works"
+        ]
+      },
+      "evidence": [
+        "how it works"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@id": "https://qdrant.tech/#organization",
+            "@type": "Organization",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "DE",
+              "addressLocality": "Berlin",
+              "addressRegion": "Berlin",
+              "postalCode": "10115",
+              "streetAddress": "Chausseestraße 86"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "info@qdrant.com",
+              "telephone": "+49 3040797694"
+            },
+            "description": "Qdrant is an Open-Source Vector Search Engine written in Rust. It provides fast and scalable vector similarity search service with convenient API.",
+            "email": "info@qdrant.com",
+            "founders": [
+              {
+                "@type": "Person",
+                "name": "map[email:info@qdrant.tech name:Andrey Vasnetsov]"
+              },
+              {
+                "@type": "Person",
+                "name": "Andre Zayarni"
+              }
+            ],
+            "foundingDate": "2021",
+            "keywords": [
+              "vector search engine",
+              "neural network",
+              "matching",
+              "SaaS",
+              "approximate nearest neighbor search",
+              "image search",
+              "recommender system",
+              "vectors",
+              "knn algorithm",
+              "hnsw",
+              "vector search",
+              "embeddings",
+              "similarity",
+              "simaes networks",
+              "BERT",
+              "transformer",
+              "word2vec",
+              "fasttext",
+              "Qdrant"
+            ],
+            "legalName": "Qdrant Solutions GmbH",
+            "location": "Berlin, Germany",
+            "logo": "https://qdrant.tech/images/logo_with_text.png",
+            "name": "Qdrant",
+            "sameAs": [
+              "https://github.com/qdrant/qdrant",
+              "https://qdrant.to/discord",
+              "https://www.youtube.com/channel/UC6ftm8PwH1RU_LM1jwG0LQA",
+              "https://www.linkedin.com/company/qdrant/",
+              "https://twitter.com/qdrant_engine"
+            ],
+            "url": "https://qdrant.tech"
+          },
+          {
+            "@id": "https://qdrant.tech/#product",
+            "@type": "Product",
+            "brand": {
+              "@id": "https://qdrant.tech",
+              "@type": "Organization",
+              "name": "Qdrant Vector Database"
+            },
+            "description": "Qdrant is an Open-Source Vector Search Engine written in Rust. It provides fast and scalable vector similarity search service with convenient API.",
+            "image": "",
+            "keywords": [
+              "vector search engine",
+              "neural network",
+              "matching",
+              "SaaS",
+              "approximate nearest neighbor search",
+              "image search",
+              "recommender system",
+              "vectors",
+              "knn algorithm",
+              "hnsw",
+              "vector search",
+              "embeddings",
+              "similarity",
+              "simaes networks",
+              "BERT",
+              "transformer",
+              "word2vec",
+              "fasttext",
+              "Qdrant"
+            ],
+            "name": "Qdrant",
+            "offers": {
+              "@type": "AggregateOffer",
+              "lowPrice": "0",
+              "offerCount": "3",
+              "offers": [
+                {
+                  "@type": "Offer",
+                  "priceSpecification": {
+                    "@type": "PriceSpecification",
+                    "name": "Community",
+                    "price": "free",
+                    "priceCurrency": "USD",
+                    "url": "https://qdrant.tech/documentation/quick-start/"
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "priceSpecification": {
+                    "@type": "PriceSpecification",
+                    "name": "Managed Cloud",
+                    "price": "from 25$",
+                    "priceCurrency": "USD",
+                    "url": "https://qdrant.to/cloud"
+                  }
+                },
+                {
+                  "@type": "Offer",
+                  "priceSpecification": {
+                    "@type": "PriceSpecification",
+                    "name": "Enterprise",
+                    "price": "on request",
+                    "priceCurrency": "USD",
+                    "url": "https://qdrant.to/contact-us"
+                  }
+                }
+              ],
+              "priceCurrency": "USD"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:58:29.331085+00:00"
+  }
+}

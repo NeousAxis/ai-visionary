@@ -1,0 +1,320 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:29.334118+00:00",
+  "source": {
+    "input_url": "https://www.copper.com",
+    "canonical_domain": "copper.com",
+    "pages_scanned": [
+      "https://www.copper.com/",
+      "https://www.copper.com/about",
+      "https://www.copper.com/a-propos",
+      "https://www.copper.com/contact",
+      "https://www.copper.com/services",
+      "https://www.copper.com/products",
+      "https://www.copper.com/pricing",
+      "https://www.copper.com/faq",
+      "https://www.copper.com/legal",
+      "https://www.copper.com/privacy",
+      "https://www.copper.com/terms"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1224
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Copper CRM Inc.",
+    "website": "https://www.copper.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "info@copper.com",
+      "phone": "1-800-778-7879",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Copper CRM Inc.",
+        "website": "https://www.copper.com/",
+        "email": "info@copper.com",
+        "phone": "1-800-778-7879",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "CRM Software Solutions Company for Service Businesses | Copper CRM"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Win clients for life with Copper CRM software solutions. Give us a try and see how we can help your business build stronger customer relationships.",
+        "og_description": "Win clients for life with Copper CRM software solutions. Give us a try and see how we can help your business build stronger customer relationships."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "methodology",
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "methodology",
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.1,
+    "final_score": 75,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 75,
+    "raw_score": 75.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Copper CRM Inc.",
+        "legalName": "Copper CRM Inc.",
+        "alternateName": [
+          "Copper",
+          "Copper CRM"
+        ],
+        "disambiguatingDescription": "Copper CRM is a customer relationship management software company for Google Workspace users. Not to be confused with copper the metal/commodity, Copper Banking (getcopper.com), digital asset services (copper.co), or Copper restaurant payment systems (usecopper.com).",
+        "url": "https://www.copper.com",
+        "logo": "https://www.copper.com/_next/image?url=https%3A%2F%2Fd2ydtwisqcxv72.cloudfront.net%2Ficons%2Fnavigation%2Fcopper_logo.webp&w=1200&q=75",
+        "description": "Copper is the only CRM that's a Recommended for Google Workspace app. Designed for relationship-focused businesses in professional services, Copper helps teams manage leads, close deals, deliver projects, and build lasting customer relationships directly from Gmail, Google Calendar, and Google Drive.",
+        "foundingDate": "2012",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "contactType": "Sales",
+            "email": "sales@copper.com",
+            "availableLanguage": "English"
+          },
+          {
+            "@type": "ContactPoint",
+            "contactType": "Customer Support",
+            "availableLanguage": "English"
+          },
+          {
+            "@type": "ContactPoint",
+            "contactType": "General Inquiries",
+            "email": "info@copper.com",
+            "availableLanguage": "English"
+          },
+          {
+            "@type": "ContactPoint",
+            "contactType": "Partnership",
+            "email": "partners@copper.com",
+            "availableLanguage": "English"
+          },
+          {
+            "@type": "ContactPoint",
+            "contactType": "Privacy",
+            "email": "privacy@copper.com",
+            "availableLanguage": "English"
+          }
+        ],
+        "sameAs": [
+          "https://www.linkedin.com/company/copper-inc/",
+          "https://www.facebook.com/CopperInc/",
+          "https://www.instagram.com/copper.crm/",
+          "https://www.crunchbase.com/organization/copper-inc",
+          "https://play.google.com/store/apps/details?id=com.prosperworks.android",
+          "https://chromewebstore.google.com/detail/copper-crm-for-gmail-and/hpfmedbkgaakgagknibnonpkimkibkla",
+          "https://workspace.google.com/marketplace/app/copper_crm_for_google_sheets/461423560386",
+          "https://www.trustpilot.com/review/www.copper.com",
+          "https://catalog.appdirect.com/en-us/apps/207942/copper-crm"
+        ],
+        "areaServed": {
+          "@type": "Place",
+          "name": "Worldwide"
+        },
+        "knowsAbout": [
+          "Customer Relationship Management",
+          "CRM Software",
+          "Google Workspace Integration",
+          "Lead Management",
+          "Pipeline Management",
+          "Gmail Integration",
+          "Contact Management"
+        ],
+        "slogan": "Copper is the only CRM that's a Recommended for Google Workspace app"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:29.334131+00:00"
+  }
+}

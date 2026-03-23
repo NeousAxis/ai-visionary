@@ -1,0 +1,309 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:49.637146+00:00",
+  "source": {
+    "input_url": "https://www.outreach.io",
+    "canonical_domain": "outreach.io",
+    "pages_scanned": [
+      "https://www.outreach.io/",
+      "https://www.outreach.io/company/contact",
+      "https://www.outreach.io/pricing",
+      "https://www.outreach.io/resources",
+      "https://www.outreach.io/terms"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Outreach",
+    "website": "https://www.outreach.io/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "billing@outreach.io",
+      "phone": "1 (888) 938-7356",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "store",
+      "buy",
+      "delivery",
+      "marketplace",
+      "product"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Outreach",
+        "website": "https://www.outreach.io/",
+        "email": "billing@outreach.io",
+        "phone": "1 (888) 938-7356",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "AI Revenue Workflow Platform | Outreach"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution"
+        ],
+        "meta_description": "Outreach helps sales, marketing, RevOps, and GTM teams win with AI-powered workflows. Discover the platform driving revenue success today.",
+        "og_description": "Outreach helps sales, marketing, RevOps, and GTM teams win with AI-powered workflows. Discover the platform driving revenue success today."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "gdpr",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "gdpr",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "author": {
+              "@id": "https://outreach.io#identity"
+            },
+            "copyrightHolder": {
+              "@id": "https://outreach.io#identity"
+            },
+            "copyrightYear": "2025",
+            "creator": {
+              "@id": "#creator"
+            },
+            "dateCreated": "2025-01-30T14:41:46-08:00",
+            "dateModified": "2026-01-16T08:04:52-08:00",
+            "datePublished": "2025-01-30T15:29:00-08:00",
+            "description": "Outreach helps sales, marketing, RevOps, and GTM teams win with AI-powered workflows. Discover the platform driving revenue success today.",
+            "headline": "AI Revenue Workflow Platform",
+            "image": {
+              "@type": "ImageObject",
+              "url": "https://cdn-mktg.outreach.io/assets/_1200x630_crop_center-center_82_none/amp-up-revenue.png?mtime=1752615558"
+            },
+            "inLanguage": "en-us",
+            "mainEntityOfPage": "https://outreach.io/",
+            "name": "Outreach",
+            "publisher": {
+              "@id": "#creator"
+            },
+            "url": "https://outreach.io/"
+          },
+          {
+            "@id": "https://outreach.io#identity",
+            "@type": "Organization",
+            "description": "AI-powered revenue workflow platform helping sales, marketing, RevOps, and GTM teams build pipeline, close deals, and drive revenue success",
+            "foundingDate": "2014",
+            "image": {
+              "@type": "ImageObject",
+              "height": "30",
+              "url": "https://cdn-mktg.outreach.io/assets/default/outreach_logo_v2.svg",
+              "width": "158"
+            },
+            "logo": {
+              "@type": "ImageObject",
+              "height": "60",
+              "width": "316"
+            },
+            "name": "Outreach",
+            "sameAs": [
+              "https://twitter.com/outreach_io",
+              "https://www.facebook.com/Outreach.io/",
+              "https://www.linkedin.com/company/outreach-saas/"
+            ],
+            "url": "https://outreach.io"
+          },
+          {
+            "@id": "#creator",
+            "@type": "Organization"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "description": "Breadcrumbs list",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "item": "https://outreach.io/",
+                "name": "Home",
+                "position": 1
+              }
+            ],
+            "name": "Breadcrumbs"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:49.637159+00:00"
+  }
+}

@@ -1,0 +1,476 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:19.454697+00:00",
+  "source": {
+    "input_url": "https://www.wandb.ai",
+    "canonical_domain": "wandb.ai",
+    "pages_scanned": [
+      "https://wandb.ai/site",
+      "https://wandb.ai/about",
+      "https://wandb.ai/a-propos",
+      "https://wandb.ai/contact",
+      "https://wandb.ai/services",
+      "https://wandb.ai/products",
+      "https://wandb.ai/site/pricing/",
+      "https://wandb.ai/faq",
+      "https://wandb.ai/legal",
+      "https://wandb.ai/privacy",
+      "https://wandb.ai/terms"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 12907
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Weights and Biases, Inc",
+    "website": "https://wandb.ai/site",
+    "country": "US",
+    "city": "San Francisco",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "support@wandb.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Weights and Biases, Inc",
+        "website": "https://wandb.ai/site",
+        "email": "support@wandb.com",
+        "phone": "",
+        "country": "US",
+        "city": "San Francisco",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Weights & Biases: The AI developer platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Learn why thousands of companies rely on W&B as their system of record for training AI models and developing AI applications with confidence.",
+        "og_description": "Learn why thousands of companies rely on W&B as their system of record for training AI models and developing AI applications with confidence."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "gdpr",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "",
+          "Corporation",
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 76.6,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 76.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://wandb.ai/site/",
+            "url": "https://wandb.ai/site/",
+            "name": "Weights & Biases: The AI developer platform",
+            "isPartOf": {
+              "@id": "https://wandb.ai/site/#website"
+            },
+            "about": {
+              "@id": "https://wandb.ai/site/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://wandb.ai/site/#primaryimage"
+            },
+            "image": {
+              "@id": "https://wandb.ai/site/#primaryimage"
+            },
+            "thumbnailUrl": "https://wandb.ai/site/wp-content/uploads/2023/05/logo.jpg",
+            "datePublished": "2024-04-12T04:37:42+00:00",
+            "dateModified": "2026-03-16T20:35:13+00:00",
+            "description": "Learn why thousands of companies rely on W&B as their system of record for training AI models and developing AI applications with confidence.",
+            "breadcrumb": {
+              "@id": "https://wandb.ai/site/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://wandb.ai/site/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://wandb.ai/site/#primaryimage",
+            "url": "https://wandb.ai/site/wp-content/uploads/2023/05/logo.jpg",
+            "contentUrl": "https://wandb.ai/site/wp-content/uploads/2023/05/logo.jpg",
+            "width": 900,
+            "height": 900
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://wandb.ai/site/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://wandb.ai/site/#website",
+            "url": "https://wandb.ai/site/",
+            "name": "Weights & Biases: The AI developer platform",
+            "description": "The AI developer platform",
+            "publisher": {
+              "@id": "https://wandb.ai/site/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://wandb.ai/site/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://wandb.ai/site/#organization",
+            "name": "Weights & Biases",
+            "alternateName": "W&B",
+            "url": "https://wandb.ai/site/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://wandb.ai/site/#/schema/logo/image/",
+              "url": "https://wandb.ai/site/wp-content/uploads/2024/01/logo-h-black.svg",
+              "contentUrl": "https://wandb.ai/site/wp-content/uploads/2024/01/logo-h-black.svg",
+              "width": 302,
+              "height": 37,
+              "caption": "Weights & Biases"
+            },
+            "image": {
+              "@id": "https://wandb.ai/site/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/weightsandbiases",
+              "https://x.com/wandb",
+              "https://www.linkedin.com/company/wandb"
+            ],
+            "description": "Weights & Biases is the AI developer platform powering the GenAI industry. Train your own foundation models, fine-tune someone else’s foundation model, manage models from experimentation to production, or develop AI applications powered by frontier LLMs.",
+            "email": "support@wandb.com",
+            "legalName": "Weights and Biases, Inc",
+            "foundingDate": "2017-07-01",
+            "numberOfEmployees": {
+              "@type": "QuantitativeValue",
+              "minValue": "201",
+              "maxValue": "500"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Corporation",
+        "@id": "https://wandb.ai/#organization",
+        "name": "Weights and Biases, Inc",
+        "alternateName": [
+          "Weights & Biases",
+          "W&B",
+          "wandb",
+          "Weights & Biases by CoreWeave"
+        ],
+        "description": "Weights & Biases is the AI developer platform powering the GenAI industry. Train your own foundation models, fine-tune someone else's foundation model, manage models from experimentation to production, or develop AI applications powered by frontier LLMs.",
+        "url": "https://wandb.ai/site",
+        "logo": "https://wandb.ai/logo.png",
+        "image": "https://assets.website-files.com/5ac6b7f2924c656f2b13a88c/5f3ea98410a400266d2579b5_image%2015.jpg",
+        "sameAs": [
+          "https://www.wikidata.org/wiki/Q107382092",
+          "https://x.com/wandb",
+          "https://www.linkedin.com/company/wandb/",
+          "https://www.facebook.com/weightsandbiases",
+          "https://www.youtube.com/c/WeightsBiases",
+          "https://www.crunchbase.com/organization/weights-biases",
+          "https://github.com/wandb"
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "400 Alabama Street",
+          "addressLocality": "San Francisco",
+          "postalCode": "94110",
+          "addressCountry": "US"
+        },
+        "founder": [
+          {
+            "@type": "Person",
+            "name": "Lukas Biewald",
+            "url": "https://lukasbiewald.com/",
+            "sameAs": [
+              "https://www.wikidata.org/wiki/Q6701670",
+              "https://en.wikipedia.org/wiki/Lukas_Biewald",
+              "https://www.linkedin.com/in/lbiewald",
+              "https://x.com/l2k",
+              "https://www.crunchbase.com/person/lukas-biewald"
+            ]
+          },
+          {
+            "@type": "Person",
+            "name": "Chris Van Pelt",
+            "sameAs": [
+              "https://www.linkedin.com/in/chrisvanpelt"
+            ]
+          },
+          {
+            "@type": "Person",
+            "name": "Shawn Lewis",
+            "sameAs": [
+              "https://www.linkedin.com/in/shawn-lewis-524a563"
+            ]
+          }
+        ],
+        "parentOrganization": {
+          "@type": "Corporation",
+          "@id": "https://www.coreweave.com/#organization",
+          "name": "CoreWeave",
+          "legalName": "CoreWeave, Inc.",
+          "url": "https://www.coreweave.com/",
+          "sameAs": [
+            "https://www.wikidata.org/wiki/Q121875386",
+            "https://www.linkedin.com/company/coreweave/",
+            "https://x.com/CoreWeave",
+            "https://www.crunchbase.com/organization/coreweave",
+            "https://en.wikipedia.org/wiki/CoreWeave"
+          ]
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.7",
+          "bestRating": "5",
+          "worstRating": "4",
+          "ratingCount": "44",
+          "reviewCount": "44",
+          "url": "https://www.g2.com/products/weights-biases/reviews"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "headline": "Weights &amp; Biases",
+        "url": "https://site.wandb.ai",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "http://site.wandb.ai/"
+        },
+        "thumbnailUrl": "https://site.wandb.ai/wp-content/uploads/2023/05/logo.jpg?w=150&h=150&crop=1",
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://site.wandb.ai/wp-content/uploads/2023/05/logo.jpg"
+        },
+        "articleSection": "All",
+        "author": [
+          {
+            "@type": "Person",
+            "name": "wandb"
+          }
+        ],
+        "creator": [
+          "wandb"
+        ],
+        "publisher": {
+          "@type": "Organization",
+          "name": "Weights &amp; Biases",
+          "logo": ""
+        },
+        "keywords": [],
+        "dateCreated": "2024-04-12T04:37:42Z",
+        "datePublished": "2024-04-12T04:37:42Z",
+        "dateModified": "2026-03-16T20:35:13Z"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:58:19.454705+00:00"
+  }
+}

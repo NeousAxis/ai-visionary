@@ -1,0 +1,349 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:15.407520+00:00",
+  "source": {
+    "input_url": "https://www.neo4j.com",
+    "canonical_domain": "neo4j.com",
+    "pages_scanned": [
+      "https://neo4j.com/",
+      "https://support.neo4j.com/s/",
+      "https://neo4j.com/product/",
+      "https://neo4j.com/pricing/",
+      "https://legal.neo4j.com/#website-terms-of-use"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 22
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Neo4j Graph Intelligence Platform",
+    "website": "https://neo4j.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "sales@neo4j.com",
+      "phone": "+33 (0) 1 88 46 13 20",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Neo4j Graph Intelligence Platform",
+        "website": "https://neo4j.com/",
+        "email": "sales@neo4j.com",
+        "phone": "+33 (0) 1 88 46 13 20",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Neo4j Graph Intelligence Platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Connect data as it's stored with Neo4j. Perform powerful, complex queries at scale and speed with our graph data platform.",
+        "og_description": "Connect data as it's stored with Neo4j. Perform powerful, complex queries at scale and speed with our graph data platform."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://neo4j.com/",
+            "url": "https://neo4j.com/",
+            "name": "Neo4j Graph Intelligence Platform",
+            "isPartOf": {
+              "@id": "https://neo4j.com/#website"
+            },
+            "about": {
+              "@id": "https://neo4j.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://neo4j.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://neo4j.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://dist.neo4j.com/wp-content/uploads/20260323085936/neo4j-graph-intelligence-platform-og-image.webp",
+            "datePublished": "2020-05-16T14:07:19+00:00",
+            "dateModified": "2026-03-23T16:00:13+00:00",
+            "description": "Connect data as it's stored with Neo4j. Perform powerful, complex queries at scale and speed with our graph data platform.",
+            "breadcrumb": {
+              "@id": "https://neo4j.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://neo4j.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://neo4j.com/#primaryimage",
+            "url": "https://dist.neo4j.com/wp-content/uploads/20260323085936/neo4j-graph-intelligence-platform-og-image.webp",
+            "contentUrl": "https://dist.neo4j.com/wp-content/uploads/20260323085936/neo4j-graph-intelligence-platform-og-image.webp",
+            "width": 2560,
+            "height": 1344
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://neo4j.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Neo4j Graph Intelligence Platform"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://neo4j.com/#website",
+            "url": "https://neo4j.com/",
+            "name": "Graph Database &amp; Analytics",
+            "description": "The Leader in Graph Databases",
+            "publisher": {
+              "@id": "https://neo4j.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://neo4j.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://neo4j.com/#organization",
+            "name": "Neo4j",
+            "url": "https://neo4j.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://neo4j.com/#/schema/logo/image/",
+              "url": "https://dist.neo4j.com/wp-content/uploads/20230926084108/Logo_FullColor_RGB_TransBG.svg",
+              "contentUrl": "https://dist.neo4j.com/wp-content/uploads/20230926084108/Logo_FullColor_RGB_TransBG.svg",
+              "width": 677,
+              "height": 242,
+              "caption": "Neo4j"
+            },
+            "image": {
+              "@id": "https://neo4j.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/neo4j.graph.database",
+              "https://x.com/neo4j",
+              "https://instagram.com/neo4j",
+              "https://www.linkedin.com/company/neo4j",
+              "https://www.pinterest.com/neo4j/",
+              "https://www.youtube.com/neo4j"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:15.407528+00:00"
+  }
+}

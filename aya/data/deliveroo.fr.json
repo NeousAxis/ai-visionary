@@ -1,0 +1,245 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:49.158939+00:00",
+  "source": {
+    "input_url": "https://www.deliveroo.fr",
+    "canonical_domain": "deliveroo.fr",
+    "pages_scanned": [
+      "https://deliveroo.fr/fr/",
+      "https://deliveroo.fr/fr/contact",
+      "https://deliveroo.fr/fr/faq",
+      "https://deliveroo.fr/fr/legal",
+      "https://deliveroo.fr/fr/privacy",
+      "https://deliveroo.fr/fr/terms"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Deliveroo.fr",
+    "website": "https://deliveroo.fr/fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "Website",
+    "contacts": {
+      "email": "corporate@deliveroo.fr",
+      "phone": "+33 9 70 73 42 30",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "food",
+    "sector_label": "Restauration & Alimentation",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "restaurant",
+      "menu",
+      "cuisine",
+      "food",
+      "repas"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Deliveroo.fr",
+        "website": "https://deliveroo.fr/fr/",
+        "email": "corporate@deliveroo.fr",
+        "phone": "+33 9 70 73 42 30",
+        "country": "FR",
+        "city": "",
+        "org_type": "Website"
+      },
+      "evidence": [
+        "Livraison de vos plats préférés - Deliveroo"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "product",
+          "produit",
+          "produits",
+          "restaurant",
+          "service",
+          "services",
+          "solution"
+        ],
+        "meta_description": "Vos restaurants de quartier prêts pour vous livrer.  Commandez dès aujourd'hui !",
+        "og_description": "Vos restaurants de quartier prêts pour vous livrer.  Commandez dès aujourd'hui !"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "comment ça marche",
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "comment ça marche",
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "iso",
+          "legal",
+          "mentions légales",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Website"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 76.6,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 76.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org/",
+        "@type": "Website",
+        "name": "Deliveroo.fr",
+        "description": "Vos restaurants de quartier prêts pour vous livrer. \nCommandez dès aujourd'hui !",
+        "url": "https://deliveroo.fr/fr/"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:49.158948+00:00"
+  }
+}

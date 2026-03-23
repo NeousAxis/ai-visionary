@@ -1,0 +1,433 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:15.639655+00:00",
+  "source": {
+    "input_url": "https://www.cockroachlabs.com",
+    "canonical_domain": "cockroachlabs.com",
+    "pages_scanned": [
+      "https://www.cockroachlabs.com/",
+      "https://www.cockroachlabs.com/about/",
+      "https://www.cockroachlabs.com/contact/",
+      "https://www.cockroachlabs.com/pricing/",
+      "https://www.cockroachlabs.com/privacy/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1896
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "CockroachDB",
+    "website": "https://www.cockroachlabs.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "info@cockroachlabs.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "devops"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "CockroachDB",
+        "website": "https://www.cockroachlabs.com/",
+        "email": "info@cockroachlabs.com",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "CockroachDB | Distributed SQL for always-on customer experiences"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "CockroachDB is a distributed database with standard SQL for cloud applications. CockroachDB powers companies like Comcast, Lush, and Bose.",
+        "og_description": "CockroachDB is a distributed database with standard SQL for cloud applications. CockroachDB powers companies like Comcast, Lush, and Bose."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process"
+        ]
+      },
+      "evidence": [
+        "our process"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@id": "https://www.cockroachlabs.com/#service",
+            "@type": "Service",
+            "name": "CockroachDB | Distributed SQL for always-on customer experiences",
+            "description": "CockroachDB is a distributed SQL database built for global scale, resilience, and compliance. Deploy anywhere — on our cloud or yours — with zero data loss, automated failover, and full PostgreSQL compatibility.",
+            "url": "https://www.cockroachlabs.com/",
+            "serviceType": "Cloud Database Platform",
+            "category": "Distributed SQL, Database Software, Cloud Infrastructure",
+            "areaServed": "Worldwide",
+            "audience": {
+              "@type": "Audience",
+              "audienceType": "Platform Engineers, CTOs, Database Architects, Cloud-Native Developers, AI Application Teams"
+            },
+            "serviceOutput": {
+              "@type": "Thing",
+              "name": "Globally Distributed SQL Database",
+              "description": "A PostgreSQL-compatible, globally distributed database with automated failover, zero data loss, seamless horizontal scaling, and built-in geo-compliance — deployable on any cloud or on-premise environment."
+            },
+            "hasOfferCatalog": {
+              "@type": "OfferCatalog",
+              "name": "CockroachDB Deployment Options",
+              "itemListElement": [
+                {
+                  "@type": "Offer",
+                  "name": "CockroachDB Fully-Managed Cloud",
+                  "description": "Fully-managed cloud database service.",
+                  "url": "https://www.cockroachlabs.com/product/cloud/"
+                },
+                {
+                  "@type": "Offer",
+                  "name": "CockroachDB Bring Your Own Cloud (BYOC)",
+                  "description": "Managed service deployed in your own cloud environment.",
+                  "url": "https://www.cockroachlabs.com/product/cloud/bring-your-own-cloud/"
+                },
+                {
+                  "@type": "Offer",
+                  "name": "CockroachDB Enterprise",
+                  "description": "Self-hosted, on-premise deployment for enterprises.",
+                  "url": "https://www.cockroachlabs.com/product/enterprise/"
+                }
+              ]
+            },
+            "isSimilarTo": {
+              "@id": "https://www.cockroachlabs.com/#software"
+            }
+          },
+          {
+            "@id": "https://www.cockroachlabs.com/#coreadvantages",
+            "@type": "ItemList",
+            "name": "One Platform. Four Core Advantages.",
+            "description": "The four core platform advantages of CockroachDB: resilience, seamless scale, global compliance, and operational cost efficiency.",
+            "url": "https://www.cockroachlabs.com/",
+            "numberOfItems": 4,
+            "itemListOrder": "https://schema.org/ItemListOrderAscending",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Enable state-of-the-art resilience",
+                "description": "Survive regional failures with zero data loss, automated failover, and strong consistency. No runbooks and minimal maintenance windows — online upgrades, schema changes, and backups keep everything running smoothly."
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Scale seamlessly",
+                "description": "Eliminate manual sharding and scale effortlessly with consistent performance. Start small, scale to hundreds of nodes and petabytes — no app re-architecture required."
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Deploy global and compliant applications",
+                "description": "Implement declarative policies to pin data in specific localities and geographic locations. Launch into global markets by enabling compliance and keeping data close to users to reduce latency."
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Streamline operations and drive cost efficiencies at scale",
+                "description": "Achieve high cost efficiency and consolidate databases on a modern PostgreSQL platform. Simplify migrations with MOLT and stream real-time updates to analytics across any environment, from laptops to Kubernetes."
+              }
+            ]
+          },
+          {
+            "@id": "https://www.cockroachlabs.com/#futureproof",
+            "@type": "ItemList",
+            "name": "Stay Ahead of the Game. Future-Proof Today.",
+            "description": "Three modernization paths CockroachDB powers: database modernization, application modernization, and AI-ready infrastructure.",
+            "url": "https://www.cockroachlabs.com/",
+            "numberOfItems": 3,
+            "itemListOrder": "https://schema.org/ItemListOrderAscending",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Database Modernization",
+                "description": "Moving away from traditional data infrastructure requires applications and data that are agile, global, and resilient. CockroachDB is a modern database that enables organizations to navigate database modernization with confidence.",
+                "url": "https://www.cockroachlabs.com/guides/architects-guide-database-modernization/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Application Modernization",
+                "description": "Cloud-native applications, microservices, and DevOps demand a fresh approach for managing and storing data. CockroachDB enables you to move to modern application architectures.",
+                "url": "https://www.cockroachlabs.com/guides/application-modernization/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Artificial Intelligence",
+                "description": "As other databases struggle to scale globally, degrade under concurrency, and incur downtime with agents and AI data, CockroachDB delivers the highest scale and proven availability for AI-driven applications.",
+                "url": "https://www.cockroachlabs.com/guides/3-ai-use-cases/"
+              }
+            ]
+          },
+          {
+            "@id": "https://www.cockroachlabs.com/#customerstories",
+            "@type": "ItemList",
+            "name": "Hear Straight From Our Customers",
+            "description": "Real-world customer stories showing how leading companies rely on CockroachDB for their most critical workloads.",
+            "url": "https://www.cockroachlabs.com/",
+            "numberOfItems": 3,
+            "itemListOrder": "https://schema.org/ItemListOrderAscending",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "How Booking.com simplified order management with CockroachDB",
+                "description": "Booking.com adopted CockroachDB to simplify order management and maintain high availability at global scale.",
+                "url": "https://www.cockroachlabs.com/customers/booking-com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Kaizen Gaming bets big on distributed SQL",
+                "description": "Kaizen Gaming chose CockroachDB's distributed SQL architecture to power their global gaming platform with resilience and scale.",
+                "url": "https://www.cockroachlabs.com/customers/kaizen-gaming/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Why SumUp chose CockroachDB for global payments",
+                "description": "SumUp, a global fintech serving 4M+ merchants across 35 markets, relies on CockroachDB to meet compliance requirements like DORA without per-country databases.",
+                "url": "https://www.cockroachlabs.com/customers/sumup/"
+              }
+            ]
+          },
+          {
+            "@id": "https://www.cockroachlabs.com/#resources",
+            "@type": "ItemList",
+            "name": "Engineering Deep Dives, Product News, and More",
+            "description": "The latest blog posts from Cockroach Labs covering engineering, AI, fintech, product news, and distributed SQL.",
+            "url": "https://www.cockroachlabs.com/",
+            "numberOfItems": 5,
+            "itemListOrder": "https://schema.org/ItemListOrderAscending",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Why these three fintech companies scaled with distributed SQL",
+                "description": "From retail investing and global card payments to large-scale lending, fintech platforms are being pushed to their limits.",
+                "url": "https://www.cockroachlabs.com/blog/fintech-companies-scaled-distributed-sql"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Vertical vs. horizontal scaling: What's the difference and which is better?",
+                "description": "A comparison of vertical and horizontal scaling strategies for modern database infrastructure.",
+                "url": "https://www.cockroachlabs.com/blog/vertical-scaling-vs-horizontal-scaling"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "1,000+ tech leaders know AI is scaling faster than systems can adapt",
+                "description": "Insights from over a thousand technology leaders on the gap between AI growth and infrastructure readiness.",
+                "url": "https://www.cockroachlabs.com/blog/tech-leaders-ai-scaling-faster-than-systems"
+              },
+              {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Rethinking the Global Reporting Platform",
+                "description": "An engineering deep dive into redesigning a global reporting platform for scale and resilience.",
+                "url": "https://www.cockroachlabs.com/blog/rethinking-global-reporting-platform"
+              },
+              {
+                "@type": "ListItem",
+                "position": 5,
+                "name": "SQL DROP COLUMN and ADD COLUMN: adding and removing columns in SQL",
+                "description": "A practical guide to adding and removing columns in SQL using DROP COLUMN and ADD COLUMN statements.",
+                "url": "https://www.cockroachlabs.com/blog/sql-add-column-drop-column"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:15.639666+00:00"
+  }
+}

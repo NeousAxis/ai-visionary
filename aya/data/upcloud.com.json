@@ -1,0 +1,316 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:25.250618+00:00",
+  "source": {
+    "input_url": "https://www.upcloud.com",
+    "canonical_domain": "upcloud.com",
+    "pages_scanned": [
+      "https://upcloud.com/",
+      "https://upcloud.com/global/about/",
+      "https://upcloud.com/global/",
+      "https://upcloud.com/global/contact/",
+      "https://upcloud.com/global/",
+      "https://upcloud.com/products/",
+      "https://upcloud.com/pricing/",
+      "https://upcloud.com/global/",
+      "https://upcloud.com/global/",
+      "https://upcloud.com/global/",
+      "https://upcloud.com/global/"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Global Cloud Platform",
+    "website": "https://upcloud.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "2 7 10500",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Global Cloud Platform",
+        "website": "https://upcloud.com/",
+        "email": "",
+        "phone": "2 7 10500",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Global Cloud Platform - UpCloud"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Discover UpCloud's high-performance cloud infrastructure, built for developers and businesses. Get reliable, fast, and secure cloud hosting with flexible pricing, 100% uptime SLA, and 24/7 support. Start your cloud journey with UpCloud today.",
+        "og_description": "Discover UpCloud's high-performance cloud infrastructure, built for developers and businesses. Get reliable, fast, and secure cloud hosting with flexible pricing, 100% uptime SLA, and 24/7 support. Start your cloud journey with UpCloud today."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "gdpr",
+          "iso",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "gdpr",
+        "iso",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://upcloud.com/#organization",
+            "name": "UpCloud",
+            "url": "https://upcloud.com",
+            "sameAs": [
+              "https://twitter.com/upcloud",
+              "https://www.linkedin.com/company/upcloud/",
+              "https://www.instagram.com/upcloud/",
+              "https://www.youtube.com/channel/UCkIkxF5pBTBLYgYHXDIUUuw",
+              "https://github.com/UpCloudLtd"
+            ],
+            "email": "hello@upcloud.com",
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://upcloud.com/#logo",
+              "url": "https://upcloud.com/media/upcloud_logo_horizontal.png",
+              "contentUrl": "https://upcloud.com/media/upcloud_logo_horizontal.png",
+              "caption": "UpCloud",
+              "inLanguage": "en-US"
+            },
+            "description": "UpCloud is a leading European cloud service provider with a global cloud platform spanning four continents. We offer a reliable, GDPR-compliant cloud-native product portfolio available from 13 different data centres.\r\n\r\nFormed in 2012, UpCloud is headquartered in Helsinki, Finland with an international team working across the globe. Our 100% SLA ensures uninterrupted services, empowering businesses worldwide to thrive."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://upcloud.com/#website",
+            "url": "https://upcloud.com",
+            "name": "UpCloud",
+            "publisher": {
+              "@id": "https://upcloud.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://upcloud.com/?s={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://upcloud.com/media/screenshot-2025-06-30-at-09.53.12.png",
+            "url": "https://upcloud.com/media/screenshot-2025-06-30-at-09.53.12.png",
+            "width": "200",
+            "height": "200",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://upcloud.com/#webpage",
+            "url": "https://upcloud.com/",
+            "name": "Global Cloud Platform - UpCloud",
+            "datePublished": "2022-03-18T10:10:09+02:00",
+            "dateModified": "2026-03-18T14:42:28+02:00",
+            "about": {
+              "@id": "https://upcloud.com/#organization"
+            },
+            "isPartOf": {
+              "@id": "https://upcloud.com/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://upcloud.com/media/screenshot-2025-06-30-at-09.53.12.png"
+            },
+            "inLanguage": "en-US"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:25.250626+00:00"
+  }
+}

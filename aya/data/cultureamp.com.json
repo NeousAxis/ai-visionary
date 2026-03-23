@@ -1,0 +1,305 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:18.470388+00:00",
+  "source": {
+    "input_url": "https://www.cultureamp.com",
+    "canonical_domain": "cultureamp.com",
+    "pages_scanned": [
+      "https://www.cultureamp.com/",
+      "https://www.cultureamp.com/company",
+      "https://www.cultureamp.com/platform",
+      "https://www.cultureamp.com/platform",
+      "https://www.cultureamp.com/platform/plans-and-pricing",
+      "https://www.cultureamp.com/company/trust",
+      "https://www.cultureamp.com/company/legal/terms"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Culture Amp",
+    "website": "https://www.cultureamp.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "legal@cultureamp.com",
+      "phone": "138 600 987",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Culture Amp",
+        "website": "https://www.cultureamp.com/",
+        "email": "legal@cultureamp.com",
+        "phone": "138 600 987",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "The market-leading employee experience platform | Culture Amp"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Empower your teams and fuel positive change with performance, development, and employee engagement tools – all-in-one intuitive employee experience platform.",
+        "og_description": "Empower your teams and fuel positive change with performance, development, and employee engagement tools – all-in-one intuitive employee experience platform."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 71.7,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 71.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Culture Amp",
+            "url": "https://www.cultureamp.com",
+            "inLanguage": "en-US"
+          },
+          {
+            "@id": "https://www.cultureamp.com/#organization",
+            "@type": "Organization",
+            "name": "Culture Amp",
+            "url": "https://www.cultureamp.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.cultureamp.com/assets/slices/main/assets/public/media/logo-culture-amp-gsearch.e232847c57a772c0699d.webp",
+              "width": 530,
+              "height": 530
+            },
+            "email": "support@cultureamp.com",
+            "description": "The market-leading employee experience",
+            "sameAs": [
+              "https://twitter.com/cultureamp",
+              "https://www.linkedin.com/company/cultureamp",
+              "https://www.facebook.com/CultureAmp",
+              "https://www.instagram.com/cultureamp",
+              "https://www.youtube.com/channel/UCBz-KK036_WU5x0Hm0le30w"
+            ],
+            "award": "Fast Company's Top 10 Most Innovative Workplace Companies 2023",
+            "ethicsPolicy": "https://cultureampcom-production-488117387746-files.s3.us-west-2.amazonaws.com/uploads/CultureAmp-ModernSlaveryStatement-2025.pdf",
+            "founder": [
+              {
+                "@type": "Person",
+                "name": "Didier Elzinga",
+                "image": "https://www.cultureamp.com/assets/slices/main/assets/public/media/didier-elzinga.ac0f40e3717023a1c3ea.webp",
+                "url": "https://www.cultureamp.com/contributors/didier-elzinga",
+                "jobTitle": "CEO"
+              }
+            ],
+            "legalName": "Culture Amp Pty Ltd",
+            "slogan": "Create a better world of work",
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "telephone": "+1-415-636-8011",
+                "contactType": "Sales",
+                "areaServed": "US"
+              },
+              {
+                "@type": "ContactPoint",
+                "telephone": "+44-20-3744-2922",
+                "contactType": "Sales",
+                "areaServed": "Europe"
+              },
+              {
+                "@type": "ContactPoint",
+                "telephone": "+61-3-7035-1005",
+                "contactType": "Sales",
+                "areaServed": "Australia"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:18.470396+00:00"
+  }
+}

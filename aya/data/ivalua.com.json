@@ -1,0 +1,351 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:47.107542+00:00",
+  "source": {
+    "input_url": "https://www.ivalua.com",
+    "canonical_domain": "ivalua.com",
+    "pages_scanned": [
+      "https://www.ivalua.com/",
+      "https://www.ivalua.com/company/about-ivalua/",
+      "https://www.ivalua.com/company/about-ivalua/",
+      "https://www.ivalua.com/lets-talk/",
+      "https://www.ivalua.com/services/",
+      "https://www.ivalua.com/legal/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 8
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Ivalua",
+    "website": "https://www.ivalua.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+1 650-930-9710",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Ivalua",
+        "website": "https://www.ivalua.com/",
+        "email": "",
+        "phone": "+1 650-930-9710",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Ivalua | Procurement, Spend & Supplier Management Software"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Ivalua is a global leader of AI-powered procurement software for complete spend & supplier management on a unified source-to-pay platform.",
+        "og_description": "Ivalua is a global leader of AI-powered procurement software for complete spend & supplier management on a unified source-to-pay platform."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "glossary",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.ivalua.com/",
+            "url": "https://www.ivalua.com/",
+            "name": "Ivalua | Procurement, Spend & Supplier Management Software",
+            "isPartOf": {
+              "@id": "https://www.ivalua.com/#website"
+            },
+            "about": {
+              "@id": "https://www.ivalua.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.ivalua.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.ivalua.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://www.ivalua.com/wp-content/uploads/2022/09/ivalua-a-single-platform-to-efficiently-manage-si.png",
+            "datePublished": "2025-01-19T15:12:00+00:00",
+            "dateModified": "2026-02-13T04:14:03+00:00",
+            "description": "Ivalua is a global leader of AI-powered procurement software for complete spend & supplier management on a unified source-to-pay platform.",
+            "breadcrumb": {
+              "@id": "https://www.ivalua.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.ivalua.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://www.ivalua.com/#primaryimage",
+            "url": "https://www.ivalua.com/wp-content/uploads/2022/09/ivalua-a-single-platform-to-efficiently-manage-si.png",
+            "contentUrl": "https://www.ivalua.com/wp-content/uploads/2022/09/ivalua-a-single-platform-to-efficiently-manage-si.png",
+            "width": 1200,
+            "height": 675,
+            "caption": "Home - A Single Platform to Efficiently Manage All Supplier Relationships and Spend - Social Image"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.ivalua.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ivalua.com/#website",
+            "url": "https://www.ivalua.com/",
+            "name": "Ivalua",
+            "description": "The Procurement Empowerment Platform",
+            "publisher": {
+              "@id": "https://www.ivalua.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.ivalua.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.ivalua.com/#organization",
+            "name": "Ivalua",
+            "url": "https://www.ivalua.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.ivalua.com/#/schema/logo/image/",
+              "url": "https://www.ivalua.com/wp-content/uploads/2020/01/logo_ivalua2020v1.png",
+              "contentUrl": "https://www.ivalua.com/wp-content/uploads/2020/01/logo_ivalua2020v1.png",
+              "width": 155,
+              "height": 76,
+              "caption": "Ivalua"
+            },
+            "image": {
+              "@id": "https://www.ivalua.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://facebook.com/ivalua",
+              "https://x.com/ivalua",
+              "https://www.linkedin.com/company/ivalua",
+              "https://www.pinterest.com/IvaluaBuyer/",
+              "https://www.youtube.com/@IvaluaNOW"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:47.107555+00:00"
+  }
+}

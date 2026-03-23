@@ -1,0 +1,547 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:01.620438+00:00",
+  "source": {
+    "input_url": "https://www.orca.security",
+    "canonical_domain": "orca.security",
+    "pages_scanned": [
+      "https://orca.security/",
+      "https://orca.security/about/",
+      "https://orca.security/resources/faq/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Orca Security",
+    "website": "https://orca.security/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "",
+      "phone": "2019-2023",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Orca Security",
+        "website": "https://orca.security/",
+        "email": "",
+        "phone": "2019-2023",
+        "country": "",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "Orca Security | AI-Powered Cloud Security Platform & CNAPP"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Secure your multi-cloud environment from build to runtime with the industry-leading CNAPP. Featuring comprehensive AI security and workload defense.",
+        "og_description": "Orca Security provides agentless, workload-deep, context-aware cloud infrastructure security and compliance through our comprehensive cloud security solution all in a single platform."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "iso",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "iso",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "",
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 71.7,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 71.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://orca.security/",
+            "url": "https://orca.security/",
+            "name": "Orca Security | AI-Powered Cloud Security Platform & CNAPP",
+            "isPartOf": {
+              "@id": "https://orca.security/#website"
+            },
+            "about": {
+              "@id": "https://orca.security/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://orca.security/#primaryimage"
+            },
+            "image": {
+              "@id": "https://orca.security/#primaryimage"
+            },
+            "thumbnailUrl": "https://orca.security/wp-content/uploads/2025/01/default-background-dark.png",
+            "datePublished": "2022-11-03T17:10:58+00:00",
+            "dateModified": "2026-03-23T13:01:55+00:00",
+            "description": "Secure your multi-cloud environment from build to runtime with the industry-leading CNAPP. Featuring comprehensive AI security and workload defense.",
+            "breadcrumb": {
+              "@id": "https://orca.security/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://orca.security/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://orca.security/#primaryimage",
+            "url": "https://orca.security/wp-content/uploads/2025/01/default-background-dark.png",
+            "contentUrl": "https://orca.security/wp-content/uploads/2025/01/default-background-dark.png",
+            "width": 1920,
+            "height": 1080,
+            "caption": "The Orca Security \"O\" mark on a dark background"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://orca.security/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://orca.security/#website",
+            "url": "https://orca.security/",
+            "name": "Orca Security",
+            "description": "Orca’s cloud security solution deploys in minutes and identifies vulnerabilities, malware, misconfigurations, secret keys, leaked passwords, lateral movement risk, and high-risk data such as PII.",
+            "publisher": {
+              "@id": "https://orca.security/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://orca.security/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://orca.security/#organization",
+            "name": "Orca Security",
+            "url": "https://orca.security/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://orca.security/#/schema/logo/image/",
+              "url": "https://orca.security/wp-content/uploads/2025/01/orca-security-logo-2025.svg",
+              "contentUrl": "https://orca.security/wp-content/uploads/2025/01/orca-security-logo-2025.svg",
+              "width": 214,
+              "height": 81,
+              "caption": "Orca Security"
+            },
+            "image": {
+              "@id": "https://orca.security/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://x.com/OrcaSec",
+              "https://www.linkedin.com/company/orca-security/",
+              "https://www.youtube.com/orcasecurity",
+              "https://www.g2.com/products/orca-security/reviews",
+              "https://www.crunchbase.com/organization/orca-security",
+              "https://www.google.com/search?kgmid=/g/11p5zx0wrk&hl=en-US&q=Orca Security Ltd.&kgs=56b4534bd8fbf4a9&shndl=17&source=sh/x/kp/osrp/m5/1",
+              "https://www.bloomberg.com/profile/company/1724724D:IT?embedded-checkout=true",
+              "https://www.zoominfo.com/c/orca-security-ltd/474907172"
+            ],
+            "description": "At Orca, we’re not just innovators in the cloud security space—we’re creators of it. Our founders understood that modern computing technologies and the cloud required a re-architecture of security, so they set out to change the game. Their vision became the industry’s first agentless cloud security solution, providing customers with comprehensive and scalable coverage never seen before. With a patent for this revolutionary SideScanning™ technology, Orca pioneered the path for modern cloud security and continues on the path of innovation, including AI-powered cloud security. With our Unified Data model offering contextual security insights, Orca effectively prioritizes risks, allowing security teams to focus on what matters most.",
+            "telephone": "+19713425080",
+            "legalName": "Orca Security, Ltd.",
+            "foundingDate": "2019-12-01",
+            "duns": "117191573",
+            "naics": "541990",
+            "numberOfEmployees": {
+              "@type": "QuantitativeValue",
+              "value": "350"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+19713425080",
+              "contactType": "Customer service"
+            },
+            "address": [
+              {
+                "@type": "PostalAddress",
+                "addressLocality": "London",
+                "addressRegion": "United Kingdom",
+                "postalCode": "W1W 8DY",
+                "addressCountry": "GB",
+                "streetAddress": "16-19 Eastcastle St"
+              },
+              {
+                "@type": "PostalAddress",
+                "addressLocality": "Tel Aviv",
+                "addressRegion": "Tel Aviv-Yafo",
+                "postalCode": "61131",
+                "addressCountry": "IL",
+                "streetAddress": "Tushiya St 3"
+              },
+              {
+                "@type": "PostalAddress",
+                "addressLocality": "Portland",
+                "addressRegion": "OR",
+                "postalCode": "97209",
+                "addressCountry": "US",
+                "streetAddress": "1455 NW Irving St., Suite 390"
+              }
+            ],
+            "founders": [
+              {
+                "@type": "Person",
+                "name": "Gil Geron",
+                "jobTitle": "CEO and Co-Founder",
+                "url": "https://orca.security/about/"
+              },
+              {
+                "@type": "Person",
+                "name": "Avi Shua",
+                "jobTitle": "Chief Innovation Officer & Co-Founder",
+                "url": "https://orca.security/about/"
+              }
+            ],
+            "awards": [
+              "CNBC Disruptor 50 and Forbes Cloud 100",
+              "2024 CRN AI 100 List For Cybersecurity",
+              "AWS Advanced Technology Partner Security Competency",
+              "FedRAMP Moderate Authorized",
+              "ISO/EC 27001 Information",
+              "ISO/EC 27017 Information",
+              "ISO/EC 27018 Information",
+              "ISO/EC 27701 Privacy",
+              "PCI SAQ-D",
+              "SOC 2 TYPE II Certified",
+              "2022 AWS Global Security Partner of the Year",
+              "Star Level One: Self-Assessment Cloud Security Alliance",
+              "CSA Trusted Cloud Provider Cloud Security Alliance",
+              "IRAP Certification"
+            ],
+            "funder": [
+              {
+                "@type": "Organization",
+                "name": "YL Ventures",
+                "url": "https://www.ylventures.com/",
+                "description": "YL Ventures is a seed-stage venture capital firm. The company’s managing partner Yoav Leitersdorf who founded the firm with John Quigley in 2007, along with Israel and U.S. partners Ofer Schreiber and John Brennan. Current partners also include Sharon Seeman and Michael Cortez. The firm has headquarters in San Francisco and Tel Aviv. A main focus of YL Ventures is to introduce Israeli cybersecurity start-ups to the American market and develop a U.S. customer base."
+              },
+              {
+                "@type": "Organization",
+                "name": "Willoughby Capital",
+                "url": "https://www.willcapllc.com/",
+                "description": "Willow Capital, LLC, is a premier investment management firm dedicated to delivering superior financial solutions tailored to meet the unique needs of its clients. With a steadfast commitment to excellence, Willow Capital provides comprehensive investment strategies and personalized wealth management services, ensuring the growth and preservation of client assets. Leveraging a team of seasoned financial professionals, the firm specializes in a wide array of investment opportunities, including equities, fixed income, real estate, and alternative investments. By combining deep market insights with a client-centric approach, Willow Capital empowers individuals, families, and institutions to achieve their financial goals and secure their financial future."
+              },
+              {
+                "@type": "Organization",
+                "name": "TEMASEK",
+                "url": "https://www.temasek.com.sg/en/index",
+                "description": "Temasek is a global investment company headquartered in Singapore, dedicated to creating sustainable long-term value for its stakeholders. With a diverse portfolio spanning various sectors including financial services, telecommunications, media, technology, transportation, industrials, consumer, and real estate, Temasek operates in markets around the world. Established in 1974, the company is driven by its core values of integrity, excellence, and respect, investing with a focus on sustainability, innovation, and societal impact. Through strategic investments, Temasek aims to foster inclusive growth and contribute positively to communities, shaping a better and more resilient future."
+              },
+              {
+                "@type": "Organization",
+                "name": "Silicon Valley CISO Investments (SVCI)",
+                "url": "https://www.svci.io/",
+                "description": "Silicon Valley CISO Investments (SVCI) is an exclusive, member-driven venture capital fund composed of Chief Information Security Officers (CISOs) from leading organizations. With a unique focus on cybersecurity innovation, SVCI leverages the deep industry expertise and strategic insights of its members to identify and invest in promising cybersecurity startups. The collective experience of its CISO members provides unparalleled guidance and mentorship to portfolio companies, fostering the development of cutting-edge security solutions. Committed to advancing the cybersecurity landscape, SVCI plays a pivotal role in driving technological advancements and securing the digital future."
+              },
+              {
+                "@type": "Organization",
+                "name": "Stripes",
+                "url": "https://www.stripes.co/",
+                "description": "Stripes is a growth equity firm dedicated to partnering with visionary founders and management teams to build transformative, market-leading companies. With a focus on technology and consumer businesses, Stripes leverages its extensive industry expertise, strategic insights, and operational support to accelerate growth and drive long-term value. The firm prides itself on its collaborative approach, fostering deep relationships with its portfolio companies to unlock their full potential. By combining a passion for innovation with a commitment to excellence, Stripes aims to create lasting impact and shape the future of industries worldwide.."
+              },
+              {
+                "@type": "Organization",
+                "name": "Splunk",
+                "url": "https://www.splunk.com/",
+                "description": "Splunk Inc. is a leading provider of data analytics and monitoring solutions that empower organizations to turn machine data into valuable insights. Specializing in big data, artificial intelligence, and cloud services, Splunk enables businesses to enhance operational intelligence, security, and performance. Its robust platform collects, indexes, and analyzes real-time data generated by various digital systems and technologies, helping organizations to monitor, troubleshoot, and optimize their IT infrastructure and business processes. With a commitment to innovation and customer success, Splunk transforms data into actionable knowledge, driving improved decision-making and business outcomes across diverse industries."
+              },
+              {
+                "@type": "Organization",
+                "name": "SAIC",
+                "url": "https://www.saic.com/",
+                "description": "Science Applications International Corporation (SAIC) is a premier technology integrator specializing in delivering high-impact, mission-critical solutions for government and commercial clients. With a robust portfolio spanning defense, space, civilian, and intelligence sectors, SAIC leverages cutting-edge technologies and deep domain expertise to address complex challenges. The company provides a comprehensive suite of services, including digital transformation, IT modernization, cloud migration, cybersecurity, and advanced analytics. Committed to innovation and excellence, SAIC empowers organizations to achieve their strategic objectives, ensuring operational efficiency and enhanced performance in an increasingly dynamic and digital world."
+              },
+              {
+                "@type": "Organization",
+                "name": "Redpoint",
+                "url": "https://www.redpointglobal.com/",
+                "description": "Redpoint Global is a leading provider of customer data platform (CDP) and customer engagement technology, empowering businesses to deliver personalized, real-time customer experiences across all touchpoints. By integrating and orchestrating data from various sources, Redpoint&#039;s solutions provide a unified customer view, enabling organizations to drive meaningful interactions and enhance customer loyalty. Their advanced analytics, machine learning, and automation capabilities help businesses optimize marketing efforts, increase operational efficiency, and achieve measurable growth. With a commitment to innovation and customer success, Redpoint Global helps companies transform their customer engagement strategies, creating lasting and impactful connections."
+              },
+              {
+                "@type": "Organization",
+                "name": "Lone Pine Capital",
+                "url": "https://www.lonepinecapital.com/",
+                "description": "Lone Pine Capital is a renowned investment management firm known for its expertise in global equities. With a focus on fundamental research and a long-term investment horizon, Lone Pine seeks to identify high-quality companies with strong growth potential. Led by founder and portfolio manager Stephen Mandel Jr., the firm employs a disciplined investment approach that combines rigorous analysis, active management, and risk management principles. By leveraging their deep industry knowledge and extensive network, Lone Pine aims to generate superior returns for their investors while preserving capital over the long term."
+              },
+              {
+                "@type": "Organization",
+                "name": "ICONIQ",
+                "url": "https://www.iconiqcapital.com/",
+                "description": "ICONIQ Capital is a premier investment firm renowned for its innovative approach to wealth management and asset allocation. Catering to a select group of high-net-worth individuals, families, and institutions, ICONIQ offers personalized investment solutions tailored to each client&#039;s unique financial goals and preferences. With a focus on technology, growth equity, and venture capital, the firm leverages its deep industry expertise and global network to identify and invest in transformative opportunities. Led by a team of seasoned professionals, ICONIQ Capital is committed to delivering exceptional returns and fostering long-term relationships built on trust, integrity, and performance."
+              },
+              {
+                "@type": "Organization",
+                "name": "Harmony Partners",
+                "url": "https://www.harmonyvp.com/",
+                "description": "Harmony Venture Partners is a distinguished venture capital firm dedicated to fueling the growth of early-stage technology startups. With a focus on innovation, disruption, and scalable solutions, Harmony VP provides strategic capital, mentorship, and operational support to entrepreneurs and visionary founders. Leveraging its extensive network, industry insights, and hands-on approach, the firm partners with promising startups across various sectors, including software, fintech, healthcare, and consumer technology. Committed to driving success and unlocking potential, Harmony VP empowers entrepreneurs to transform their ideas into thriving businesses, shaping the future of innovation and entrepreneurship."
+              },
+              {
+                "@type": "Organization",
+                "name": "Notable",
+                "url": "https://notablecap.com/",
+                "description": "Notable Capital is a distinguished investment firm specializing in private equity and venture capital investments across a diverse range of industries. With a focus on identifying exceptional opportunities and partnering with visionary entrepreneurs, Notable Capital provides strategic capital, operational expertise, and industry insights to drive sustainable growth and value creation. Leveraging their deep network and extensive experience, the firm seeks to generate attractive returns for their investors while fostering innovation and long-term success for their portfolio companies. Committed to integrity, transparency, and collaboration, Notable Capital strives to be a trusted partner and catalyst for positive change in the global business landscape."
+              },
+              {
+                "@type": "Organization",
+                "name": "CapitalG",
+                "url": "https://www.capitalg.com/",
+                "description": "CapitalG, formerly known as Google Capital, is a leading growth equity firm focused on investing in innovative technology companies poised for exponential growth. With a deep understanding of the tech landscape and a track record of success, CapitalG partners with exceptional entrepreneurs to provide strategic capital and operational support. Leveraging their access to Google&#039;s resources and expertise, the firm empowers portfolio companies to accelerate their growth, expand their reach, and drive meaningful impact. Committed to fostering innovation and driving positive change, CapitalG is dedicated to building lasting relationships and unlocking the potential of tomorrow&#039;s technology leaders."
+              },
+              {
+                "@type": "Organization",
+                "name": "Adams Street",
+                "url": "https://www.adamsstreetpartners.com/",
+                "description": "Adams Street Partners is a premier private markets investment management firm, specializing in venture capital, growth equity, and buyout investments. With a global presence and over four decades of experience, Adams Street Partners offers institutional investors access to a diverse range of investment strategies and opportunities. Through a combination of rigorous research, disciplined investment processes, and extensive industry networks, the firm aims to generate attractive returns while managing risk effectively. Committed to partnership, integrity, and long-term value creation, Adams Street Partners collaborates closely with entrepreneurs and management teams to support their growth and success, driving innovation and innovation in the global economy."
+              }
+            ],
+            "brand": {
+              "@type": "Brand",
+              "name": "Orca Security",
+              "url": "https://orca.security/",
+              "logo": "https://orca.security/wp-content/uploads/2025/01/orca-security-logo-2025.svg"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "headline": "Orca Security",
+        "url": "https://orca.security",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "http://orca.security/"
+        },
+        "thumbnailUrl": "https://orca.security/wp-content/uploads/2025/01/default-background-dark.png?w=384",
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://orca.security/wp-content/uploads/2025/01/default-background-dark.png"
+        },
+        "articleSection": "Landing Page",
+        "author": [
+          {
+            "@type": "Person",
+            "name": "John Lewis"
+          }
+        ],
+        "creator": [
+          "John Lewis"
+        ],
+        "publisher": {
+          "@type": "Organization",
+          "name": "Orca Security",
+          "logo": ""
+        },
+        "keywords": [],
+        "dateCreated": "2022-11-03T17:10:58Z",
+        "datePublished": "2022-11-03T17:10:58Z",
+        "dateModified": "2026-03-23T13:01:55Z"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:01.620446+00:00"
+  }
+}

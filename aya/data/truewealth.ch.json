@@ -1,0 +1,234 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:56.071216+00:00",
+  "source": {
+    "input_url": "https://www.truewealth.ch",
+    "canonical_domain": "truewealth.ch",
+    "pages_scanned": [
+      "https://www.truewealth.ch/",
+      "https://www.truewealth.ch/contact",
+      "https://www.truewealth.ch/pricing",
+      "https://www.truewealth.ch/faq"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "True Wealth AG",
+    "website": "https://www.truewealth.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "press@truewealth.ch",
+      "phone": "+41 44 508 70 17",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "investment",
+      "trading",
+      "wealth",
+      "portfolio"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "True Wealth AG",
+        "website": "https://www.truewealth.ch/",
+        "email": "press@truewealth.ch",
+        "phone": "+41 44 508 70 17",
+        "country": "CH",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "True Wealth – Online wealth management in Switzerland"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution"
+        ],
+        "meta_description": "True Wealth, online wealth management. Intuitive, transparent, cost-efficient: invest and build wealth with ETFs.",
+        "og_description": "True Wealth, online wealth management. Intuitive, transparent, cost-efficient: invest and build wealth with ETFs."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "product",
+        "products",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "iso",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 61.6,
+    "final_score": 62,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 62,
+    "raw_score": 61.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "True Wealth AG",
+        "url": "https://www.truewealth.ch",
+        "sameAs": [
+          "https://www.facebook.com/pages/True-Wealth/175945535896582",
+          "https://www.linkedin.com/company/true-wealth"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "logo": "https://www.truewealth.ch/logo.png",
+        "url": "https://www.truewealth.ch"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:56.071227+00:00"
+  }
+}

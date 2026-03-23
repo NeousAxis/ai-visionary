@@ -1,0 +1,326 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:59.665592+00:00",
+  "source": {
+    "input_url": "https://www.additiv.com",
+    "canonical_domain": "additiv.com",
+    "pages_scanned": [
+      "https://www.additiv.com/",
+      "https://www.additiv.com/contact/"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 5
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "additiv",
+    "website": "https://www.additiv.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1998-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "crédit",
+      "investment",
+      "insurance",
+      "wealth"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "additiv",
+        "website": "https://www.additiv.com/",
+        "email": "",
+        "phone": "1998-2026",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "The digital financial services platform to add innovation | additiv"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Join 400+ companies using the additiv platform to efficiently launch and manage financial services across channels and markets.",
+        "og_description": "Evolve your business model and transform your offering with innovative wealth management, banking, credit, and insurance solutions."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "menu",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "gdpr",
+          "iso",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "gdpr",
+        "iso",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.additiv.com/",
+            "url": "https://www.additiv.com/",
+            "name": "The digital financial services platform to add innovation | additiv",
+            "isPartOf": {
+              "@id": "https://www.additiv.com/#website"
+            },
+            "about": {
+              "@id": "https://www.additiv.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.additiv.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.additiv.com/#primaryimage"
+            },
+            "thumbnailUrl": "/wp-content/uploads/2024/05/additiv-Platform-Diagram-vF.png",
+            "datePublished": "2025-04-15T11:46:06+00:00",
+            "dateModified": "2025-10-22T14:22:41+00:00",
+            "description": "Join 400+ companies using the additiv platform to efficiently launch and manage financial services across channels and markets.",
+            "breadcrumb": {
+              "@id": "https://www.additiv.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.additiv.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://www.additiv.com/#primaryimage",
+            "url": "/wp-content/uploads/2024/05/additiv-Platform-Diagram-vF.png",
+            "contentUrl": "/wp-content/uploads/2024/05/additiv-Platform-Diagram-vF.png",
+            "width": 1003,
+            "height": 1003
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.additiv.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.additiv.com/#website",
+            "url": "https://www.additiv.com/",
+            "name": "additiv",
+            "description": "",
+            "publisher": {
+              "@id": "https://www.additiv.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.additiv.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.additiv.com/#organization",
+            "name": "Additiv AG",
+            "url": "https://www.additiv.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.additiv.com/#/schema/logo/image/",
+              "url": "https://www.additiv.com/wp-content/uploads/2021/08/logo-additiv.svg",
+              "contentUrl": "https://www.additiv.com/wp-content/uploads/2021/08/logo-additiv.svg",
+              "width": "1440",
+              "height": "1440",
+              "caption": "Additiv AG"
+            },
+            "image": {
+              "@id": "https://www.additiv.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://x.com/additivAG",
+              "https://www.linkedin.com/company/additiv/",
+              "https://www.youtube.com/channel/UC1B4S1TtFeBe43RAnSAVhhQ"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:50:59.665604+00:00"
+  }
+}

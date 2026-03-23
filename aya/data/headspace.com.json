@@ -1,0 +1,312 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:17.758490+00:00",
+  "source": {
+    "input_url": "https://www.headspace.com",
+    "canonical_domain": "headspace.com",
+    "pages_scanned": [
+      "https://www.headspace.com/",
+      "https://help.headspace.com/hc/en-us"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 2670
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Headspace",
+    "website": "https://www.headspace.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "SoftwareApplication",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "SoftwareApplication"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Headspace",
+        "website": "https://www.headspace.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "SoftwareApplication"
+      },
+      "evidence": [
+        "Mental Health App for Meditation & Sleep - Headspace"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "product",
+          "products",
+          "service",
+          "services"
+        ],
+        "meta_description": "Live a healthier, happier, more well-rested life in just a few minutes a day. Get the science-backed mental health app for every moment. Try for free.",
+        "og_description": "Live a healthier, happier, more well-rested life in just a few minutes a day. Get the science-backed mental health app for every moment. Try for free."
+      },
+      "evidence": [
+        "app",
+        "product",
+        "products",
+        "service",
+        "services"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps"
+        ]
+      },
+      "evidence": [
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "SoftwareApplication",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Headspace",
+        "operatingSystem": [
+          "iOS",
+          "Android",
+          "Web"
+        ],
+        "applicationCategory": "HealthApplication",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": 4.7,
+          "ratingCount": 1284000,
+          "bestRating": 5,
+          "reviewCount": 1284000
+        },
+        "offers": [
+          {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "category": "free"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Headspace?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Headspace is your lifelong guide to better mental health. Through evidence-based [meditation](https://www.headspace.com/meditation?origin=homepage) and [mindfulness tools](https://www.headspace.com/mindfulness?origin=homepage), [sleep resources](https://www.headspace.com/sleep?origin=homepage), [mental health coaching](https://www.headspace.com/coaching?origin=homepage), and more, Headspace helps you create life-changing habits to support your mental health and find a healthier, happier you.\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is Headspace’s mission?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Headspace was founded in 2010 with the mission to revolutionize mental health for humanity and to guide you to more joy, less stress, and the best sleep of your life. A better day at work, home, and all the moments in between — Headspace makes it easy for you to love your mind."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I download the Headspace app?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The Headspace app is currently available on Apple (iPhone, iPad, iPod Touch) and Android (smartphone and tablet) devices. [Sign up for a Headspace account](https://checkout.headspace.com/checkout?voucherCode=B2C14DANNUAL2022&amp;origin=homepage), and then you'll be directed to download the app to get started."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is included in a Headspace app subscription?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Once you've [subscribed](https://checkout.headspace.com/checkout?voucherCode=B2C14DANNUAL2022&amp;origin=homepage), your subscription will include: <br>\n\n- [1,000+ expert-led exercises](https://www.headspace.com/content?origin=homepage): Mood-boosting meditations and stress-relieving tools for all of life’s moments\n- Find your best sleep: Rest easy with [relaxing wind downs](https://www.headspace.com/content/wind-down/goodnight/291?origin=homepage), [soundscapes](https://www.headspace.com/content/topics/65?origin=homepage), and fan-favorite [sleepcasts](https://www.headspace.com/sleep/sleepcasts?origin=homepage)\n- [Proven mental health resources](https://www.headspace.com/content/topics/156?origin=homepage): Reach your goals with tools backed by research and delivered by trained mindfulness experts \n\nYou can also add [mental health coaching](https://www.headspace.com/coaching?origin=homepage) to your plan.\n\nIf you need help choosing a plan or subscribing, please visit our [FAQs](https://help.headspace.com/hc/en-us?origin=homepage)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How much does Headspace cost?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can check out all of our different [subscription plans](https://www.headspace.com/subscriptions?origin=homepage), which include our [Annual](https://checkout.headspace.com/checkout?voucherCode=B2C14DANNUAL2022&amp;origin=homepage) and [Monthly](https://checkout.headspace.com/checkout?voucherCode=B2C7DMONTHLY&amp;origin=homepage) plans. We also have [student](https://headspace.com/studentplan?origin=homepage) and [family plans](https://www.headspace.com/family-plan?origin=homepage), as well as a [gift](https://www.headspace.com/buy/gift?origin=homepage) option."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does my Headspace subscription automatically renew?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, your [annual](https://checkout.headspace.com/checkout?voucherCode=B2C14DANNUAL2022&amp;origin=homepage) or [monthly](https://checkout.headspace.com/checkout?voucherCode=B2C7DMONTHLY&amp;origin=homepage) subscription will auto-renew. Unless canceled, monthly subscriptions automatically renew each month and annual subscriptions automatically renew each year on the day you subscribed. Your subscription can be canceled at any time. "
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I cancel my Headspace subscription?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "If you need help canceling your subscription, you can learn more [here](https://help.headspace.com/hc/en-us/articles/115008364988-How-do-I-cancel-my-subscription?origin=homepage)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I support my team’s mental health at work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "[Request a demo](https://organizations.headspace.com/demo?origin=homepage) to learn more about how we help you support your team. Headspace is here to provide mindfulness, coaching, [EAP](https://organizations.headspace.com/headspace-eap?origin=homepage), therapy, psychiatry, and more to 4,000+ organizations worldwide.\n"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:17.758499+00:00"
+  }
+}

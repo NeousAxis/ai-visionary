@@ -1,0 +1,330 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:27.407251+00:00",
+  "source": {
+    "input_url": "https://www.temenos.com",
+    "canonical_domain": "temenos.com",
+    "pages_scanned": [
+      "https://www.temenos.com/",
+      "https://www.temenos.com/video/about-temenos-value-benchmark/",
+      "https://www.temenos.com/contact-us/",
+      "https://www.temenos.com/products/services/",
+      "https://www.temenos.com/products/",
+      "https://www.temenos.com/products/core-banking/regulatory-compliance/legal-entity-identifier/",
+      "https://www.temenos.com/legal-information/privacy-policy/"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 32
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Temenos",
+    "website": "https://www.temenos.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+49 228 926165 109",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Temenos",
+        "website": "https://www.temenos.com/",
+        "email": "",
+        "phone": "+49 228 926165 109",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Temenos | Core, Digital & AI Banking Software Leader"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Temenos offers cloud-native, AI-driven banking software trusted by 950+ banks for core, digital & wealth. Explore our solutions.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 65.6,
+    "final_score": 66,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 66,
+    "raw_score": 65.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.temenos.com/",
+            "url": "https://www.temenos.com/",
+            "name": "Temenos | Core, Digital & AI Banking Software Leader",
+            "isPartOf": {
+              "@id": "https://www.temenos.com/#website"
+            },
+            "about": {
+              "@id": "https://www.temenos.com/#organization"
+            },
+            "datePublished": "2025-04-07T12:41:41+00:00",
+            "dateModified": "2026-03-12T17:44:32+00:00",
+            "description": "Temenos offers cloud-native, AI-driven banking software trusted by 950+ banks for core, digital & wealth. Explore our solutions.",
+            "breadcrumb": {
+              "@id": "https://www.temenos.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.temenos.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.temenos.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.temenos.com/#website",
+            "url": "https://www.temenos.com/",
+            "name": "Temenos",
+            "description": "Grow Bigger Scale Faster Bank Better",
+            "publisher": {
+              "@id": "https://www.temenos.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.temenos.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.temenos.com/#organization",
+            "name": "Temenos",
+            "url": "https://www.temenos.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.temenos.com/#/schema/logo/image/",
+              "url": "https://www.temenos.com/wp-content/uploads/2025/04/Temenos_Logo.png",
+              "contentUrl": "https://www.temenos.com/wp-content/uploads/2025/04/Temenos_Logo.png",
+              "width": 2560,
+              "height": 411,
+              "caption": "Temenos"
+            },
+            "image": {
+              "@id": "https://www.temenos.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/TemenosGroup/",
+              "https://x.com/Temenos",
+              "https://www.linkedin.com/company/temenos/"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:27.407262+00:00"
+  }
+}

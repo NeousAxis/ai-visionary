@@ -1,0 +1,372 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:56.186294+00:00",
+  "source": {
+    "input_url": "https://www.apollo.io",
+    "canonical_domain": "apollo.io",
+    "pages_scanned": [
+      "https://www.apollo.io/",
+      "https://www.apollo.io/about",
+      "https://www.apollo.io/contact-us",
+      "https://www.apollo.io/pricing",
+      "https://www.apollo.io/privacy-policy",
+      "https://www.apollo.io/terms"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 159
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Apollo.io",
+    "website": "https://www.apollo.io/",
+    "country": "US",
+    "city": "New York",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "abuse@apollo.io",
+      "phone": "91723-1722",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Apollo.io",
+        "website": "https://www.apollo.io/",
+        "email": "abuse@apollo.io",
+        "phone": "91723-1722",
+        "country": "US",
+        "city": "New York",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "AI Sales Platform | Apollo.io - Outbound, Inbound & Automation"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Accelerate B2B sales with Apollo.io—an AI sales platform for prospecting, lead gen, and deal automation. Close more deals, faster, with smart data.",
+        "og_description": "Accelerate B2B sales with Apollo.io—an AI sales platform for prospecting, lead gen, and deal automation. Close more deals, faster, with smart data."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "guide",
+          "help",
+          "knowledge base",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization",
+          "WebSite",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 80.0,
+    "final_score": 80,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 80,
+    "raw_score": 80.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Apollo.io",
+        "url": "https://www.apollo.io",
+        "logo": "https://www.apollo.io/logo.png",
+        "description": "Apollo.io is an AI-powered B2B sales intelligence platform that helps businesses search, engage, and convert leads more effectively.",
+        "sameAs": [
+          "https://www.linkedin.com/company/apollo-io",
+          "https://x.com/useapolloio",
+          "https://www.crunchbase.com/organization/apollo-io"
+        ],
+        "foundingDate": "2015",
+        "founders": [
+          {
+            "@type": "Person",
+            "name": "Tim Zheng"
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "135 West 50th Street",
+          "addressLocality": "New York",
+          "addressRegion": "NY",
+          "postalCode": "10020",
+          "addressCountry": "US"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.7",
+          "reviewCount": "8111",
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Apollo.io",
+        "url": "https://www.apollo.io"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Does Apollo.io provide a large and rich B2B contact and company database?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io provides a large and rich B2B contact and company database by giving access to millions of verified contacts and company profiles across industries and regions, which helps sales teams identify and connect with decision-makers more efficiently."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can Apollo.io enable highly precise lead targeting via advanced filtering?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io enables highly precise lead targeting with advanced filtering by letting users segment prospects using criteria like job title, seniority, company size, industry, location, and buyer intent signals, ensuring outreach efforts are focused on the most relevant opportunities."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Apollo.io automate outreach sequences and follow-ups?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io automates outreach sequences and follow-ups by offering built-in email sequencing, task reminders, and multi-touch campaign workflows, which save time and help sales teams maintain consistent, professional engagement with prospects."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Apollo.io integrate smoothly with CRMs and existing sales tools?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io integrates smoothly with CRMs and existing sales tools by syncing contact data, activity history, and outreach campaigns with platforms like Salesforce, HubSpot, and others, ensuring a seamless workflow across the sales tech stack."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Apollo.io offer strong analytics and reporting on outreach performance?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io offers strong analytics and reporting on outreach performance by providing dashboards that track metrics like open rates, response rates, and pipeline growth, helping teams refine strategies and measure success with data-driven insights."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is Apollo.io good value for its cost, especially for growing sales teams?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io delivers strong value for its cost by combining a vast B2B database with outreach automation and CRM integrations in one platform, which reduces the need for multiple tools and offers scalable pricing plans for growing sales teams."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Apollo.io support users with helpful educational resources and onboarding?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Every user gets always-on help—Academy courses, tutorials, webinars, community, and 24/7 AI chat—to reach first value fast. Live, personalized onboarding is included on paid plans."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can Apollo.io help reduce time spent on manual prospecting?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io helps reduce time spent on manual prospecting by combining automated lead generation, contact enrichment, and pre-built email workflows, allowing sales reps to focus more on conversations and closing deals rather than repetitive tasks."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Apollo.io improve the quality of sales pipelines?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io improves the quality of sales pipelines by providing accurate contact data, advanced segmentation, and engagement tracking, which together help build healthier pipelines filled with prospects that match ideal customer profiles."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can Apollo.io scale with a business as sales needs grow?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Apollo.io scales with a business as sales needs grow by offering flexible plans, feature-rich automation, and an expanding data network, ensuring that teams can rely on the same platform from early-stage prospecting to enterprise-level sales operations."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:56.186304+00:00"
+  }
+}

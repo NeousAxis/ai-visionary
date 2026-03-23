@@ -1,0 +1,268 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:45.580265+00:00",
+  "source": {
+    "input_url": "https://www.mediapart.fr",
+    "canonical_domain": "mediapart.fr",
+    "pages_scanned": [
+      "https://www.mediapart.fr/",
+      "https://aide.mediapart.fr/hc/fr",
+      "https://blogs.mediapart.fr/edition/le-club-mode-demploi"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Mediapart",
+    "website": "https://www.mediapart.fr/",
+    "country": "FR",
+    "city": "Paris",
+    "languages": [],
+    "org_type": "NewsMediaOrganization",
+    "contacts": {
+      "email": "dpo@opper.io",
+      "phone": "2005-2025 6",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "NewsMediaOrganization"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Mediapart",
+        "website": "https://www.mediapart.fr/",
+        "email": "dpo@opper.io",
+        "phone": "2005-2025 6",
+        "country": "FR",
+        "city": "Paris",
+        "org_type": "NewsMediaOrganization"
+      },
+      "evidence": [
+        "Mediapart - Actualité, enquêtes et dossiers d’investigation en toute indépendance !"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "offre",
+          "product",
+          "produit",
+          "produits",
+          "service",
+          "services"
+        ],
+        "meta_description": "Mediapart est un journal d’information numérique, participatif et indépendant, sans publicité ni subvention, et qui ne vit que du soutien de ses lecteurs et lectrices.",
+        "og_description": "Mediapart est un journal d’information numérique, participatif et indépendant, sans publicité ni subvention, et qui ne vit que du soutien de ses lecteurs et lectrices."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "confidentialité",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "confidentialité",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "NewsMediaOrganization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 61.0,
+    "final_score": 61,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 61,
+    "raw_score": 61.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@type": "NewsMediaOrganization",
+        "@id": "https://www.mediapart.fr/#organization",
+        "name": "Mediapart",
+        "url": "https://www.mediapart.fr/",
+        "description": "Mediapart est un journal d’information numérique, participatif et indépendant, sans publicité ni subvention, et qui ne vit que du soutien de ses lecteurs et lectrices.",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.mediapart.fr/images/v2/header/brand.svg"
+        },
+        "sameAs": [
+          "https://www.dailymotion.com/Mediapart",
+          "https://www.facebook.com/Mediapart.fr",
+          "https://www.instagram.com/mediapart/",
+          "https://fr.linkedin.com/company/mediapart",
+          "https://mediapart.social/@mediapart",
+          "https://www.youtube.com/user/mediapart"
+        ],
+        "foundingDate": "2008-03-16",
+        "ethicsPolicy": "https://www.mediapart.fr/charte-de-deontologie",
+        "ownershipFundingInfo": "https://www.mediapart.fr/journal/france/020719/mediapart-rend-son-independance-irreversible",
+        "masthead": "https://www.mediapart.fr/mentions-legales",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "127 avenue Ledru-Rollin",
+          "postalCode": "75011",
+          "addressLocality": "Paris",
+          "addressCountry": "FR"
+        },
+        "founders": [
+          {
+            "@type": "Person",
+            "name": "François Bonnet"
+          },
+          {
+            "@type": "Person",
+            "name": "Laurent Mauduit"
+          },
+          {
+            "@type": "Person",
+            "name": "Edwy Plenel"
+          },
+          {
+            "@type": "Person",
+            "name": "Marie-Hélène Smiéjan"
+          }
+        ],
+        "@context": "https://schema.org/"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:45.580275+00:00"
+  }
+}

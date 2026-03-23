@@ -1,0 +1,277 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:16.787143+00:00",
+  "source": {
+    "input_url": "https://www.jobup.ch",
+    "canonical_domain": "jobup.ch",
+    "pages_scanned": [
+      "https://www.jobup.ch/fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Jobup",
+    "website": "https://www.jobup.ch/fr/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "101 - 250",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "travel",
+    "sector_label": "Tourisme & Transport",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "hôtel",
+      "vol",
+      "tourism",
+      "tourisme",
+      "transport"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Jobup",
+        "website": "https://www.jobup.ch/fr/",
+        "email": "",
+        "phone": "101 - 250",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Toutes les offres d’emploi disponibles en Suisse romande sur jobup.ch"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "offre",
+          "product",
+          "service",
+          "services"
+        ],
+        "meta_description": "A la recherche d’un emploi en Suisse romande ? Annonces, portraits et évaluations d’entreprises, Base CV, Job Alerte… jobup.ch est l’outil incontournable pour votre recherche d’emploi !",
+        "og_description": "A la recherche d’un emploi en Suisse romande ? Annonces, portraits et évaluations d’entreprises, Base CV, Job Alerte… jobup.ch est l’outil incontournable pour votre recherche d’emploi !"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      [
+        {
+          "@context": "http://schema.org/",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://www.jobup.ch/#/schema/Organization/1",
+              "url": "https://www.jobup.ch/fr/",
+              "name": "jobup.ch",
+              "description": "jobup.ch est un site et une application consacrés à l'emploi",
+              "logo": {
+                "@type": "ImageObject",
+                "@id": "https://www.jobup.ch/public/favicon/apple-touch-icon.png"
+              },
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "25 Rue Eugène-Marziano",
+                "addressLocality": "Genève",
+                "addressRegion": "Genève",
+                "addressCountry": "CH",
+                "postalCode": "1227"
+              },
+              "sameAs": [
+                "https://www.linkedin.com/company/jobup-ch/",
+                "https://www.facebook.com/jobup.ch",
+                "https://www.instagram.com/jobup.ch",
+                "https://www.youtube.com/@jobup",
+                "https://www.tiktok.com/@jobup.ch"
+              ],
+              "parentOrganization": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://www.jobup.ch/#/schema/Organization/Ringier"
+                },
+                {
+                  "@type": "Organization",
+                  "@id": "https://www.jobup.ch/#/schema/Organization/Tamedia"
+                }
+              ]
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://www.jobup.ch/#/schema/WebSite/1",
+              "url": "https://www.jobup.ch/fr/",
+              "name": "jobup.ch",
+              "publisher": {
+                "@type": "Organization",
+                "@id": "https://www.jobup.ch/#/schema/Organization/1"
+              },
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://www.jobup.ch/fr/emplois/?term={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            }
+          ]
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:16.787157+00:00"
+  }
+}

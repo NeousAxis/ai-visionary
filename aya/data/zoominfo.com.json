@@ -1,0 +1,389 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:00.157142+00:00",
+  "source": {
+    "input_url": "https://www.zoominfo.com",
+    "canonical_domain": "zoominfo.com",
+    "pages_scanned": [
+      "https://www.zoominfo.com/",
+      "https://www.zoominfo.com/about",
+      "https://www.zoominfo.com/about/contact",
+      "https://www.zoominfo.com/services",
+      "https://help.zoominfo.com/s/",
+      "https://www.zoominfo.com/legal/terms-of-use"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "ZoomInfo",
+    "website": "https://www.zoominfo.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "FAQPage",
+    "contacts": {
+      "email": "dmca@zoominfo.com",
+      "phone": "+1 866-904-9666",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "ZoomInfo",
+        "website": "https://www.zoominfo.com/",
+        "email": "dmca@zoominfo.com",
+        "phone": "+1 866-904-9666",
+        "country": "",
+        "city": "",
+        "org_type": "FAQPage"
+      },
+      "evidence": [
+        "ZoomInfo: The #1 GTM Platform  - Sales AI for Lead Generation"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "ZoomInfo is the #1 GTM Platform: Marketing and sales AI plus the best B2B data. All-in-one lead generation, prospecting, market intelligence , and ABM software.",
+        "og_description": "ZoomInfo is the #1 GTM Platform: Marketing and sales AI plus the best B2B data. All-in-one lead generation, prospecting, market intelligence , and ABM software."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "glossary",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.1,
+    "final_score": 73,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 73,
+    "raw_score": 73.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@id": "https://www.zoominfo.com/#website",
+            "@type": "WebSite",
+            "url": "https://www.zoominfo.com/",
+            "name": "ZoomInfo: The GTM Platform",
+            "alternateName": [
+              "ZoomInfo Technologies",
+              "ZoomInfo Technologies Inc",
+              "ZoomInfo LLC"
+            ],
+            "publisher": {
+              "@id": "https://www.zoominfo.com/#organization"
+            }
+          },
+          {
+            "@id": "https://www.zoominfo.com/#organization",
+            "@type": "Organization",
+            "url": "https://www.zoominfo.com/",
+            "logo": "https://www.zoominfo.com/_next/static/media/zoominfo-red-logomark.253353d3.svg",
+            "name": "ZoomInfo Inc",
+            "sameAs": [
+              "https://www.linkedin.com/company/zoominfo/",
+              "https://www.instagram.com/zoominfo/",
+              "https://www.facebook.com/ZoomInformation/",
+              "https://www.youtube.com/c/zoominformation"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressRegion": "Washington",
+              "addressCountry": "US",
+              "addressLocality": "Vancouver"
+            },
+            "telephone": "+1-866-904-9666",
+            "description": "ZoomInfo is the #1 GTM Platform. Marketing and sales AI combined with B2B data to support lead generation, sales enablement, prospecting, pipeline management, market intelligence, and ABM."
+          },
+          {
+            "@id": "https://www.zoominfo.com/#app",
+            "@type": "SoftwareApplication",
+            "url": "https://www.zoominfo.com/",
+            "name": "ZoomInfo",
+            "publisher": {
+              "@id": "https://www.zoominfo.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "description": "Go-to-market intelligence platform providing B2B data, buying signals, and automation to help revenue teams find in-market buyers, build pipeline, and close deals faster.",
+            "featureList": [
+              "ZoomInfo Copilot",
+              "GTM Studio",
+              "GTM Workspace",
+              "Buyer intent and website visitor tracking",
+              "B2B contact and company data",
+              "Automated enrichment and data management",
+              "Chorus conversation intelligence"
+            ],
+            "operatingSystem": "Web",
+            "applicationCategory": "BusinessApplication",
+            "offers": {
+              "@type": "Offer",
+              "url": "https://www.zoominfo.com/free-trial",
+              "name": "Free trial",
+              "description": "Start a free trial of ZoomInfo."
+            },
+            "screenshot": {
+              "@type": "ImageObject",
+              "url": "https://images.ctfassets.net/kyld7105l6mt/7rUxB1OeyT5qX1pfG6m6fQ/bd7e0b75cbed801ac6e60899cf1a853b/sales-ui-1.png",
+              "description": "Screenshot of the ZoomInfo GTM Platform"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Zoominfo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p><a href=\"https://pipeline.zoominfo.com/sales/what-is-zoominfo\">ZoomInfo</a> is a go-to-market platform that helps B2B companies identify, connect with, and close their ideal customers through access to business contact data, intent signals, and sales automation tools.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Who uses ZoomInfo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Sales, marketing, recruiting, and RevOps teams at companies of all sizes use ZoomInfo to accelerate pipeline generation and revenue growth.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is ZoomInfo an AI-powered platform?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Absolutely. ZoomInfo is not just a contact database - it is an <strong>AI-powered Go-to-Market (GTM) Intelligence Platform</strong> that brings together company and contact data, buying intent signals, and workflow automation. \nWith innovations like ZoomInfo Copilot and GTM Studio, we apply generative AI and machine learning to every stage of the customer journey. This means your teams can uncover hidden opportunities, prioritize accounts more effectively, and personalize outreach at scale - all from one integrated platform.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does ZoomInfo get its data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>ZoomInfo gathers <a href=\"https://pipeline.zoominfo.com/sales/how-does-zoominfo-get-data\">data</a> through proprietary technology, machine learning, public sources, and a contributory network to ensure accuracy and freshness.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is ZoomInfo different from other GTM or AI tools?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Many AI tools are point solutions - they focus on one slice of the workflow, like writing emails or analyzing intent data. ZoomInfo is different: it combines the <strong>world’s most accurate and comprehensive B2B data</strong> with <strong>AI-driven intelligence and automation</strong>. That means you get:</p>\n<ul><li><p><strong>Unmatched depth of data</strong>: Millions of verified contacts, companies, and technologies tracked globally.</p>\n</li>\n<li><p><strong>Real-time insights</strong>: AI monitors signals such as buying intent, executive moves, and market activity.</p>\n</li>\n<li><p><strong>Seamless execution</strong>: Our AI doesn’t just analyze - it automates workflows inside your CRM, sales engagement tools, and marketing platforms.\n The result? One unified GTM system that drives pipeline growth faster than disconnected point solutions.</p>\n</li>\n</ul><p></p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I try ZoomInfo before buying?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Yes, ZoomInfo offers product demos and <a href=\"https://www.zoominfo.com/free-trial?camp_id=7014y000001e1p9AAA\">trial</a> options so you can explore the platform before committing.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is ZoomInfo GDPR and CCPA compliant?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Yes, ZoomInfo complies with applicable data privacy regulations, including <a href=\"https://pipeline.zoominfo.com/sales/gdpr-compliance-guide\">GDPR and CCPA</a>, and provides tools for users to manage their data preferences.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does ZoomInfo’s AI solutions helps GTM teams every day?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>ZoomInfo’s AI solutions are designed to work in the background so your teams can focus on closing deals. Every day, our AI tools:</p>\n<ul><li><p><strong>Prioritize high-value accounts</strong> by analyzing intent signals, funding events, technology adoption, and market activity.</p>\n</li>\n<li><p><strong>Uncover buying committees</strong> so you know exactly who is involved in purchase decisions, not just a single contact.</p>\n</li>\n<li><p><strong>Generate insights instantly</strong>, such as account summaries, competitor landscapes, or industry trends.</p>\n</li>\n<li><p><strong>Automate personalization</strong> by drafting outreach emails, meeting prep notes, and playbook-based recommendations in seconds.</p>\n</li>\n<li><p><strong>Alert you in real time</strong> when prospects change jobs, raise funding, or show intent to purchase — so your team never misses the right moment to engage.</p>\n</li>\n</ul><p></p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can the AI solutions in ZoomInfo integrate with our existing CRM and sales tools?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Yes. ZoomInfo’s AI solutions are built to work seamlessly with the tools your teams already use every day. \nWhether it’s Salesforce, HubSpot, Outreach, Salesloft, Marketo, or dozens of other CRM and marketing platforms, our AI solutions plug directly into your existing workflows. That means AI-powered recommendations, prospect alerts, automated enrichment, and personalized outreach appear right where your sales and marketing teams are already working - no extra logins, no steep learning curve. ZoomInfo makes it easy for GTM teams to scale smarter, move faster, and get measurable results without changing the way they work.</p>\n"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:00.157156+00:00"
+  }
+}

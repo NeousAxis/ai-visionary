@@ -1,0 +1,362 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:31.750133+00:00",
+  "source": {
+    "input_url": "https://www.insightly.com",
+    "canonical_domain": "insightly.com",
+    "pages_scanned": [
+      "https://www.insightly.com/",
+      "https://www.insightly.com/about/",
+      "https://www.insightly.com/pricing-plans/?plan=crm",
+      "https://www.insightly.com/privacy-policy/"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 5,
+      "sitemap_found": true,
+      "sitemap_url_count": 9
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Insightly",
+    "website": "https://www.insightly.com/",
+    "country": "US",
+    "city": "San Francisco",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "50 100 200",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Insightly",
+        "website": "https://www.insightly.com/",
+        "email": "",
+        "phone": "50 100 200",
+        "country": "US",
+        "city": "San Francisco",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Insightly CRM: Modern, scalable Customer Relationship Management software platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Insightly is easy-to-use, modern and affordable CRM tool. Sell smarter, grow faster and build lasting customer relationships. Watch a demo-on-demand now.",
+        "og_description": "Insightly is easy-to-use, modern and affordable CRM tool.  Sell smarter, grow faster and build lasting customer relationships. Watch a demo-on-demand now."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "faq",
+          "guide",
+          "help",
+          "knowledge base",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "BreadcrumbList",
+          "WebPage",
+          "Corporation",
+          "VideoObject",
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 76.6,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 76.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Insightly",
+            "item": "https://www.insightly.com/"
+          }
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "WebPage",
+        "url": "https://www.insightly.com/",
+        "name": "Insightly",
+        "headline": "The modern, scalable CRM teams love",
+        "mainContentOfPage": "Customers today want relationships, not transactions. If customers feel poorly treated, they’ll leave you. Insightly gives you everything you need to build a complete view of your customers across the entire buying experience, and deliver exactly what they want—from the first hello to delivery and beyond.",
+        "significantLink": [
+          "https://www.insightly.com/marketing/",
+          "https://www.insightly.com/crm/#sales",
+          "https://www.insightly.com/service/",
+          "https://www.insightly.com/crm/#projects",
+          "https://www.insightly.com/appconnect/integrations/"
+        ]
+      },
+      {
+        "@context": "http://www.schema.org",
+        "@type": "Corporation",
+        "name": "Insightly",
+        "url": "https://www.insightly.com/",
+        "logo": "https://www.insightly.com/wp-content/uploads/2025/03/insightly-logo.svg",
+        "description": "Insightly specializes in the fields of CRM, enterprise software, and project management. Insightly CRM aims to helps businesses in every industry build lasting customer relationships, deliver projects, and grow revenues faster. Insightly was founded in 2009 by Anthony Smith and is headquartered in San Francisco, California. Notable investors include Emergence, Cloud Apps Capital Partners, and Scott Bommer.",
+        "disambiguatingDescription": "Insightly CRM aims to helps businesses in every industry build lasting customer relationships, deliver projects, and grow revenues faster.",
+        "areaServed": "Worldwide",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "680 Folsom St #550",
+          "addressLocality": "San Francisco",
+          "addressRegion": "CA",
+          "postalCode": "94107",
+          "addressCountry": "United States"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+1-888-999-4039",
+          "contactType": "Customer Service"
+        },
+        "sameAs": [
+          "https://www.facebook.com/Insightly/",
+          "https://twitter.com/insightly",
+          "https://www.youtube.com/insightlyCRM",
+          "https://www.linkedin.com/company/insightly/",
+          "https://en.wikipedia.org/wiki/Insightly"
+        ],
+        "foundingDate": "2009",
+        "foundingLocation": {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "San Francisco",
+            "addressRegion": "CA"
+          }
+        },
+        "knowsAbout": [
+          "CRM",
+          "Customer Relationship Management",
+          "Marketing Automation",
+          "Sales Cycle"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Subscribe to Insightly's YouTube Channel",
+        "description": "Insightly is the easiest customer relationship management solution (CRM) to use for managing deep customer relationships. Customers use Insightly’s tightly integrated CRM & project management features to close new business, track post sale customer interactions & drive repeat purchases.",
+        "thumbnailUrl": [
+          "https://i.ytimg.com/vi/N5iHhL7_N98/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLBLT2Emzqi6fWA3-M2Xuto92uTiQw%22,%22widt"
+        ],
+        "uploadDate": "2020-04-03",
+        "duration": "PT00M57S",
+        "embedUrl": "https://www.youtube.com/embed/N5iHhL7_N98"
+      },
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.insightly.com/#organization",
+            "name": "Insightly",
+            "sameAs": [
+              "https://www.facebook.com/Insightly/",
+              "https://twitter.com/insightly"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.insightly.com/#website",
+            "url": "https://www.insightly.com",
+            "name": "Insightly",
+            "publisher": {
+              "@id": "https://www.insightly.com/#organization"
+            },
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.insightly.com/wp-content/uploads/2025/03/OG_Generic_Insightly.png",
+            "url": "https://www.insightly.com/wp-content/uploads/2025/03/OG_Generic_Insightly.png",
+            "width": "1801",
+            "height": "892",
+            "caption": "OG_Generic_Insightly",
+            "inLanguage": "en-US"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:31.750143+00:00"
+  }
+}

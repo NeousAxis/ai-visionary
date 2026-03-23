@@ -1,0 +1,364 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:54.752904+00:00",
+  "source": {
+    "input_url": "https://www.atos.net",
+    "canonical_domain": "atos.net",
+    "pages_scanned": [
+      "https://atos.net/en/",
+      "https://atos.net/en/",
+      "https://www.atosgroup.com/en/investors/investor-contact",
+      "https://atos.net/en/services",
+      "https://atos.net/fr/lp/ugap-cloud-open/faq",
+      "https://atos.net/en/privacy",
+      "https://atos.net/en/terms-and-conditions"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Atos",
+    "website": "https://atos.net/en/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "BreadcrumbList",
+    "contacts": {
+      "email": "",
+      "phone": "+33 1 73 26 00 00",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Atos",
+        "website": "https://atos.net/en/",
+        "email": "",
+        "phone": "+33 1 73 26 00 00",
+        "country": "",
+        "city": "",
+        "org_type": "BreadcrumbList"
+      },
+      "evidence": [
+        "Homepage - Atos"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "delivery",
+          "offre",
+          "platform",
+          "prestation",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "We design digital solutions from the everyday to the mission critical — in artificial intelligence, hybrid cloud, infrastructure management, decarbonization and employee experience.",
+        "og_description": "We design digital solutions from the everyday to the mission critical — in artificial intelligence, hybrid cloud, infrastructure management, decarbonization and employee experience."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "consulting"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog",
+          "faq",
+          "glossaire",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "",
+          "BreadcrumbList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://atos.net/en/",
+            "url": "https://atos.net/en/",
+            "name": "Homepage - Atos",
+            "isPartOf": {
+              "@id": "https://atos.net/en/#website"
+            },
+            "about": {
+              "@id": "https://atos.net/en/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://atos.net/en/#primaryimage"
+            },
+            "image": {
+              "@id": "https://atos.net/en/#primaryimage"
+            },
+            "thumbnailUrl": "https://atos.net/wp-content/uploads/2025/04/having-an-idea-banner-light.jpg",
+            "datePublished": "2023-03-16T08:17:40+00:00",
+            "dateModified": "2026-03-06T17:31:32+00:00",
+            "description": "We design digital solutions from the everyday to the mission critical — in artificial intelligence, hybrid cloud, infrastructure management, decarbonization and employee experience.",
+            "breadcrumb": {
+              "@id": "https://atos.net/en/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://atos.net/en/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://atos.net/en/#primaryimage",
+            "url": "https://atos.net/wp-content/uploads/2025/04/having-an-idea-banner-light.jpg",
+            "contentUrl": "https://atos.net/wp-content/uploads/2025/04/having-an-idea-banner-light.jpg",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://atos.net/en/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://atos.net/en/#website",
+            "url": "https://atos.net/en/",
+            "name": "Advancing what matters",
+            "description": "Shaping the future together",
+            "publisher": {
+              "@id": "https://atos.net/en/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://atos.net/en/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://atos.net/en/#organization",
+            "name": "Atos SE",
+            "url": "https://atos.net/en/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://atos.net/en/#/schema/logo/image/",
+              "url": "https://atos.net/wp-content/uploads/2024/02/atos-logo-blue-2023.svg",
+              "contentUrl": "https://atos.net/wp-content/uploads/2024/02/atos-logo-blue-2023.svg",
+              "width": 138,
+              "height": 46,
+              "caption": "Atos SE"
+            },
+            "image": {
+              "@id": "https://atos.net/en/#/schema/logo/image/"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "item": {
+              "@id": "/en/",
+              "name": "Homepage"
+            }
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "item": {
+              "@id": "https://atos.net/en/",
+              "name": "Homepage"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:54.752912+00:00"
+  }
+}

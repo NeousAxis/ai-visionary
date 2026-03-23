@@ -1,0 +1,347 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:59:27.524861+00:00",
+  "source": {
+    "input_url": "https://www.clever-cloud.com",
+    "canonical_domain": "clever.cloud",
+    "pages_scanned": [
+      "https://www.clever.cloud/",
+      "https://www.clever.cloud/about/",
+      "https://www.clever.cloud/fr/a-propos/",
+      "https://www.clever.cloud/contact/",
+      "https://www.clever.cloud/pricing/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Clever Cloud",
+    "website": "https://www.clever.cloud/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "podcast@clever-cloud.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Clever Cloud",
+        "website": "https://www.clever.cloud/",
+        "email": "podcast@clever-cloud.com",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Home | Clever Cloud"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "offre",
+          "platform",
+          "product",
+          "products",
+          "produit",
+          "produits",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Clever Cloud provides you with the best tools to host, deploy and maintain your applications in operational conditions, at a controlled cost.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "confidentialité",
+          "conformité",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "mentions légales",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "confidentialité",
+        "conformité"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "documentation",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 50.6,
+    "final_score": 51,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 51,
+    "raw_score": 50.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.clever.cloud/",
+            "url": "https://www.clever.cloud/",
+            "name": "Home | Clever Cloud",
+            "isPartOf": {
+              "@id": "https://www.clever.cloud/#website"
+            },
+            "about": {
+              "@id": "https://www.clever.cloud/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.clever.cloud/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.clever.cloud/#primaryimage"
+            },
+            "thumbnailUrl": "https://staging-cc-assetsv6.cellar-c2.services.clever-cloud.com/uploads/2025/07/daiii.png",
+            "datePublished": "2025-11-12T15:20:17+00:00",
+            "dateModified": "2025-12-09T10:15:58+00:00",
+            "description": "Clever Cloud provides you with the best tools to host, deploy and maintain your applications in operational conditions, at a controlled cost.",
+            "breadcrumb": {
+              "@id": "https://www.clever.cloud/#breadcrumb"
+            },
+            "inLanguage": "en-GB",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.clever.cloud/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-GB",
+            "@id": "https://www.clever.cloud/#primaryimage",
+            "url": "https://staging-cc-assetsv6.cellar-c2.services.clever-cloud.com/uploads/2025/07/daiii.png",
+            "contentUrl": "https://staging-cc-assetsv6.cellar-c2.services.clever-cloud.com/uploads/2025/07/daiii.png"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.clever.cloud/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.clever.cloud/#website",
+            "url": "https://www.clever.cloud/",
+            "name": "Clever Cloud",
+            "description": "From Code to Product",
+            "publisher": {
+              "@id": "https://www.clever.cloud/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.clever.cloud/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-GB"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.clever.cloud/#organization",
+            "name": "Clever Cloud",
+            "url": "https://www.clever.cloud/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-GB",
+              "@id": "https://www.clever.cloud/#/schema/logo/image/",
+              "url": "https://cdn.clever-cloud.com/uploads/2023/03/logoonwhite.svg",
+              "contentUrl": "https://cdn.clever-cloud.com/uploads/2023/03/logoonwhite.svg",
+              "width": 448,
+              "height": 116,
+              "caption": "Clever Cloud"
+            },
+            "image": {
+              "@id": "https://www.clever.cloud/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "http://www.facebook.com/clevercloudsas",
+              "https://x.com/clever_cloud"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:59:27.524868+00:00"
+  }
+}

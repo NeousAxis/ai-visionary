@@ -1,0 +1,293 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:47.380581+00:00",
+  "source": {
+    "input_url": "https://www.wolt.com",
+    "canonical_domain": "wolt.com",
+    "pages_scanned": [
+      "https://wolt.com/",
+      "https://explore.wolt.com/about",
+      "https://explore.wolt.com/contact",
+      "https://explore.wolt.com/privacy",
+      "https://explore.wolt.com/terms"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 4,
+      "sitemap_found": true,
+      "sitemap_url_count": 297
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Wolt",
+    "website": "https://wolt.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "SoftwareApplication"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Wolt",
+        "website": "https://wolt.com/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "Wolt Delivery | Food, Groceries and more in 30 minutes – Wolt"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "delivery",
+          "menu",
+          "product",
+          "products",
+          "restaurant",
+          "service"
+        ],
+        "meta_description": "When people try Wolt, they love it! The joy of food, groceries and more from local stores and restaurants, delivered in 30 minutes. Try the most-loved delivery app now.",
+        "og_description": "When people try Wolt, they love it! The joy of food, groceries and more from local stores and restaurants, delivered in 30 minutes. Try the most-loved delivery app now."
+      },
+      "evidence": [
+        "app",
+        "delivery",
+        "menu",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization",
+          "WebSite",
+          "SoftwareApplication",
+          "SoftwareApplication"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 59.3,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 59.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "http://wolt.com",
+        "logo": "https://d21buns5ku92am.cloudfront.net/69274/images/392254-06b21419-d6d8-4fd1-ae80-4d6aa7434048_logo-5bc0ff-medium-1622463718.jpeg",
+        "name": "Wolt",
+        "sameAs": [
+          "https://en.wikipedia.org/wiki/Wolt",
+          "https://www.wikidata.org/wiki/Q30024526",
+          "https://twitter.com/woltapp",
+          "https://www.youtube.com/channel/UCGNXyHim3x8l0LFio5FnANg",
+          "https://www.tiktok.com/@woltapp",
+          "https://www.linkedin.com/company/wolt-oy/",
+          "https://www.crunchbase.com/organization/wolt",
+          "https://www.facebook.com/woltapp",
+          "https://www.instagram.com/woltapp"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://wolt.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://wolt.com/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        },
+        "publisher": {
+          "@id": "https://schema.wolt.com/wolt-org"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Wolt",
+        "operatingSystem": "Android",
+        "applicationCategory": "ShoppingApplication",
+        "publisher": {
+          "@id": "https://schema.wolt.com/wolt-org"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.7",
+          "ratingCount": "33872"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "url": "https://play.google.com/store/apps/details?id=com.wolt.android",
+        "sameAs": "https://play.google.com/store/apps/details?id=com.wolt.android"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Wolt",
+        "operatingSystem": "iOS",
+        "applicationCategory": "ShoppingApplication",
+        "publisher": {
+          "@id": "https://schema.wolt.com/wolt-org"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "3884"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "url": "https://apps.apple.com/app/wolt/id943905271",
+        "sameAs": "https://apps.apple.com/app/wolt/id943905271"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:47.380596+00:00"
+  }
+}

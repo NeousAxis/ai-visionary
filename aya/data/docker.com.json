@@ -1,0 +1,381 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:31.275714+00:00",
+  "source": {
+    "input_url": "https://www.docker.com",
+    "canonical_domain": "docker.com",
+    "pages_scanned": [
+      "https://www.docker.com/",
+      "https://www.docker.com/company/contact/",
+      "https://www.docker.com/products/",
+      "https://www.docker.com/pricing/",
+      "https://www.docker.com/legal/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 15
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Docker",
+    "website": "https://www.docker.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "100 500 1",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "cloud",
+      "api",
+      "platform",
+      "developer"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Docker",
+        "website": "https://www.docker.com/",
+        "email": "",
+        "phone": "100 500 1",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Docker: Accelerated Container Application Development"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Docker is a platform designed to help developers build, share, and run container applications. We handle the tedious setup, so you can focus on the code.",
+        "og_description": "Docker is a platform designed to help developers build, share, and run container applications. We handle the tedious setup, so you can focus on the code."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "documentation",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Corporation",
+            "@id": "https://www.docker.com/#organization",
+            "name": "Docker",
+            "url": "https://www.docker.com",
+            "sameAs": [
+              "https://www.facebook.com/docker.run",
+              "https://twitter.com/Docker"
+            ],
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://www.docker.com/#logo",
+              "url": "https://www.docker.com/app/uploads/2022/05/Docker_Temporary_Image_Google_Blue_1080x1080_v1.png",
+              "contentUrl": "https://www.docker.com/app/uploads/2022/05/Docker_Temporary_Image_Google_Blue_1080x1080_v1.png",
+              "caption": "Docker",
+              "inLanguage": "en-US"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.docker.com/#website",
+            "url": "https://www.docker.com",
+            "name": "Docker",
+            "publisher": {
+              "@id": "https://www.docker.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.docker.com/?s={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "ImageObject",
+            "@id": "https://www.docker.com/app/uploads/2023/06/meta-image-homepage.png",
+            "url": "https://www.docker.com/app/uploads/2023/06/meta-image-homepage.png",
+            "width": "2400",
+            "height": "1254",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.docker.com/#webpage",
+            "url": "https://www.docker.com/",
+            "name": "Docker: Accelerated Container Application Development",
+            "datePublished": "2025-04-09T11:34:04-07:00",
+            "dateModified": "2026-03-12T11:50:53-07:00",
+            "about": {
+              "@id": "https://www.docker.com/#organization"
+            },
+            "isPartOf": {
+              "@id": "https://www.docker.com/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.docker.com/app/uploads/2023/06/meta-image-homepage.png"
+            },
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Person",
+            "@id": "https://www.docker.com/author/simeonr/",
+            "name": "Simeon Ratliff",
+            "url": "https://www.docker.com/author/simeonr/",
+            "image": {
+              "@type": "ImageObject",
+              "@id": "https://secure.gravatar.com/avatar/79dbc04ffb7b4baec50019366726aa872e08550d053578048ba37c07459939ab?s=96&amp;d=mm&amp;r=g",
+              "url": "https://secure.gravatar.com/avatar/79dbc04ffb7b4baec50019366726aa872e08550d053578048ba37c07459939ab?s=96&amp;d=mm&amp;r=g",
+              "caption": "Simeon Ratliff",
+              "inLanguage": "en-US"
+            },
+            "worksFor": {
+              "@id": "https://www.docker.com/#organization"
+            }
+          },
+          {
+            "headline": "Docker: Accelerated Container Application Development",
+            "description": "Docker is a platform designed to help developers build, share, and run container applications. We handle the tedious setup, so you can focus on the code.",
+            "datePublished": "2025-04-09T11:34:04-07:00",
+            "dateModified": "2026-03-12T11:50:53-07:00",
+            "keywords": "docker",
+            "image": {
+              "@id": "https://www.docker.com/app/uploads/2023/06/meta-image-homepage.png"
+            },
+            "author": {
+              "@id": "https://www.docker.com/author/simeonr/",
+              "name": "Simeon Ratliff"
+            },
+            "@type": "Article",
+            "name": "Docker: Accelerated Container Application Development",
+            "@id": "https://www.docker.com/#schema-1585677",
+            "isPartOf": {
+              "@id": "https://www.docker.com/#webpage"
+            },
+            "publisher": {
+              "@id": "https://www.docker.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "mainEntityOfPage": {
+              "@id": "https://www.docker.com/#webpage"
+            }
+          },
+          {
+            "@type": "VideoObject",
+            "name": "Docker: Accelerated Container Application Development",
+            "description": "Docker is a platform designed to help developers build, share, and run container applications. We handle the tedious setup, so you can focus on the code.",
+            "uploadDate": "2025-04-09T11:34:04-07:00",
+            "contentUrl": "/app/uploads/brand/background/DOCKER_hero_loop_opacity-reduction-25percent_GRAY_10_31_25.mp4",
+            "isFamilyFriendly": "True",
+            "@id": "https://www.docker.com/#schema-1587980",
+            "isPartOf": {
+              "@id": "https://www.docker.com/#webpage"
+            },
+            "publisher": {
+              "@id": "https://www.docker.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "mainEntityOfPage": {
+              "@id": "https://www.docker.com/#webpage"
+            }
+          },
+          {
+            "@type": "VideoObject",
+            "name": "Docker: Accelerated Container Application Development",
+            "description": "Docker is a platform designed to help developers build, share, and run container applications. We handle the tedious setup, so you can focus on the code.",
+            "uploadDate": "2025-04-09T11:34:04-07:00",
+            "contentUrl": "/app/uploads/2025/11/AgenticCompose-web-1080.mp4",
+            "isFamilyFriendly": "True",
+            "@id": "https://www.docker.com/#schema-1587981",
+            "isPartOf": {
+              "@id": "https://www.docker.com/#webpage"
+            },
+            "publisher": {
+              "@id": "https://www.docker.com/#organization"
+            },
+            "inLanguage": "en-US",
+            "mainEntityOfPage": {
+              "@id": "https://www.docker.com/#webpage"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:57:31.275723+00:00"
+  }
+}

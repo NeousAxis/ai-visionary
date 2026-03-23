@@ -1,0 +1,329 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:11.208022+00:00",
+  "source": {
+    "input_url": "https://www.sophiagenetics.com",
+    "canonical_domain": "sophiagenetics.com",
+    "pages_scanned": [
+      "https://www.sophiagenetics.com/",
+      "https://www.sophiagenetics.com/faq/",
+      "https://www.sophiagenetics.com/legal-documents/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 7
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "SOPHiA GENETICS",
+    "website": "https://www.sophiagenetics.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "1-55051215",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "health",
+    "sector_label": "Santé & Pharma",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "health",
+      "medical",
+      "pharma",
+      "clinical",
+      "patient"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "SOPHiA GENETICS",
+        "website": "https://www.sophiagenetics.com/",
+        "email": "",
+        "phone": "1-55051215",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "SOPHiA GENETICS - Democratizing Data-Driven Medicine, Together"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Helping clinicians to generate real-time, actionable insights for patients with cancer and rare disorders.",
+        "og_description": "Helping clinicians to generate real-time, actionable insights for patients with cancer and rare disorders."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.sophiagenetics.com/",
+            "url": "https://www.sophiagenetics.com/",
+            "name": "SOPHiA GENETICS - Democratizing Data-Driven Medicine, Together",
+            "isPartOf": {
+              "@id": "https://www.sophiagenetics.com/#website"
+            },
+            "about": {
+              "@id": "https://www.sophiagenetics.com/#organization"
+            },
+            "datePublished": "2024-06-20T12:50:43+00:00",
+            "dateModified": "2025-01-14T12:40:31+00:00",
+            "description": "Helping clinicians to generate real-time, actionable insights for patients with cancer and rare disorders.",
+            "breadcrumb": {
+              "@id": "https://www.sophiagenetics.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.sophiagenetics.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.sophiagenetics.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.sophiagenetics.com/#website",
+            "url": "https://www.sophiagenetics.com/",
+            "name": "SOPHiA GENETICS",
+            "description": "Where others see data we see answers",
+            "publisher": {
+              "@id": "https://www.sophiagenetics.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.sophiagenetics.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.sophiagenetics.com/#organization",
+            "name": "SOPHiA GENETICS",
+            "url": "https://www.sophiagenetics.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.sophiagenetics.com/#/schema/logo/image/",
+              "url": "https://www.sophiagenetics.com/wp-content/uploads/2024/10/logo-thumnail.png",
+              "contentUrl": "https://www.sophiagenetics.com/wp-content/uploads/2024/10/logo-thumnail.png",
+              "width": 1334,
+              "height": 867,
+              "caption": "SOPHiA GENETICS"
+            },
+            "image": {
+              "@id": "https://www.sophiagenetics.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/sophiagenetics",
+              "https://x.com/SOPHiAGENETICS"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:50:11.208035+00:00"
+  }
+}

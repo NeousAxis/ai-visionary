@@ -1,0 +1,797 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:27.247398+00:00",
+  "source": {
+    "input_url": "https://www.alan.com",
+    "canonical_domain": "alan.com",
+    "pages_scanned": [
+      "https://alan.com/",
+      "https://alan.com/en",
+      "https://alan.com/a-propos",
+      "https://alan.com/help",
+      "https://alan.com/services",
+      "https://alan.com/products",
+      "https://alan.com/fr-fr/assurance-sante/garanties-et-remboursements-sante",
+      "https://alan.com/faq",
+      "https://alan.com/fr-fr/privacy",
+      "https://alan.com/terms"
+    ],
+    "pages_scanned_count": 10,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 67,
+      "sitemap_found": true,
+      "sitemap_url_count": 45
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Alan",
+    "website": "https://alan.com/",
+    "country": "FR",
+    "city": "Paris",
+    "languages": [],
+    "org_type": "Corporation",
+    "contacts": {
+      "email": "",
+      "phone": "1 000 000",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "manufacturing",
+    "sector_label": "Industrie & Manufacturing",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "Corporation"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Alan",
+        "website": "https://alan.com/",
+        "email": "",
+        "phone": "1 000 000",
+        "country": "FR",
+        "city": "Paris",
+        "org_type": "Corporation"
+      },
+      "evidence": [
+        "Alan - Votre partenaire santé qui prévient, assure et accompagne au quotidien"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "offre",
+          "platform",
+          "prestation",
+          "product",
+          "products",
+          "produit",
+          "produits",
+          "restaurant",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Alan permet à chacun d’agir sur sa santé physique et mentale, en alliant le meilleur de la prévention et de l’assurance, le tout au sein d’une expérience unique.",
+        "og_description": "Alan permet à chacun d’agir sur sa santé physique et mentale, en alliant le meilleur de la prévention et de l’assurance, le tout au sein d’une expérience unique."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how we work"
+        ]
+      },
+      "evidence": [
+        "how we work"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "conditions",
+          "confidentialité",
+          "conformité",
+          "cookies",
+          "iso",
+          "privacy",
+          "rgpd"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "conditions",
+        "confidentialité",
+        "conformité",
+        "cookies"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "blog",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Corporation",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "VideoObject",
+          "VideoObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject",
+          "ImageObject"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.6,
+    "final_score": 79,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 79,
+    "raw_score": 78.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "Corporation",
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://static.alan.com/murray/e5830dc1cc164ef2b054023851e32206_Alan_Lockup_Horizontal_Black_RGB_Large.png",
+          "caption": "Alan"
+        },
+        "description": "Alan permet à chacun d’agir sur sa santé physique et mentale, en alliant le meilleur de la prévention et de l’assurance, le tout au sein d’une expérience unique.",
+        "name": "Alan",
+        "legalName": "Alan",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Paris",
+          "addressCountry": "FR",
+          "postalCode": "75010",
+          "streetAddress": "117 quai de valmy"
+        },
+        "email": "contact@alan.com",
+        "url": "https://alan.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://alan.com/static/images/favicon/android-icon-96x96.png",
+          "width": 96,
+          "height": 96,
+          "caption": "Alan"
+        },
+        "sameAs": [
+          "https://alan.com",
+          "https://www.facebook.com/withalan",
+          "https://www.twitter.com/avec_alan",
+          "https://www.linkedin.com/company/alan-assurances",
+          "https://www.societe.com/societe/alan-818353070.html",
+          "https://jobs.ashbyhq.com/alan",
+          "https://medium.com/alan"
+        ],
+        "owns": {
+          "name": "Alan",
+          "url": "https://alan.com/"
+        },
+        "foundingDate": "2016-02-10",
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "url": "https://alan.com/",
+          "name": "Alan - Votre partenaire santé qui prévient, assure et accompagne au quotidien",
+          "isPartOf": {
+            "@type": "WebSite",
+            "url": "https://alan.com",
+            "name": "Alan",
+            "publisher": {
+              "@type": "Organization",
+              "name": "Alan",
+              "url": "https://alan.com",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://alan.com/static/images/favicon/android-icon-96x96.png",
+                "width": 96,
+                "height": 96,
+                "caption": "Alan"
+              },
+              "image": {
+                "@type": "ImageObject",
+                "url": "https://static.alan.com/murray/e5830dc1cc164ef2b054023851e32206_Alan_Lockup_Horizontal_Black_RGB_Large.png",
+                "caption": "Alan"
+              },
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Paris",
+                "addressCountry": "FR",
+                "postalCode": "75010",
+                "streetAddress": "117 quai de valmy"
+              },
+              "email": "contact@alan.com",
+              "sameAs": [
+                "https://alan.com",
+                "https://www.facebook.com/withalan",
+                "https://www.twitter.com/avec_alan",
+                "https://www.linkedin.com/company/alan-assurances",
+                "https://www.societe.com/societe/alan-818353070.html",
+                "https://jobs.ashbyhq.com/alan",
+                "https://medium.com/alan"
+              ],
+              "foundingDate": "2016-02-10"
+            }
+          },
+          "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Alan",
+                "item": "https://alan.com"
+              }
+            ]
+          },
+          "image": {
+            "@type": "ImageObject",
+            "url": "https://static.alan.com/murray/e5830dc1cc164ef2b054023851e32206_Alan_Lockup_Horizontal_Black_RGB_Large.png",
+            "caption": "Alan"
+          }
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/cover_first_employees-b3497002e6ee6535.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/purchasing_power-d223311cddfd8178.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/hr_efficiency-122825da4ff07d11.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/marmot_phone-f9bc3f6fe1d942a0.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/guide_ai-218cd258b310a142.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/guide_mutuelle-f939917d6c477c37.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/marmot_smile-b8cf033f2973804b.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Votre partenaire santé \nqui prévient, assure et \naccompagne au quotidien",
+        "description": "",
+        "uploadDate": "",
+        "duration": "PT0M00S",
+        "thumbnailUrl": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aLqdLmGNHVfTOsNX_Alan_Homepage_Trailer_Mobile_Thumbnail-min.png",
+        "embedUrl": "https://alan.com/website-assets/homepage_video/fr_homepage_hero_trailer_mobile.mp4"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Votre partenaire santé \nqui prévient, assure et \naccompagne au quotidien",
+        "description": "",
+        "uploadDate": "",
+        "duration": "PT0M00S",
+        "thumbnailUrl": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aLqdK2GNHVfTOsNW_Alan_Homepage_Trailer_Desktop_Thumbnail-min.png",
+        "embedUrl": "https://alan.com/website-assets/homepage_video/fr_homepage_hero_trailer_desktop.mp4"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNavUMTzAJOCfOl_celio.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNhlkMTzAJOCfR-_blablacar-1-.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNbYkMTzAJOCfPA_backmarket.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNblkMTzAJOCfPI_caudalie.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/510338de-8c3e-486d-9f1a-6371196aedcc_Vitalliance_logo.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNbfkMTzAJOCfPC_axereal.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/2dee4fab-2c67-43c7-8b9b-52956a9fa755_logo_netatmo.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNcHUMTzAJOCfPs_siapartners.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNdkEMTzAJOCfQg_ami.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Z8XRbRsAHJWomD0p_etam.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Z8XSMRsAHJWomD1j_Cultura_Logo_20211.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNavUMTzAJOCfOl_celio.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNhlkMTzAJOCfR-_blablacar-1-.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNbYkMTzAJOCfPA_backmarket.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNblkMTzAJOCfPI_caudalie.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/510338de-8c3e-486d-9f1a-6371196aedcc_Vitalliance_logo.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNbfkMTzAJOCfPC_axereal.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/2dee4fab-2c67-43c7-8b9b-52956a9fa755_logo_netatmo.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNcHUMTzAJOCfPs_siapartners.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjNdkEMTzAJOCfQg_ami.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Z8XRbRsAHJWomD0p_etam.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Z8XSMRsAHJWomD1j_Cultura_Logo_20211.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/tpe-400aa87c8d132a40.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/pme-3c6d8854de163d86.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/large-enterprise-2df75ddc7375c6ea.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/tns-54f05f7e7f9c2dd9.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aGz12UMqNJQqHqzw_Photo.png?rect=0%2C2%2C384%2C280&w=1952&h=1424&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aGz19UMqNJQqHqzz_Photo-1-.png?rect=0%2C2%2C384%2C280&w=1952&h=1424&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aGz2F0MqNJQqHqz8_Data.png?rect=0%2C2%2C384%2C280&w=1952&h=1424&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZhesCDjCgu4jzvuE_Media.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZhesCDjCgu4jzvuE_Media.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZiDilfPdc1huKmN7_video01.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZiDilfPdc1huKmN7_video01.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZjSTQUMTzAJOCgo1_mugandcomputer.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aG_WhkMqNJQqHwrK_Testimonial-2-.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aG_agUMqNJQqHwud_EXPORTTHIS-1-.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aGz2f0MqNJQqHq0D_Asset-24-.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/marmot-7a942e772fe6b002.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/avatars-7cefc06afb685911.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/lighting-strike-b8e54d0b4184451d.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aBJHifIqRLdaBwpF_homepage_individual.png?rect=0%2C36%2C712%2C905&w=1536&h=1952&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aHYOX0MqNJQqH6GE_image.png?rect=0%2C39%2C784%2C996&w=1536&h=1952&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aHYOnUMqNJQqH6GW_HomepageFonctionPublique.png?rect=1%2C0%2C973%2C710&w=1952&h=1424&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aBJHifIqRLdaBwpF_homepage_individual.png?rect=0%2C36%2C712%2C905&w=1536&h=1952&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aHYOX0MqNJQqH6GE_image.png?rect=0%2C39%2C784%2C996&w=1536&h=1952&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/aHYOnUMqNJQqH6GW_HomepageFonctionPublique.png?rect=1%2C0%2C973%2C710&w=1952&h=1424&auto=format",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZiDYTPPdc1huKmIt_video7.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZiDgPPPdc1huKmMn_apollinedelataille-1-.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZiDXkvPdc1huKmIf_video4.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/ZiDW-vPdc1huKmH8_video03.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Zh_91vPdc1huKlPr_video06.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Zh_RWUaI3ufuUQVN_Rectangle2866.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Zh_3tPPdc1huKlM-_video05.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:prismic/Zh__BPPdc1huKlQA_video04.png",
+        "description": ""
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/cta-marmot-df33309a53761ca3.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/appstore-black-fr-c546e5d819618556.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "image": "https://6vvt7k9n.twic.pics/v1/quality=50/image:website-assets/alan-alan-website:47e931bb683018780b922ee84dfca1f9e54a1d4d/playstore-black-fr-bb386b8bc9a858b8.png"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:27.247408+00:00"
+  }
+}

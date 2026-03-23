@@ -1,0 +1,305 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:07.388861+00:00",
+  "source": {
+    "input_url": "https://www.banquepopulaire.fr",
+    "canonical_domain": "banquepopulaire.fr",
+    "pages_scanned": [
+      "https://www.banquepopulaire.fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 4
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "votre site Banque Populaire",
+    "website": "https://www.banquepopulaire.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "banque",
+      "crédit",
+      "assurance",
+      "patrimoine"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "votre site Banque Populaire",
+        "website": "https://www.banquepopulaire.fr/",
+        "email": "",
+        "phone": "",
+        "country": "FR",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Banque Populaire : La réussite est en vous - Banque et assurances"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Découvrez l'offre Banque Populaire pour les particuliers : comptes, cartes, assurances, souscription et simulateurs en ligne.",
+        "og_description": "Découvrez l'offre Banque Populaire pour les particuliers : comptes, cartes, assurances, souscription et simulateurs en ligne."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "menu",
+        "offre",
+        "produit"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "cookies",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "cookies",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.banquepopulaire.fr/",
+            "url": "https://www.banquepopulaire.fr/",
+            "name": "Banque Populaire : La réussite est en vous - Banque et assurances",
+            "isPartOf": {
+              "@id": "https://www.banquepopulaire.fr/#website"
+            },
+            "about": {
+              "@id": "https://www.banquepopulaire.fr/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.banquepopulaire.fr/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.banquepopulaire.fr/#primaryimage"
+            },
+            "thumbnailUrl": "https://www.img.banquepopulaire.fr/app/uploads/sites/5/2022/03/01155728/cc-lancement-site-national-particuliers.jpg",
+            "datePublished": "2020-08-04T16:34:15+00:00",
+            "dateModified": "2026-03-19T14:51:00+00:00",
+            "description": "Découvrez l'offre Banque Populaire pour les particuliers : comptes, cartes, assurances, souscription et simulateurs en ligne.",
+            "breadcrumb": {
+              "@id": "https://www.banquepopulaire.fr/#breadcrumb"
+            },
+            "inLanguage": "fr-FR",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.banquepopulaire.fr/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "fr-FR",
+            "@id": "https://www.banquepopulaire.fr/#primaryimage",
+            "url": "https://bp-prod.cloudimg.io/_images_/app/uploads/sites/5/2022/03/01155728/cc-lancement-site-national-particuliers.jpg?gravity=auto&optipress=2",
+            "contentUrl": "https://www.img.banquepopulaire.fr/app/uploads/sites/5/2022/03/01155728/cc-lancement-site-national-particuliers.jpg",
+            "width": 599,
+            "height": 362
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.banquepopulaire.fr/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.banquepopulaire.fr/#website",
+            "url": "https://www.banquepopulaire.fr/",
+            "name": "Banque Populaire National",
+            "description": "Retrouvez tous les services de Banque Populaire : comptes, épargne, assurance-vie, bourse, crédit immobilier, auto, prêt personnel et assurances.",
+            "publisher": {
+              "@id": "https://www.banquepopulaire.fr/#organization"
+            },
+            "inLanguage": "fr-FR"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.banquepopulaire.fr/#organization",
+            "name": "Banque Populaire",
+            "url": "https://www.banquepopulaire.fr/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "fr-FR",
+              "@id": "https://www.banquepopulaire.fr/#/schema/logo/image/",
+              "url": "https://bp-prod.cloudimg.io/_images_/app/uploads/sites/5/2020/01/16160230/logo-BP-scaled-1.png?gravity=auto&optipress=2",
+              "contentUrl": "https://www.img.banquepopulaire.fr/app/uploads/sites/5/2020/01/16160230/logo-BP-scaled-1.png",
+              "width": 2560,
+              "height": 1027,
+              "caption": "Banque Populaire"
+            },
+            "image": {
+              "@id": "https://www.banquepopulaire.fr/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/banquepopulaire",
+              "https://x.com/BanquePopulaire"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:07.388869+00:00"
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:54:17.005680+00:00",
+  "source": {
+    "input_url": "https://www.maif.fr",
+    "canonical_domain": "maif.fr",
+    "pages_scanned": [
+      "https://www.maif.fr/",
+      "https://www.maif.fr/annexes/mentions-legales"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "MAIF",
+    "website": "https://www.maif.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "WebPage",
+    "contacts": {
+      "email": "asso.prevention@maif.fr",
+      "phone": "05 49 73 74 75",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "presse",
+      "agence"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "MAIF",
+        "website": "https://www.maif.fr/",
+        "email": "asso.prevention@maif.fr",
+        "phone": "05 49 73 74 75",
+        "country": "FR",
+        "city": "",
+        "org_type": "WebPage"
+      },
+      "evidence": [
+        "MAIF - Assurance des particuliers, professionnels et associations"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "product",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Découvrez nos offres d'assurance auto, moto, habitation, santé, prévoyance et épargne. Simulation de prix et devis gratuits en ligne. Accédez aussi à votre espace personnel.",
+        "og_description": "Découvrez nos offres d'assurance auto, moto, habitation, santé, prévoyance et épargne. Simulation de prix et devis gratuits en ligne. Accédez aussi à votre espace personnel."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conformité",
+          "cookies",
+          "iso",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conformité",
+        "cookies",
+        "iso",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 76.6,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 76.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      [
+        {
+          "@context": "http://schema.org",
+          "@type": "WebPage",
+          "publisher": {
+            "@type": "Organization",
+            "name": "MAIF",
+            "url": "https://www.maif.fr/",
+            "sameAs": [
+              "https://www.facebook.com/MAIFassureur",
+              "https://twitter.com/maif",
+              "https://www.youtube.com/user/maif",
+              "https://www.linkedin.com/company/maif"
+            ],
+            "logo": {
+              "@type": "ImageObject",
+              "name": "logo Maif",
+              "width": "60",
+              "height": "60",
+              "url": "https://www.maif.fr/content/documents/public/maif-fr/images-reseaux/logo-maif-reseaux-sociaux.png"
+            }
+          }
+        }
+      ]
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:54:17.005692+00:00"
+  }
+}

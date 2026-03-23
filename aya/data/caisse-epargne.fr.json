@@ -1,0 +1,281 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:27.339423+00:00",
+  "source": {
+    "input_url": "https://www.caisse-epargne.fr",
+    "canonical_domain": "caisse-epargne.fr",
+    "pages_scanned": [
+      "https://www.caisse-epargne.fr/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 4
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Caisse d'Epargne",
+    "website": "https://www.caisse-epargne.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "banque",
+      "crédit",
+      "assurance",
+      "patrimoine"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Caisse d'Epargne",
+        "website": "https://www.caisse-epargne.fr/",
+        "email": "",
+        "phone": "",
+        "country": "FR",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Banque et assurances | Particuliers | Caisse d'Epargne"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Caisse d'Epargne vous propose des produits et services bancaires adaptés à vos besoins, tout en privilégiant une relation de confiance et de proximité.",
+        "og_description": "Caisse d'Epargne vous propose des produits et services bancaires adaptés à vos besoins, tout en privilégiant une relation de confiance et de proximité."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "faq",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 57.3,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 57.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.caisse-epargne.fr/",
+            "url": "https://www.caisse-epargne.fr/",
+            "name": "Banque et assurances | Particuliers | Caisse d'Epargne",
+            "isPartOf": {
+              "@id": "https://www.caisse-epargne.fr/#website"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://www.caisse-epargne.fr/#primaryimage"
+            },
+            "image": {
+              "@id": "https://www.caisse-epargne.fr/#primaryimage"
+            },
+            "thumbnailUrl": "https://www.img.caisse-epargne.fr/app/uploads/sites/3/2020/12/14143618/home-particulier-960x580-1.jpg",
+            "datePublished": "2020-11-17T08:33:06+00:00",
+            "dateModified": "2026-02-20T13:33:25+00:00",
+            "description": "Caisse d'Epargne vous propose des produits et services bancaires adaptés à vos besoins, tout en privilégiant une relation de confiance et de proximité.",
+            "breadcrumb": {
+              "@id": "https://www.caisse-epargne.fr/#breadcrumb"
+            },
+            "inLanguage": "fr-FR",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.caisse-epargne.fr/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "fr-FR",
+            "@id": "https://www.caisse-epargne.fr/#primaryimage",
+            "url": "https://ce-prod.cloudimg.io/_images_/app/uploads/sites/3/2020/12/14143618/home-particulier-960x580-1.jpg?gravity=auto&optipress=2",
+            "contentUrl": "https://www.img.caisse-epargne.fr/app/uploads/sites/3/2020/12/14143618/home-particulier-960x580-1.jpg",
+            "width": 960,
+            "height": 580
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.caisse-epargne.fr/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.caisse-epargne.fr/#website",
+            "url": "https://www.caisse-epargne.fr/",
+            "name": "Caisse d'Epargne National",
+            "description": "Un site utilisant BPCE Sites",
+            "inLanguage": "fr-FR"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:27.339433+00:00"
+  }
+}

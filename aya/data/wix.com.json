@@ -1,0 +1,351 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:57:55.105644+00:00",
+  "source": {
+    "input_url": "https://www.wix.com",
+    "canonical_domain": "wix.com",
+    "pages_scanned": [
+      "https://www.wix.com/",
+      "https://www.wix.com/about/us",
+      "https://www.wix.com/contact",
+      "https://www.wix.com/plans"
+    ],
+    "pages_scanned_count": 4,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 4,
+      "sitemap_found": true,
+      "sitemap_url_count": 11201
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Wix.com",
+    "website": "https://www.wix.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "HowTo",
+    "contacts": {
+      "email": "info@mystunningwebsite.com",
+      "phone": "2006-2026",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "cloud",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Wix.com",
+        "website": "https://www.wix.com/",
+        "email": "info@mystunningwebsite.com",
+        "phone": "2006-2026",
+        "country": "",
+        "city": "",
+        "org_type": "HowTo"
+      },
+      "evidence": [
+        "Website Builder - Create a Free Website In Minutes | Wix.com"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "restaurant",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Get everything you need to build a website your way. Wix’s free, easy-to-use website builder offers 2,000+ templates, built-in AI tools and a custom domain.",
+        "og_description": "Get everything you need to create your website, your way. From an intuitive website builder to built-in business solutions and AI tools—try Wix for free."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "menu",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "gdpr",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "gdpr",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "faq",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "HowTo",
+          "Organization",
+          "VideoObject",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 77.1,
+    "final_score": 77,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 77,
+    "raw_score": 77.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to create a website for free",
+        "description": "Follow these 7 simple steps to create a website today.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Find a platform",
+            "text": "Pick a secure and reliable free website builder like Wix to create, host and manage your site in one place."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Plan your website",
+            "text": "Map out your goals, site structure and who your audience is to make sure your business stays on track."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Start creating",
+            "text": "Choose from 2,000+ free templates built for every industry or use the AI website builder."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Customize everything",
+            "text": "Use the drag and drop editor and built-in AI tools to adjust colors, fonts and animations to reflect your brand."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Optimize for search engines",
+            "text": "Set up your site for strong organic visibility with a suite of built-in SEO tools."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Publish your website",
+            "text": "Register and connect a domain name, make sure your site looks good on all devices and go live."
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Drive traffic",
+            "text": "Use built-in marketing tools to create email campaigns, social posts, ads and track analytics."
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Wix.com",
+        "legalName": "Wix.com Ltd",
+        "url": "https://www.wix.com/",
+        "logo": "https://static.wixstatic.com/media/9ab0d1_2ff5ca18550e405ea1844e52afaff120~mv2.jpg/v1/fill/w_333,h_154,al_c,lg_1,q_80,enc_auto/Wix%20logo%20white%20BG.jpg",
+        "sameAs": [
+          "https://www.facebook.com/wix",
+          "https://twitter.com/wix",
+          "https://www.instagram.com/wix",
+          "https://www.youtube.com/user/Wix",
+          "https://www.linkedin.com/company/wix-com/",
+          "https://www.pinterest.com/wixcom/",
+          "https://en.wikipedia.org/wiki/Wix.com"
+        ],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "Customer Support",
+          "url": "https://www.wix.com/contact"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "name": "Wix website builder",
+        "description": "Describe what you want and get a unique website in minutes. Refine any detail in a way that feels most natural to you on our flagship AI website builder.",
+        "thumbnailUrl": "https://static.wixstatic.com/media/3ae05b_1c71c1a248004af7b976bde648dd44cef002.png/v1/fill/w_799,h_504,al_c,q_90,usm_0.33_1.00_0.00,enc_avif,quality_auto/3ae05b_1c71c1a248004af7b976bde648dd44cef002.png",
+        "uploadDate": "2026-02-08T00:00:00Z",
+        "duration": "PT73S",
+        "contentUrl": "https://video.wixstatic.com/video/3ae05b_1c71c1a248004af7b976bde648dd44ce/480p/mp4/file.mp4"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is it easy to build a website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Wix offers a few different ways to create your own free website, so you can choose the creation process that works best for you. Pick from 2000+ designer-made templates, or use our AI website builder to create a business-ready site in no time using a conversational interface. You can also start from scratch using Wix’s drag and drop website builder. Whichever way you choose, you can always continue customizing in the Editor for total website design freedom."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I create a website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Whether you’re selling online, running events or growing a community, here’s how to create your own website in 6 simple steps:  Plan your website. First, think about the type of site you’re creating and your target audience. With that in mind, you can start mapping out the pages you want to incorporate like the “About” and “Contact” pages, perhaps a blog or a photo gallery, and a page for products or services.  Build with AI or choose a template. Chat with our AI website builder about your business and preferences to instantly get a fully functional and customizable website built for you. You can also start by choosing from a variety of templates, all professionally designed with the best site practices in mind.   Customize your website. Whether you start with AI or a template, you can use our intuitive drag and drop editor to customize your site to match your brand. Your site will also be optimized for mobile, but in the editor you have the option to make changes and customize your site’s mobile view.   Get a domain name. When trying to come up with the perfect domain name, you can use Wix to search and register available names, or connect an existing one to your new site.  Optimize for search engines and LLM’s. Use a suite of advanced SEO and AI visibility tools to ensure your site is easy for search engines to crawl and LLMs to understand. Wix gives you powerful SEO and GEO tools to optimize your pages, organize your content clearly and help search engines understand what your site is about.  Publish and promote your website. Once you’re happy with your site, you’re ready to hit ‘publish’ and start gaining traffic. Now’s the time to promote your site with built-in marketing tools and streamline your customer management processes with a smart CRM system.    By following these steps, you'll be able to build a powerful online presence that drives business growth."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I create a website for free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, with Wix, creating a website is completely free. You can design your site, publish it and share it with the world without spending a dime. It’s a great way to get started and see what’s possible for your ideas.  However, if you’re looking to take things to the next level—like selling products through an online store, using custom domains or removing ads—you’ll need to upgrade to one of our Premium plans. These plans unlock extra features designed to help your business grow."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I connect a domain to my website?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When you create a free website with Wix, it comes with a Wixsite domain name built in (i.e., mysite.wixsite.com). To instantly look more professional, boost your credibility and help visitors find you online, you can also get a new custom domain name, which comes free for a year with the initial purchase of an annual Premium plan. You can choose from a list of domain extensions, such as .com, .net, .org and many more to find the one that’s just right for your site. If you already own a domain name, you can always connect or transfer it to your Wix site."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:57:55.105651+00:00"
+  }
+}

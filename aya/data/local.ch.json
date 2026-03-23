@@ -1,0 +1,241 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:19.971985+00:00",
+  "source": {
+    "input_url": "https://www.local.ch",
+    "canonical_domain": "local.ch",
+    "pages_scanned": [
+      "https://www.local.ch/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "local.ch",
+    "website": "https://www.local.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "food",
+    "sector_label": "Restauration & Alimentation",
+    "confidence": 0.5,
+    "source": "keyword_match",
+    "evidence": [
+      "restaurant",
+      "menu"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "local.ch",
+        "website": "https://www.local.ch/",
+        "email": "",
+        "phone": "",
+        "country": "CH",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "local.ch – Die Buchungsplattform für die Schweiz"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "menu",
+          "restaurant"
+        ],
+        "meta_description": "Mehr als 500'000 Geschäfte finden 🏪 Passenden Termin buchen oder einen Tisch im Restaurant reservieren 📅 Einfach online buchen – jetzt auf local.ch!",
+        "og_description": "Mehr als 500'000 Geschäfte finden 🏪 Passenden Termin buchen oder einen Tisch im Restaurant reservieren 📅 Einfach online buchen – jetzt auf local.ch!"
+      },
+      "evidence": [
+        "api",
+        "menu",
+        "restaurant"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "faq"
+        ]
+      },
+      "evidence": [
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 43.7,
+    "final_score": 44,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 44,
+    "raw_score": 43.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "url": "https://www.local.ch/",
+        "name": "local.ch",
+        "alternateName": "localsearch",
+        "description": "Mehr als 500\\u0027000 Geschäfte finden 🏪 Passenden Termin buchen oder einen Tisch im Restaurant reservieren 📅 Einfach online buchen – jetzt auf local.ch!",
+        "publisher": {
+          "@type": "Organization",
+          "name": "localsearch",
+          "legalName": "Swisscom Directories AG",
+          "url": "https://www.local.ch/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.local.ch/img/local_logo_90x32.svg",
+            "width": 90,
+            "height": 32
+          },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Förrlibuckstrasse 62",
+            "addressLocality": "Zurich",
+            "addressRegion": "Zurich",
+            "postalCode": "8005",
+            "addressCountry": "CH"
+          },
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "contactType": "Kundenservice",
+              "telephone": "0800 86 80 86",
+              "email": "customercare@localsearch.ch"
+            }
+          ],
+          "sameAs": [
+            "https://www.facebook.com/localch/",
+            "https://twitter.com/localch"
+          ]
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://www.local.ch/de/s/schweiz/{search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:19.971997+00:00"
+  }
+}

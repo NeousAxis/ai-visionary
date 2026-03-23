@@ -1,0 +1,336 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:56.937926+00:00",
+  "source": {
+    "input_url": "https://www.yuh.com",
+    "canonical_domain": "yuh.com",
+    "pages_scanned": [
+      "https://www.yuh.com/de/",
+      "https://www.yuh.com/en/about-yuh/",
+      "https://www.yuh.com/en/contact/",
+      "https://www.yuh.com/en/pricing/",
+      "https://www.yuh.com/en/help/faq/",
+      "https://www.yuh.com/en/legal/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Yuh Finanz- App",
+    "website": "https://www.yuh.com/de/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "FAQPage",
+    "contacts": {
+      "email": "",
+      "phone": "+41 44 825 87 89",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "investment",
+      "trading",
+      "insurance",
+      "versicherung"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Yuh Finanz- App",
+        "website": "https://www.yuh.com/de/",
+        "email": "",
+        "phone": "+41 44 825 87 89",
+        "country": "",
+        "city": "",
+        "org_type": "FAQPage"
+      },
+      "evidence": [
+        "Yuh Finanz- App | Kostenloses All-in-One Online-Konto"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "menu",
+          "product",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Mit dem Yuh Online-Konto kannst du zahlen, sparen, investieren – und das zu niedrigen Gebühren! Finanzen endlich entspannt: Gönn dir jetzt die App.",
+        "og_description": "Mit dem Yuh Online-Konto kannst du zahlen, sparen, investieren – und das zu niedrigen Gebühren! Finanzen endlich entspannt: Gönn dir jetzt die App."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "menu",
+        "product",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "help"
+        ]
+      },
+      "evidence": [
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "",
+          "FAQPage"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.yuh.com/de/",
+            "url": "https://www.yuh.com/de/",
+            "name": "Yuh Finanz- App | Kostenloses All-in-One Online-Konto",
+            "isPartOf": {
+              "@id": "https://www.yuh.com/de/#website"
+            },
+            "datePublished": "2023-02-20T16:46:23+00:00",
+            "dateModified": "2025-08-13T14:38:33+00:00",
+            "description": "Mit dem Yuh Online-Konto kannst du zahlen, sparen, investieren – und das zu niedrigen Gebühren! Finanzen endlich entspannt: Gönn dir jetzt die App.",
+            "breadcrumb": {
+              "@id": "https://www.yuh.com/de/#breadcrumb"
+            },
+            "inLanguage": "de-DE",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://www.yuh.com/de/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.yuh.com/de/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.yuh.com/de/#website",
+            "url": "https://www.yuh.com/de/",
+            "name": "Yuh.com - DE",
+            "description": "",
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://www.yuh.com/de/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "de-DE"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Ist Yuh eine Bank?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Yuh hat als Joint Venture von Swissquote und PostFinance begonnen. Im Juli 2025 hat Swissquote den Anteil von PostFinance an Yuh übernommen, sodass wir nun vollständig zur Swissquote-Familie gehören. Unsere Mission ist es, dir günstige Dienstleistungen in einer einzigen, benutzerfreundlichen mobilen App anzubieten. Yuh selbst ist keine Bank. Alle Bank- und Finanzdienstleistungen, die über die Yuh-App angeboten werden, werden jedoch von Swissquote bereitgestellt. Swissquote Bank AG ist von der FINMA (der Eidgenössischen Finanzmarktaufsicht) zugelassen. Du profitierst somit von allen Schutzbestimmungen des Schweizer Bankengesetzes, einschliesslich einer Einlagensicherung von bis zu 100’000 CHF im Falle einer Insolvenz. Da Yuh und Swissquote als eine Einheit gelten, gilt diese Deckung für deine Gelder auf deinen Yuh- und Swissquote-Konten zusammen.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie hoch sind die Kontogebühren für Yuh?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p><html><body>Yuh berechnet keine Gebühren, wann immer es möglich ist, und niedrige Gebühren, wenn es notwendig ist. In allen Fällen erhältst du volle Transparenz. Hier findest du die <a href=\"https://www.yuh.com/de/pricing/\">Preisliste</a>.</body></html></p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Mit welchen Anlageprodukten kann ich bei Yuh handeln?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p><html><body>Wir bieten dir eine grosse Auswahl der beliebtesten Anlageprodukte wie Aktien, ETFs, digitale Assets oder Trendthemen.</p>\n<p>Entdecke alle Produkte <a href=\"https://www.yuh.com/de/app/invest/#assets\" target=\"_blank\" rel=\"noopener\" class=\"icon-link\">hier</a>.</body></html></p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Wie bekomme ich die kostenlose Yuh Mastercard?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Du kannst deine <strong>virtuelle</strong> <strong>Karte</strong> in der App aktivieren und nutzen. Gehe dazu einfach zu <strong>Zahlen &gt; Karte</strong> und füge sie deinen bevorzugten mobilen Zahlungsmethoden hinzu. Doch lieber eine <strong>physische Karte</strong>? Bleib in <strong>Zahlen &gt; Karte</strong> und swipe bis die physischen Karte erscheint. Bestelle sie und innerhalb von 10 Werktagen ist sie bei dir auf der Matte.</p>\n"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Was mache ich, wenn meine Karte gestohlen wurde oder ich sie verloren habe?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "<p>Ganz wichtig: TIEF DURCHATMEN! Wir sind für dich da. Wenn du merkst, dass deine Karte verschwunden ist oder gestohlen wurde, kannst du sie vorübergehend sperren, um unerlaubte Verwendungen und finanziellen Schaden zu verhindern. Melde dich ganz einfach auf deiner Yuh-App an, klicke auf Zahlen, dann auf Karte, Karteneinstellungen, und sperre deine Karte.</p>\n<p>Wenn du deine Karte dann hinter dem Sofakissen oder unter der schlafenden Katze wiederfindest, kannst du sie auf dem gleichen Weg auch wieder ganz einfach entsperren. Vermutest du, dass deine Karte gestohlen wurde? Während wir warten, bis das Schicksal den Dieb überführt hat, gib uns Bescheid und rufe im Customer Care Center unter +41 44 825 87 89 an. Wir reden dir dann nicht nur gut zu, sondern stellen dir nebenbei flugs eine neue Karte aus.</p>\n<p><span class=\"ui-provider ed bka bzc bzd bze bzf bzg bzh bzi bzj bzk bzl bzm bzn bzo bzp bzq bzr bzs bzt bzu bzv bzw bzx bzy bzz caa cab cac cae caf cag cah cai caj\" dir=\"ltr\">Bei der Bestellung einer neuen physischen Karte erheben wir eine geringe Gebühr in Höhe von 20 CHF.</span></p>\n"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:56.937937+00:00"
+  }
+}

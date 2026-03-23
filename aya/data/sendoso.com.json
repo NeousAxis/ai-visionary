@@ -1,0 +1,301 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:00:00.504453+00:00",
+  "source": {
+    "input_url": "https://www.sendoso.com",
+    "canonical_domain": "sendoso.com",
+    "pages_scanned": [
+      "https://www.sendoso.com/",
+      "https://www.sendoso.com/contact",
+      "https://www.sendoso.com/compare-plans",
+      "https://www.sendoso.com/privacy",
+      "https://www.sendoso.com/terms"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 1083
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Sendoso",
+    "website": "https://www.sendoso.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "SoftwareApplication",
+    "contacts": {
+      "email": "",
+      "phone": "+1 844-331-2714",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "SoftwareApplication"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Sendoso",
+        "website": "https://www.sendoso.com/",
+        "email": "",
+        "phone": "+1 844-331-2714",
+        "country": "",
+        "city": "",
+        "org_type": "SoftwareApplication"
+      },
+      "evidence": [
+        "Sendoso | Gifting & Direct Mail Platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "delivery",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Automate personalized gifting campaigns to drive revenue. Sendoso's AI-Enhanced Gifting and Direct Mail Automation Platform is data-backed by 100k+ users and 10's of millions of gifts sent.",
+        "og_description": "Automate personalized gifting campaigns to drive revenue. Sendoso's AI-Enhanced Gifting and Direct Mail Automation Platform is data-backed by 100k+ users and 10's of millions of gifts sent."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "delivery"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "SoftwareApplication"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 73.7,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 73.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Sendoso",
+        "url": "/",
+        "description": "AI-Enhanced Gifting and Direct Mail Automation Platform that helps businesses automate personalized gifting campaigns to drive revenue growth.",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "availability": "https://schema.org/InStock",
+          "url": "/demo-request"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.5",
+          "reviewCount": "1170"
+        },
+        "featureList": [
+          "AI-powered gift recommendations",
+          "Automated gifting campaigns",
+          "Global fulfillment to 165+ countries",
+          "Secure address confirmation",
+          "CRM integrations",
+          "Real-time analytics and ROI tracking",
+          "Custom branded merchandise",
+          "Direct mail automation",
+          "Event fulfillment"
+        ],
+        "provider": {
+          "@type": "Organization",
+          "name": "Sendoso",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://cdn.prod.website-files.com/651ad5ceeba626e1de2f2ce8/651c92a16a856b0f0d5656ca_SendosoLogo_RGB.svg"
+          },
+          "sameAs": [],
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "telephone": "+1-888-717-3287",
+              "contactType": "customer service",
+              "areaServed": "US"
+            },
+            {
+              "@type": "ContactPoint",
+              "telephone": "+1-844-331-2714",
+              "contactType": "customer service",
+              "areaServed": "CA"
+            },
+            {
+              "@type": "ContactPoint",
+              "telephone": "+44-808-169-9437",
+              "contactType": "customer service",
+              "areaServed": "GB"
+            },
+            {
+              "@type": "ContactPoint",
+              "telephone": "+61-1800-931-581",
+              "contactType": "customer service",
+              "areaServed": "AU"
+            }
+          ]
+        },
+        "inLanguage": "en"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:00:00.504462+00:00"
+  }
+}

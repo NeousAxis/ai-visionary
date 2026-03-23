@@ -1,0 +1,247 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:54.262556+00:00",
+  "source": {
+    "input_url": "https://www.franckmuller.com",
+    "canonical_domain": "franckmuller.com",
+    "pages_scanned": [
+      "https://www.franckmuller.com/",
+      "https://www.franckmuller.com/contact",
+      "https://www.franckmuller.com/legal"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 3,
+      "sitemap_found": true,
+      "sitemap_url_count": 243
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Franck Muller",
+    "website": "https://www.franckmuller.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "",
+      "phone": "+1 646 580 3456",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "presse",
+      "broadcast"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Franck Muller",
+        "website": "https://www.franckmuller.com/",
+        "email": "",
+        "phone": "+1 646 580 3456",
+        "country": "",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Franck Muller Official Website - Haute Horlogerie Watches"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "consulting",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "Franck Muller is world-famous for its Grand Complications and Luxury \nwatches. Discover all the Franck Muller Haute Horlogerie timepieces on the \nofficial Franck Muller website.",
+        "og_description": "Franck Muller is world-famous for its Grand Complications and Luxury watches. Discover all the Franck Muller Haute Horlogerie timepieces on the official Franck Muller website."
+      },
+      "evidence": [
+        "app",
+        "consulting",
+        "product",
+        "products",
+        "service"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "legal",
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog"
+        ]
+      },
+      "evidence": [
+        "blog"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "WebSite",
+          "Organization",
+          "LocalBusiness"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.7,
+    "final_score": 61,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 61,
+    "raw_score": 60.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "url": "https://www.franckmuller.com",
+        "name": "Franck Muller",
+        "description": "<p>Franck Muller is world-famous for its Grand Complications and Luxury timepieces. Discover all the Franck Muller Haute Horlogerie watches on the Official Franck Muller website.</p>",
+        "image": "//images.squarespace-cdn.com/content/v1/56a9e12ac647ad08eb4453c7/1571039610015-2NS36IUA34CCAD1UE3KJ/Franck+Muller.png",
+        "@context": "http://schema.org",
+        "@type": "WebSite"
+      },
+      {
+        "legalName": "Franck Muller Genève",
+        "address": "22 Route de Malagny\nGenthod, GE, 1294\nSwitzerland",
+        "email": "",
+        "telephone": "+41 22 959 88 88",
+        "sameAs": [
+          "https://www.facebook.com/FranckMullerWatches/",
+          "https://www.youtube.com/user/FMwatchland",
+          "https://www.instagram.com/franckmuller_geneve/"
+        ],
+        "@context": "http://schema.org",
+        "@type": "Organization"
+      },
+      {
+        "address": "22 Route de Malagny\nGenthod, GE, 1294\nSwitzerland",
+        "image": "https://static1.squarespace.com/static/56a9e12ac647ad08eb4453c7/t/5da42979ae38d16041a28200/1773218113047/",
+        "name": "Franck Muller Genève",
+        "openingHours": "Mo 09:00-12:00, Mo 14:00-17:00, Tu 09:00-12:00, Tu 14:00-17:00, We 09:00-12:00, We 14:00-17:00, Th 09:00-12:00, Th 14:00-17:00, Fr 09:00-12:00, Fr 14:00-17:00, , ",
+        "@context": "http://schema.org",
+        "@type": "LocalBusiness"
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:49:54.262565+00:00"
+  }
+}

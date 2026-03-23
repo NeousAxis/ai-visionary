@@ -1,0 +1,347 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:52.007949+00:00",
+  "source": {
+    "input_url": "https://www.kayako.com",
+    "canonical_domain": "kayako.com",
+    "pages_scanned": [
+      "https://kayako.com/",
+      "http://kayako.com/about/",
+      "http://kayako.com/pricing/",
+      "http://kayako.com/legal/",
+      "http://kayako.com/about/privacy/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 7
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Kayako",
+    "website": "https://kayako.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "privacy@kayako.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Kayako",
+        "website": "https://kayako.com/",
+        "email": "privacy@kayako.com",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "AI Help Desk and Customer Support Platform | Kayako"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Automate 60% of support tickets with Kayako's AI-first customer support platform. Discover how companies save $500K yearly. Get your personalized demo today.",
+        "og_description": "Automate 60% of support tickets with Kayako's AI-first customer support platform. Discover how companies save $500K yearly. Get your personalized demo today."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 72.3,
+    "final_score": 72,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 72,
+    "raw_score": 72.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://kayako.com/",
+            "url": "https://kayako.com/",
+            "name": "AI Help Desk and Customer Support Platform | Kayako",
+            "isPartOf": {
+              "@id": "https://kayako.com/#website"
+            },
+            "about": {
+              "@id": "https://kayako.com/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://kayako.com/#primaryimage"
+            },
+            "image": {
+              "@id": "https://kayako.com/#primaryimage"
+            },
+            "thumbnailUrl": "https://kayako.com/wp-content/uploads/2024/11/Tkets-1.png",
+            "datePublished": "2025-09-17T16:53:38+00:00",
+            "dateModified": "2026-01-23T03:57:13+00:00",
+            "description": "Automate 60% of support tickets with Kayako's AI-first customer support platform. Discover how companies save $500K yearly. Get your personalized demo today.",
+            "breadcrumb": {
+              "@id": "https://kayako.com/#breadcrumb"
+            },
+            "inLanguage": "en-US",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://kayako.com/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "en-US",
+            "@id": "https://kayako.com/#primaryimage",
+            "url": "https://kayako.com/wp-content/uploads/2024/11/Tkets-1.png",
+            "contentUrl": "https://kayako.com/wp-content/uploads/2024/11/Tkets-1.png",
+            "width": 1920,
+            "height": 1080
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://kayako.com/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://kayako.com/#website",
+            "url": "https://kayako.com/",
+            "name": "Kayako",
+            "description": "See It. Use It. Love It.",
+            "publisher": {
+              "@id": "https://kayako.com/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://kayako.com/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://kayako.com/#organization",
+            "name": "Kayako",
+            "url": "https://kayako.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://kayako.com/#/schema/logo/image/",
+              "url": "https://kayako.com/wp-content/uploads/2024/07/kayako-ai-logo.png",
+              "contentUrl": "https://kayako.com/wp-content/uploads/2024/07/kayako-ai-logo.png",
+              "width": 555,
+              "height": 193,
+              "caption": "Kayako"
+            },
+            "image": {
+              "@id": "https://kayako.com/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/kayako",
+              "https://x.com/kayako",
+              "https://www.linkedin.com/company/kayako"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:52.007960+00:00"
+  }
+}

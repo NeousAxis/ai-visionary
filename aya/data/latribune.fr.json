@@ -1,0 +1,233 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:45.066298+00:00",
+  "source": {
+    "input_url": "https://www.latribune.fr",
+    "canonical_domain": "latribune.fr",
+    "pages_scanned": [
+      "https://www.latribune.fr/",
+      "https://www.latribune.fr/contact"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "La Tribune",
+    "website": "https://www.latribune.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "NewsMediaOrganization",
+    "contacts": {
+      "email": "",
+      "phone": "01 47 07 56 10 06 07 26 79 25",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.85,
+    "source": "jsonld_type",
+    "evidence": [
+      "NewsMediaOrganization"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "La Tribune",
+        "website": "https://www.latribune.fr/",
+        "email": "",
+        "phone": "01 47 07 56 10 06 07 26 79 25",
+        "country": "FR",
+        "city": "",
+        "org_type": "NewsMediaOrganization"
+      },
+      "evidence": [
+        "La Tribune - Actualité Économique et Financière"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "cloud",
+          "consulting",
+          "menu",
+          "offre",
+          "product",
+          "produit",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Suivez l'actualité économique, financière et boursière avec La Tribune. Analyses, décryptages et informations exclusives sur l'économie française et internationale.",
+        "og_description": "Suivez l'actualité économique, financière et boursière avec La Tribune."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "cloud",
+        "consulting",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "mentions légales"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "mentions légales"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "NewsMediaOrganization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.1,
+    "final_score": 60,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.71,
+        "score": 7.1
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 60,
+    "raw_score": 60.1,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "NewsMediaOrganization",
+        "@id": "https://www.latribune.fr/#organization",
+        "name": "La Tribune",
+        "url": "https://www.latribune.fr/",
+        "logo": "https://static.latribune.fr/assets/bundles/latribunefront/img/subdomain/www/LT_latribune.png?version=20250624091558",
+        "sameAs": [
+          "https://www.facebook.com/latribune",
+          "https://www.instagram.com/latribune_news/?hl=fr",
+          "https://whatsapp.com/channel/0029VaB0ALpIiRosYKK4mn41",
+          "https://www.linkedin.com/company/la-tribune",
+          "https://twitter.com/latribune",
+          "https://fr.wikipedia.org/wiki/La_Tribune_(France,_1985)",
+          "https://profile.google.com/cp/CgovbS8wM21keTJn"
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:45.066306+00:00"
+  }
+}

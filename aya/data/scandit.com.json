@@ -1,0 +1,368 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:49:58.589993+00:00",
+  "source": {
+    "input_url": "https://www.scandit.com",
+    "canonical_domain": "scandit.com",
+    "pages_scanned": [
+      "https://www.scandit.com/",
+      "https://www.scandit.com/contact-us/",
+      "https://www.scandit.com/products/",
+      "https://www.scandit.com/pricing/",
+      "https://www.scandit.com/privacy/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 7
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Scandit",
+    "website": "https://www.scandit.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "dpo@aphaia.co.uk",
+      "phone": "+358 341 092 966",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "api",
+      "platform",
+      "developer",
+      "data"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Scandit",
+        "website": "https://www.scandit.com/",
+        "email": "dpo@aphaia.co.uk",
+        "phone": "+358 341 092 966",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Smart Data Capture on Smart Devices"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "delivery",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Data capture. Smarter. Scandit advanced barcode scanning, ID scanning or shelf intelligence software runs on any smart device. Unmatched speed and accuracy.",
+        "og_description": "Data capture. Smarter. Scandit advanced barcode scanning, ID scanning or shelf intelligence software runs on any smart device. Unmatched speed and accuracy."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "delivery",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "our process",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "our process",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "blog",
+          "documentation",
+          "faq",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "blog",
+        "documentation"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 75.7,
+    "final_score": 76,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 76,
+    "raw_score": 75.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://www.scandit.com/#website",
+            "name": "Scandit",
+            "description": "Scandit is the leading smart data capture platform for enterprise barcode scanning, ID verification, and shelf intelligence.",
+            "url": "https://www.scandit.com/",
+            "publisher": {
+              "@id": "https://www.scandit.com/#organization"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://www.scandit.com/#organization",
+            "name": "Scandit",
+            "alternateName": "Scandit AG",
+            "url": "https://www.scandit.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.scandit.com/assets/global/scandit-logo-dark.svg"
+            },
+            "sameAs": [
+              "https://en.wikipedia.org/wiki/Scandit",
+              "https://www.linkedin.com/company/scandit/",
+              "https://www.youtube.com/channel/UCdqGnNVZwfSJ-mhNeUeauXw",
+              "https://www.instagram.com/scandit_official/",
+              "https://github.com/Scandit",
+              "https://twitter.com/Scandit"
+            ],
+            "knowsAbout": [
+              {
+                "@type": "Thing",
+                "name": "Barcode Scanning",
+                "url": "https://www.scandit.com/products/barcode-scanning/",
+                "sameAs": "https://en.wikipedia.org/wiki/Barcode_reader"
+              },
+              {
+                "@type": "Thing",
+                "name": "Smart Data Capture",
+                "url": "https://www.scandit.com/smart-data-capture/",
+                "sameAs": "https://en.wikipedia.org/wiki/Smart_data_capture"
+              },
+              {
+                "@type": "Thing",
+                "name": "ID Scanning",
+                "url": "https://www.scandit.com/products/id-scanning/",
+                "sameAs": "https://en.wikipedia.org/wiki/Identity_document"
+              },
+              {
+                "@type": "Thing",
+                "name": "ID Verification",
+                "url": "https://www.scandit.com/products/id-validate/",
+                "sameAs": "https://en.wikipedia.org/wiki/Identity_verification_service"
+              },
+              {
+                "@type": "Thing",
+                "name": "Data Capture",
+                "url": "https://www.scandit.com/products/",
+                "sameAs": "https://en.wikipedia.org/wiki/Automatic_identification_and_data_capture"
+              }
+            ],
+            "founder": [
+              {
+                "@type": "Person",
+                "name": "Samuel Mueller",
+                "jobTitle": "CEO and Co-founder",
+                "url": "https://www.scandit.com/authors/samuel-mueller/",
+                "sameAs": "https://www.linkedin.com/in/samuelmueller/"
+              },
+              {
+                "@type": "Person",
+                "name": "Christof Roduner",
+                "jobTitle": "VP Engineering, CIO and Co-founder",
+                "url": "https://www.scandit.com/authors/christof-roduner/",
+                "sameAs": "https://www.linkedin.com/in/christofroduner/"
+              },
+              {
+                "@type": "Person",
+                "name": "Christian Floerkemeier",
+                "jobTitle": "VP Product, CTO and Co-founder",
+                "url": "https://www.scandit.com/authors/christian-floerkemeier/",
+                "sameAs": "https://www.linkedin.com/in/christian-floerkemeier-1402183/"
+              }
+            ],
+            "foundingLocation": {
+              "@type": "Place",
+              "name": "Zurich, Switzerland"
+            },
+            "foundingDate": "2009",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "email": "contact@scandit.com",
+              "contactType": "sales"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.scandit.com/#webpage",
+            "name": "Smart Data Capture on Smart Devices",
+            "description": "Data capture. Smarter. Scandit advanced barcode scanning, ID scanning or shelf intelligence software runs on any smart device. Unmatched speed and accuracy.",
+            "url": "https://www.scandit.com/",
+            "isPartOf": {
+              "@id": "https://www.scandit.com/#website"
+            },
+            "about": {
+              "@id": "https://www.scandit.com/#organization"
+            },
+            "publisher": {
+              "@id": "https://www.scandit.com/#organization"
+            }
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.scandit.com/#breadcrumb",
+            "name": "Navigation Path",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://www.scandit.com/"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:49:58.590007+00:00"
+  }
+}

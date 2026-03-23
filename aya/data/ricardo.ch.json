@@ -1,0 +1,346 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:48:14.473229+00:00",
+  "source": {
+    "input_url": "https://www.ricardo.ch",
+    "canonical_domain": "ricardo.ch",
+    "pages_scanned": [
+      "https://www.ricardo.ch/de/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Ricardo",
+    "website": "https://www.ricardo.ch/de/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "000.00 (0",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "magazine",
+      "video"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Ricardo",
+        "website": "https://www.ricardo.ch/de/",
+        "email": "",
+        "phone": "000.00 (0",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Ricardo - Sicher kaufen & verkaufen mit über 5 Mio. Nutzern"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "service",
+          "software"
+        ],
+        "meta_description": "Jetzt einstellen und erfolgreich verkaufen auf dem grössten Online-Marktplatz der Schweiz. Mehr als 1.5 Mio. Angebote - kaufe und ersteigere einzigartige Produkte, die es nirgendwo sonst gibt.",
+        "og_description": ""
+      },
+      "evidence": [
+        "api",
+        "app",
+        "service",
+        "software"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "iso"
+        ]
+      },
+      "evidence": [
+        "iso"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 42.0,
+    "final_score": 42,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 0.67,
+        "score": 13.3
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 42,
+    "raw_score": 42.0,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Ricardo.ch",
+            "url": "https://www.ricardo.ch/de/",
+            "@id": "https://www.ricardo.ch/de/#website",
+            "mentions": {
+              "@type": "Thing",
+              "name": "online marketplace",
+              "@id": "https://www.wikidata.org/wiki/Q3390477"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "name": "Ricardo Suchen",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://www.ricardo.ch/de/s/{search_term_string}/?utm_source=google&utm_medium=organic&utm_campaign=sitelinks-searchbox"
+              },
+              "query-input": "required name=search_term_string"
+            },
+            "hasPart": {
+              "@type": "WebPage",
+              "@id": "https://www.ricardo.ch/de/#webpage",
+              "url": "https://www.ricardo.ch/de/",
+              "name": "Ricardo",
+              "headline": "Ricardo - Sicher kaufen & verkaufen mit über 5 Mio. Nutzern"
+            },
+            "mainEntity": {
+              "@type": [
+                "Organization",
+                "OnlineBusiness",
+                "OnlineStore"
+              ],
+              "name": "Ricardo",
+              "legalName": "Ricardo AG",
+              "alternateName": "Ricardo.ch",
+              "@id": "https://www.ricardo.ch/de/#organization",
+              "identifier": [
+                {
+                  "@type": "PropertyValue",
+                  "propertyID": "googleKgMID",
+                  "value": "/g/1q2xhf5wg"
+                },
+                {
+                  "@type": "PropertyValue",
+                  "propertyID": "wikidataQID",
+                  "value": "Q16672735"
+                }
+              ],
+              "parentOrganization": {
+                "@type": [
+                  "Organization",
+                  "OnlineBusiness"
+                ],
+                "name": "SMG Swiss Marketplace Group",
+                "legalName": "SMG Swiss Marketplace Group AG",
+                "alternateName": "SMG",
+                "taxID": "CHE-102.002.341",
+                "url": "https://swissmarketplace.group/",
+                "address": {
+                  "@type": "PostalAddress",
+                  "streetAddress": "Thurgauerstrasse 36",
+                  "addressLocality": "Zürich",
+                  "addressRegion": "Kanton Zürich",
+                  "addressCountry": "CH",
+                  "postalCode": "8050"
+                }
+              },
+              "slogan": "Sicher kaufen & verkaufen mit über 5 Mio. Nutzern",
+              "description": "Ricardo ist der grösste Schweizer Online-Marktplatz für private und gewerbliche Käufer und Verkäufer. Ricardo stellt die technische Plattform für Käufer und Verkäufer zur Verfügung und bietet selber keine Artikel an. Aus diesem Grund kann Ricardo auch keine Bestellungen entgegennehmen. Die angebotenen Artikel auf Ricardo können in Auktionen ersteigert oder mit Fixpreisen sofort gekauft werden. Ein Kauf auf Ricardo ist verbindlich. Nach Angebotsende erhalten Käufer und Verkäufer per E-Mail die Kontaktdaten der Gegenpartei, um die Verkaufsabwicklung (Bezahlung, Lieferung etc.) auszuführen. Für die Aktivität auf Ricardo ist eine kostenlose Anmeldung notwendig. Direkt nach der Anmeldung können nach der Verifizierung der Handynummer, Artikel gekauft werden. Um Artikel zum Verkauf anzubieten, ist die Verifizierung mittels Hochladen eines amtlichen Ausweises und/oder die Eingabe des Aktivierungscodes notwendig. Der Aktivierungscode wird per A-Post verschickt.",
+              "foundingDate": "1999",
+              "url": "https://www.ricardo.ch/de/",
+              "logo": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Ricardo_Logo.png",
+              "taxID": "CHE-108.695.363",
+              "areaServed": {
+                "@type": "Country",
+                "name": "Schweiz",
+                "@id": "https://de.wikipedia.org/wiki/Schweiz"
+              },
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Theilerstrasse 1a, Postfach 1160",
+                "addressLocality": "Zug",
+                "addressRegion": "Kanton Zug",
+                "addressCountry": "CH",
+                "postalCode": "6301"
+              },
+              "employee": {
+                "@type": "Person",
+                "name": "Francesco Vass",
+                "jobTitle": "Managing Director General Marketplaces",
+                "image": "https://swissmarketplace.group/wp-content/uploads/2021/12/Francesco-Vass.webp",
+                "sameAs": [
+                  "https://ch.linkedin.com/in/francescovass",
+                  "https://www.bloomberg.com/profile/person/20429077"
+                ]
+              },
+              "contactPoint": [
+                {
+                  "@type": "ContactPoint",
+                  "contactType": "customer service",
+                  "email": "service@ricardo.ch",
+                  "telephone": "+41 0842 950 950",
+                  "areaServed": {
+                    "@type": "Country",
+                    "name": "Schweiz",
+                    "@id": "https://de.wikipedia.org/wiki/Schweiz"
+                  },
+                  "availableLanguage": [
+                    "de",
+                    "fr",
+                    "it"
+                  ],
+                  "url": "https://help.ricardo.ch/hc/de/articles/360000263645-Kundendienst",
+                  "hoursAvailable": {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": [
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday"
+                    ],
+                    "opens": "08:00:00",
+                    "closes": "18:00:00"
+                  }
+                }
+              ],
+              "sameAs": [
+                "https://www.wikidata.org/wiki/Q16672735",
+                "https://www.crunchbase.com/organization/ricardo-ch",
+                "https://www.facebook.com/Ricardo.CH/",
+                "https://twitter.com/ricardo_ch",
+                "https://www.instagram.com/ricardo_ch/",
+                "https://www.tiktok.com/@ricardo.ch",
+                "https://www.linkedin.com/company/ricardo.ch/",
+                "https://de.wikipedia.org/wiki/Ricardo_(Internetauktionshaus)",
+                "https://www.uid.admin.ch/Detail.aspx?uid_id=CHE-108.695.363",
+                "https://www.trustpilot.com/review/www.ricardo.ch",
+                "https://play.google.com/store/apps/details?id=com.qxl.Client&hl=de&gl=CH",
+                "https://apps.apple.com/ch/app/ricardo-kaufen-und-verkaufen/id429185033"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:48:14.473242+00:00"
+  }
+}

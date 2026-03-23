@@ -1,0 +1,232 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:58:11.574929+00:00",
+  "source": {
+    "input_url": "https://www.bubble.io",
+    "canonical_domain": "bubble.io",
+    "pages_scanned": [
+      "https://bubble.io/",
+      "https://bubble.io/about",
+      "https://bubble.io/contact",
+      "https://bubble.io/pricing",
+      "https://bubble.io/login",
+      "https://bubble.io/privacy",
+      "https://bubble.io/terms"
+    ],
+    "pages_scanned_count": 7,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": true,
+      "sitemap_url_count": 71
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Bubble",
+    "website": "https://bubble.io/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "Website",
+    "contacts": {
+      "email": "",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "unknown",
+    "sector_label": "Non détecté",
+    "confidence": 0,
+    "source": "none",
+    "evidence": []
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Bubble",
+        "website": "https://bubble.io/",
+        "email": "",
+        "phone": "",
+        "country": "",
+        "city": "",
+        "org_type": "Website"
+      },
+      "evidence": [
+        "Bubble: Build web & mobile apps with the only no-code AI app builder"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app"
+        ],
+        "meta_description": "Build with AI when you want speed, edit visually when you want precision â design, database, logic, and privacy rules. Go from idea to launched app fast.",
+        "og_description": "Build with AI when you want speed, edit visually when you want precision â design, database, logic, and privacy rules. Go from idea to launched app fast."
+      },
+      "evidence": [
+        "app"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "privacy",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Website",
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 49.3,
+    "final_score": 49,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 49,
+    "raw_score": 49.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "http://schema.org",
+        "@type": "Website",
+        "name": "The most powerful no-code platform | Bubble",
+        "description": "Bubble introduces a new way to build a web application. Itâs a no-code tool that lets you build SaaS platforms, marketplaces and CRMs without code. Bubble hosts all applications on its cloud platform.",
+        "url": "https://bubble.io",
+        "image": "https://s3.amazonaws.com/appforest_uf/f1530294839424x143528842134401200/Icon-no-clearspace.png",
+        "genre": "http://vocab.getty.edu/aat/300265431",
+        "keywords": "No-Code App, Web app, Visual programming, Database, Productivity"
+      },
+      {
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "name": "Bubble",
+        "logo": "https://s3.amazonaws.com/appforest_uf/f1530294839424x143528842134401200/Icon-no-clearspace.png",
+        "url": "https://bubble.io",
+        "sameAs": [
+          "https://www.facebook.com/bubblebuilder",
+          "https://twitter.com/bubble",
+          "https://www.linkedin.com/company/bubble",
+          "https://www.instagram.com/bubble__hq",
+          "https://en.wikipedia.org/wiki/Bubble_(programming_language)"
+        ],
+        "brand": {
+          "@type": "Organization",
+          "name": "Bubble",
+          "description": "Bubble introduces a new way to build a web application. Itâs a no-code tool that lets you build SaaS platforms, marketplaces and CRMs without code. Bubble hosts all applications on its cloud platform.",
+          "logo": "https://s3.amazonaws.com/appforest_uf/f1530294839424x143528842134401200/Icon-no-clearspace.png",
+          "sameAs": [
+            "https://www.facebook.com/bubblebuilder",
+            "https://twitter.com/bubble",
+            "https://www.linkedin.com/company/bubble",
+            "https://www.instagram.com/bubble__hq",
+            "https://en.wikipedia.org/wiki/Bubble_(programming_language)"
+          ]
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:58:11.574942+00:00"
+  }
+}

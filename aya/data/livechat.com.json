@@ -1,0 +1,504 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:01:50.425984+00:00",
+  "source": {
+    "input_url": "https://www.livechat.com",
+    "canonical_domain": "livechat.com",
+    "pages_scanned": [
+      "https://www.livechat.com/",
+      "https://www.livechat.com/features/",
+      "https://www.livechat.com/contact/",
+      "https://www.livechat.com/",
+      "https://www.livechat.com/pricing/",
+      "https://www.livechat.com/legal/"
+    ],
+    "pages_scanned_count": 6,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 10
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "LiveChat®",
+    "website": "https://www.livechat.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "47 53-033",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "LiveChat®",
+        "website": "https://www.livechat.com/",
+        "email": "",
+        "phone": "47 53-033",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "LiveChat® - The Best AI Live Chat Software for Business | LiveChat.com"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "cloud",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "saas",
+          "service",
+          "services",
+          "software",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "LiveChat® is the best AI live chat software for business, perfect for ecommerce and B2B. It powers real-time website support, boosting sales and customer satisfaction.",
+        "og_description": "LiveChat® is the best AI live chat software for business, perfect for ecommerce and B2B. It powers real-time website support, boosting sales and customer satisfaction."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "cloud",
+        "menu"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "articles",
+          "blog",
+          "guide",
+          "help",
+          "tutorial"
+        ]
+      },
+      "evidence": [
+        "articles",
+        "blog",
+        "guide"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.3,
+    "final_score": 74,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 74,
+    "raw_score": 74.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "description": "LiveChat® is the best AI live chat software for business, perfect for ecommerce and B2B. It powers real-time website support, boosting sales and customer satisfaction.",
+            "name": "LiveChat®",
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "query-input": "required name=search_term_string",
+                "target": "https://www.livechat.com/help/search/?query={search_term_string}"
+              }
+            ],
+            "url": "https://www.livechat.com"
+          },
+          {
+            "@type": "SoftwareApplication",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "bestRating": "5",
+              "ratingCount": "1675",
+              "ratingValue": "4.6",
+              "reviewCount": "1675",
+              "worstRating": "1"
+            },
+            "applicationCategory": "BusinessApplication",
+            "description": "LiveChat® is the best AI live chat software for business, perfect for ecommerce and B2B. It powers real-time website support, boosting sales and customer satisfaction.",
+            "name": "LiveChat® for Customer Support",
+            "offers": {
+              "@type": "AggregateOffer",
+              "highPrice": "79",
+              "lowPrice": "0",
+              "offerCount": "8",
+              "offers": [
+                {
+                  "@type": "Offer",
+                  "description": "Free trial",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "DAY",
+                    "value": 14
+                  },
+                  "price": "0",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Starter plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "ANN",
+                    "value": 1
+                  },
+                  "price": "19",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Starter plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "MON",
+                    "value": 1
+                  },
+                  "price": "24",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Team plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "ANN",
+                    "value": 1
+                  },
+                  "price": "41",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Team plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "MON",
+                    "value": 1
+                  },
+                  "price": "49",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Business plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "ANN",
+                    "value": 1
+                  },
+                  "price": "59",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Business plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "MON",
+                    "value": 1
+                  },
+                  "price": "69",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Enterprise plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "ANN",
+                    "value": 1
+                  },
+                  "price": "Contact us",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                },
+                {
+                  "@type": "Offer",
+                  "description": "Enterprise plan",
+                  "eligibleQuantity": {
+                    "@type": "QuantitativeValue",
+                    "unitCode": "MON",
+                    "value": 1
+                  },
+                  "price": "Contact us",
+                  "priceCurrency": "USD",
+                  "url": "https://www.livechat.com"
+                }
+              ],
+              "priceCurrency": "USD",
+              "url": "https://www.livechat.com"
+            },
+            "operatingSystem": "WebApp",
+            "seller": {
+              "@type": "Organization",
+              "name": "LiveChat®",
+              "url": "https://www.livechat.com"
+            }
+          },
+          {
+            "@type": "Product",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "bestRating": "5",
+              "ratingCount": "1675",
+              "ratingValue": "4.6",
+              "reviewCount": "1675",
+              "worstRating": "1"
+            },
+            "brand": {
+              "@type": "Brand",
+              "name": "LiveChat®",
+              "url": "https://www.livechat.com"
+            },
+            "category": "Software",
+            "description": "LiveChat® is the best AI live chat software for business, perfect for ecommerce and B2B. It powers real-time website support, boosting sales and customer satisfaction.",
+            "image": "https://www.livechat.com/icon-512.png",
+            "name": "LiveChat® for Customer Support",
+            "offers": {
+              "@type": "AggregateOffer",
+              "highPrice": "79",
+              "lowPrice": "0",
+              "offerCount": "8",
+              "priceCurrency": "USD"
+            },
+            "url": "https://www.livechat.com"
+          },
+          {
+            "@type": "Organization",
+            "address": [
+              {
+                "@type": "PostalAddress",
+                "addressCountry": "US",
+                "addressLocality": "Boston",
+                "addressRegion": "Massachusetts",
+                "postalCode": "02110",
+                "streetAddress": "101 Arch Street, 8th Floor"
+              },
+              {
+                "@type": "PostalAddress",
+                "addressCountry": "PL",
+                "addressLocality": "Wrocław",
+                "addressRegion": "dolnośląskie",
+                "postalCode": "53-033",
+                "streetAddress": "Zwycięska 47"
+              }
+            ],
+            "brand": {
+              "description": "Secure & user-friendly web communication app. Join over 35,000+ companies from 150 countries that use LiveChat®. Try now, chat for free!",
+              "name": "LiveChat®",
+              "url": "https://www.livechat.com"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "areaServed": "Worldwide",
+              "availableLanguage": "English",
+              "contactType": "Customer Support"
+            },
+            "description": "AI-powered technology for customer service software",
+            "logo": "https://www.livechat.com/icon-512.png",
+            "name": "Text, Inc.",
+            "sameAs": [
+              "https://www.facebook.com/livechat",
+              "https://www.instagram.com/livechat/",
+              "https://www.linkedin.com/company/livechat/",
+              "https://www.pinterest.com/livechat/",
+              "https://x.com/TextPlatform",
+              "https://www.wikidata.org/wiki/Q6658155",
+              "https://en.wikipedia.org/wiki/Text_(company)",
+              "https://www.youtube.com/@text_official"
+            ],
+            "subOrganization": {
+              "@type": "Product",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "bestRating": "5",
+                "ratingCount": "1675",
+                "ratingValue": "4.6",
+                "reviewCount": "1675",
+                "worstRating": "1"
+              },
+              "name": "LiveChat®",
+              "offers": {
+                "@type": "AggregateOffer",
+                "highPrice": "59",
+                "lowPrice": "0",
+                "offerCount": "8",
+                "priceCurrency": "USD"
+              },
+              "sameAs": [
+                "https://www.facebook.com/livechat",
+                "https://www.instagram.com/livechat/",
+                "https://www.linkedin.com/company/livechat/",
+                "https://www.pinterest.com/livechat/",
+                "https://x.com/livechat",
+                "https://www.wikidata.org/wiki/Q1763653",
+                "https://en.wikipedia.org/wiki/LiveChat",
+                "https://www.youtube.com/livechat"
+              ],
+              "url": "https://www.livechat.com"
+            },
+            "url": "https://www.text.com"
+          },
+          {
+            "@type": "WebPage",
+            "description": "LiveChat® is the best AI live chat software for business, perfect for ecommerce and B2B. It powers real-time website support, boosting sales and customer satisfaction.",
+            "name": "LiveChat® - The Best AI Live Chat Software for Business",
+            "url": "https://www.livechat.com"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:01:50.425994+00:00"
+  }
+}

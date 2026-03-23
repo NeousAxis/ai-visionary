@@ -1,0 +1,236 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:47.425751+00:00",
+  "source": {
+    "input_url": "https://www.klara.ch",
+    "canonical_domain": "klara.ch",
+    "pages_scanned": [
+      "https://www.klara.ch/",
+      "https://www.klara.ch/en/contact",
+      "https://www.klara.ch/faq"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 865
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "KLARA",
+    "website": "https://www.klara.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "VideoObject",
+    "contacts": {
+      "email": "info@klara.ch",
+      "phone": "2026 12.03.2026 08",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "press",
+      "video",
+      "marketing"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "KLARA",
+        "website": "https://www.klara.ch/",
+        "email": "info@klara.ch",
+        "phone": "2026 12.03.2026 08",
+        "country": "CH",
+        "city": "",
+        "org_type": "VideoObject"
+      },
+      "evidence": [
+        "Business Software für KMU in der Schweiz | KLARA"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "product",
+          "products",
+          "restaurant",
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "All-in-one Business-Software für KMU. Verwalte Buchhaltung, Lohn, Kassensystem, Online-Shop und mehr in einer cloudbasierten Lösung. Starte jetzt flexibel.",
+        "og_description": "All-in-one Business-Software für KMU. Verwalte Buchhaltung, Lohn, Kassensystem, Online-Shop und mehr in einer cloudbasierten Lösung. Starte jetzt flexibel."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "product",
+        "products"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "steps",
+          "workflow"
+        ]
+      },
+      "evidence": [
+        "steps",
+        "workflow"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "VideoObject"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.6,
+    "final_score": 79,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 79,
+    "raw_score": 78.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        "caption": {
+          "contentUrl": "https://www.klara.ch/media-transcripts/236574507251/de.vtt",
+          "inLanguage": "de",
+          "name": "de Captions"
+        },
+        "contentUrl": "https://2588476.fs1.hubspotusercontent-eu1.net/hubfs/2588476/KLARA/KLARA%20Ka%20Pay/05_Payments_Videos/Klara-Payment-Vorstellungsvideo_FullHD-Small_MASTER.mp4",
+        "dateModified": "2026-03-23T13:34:42.794Z",
+        "duration": "PT2M46.12S",
+        "height": 1080,
+        "name": "Klara-Payment-Vorstellungsvideo_FullHD-Small_MASTER",
+        "thumbnailUrl": "https://api-eu1.hubspot.com/filemanager/api/v3/files/thumbnail-redirect/236574507251?portalId=2588476&size=medium",
+        "uploadDate": "2025-05-15T08:18:34.493Z",
+        "width": 1920
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:50:47.425765+00:00"
+  }
+}

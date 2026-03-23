@@ -1,0 +1,202 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:03:20.735033+00:00",
+  "source": {
+    "input_url": "https://www.spotify.com",
+    "canonical_domain": "open.spotify.com",
+    "pages_scanned": [
+      "https://open.spotify.com/",
+      "https://www.spotify.com/ch-de/about/",
+      "https://www.spotify.com/ch-de/a-propos/",
+      "https://www.spotify.com/ch-de/contact/",
+      "https://www.spotify.com/ch-de/services/",
+      "https://www.spotify.com/ch-de/premium/",
+      "https://www.spotify.com/ch-de/pricing/",
+      "https://www.spotify.com/ch-de/faq/",
+      "https://www.spotify.com/ch-de/legal/end-user-agreement/",
+      "https://www.spotify.com/ch-de/safetyandprivacy/personal-data-collected",
+      "https://www.spotify.com/ch-de/terms/"
+    ],
+    "pages_scanned_count": 11,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": false,
+      "jsonld_count": 0,
+      "sitemap_found": true,
+      "sitemap_url_count": 10
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Spotify",
+    "website": "https://open.spotify.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "26.08.2025 1",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "press",
+      "podcast",
+      "video",
+      "marketing"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Spotify",
+        "website": "https://open.spotify.com/",
+        "email": "",
+        "phone": "26.08.2025 1",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Spotify - Web Player: Music for everyone"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "menu",
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "Spotify is a digital music service that gives you access to millions of songs.",
+        "og_description": "Spotify is a digital music service that gives you access to millions of songs."
+      },
+      "evidence": [
+        "app",
+        "menu",
+        "service",
+        "services",
+        "software"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": false,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": []
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 30.3,
+    "final_score": 30,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "engagements_conformite",
+      "indicateurs",
+      "contenus_pedagogiques"
+    ],
+    "estimated_aio_score": 30,
+    "raw_score": 30.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 35
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": []
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.35,
+    "generated_at": "2026-03-23T17:03:20.735043+00:00"
+  }
+}

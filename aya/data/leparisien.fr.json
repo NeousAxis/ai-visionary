@@ -1,0 +1,341 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:55:42.381952+00:00",
+  "source": {
+    "input_url": "https://www.leparisien.fr",
+    "canonical_domain": "leparisien.fr",
+    "pages_scanned": [
+      "https://www.leparisien.fr/",
+      "https://www.leparisien.fr/contact/",
+      "https://www.leparisien.fr/faq/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 2,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Le Parisien",
+    "website": "https://www.leparisien.fr/",
+    "country": "FR",
+    "city": "",
+    "languages": [],
+    "org_type": "WebSite",
+    "contacts": {
+      "email": "abonnement@leparisien.fr",
+      "phone": "01 76 49 11 11",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "journal",
+      "press",
+      "presse",
+      "magazine"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Le Parisien",
+        "website": "https://www.leparisien.fr/",
+        "email": "abonnement@leparisien.fr",
+        "phone": "01 76 49 11 11",
+        "country": "FR",
+        "city": "",
+        "org_type": "WebSite"
+      },
+      "evidence": [
+        "Actualités en direct et info en continu - Le Parisien"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "offre",
+          "prestation",
+          "product",
+          "produit",
+          "produits",
+          "service",
+          "services",
+          "solution"
+        ],
+        "meta_description": "Retrouvez toute l'actualité en direct, en photos et en vidéo sur l'actualité politique, sociale, économique et sportive avec Le Parisien.",
+        "og_description": "Retrouvez toute l'actualité en direct, en photos et en vidéo sur l'actualité politique, sociale, économique et sportive avec Le Parisien."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "offre"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "étapes"
+        ]
+      },
+      "evidence": [
+        "étapes"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "confidentialité",
+          "cookies",
+          "iso",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "confidentialité",
+        "cookies",
+        "iso",
+        "terms"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "aide",
+          "articles",
+          "faq",
+          "guide"
+        ]
+      },
+      "evidence": [
+        "aide",
+        "articles",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          "WebSite",
+          "ItemList"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 74.6,
+    "final_score": 75,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 75,
+    "raw_score": 74.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Le Parisien",
+          "alternateName": "Actualités en Direct et info en continu sur Le Parisien",
+          "url": "https://www.leparisien.fr/",
+          "image": "https://www.leparisien.fr/pf/resources/images/E-LOGO-LP-192x60.png?d=937",
+          "publisher": {
+            "@type": "Organization",
+            "name": "Le Parisien",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://leparisien.fr/resizer/N0XAyVPO-iL0Um_D3ylq1iFIj9Y=/192x60/www.leparisien.fr/pf/resources/images/E-LOGO-LP-192x60.png%3Fd=937",
+              "height": 60,
+              "width": 192
+            }
+          }
+        }
+      ],
+      {
+        "@context": "http://schema.org",
+        "@type": "ItemList",
+        "itemListElement": [
+          {
+            "@type": "SiteNavigationElement",
+            "position": 1,
+            "name": "À la une",
+            "url": "https://www.leparisien.fr/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 2,
+            "name": "En continu",
+            "url": "https://www.leparisien.fr/actualites-en-continu/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 3,
+            "name": "Paris & Île-de-France",
+            "url": "https://www.leparisien.fr/info-paris-ile-de-france-oise/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 4,
+            "name": "Faits divers",
+            "url": "https://www.leparisien.fr/faits-divers/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 5,
+            "name": "Municipales 2026",
+            "url": "https://www.leparisien.fr/elections/municipales/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 6,
+            "name": "International",
+            "url": "https://www.leparisien.fr/international/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 7,
+            "name": "Économie",
+            "url": "https://www.leparisien.fr/economie/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 8,
+            "name": "Société",
+            "url": "https://www.leparisien.fr/societe/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 9,
+            "name": "Sports",
+            "url": "https://www.leparisien.fr/sports/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 10,
+            "name": "Culture",
+            "url": "https://www.leparisien.fr/culture-loisirs/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 11,
+            "name": "Étudiant",
+            "url": "https://www.leparisien.fr/etudiant/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 12,
+            "name": "Vidéos",
+            "url": "https://www.leparisien.fr/video/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 13,
+            "name": "Guide d'achat",
+            "url": "https://www.leparisien.fr/guide-shopping/"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 14,
+            "name": "Jardin",
+            "url": "https://www.leparisien.fr/jardin/"
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:55:42.381962+00:00"
+  }
+}

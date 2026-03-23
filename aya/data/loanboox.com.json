@@ -1,0 +1,310 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:50:51.060340+00:00",
+  "source": {
+    "input_url": "https://www.loanboox.com",
+    "canonical_domain": "loanboox.com",
+    "pages_scanned": [
+      "https://loanboox.com/ch/de/"
+    ],
+    "pages_scanned_count": 1,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 2
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Loanboox Schweiz",
+    "website": "https://loanboox.com/ch/de/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+41 55 220 78 20",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.6000000000000001,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "fintech",
+      "portfolio"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Loanboox Schweiz",
+        "website": "https://loanboox.com/ch/de/",
+        "email": "",
+        "phone": "+41 55 220 78 20",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Loanboox Schweiz | Die führende Software- & Fremdfinanzierungslösung"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "cloud",
+          "software"
+        ],
+        "meta_description": "Loanboox ist die führende Fremdkapitalmarkt-Plattform und Software-Anbieterin. Über 3000 Immobiliengesellschaften, Wohnbaugenossenschaften, Gemeinden, Städte, Banken & Versicherungen sind Loanboox Kunden.",
+        "og_description": "Loanboox ist die führende Fremdkapitalmarkt-Plattform und Software-Anbieterin. Über 3000 Immobiliengesellschaften, Wohnbaugenossenschaften, Gemeinden, Städte, Banken & Versicherungen sind Loanboox Kunden."
+      },
+      "evidence": [
+        "api",
+        "cloud",
+        "software"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance"
+        ]
+      },
+      "evidence": [
+        "compliance"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 59.3,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.43,
+        "score": 4.3
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 59.3,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://loanboox.com/ch/de/",
+            "url": "https://loanboox.com/ch/de/",
+            "name": "Loanboox Schweiz | Die führende Software- & Fremdfinanzierungslösung",
+            "isPartOf": {
+              "@id": "https://loanboox.com/ch/de/#website"
+            },
+            "about": {
+              "@id": "https://loanboox.com/ch/de/#organization"
+            },
+            "primaryImageOfPage": {
+              "@id": "https://loanboox.com/ch/de/#primaryimage"
+            },
+            "image": {
+              "@id": "https://loanboox.com/ch/de/#primaryimage"
+            },
+            "thumbnailUrl": "https://loanboox.com/ch/wp-content/uploads/sites/9/loanboox-banner-mobile-home.jpg",
+            "datePublished": "2025-06-18T11:16:42+00:00",
+            "dateModified": "2025-11-25T10:24:27+00:00",
+            "description": "Loanboox ist die führende Fremdkapitalmarkt-Plattform und Software-Anbieterin. Über 3000 Immobiliengesellschaften, Wohnbaugenossenschaften, Gemeinden, Städte, Banken & Versicherungen sind Loanboox Kunden.",
+            "breadcrumb": {
+              "@id": "https://loanboox.com/ch/de/#breadcrumb"
+            },
+            "inLanguage": "de-CH",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://loanboox.com/ch/de/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "ImageObject",
+            "inLanguage": "de-CH",
+            "@id": "https://loanboox.com/ch/de/#primaryimage",
+            "url": "https://loanboox.com/ch/wp-content/uploads/sites/9/loanboox-banner-mobile-home.jpg",
+            "contentUrl": "https://loanboox.com/ch/wp-content/uploads/sites/9/loanboox-banner-mobile-home.jpg",
+            "width": 2000,
+            "height": 1506,
+            "caption": "Banner for the Loanboox Front Page."
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://loanboox.com/ch/de/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://loanboox.com/ch/de/#website",
+            "url": "https://loanboox.com/ch/de/",
+            "name": "Loanboox",
+            "description": "Europas führende Fremdkapitalmarkt-Plattform",
+            "publisher": {
+              "@id": "https://loanboox.com/ch/de/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://loanboox.com/ch/de/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "de-CH"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://loanboox.com/ch/de/#organization",
+            "name": "Loanboox",
+            "url": "https://loanboox.com/ch/de/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "de-CH",
+              "@id": "https://loanboox.com/ch/de/#/schema/logo/image/",
+              "url": "https://loanboox.com/ch/wp-content/uploads/sites/9/Loanboox_Logo_Color.png",
+              "contentUrl": "https://loanboox.com/ch/wp-content/uploads/sites/9/Loanboox_Logo_Color.png",
+              "width": 1605,
+              "height": 264,
+              "caption": "Loanboox"
+            },
+            "image": {
+              "@id": "https://loanboox.com/ch/de/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/loanboox",
+              "https://x.com/loanboox",
+              "https://www.linkedin.com/company/loanboox",
+              "https://www.youtube.com/channel/UC5IifmyMY9iGP74AQ8A4DkA"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:50:51.060350+00:00"
+  }
+}

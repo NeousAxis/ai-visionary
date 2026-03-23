@@ -1,0 +1,315 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:51:42.534258+00:00",
+  "source": {
+    "input_url": "https://www.accounto.ch",
+    "canonical_domain": "accounto.ch",
+    "pages_scanned": [
+      "https://accounto.ch/",
+      "https://accounto.ch/en/about-us-2/",
+      "https://accounto.ch/faq/",
+      "https://accounto.ch/datenschutz/",
+      "https://accounto.ch/nutzungsbedingungen/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 5
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Accounto",
+    "website": "https://accounto.ch/",
+    "country": "CH",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "",
+      "phone": "+41 (0)44 520 60 51",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "tech",
+    "sector_label": "Technologie & SaaS",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "software",
+      "saas",
+      "cloud",
+      "api",
+      "platform"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Accounto",
+        "website": "https://accounto.ch/",
+        "email": "",
+        "phone": "+41 (0)44 520 60 51",
+        "country": "CH",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Online Buchhaltungssoftware für KMU und Treuhänder ❘ Accounto"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "cloud",
+          "platform",
+          "product",
+          "saas",
+          "service",
+          "software"
+        ],
+        "meta_description": "Unsere innovative Buchhaltungssoftware erlöst KMU und Treuhänder von mühsamen Buchhaltungsarbeiten. einfach. digital. schnell.",
+        "og_description": "Unsere innovative Buchhaltungssoftware erlöst KMU und Treuhänder von mühsamen Buchhaltungsarbeiten. einfach. digital. schnell."
+      },
+      "evidence": [
+        "api",
+        "app",
+        "cloud",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "conditions",
+          "cookies",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "conditions",
+        "cookies",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 58.7,
+    "final_score": 59,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.8,
+        "score": 8.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 59,
+    "raw_score": 58.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "@id": "https://accounto.ch/",
+            "url": "https://accounto.ch/",
+            "name": "Online Buchhaltungssoftware für KMU und Treuhänder ❘ Accounto",
+            "isPartOf": {
+              "@id": "https://accounto.ch/#website"
+            },
+            "about": {
+              "@id": "https://accounto.ch/#organization"
+            },
+            "datePublished": "2023-02-02T10:13:58+00:00",
+            "dateModified": "2026-02-09T17:38:46+00:00",
+            "description": "Unsere innovative Buchhaltungssoftware erlöst KMU und Treuhänder von mühsamen Buchhaltungsarbeiten. einfach. digital. schnell.",
+            "breadcrumb": {
+              "@id": "https://accounto.ch/#breadcrumb"
+            },
+            "inLanguage": "de",
+            "potentialAction": [
+              {
+                "@type": "ReadAction",
+                "target": [
+                  "https://accounto.ch/"
+                ]
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://accounto.ch/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home"
+              }
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://accounto.ch/#website",
+            "url": "https://accounto.ch/",
+            "name": "Accounto | Digitale Buchhaltung",
+            "description": "Wir machen aus Treuhandunternehmen unverzichtbare, digitale KMU Champions",
+            "publisher": {
+              "@id": "https://accounto.ch/#organization"
+            },
+            "potentialAction": [
+              {
+                "@type": "SearchAction",
+                "target": {
+                  "@type": "EntryPoint",
+                  "urlTemplate": "https://accounto.ch/?s={search_term_string}"
+                },
+                "query-input": {
+                  "@type": "PropertyValueSpecification",
+                  "valueRequired": true,
+                  "valueName": "search_term_string"
+                }
+              }
+            ],
+            "inLanguage": "de"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://accounto.ch/#organization",
+            "name": "Accounto AG",
+            "url": "https://accounto.ch/",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "de",
+              "@id": "https://accounto.ch/#/schema/logo/image/",
+              "url": "https://accounto.ch/wp-content/uploads/2020/04/accounto_logo-3.png",
+              "contentUrl": "https://accounto.ch/wp-content/uploads/2020/04/accounto_logo-3.png",
+              "width": 500,
+              "height": 78,
+              "caption": "Accounto AG"
+            },
+            "image": {
+              "@id": "https://accounto.ch/#/schema/logo/image/"
+            },
+            "sameAs": [
+              "https://www.facebook.com/accounto.ch/",
+              "https://x.com/accounto_tech",
+              "https://www.instagram.com/accounto.ch/",
+              "https://www.linkedin.com/company/10652987"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:51:42.534266+00:00"
+  }
+}

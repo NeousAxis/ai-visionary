@@ -1,0 +1,447 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:28.620102+00:00",
+  "source": {
+    "input_url": "https://www.qonto.com",
+    "canonical_domain": "qonto.com:443",
+    "pages_scanned": [
+      "https://qonto.com:443/en",
+      "https://qonto.com/en/legal-documents/privacy-notice"
+    ],
+    "pages_scanned_count": 2,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": false,
+      "sitemap_url_count": 0
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Qonto",
+    "website": "https://qonto.com:443/en",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "dpo@qonto.com",
+      "phone": "819 489 626",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "finance",
+    "sector_label": "Finance & Banque",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "bank",
+      "crédit",
+      "investment",
+      "insurance"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Qonto",
+        "website": "https://qonto.com:443/en",
+        "email": "dpo@qonto.com",
+        "phone": "819 489 626",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "Manage all your finances from your Qonto business account"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "consulting",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "A business account - and much more. ✓ Invoicing ✓ Bookkeeping ✓ Expense management ✓ Financing | 7/7 customer support",
+        "og_description": "A business account - and much more. ✓ Invoicing ✓ Bookkeeping ✓ Expense management ✓ Financing | 7/7 customer support"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "consulting",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "compliance",
+          "cookies",
+          "iso",
+          "legal",
+          "privacy"
+        ]
+      },
+      "evidence": [
+        "compliance",
+        "cookies",
+        "iso",
+        "legal",
+        "privacy"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "glossary",
+          "help"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": false,
+        "canonical_present": true,
+        "hreflang_present": false,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 56.7,
+    "final_score": 57,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 0.6,
+        "score": 6.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 57,
+    "raw_score": 56.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@context": "http://schema.org",
+            "@type": "WebSite",
+            "name": "Qonto.com",
+            "@id": "https://qonto.com/en#website",
+            "url": "https://qonto.com/en",
+            "inLanguage": "en",
+            "publisher": {
+              "@id": "https://qonto.com#organization"
+            }
+          },
+          {
+            "@type": "Brand",
+            "@id": "https://qonto.com#brand",
+            "name": "Qonto",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://qonto.com/blog/assets/logo-7d4cecd23c516a73d28522b73227cb8bdc80cbbe1d7c83d9228a7e0ab84a0852.svg",
+              "caption": "Qonto"
+            }
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://qonto.com/en#webpage",
+            "url": "https://qonto.com/en",
+            "name": "Homepage Website - Qonto",
+            "description": "A business account - and much more. ✓ Invoicing ✓ Bookkeeping ✓ Expense management ✓ Financing | 7/7 customer support",
+            "mainEntity": {
+              "@id": "https://qonto.com/en#productsoftwareapplicationwebapplication"
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "@id": "https://qonto.com/en#breadcrumb",
+              "name": "Breadcrumb - Website",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Homepage Website - Qonto",
+                  "item": "https://qonto.com"
+                }
+              ]
+            }
+          },
+          {
+            "@type": "Service",
+            "@id": "https://qonto.com#service",
+            "name": "Qonto - Online Business Account",
+            "serviceType": "FinancialProduct",
+            "provider": {
+              "@id": "https://qonto.com#organization"
+            }
+          },
+          {
+            "@type": [
+              "Product",
+              "SoftwareApplication",
+              "WebApplication"
+            ],
+            "@id": "https://qonto.com/en#productsoftwareapplicationwebapplication",
+            "@context": {
+              "@vocab": "http://schema.org/",
+              "kg": "https://g.co/kgs/y3kRKG"
+            },
+            "url": "https://qonto.com/en",
+            "brand": {
+              "@id": "https://qonto.com#brand"
+            },
+            "name": "Qonto - Financial Solution for Professionals",
+            "applicationCategory": "Finance",
+            "operatingSystem": "Web, iOS, Android",
+            "image": [
+              {
+                "@type": "ImageObject",
+                "@id": "https://qonto.com/en#imageobject",
+                "url": [
+                  "https://qonto.com/blog/images/asset/12481/image/bb0dd447ff620dfcaacf883327cce4cc.png",
+                  "https://qonto.com/blog/assets/logo-7d4cecd23c516a73d28522b73227cb8bdc80cbbe1d7c83d9228a7e0ab84a0852.svg"
+                ]
+              }
+            ],
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "reviewCount": "53920",
+              "ratingValue": "4.8",
+              "name": "Qonto Financial Solution",
+              "author": {
+                "@type": "Organization",
+                "name": "Trustpilot"
+              }
+            },
+            "featureList": [
+              "https://qonto.com/en/accounting",
+              "https://qonto.com/en/invoicing",
+              "https://qonto.com/en/medium-business",
+              "https://qonto.com/en/multi-account",
+              "https://qonto.com/en/open-an-account",
+              "https://qonto.com/en/open-an-account/freelancers",
+              "https://qonto.com/en/payment-methods",
+              "https://qonto.com/en/payment-methods/card",
+              "https://qonto.com/en/payment-methods/card/card-plus",
+              "https://qonto.com/en/payment-methods/card/cards-insurance",
+              "https://qonto.com/en/payment-methods/card/virtual-card",
+              "https://qonto.com/en/payment-methods/card/x-card",
+              "https://qonto.com/en/payment-methods/instant-transfer",
+              "https://qonto.com/en/small-business"
+            ],
+            "organization": {
+              "@type": "Organization",
+              "name": "Qonto",
+              "legalName": "Qonto SA",
+              "@id": "https://qonto.com#organization",
+              "numberOfEmployees": "1600",
+              "description": "The neobank for SMEs and freelancers. Qonto provides a fully featured business account with a simplified accounting flow.",
+              "url": "https://qonto.com",
+              "knowsLanguage": [
+                "https://www.wikidata.org/wiki/Q150",
+                "https://www.wikidata.org/wiki/Q1860",
+                "https://www.wikidata.org/wiki/Q1321",
+                "https://www.wikidata.org/wiki/Q188",
+                "https://www.wikidata.org/wiki/Q652"
+              ],
+              "knowsAbout": [
+                "https://www.wikidata.org/wiki/Q16319025",
+                "https://www.wikidata.org/wiki/Q837171",
+                "https://www.wikidata.org/wiki/Q7576280",
+                "https://www.wikidata.org/wiki/Q104636707",
+                "https://www.wikidata.org/wiki/Q7576277",
+                "https://www.wikidata.org/wiki/Q13426746",
+                "https://www.wikidata.org/wiki/Q4116214",
+                "https://www.wikidata.org/wiki/Q12653690",
+                "https://www.wikidata.org/wiki/Q10481245",
+                "https://www.wikidata.org/wiki/Q3707847",
+                "https://www.wikidata.org/wiki/Q215279",
+                "https://www.wikidata.org/wiki/Q6055890",
+                "https://www.wikidata.org/wiki/Q4112087",
+                "https://www.wikidata.org/wiki/Q12075810"
+              ],
+              "logo": {
+                "@type": "ImageObject",
+                "name": "Qonto Logo",
+                "width": {
+                  "@type": "QuantitativeValue",
+                  "unitCode": "E37",
+                  "value": "85"
+                },
+                "height": {
+                  "@type": "QuantitativeValue",
+                  "unitCode": "E37",
+                  "value": "24"
+                },
+                "url": "https://qonto.com/blog/assets/logo-7d4cecd23c516a73d28522b73227cb8bdc80cbbe1d7c83d9228a7e0ab84a0852.svg",
+                "caption": "Qonto"
+              },
+              "foundingDate": "2016-04-04",
+              "address": {
+                "streetAddress": "18 RUE DE NAVARIN",
+                "addressLocality": "Paris",
+                "addressRegion": "Ile-de-France",
+                "postalCode": "75009",
+                "addressCountry": "FR"
+              },
+              "founders": [
+                {
+                  "@type": "Person",
+                  "name": "Alexandre Prot"
+                },
+                {
+                  "@type": "Person",
+                  "name": "Steve Anavi"
+                }
+              ],
+              "sameAs": [
+                "https://www.facebook.com/getqonto",
+                "https://x.com/getqonto",
+                "https://www.linkedin.com/company/qonto",
+                "https://www.youtube.com/channel/UCW4la34_QYt52-5IvSK2qzg",
+                "https://www.instagram.com/qonto",
+                "https://dribbble.com/qonto",
+                "https://fr.wikipedia.org/wiki/Qonto",
+                "https://www.wikidata.org/wiki/Q56319259",
+                "https://www.crunchbase.com/organization/qonto"
+              ]
+            }
+          },
+          {
+            "@type": "ServiceChannel",
+            "@id": "https://qonto.com#servicechannel",
+            "serviceUrl": "https://qonto.com/en/contact-form",
+            "availableLanguage": [
+              {
+                "@type": "Language",
+                "name": "French"
+              },
+              {
+                "@type": "Language",
+                "name": "English"
+              },
+              {
+                "@type": "Language",
+                "name": "Spanish"
+              },
+              {
+                "@type": "Language",
+                "name": "Italian"
+              },
+              {
+                "@type": "Language",
+                "name": "German"
+              },
+              {
+                "@type": "Language",
+                "name": "Dutch"
+              },
+              {
+                "@type": "Language",
+                "name": "Portuguese"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:28.620111+00:00"
+  }
+}

@@ -1,0 +1,288 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T16:53:23.855729+00:00",
+  "source": {
+    "input_url": "https://www.criteo.com",
+    "canonical_domain": "criteo.com",
+    "pages_scanned": [
+      "https://www.criteo.com/",
+      "https://www.criteo.com/company/",
+      "https://www.criteo.com/",
+      "https://www.criteo.com/legal/",
+      "https://www.criteo.com/privacy/"
+    ],
+    "pages_scanned_count": 5,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 9
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "Criteo",
+    "website": "https://www.criteo.com/",
+    "country": "",
+    "city": "",
+    "languages": [],
+    "org_type": "",
+    "contacts": {
+      "email": "contact@criteo.com",
+      "phone": "+33 (0) 1 75 85 09 39",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "ecommerce",
+    "sector_label": "E-commerce & Retail",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "shop",
+      "store",
+      "buy",
+      "cart",
+      "marketplace"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "Criteo",
+        "website": "https://www.criteo.com/",
+        "email": "contact@criteo.com",
+        "phone": "+33 (0) 1 75 85 09 39",
+        "country": "",
+        "city": "",
+        "org_type": ""
+      },
+      "evidence": [
+        "The Global Commerce Intelligence Platform"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "api",
+          "app",
+          "application",
+          "menu",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "solution",
+          "solutions"
+        ],
+        "meta_description": "Make every shopping moment smarter with ads powered by commerce AI fueled by the world’s largest set of commerce data",
+        "og_description": "Make every shopping moment smarter with ads powered by commerce AI fueled by the world’s largest set of commerce data"
+      },
+      "evidence": [
+        "api",
+        "app",
+        "application",
+        "menu",
+        "platform"
+      ]
+    },
+    "processus_methodes": {
+      "present": false,
+      "fields": {
+        "keywords_detected": []
+      },
+      "evidence": []
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "certification",
+          "conditions",
+          "cookies",
+          "gdpr",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "certification",
+        "conditions",
+        "cookies",
+        "gdpr",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "blog",
+          "faq",
+          "glossary",
+          "guide",
+          "help",
+          "knowledge base"
+        ]
+      },
+      "evidence": [
+        "blog",
+        "faq",
+        "glossary"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          ""
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 60.7,
+    "final_score": 61,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.57,
+        "score": 5.7
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "processus_methodes",
+      "indicateurs"
+    ],
+    "estimated_aio_score": 61,
+    "raw_score": 60.7,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Corporation",
+            "name": "Criteo",
+            "legalName": "Criteo S.A.",
+            "url": "https://www.criteo.com",
+            "logo": {
+              "@type": "ImageObject",
+              "inLanguage": "en-US",
+              "@id": "https://www.criteo.com/#/schema/logo/image/",
+              "url": "https://www.criteo.com/wp-content/uploads/2023/02/criteo-logo-orange.svg",
+              "contentUrl": "https://www.criteo.com/wp-content/uploads/2023/02/criteo-logo-orange.svg",
+              "width": 118,
+              "height": 24,
+              "caption": "Criteo"
+            },
+            "foundingDate": "2005",
+            "sameAs": [
+              "https://www.linkedin.com/company/criteo",
+              "https://www.youtube.com/user/CriteoOfficial",
+              "https://x.com/criteo",
+              "https://www.facebook.com/GoCriteo",
+              "https://www.instagram.com/gocriteo/",
+              "https://en.wikipedia.org/wiki/Criteo"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "32 Rue Blanche",
+              "addressLocality": "Paris",
+              "addressRegion": "Île-de-France",
+              "postalCode": "75009",
+              "addressCountry": {
+                "@type": "Country",
+                "name": "France"
+              }
+            },
+            "description": "Criteo offers the world's leading Commerce Media Platform, enabling marketers and media owners to connect, scale, and maximize digital and physical asset monetization through a unified platform.",
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": "https://www.criteo.com/#website",
+              "url": "https://www.criteo.com/",
+              "name": "Criteo",
+              "description": "The official website of Criteo, providing information about the world's leading Commerce Media Platform.",
+              "publisher": {
+                "@type": "Organization",
+                "@id": "https://www.criteo.com/#organization"
+              },
+              "copyrightHolder": {
+                "@type": "Organization",
+                "@id": "https://www.criteo.com/#organization"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T16:53:23.855740+00:00"
+  }
+}

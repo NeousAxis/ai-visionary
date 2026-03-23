@@ -1,0 +1,246 @@
+{
+  "version": "AYA-PREINDEX-1.0",
+  "generated_at": "2026-03-23T17:02:20.392493+00:00",
+  "source": {
+    "input_url": "https://www.whoop.com",
+    "canonical_domain": "whoop.com",
+    "pages_scanned": [
+      "https://www.whoop.com/ch/en/",
+      "https://www.whoop.com/ch/en/about/",
+      "https://www.whoop.com/ch/en/whoop-privacy-policies/"
+    ],
+    "pages_scanned_count": 3,
+    "structured_data_found": {
+      "asr_found": false,
+      "jsonld_found": true,
+      "jsonld_count": 1,
+      "sitemap_found": true,
+      "sitemap_url_count": 223
+    }
+  },
+  "entity": {
+    "is_organization": true,
+    "name": "WHOOP",
+    "website": "https://www.whoop.com/ch/en/",
+    "country": "US",
+    "city": "Boston",
+    "languages": [],
+    "org_type": "Organization",
+    "contacts": {
+      "email": "privacy@whoop.com",
+      "phone": "",
+      "address": ""
+    }
+  },
+  "sector": {
+    "sector_id": "media",
+    "sector_label": "Média & Communication",
+    "confidence": 0.7,
+    "source": "keyword_match",
+    "evidence": [
+      "news",
+      "media",
+      "press",
+      "presse",
+      "magazine"
+    ]
+  },
+  "aio_blocks": {
+    "identite": {
+      "present": true,
+      "fields": {
+        "name": "WHOOP",
+        "website": "https://www.whoop.com/ch/en/",
+        "email": "privacy@whoop.com",
+        "phone": "",
+        "country": "US",
+        "city": "Boston",
+        "org_type": "Organization"
+      },
+      "evidence": [
+        "WHOOP | Unlock Human Performance & Healthspan"
+      ]
+    },
+    "offre": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "app",
+          "application",
+          "cloud",
+          "platform",
+          "product",
+          "products",
+          "service",
+          "services",
+          "software"
+        ],
+        "meta_description": "Optimize sleep, strain, and recovery with WHOOP, the most advanced fitness and health wearable.  With personalized insights, improve performance, build healthier habits, and extend healthspan with continuous health monitoring.",
+        "og_description": "Optimize sleep, strain, and recovery with WHOOP, the most advanced fitness and health wearable.  With personalized insights, improve performance, build healthier habits, and extend healthspan with continuous health monitoring."
+      },
+      "evidence": [
+        "app",
+        "application",
+        "cloud",
+        "platform",
+        "product"
+      ]
+    },
+    "processus_methodes": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "how it works",
+          "steps"
+        ]
+      },
+      "evidence": [
+        "how it works",
+        "steps"
+      ]
+    },
+    "engagements_conformite": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "conditions",
+          "cookies",
+          "gdpr",
+          "iso",
+          "legal",
+          "privacy",
+          "terms"
+        ]
+      },
+      "evidence": [
+        "conditions",
+        "cookies",
+        "gdpr",
+        "iso",
+        "legal"
+      ]
+    },
+    "indicateurs": {
+      "present": false,
+      "fields": {},
+      "evidence": []
+    },
+    "contenus_pedagogiques": {
+      "present": true,
+      "fields": {
+        "keywords_detected": [
+          "documentation",
+          "guide",
+          "help"
+        ]
+      },
+      "evidence": [
+        "documentation",
+        "guide",
+        "help"
+      ]
+    },
+    "structure_technique": {
+      "present": true,
+      "fields": {
+        "has_jsonld": true,
+        "has_sitemap": true,
+        "canonical_present": true,
+        "hreflang_present": true,
+        "jsonld_types": [
+          "Organization"
+        ]
+      },
+      "evidence": []
+    }
+  },
+  "aio_scoring": {
+    "raw_score": 78.6,
+    "final_score": 79,
+    "cap_applied": false,
+    "cap_reason": null,
+    "block_scores": {
+      "identite": {
+        "weight": 10,
+        "fill": 0.86,
+        "score": 8.6
+      },
+      "offre": {
+        "weight": 20,
+        "fill": 1.0,
+        "score": 20.0
+      },
+      "processus_methodes": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "engagements_conformite": {
+        "weight": 15,
+        "fill": 1.0,
+        "score": 15.0
+      },
+      "indicateurs": {
+        "weight": 20,
+        "fill": 0.0,
+        "score": 0.0
+      },
+      "contenus_pedagogiques": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      },
+      "structure_technique": {
+        "weight": 10,
+        "fill": 1.0,
+        "score": 10.0
+      }
+    }
+  },
+  "aoi_readiness": {
+    "blocks_present": [
+      "identite",
+      "offre",
+      "processus_methodes",
+      "engagements_conformite",
+      "contenus_pedagogiques",
+      "structure_technique"
+    ],
+    "blocks_missing": [
+      "indicateurs"
+    ],
+    "estimated_aio_score": 79,
+    "raw_score": 78.6,
+    "cap_applied": false,
+    "cap_reason": null,
+    "confidence": 60
+  },
+  "extracted_structured_payloads": {
+    "asr": null,
+    "jsonld": [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "url": "https://www.whoop.com/us/en/",
+        "logo": "[https://images.ctfassets.net/rbzqg6pelgqa/1yTHjaEgJ8iNXx0NGBSc0v/670fa3e14ab0be1cdbba478a8e3d0292/WHOOP_Logo_R_Black.png]",
+        "name": "WHOOP | Unlock Human Performance & Healthspan",
+        "description": "Optimize sleep, strain, and recovery with WHOOP, the most advanced fitness and health wearable.  With personalized insights, improve performance, build healthier habits, and extend healthspan with continuous health monitoring. ",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "One Kenmore Sq",
+          "addressLocality": "Boston",
+          "addressCountry": "USA",
+          "addressRegion": "Massachusettes",
+          "postalCode": "02215"
+        }
+      }
+    ]
+  },
+  "asr_derived": {
+    "asr_status": "ASR_DERIVED",
+    "source": "AYA-BOT",
+    "version": "0.1",
+    "confidence": 0.6,
+    "generated_at": "2026-03-23T17:02:20.392502+00:00"
+  }
+}
