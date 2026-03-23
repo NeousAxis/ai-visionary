@@ -1111,6 +1111,22 @@ L'entonnoir de conversion est :
 - `scripts/e2e-test.js` — test E2E automatisé du questionnaire
 - `scripts/generate-perfect-pack.ts` — génération fichiers avec données complètes
 
+### Registre AYA — Option B (23 mars 2026)
+- **`lib/db.ts:getAyaEntities()`** — Filtre `payment_completed=true` supprimé. Tri par `payment_completed DESC` puis `asr_score DESC`. Limit 20→500.
+- **`app/aya/page.tsx`** — Refonte complète :
+  - Badges visuels : "ASR CERTIFIÉ" (vert, bordure verte) / "INDEXÉ" (gris, bordure grise)
+  - Barre de stats (total / certifiés / indexés)
+  - Liens certificat : `entity_id` en priorité (corrige le bug "Certificat non trouvé")
+  - CTA "Passez à Certifié" dans le footer
+  - Recherche par nom, secteur, pays
+- **`aya/generator.py:detect_entity_name()`** — Filtrage intelligent :
+  - Slogans détectés ("The best VPN...", "Pioneering sustainable...") → fallback domain
+  - Noms génériques filtrés ("Homepage", "Welcome", noms de pays)
+  - `_clean_title()` : extraction du vrai nom avant séparateur `|`, `-`, `—`
+  - `_strip_prefix()` : "Welcome to L'Oréal" → "L'Oréal"
+  - `_name_matches_domain()` : JSON-LD name validé contre le domaine
+- **206 entités** dans Supabase `aya_registry` (re-scrapé + re-poussé avec noms corrigés)
+
 ### Build
 - `npm run build` ✅ — 16 pages générées, 0 erreur TypeScript
 
