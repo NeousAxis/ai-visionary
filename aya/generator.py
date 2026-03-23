@@ -84,7 +84,7 @@ SLOGAN_INDICATORS = [
     "your partner", "for a safe", "for speed", "for the future",
     "welcome to ", "we help", "we make", "we build", "we are",
     "enabling", "reimagining", "redefining", "unlocking",
-    "connect, protect", "manage your", "manage all",
+    "connect, protect",
     "how to ", "smart data", "production-grade",
     "world leader", "passwords, secrets",
     "container orchestration", "workflow platform",
@@ -94,12 +94,19 @@ SLOGAN_INDICATORS = [
     # French
     "votre partenaire", "la référence", "toute la ", "tout le ",
     "découvrez", "bienvenue chez ", "bienvenue sur ",
-    "acheter et vendre",
     # German
     "günstige ", "willkommen", "führend", "für ki", "konzipiert",
     "entdecken", "suchen auf", "die schweizer",
     "trends und angebote", "im online shop",
 ]
+
+# Verbs/adverbs that start slogans — checked via startswith() in _is_slogan
+_ACTION_STARTERS = (
+    "manage ", "secure ", "acheter ", "discover ", "arbeit ", "finally",
+)
+
+# Post-comma marketing words — "Name, tagline" detection in _is_slogan
+_COMMA_MARKETING = ("world leader", "your way", "since ", "seit ", "votre ")
 
 # Known brand names that can't be derived from domain capitalization
 KNOWN_BRANDS = {
@@ -157,29 +164,17 @@ def _strip_prefix(text: str) -> str:
 def _is_slogan(text: str) -> bool:
     """Detect if text is a marketing slogan rather than a company name."""
     lower = text.lower().strip()
-    # Empty or invisible text
-    if len(lower) <= 1:
+    if len(lower) <= 1 or len(lower) > 50:
         return True
-    # Too long to be a name (> 50 chars)
-    if len(lower) > 50:
+    if any(ind in lower for ind in SLOGAN_INDICATORS):
         return True
-    # Contains slogan patterns
-    for indicator in SLOGAN_INDICATORS:
-        if indicator in lower:
-            return True
-    # Starts with an article → likely a description (if > 25 chars)
-    if lower.startswith(("the ", "le ", "la ", "les ", "un ", "une ", "des ")):
-        if len(lower) > 25:
-            return True
-    # Starts with action verbs / adverbs
-    action_starters = ("manage ", "secure ", "acheter ", "discover ", "arbeit ", "finally")
-    if lower.startswith(action_starters):
+    if lower.startswith(("the ", "le ", "la ", "les ", "un ", "une ", "des ")) and len(lower) > 25:
         return True
-    # "Name, tagline" pattern — comma followed by marketing words
+    if lower.startswith(_ACTION_STARTERS):
+        return True
     if ',' in lower:
         after_comma = lower.split(',', 1)[1].strip()
-        marketing = ["world leader", "your way", "since ", "seit ", "votre "]
-        if any(m in after_comma for m in marketing):
+        if any(m in after_comma for m in _COMMA_MARKETING):
             return True
     return False
 
