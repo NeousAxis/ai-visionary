@@ -397,6 +397,81 @@ export function sanitizeKeywords(items: string[], maxLen: number = 80): string[]
     return items.filter(k => k.length <= maxLen && !/[a-zA-Z0-9-]+\.(com|org|net|io|fr|ch)/i.test(k));
 }
 
+// --- FIX 2: SANITIZER FOR RAW FORM QUESTIONS INJECTED AS DATA ---
+// Strips values containing questionnaire question text, doubt language, or bare "Oui"/"Non" responses
+
+/** Patterns that indicate a raw questionnaire question was injected as data */
+const FORM_QUESTION_RE = /^(Possédez-vous|Avez-vous|Disposez-vous|Utilisez-vous|Proposez-vous|Êtes-vous|Est-ce que|Combien de)/i;
+/** Parenthetical doubt markers that indicate unverified data */
+const DOUBT_MARKER_RE = /\((présumé|à vérifier|non confirmé|supposé|probable|estimé)\)/i;
+/** Raw form answer patterns like "question... : Oui" */
+const RAW_FORM_ANSWER_RE = /^.{10,}\s*:\s*(Oui|Non|Peut-être)\s*$/i;
+/** "RGPD (présumé)" style doubt values */
+const DOUBT_VALUE_RE = /\(présumé\)|\(à vérifier\)|\(non confirmé\)/i;
+
+/**
+ * FIX 2: Sanitize a single value — strip form question contamination.
+ * Returns null if the value is a raw form question or contains doubt markers.
+ */
+export function sanitizeFormContamination(value: string | null | undefined): string | null {
+    if (!value || typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (FORM_QUESTION_RE.test(trimmed)) return null;
+    if (RAW_FORM_ANSWER_RE.test(trimmed)) return null;
+    if (DOUBT_VALUE_RE.test(trimmed)) return null;
+    // Strip doubt markers inline (e.g. "RGPD (présumé)" → "RGPD")
+    return trimmed.replace(DOUBT_MARKER_RE, '').trim() || null;
+}
+
+/**
+ * FIX 2: Sanitize an array — remove form question contamination.
+ */
+export function sanitizeFormContaminationArray(values: string[]): string[] {
+    return values
+        .map(v => sanitizeFormContamination(v))
+        .filter((v): v is string => v !== null && v.length > 0);
+}
+
+/**
+ * FIX 2: Special handling for certifications — if user only answered "Oui" without naming
+ * specific certifications, return empty array.
+ */
+export function sanitizeCertifications(values: string[]): string[] {
+    // If the only entry is a bare "Oui" or similar confirmation, return empty
+    const BARE_CONFIRMATION_RE = /^(oui|yes|ok|d'accord|exact|je confirme)[\s!.]*$/i;
+    const filtered = values.filter(v => !BARE_CONFIRMATION_RE.test(v.trim()));
+    return sanitizeFormContaminationArray(filtered);
+}
+
+/**
+ * FIX 3: Strip leading numbers/dots from process steps.
+ * "1. Structuration..." → "Structuration..."
+ * "ASR. 2. Création..." → "Création..."
+ */
+export function cleanProcessStep(step: string): string {
+    return step.replace(/^\d+[\.\)]\s*/g, '').replace(/^[A-Z]+\.\s*\d+[\.\)]\s*/g, '').trim();
+}
+
+/**
+ * FIX 4: Filter glossary entries contaminated with form questions or user answers.
+ */
+export function isFormContaminatedGlossary(term: string, description: string): boolean {
+    const combined = `${term} ${description}`;
+    if (FORM_QUESTION_RE.test(term) || FORM_QUESTION_RE.test(description)) return true;
+    if (/\?\s*$/.test(term)) return true; // Term itself is a question
+    if (RAW_FORM_ANSWER_RE.test(combined)) return true;
+    if (/:\s*(Oui|Non)\s*$/i.test(combined)) return true;
+    if (DOUBT_VALUE_RE.test(combined)) return true;
+    return false;
+}
+
+/**
+ * FIX 5: Clean keyword/intent entries — remove escaped quotes, leading dots, trailing punctuation.
+ */
+export function cleanKeywordEntry(entry: string): string {
+    return entry.replace(/^[\s."]+|[\s."]+$/g, '').replace(/\\"/g, '').trim();
+}
+
 // --- DATA QUALITY HELPERS ---
 
 /** Bug 1: Filter out garbage array entries like "Etc.", "etc.", "...", "" */
@@ -653,9 +728,9 @@ export function generateManifestJson(data: any, url: string): any {
     const rawBT = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBT || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
-    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
-    const dataFrameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
-    const dataPolicies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
+    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
+    const dataFrameworks = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
+    const dataPolicies = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
 
     const isAssoManifest = isAssociation(businessType, name, url);
@@ -740,7 +815,7 @@ export function generateManifestJson(data: any, url: string): any {
         discovery: {
             sitemap: joinUrl(url, 'sitemap.xml'),
             asrEndpoint: joinUrl(url, '.ayo/'),
-            registryUrl: joinUrl(url, "aya")
+            registryUrl: "https://www.ai-visionary.com/aya"
         },
         api_access: {
             status: "open",
@@ -768,17 +843,17 @@ export function generateFaqJson(data: any, url: string): any {
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
     const legalName = sanitizeFieldValue(cleanVal(data.identite?.legal_name?.value)) || "";
-    const processSteps = sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value));
+    const processSteps = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value))).map(cleanProcessStep);
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
     const geoServed = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
     const rawQAfaq = data.processus_methodes?.quality_assurance?.value;
     const qualityAssurance = sanitizeFieldValue(
         Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ') : cleanVal(rawQAfaq)
     ) || "";
-    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
-    const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
-    const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
-    const securityMeasures = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
+    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
+    const frameworks = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
+    const policies = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
+    const securityMeasures = filterGarbageEntries(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))
         .map(s => truncateSecurity(s)));
     const NO_DATA_PHRASES_FAQ = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
     const keyIndicators = filterGarbageEntries(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
@@ -992,8 +1067,8 @@ export function generateGlossaryJson(data: any): any {
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTgloss || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
-    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
-    const processSteps = sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value));
+    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
+    const processSteps = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value))).map(cleanProcessStep);
     const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceGloss ? sanitizeAudience(rawAudienceGloss) : "";
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
@@ -1016,6 +1091,8 @@ export function generateGlossaryJson(data: any): any {
         if (AI_NAME_GLOSSARY_RE.test(term.trim())) return;
         // Bug 7: Skip "Etc.", "etc.", "..." garbage terms
         if (isGarbageGlossaryTerm(term)) return;
+        // FIX 4: Skip form-contaminated glossary entries
+        if (isFormContaminatedGlossary(term, def)) return;
         const key = term.toLowerCase().trim();
         if (key.length < 3 || seen.has(key)) return;
         const cleanTerm = term.replace(/Creative Common\b(?!s)/gi, "Creative Commons");
@@ -1118,7 +1195,7 @@ export function generateGlossaryJson(data: any): any {
         inLanguage: "fr",
         numberOfTerms: terms.length,
         hasDefinedTerm: terms
-            .filter(item => !isGarbageGlossaryTerm(item.term))
+            .filter(item => !isGarbageGlossaryTerm(item.term) && !isFormContaminatedGlossary(item.term, item.def))
             .map(item => {
                 // Bug 8: Fix bare "ASR" term with generic description
                 let def = item.def;
@@ -1149,10 +1226,10 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     const email = data.identite?.contact_email?.value || "";
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhoneExt) ? rawPhoneExt : "";
-    const certifications = sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value));
-    const frameworks = sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value));
-    const policies = sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value));
-    const processSteps = sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value));
+    const certifications = sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)));
+    const frameworks = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
+    const policies = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
+    const processSteps = sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value))).map(cleanProcessStep);
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
     const geographies = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
     const rawQAec = data.processus_methodes?.quality_assurance?.value;
@@ -1328,8 +1405,8 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
             process_transparency: (processSteps.length > 0 || deliveryMode) ? "documented" : "undisclosed"
         },
         keywords_context: {
-            discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords.map(stripNumberedPrefix))),
-            intent_keywords: filterGarbageEntries(sanitizeKeywords(intentKeywords).map(stripNumberedPrefix)),
+            discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords.map(stripNumberedPrefix).map(cleanKeywordEntry))),
+            intent_keywords: filterGarbageEntries(sanitizeKeywords(intentKeywords).map(stripNumberedPrefix).map(cleanKeywordEntry)),
             audience_segments: filterGarbageEntries(audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
             source: "declared_plus_structured_normalization"
         },

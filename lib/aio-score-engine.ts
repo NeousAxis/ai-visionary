@@ -146,7 +146,31 @@ export function computeAioScore(extract: AyoExtract) {
         blockScores[block] = { weight, raw: rawAvg, score };
     });
 
-    // 2) Total (base)
+    // 2) Apply per-block caps based on data quality (FIX 1: stricter scoring)
+    // a) certifications empty → conformity block max 8/15
+    const certNode = extract.fields?.engagements_conformite?.certifications;
+    const certArr = certNode?.value;
+    const certEmpty = !certArr || (Array.isArray(certArr) && certArr.length === 0);
+    if (certEmpty && blockScores.engagements_conformite) {
+        blockScores.engagements_conformite.score = Math.min(blockScores.engagements_conformite.score, 8);
+    }
+
+    // b) key_indicators with no concrete numbers → indicateurs block max 8/20
+    const indNode = extract.fields?.indicateurs?.key_indicators;
+    const indArr = indNode?.value;
+    const hasConcreteNumbers = Array.isArray(indArr) && indArr.some((v: any) => /\d/.test(String(v)));
+    if (!hasConcreteNumbers && blockScores.indicateurs) {
+        blockScores.indicateurs.score = Math.min(blockScores.indicateurs.score, 8);
+    }
+
+    // c) No testimonials (review date absent or indicators empty) → indicateurs max 10/20
+    const reviewNode = extract.fields?.indicateurs?.last_review_date;
+    const noTestimonials = !reviewNode?.value || reviewNode.q === 0;
+    if (noTestimonials && (!indArr || (Array.isArray(indArr) && indArr.length === 0)) && blockScores.indicateurs) {
+        blockScores.indicateurs.score = Math.min(blockScores.indicateurs.score, 10);
+    }
+
+    // 2b) Total (base)
     let total = sum(Object.values(blockScores).map((b) => b.score));
 
     // 3) Règles strictes (Bible + réalité technique)
@@ -163,6 +187,15 @@ export function computeAioScore(extract: AyoExtract) {
     if (!hasAsr) {
         total = Math.min(total, 90);
     }
+
+    // c) No external proof/evidence → cap total at 78 (FIX 1)
+    const hasExternalProof = !certEmpty || hasConcreteNumbers ||
+        (extract.source.scan.has_asr_file === true) ||
+        isAyaRegistered;
+    if (!hasExternalProof) {
+        total = Math.min(total, 78);
+    }
+
     // Ce moteur est PUR.
 
     total = clamp(total, 0, 100);

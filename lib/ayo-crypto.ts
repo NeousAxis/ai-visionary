@@ -5,7 +5,9 @@ import {
     cleanSkippedValues, isAssociation, PHONE_REGEX,
     fixUnmatchedBrackets, mergeAiNamesInUseCases,
     filterGarbageEntries, normalizeCase, truncateSecurity, filterAiModelNames,
-    splitLongSecurityEntries
+    splitLongSecurityEntries,
+    sanitizeFormContaminationArray, sanitizeCertifications, cleanProcessStep,
+    cleanKeywordEntry
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
@@ -294,10 +296,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         };
         const BARE_ACRONYM_RE = /^[A-Z][A-Z0-9\-]{1,10}$/; // All caps, no spaces, 2-11 chars
         processus.process_steps = filterGarbageEntries(
-            sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value))
+            sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.processus_methodes?.process_steps?.value)))
         )
             .map((step: string) => {
-                const trimmed = step.trim();
+                // FIX 3: Strip leading numbers/dots from process_steps
+                const cleaned = cleanProcessStep(step);
+                const trimmed = cleaned.trim();
                 // Replace known bare acronyms with their expanded form
                 if (ACRONYM_EXPANSIONS[trimmed]) return ACRONYM_EXPANSIONS[trimmed];
                 // Filter bare acronyms (all caps, no spaces)
@@ -330,9 +334,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Engagements & Compliance
     const engagements: any = {};
     if (mode !== 'LIGHT') {
-        engagements.certifications = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value)));
-        engagements.frameworks = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value)));
-        engagements.policies = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)));
+        engagements.certifications = filterGarbageEntries(sanitizeCertifications(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value))));
+        engagements.frameworks = filterGarbageEntries(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value))));
+        engagements.policies = filterGarbageEntries(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value))));
         engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
             .map(s => truncateSecurity(s))));
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
