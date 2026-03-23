@@ -52,8 +52,9 @@ import {
     getExtractionRulesForPrompt,
 } from '@/lib/agents/architecte';
 
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+// Allow streaming responses up to 120 seconds (Vercel Pro supports up to 300s)
+// Scoring + Gemini extraction can take 45-90s under load
+export const maxDuration = 120;
 
 // Initialize Resend
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -754,23 +755,29 @@ FORMAT JSON ATTENDU :
 GÉNÈRE CE JSON MAINTENANT :
 `;
 
-            const extractionResult = await generateText({
-                model: modelToUse,
-                temperature: 0.1,
-                system: EXTRACTION_ATTEMPT_PROMPT,
-                messages: [{ role: 'user', content: `Extrait les réponses du scan de ${urlToScan}` }]
-            });
-
             // Parse extraction result
             let extractedAnswers: any[] = [];
             try {
+                const extractionResult = await Promise.race([
+                    generateText({
+                        model: modelToUse,
+                        temperature: 0.1,
+                        system: EXTRACTION_ATTEMPT_PROMPT,
+                        messages: [{ role: 'user', content: `Extrait les réponses du scan de ${urlToScan}` }],
+                        abortSignal: AbortSignal.timeout(50000),
+                    }),
+                    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('EXTRACTION_TIMEOUT')), 50000))
+                ]);
+
                 const jsonMatch = extractionResult.text.match(/\{[\s\S]*"answers"[\s\S]*\}/);
                 if (jsonMatch) {
                     const parsed = JSON.parse(jsonMatch[0]);
                     extractedAnswers = parsed.answers || [];
                 }
             } catch (e) {
-                console.warn("Failed to parse extraction:", e);
+                console.warn("⚠️ LLM extraction timeout/failure at scan phase. Continuing with empty answers.", e);
+                // FALLBACK: Continue with empty extractedAnswers — the questionnaire
+                // flow will collect answers directly from the user instead.
             }
 
             console.log(`✅ Extracted ${extractedAnswers.length} answers from scan`);
@@ -1862,22 +1869,22 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
 """
 `;
 
-                // CALL LLM FOR EXTRACTION ONLY
                 // CALL LLM FOR EXTRACTION ONLY (WITH TIMEOUT & FALLBACK)
-                console.log("... Extracting Signals via LLM (Timeout: 8s) ...");
+                console.log("... Extracting Signals via LLM (Timeout: 90s) ...");
 
                 let extractionResultText = "";
                 try {
                     // Timeout promise
                     const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error("LLM_TIMEOUT")), 45000)
+                        setTimeout(() => reject(new Error("LLM_TIMEOUT")), 90000)
                     );
 
-                    // LLM extraction promise
+                    // LLM extraction promise (with AbortSignal as belt-and-suspenders)
                     const extractionPromise = generateText({
                         model: modelToUse,
                         temperature: 0,
                         system: EXTRACTION_PROMPT,
+                        abortSignal: AbortSignal.timeout(90000),
                         messages: [
                             { role: 'user', content: "Extract JSON now. N'oublie pas de mettre q=1 si l'information est trouvée, particulièrement depuis le USER CONTEXT." },
                             { role: 'user', content: `USER CONTEXT (ANSWERS TO QUESTIONNAIRE) - PRIORITIZE THIS INFO AND SET q=1:\n"${userAnswersContext}"` }
@@ -2255,15 +2262,21 @@ ${architecteText}
 ${(() => {
                         // BUG FIX: Build pack question JSON separately to ensure clean serialization.
                         // The pack question must be the last |||‐separated chunk so the client renders it
-                        // as an interactive question_block. Avoid special chars in intro that could trigger
-                        // the client-side sanitizeDisplayText JSON_LEAK detector.
-                        const packIntro = "PROCHAINE ETAPE\n\n" + architecteRecommendations.summary + "\n\nChoisissez votre niveau de certification :";
+                        // as an interactive question_block.
+                        // CRITICAL: The intro text MUST NOT contain patterns that match the client-side
+                        // sanitizeDisplayText JSON_LEAK regex (e.g. "word": or { or }).
+                        // Strip any JSON-triggering chars from the summary to prevent sanitizer from
+                        // destroying the intro, which causes the whole question_block to fail silently.
+                        const safeSummary = (architecteRecommendations.summary || '')
+                            .replace(/[{}[\]"]/g, '')
+                            .replace(/\s*:\s*/g, ' - ');
+                        const packIntro = `PROCHAINE ETAPE\n\n${safeSummary}\n\nChoisissez votre niveau de certification`;
                         const packQuestion = {
                             type: "question_block",
                             intro: packIntro,
                             questions: [{
                                 id: "pack_intention",
-                                text: "Selectionnez votre Pack pour activer votre recommandation :",
+                                text: "Selectionnez votre Pack pour activer votre recommandation",
                                 options: ["Abonnement AYA - 19 CHF/mois", "Pack PRO - 499 CHF (Propriete)"],
                                 allowCustom: false,
                                 allowMultiple: false
