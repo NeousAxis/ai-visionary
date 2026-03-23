@@ -60,7 +60,7 @@ export function buildStripeLinks(url: string, email: string): { pro: string; aya
         if (url) payload.u = url;
         if (email) payload.e = email;
 
-        const b64 = Buffer.from(JSON.stringify(payload)).toString('base64');
+        const b64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
         if (b64.length <= 250) {
             suffix = `?client_reference_id=${b64}`;
             if (email) suffix += `&prefilled_email=${encodeURIComponent(email)}`;
@@ -112,7 +112,7 @@ export function encodeClientReference(data: { url: string; email: string; analys
     if (data.email) payload.e = data.email;
     if (data.analysisId) payload.aid = data.analysisId;
 
-    return Buffer.from(JSON.stringify(payload)).toString('base64');
+    return Buffer.from(JSON.stringify(payload)).toString('base64url');
 }
 
 /**
@@ -120,7 +120,8 @@ export function encodeClientReference(data: { url: string; email: string; analys
  */
 export function decodeClientReference(b64: string): { url?: string; email?: string; analysisId?: string } {
     try {
-        const payload = JSON.parse(Buffer.from(b64, 'base64').toString('utf-8'));
+        // Support both base64 and base64url encoding
+        const payload = JSON.parse(Buffer.from(b64, 'base64url').toString('utf-8'));
         return {
             url: payload.u,
             email: payload.e,
