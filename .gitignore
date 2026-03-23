@@ -52,6 +52,13 @@ ADMIN_SECRETS*
 CLAUDE.md
 PLAN-ACTION-AYO-COMPLET.md
 
+# private data & generated files
+__pycache__/
+aya/data/
+AYO_Pack_PRO/
+firebase-debug.log
+Strategie AI*.txt
+
 # debug/test scripts (root level only)
 /check*.js
 /clean_db.js
