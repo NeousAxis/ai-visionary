@@ -621,7 +621,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         asrContent.contextualRelevance = filteredRelevance.length > 0 ? filteredRelevance : buildContextualRelevance();
 
         // Enrich compliance (cleaned)
-        asrContent.compliance.policies = cleanArrayAsr(data.engagements_conformite?.policies?.value);
+        asrContent.compliance.policies = cleanFormResiduesArray(cleanArrayAsr(data.engagements_conformite?.policies?.value));
 
         // PRO-exclusive: Interoperability layer for AI agents
         asrContent.interoperability = {
