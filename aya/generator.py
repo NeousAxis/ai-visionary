@@ -4,6 +4,7 @@ AYA Generator — Builds AYA_PREINDEX + ASR_DERIVED records from scraped data.
 
 import json
 import os
+import re
 from datetime import datetime, timezone
 
 from parser import (
@@ -19,7 +20,7 @@ from parser import (
     detect_country_from_tld,
 )
 
-# AIO block weights (Bible AIO)
+# AIO block weights (Bible AIO) — Mirror of lib/aio-score-engine.ts, keep in sync
 BLOCK_WEIGHTS = {
     "identite": 10,
     "offre": 20,
@@ -60,7 +61,11 @@ GENERIC_NAMES = {
     "home", "homepage", "accueil", "welcome", "bienvenue",
     "start", "index", "main", "default", "page d'accueil",
     "untitled", "sans titre", "new tab", "nouvel onglet",
-    # Country names that sites use as JSON-LD name instead of company name
+}
+
+# Country/region names used as JSON-LD "name" instead of actual company name
+# (e.g. swissinfo.ch has name="Switzerland" — not an entity name)
+COUNTRY_NAMES_NOT_ENTITY = {
     "switzerland", "suisse", "schweiz", "svizzera",
     "france", "germany", "deutschland", "italia", "italy",
     "españa", "spain", "united states", "united kingdom",
@@ -75,7 +80,7 @@ SLOGAN_INDICATORS = [
     "pioneering", "leading the", "transforming", "empowering",
     "your partner", "votre partenaire", "la référence",
     "for a safe", "for speed", "for the future",
-    "toute la ", "tout le ", "découvrez", "bienvenue",
+    "toute la ", "tout le ", "découvrez",
     "welcome to ", "bienvenue chez ", "bienvenue sur ",
     "we help", "we make", "we build", "we are",
     "enabling", "reimagining", "redefining", "unlocking",
@@ -111,8 +116,9 @@ def _is_slogan(text: str) -> bool:
 
 
 def _is_generic(text: str) -> bool:
-    """Check if text is a generic/useless page name."""
-    return text.lower().strip() in GENERIC_NAMES
+    """Check if text is a generic page name or a bare country/region name."""
+    lower = text.lower().strip()
+    return lower in GENERIC_NAMES or lower in COUNTRY_NAMES_NOT_ENTITY
 
 
 def _clean_title(raw: str, domain: str = "") -> str:
@@ -127,7 +133,6 @@ def _clean_title(raw: str, domain: str = "") -> str:
     if not raw:
         return ""
     # Split on ALL separators at once
-    import re
     parts = re.split(r'\s*[|–—·]\s*|\s+-\s+|\s*:\s+', raw)
     parts = [p.strip() for p in parts if p.strip()]
 

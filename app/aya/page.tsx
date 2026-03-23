@@ -2,7 +2,16 @@
 "use client";
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+
+const ENTITY_TYPE_LABELS: Record<string, string> = {
+    'company': 'Entreprise',
+    'association': 'Association',
+    'public_body': 'Organisme Public',
+    'individual': 'Indépendant',
+};
+
+const getEntityId = (e: any): string => e.entity_id || e.aya_entity_id || e.id || '';
 
 export default function AyaPage() {
     const [query, setQuery] = useState("");
@@ -29,6 +38,16 @@ export default function AyaPage() {
             });
     }, []);
 
+    const { certifiedCount, indexedCount } = useMemo(() => {
+        let certified = 0;
+        let indexed = 0;
+        for (const e of results) {
+            if (e.payment_completed) certified++;
+            else indexed++;
+        }
+        return { certifiedCount: certified, indexedCount: indexed };
+    }, [results]);
+
     const displayedResults = results.filter((ent: any) => {
         if (!query) return true;
         const q = query.toLowerCase();
@@ -41,17 +60,7 @@ export default function AyaPage() {
         );
     });
 
-    const certifiedCount = results.filter(e => e.payment_completed).length;
-    const indexedCount = results.filter(e => !e.payment_completed).length;
-
     const isCertified = (entity: any) => entity.payment_completed === true;
-
-    const entityTypeLabel: Record<string, string> = {
-        'company': 'Entreprise',
-        'association': 'Association',
-        'public_body': 'Organisme Public',
-        'individual': 'Ind\u00e9pendant',
-    };
 
     return (
         <div style={{ background: 'var(--bg-main)', minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
@@ -151,7 +160,7 @@ export default function AyaPage() {
                             displayedResults.map((entity) => {
                                 const certified = isCertified(entity);
                                 return (
-                                    <div key={entity.entity_id || entity.aya_entity_id || entity.id} className="card" style={{
+                                    <div key={getEntityId(entity)} className="card" style={{
                                         position: 'relative',
                                         overflow: 'hidden',
                                         display: 'flex',
@@ -161,7 +170,7 @@ export default function AyaPage() {
                                         {/* TOP ROW: Country + Badge */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                                             <span style={{ background: 'var(--bg-main)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                                                {(entity.country_legal || 'XX').toUpperCase().slice(0, 2)} &bull; {entityTypeLabel[entity.entity_type] || 'Organisation'}
+                                                {(entity.country_legal || 'XX').toUpperCase().slice(0, 2)} &bull; {ENTITY_TYPE_LABELS[entity.entity_type] || 'Organisation'}
                                             </span>
                                             {certified ? (
                                                 <span style={{
@@ -195,7 +204,7 @@ export default function AyaPage() {
                                         </div>
 
                                         {/* NAME */}
-                                        <Link href={`/aya/e/${entity.entity_id || entity.aya_entity_id || entity.id}`} style={{ textDecoration: 'none' }}>
+                                        <Link href={`/aya/e/${getEntityId(entity)}`} style={{ textDecoration: 'none' }}>
                                             <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: 'var(--text-main)', cursor: 'pointer' }}>
                                                 {entity.display_name || entity.legal_name || "Entit\u00e9"}
                                             </h3>
@@ -212,7 +221,7 @@ export default function AyaPage() {
                                         <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                 <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#94a3b8', letterSpacing: '-0.5px' }}>
-                                                    ID: aya:{(entity.country_legal || 'xx').toLowerCase()}:{(entity.entity_id || entity.aya_entity_id || entity.id || '').slice(0, 8)}...
+                                                    ID: aya:{(entity.country_legal || 'xx').toLowerCase()}:{(getEntityId(entity) || '').slice(0, 8)}...
                                                 </span>
                                             </div>
                                             <div style={{ textAlign: 'right' }}>
