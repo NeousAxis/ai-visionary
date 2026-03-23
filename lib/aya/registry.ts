@@ -113,7 +113,7 @@ export async function registerOrUpdateEntity(
 export async function getLiveEntities(): Promise<AyaEntity[]> {
     console.log('🔍 AYA REGISTRY: Fetching live entities from Supabase...');
     try {
-        const entities = await db.getAyaEntities(500);
+        const entities = await db.getAyaEntities(); // No limit — uses default from db.ts (10000)
         return entities as AyaEntity[];
     } catch (err) {
         console.error('❌ AYA REGISTRY: Failed to fetch live entities', err);
