@@ -49,6 +49,8 @@ ADMIN_SECRETS*
 
 # claude code
 .claude/
+CLAUDE.md
+PLAN-ACTION-AYO-COMPLET.md
 
 # debug/test scripts (root level only)
 /check*.js
