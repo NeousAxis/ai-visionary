@@ -352,7 +352,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 6 | ❌ Pas commencée | — | Modules sémantiques |
 | Session 7 | ❌ Pas commencée | — | Pages AYA + certificat (page /aya 404) |
 | Session 8 | ❌ Pas commencée | — | UI/SEO + tests E2E |
-| **Bot AYA** | ✅ **MVP TERMINÉ** | 2026-03-23 | 251 fichiers scrapés, 143 entités dans Supabase, API FastAPI, doc OpenAI tool. **PROBLÈME** : Registre AYA vide car filtre `payment_completed=true` exclut les entités bot. Voir section 17.5. |
+| **Bot AYA** | ✅ **LIVE** | 2026-03-23 | 256 domaines scrapés, 206 entités dans Supabase, page `/aya` live avec badges Certifié/Indexé. Noms corrigés (slogans filtrés). API FastAPI + doc OpenAI tool. Reste : atteindre 1'000 domaines, déployer API, connecter aux IA. |
 
 > **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
 
@@ -1165,51 +1165,45 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 
 ### 17.4 État actuel (23 mars 2026)
 
-- ✅ **251 fichiers JSON** générés dans `aya/data/` (2 MB)
-- ✅ **143 entités** poussées dans Supabase `aya_registry` (score >= 20)
-- ✅ Score moyen : 48.3/100
-- ✅ 56 entreprises suisses, 19 françaises
-- ✅ 13 secteurs détectés (tech, finance, santé, food, education, etc.)
+- ✅ **256 domaines** scrapés, **206 entités** dans Supabase `aya_registry` (score >= 20)
+- ✅ **Page `/aya` live** sur ai-visionary.com — affiche toutes les entités (certifiées + indexées)
+- ✅ **Option B implémentée** — filtre `payment_completed=true` supprimé, badges visuels "ASR CERTIFIÉ" (vert) / "INDEXÉ" (gris)
+- ✅ **Noms d'entités corrigés** — détection slogans, noms génériques ("Homepage", pays), extraction intelligente depuis `<title>` et JSON-LD
+- ✅ **Liens certificat corrigés** — `entity_id` utilisé en priorité (au lieu de `entity.id` qui était null)
+- ✅ **Pipeline concurrent** — `run_pipeline_fast.py` (10 workers, 256 domaines en 3.3 min)
 - ✅ API FastAPI fonctionnelle avec filtres par secteur, pays, score
-- ✅ Doc API + Tool spec OpenAI créés
+- ✅ Doc API (`aya/docs/api.md`) + Tool spec OpenAI (`aya/docs/tool_spec.json`) créés
+- ✅ Tri : `payment_completed DESC` puis `asr_score DESC` (certifiés en premier)
 
-### 17.5 PROBLÈME CRITIQUE — Registre AYA vide sur le site
+### 17.5 Registre AYA — Problème résolu (Option B)
 
-**Symptôme** : La page `ai-visionary.com/aya` affiche "0 Entreprises enregistrées" malgré les 143 entités dans Supabase.
+**Problème initial** : La page `/aya` affichait "0 Entreprises" car `db.getAyaEntities()` filtrait sur `payment_completed = true`.
 
-**Cause** : La chaîne de filtrage exclut les entités du bot :
+**Solution appliquée (Option B)** :
+- `lib/db.ts:303` — Filtre supprimé, tri par `payment_completed DESC` puis `asr_score DESC`
+- `app/aya/page.tsx` — Refonte complète avec badges visuels :
+  - Clients payants : bordure verte + badge "ASR CERTIFIÉ"
+  - Entités bot : bordure grise + badge "INDEXÉ"
+  - Barre de stats en haut (total / certifiés / indexés)
+  - CTA "Passez à Certifié" pour convertir les indexés
 
-```
-app/aya/page.tsx
-  → fetch('/api/aya/live')
-    → getLiveEntities() [lib/aya/registry.ts:113]
-      → db.getAyaEntities(500) [lib/db.ts:296]
-        → .eq('payment_completed', true)  ← FILTRE ICI
-```
-
-Les entités du bot ont `payment_completed = false` et `data_origin = 'AYA-BOT'`.
-
-**Options pour résoudre** :
-
-| Option | Description | Impact |
-|--------|-------------|--------|
-| **A — Vue séparée** | Créer une nouvelle page `/aya/index` pour les entités du bot, garder `/aya` pour les clients payants | Aucun impact sur l'existant |
-| **B — Modifier le filtre** | `db.getAyaEntities()` retourne TOUTES les entités (payantes + bot) avec un badge visuel pour distinguer | Change la page AYA existante |
-| **C — Deux sections** | La page `/aya` affiche 2 sections : "Certifiés AYA" (payants) + "Index AYA" (bot) | Meilleur compromis |
-
-**Décision requise de Cyril** : Quelle option choisir ? L'option C semble la plus stratégique — le registre paraît plus riche tout en valorisant les clients payants.
+**Bugs corrigés dans la même session** :
+- `generator.py:detect_entity_name()` — slogans ("The best VPN for speed...") et noms génériques ("Homepage") filtrés
+- `generator.py:_clean_title()` — extraction du vrai nom depuis les `<title>` avec séparateurs (ex: "ge.ch – République et canton de Genève | ge.ch" → "République et canton de Genève")
+- `generator.py:_strip_prefix()` — "Welcome to L'Oréal" → "L'Oréal"
+- `app/aya/page.tsx` — `entity_id` en priorité dans les liens (au lieu de `entity.id` qui est null pour les entités bot)
 
 ### 17.6 Ce qui reste à faire
 
 | Tâche | Priorité | Effort |
 |-------|----------|--------|
-| **Résoudre le registre vide** (option A, B, ou C) | 🔴 Critique | 1h |
 | **Atteindre 1'000 domaines** — ajouter annuaires CH/FR | 🟡 Haute | 2h |
 | **Déployer l'API AYA** sur Render/Railway | 🟡 Haute | 1h |
 | **Connecter l'API aux IA** via tool_spec.json | 🟡 Haute | 2h |
+| **Affiner les noms restants** — quelques slogans en allemand persistent | 🟡 Moyenne | 1h |
 | **Enrichissement IA** (Gemini) pour secteur, description | 🟢 Moyenne | 3h |
 | **Scheduler automatique** (cron pour re-scraper) | 🟢 Moyenne | 2h |
-| **Base de données** (remplacer fichiers JSON par SQLite/Supabase) | 🟢 Basse | 2h |
+| **Pagination page /aya** — pour quand on dépassera 500 entités | 🟢 Basse | 1h |
 
 ### 17.7 Commandes
 
