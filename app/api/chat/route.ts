@@ -2444,9 +2444,9 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                 const stripeSuffix = `?client_reference_id=${clientRef}&prefilled_email=${encodeURIComponent(userEmail)}`;
                 logger.info('STRIPE_LINK', `Stripe link generated with aid=${sessionAsrId}, email=${userEmail}`);
 
-                const actionLink = selectedPlan === "PRO"
+                const actionLink = (selectedPlan === "PRO"
                     ? `${STRIPE_LINKS.PRO}${stripeSuffix}`
-                    : `${STRIPE_LINKS.AYA_SUB}${stripeSuffix}`;
+                    : `${STRIPE_LINKS.AYA_SUB}${stripeSuffix}`).replace(/\s/g, '');
 
                 if (selectedPlan === "PRO") {
                     finalResponseText = `✅ **Email enregistré.**

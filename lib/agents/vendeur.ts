@@ -22,8 +22,8 @@ export const STRIPE_PRICES = {
 } as const;
 
 export const STRIPE_LINKS = {
-    PRO: process.env.STRIPE_LINK_PRO || '',
-    AYA_SUB: process.env.STRIPE_LINK_AYA_SUB || '',
+    PRO: (process.env.STRIPE_LINK_PRO || '').trim(),
+    AYA_SUB: (process.env.STRIPE_LINK_AYA_SUB || '').trim(),
 } as const;
 
 export type PackType = 'LIGHT' | 'PRO' | 'AYA_SUB';
