@@ -49,6 +49,11 @@ export default function AyaPage() {
     }, [results]);
 
     const [sortBy, setSortBy] = useState<'default' | 'alpha' | 'score' | 'country' | 'certified'>('default');
+    const [page, setPage] = useState(1);
+    const PAGE_SIZE = 50;
+
+    // Reset page when search or sort changes
+    useEffect(() => { setPage(1); }, [query, sortBy]);
 
     const displayedResults = useMemo(() => {
         let filtered = results.filter((ent: any) => {
@@ -198,11 +203,18 @@ export default function AyaPage() {
                         </div>
                     </div>
 
+                    {/* PAGINATION INFO */}
+                    {!loading && displayedResults.length > PAGE_SIZE && (
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
+                            Page {page}/{Math.ceil(displayedResults.length / PAGE_SIZE)} &mdash; {displayedResults.length} r&eacute;sultats
+                        </p>
+                    )}
+
                     <div className="grid-3" style={{ rowGap: '30px' }}>
                         {loading ? (
                             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px' }}>Chargement...</div>
                         ) : displayedResults.length > 0 ? (
-                            displayedResults.map((entity) => {
+                            displayedResults.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((entity) => {
                                 const certified = isCertified(entity);
                                 return (
                                     <div key={getEntityId(entity)} className="card" style={{
@@ -295,6 +307,57 @@ export default function AyaPage() {
                             </div>
                         )}
                     </div>
+
+                    {/* PAGINATION */}
+                    {!loading && displayedResults.length > PAGE_SIZE && (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '40px', flexWrap: 'wrap' }}>
+                            <button
+                                onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                                disabled={page === 1}
+                                style={{
+                                    padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-light)',
+                                    background: page === 1 ? '#f1f5f9' : 'white', color: page === 1 ? '#cbd5e1' : 'var(--text-main)',
+                                    cursor: page === 1 ? 'default' : 'pointer', fontSize: '0.85rem',
+                                }}
+                            >
+                                &larr; Pr&eacute;c&eacute;dent
+                            </button>
+
+                            {Array.from({ length: Math.ceil(displayedResults.length / PAGE_SIZE) }, (_, i) => i + 1)
+                                .filter(p => p === 1 || p === Math.ceil(displayedResults.length / PAGE_SIZE) || Math.abs(p - page) <= 2)
+                                .map((p, idx, arr) => (
+                                    <span key={p}>
+                                        {idx > 0 && arr[idx - 1] !== p - 1 && <span style={{ color: '#cbd5e1' }}>&hellip;</span>}
+                                        <button
+                                            onClick={() => { setPage(p); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                                            style={{
+                                                padding: '8px 14px', borderRadius: '8px',
+                                                border: p === page ? '1px solid var(--primary-color)' : '1px solid var(--border-light)',
+                                                background: p === page ? 'var(--bg-accent)' : 'white',
+                                                color: p === page ? 'var(--primary-color)' : 'var(--text-muted)',
+                                                fontWeight: p === page ? 'bold' : 'normal',
+                                                cursor: 'pointer', fontSize: '0.85rem',
+                                            }}
+                                        >
+                                            {p}
+                                        </button>
+                                    </span>
+                                ))}
+
+                            <button
+                                onClick={() => { setPage(p => Math.min(Math.ceil(displayedResults.length / PAGE_SIZE), p + 1)); window.scrollTo({ top: 400, behavior: 'smooth' }); }}
+                                disabled={page === Math.ceil(displayedResults.length / PAGE_SIZE)}
+                                style={{
+                                    padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-light)',
+                                    background: page === Math.ceil(displayedResults.length / PAGE_SIZE) ? '#f1f5f9' : 'white',
+                                    color: page === Math.ceil(displayedResults.length / PAGE_SIZE) ? '#cbd5e1' : 'var(--text-main)',
+                                    cursor: page === Math.ceil(displayedResults.length / PAGE_SIZE) ? 'default' : 'pointer', fontSize: '0.85rem',
+                                }}
+                            >
+                                Suivant &rarr;
+                            </button>
+                        </div>
+                    )}
 
                 </div>
             </section>
