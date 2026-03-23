@@ -400,6 +400,23 @@ export async function POST(req: Request) {
         } catch (e: unknown) {
             const message = e instanceof Error ? e.message : 'Unknown error';
             logger.error('WEBHOOK_AYA_ERROR', message, { session_id });
+            // Retry once — registration is critical for the certificate link in the email
+            try {
+                const { registerOrUpdateEntity } = await import('@/lib/aya/registry');
+                ayaId = await registerOrUpdateEntity({
+                    legal_name: entityName,
+                    display_name: entityName,
+                    entity_type: resolvedEntityType,
+                    country_legal: resolvedCountryLegal,
+                    sector_macro: resolvedSector,
+                    website: analysisData.url,
+                    asr_score: Math.round(analysisData.score || 0),
+                    asr_payload: { data: analysisData.extract } as any
+                }, packType === 'AYA_SUB' ? 'subscription' : 'purchase');
+                logger.info('WEBHOOK_AYA_RETRY_OK', `AYA retry success: ${ayaId}`, { ayaId });
+            } catch (retryErr) {
+                logger.error('WEBHOOK_AYA_RETRY_FAIL', 'AYA registration failed after retry', { session_id });
+            }
         }
 
         // 5. DELIVERY
