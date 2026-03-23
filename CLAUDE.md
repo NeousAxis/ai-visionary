@@ -1213,13 +1213,15 @@ api/main.py (API FastAPI locale — recherche, filtres, stats)
 
 | Tâche | Priorité | Effort |
 |-------|----------|--------|
-| **Atteindre 1'000 domaines** — ajouter annuaires CH/FR | 🟡 Haute | 2h |
-| **Déployer l'API AYA** sur Render/Railway | 🟡 Haute | 1h |
-| **Connecter l'API aux IA** via tool_spec.json | 🟡 Haute | 2h |
-| **Affiner les noms restants** — quelques slogans en allemand persistent | 🟡 Moyenne | 1h |
-| **Enrichissement IA** (Gemini) pour secteur, description | 🟢 Moyenne | 3h |
-| **Scheduler automatique** (cron pour re-scraper) | 🟢 Moyenne | 2h |
-| **Pagination page /aya** — pour quand on dépassera 500 entités | 🟢 Basse | 1h |
+| **Atteindre 1'000 domaines** — ajouter annuaires CH/FR | 🟡 Haute | 2h | 🔄 En cours |
+| **API AYA publique** — routes Next.js sur Vercel (pas de FastAPI externe) | 🟡 Haute | 1h | ❌ |
+| **Connecter l'API aux IA** via tool_spec.json | 🟡 Haute | 2h | ❌ |
+| **Affiner les noms restants** — quelques slogans en allemand persistent | 🟡 Moyenne | 1h | 🔄 En cours |
+| **Enrichissement IA** (Gemini) pour secteur, description | 🟢 Moyenne | 3h | ❌ |
+| **Scheduler automatique** (cron pour re-scraper) | 🟢 Moyenne | 2h | ❌ |
+| **Pagination page /aya** — pour quand on dépassera 500 entités | 🟢 Basse | 1h | ❌ |
+
+> **Décision API (23 mars 2026)** : L'API AYA publique sera des routes Next.js `/api/aya/*` sur Vercel (gratuit, même infra). L'API FastAPI locale (`aya/api/main.py`) reste pour le dev/test. Pas besoin de Render/Railway/Koyeb.
 
 ### 17.7 Commandes
 
