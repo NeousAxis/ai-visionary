@@ -73,8 +73,49 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     ])].filter((k: any) => typeof k === 'string' && k.length > 2);
     const keywords = allKeywords.slice(0, 10);
 
+    // JSON-LD Organization structured data for AI bots and search engines
+    const entityTypeMap: Record<string, string> = {
+        company: 'Corporation',
+        association: 'NGO',
+        individual: 'Person',
+        public_body: 'GovernmentOrganization',
+    };
+    const schemaType = entityTypeMap[entity.entity_type] || 'Organization';
+    const certificateUrl = `https://ai-visionary.com/aya/e/${entity.entity_id || id}`;
+
+    const jsonLd: Record<string, unknown> = {
+        '@context': 'https://schema.org',
+        '@type': schemaType,
+        name: displayName,
+        ...(entity.website ? { url: entity.website } : {}),
+        ...(description ? { description } : {}),
+        ...(entity.country_legal ? {
+            address: {
+                '@type': 'PostalAddress',
+                addressCountry: entity.country_legal,
+            },
+        } : {}),
+        sameAs: [certificateUrl],
+        ...(entity.entity_type ? { additionalType: entity.entity_type } : {}),
+        ...(keywords.length > 0 ? { keywords: keywords.join(', ') } : {}),
+        ...(score !== null ? {
+            'aio:score': score,
+            'aio:scoredBy': {
+                '@type': 'Organization',
+                name: 'AI Visionary',
+                url: 'https://ai-visionary.com',
+            },
+        } : {}),
+    };
+
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
+
+            {/* JSON-LD Organization structured data */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
 
             {/* COMPACT NAV (Like Home) */}
             <div className="container" style={{ padding: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

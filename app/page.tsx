@@ -8,6 +8,33 @@ import PaymentSuccessModal from './components/PaymentSuccessModal';
 export default function Home() {
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "AI Visionary",
+            "alternateName": "AYA Registry",
+            "url": "https://ai-visionary.com",
+            "logo": "https://ai-visionary.com/logo-v2.png",
+            "description": "AYA is a public registry of 1800+ organizations rated for AI readability. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Genève",
+              "addressCountry": "CH"
+            },
+            "sameAs": [
+              "https://github.com/NeousAxis/ai-visionary"
+            ],
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://ai-visionary.com/api/aya/search?q={query}",
+              "query-input": "required name=query"
+            }
+          })
+        }}
+      />
       <Suspense fallback={null}>
         <PaymentSuccessModal />
       </Suspense>

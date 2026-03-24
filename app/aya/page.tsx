@@ -119,8 +119,36 @@ export default function AyaPage() {
 
     const isCertified = (entity: any) => entity.payment_completed === true;
 
+    const jsonLd = useMemo(() => {
+        if (!results.length) return null;
+        return {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "AYA Registry — AI Readability Index",
+            "description": `Public registry of ${results.length}+ organizations rated for AI readability (AIO score 0-100)`,
+            "url": "https://ai-visionary.com/aya",
+            "numberOfItems": results.length,
+            "itemListElement": results.slice(0, 10).map((e, i) => ({
+                "@type": "ListItem",
+                "position": i + 1,
+                "item": {
+                    "@type": "Organization",
+                    "name": e.display_name || e.name || e.canonical_domain || "Unknown",
+                    ...(e.website ? { "url": e.website } : {}),
+                },
+            })),
+        };
+    }, [results]);
+
     return (
         <div style={{ background: 'var(--bg-main)', minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
+
+            {jsonLd && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
+            )}
 
             {/* HEADER */}
             <header style={{ background: 'white', borderBottom: '1px solid var(--border-light)', position: 'sticky', top: 0, zIndex: 100, padding: '15px 0' }}>
