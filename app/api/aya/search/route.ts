@@ -22,13 +22,25 @@ export async function GET(req: NextRequest) {
 
         const results = allEntities
             .filter((e: any) => {
-                return (
+                // Search in basic fields
+                const basicMatch = (
                     (e.display_name && e.display_name.toLowerCase().includes(qLower)) ||
                     (e.legal_name && e.legal_name.toLowerCase().includes(qLower)) ||
                     (e.website && e.website.toLowerCase().includes(qLower)) ||
                     (e.sector_macro && e.sector_macro.toLowerCase().includes(qLower)) ||
-                    (e.country_legal && e.country_legal.toLowerCase().includes(qLower))
+                    (e.country_legal && e.country_legal.toLowerCase().includes(qLower)) ||
+                    (e.contact_email && e.contact_email.toLowerCase().includes(qLower))
                 );
+                if (basicMatch) return true;
+
+                // Deep search in ASR payload (description, services, keywords)
+                if (e.asr_payload) {
+                    const payloadStr = typeof e.asr_payload === 'string'
+                        ? e.asr_payload.toLowerCase()
+                        : JSON.stringify(e.asr_payload).toLowerCase();
+                    return payloadStr.includes(qLower);
+                }
+                return false;
             })
             .slice(0, limit)
             .map((e: any) => ({
