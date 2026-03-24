@@ -252,9 +252,25 @@ SECTOR_RULES = [
 ]
 
 
+# Domain hints — if domain contains these words, boost the sector score
+DOMAIN_SECTOR_HINTS = {
+    "travel": "travel", "tour": "travel", "visit": "travel", "hotel": "travel",
+    "zuerich": "travel", "zurich": "travel", "geneve": "travel", "geneva": "travel",
+    "lausanne": "travel", "bern": "travel", "luzern": "travel", "lugano": "travel",
+    "paris": "travel", "london": "travel", "berlin": "travel", "rome": "travel",
+    "bank": "finance", "credit": "finance", "finanz": "finance",
+    "pharma": "health", "medic": "health", "sante": "health",
+    "immobili": "realestate", "immo": "realestate",
+    "edu": "education", "uni": "education", "school": "education",
+    "news": "media", "media": "media", "press": "media",
+    "admin": "government", "gouv": "government", "canton": "government",
+}
+
+
 def detect_sector(text: str, jsonld_payloads: list, domain: str) -> dict:
     """Detect the most likely business sector from text and JSON-LD."""
     lower_text = text.lower()
+    domain_lower = domain.lower()
 
     # Check JSON-LD @type first (highest confidence)
     for payload in jsonld_payloads:
@@ -275,16 +291,38 @@ def detect_sector(text: str, jsonld_payloads: list, domain: str) -> dict:
                         "evidence": [org_type],
                     }
 
+    # Domain-based hint (boost +3 hits for matching sector)
+    domain_boost_sector = None
+    for hint_word, sector_id in DOMAIN_SECTOR_HINTS.items():
+        if hint_word in domain_lower:
+            domain_boost_sector = sector_id
+            break
+
     # Keyword matching (lower confidence)
     scores = {}
     for rule in SECTOR_RULES:
         hits = [kw for kw in rule["keywords"] if kw in lower_text]
         if hits:
+            hit_count = len(hits)
+            # Apply domain boost
+            if domain_boost_sector and rule["id"] == domain_boost_sector:
+                hit_count += 3
             scores[rule["id"]] = {
                 "rule": rule,
-                "hits": len(hits),
+                "hits": hit_count,
                 "evidence": hits[:5],
             }
+
+    # If domain hints a sector but no keywords matched, add it with base score
+    if domain_boost_sector and domain_boost_sector not in scores:
+        for rule in SECTOR_RULES:
+            if rule["id"] == domain_boost_sector:
+                scores[rule["id"]] = {
+                    "rule": rule,
+                    "hits": 3,
+                    "evidence": [f"domain:{domain}"],
+                }
+                break
 
     if scores:
         best = max(scores.values(), key=lambda x: x["hits"])

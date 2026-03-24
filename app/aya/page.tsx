@@ -13,16 +13,17 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
 
 const getEntityId = (e: any): string => e.entity_id || e.aya_entity_id || e.id || '';
 
-/** Deterministic shuffle based on entity_id — looks random but stable across renders */
+/** Deterministic shuffle — uses FNV-1a hash for better distribution across entity IDs */
 function deterministicShuffle<T>(arr: T[], getId: (item: T) => string): T[] {
-    const hash = (s: string) => {
-        let h = 0;
+    const fnv1a = (s: string) => {
+        let h = 0x811c9dc5;
         for (let i = 0; i < s.length; i++) {
-            h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+            h ^= s.charCodeAt(i);
+            h = Math.imul(h, 0x01000193);
         }
-        return h;
+        return h >>> 0;
     };
-    return [...arr].sort((a, b) => hash(getId(a)) - hash(getId(b)));
+    return [...arr].sort((a, b) => fnv1a(getId(a)) - fnv1a(getId(b)));
 }
 
 export default function AyaPage() {
