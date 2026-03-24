@@ -302,18 +302,30 @@ export const database = {
         if (!client) return [];
 
         try {
-            const { data, error } = await client
-                .from('aya_registry')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(limit);
+            // Supabase limits to 1000 rows per query — paginate to get all
+            const allData: any[] = [];
+            const pageSize = 1000;
+            let offset = 0;
 
-            if (error) {
-                console.error('❌ [Supabase] Get AYA Entities Error:', error);
-                return [];
+            while (offset < limit) {
+                const { data, error } = await client
+                    .from('aya_registry')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .range(offset, offset + pageSize - 1);
+
+                if (error) {
+                    console.error('❌ [Supabase] Get AYA Entities Error:', error);
+                    break;
+                }
+
+                if (!data || data.length === 0) break;
+                allData.push(...data);
+                if (data.length < pageSize) break; // Last page
+                offset += pageSize;
             }
 
-            return data || [];
+            return allData;
         } catch (error) {
             console.error('❌ [Supabase] Get AYA Entities Error:', error);
             return [];
