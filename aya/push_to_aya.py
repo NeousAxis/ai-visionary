@@ -22,7 +22,7 @@ import json
 import os
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 try:
     from supabase import create_client, Client
@@ -78,7 +78,22 @@ def record_to_aya_entity(record: dict) -> dict:
             "aio_scoring": scoring,
         },
         "generated_at": record.get("generated_at", ""),
+        "valid_until": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
     }
+
+    # Inject keywords into external_context for certificate page
+    keywords = record.get("keywords", [])
+    if keywords:
+        asr_payload["data"]["external_context"] = {
+            "keywords": {"value": keywords, "q": 0.5, "source": "AYA-BOT"}
+        }
+
+    # Inject offer keywords into offre block
+    offer_kw = record.get("aio_blocks", {}).get("offre", {}).get("fields", {}).get("keywords_detected", [])
+    if offer_kw:
+        if "offre" not in asr_payload["data"]:
+            asr_payload["data"]["offre"] = {}
+        asr_payload["data"]["offre"]["services"] = {"value": offer_kw[:10], "q": 0.5, "source": "AYA-BOT"}
 
     # Build recommendability
     score = readiness.get("estimated_aio_score", 0)

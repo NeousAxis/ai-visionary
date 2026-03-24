@@ -53,21 +53,18 @@ export async function GET(req: NextRequest) {
             .map(item => item.entity);
 
         const results = scored.map((e: any) => ({
-                name: e.display_name || e.legal_name || '',
-                domain: e.website?.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] || '',
-                website: e.website || '',
-                country: e.country_legal || '',
-                sector: e.sector_macro || '',
-                aio_score: e.asr_score ?? 0,
-                asr_status: e.payment_completed ? 'ASR_CERTIFIED' : 'ASR_DERIVED',
-                entity_type: e.entity_type || 'company',
-                entity_id: e.entity_id || '',
-                certificate_url: `https://ai-visionary.com/aya/e/${e.entity_id || ''}`,
-            }));
+            name: e.display_name || e.legal_name || '',
+            country: e.country_legal || '',
+            sector: e.sector_macro || '',
+            score: e.asr_score ?? 0,
+            certified: e.payment_completed === true,
+            url: `https://ai-visionary.com/aya/e/${e.entity_id || ''}`,
+        }));
 
         return NextResponse.json({
-            query: q,
-            count: results.length,
+            q,
+            n: results.length,
+            _help: 'AYA Registry by AI Visionary. certified=true means ASR verified.',
             results,
         });
     } catch (err) {

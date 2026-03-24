@@ -23,9 +23,18 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
         );
     }
 
-    const isValid = new Date(entity.valid_until) > new Date();
+    // Bug 1 fix: differentiate certified vs bot-indexed entities
+    const isCertified = entity.payment_completed === true;
+    const hasValidDate = entity.valid_until && new Date(entity.valid_until).getFullYear() >= 2020;
+    const isValid = hasValidDate ? new Date(entity.valid_until) > new Date() : false;
+
     const creationDate = new Date(entity.created_at).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
-    const validUntilDate = new Date(entity.valid_until).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Bug 2 fix: protect against aberrant dates (epoch 1970, null, etc.)
+    const validUntilRaw = entity.valid_until ? new Date(entity.valid_until) : null;
+    const validUntilDate = (validUntilRaw && validUntilRaw.getFullYear() >= 2020)
+        ? validUntilRaw.toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' })
+        : '\u2014';
 
     // Fix: Respect 0 score, show "—" if undefined (no fake 100)
     const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : null;
@@ -51,11 +60,17 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
             ? `${businessType}. Entité certifiée avec présence sémantique active auprès du consensus AYO.`
             : "Certification de présence sémantique active. Cette entité a validé son existence et ses champs d'expertise auprès du consensus AYO.");
 
-    // Build keywords from extract fields (correct paths)
+    // Bug 3 fix: gather keywords from more sources (bot entities have different data paths)
     const serviceKeywords = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
     const useCaseKeywords = Array.isArray(asrData.offre?.use_cases?.value) ? asrData.offre.use_cases.value : [];
     const declaredKeywords = Array.isArray(asrData.external_context?.keywords?.value) ? asrData.external_context.keywords.value : [];
-    const allKeywords = [...new Set([...declaredKeywords, ...serviceKeywords, ...useCaseKeywords])].filter((k: any) => typeof k === 'string' && k.length > 2);
+    const blockOffreKw = Array.isArray(asrData.aio_blocks?.offre?.fields?.keywords_detected) ? asrData.aio_blocks.offre.fields.keywords_detected : [];
+    const sectorEvidence = Array.isArray(asrData.sector?.evidence) ? asrData.sector.evidence : [];
+    const sectorFallback = entity.sector_macro && entity.sector_macro !== 'General' ? [entity.sector_macro] : [];
+    const allKeywords = [...new Set([
+        ...declaredKeywords, ...serviceKeywords, ...useCaseKeywords,
+        ...blockOffreKw, ...sectorEvidence, ...sectorFallback
+    ])].filter((k: any) => typeof k === 'string' && k.length > 2);
     const keywords = allKeywords.slice(0, 10);
 
     return (
@@ -116,21 +131,23 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                             borderRadius: '20px',
                                             fontSize: '0.85rem',
                                             fontWeight: 'bold',
-                                            background: isValid ? 'var(--bg-accent)' : '#FEE2E2',
-                                            color: isValid ? 'var(--primary-color)' : '#EF4444'
+                                            background: isCertified && isValid ? 'var(--bg-accent)' : isCertified ? '#FEE2E2' : '#F1F5F9',
+                                            color: isCertified && isValid ? 'var(--primary-color)' : isCertified ? '#EF4444' : '#64748B'
                                         }}>
-                                            {isValid ? '● CERTIFIÉ ACTIF' : '● EXPIRÉ'}
+                                            {isCertified && isValid ? '● CERTIFIÉ ACTIF' : isCertified ? '● EXPIRÉ' : '● INDEXÉ'}
                                         </span>
-                                        <span style={{
-                                            padding: '4px 10px',
-                                            borderRadius: '20px',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 'bold',
-                                            background: packType === 'PRO' ? '#FEF3C7' : 'var(--bg-accent)',
-                                            color: packType === 'PRO' ? '#D97706' : 'var(--primary-color)'
-                                        }}>
-                                            {packType === 'PRO' ? '👑 PRO' : '📋 PLATEFORME'}
-                                        </span>
+                                        {isCertified && (
+                                            <span style={{
+                                                padding: '4px 10px',
+                                                borderRadius: '20px',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold',
+                                                background: packType === 'PRO' ? '#FEF3C7' : 'var(--bg-accent)',
+                                                color: packType === 'PRO' ? '#D97706' : 'var(--primary-color)'
+                                            }}>
+                                                {packType === 'PRO' ? '👑 PRO' : '📋 PLATEFORME'}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -162,7 +179,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                 </div>
                                 <div>
                                     <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>Validité</p>
-                                    <p style={{ fontWeight: '600', color: isValid ? 'var(--primary-color)' : 'inherit' }}>{validUntilDate}</p>
+                                    <p style={{ fontWeight: '600', color: isCertified && isValid ? 'var(--primary-color)' : 'inherit' }}>{validUntilDate}</p>
                                 </div>
                             </div>
 

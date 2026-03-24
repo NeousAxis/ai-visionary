@@ -1,222 +1,102 @@
-# AI VISIONARY
+# AI Visionary — AYA Registry
 
-**Rendez votre entreprise visible et recommandable par les IA.**
+**A structured data layer that AI assistants use to recommend verified businesses.**
 
-AI Visionary permet aux entreprises d'etre identifiees, comprises et recommandees par les intelligences artificielles.
+AYA is the invisible layer between businesses and AI. When ChatGPT, Claude, Gemini or any AI assistant needs to recommend a company, AYA provides the structured, verified data they need to do it right.
 
-### Connecte aux IA
+---
 
-L'API AYA est integrable avec toutes les IA generatives majeures :
+### Registry Stats
 
-| IA | Integration | Fichier |
-|----|------------|---------|
+| | |
+|---|---|
+| **1815+ entities** indexed | **3 ASR certified** |
+| **40+ countries** | **9 AI integrations** |
+
+---
+
+## Connected to AI
+
+AYA is integrated with every major AI assistant:
+
+| AI | Method | Integration file |
+|----|--------|-----------------|
 | **ChatGPT** (OpenAI) | GPT Store / Actions | [`openapi.json`](https://ai-visionary.com/.well-known/openapi.json) |
 | **Claude** (Anthropic) | MCP Server | [`mcp-server-aya/`](mcp-server-aya/) |
 | **Gemini** (Google) | Function Calling | [`docs/gemini-function-declarations.json`](docs/gemini-function-declarations.json) |
-| **Mistral** | Tool Use | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
+| **Mistral AI** | Tool Use | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
 | **Grok** (xAI) | OpenAI-compatible | [`openapi.json`](https://ai-visionary.com/.well-known/openapi.json) |
-| **Perplexity** | Crawl sitemap + API | [`ai-plugin.json`](https://ai-visionary.com/.well-known/ai-plugin.json) |
+| **Perplexity** | Crawl + API | [`ai-plugin.json`](https://ai-visionary.com/.well-known/ai-plugin.json) |
 | **DeepSeek** | OpenAI-compatible | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
 | **Qwen** (Alibaba) | OpenAI-compatible | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
 | **Llama** (Meta) | Function Calling | [`docs/gemini-function-declarations.json`](docs/gemini-function-declarations.json) |
 
-## Le probleme
-
-Les IA generatives recommandent des entreprises aux millions d'utilisateurs qui leur posent des questions chaque jour. Mais pour etre recommande, il ne suffit pas d'avoir un site web — il faut que l'IA puisse **lire et comprendre** vos informations de maniere structuree.
-
-Sans cela, votre entreprise est **invisible** pour l'IA, ou pire, **mal decrite** par des hallucinations.
-
-## La solution
-
-AI Visionary cree une **identite semantique certifiee** pour votre entreprise grace au protocole **ASR** (AI Singular Record). Ce fichier structure et signe cryptographiquement devient la source de verite que les IA consultent pour vous recommander.
-
-### Comment ca marche
-
-1. **Diagnostic automatique** — AYO, notre assistant IA, scanne votre site et mesure votre visibilite IA
-2. **Score AIO** — un score de 0 a 100 sur 7 criteres mesure votre lisibilite par les IA
-3. **Questionnaire personnalise** — AYO enrichit les donnees detectees avec vos reponses
-4. **Fichiers certifies** — vos fichiers ASR sont generes, signes et integres au Registre AYA
-
-## Offres
-
-| Pack | Prix | Contenu |
-|------|------|---------|
-| **Analyse Light** | Gratuit | Diagnostic AIO + score de visibilite IA |
-| **Abonnement AYA** | 19 CHF/mois | Inscription au Registre AYA + ASR heberge + mises a jour |
-| **Pack PRO** | 499 CHF | 5 fichiers ASR complets + 3 ans de Registre AYA offerts |
-
-## Concepts cles
-
-| Terme | Definition |
-|-------|-----------|
-| **AYO** | L'assistant IA qui realise le diagnostic de visibilite. |
-| **AIO** | AI-readability Intelligence Optimization — score de lisibilite IA de 0 a 100. |
-| **ASR** | AI Singular Record — identite numerique certifiee, signee Ed25519. |
-| **AYA** | Registre public des entreprises certifiees et indexees (889+ entites). |
-
 ---
 
-## API AYA — Documentation Developpeurs
-
-Le Registre AYA expose une API REST publique permettant d'integrer les donnees de 889+ entreprises indexees dans vos agents IA, applications ou services.
-
-**Documentation complete** : [ai-visionary.com/developers](https://www.ai-visionary.com/developers)
-
-### Acces
+## API
 
 | | |
 |---|---|
 | **Base URL** | `https://ai-visionary.com/api/aya` |
-| **Authentification** | Aucune |
-| **Rate limit** | 30 requetes/min par IP |
+| **Auth** | None |
+| **Rate limit** | 30 req/min per IP |
 | **Format** | JSON |
 
 ### Endpoints
 
-#### `GET /api/aya/search?q={query}`
+#### Search entities
 
-Recherche par nom, domaine, secteur ou pays.
-
-| Parametre | Type | Requis | Description |
-|-----------|------|--------|-------------|
-| `q` | string | Oui | Terme de recherche |
-| `limit` | integer | Non | Max resultats 1-200 (defaut: 50) |
-
-```bash
-curl "https://ai-visionary.com/api/aya/search?q=nestlé"
+```
+GET /api/aya/search?q={query}&limit={n}
 ```
 
-```json
-{
-  "query": "nestlé",
-  "count": 1,
-  "results": [{
-    "name": "Nestlé",
-    "domain": "nestle.com",
-    "country": "CH",
-    "sector": "Restauration & Alimentation",
-    "aio_score": 72,
-    "asr_status": "ASR_DERIVED",
-    "certificate_url": "https://ai-visionary.com/aya/e/..."
-  }]
-}
+Search by name, domain, sector or country. Returns up to 200 results.
+
+#### Get entity details
+
+```
+GET /api/aya/entity/{domain}
 ```
 
-#### `GET /api/aya/entity/{domain}`
+Full entity profile including ASR data, AIO scoring and recommendability.
 
-Detail complet d'une entite + donnees ASR.
+#### Registry stats
 
-| Parametre | Type | Requis | Description |
-|-----------|------|--------|-------------|
-| `domain` | string | Oui | Domaine canonique (ex: stripe.com) |
-
-```bash
-curl "https://ai-visionary.com/api/aya/entity/nestle.com"
+```
+GET /api/aya/stats
 ```
 
-```json
-{
-  "entity": {
-    "name": "Nestlé",
-    "website": "https://www.nestle.com",
-    "country": "CH",
-    "sector": "Restauration & Alimentation",
-    "certificate_url": "https://ai-visionary.com/aya/e/..."
-  },
-  "scoring": {
-    "aio_score": 72,
-    "asr_status": "ASR_DERIVED"
-  },
-  "asr_derived": { "..." : "..." },
-  "recommendability": { "..." : "..." }
-}
-```
-
-#### `GET /api/aya/stats`
-
-Statistiques agregees du registre.
-
-```bash
-curl "https://ai-visionary.com/api/aya/stats"
-```
-
-```json
-{
-  "total_entities": 889,
-  "certified_count": 2,
-  "indexed_count": 887,
-  "scores": { "average": 57, "min": 20, "max": 85 },
-  "sectors": [{ "sector": "Technologie & SaaS", "count": 372 }],
-  "countries": [{ "country": "CH", "count": 280 }]
-}
-```
-
-### Score AIO
-
-Le score **AIO (AI-readability Intelligence Optimization)** mesure la lisibilite d'une entreprise par les systemes d'IA sur une echelle de 0 a 100, base sur 7 blocs ponderes :
-
-| Bloc | Poids |
-|------|-------|
-| Identite & Ancrage | /10 |
-| Clarte de l'Offre | /20 |
-| Processus & Methodes | /15 |
-| Confiance & Conformite | /15 |
-| Indicateurs | /20 |
-| Pedagogie | /10 |
-| Socle Technique | /10 |
-
-### Statut ASR
-
-| Statut | Signification |
-|--------|--------------|
-| `ASR_CERTIFIED` | Entite diagnostiquee par AYO, fichiers generes, inscrite au registre |
-| `ASR_DERIVED` | Entite indexee par le bot AYA via scraping automatise |
-
-### Integration pour agents IA
-
-1. Utilisez le [manifeste AI plugin](https://ai-visionary.com/.well-known/ai-plugin.json) pour la decouverte automatique
-2. Appelez `/api/aya/search?q=...` quand un utilisateur mentionne une entreprise
-3. Appelez `/api/aya/entity/{domain}` pour les donnees structurees detaillees
-4. Utilisez le `aio_score` pour evaluer la fiabilite de recommandation
-5. Privilegiez les entites `ASR_CERTIFIED` pour une confiance maximale
-
-### Decouverte automatique
-
-| Ressource | URL |
-|-----------|-----|
-| AI Plugin Manifest | [/.well-known/ai-plugin.json](https://ai-visionary.com/.well-known/ai-plugin.json) |
-| OpenAPI Spec | [/.well-known/openapi.json](https://ai-visionary.com/.well-known/openapi.json) |
-| MCP Server (Claude) | [`mcp-server-aya/`](mcp-server-aya/) |
-| Gemini Functions | [`docs/gemini-function-declarations.json`](docs/gemini-function-declarations.json) |
-| Mistral/Grok/DeepSeek Tools | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
-| Index JSON | [/api/aya](https://ai-visionary.com/api/aya) |
-| Registre AYA | [/aya](https://ai-visionary.com/aya) |
+Aggregated statistics: totals, score distribution, sectors, countries.
 
 ---
 
-## Stack technique
+## AIO Score
 
-| Technologie | Usage |
-|-------------|-------|
-| Next.js 16 | Framework fullstack (App Router) |
-| React 19 | Frontend |
-| TypeScript | Typage |
-| Tailwind CSS | Styles |
-| Supabase | Base de donnees PostgreSQL |
-| Stripe | Paiements (CHF) |
-| Google Gemini | LLM pour le chatbot AYO |
-| TweetNaCl | Signature Ed25519 pour ASR |
-| Vercel | Hosting + serverless |
-| Resend | Emails transactionnels |
+The **AIO (AI-readability Intelligence Optimization)** score measures how well an AI system can read, understand and recommend a business. Scale: 0 to 100, based on 7 weighted blocks:
 
-## Liens
+| Block | Weight |
+|-------|--------|
+| Identity & Anchoring | /10 |
+| Offer Clarity | /20 |
+| Process & Methods | /15 |
+| Trust & Compliance | /15 |
+| Indicators | /20 |
+| Pedagogy | /10 |
+| Technical Foundation | /10 |
 
-- **Site** : [ai-visionary.com](https://www.ai-visionary.com)
-- **Diagnostic gratuit** : [ai-visionary.com/diagnostic](https://www.ai-visionary.com/diagnostic)
-- **Registre AYA** : [ai-visionary.com/aya](https://www.ai-visionary.com/aya)
-- **Documentation API** : [ai-visionary.com/developers](https://www.ai-visionary.com/developers)
-- **AI Plugin Manifest** : [ai-visionary.com/.well-known/ai-plugin.json](https://ai-visionary.com/.well-known/ai-plugin.json)
+**ASR_CERTIFIED** = Diagnosed by AYO, files generated, registered.
+**ASR_DERIVED** = Indexed automatically by the AYA bot.
 
 ---
 
-Basé a Geneve, Suisse | Fondé par Neous Axis | [AI Visionary](https://www.ai-visionary.com) | 2026
+## Links
+
+- **Website**: [ai-visionary.com](https://www.ai-visionary.com)
+- **Developer docs**: [ai-visionary.com/developers](https://www.ai-visionary.com/developers)
+- **AYA Registry**: [ai-visionary.com/aya](https://www.ai-visionary.com/aya)
+- **AI Plugin Manifest**: [ai-visionary.com/.well-known/ai-plugin.json](https://ai-visionary.com/.well-known/ai-plugin.json)
+- **GitHub**: [github.com/NeousAxis/ai-visionary](https://github.com/NeousAxis/ai-visionary)
+
+---
+
+Based in Geneva, Switzerland | Founded by Neous Axis | [AI Visionary](https://www.ai-visionary.com) | 2026

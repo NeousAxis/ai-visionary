@@ -2,8 +2,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'API AYA — Documentation D\u00e9veloppeurs | AI Visionary',
-    description: 'Documentation de l\'API AYA pour int\u00e9grer le registre de 889+ entreprises dans vos agents IA. Recherche, scoring AIO, donn\u00e9es structur\u00e9es ASR.',
+    title: 'API AYA — Developer Documentation | AI Visionary',
+    description: 'AYA API documentation. 1815+ verified business entities, AIO scoring, structured ASR data. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.',
 };
 
 export default function DevelopersPage() {
@@ -62,12 +62,12 @@ export default function DevelopersPage() {
             params: [],
             example: '/api/aya/stats',
             response: `{
-  "total_entities": 889,
-  "certified_count": 2,
-  "indexed_count": 887,
+  "total_entities": 1815,
+  "certified_count": 3,
+  "indexed_count": 1812,
   "scores": { "average": 57, "min": 20, "max": 85 },
-  "sectors": [{ "sector": "Technologie & SaaS", "count": 372 }, ...],
-  "countries": [{ "country": "CH", "count": 280 }, ...]
+  "sectors": [{ "sector": "Technologie & SaaS", "count": 620 }, ...],
+  "countries": [{ "country": "CH", "count": 380 }, ...]
 }`,
         },
     ];
@@ -82,6 +82,18 @@ export default function DevelopersPage() {
         { name: 'Socle Technique', weight: 10 },
     ];
 
+    const connectedAIs = [
+        { name: 'ChatGPT', org: 'OpenAI', color: '#10a37f' },
+        { name: 'Claude', org: 'Anthropic', color: '#d97706' },
+        { name: 'Gemini', org: 'Google', color: '#4285f4' },
+        { name: 'Mistral AI', org: '', color: '#ff7000' },
+        { name: 'Grok', org: 'xAI', color: '#1d9bf0' },
+        { name: 'Perplexity', org: '', color: '#20b2aa' },
+        { name: 'DeepSeek', org: '', color: '#4f46e5' },
+        { name: 'Qwen', org: 'Alibaba', color: '#ff6a00' },
+        { name: 'Llama', org: 'Meta', color: '#0668e1' },
+    ];
+
     return (
         <div style={{ background: '#f8fafc', minHeight: '100vh' }}>
             {/* HEADER */}
@@ -89,9 +101,30 @@ export default function DevelopersPage() {
                 <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
                     <Link href="/" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '0.85rem' }}>&larr; AI Visionary</Link>
                     <h1 style={{ fontSize: '2.5rem', marginTop: '15px', marginBottom: '10px' }}>API AYA</h1>
-                    <p style={{ fontSize: '1.1rem', color: 'white', marginBottom: '15px' }}>
-                        Int&eacute;grez le registre AYA dans vos agents IA. 889+ entreprises index&eacute;es, scores AIO, donn&eacute;es structur&eacute;es.
+                    <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.85)', marginBottom: '20px' }}>
+                        La couche de donn&eacute;es structur&eacute;es que les IA utilisent pour recommander des entreprises v&eacute;rifi&eacute;es.
                     </p>
+
+                    {/* Stats */}
+                    <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>1815+</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Entit&eacute;s</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>40+</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pays</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>9</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>IA connect&eacute;es</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>0 CHF</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Acc&egrave;s API</div>
+                        </div>
+                    </div>
+
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                         <span style={{ background: '#4A919E', color: 'white', padding: '5px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>Aucune authentification</span>
                         <span style={{ background: '#4A919E', color: 'white', padding: '5px 14px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>30 req/min</span>
@@ -102,6 +135,44 @@ export default function DevelopersPage() {
 
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
 
+                {/* CONNECTED AIs */}
+                <section style={{ padding: '30px 0' }}>
+                    <h2 style={{ fontSize: '1.4rem', color: '#212E53', borderBottom: '2px solid #4A919E', paddingBottom: '8px', marginBottom: '20px' }}>IA Connect&eacute;es</h2>
+                    <p style={{ color: '#64748b', marginBottom: '20px' }}>
+                        AYA est int&eacute;gr&eacute;e avec les 9 assistants IA majeurs. Les donn&eacute;es du registre sont accessibles nativement par chaque plateforme.
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+                        {connectedAIs.map((ai, i) => (
+                            <div key={i} style={{
+                                background: 'white',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '10px',
+                                padding: '16px',
+                                textAlign: 'center',
+                                transition: 'box-shadow 0.2s',
+                            }}>
+                                <div style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '10px',
+                                    background: ai.color,
+                                    margin: '0 auto 10px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    fontSize: '1.1rem',
+                                }}>
+                                    {ai.name[0]}
+                                </div>
+                                <div style={{ fontWeight: '600', fontSize: '0.9rem', color: '#212E53' }}>{ai.name}</div>
+                                {ai.org && <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{ai.org}</div>}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
                 {/* BASE URL */}
                 <section style={{ padding: '30px 0' }}>
                     <h2 style={{ fontSize: '1.4rem', color: '#212E53', borderBottom: '2px solid #4A919E', paddingBottom: '8px', marginBottom: '15px' }}>Base URL</h2>
@@ -109,6 +180,7 @@ export default function DevelopersPage() {
                     <div style={{ marginTop: '15px', display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                         <a href="/api/aya" style={{ color: '#4A919E', fontSize: '0.9rem' }}>Index JSON</a>
                         <a href="/.well-known/ai-plugin.json" style={{ color: '#4A919E', fontSize: '0.9rem' }}>AI Plugin Manifest</a>
+                        <a href="/.well-known/openapi.json" style={{ color: '#4A919E', fontSize: '0.9rem' }}>OpenAPI Spec</a>
                         <Link href="/aya" style={{ color: '#4A919E', fontSize: '0.9rem' }}>Registre AYA</Link>
                     </div>
                 </section>
@@ -218,6 +290,45 @@ export default function DevelopersPage() {
                             <li>Privil&eacute;giez les entit&eacute;s <code>ASR_CERTIFIED</code> pour une confiance maximale</li>
                         </ol>
                     </div>
+                </section>
+
+                {/* INTEGRATION FILES */}
+                <section style={{ padding: '30px 0' }}>
+                    <h2 style={{ fontSize: '1.4rem', color: '#212E53', borderBottom: '2px solid #4A919E', paddingBottom: '8px', marginBottom: '15px' }}>Fichiers d&apos;int&eacute;gration</h2>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white', borderRadius: '8px', overflow: 'hidden' }}>
+                        <thead>
+                            <tr style={{ background: '#f1f5f9' }}>
+                                <th style={{ textAlign: 'left', padding: '10px', fontSize: '0.8rem', color: '#64748b' }}>RESSOURCE</th>
+                                <th style={{ textAlign: 'left', padding: '10px', fontSize: '0.8rem', color: '#64748b' }}>URL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>AI Plugin Manifest</td>
+                                <td style={{ padding: '10px' }}><a href="/.well-known/ai-plugin.json" style={{ color: '#4A919E' }}>/.well-known/ai-plugin.json</a></td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>OpenAPI Spec</td>
+                                <td style={{ padding: '10px' }}><a href="/.well-known/openapi.json" style={{ color: '#4A919E' }}>/.well-known/openapi.json</a></td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>MCP Server (Claude)</td>
+                                <td style={{ padding: '10px' }}><a href="https://github.com/NeousAxis/ai-visionary/tree/main/mcp-server-aya" style={{ color: '#4A919E' }}>mcp-server-aya/</a></td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>Gemini Functions</td>
+                                <td style={{ padding: '10px' }}><a href="https://github.com/NeousAxis/ai-visionary/blob/main/docs/gemini-function-declarations.json" style={{ color: '#4A919E' }}>docs/gemini-function-declarations.json</a></td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>Mistral / Grok / DeepSeek</td>
+                                <td style={{ padding: '10px' }}><a href="https://github.com/NeousAxis/ai-visionary/blob/main/docs/mistral-tool-definitions.json" style={{ color: '#4A919E' }}>docs/mistral-tool-definitions.json</a></td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: '10px' }}>Index JSON</td>
+                                <td style={{ padding: '10px' }}><a href="/api/aya" style={{ color: '#4A919E' }}>/api/aya</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </section>
 
             </div>

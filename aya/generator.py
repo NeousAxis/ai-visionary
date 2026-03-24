@@ -319,6 +319,95 @@ def detect_entity_name(meta: dict, jsonld_payloads: list, domain: str) -> str:
     return domain_fallback
 
 
+STOPWORDS = {
+    # French
+    "les", "des", "une", "pour", "par", "sur", "dans", "avec", "que", "qui",
+    "est", "son", "ses", "aux", "nos", "vos", "leur", "leurs", "ont", "sont",
+    "pas", "plus", "tout", "tous", "cette", "ces", "mais", "aussi", "entre",
+    "nous", "vous", "elle", "elles", "ils", "lui", "même", "être", "avoir",
+    "fait", "bien", "très", "chez", "dont", "peut", "depuis", "comme",
+    # English
+    "the", "and", "for", "are", "but", "not", "you", "all", "can", "had",
+    "her", "was", "one", "our", "out", "has", "his", "how", "its", "may",
+    "new", "now", "old", "see", "way", "who", "did", "get", "let", "say",
+    "she", "too", "use", "from", "have", "been", "will", "with", "this",
+    "that", "your", "they", "more", "than", "them", "then", "what", "when",
+    "which", "their", "about", "would", "there", "could", "other", "into",
+    "some", "each", "make", "like", "just", "over", "such", "take", "year",
+    "also", "back", "after", "only", "most", "were", "here", "where",
+    # Common web / generic
+    "home", "page", "site", "web", "www", "http", "https", "com", "org",
+    "privacy", "terms", "cookies", "contact", "login", "menu", "footer",
+    "header", "copyright", "reserved", "rights", "click", "read", "more",
+}
+
+
+def extract_keywords(meta: dict, blocks: dict, sector: dict, entity: dict, max_kw: int = 20) -> list:
+    """Extract search keywords from all available signals."""
+    raw = []
+
+    # 1. Title — split on separators
+    title = meta.get("title", "") or ""
+    if title:
+        parts = re.split(r'\s*[|–—·\\;:,\-]\s+|\s+[|–—·\\;:,\-]\s*', title)
+        for p in parts:
+            raw.extend(re.split(r'\s+', p.strip()))
+
+    # 2. Meta description
+    desc = meta.get("meta_description", "") or ""
+    if desc:
+        raw.extend(re.split(r'[\s,.;:!?()]+', desc))
+
+    # 3. Keywords detected per block
+    for block_name in ("offre", "processus_methodes", "engagements_conformite", "contenus_pedagogiques"):
+        block = blocks.get(block_name, {})
+        kw_detected = block.get("fields", {}).get("keywords_detected", [])
+        if isinstance(kw_detected, list):
+            raw.extend(kw_detected)
+
+    # 4. Sector label
+    if isinstance(sector, dict):
+        sector_label = sector.get("sector_label", "")
+        if sector_label and sector_label != "General":
+            raw.extend(re.split(r'[\s_]+', sector_label))
+
+    # 5. City and country
+    city = entity.get("city", "") or ""
+    country = entity.get("country", "") or ""
+    if city:
+        raw.append(city)
+    if country and len(country) > 2:
+        raw.append(country)
+
+    # 6. JSON-LD types
+    st_block = blocks.get("structure_technique", {})
+    jsonld_types = st_block.get("fields", {}).get("jsonld_types", [])
+    for t in jsonld_types:
+        if t:
+            # Split CamelCase: "LocalBusiness" → ["Local", "Business"]
+            parts = re.sub(r'([a-z])([A-Z])', r'\1 \2', str(t)).split()
+            raw.extend(parts)
+
+    # Filter: lowercase, remove stopwords, short words, duplicates
+    seen = set()
+    keywords = []
+    for w in raw:
+        w = re.sub(r'[^a-zA-ZàâäéèêëïîôùûüçÀÂÄÉÈÊËÏÎÔÙÛÜÇ\'-]', '', w).strip()
+        lower = w.lower()
+        if len(lower) < 3:
+            continue
+        if lower in STOPWORDS:
+            continue
+        if lower in seen:
+            continue
+        seen.add(lower)
+        keywords.append(w)
+
+    # Sort by length desc (longer = more specific), cap at max_kw
+    keywords.sort(key=lambda x: len(x), reverse=True)
+    return keywords[:max_kw]
+
+
 def detect_keywords(text: str, keywords: list) -> list:
     lower_text = text.lower()
     return sorted(set(kw for kw in keywords if kw in lower_text))
@@ -493,6 +582,19 @@ def build_record(scraped: dict) -> dict:
 
     scoring = estimate_aio_score(blocks, has_jsonld, has_sitemap)
 
+    # Extract search keywords from all signals
+    keywords = extract_keywords(
+        meta=meta,
+        blocks=blocks,
+        sector=sector,
+        entity={
+            "name": entity_name,
+            "city": city,
+            "country": country,
+        },
+        max_kw=20,
+    )
+
     record = {
         "version": "AYA-PREINDEX-1.0",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -539,6 +641,7 @@ def build_record(scraped: dict) -> dict:
             "asr": None,
             "jsonld": jsonld_payloads,
         },
+        "keywords": keywords,
         "asr_derived": {
             "asr_status": "ASR_DERIVED",
             "source": "AYA-BOT",
