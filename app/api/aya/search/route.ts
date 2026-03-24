@@ -19,28 +19,30 @@ export async function GET(req: NextRequest) {
     try {
         const allEntities = await db.getAyaEntities();
         const qLower = q.toLowerCase();
+        // Split query into individual words for multi-word matching
+        const stopWords = new Set(['le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'en', 'à', 'a', 'au', 'aux', 'dans', 'pour', 'sur', 'par', 'avec', 'the', 'of', 'in', 'and', 'for', 'on', 'at', 'to', 'is', 'an']);
+        const words = qLower.split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w));
 
         const results = allEntities
             .filter((e: any) => {
-                // Search in basic fields
-                const basicMatch = (
-                    (e.display_name && e.display_name.toLowerCase().includes(qLower)) ||
-                    (e.legal_name && e.legal_name.toLowerCase().includes(qLower)) ||
-                    (e.website && e.website.toLowerCase().includes(qLower)) ||
-                    (e.sector_macro && e.sector_macro.toLowerCase().includes(qLower)) ||
-                    (e.country_legal && e.country_legal.toLowerCase().includes(qLower)) ||
-                    (e.contact_email && e.contact_email.toLowerCase().includes(qLower))
-                );
-                if (basicMatch) return true;
+                // Build searchable text from basic fields
+                const basicText = [
+                    e.display_name, e.legal_name, e.website,
+                    e.sector_macro, e.country_legal, e.contact_email
+                ].filter(Boolean).join(' ').toLowerCase();
 
-                // Deep search in ASR payload (description, services, keywords)
+                // Build searchable text from ASR payload
+                let payloadText = '';
                 if (e.asr_payload) {
-                    const payloadStr = typeof e.asr_payload === 'string'
+                    payloadText = typeof e.asr_payload === 'string'
                         ? e.asr_payload.toLowerCase()
                         : JSON.stringify(e.asr_payload).toLowerCase();
-                    return payloadStr.includes(qLower);
                 }
-                return false;
+
+                const fullText = basicText + ' ' + payloadText;
+
+                // Match: ALL words must be found somewhere in the entity data
+                return words.length > 0 && words.every(word => fullText.includes(word));
             })
             .slice(0, limit)
             .map((e: any) => ({
