@@ -2,7 +2,23 @@
 
 **Rendez votre entreprise visible et recommandable par les IA.**
 
-AI Visionary permet aux entreprises d'etre identifiees, comprises et recommandees par les intelligences artificielles (ChatGPT, Gemini, Claude, Perplexity, Mistral).
+AI Visionary permet aux entreprises d'etre identifiees, comprises et recommandees par les intelligences artificielles.
+
+### Connecte aux IA
+
+L'API AYA est integrable avec toutes les IA generatives majeures :
+
+| IA | Integration | Fichier |
+|----|------------|---------|
+| **ChatGPT** (OpenAI) | GPT Store / Actions | [`openapi.json`](https://ai-visionary.com/.well-known/openapi.json) |
+| **Claude** (Anthropic) | MCP Server | [`mcp-server-aya/`](mcp-server-aya/) |
+| **Gemini** (Google) | Function Calling | [`docs/gemini-function-declarations.json`](docs/gemini-function-declarations.json) |
+| **Mistral** | Tool Use | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
+| **Grok** (xAI) | OpenAI-compatible | [`openapi.json`](https://ai-visionary.com/.well-known/openapi.json) |
+| **Perplexity** | Crawl sitemap + API | [`ai-plugin.json`](https://ai-visionary.com/.well-known/ai-plugin.json) |
+| **DeepSeek** | OpenAI-compatible | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
+| **Qwen** (Alibaba) | OpenAI-compatible | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
+| **Llama** (Meta) | Function Calling | [`docs/gemini-function-declarations.json`](docs/gemini-function-declarations.json) |
 
 ## Le probleme
 
@@ -169,6 +185,10 @@ Le score **AIO (AI-readability Intelligence Optimization)** mesure la lisibilite
 | Ressource | URL |
 |-----------|-----|
 | AI Plugin Manifest | [/.well-known/ai-plugin.json](https://ai-visionary.com/.well-known/ai-plugin.json) |
+| OpenAPI Spec | [/.well-known/openapi.json](https://ai-visionary.com/.well-known/openapi.json) |
+| MCP Server (Claude) | [`mcp-server-aya/`](mcp-server-aya/) |
+| Gemini Functions | [`docs/gemini-function-declarations.json`](docs/gemini-function-declarations.json) |
+| Mistral/Grok/DeepSeek Tools | [`docs/mistral-tool-definitions.json`](docs/mistral-tool-definitions.json) |
 | Index JSON | [/api/aya](https://ai-visionary.com/api/aya) |
 | Registre AYA | [/aya](https://ai-visionary.com/aya) |
 

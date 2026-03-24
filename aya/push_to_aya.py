@@ -113,7 +113,6 @@ def record_to_aya_entity(record: dict) -> dict:
         "asr_score": min(score, 100),
         "payment_completed": False,
         "contact_email": entity.get("contacts", {}).get("email", ""),
-        "last_update": datetime.now(timezone.utc).isoformat(),
         "data_origin": "AYA-BOT",
         "asr_payload": asr_payload,
         "recommendability": recommendability,
@@ -155,10 +154,12 @@ def main():
         name = entity["display_name"][:40]
 
         try:
-            result = supabase.table("aya_registry").upsert(
-                entity,
-                on_conflict="entity_id"
-            ).execute()
+            # Delete existing bot entry (if any), then insert fresh
+            supabase.table("aya_registry").delete().eq(
+                "entity_id", entity["entity_id"]
+            ).eq("data_origin", "AYA-BOT").execute()
+
+            result = supabase.table("aya_registry").insert(entity).execute()
 
             if result.data:
                 print(f"[{i}/{len(records)}] OK: {name} (score={entity['asr_score']})")

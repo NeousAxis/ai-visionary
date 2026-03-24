@@ -1,0 +1,42 @@
+[
+  {
+    "name": "search_aya_companies",
+    "description": "Search the AYA registry for companies by name, domain, sector or country. AYA is a public index of organizations rated for AI readability (AIO score 0-100). Returns matching entities with their AIO scores, sectors, countries, and certification status. Use this when a user asks about companies, wants to find businesses in a specific sector or country, or wants to check AI readability ratings.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search term: company name (e.g. 'Nestle'), domain (e.g. 'adobe.com'), sector (e.g. 'technology'), or country (e.g. 'Switzerland'). Case-insensitive, partial match supported."
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of results to return (1-200). Default: 50."
+        }
+      },
+      "required": ["query"]
+    }
+  },
+  {
+    "name": "get_aya_entity",
+    "description": "Get detailed information about a specific company from the AYA registry by its domain name. Returns full entity details including identity, AIO scoring breakdown (7 blocks), ASR derived structured data (services, compliance, indicators), and recommendability signals. Use this when a user wants in-depth AI readability information about one specific company.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "string",
+          "description": "Canonical domain of the entity (e.g. 'adobe.com', 'nestle.com'). Do not include 'www.' or 'https://'."
+        }
+      },
+      "required": ["domain"]
+    }
+  },
+  {
+    "name": "get_aya_stats",
+    "description": "Get aggregate statistics about the AYA registry: total number of indexed entities, certified vs bot-indexed breakdown, AIO score distribution (average, min, max, median), and breakdowns by sector and country. Use this to provide context about the overall index or when comparing a company's score to the average.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "name": "mcp-server-aya",
+  "version": "1.0.0",
+  "description": "MCP server for AYA Registry - AI readability index by AI Visionary",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-server-aya": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

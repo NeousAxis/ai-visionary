@@ -73,3 +73,5 @@ Strategie AI*.txt
 /test-*.ts
 /test-*.sh
 /TEST_*.json
+mcp-server-aya/node_modules/
+mcp-server-aya/dist/

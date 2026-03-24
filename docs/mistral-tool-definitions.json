@@ -1,0 +1,52 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "search_aya_companies",
+      "description": "Search the AYA public index of organizations rated for AI readability. Returns companies matching the query by name, domain, sector, or country, sorted by AIO score (0-100). The AIO score measures how well a website's structured data can be understood by AI systems. Use this when a user asks about a specific company, wants to find companies in a given sector or country, or wants to check if a company is indexed in AYA.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search term: company name (e.g. 'Nestle'), domain (e.g. 'adobe.com'), sector (e.g. 'finance'), or country (e.g. 'Switzerland'). Case-insensitive, partial match supported."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return (1-200). Default: 50.",
+            "default": 50
+          }
+        },
+        "required": ["query"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_aya_entity",
+      "description": "Get the full AYA record for a specific entity by its canonical domain. Returns complete data including identity, AIO scoring with all 7 block scores, ASR_DERIVED structured data (services, compliance, indicators), and recommendability signals. Use this when you need detailed information about one specific company.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "description": "Canonical domain of the entity (e.g. 'adobe.com', 'nestle.com'). Do not include 'www.' or 'https://'."
+          }
+        },
+        "required": ["domain"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_aya_stats",
+      "description": "Get aggregate statistics about the entire AYA index: total entities, certified vs indexed breakdown, average/min/max/median AIO scores, and entity count per sector and country. Use this to provide context about the index or when comparing a specific entity's score to the average.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+]

@@ -19,6 +19,8 @@ from parser import (
     count_sitemap_urls,
     detect_sector,
     detect_country_from_tld,
+    detect_country_from_hreflang,
+    detect_country_from_phone,
 )
 
 # AIO block weights (Bible AIO) — Mirror of lib/aio-score-engine.ts, keep in sync
@@ -411,8 +413,13 @@ def build_record(scraped: dict) -> dict:
     pedagogy_found = detect_keywords(all_text, PEDAGOGY_KEYWORDS)
 
     entity_name = detect_entity_name(meta, jsonld_payloads, scraped["canonical_domain"])
+    # Country detection chain: JSON-LD → hreflang → phone prefix → TLD
     raw_country = extract_country_from_jsonld(jsonld_payloads)
     country = normalize_country(raw_country)
+    if not country:
+        country = detect_country_from_hreflang(meta)
+    if not country:
+        country = detect_country_from_phone(phones)
     if not country:
         country = detect_country_from_tld(scraped["canonical_domain"])
     city = extract_city_from_jsonld(jsonld_payloads)

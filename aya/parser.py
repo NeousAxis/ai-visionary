@@ -59,7 +59,9 @@ def extract_title_and_meta(html: str) -> dict:
     if canonical_tag and canonical_tag.get("href"):
         canonical = canonical_tag["href"].strip()
 
-    hreflang_present = bool(soup.find("link", attrs={"hreflang": True}))
+    hreflang_tags = soup.find_all("link", attrs={"hreflang": True})
+    hreflang_present = len(hreflang_tags) > 0
+    hreflang_values = [tag["hreflang"] for tag in hreflang_tags if tag.get("hreflang")]
 
     return {
         "title": title,
@@ -68,6 +70,7 @@ def extract_title_and_meta(html: str) -> dict:
         "og_description": og_description,
         "canonical": canonical,
         "hreflang_present": hreflang_present,
+        "_hreflang_values": hreflang_values,
     }
 
 
@@ -376,6 +379,80 @@ def normalize_country(raw: str) -> str:
         return cleaned.upper()
     # Lookup by name
     return COUNTRY_NAME_TO_ISO.get(cleaned.lower(), "")
+
+
+def detect_country_from_hreflang(meta: dict) -> str:
+    """Extract country from hreflang tags (e.g. 'fr-CH' → 'CH', 'de-DE' → 'DE').
+
+    Expects meta dict from extract_title_and_meta() — but we need the raw HTML
+    to find all hreflang links.  As a lightweight alternative the caller can pass
+    the full HTML via meta["_html"] so we parse it here, or we accept a
+    pre-extracted list via meta["_hreflang_values"].
+    """
+    values: list[str] = meta.get("_hreflang_values", [])
+
+    if not values:
+        return ""
+
+    # Collect region codes from values like "fr-CH", "de-DE", "en-US"
+    region_counts: dict[str, int] = {}
+    for val in values:
+        val = val.strip().lower()
+        if val in ("x-default", ""):
+            continue
+        # Format: lang-REGION  (e.g. fr-CH, de-DE, en-US)
+        if "-" in val:
+            parts = val.split("-")
+            if len(parts) >= 2 and len(parts[-1]) == 2:
+                region = parts[-1].upper()
+                region_counts[region] = region_counts.get(region, 0) + 1
+
+    if not region_counts:
+        return ""
+
+    # Return the most frequent region
+    return max(region_counts, key=region_counts.get)  # type: ignore[arg-type]
+
+
+# Phone prefix → ISO country code
+PHONE_PREFIX_MAP = {
+    "+41": "CH", "+33": "FR", "+1": "US", "+44": "GB", "+49": "DE",
+    "+39": "IT", "+34": "ES", "+81": "JP", "+86": "CN", "+91": "IN",
+    "+82": "KR", "+65": "SG", "+61": "AU", "+31": "NL", "+32": "BE",
+    "+43": "AT", "+46": "SE", "+47": "NO", "+45": "DK", "+358": "FI",
+    "+351": "PT", "+48": "PL", "+420": "CZ", "+36": "HU", "+7": "RU",
+    "+55": "BR", "+52": "MX", "+971": "AE", "+966": "SA", "+972": "IL",
+}
+
+# Sorted by prefix length DESC so "+358" matches before "+3"
+_SORTED_PREFIXES = sorted(PHONE_PREFIX_MAP.keys(), key=len, reverse=True)
+
+
+def detect_country_from_phone(phones: list) -> str:
+    """Detect country from phone number international prefix.
+
+    Scans the list of phone strings and returns the ISO country code
+    of the most common prefix found.
+    """
+    if not phones:
+        return ""
+
+    counts: dict[str, int] = {}
+    for phone in phones:
+        # Normalize: remove spaces, dashes, dots, parens
+        cleaned = re.sub(r"[\s.()\-]", "", phone)
+        if not cleaned.startswith("+"):
+            continue
+        for prefix in _SORTED_PREFIXES:
+            if cleaned.startswith(prefix):
+                cc = PHONE_PREFIX_MAP[prefix]
+                counts[cc] = counts.get(cc, 0) + 1
+                break
+
+    if not counts:
+        return ""
+
+    return max(counts, key=counts.get)  # type: ignore[arg-type]
 
 
 def detect_country_from_tld(domain: str) -> str:

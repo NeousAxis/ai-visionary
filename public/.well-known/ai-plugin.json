@@ -9,7 +9,7 @@
     },
     "api": {
         "type": "openapi",
-        "url": "https://ai-visionary.com/api/aya"
+        "url": "https://ai-visionary.com/.well-known/openapi.json"
     },
     "logo_url": "https://ai-visionary.com/logo-v2.png",
     "contact_email": "hello@ai-visionary.com",

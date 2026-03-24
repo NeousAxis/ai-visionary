@@ -45,17 +45,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ];
 
-    // 2. Pages Entités Dynamiques (depuis Firestore)
+    // 2. Pages Entités Dynamiques (depuis Supabase)
     let entityPages: MetadataRoute.Sitemap = [];
     try {
-        const entities = await db.getAyaEntities(100);
+        const entities = await db.getAyaEntities(10000);
         entityPages = entities
-            .filter((e: any) => e.payment_completed)
             .map((entity: any) => ({
-                url: `${baseUrl}/aya/e/${entity.id || entity.aya_entity_id}`,
+                url: `${baseUrl}/aya/e/${entity.entity_id || entity.aya_entity_id}`,
                 lastModified: new Date(entity.last_update || entity.created_at),
                 changeFrequency: 'monthly' as const,
-                priority: 0.7,
+                priority: entity.payment_completed ? 0.8 : 0.6,
             }));
     } catch {
         // Firestore indisponible au build — sitemap statique uniquement
