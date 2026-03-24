@@ -23,15 +23,14 @@ export async function GET(req: NextRequest) {
         const stopWords = new Set(['le', 'la', 'les', 'de', 'du', 'des', 'un', 'une', 'et', 'en', 'à', 'a', 'au', 'aux', 'dans', 'pour', 'sur', 'par', 'avec', 'the', 'of', 'in', 'and', 'for', 'on', 'at', 'to', 'is', 'an']);
         const words = qLower.split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w));
 
-        const results = allEntities
-            .filter((e: any) => {
-                // Build searchable text from basic fields
+        // Score each entity by relevance (how many words match)
+        const scored = allEntities
+            .map((e: any) => {
                 const basicText = [
                     e.display_name, e.legal_name, e.website,
                     e.sector_macro, e.country_legal, e.contact_email
                 ].filter(Boolean).join(' ').toLowerCase();
 
-                // Build searchable text from ASR payload
                 let payloadText = '';
                 if (e.asr_payload) {
                     payloadText = typeof e.asr_payload === 'string'
@@ -41,11 +40,19 @@ export async function GET(req: NextRequest) {
 
                 const fullText = basicText + ' ' + payloadText;
 
-                // Match: ALL words must be found somewhere in the entity data
-                return words.length > 0 && words.every(word => fullText.includes(word));
+                // Count how many query words match
+                const matchCount = words.filter(word => fullText.includes(word)).length;
+                // Bonus for certified entities
+                const certBonus = e.payment_completed ? 0.5 : 0;
+
+                return { entity: e, matchCount, score: matchCount + certBonus };
             })
+            .filter(item => item.matchCount > 0) // At least 1 word must match
+            .sort((a, b) => b.score - a.score) // Best matches first
             .slice(0, limit)
-            .map((e: any) => ({
+            .map(item => item.entity);
+
+        const results = scored.map((e: any) => ({
                 name: e.display_name || e.legal_name || '',
                 domain: e.website?.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] || '',
                 website: e.website || '',
