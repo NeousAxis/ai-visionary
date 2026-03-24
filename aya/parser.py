@@ -216,7 +216,7 @@ SECTOR_RULES = [
     {
         "id": "travel",
         "label": "Tourisme & Transport",
-        "keywords": ["travel", "voyage", "hotel", "hôtel", "booking", "flight", "vol", "tourism", "tourisme", "transport", "airline", "train"],
+        "keywords": ["travel", "voyage", "hotel", "hôtel", "booking", "flight", "vol", "tourism", "tourisme", "transport", "airline", "train", "destination", "explore", "attractions", "visitor", "sightseeing", "excursion", "séjour", "vacances"],
         "jsonld_types": ["Hotel", "TravelAgency", "Airline", "TrainStation"],
     },
     {
@@ -258,6 +258,11 @@ DOMAIN_SECTOR_HINTS = {
     "zuerich": "travel", "zurich": "travel", "geneve": "travel", "geneva": "travel",
     "lausanne": "travel", "bern": "travel", "luzern": "travel", "lugano": "travel",
     "paris": "travel", "london": "travel", "berlin": "travel", "rome": "travel",
+    "barcelona": "travel", "amsterdam": "travel", "vienna": "travel",
+    "wien": "travel", "munich": "travel", "muenchen": "travel",
+    "lyon": "travel", "marseille": "travel", "tokyo": "travel",
+    "roma": "travel", "milano": "travel",
+    "basel": "travel",
     "bank": "finance", "credit": "finance", "finanz": "finance",
     "pharma": "health", "medic": "health", "sante": "health",
     "immobili": "realestate", "immo": "realestate",
@@ -306,7 +311,7 @@ def detect_sector(text: str, jsonld_payloads: list, domain: str) -> dict:
             hit_count = len(hits)
             # Apply domain boost
             if domain_boost_sector and rule["id"] == domain_boost_sector:
-                hit_count += 3
+                hit_count += 10
             scores[rule["id"]] = {
                 "rule": rule,
                 "hits": hit_count,

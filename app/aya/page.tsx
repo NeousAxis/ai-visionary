@@ -23,7 +23,13 @@ function deterministicShuffle<T>(arr: T[], getId: (item: T) => string): T[] {
         }
         return h >>> 0;
     };
-    return [...arr].sort((a, b) => fnv1a(getId(a)) - fnv1a(getId(b)));
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const seed = fnv1a(getId(copy[i]) + ':' + i);
+        const j = seed % (i + 1);
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
 }
 
 export default function AyaPage() {
@@ -105,7 +111,7 @@ export default function AyaPage() {
             const indexed = filtered.filter((e: any) => !e.payment_completed);
             // Keep certified in created_at DESC order (real customers first)
             // Shuffle indexed entities so they don't appear grouped alphabetically
-            filtered = [...certified, ...deterministicShuffle(indexed, getEntityId)];
+            filtered = [...certified, ...deterministicShuffle(indexed, (e: any) => e.website || e.display_name || getEntityId(e))];
         }
 
         return filtered;
