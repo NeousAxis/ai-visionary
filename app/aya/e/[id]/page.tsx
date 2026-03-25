@@ -66,18 +66,23 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                 ? `${businessType}. Entité certifiée avec présence sémantique active auprès du consensus AYO.`
                 : "Certification de présence sémantique active. Cette entité a validé son existence et ses champs d'expertise auprès du consensus AYO."));
 
-    // Bug 3 fix: gather keywords from more sources (bot entities have different data paths)
-    const serviceKeywords = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
-    const useCaseKeywords = Array.isArray(asrData.offre?.use_cases?.value) ? asrData.offre.use_cases.value : [];
-    const declaredKeywords = Array.isArray(asrData.external_context?.keywords?.value) ? asrData.external_context.keywords.value : [];
-    const blockOffreKw = Array.isArray(asrData.aio_blocks?.offre?.fields?.keywords_detected) ? asrData.aio_blocks.offre.fields.keywords_detected : [];
-    const sectorEvidence = Array.isArray(asrData.sector?.evidence) ? asrData.sector.evidence : [];
-    const sectorFallback = entity.sector_macro && entity.sector_macro !== 'General' ? [entity.sector_macro] : [];
-    const allKeywords = [...new Set([
-        ...declaredKeywords, ...serviceKeywords, ...useCaseKeywords,
-        ...blockOffreKw, ...sectorEvidence, ...sectorFallback
-    ])].filter((k: any) => typeof k === 'string' && k.length > 2);
-    const keywords = allKeywords.slice(0, 10);
+    // Keywords — Gemini keywords take priority (accurate), fallback to scraper data
+    const geminiKeywords: string[] = Array.isArray(enrichment.gemini_keywords) ? enrichment.gemini_keywords : [];
+    let keywords: string[];
+    if (geminiKeywords.length > 0) {
+        keywords = geminiKeywords.slice(0, 10);
+    } else {
+        const serviceKeywords = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
+        const useCaseKeywords = Array.isArray(asrData.offre?.use_cases?.value) ? asrData.offre.use_cases.value : [];
+        const declaredKeywords = Array.isArray(asrData.external_context?.keywords?.value) ? asrData.external_context.keywords.value : [];
+        const blockOffreKw = Array.isArray(asrData.aio_blocks?.offre?.fields?.keywords_detected) ? asrData.aio_blocks.offre.fields.keywords_detected : [];
+        const sectorEvidence = Array.isArray(asrData.sector?.evidence) ? asrData.sector.evidence : [];
+        const sectorFallback = entity.sector_macro && entity.sector_macro !== 'General' ? [entity.sector_macro] : [];
+        keywords = [...new Set([
+            ...declaredKeywords, ...serviceKeywords, ...useCaseKeywords,
+            ...blockOffreKw, ...sectorEvidence, ...sectorFallback
+        ])].filter((k: any) => typeof k === 'string' && k.length > 2).slice(0, 10);
+    }
 
     // JSON-LD Organization structured data for AI bots and search engines
     const entityTypeMap: Record<string, string> = {
