@@ -121,7 +121,7 @@ export default function AyaRegistryClient({
                             type="text"
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
-                            placeholder="Rechercher une entreprise (ex: 'Stripe', 'Novartis', 'UBS')..."
+                            placeholder="Rechercher une entreprise (ex: 'Anthropic', 'Infomaniak', 'Mistral')..."
                             style={{
                                 width: '100%',
                                 padding: '18px 25px',

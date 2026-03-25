@@ -68,6 +68,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* STATS BANNER */}
+      <section style={{
+        background: 'linear-gradient(135deg, var(--text-main) 0%, var(--primary-color) 100%)',
+        padding: '40px 20px',
+        textAlign: 'center',
+      }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '60px', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>3&apos;300+</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>Entreprises index&eacute;es</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>9</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>IA compatibles</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>70+</div>
+            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>Pays couverts</div>
+          </div>
+        </div>
+      </section>
+
       {/* SECTION 2 — Le problème */}
       <section id="problem" className="section problem-section">
         <div className="container">
