@@ -254,9 +254,11 @@ export function buildPlainTextDescription(entity: any): string {
     const sectorLabel = summary.category;
     const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
 
-    // Use Gemini description if available (best quality)
+    // Use Gemini description if available (best quality) — prefer FR for certificate pages
     const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
-    const geminiDesc: string = enrichment.gemini_description || '';
+    const geminiFr: string = enrichment.gemini_description_fr || '';
+    const geminiEn: string = enrichment.gemini_description || '';
+    const geminiDesc = geminiFr || geminiEn;
 
     let phrase1 = '';
     if (geminiDesc && geminiDesc.length > 10) {
