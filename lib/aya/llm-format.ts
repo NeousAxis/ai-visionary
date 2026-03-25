@@ -92,6 +92,56 @@ function domainFromUrl(url: string): string {
     }
 }
 
+// ─── Garbage filter ──────────────────────────────────────────
+// These words are detected by the bot scraper from HTML tags/meta and are NOT real services
+const GARBAGE_SERVICES = new Set([
+    // HTML/tech noise
+    'api', 'app', 'application', 'cloud', 'service', 'services', 'platform',
+    'solution', 'solutions', 'product', 'products', 'tool', 'tools',
+    'software', 'website', 'web', 'online', 'digital', 'data', 'system',
+    'technology', 'tech', 'information', 'management', 'support',
+    // Navigation noise
+    'login', 'contact', 'about', 'home', 'privacy', 'terms', 'blog',
+    'news', 'press', 'media', 'resources', 'help', 'faq', 'careers',
+    'jobs', 'pricing', 'features', 'enterprise', 'business', 'company',
+    // Generic noise
+    'delivery', 'conditions', 'compliance', 'security', 'analytics',
+    'integration', 'mobile', 'desktop', 'download', 'sign', 'register',
+    'restaurant', 'hotel', 'shop', 'store', 'market', 'group', 'global',
+    'network', 'portal', 'hub', 'center', 'centre', 'agency', 'office',
+    'consulting', 'advisory', 'search', 'find', 'explore', 'discover',
+    'share', 'connect', 'create', 'build', 'learn', 'start', 'join',
+    'subscribe', 'free', 'premium', 'pro', 'plus', 'basic', 'standard',
+    'account', 'profile', 'dashboard', 'settings', 'menu', 'navigation',
+    'content', 'access', 'customer', 'clients', 'partner', 'partners',
+    'community', 'forum', 'feedback', 'review', 'reviews', 'rating',
+    // French generic noise (bot scrapes FR sites too)
+    'offre', 'offres', 'accueil', 'connexion', 'inscription', 'recherche',
+    'actualités', 'actualites', 'emploi', 'recrutement', 'contact',
+    'mentions', 'légales', 'legales', 'confidentialité', 'confidentialite',
+    'boutique', 'catalogue', 'espace', 'client', 'particulier', 'professionnel',
+    'particuliers', 'professionnels', 'entreprises', 'decouvrir', 'découvrir',
+    // German generic noise
+    'angebot', 'angebote', 'startseite', 'kontakt', 'impressum', 'datenschutz',
+    'produkte', 'leistungen', 'unternehmen', 'karriere', 'presse',
+]);
+
+function filterGarbageServices(services: string[]): string[] {
+    // Keep compound phrases (e.g. "payment processing", "cloud computing") — those are real services
+    // Only filter single generic words that the scraper picks up from HTML noise
+    const filtered = services.filter(s => {
+        const lower = s.toLowerCase().trim();
+        if (lower.length <= 3) return false;
+        // Multi-word phrases are likely real services (e.g. "payment processing")
+        if (lower.includes(' ') && lower.split(' ').length >= 2) return true;
+        // Single words: filter if generic
+        return !GARBAGE_SERVICES.has(lower);
+    });
+    // If ALL services got filtered out, the original data was garbage → return empty
+    // If SOME survived, we have real data → return the filtered list
+    return filtered;
+}
+
 // ─── Core functions ──────────────────────────────────────────
 
 /**
@@ -115,19 +165,35 @@ export function buildLlmSummary(entity: any): LlmSummary {
     const countryCode = entity.country_legal || 'XX';
     const location = COUNTRY_LABELS[countryCode] || (countryCode === 'XX' ? 'Global' : countryCode);
 
-    // What it does — derive from services + business_type
-    const services: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
+    // What it does — derive from services + business_type, filter garbage
+    const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
+    const services = filterGarbageServices(rawServices);
     const businessType: string = asr.identite?.business_type?.value || '';
+
+    // Priority 1: Gemini-enriched description (best quality)
+    const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
+    const geminiDesc: string = enrichment.gemini_description || '';
+
+    // Priority 2: meta description from scan
+    const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
+
     let whatItDoes = '';
-    if (services.length > 0) {
+    if (geminiDesc && geminiDesc.length > 10) {
+        // Gemini description = highest quality
+        whatItDoes = cleanText(geminiDesc);
+        if (!whatItDoes.endsWith('.')) whatItDoes += '.';
+    } else if (services.length > 0) {
         const svcText = services.slice(0, 3).join(', ');
         whatItDoes = businessType
             ? `${businessType} providing ${svcText.toLowerCase()}.`
             : `Provides ${svcText.toLowerCase()}.`;
+    } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
+        whatItDoes = cleanText(metaDesc);
+        if (!whatItDoes.endsWith('.')) whatItDoes += '.';
     } else if (businessType) {
         whatItDoes = `${businessType} based in ${location}.`;
     } else {
-        whatItDoes = `${category} organization.`;
+        whatItDoes = `${category} company.`;
     }
     whatItDoes = truncate(cleanText(whatItDoes), 200);
 
@@ -181,19 +247,31 @@ export function buildPlainTextDescription(entity: any): string {
     const locationFr = COUNTRY_LABELS_FR[cc] || (cc === 'XX' ? '' : cc);
     const prep = countryPreposition(cc);
 
-    // Phrase 1: identity + what it does (use sector label, not raw sector_macro)
-    const services: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
+    // Phrase 1: identity + what it does — filter garbage services
+    const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
+    const services = filterGarbageServices(rawServices);
     const businessType: string = asr.identite?.business_type?.value || '';
-    const sectorLabel = summary.category; // already English-clean label
+    const sectorLabel = summary.category;
+    const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
+
+    // Use Gemini description if available (best quality)
+    const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
+    const geminiDesc: string = enrichment.gemini_description || '';
 
     let phrase1 = '';
-    if (services.length > 0) {
+    if (geminiDesc && geminiDesc.length > 10) {
+        phrase1 = `${summary.name} : ${cleanText(geminiDesc)}`;
+        if (!phrase1.endsWith('.')) phrase1 += '.';
+    } else if (services.length > 0) {
         const svcFr = services.slice(0, 3).join(', ');
         if (businessType) {
             phrase1 = `${summary.name} est ${addArticle(businessType)} qui propose ${svcFr.toLowerCase()}.`;
         } else {
             phrase1 = `${summary.name} propose ${svcFr.toLowerCase()}.`;
         }
+    } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
+        phrase1 = `${summary.name} : ${cleanText(metaDesc)}`;
+        if (!phrase1.endsWith('.')) phrase1 += '.';
     } else if (businessType) {
         phrase1 = `${summary.name} est ${addArticle(businessType)}.`;
     } else {
