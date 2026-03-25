@@ -5,59 +5,69 @@ import { db } from '@/lib/db';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://ai-visionary.com';
 
-    // 1. Pages Statiques
+    const now = new Date();
+
+    // 1. Static pages
     const staticPages: MetadataRoute.Sitemap = [
         {
             url: baseUrl,
-            lastModified: new Date(),
+            lastModified: now,
             changeFrequency: 'weekly',
-            priority: 1,
+            priority: 1.0,
         },
         {
             url: `${baseUrl}/aya`,
-            lastModified: new Date(),
+            lastModified: now,
             changeFrequency: 'daily',
             priority: 0.9,
         },
         {
             url: `${baseUrl}/diagnostic`,
-            lastModified: new Date(),
+            lastModified: now,
             changeFrequency: 'monthly',
-            priority: 0.8,
+            priority: 0.5,
         },
         {
             url: `${baseUrl}/ai-et-votre-entreprise`,
-            lastModified: new Date(),
+            lastModified: now,
             changeFrequency: 'monthly',
-            priority: 0.7,
+            priority: 0.5,
         },
         {
-            url: `${baseUrl}/mentions`,
-            lastModified: new Date(),
-            changeFrequency: 'yearly',
-            priority: 0.3,
+            url: `${baseUrl}/developers`,
+            lastModified: now,
+            changeFrequency: 'monthly',
+            priority: 0.5,
         },
         {
             url: `${baseUrl}/confidentialite`,
-            lastModified: new Date(),
+            lastModified: now,
             changeFrequency: 'yearly',
-            priority: 0.3,
+            priority: 0.5,
+        },
+        {
+            url: `${baseUrl}/mentions`,
+            lastModified: now,
+            changeFrequency: 'yearly',
+            priority: 0.5,
         },
     ];
 
-    // 2. Pages Entités Dynamiques (depuis Supabase)
+    // 2. Dynamic entity certificate pages (from Supabase aya_registry)
     let entityPages: MetadataRoute.Sitemap = [];
     try {
-        const entities = await db.getAyaEntities(10000);
+        const entities = await db.getAyaEntities(50000);
         entityPages = entities
+            .filter((entity: any) => entity.entity_id)
             .map((entity: any) => ({
-                url: `${baseUrl}/aya/e/${entity.entity_id || entity.aya_entity_id}`,
-                lastModified: new Date(entity.last_update || entity.created_at),
+                url: `${baseUrl}/aya/e/${entity.entity_id}`,
+                lastModified: new Date(entity.updated_at || entity.created_at || now),
                 changeFrequency: 'monthly' as const,
-                priority: entity.payment_completed ? 0.8 : 0.6,
+                priority: 0.7,
             }));
-    } catch {
-        // Firestore indisponible au build — sitemap statique uniquement
+    } catch (_err) {
+        // Supabase unavailable at build time — static sitemap only
+        console.warn('[sitemap] Could not fetch entities from Supabase:', _err);
     }
 
     return [...staticPages, ...entityPages];

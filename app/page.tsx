@@ -18,7 +18,7 @@ export default function Home() {
             "alternateName": "AYA Registry",
             "url": "https://ai-visionary.com",
             "logo": "https://ai-visionary.com/logo-v2.png",
-            "description": "AYA is a public registry of 1800+ organizations rated for AI readability. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
+            "description": "AYA is a public registry of 3000+ organizations rated for AI readability. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
             "address": {
               "@type": "PostalAddress",
               "addressLocality": "Genève",

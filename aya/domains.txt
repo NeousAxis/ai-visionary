@@ -6765,3 +6765,5 @@ https://cohere.ai
 https://lighton.ai
 https://zhipu.ai
 https://minimax.chat
+
+https://alan.app

@@ -2,8 +2,17 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'API AYA — Developer Documentation | AI Visionary',
-    description: 'AYA API documentation. 1815+ verified business entities, AIO scoring, structured ASR data. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.',
+    title: 'API AYA — Documentation developpeurs',
+    description:
+        'Documentation de l\'API AYA : 3000+ entreprises verifiees, scoring AIO, donnees ASR structurees. Connectee a ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.',
+    openGraph: {
+        title: 'API AYA — Documentation developpeurs | AI Visionary',
+        description:
+            'API ouverte AYA : recherche d\'entreprises, scores AIO, donnees structurees ASR. Sans authentification, 30 req/min, JSON.',
+        url: 'https://ai-visionary.com/developers',
+        siteName: 'AI Visionary',
+        type: 'website',
+    },
 };
 
 export default function DevelopersPage() {

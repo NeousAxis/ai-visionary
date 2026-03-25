@@ -3,6 +3,21 @@ import React from 'react';
 import Link from 'next/link';
 import Footer from '../components/Footer';
 import FAQ from '../components/FAQ';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'L\'IA et votre entreprise — Comment les IA comprennent votre activite',
+    description:
+        'Decouvrez comment les intelligences artificielles (ChatGPT, Gemini, Claude) interpretent les informations de votre entreprise et pourquoi structurer vos donnees change leur comportement.',
+    openGraph: {
+        title: 'L\'IA et votre entreprise | AI Visionary',
+        description:
+            'Comment les IA comprennent votre entreprise et pourquoi la structuration de vos donnees est essentielle pour etre recommande.',
+        url: 'https://ai-visionary.com/ai-et-votre-entreprise',
+        siteName: 'AI Visionary',
+        type: 'website',
+    },
+};
 
 export default function ComprendrePage() {
     return (

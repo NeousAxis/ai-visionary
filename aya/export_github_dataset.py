@@ -172,19 +172,31 @@ def build_llm_record(entity: dict) -> dict:
     cc = entity.get("country_legal", "XX")
     location = COUNTRY_LABELS.get(cc, "Global" if cc == "XX" else cc)
 
-    # What it does
-    services = asr.get("offre", {}).get("services", {}).get("value", [])
-    if isinstance(services, str):
-        services = [services]
-    business_type = asr.get("identite", {}).get("business_type", {}).get("value", "")
+    # What it does — Gemini description takes priority
+    payload = entity.get("asr_payload") or {}
+    if isinstance(payload, str):
+        try: payload = json.loads(payload)
+        except: payload = {}
+    enrichment = payload.get("enrichment", {})
+    gemini_en = enrichment.get("gemini_description", "")
+    gemini_keywords = enrichment.get("gemini_keywords", [])
 
-    if services:
-        svc_text = ", ".join(services[:3]).lower()
-        what_it_does = f"{business_type} providing {svc_text}." if business_type else f"Provides {svc_text}."
-    elif business_type:
-        what_it_does = f"{business_type} based in {location}."
+    if gemini_en and len(gemini_en) > 10:
+        what_it_does = gemini_en.strip()
+        if not what_it_does.endswith("."):
+            what_it_does += "."
     else:
-        what_it_does = f"{category} organization."
+        services = asr.get("offre", {}).get("services", {}).get("value", [])
+        if isinstance(services, str):
+            services = [services]
+        business_type = asr.get("identite", {}).get("business_type", {}).get("value", "")
+        if services:
+            svc_text = ", ".join(services[:3]).lower()
+            what_it_does = f"{business_type} providing {svc_text}." if business_type else f"Provides {svc_text}."
+        elif business_type:
+            what_it_does = f"{business_type} based in {location}."
+        else:
+            what_it_does = f"{category} company."
     what_it_does = what_it_does[:200].strip()
 
     # For who
@@ -205,6 +217,7 @@ def build_llm_record(entity: dict) -> dict:
         "for_who": for_who,
         "category": category,
         "location": location,
+        "keywords": gemini_keywords[:8] if gemini_keywords else [],
         "aio_score": entity.get("asr_score", 0) or 0,
         "certificate_url": f"{BASE_URL}/{entity.get('entity_id', '')}",
     }

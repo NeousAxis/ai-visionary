@@ -3,9 +3,51 @@ import { db } from '@/lib/db';
 import { buildPlainTextDescription } from '@/lib/aya/llm-format';
 import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
+import type { Metadata } from 'next';
 
 // Force dynamic
 export const revalidate = 0;
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params;
+    const entity = await db.getAyaEntityById(id);
+
+    if (!entity) {
+        return {
+            title: 'Certificat non trouve',
+            description: 'Ce certificat AYA n\'existe pas ou a ete supprime.',
+        };
+    }
+
+    const genericNames = ["Unknown", "Entity", "Unknown Entity", "Entreprise Inconnue"];
+    const rawName = entity.display_name || entity.legal_name;
+    const name = (rawName && !genericNames.includes(rawName))
+        ? rawName
+        : (entity.website ? entity.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : 'Entite');
+
+    const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : null;
+    const scoreText = score !== null ? ` — Score AIO ${score}/100` : '';
+    const isCertified = entity.payment_completed === true;
+    const statusText = isCertified ? 'Certifie ASR' : 'Indexe';
+
+    const enrichment = entity.asr_payload?.enrichment || {};
+    const descriptionText = enrichment.gemini_description_fr || enrichment.gemini_description || '';
+    const metaDescription = descriptionText
+        ? `${name}${scoreText}. ${descriptionText}`
+        : `${name}${scoreText}. ${statusText} dans le registre AYA — lisibilite IA verifiee par AI Visionary.`;
+
+    return {
+        title: `${name}${scoreText} — Certificat AYA`,
+        description: metaDescription.slice(0, 160),
+        openGraph: {
+            title: `${name} — Certificat AYA | AI Visionary`,
+            description: metaDescription.slice(0, 200),
+            url: `https://ai-visionary.com/aya/e/${entity.entity_id || id}`,
+            siteName: 'AI Visionary',
+            type: 'website',
+        },
+    };
+}
 
 export default async function CertificatePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
