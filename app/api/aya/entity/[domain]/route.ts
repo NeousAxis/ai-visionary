@@ -9,18 +9,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ doma
     if (rateLimited) return rateLimited;
 
     const { domain } = await params;
-    if (!domain) {
-        return NextResponse.json({ error: 'Missing domain parameter' }, { status: 400 });
+    if (!domain || domain.length < 3) {
+        return NextResponse.json({ error: 'Missing or invalid domain parameter' }, { status: 400 });
     }
 
     try {
-        const allEntities = await db.getAyaEntities();
-        const domainLower = domain.toLowerCase().replace(/^www\./, '');
-
-        const entity = allEntities.find((e: any) => {
-            const eWebsite = (e.website || '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
-            return eWebsite === domainLower || eWebsite === `www.${domainLower}`;
-        });
+        // Efficient O(1) lookup via website_normalized column
+        let entity = await db.getAyaEntityByUrl(`https://${domain}`);
+        if (!entity) {
+            entity = await db.getAyaEntityByUrl(`https://www.${domain}`);
+        }
 
         if (!entity) {
             return NextResponse.json({ error: 'Entity not found', domain }, { status: 404 });
@@ -48,6 +46,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ doma
             },
             asr_derived: asr,
             recommendability: entity.recommendability || {},
+        }, {
+            headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=300' }
         });
     } catch (err) {
         console.error('AYA entity error:', err);

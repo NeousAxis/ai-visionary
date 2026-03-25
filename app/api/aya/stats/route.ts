@@ -50,6 +50,8 @@ export async function GET(req: NextRequest) {
             sectors: sortedSectors,
             countries: sortedCountries,
             last_updated: new Date().toISOString(),
+        }, {
+            headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=60' }
         });
     } catch (err) {
         console.error('AYA stats error:', err);

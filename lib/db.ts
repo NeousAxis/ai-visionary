@@ -584,6 +584,123 @@ export const database = {
             console.error('❌ [Supabase] Log Persist Error:', error);
         }
     },
+
+    /**
+     * Get paginated entities from AYA Registry with server-side search, sort, and count
+     * Used by the /aya page for server-side pagination (instead of loading ALL entities)
+     */
+    getAyaEntitiesPaginated: async (options: {
+        page: number;
+        pageSize: number;
+        search?: string;
+        sort?: 'default' | 'alpha' | 'score' | 'country' | 'certified';
+    }): Promise<{ data: any[]; total: number; certifiedCount: number; indexedCount: number }> => {
+        if (!isSupabaseConfigured()) return { data: [], total: 0, certifiedCount: 0, indexedCount: 0 };
+        const client = getSupabase();
+        if (!client) return { data: [], total: 0, certifiedCount: 0, indexedCount: 0 };
+
+        const { page, pageSize, search, sort = 'default' } = options;
+
+        try {
+            // 1. Get total counts (always unfiltered for stats bar)
+            const { count: totalCount, error: countErr } = await client
+                .from('aya_registry')
+                .select('*', { count: 'exact', head: true });
+
+            const { count: certCount, error: certErr } = await client
+                .from('aya_registry')
+                .select('*', { count: 'exact', head: true })
+                .eq('payment_completed', true);
+
+            if (countErr || certErr) {
+                console.error('❌ [Supabase] Count Error:', countErr || certErr);
+            }
+
+            const total = totalCount || 0;
+            const certifiedCount = certCount || 0;
+            const indexedCount = total - certifiedCount;
+
+            // 2. Build filtered query for count
+            let filteredTotal = total;
+            if (search) {
+                const q = `%${search}%`;
+                const { count: filteredCount, error: filteredErr } = await client
+                    .from('aya_registry')
+                    .select('*', { count: 'exact', head: true })
+                    .or(`display_name.ilike.${q},legal_name.ilike.${q},website.ilike.${q},sector_macro.ilike.${q},country_legal.ilike.${q}`);
+
+                if (!filteredErr && filteredCount !== null) {
+                    filteredTotal = filteredCount;
+                }
+            }
+
+            // For 'certified' sort mode, only count certified entities
+            if (sort === 'certified') {
+                if (search) {
+                    const q = `%${search}%`;
+                    const { count: certFilteredCount } = await client
+                        .from('aya_registry')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('payment_completed', true)
+                        .or(`display_name.ilike.${q},legal_name.ilike.${q},website.ilike.${q},sector_macro.ilike.${q},country_legal.ilike.${q}`);
+                    filteredTotal = certFilteredCount || 0;
+                } else {
+                    filteredTotal = certifiedCount;
+                }
+            }
+
+            // 3. Build paginated data query
+            const offset = (page - 1) * pageSize;
+            let query = client
+                .from('aya_registry')
+                .select('entity_id, display_name, legal_name, website, sector_macro, country_legal, entity_type, asr_score, payment_completed, created_at, asr_payload');
+
+            // Apply search filter
+            if (search) {
+                const q = `%${search}%`;
+                query = query.or(`display_name.ilike.${q},legal_name.ilike.${q},website.ilike.${q},sector_macro.ilike.${q},country_legal.ilike.${q}`);
+            }
+
+            // Apply certified filter
+            if (sort === 'certified') {
+                query = query.eq('payment_completed', true);
+            }
+
+            // Apply sort order
+            if (sort === 'alpha') {
+                query = query.order('display_name', { ascending: true, nullsFirst: false });
+            } else if (sort === 'score') {
+                query = query.order('asr_score', { ascending: false, nullsFirst: false });
+            } else if (sort === 'country') {
+                query = query.order('country_legal', { ascending: true, nullsFirst: false });
+            } else {
+                // 'default' and 'certified': certified first (payment_completed DESC), then by created_at DESC
+                query = query
+                    .order('payment_completed', { ascending: false, nullsFirst: false })
+                    .order('created_at', { ascending: false });
+            }
+
+            // Apply pagination
+            query = query.range(offset, offset + pageSize - 1);
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('❌ [Supabase] Paginated Query Error:', error);
+                return { data: [], total: filteredTotal, certifiedCount, indexedCount };
+            }
+
+            return {
+                data: data || [],
+                total: filteredTotal,
+                certifiedCount,
+                indexedCount,
+            };
+        } catch (error) {
+            console.error('❌ [Supabase] Paginated Query Error:', error);
+            return { data: [], total: 0, certifiedCount: 0, indexedCount: 0 };
+        }
+    },
 };
 
 // Export as 'db' for backward compatibility

@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({
             success: true,
             data: entities
+        }, {
+            headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60' }
         });
     } catch (err) {
         logger.error('AYA_LIVE_ERROR', err instanceof Error ? err.message : 'Unknown error');

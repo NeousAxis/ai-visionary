@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { buildPlainTextDescription } from '@/lib/aya/llm-format';
 import Link from 'next/link';
+import BackButton from '@/app/components/BackButton';
 
 // Force dynamic
 export const revalidate = 0;
@@ -134,9 +135,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                     <div style={{ background: 'var(--text-main)', color: 'white', padding: '5px 8px', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem' }}>AV</div>
                     <span style={{ fontWeight: 'bold', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>AI VISIONARY</span>
                 </Link>
-                <Link href="/aya" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '600' }}>
-                    ✕ FERMER
-                </Link>
+                <BackButton />
             </div>
 
             {/* HERO SECTION - REUSING 'hero-section' STYLES BUT COMPACT */}

@@ -66,6 +66,8 @@ export async function GET(req: NextRequest) {
             n: results.length,
             _help: 'AYA Registry by AI Visionary. certified=true means ASR verified.',
             results,
+        }, {
+            headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30' }
         });
     } catch (err) {
         console.error('AYA search error:', err);
