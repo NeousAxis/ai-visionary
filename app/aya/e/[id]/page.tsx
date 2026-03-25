@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
+import { buildPlainTextDescription } from '@/lib/aya/llm-format';
 import Link from 'next/link';
 
 // Force dynamic
@@ -149,6 +150,13 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                         )}
                     </div>
                 </div>
+            </section>
+
+            {/* PLAIN TEXT DESCRIPTION — visible to humans & LLM crawlers */}
+            <section style={{ maxWidth: '700px', margin: '0 auto', padding: '0 20px 2rem', textAlign: 'center' }}>
+                <p style={{ fontSize: '1rem', lineHeight: '1.7', color: 'var(--text-body)' }}>
+                    {buildPlainTextDescription(entity)}
+                </p>
             </section>
 
             {/* MAIN CONTENT - REUSING GRID & CARDS */}

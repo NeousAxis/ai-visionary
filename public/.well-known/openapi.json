@@ -93,6 +93,42 @@
         }
       }
     },
+    "/api/aya/llm/{domain}": {
+      "get": {
+        "operationId": "getLlmSummary",
+        "summary": "Get an ultra-simple 5-field summary of a company, optimized for LLM consumption",
+        "description": "Returns a minimal JSON with name, what_it_does, for_who, category, and location. This is the recommended endpoint for AI agents — simple, stable, no jargon. Cached for 1 hour.",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "description": "Domain name (e.g. 'stripe.com', without protocol or www)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LLM-friendly entity summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entity not found"
+          },
+          "429": {
+            "description": "Rate limit exceeded (30 requests/minute per IP)"
+          }
+        }
+      }
+    },
     "/api/aya/entity/{domain}": {
       "get": {
         "operationId": "getEntity",
@@ -400,6 +436,32 @@
             "type": "string",
             "format": "date-time",
             "description": "Timestamp of when the stats were computed"
+          }
+        }
+      },
+      "LlmSummary": {
+        "type": "object",
+        "description": "Ultra-simple 5-field summary optimized for LLM consumption. One sentence per field, no jargon.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Entity display name"
+          },
+          "what_it_does": {
+            "type": "string",
+            "description": "One sentence describing what the entity does"
+          },
+          "for_who": {
+            "type": "string",
+            "description": "Target audience in one sentence"
+          },
+          "category": {
+            "type": "string",
+            "description": "Business category (e.g. 'Technology & SaaS', 'Blockchain & Web3')"
+          },
+          "location": {
+            "type": "string",
+            "description": "Country or 'Global'"
           }
         }
       },

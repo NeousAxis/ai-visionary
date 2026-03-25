@@ -1,0 +1,225 @@
+/**
+ * LLM-friendly format utilities for AYA entities.
+ * Shared by: /api/aya/llm/[domain], certificate page, GitHub export.
+ */
+
+// ─── Types ───────────────────────────────────────────────────
+export interface LlmSummary {
+    name: string;
+    what_it_does: string;
+    for_who: string;
+    category: string;
+    location: string;
+}
+
+// ─── Mappings ────────────────────────────────────────────────
+export const COUNTRY_LABELS: Record<string, string> = {
+    CH: 'Switzerland', FR: 'France', DE: 'Germany', US: 'United States',
+    GB: 'United Kingdom', IT: 'Italy', ES: 'Spain', NL: 'Netherlands',
+    BE: 'Belgium', AT: 'Austria', LU: 'Luxembourg', CA: 'Canada',
+    AU: 'Australia', JP: 'Japan', KR: 'South Korea', CN: 'China',
+    SG: 'Singapore', HK: 'Hong Kong', IN: 'India', BR: 'Brazil',
+    SE: 'Sweden', NO: 'Norway', DK: 'Denmark', FI: 'Finland',
+    IE: 'Ireland', PT: 'Portugal', PL: 'Poland', CZ: 'Czech Republic',
+    IL: 'Israel', AE: 'United Arab Emirates', SA: 'Saudi Arabia',
+    RU: 'Russia', MX: 'Mexico', AR: 'Argentina', ZA: 'South Africa',
+    MA: 'Morocco', TH: 'Thailand', VN: 'Vietnam', ID: 'Indonesia',
+    TW: 'Taiwan', PH: 'Philippines', NZ: 'New Zealand', RO: 'Romania',
+    UA: 'Ukraine', TR: 'Turkey', EE: 'Estonia', LT: 'Lithuania',
+    LV: 'Latvia', HR: 'Croatia', BG: 'Bulgaria', GR: 'Greece',
+    KY: 'Cayman Islands', PA: 'Panama', BM: 'Bermuda',
+};
+
+export const SECTOR_LABELS: Record<string, string> = {
+    'Technologie & SaaS': 'Technology & SaaS',
+    'Finance & Assurance': 'Finance & Insurance',
+    'Santé & Pharma': 'Healthcare & Pharma',
+    'Alimentation & Boissons': 'Food & Beverage',
+    'Commerce & Retail': 'Retail & E-commerce',
+    'Éducation & Formation': 'Education & Training',
+    'Énergie & Environnement': 'Energy & Environment',
+    'Consulting & Services': 'Consulting & Services',
+    'Média & Communication': 'Media & Communication',
+    'Transport & Logistique': 'Transport & Logistics',
+    'Industrie & Manufacture': 'Industry & Manufacturing',
+    'Immobilier & Construction': 'Real Estate & Construction',
+    'Télécommunications': 'Telecommunications',
+    'Administration & Gouvernement': 'Government & Public Sector',
+    'ONG & Associations': 'Non-profit & NGO',
+    'Loisirs & Tourisme': 'Leisure & Tourism',
+    'Blockchain & Web3': 'Blockchain & Web3',
+    'Intelligence Artificielle': 'Artificial Intelligence',
+    'General': 'General',
+};
+
+const SECTOR_AUDIENCE_FALLBACK: Record<string, string> = {
+    'Technology & SaaS': 'Businesses and developers.',
+    'Finance & Insurance': 'Financial institutions and consumers.',
+    'Healthcare & Pharma': 'Healthcare professionals and patients.',
+    'Retail & E-commerce': 'Consumers and retail businesses.',
+    'Education & Training': 'Students, educators, and institutions.',
+    'Consulting & Services': 'Businesses seeking expert guidance.',
+    'Media & Communication': 'Media professionals and audiences.',
+    'Blockchain & Web3': 'Web3 developers and crypto communities.',
+    'Artificial Intelligence': 'AI researchers and enterprise teams.',
+};
+
+// ─── Helpers ─────────────────────────────────────────────────
+function extractAsrData(entity: any): any {
+    const raw = entity.asr_payload?.data;
+    if (!raw) return {};
+    if (typeof raw === 'string') {
+        try { return JSON.parse(raw); } catch { return {}; }
+    }
+    return raw;
+}
+
+function cleanText(s: string): string {
+    return s.replace(/\s+/g, ' ').replace(/["""]/g, '').trim();
+}
+
+function truncate(s: string, max: number): string {
+    if (s.length <= max) return s;
+    const cut = s.lastIndexOf(' ', max);
+    return (cut > 0 ? s.slice(0, cut) : s.slice(0, max)) + '...';
+}
+
+function domainFromUrl(url: string): string {
+    try {
+        return url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+    } catch {
+        return url;
+    }
+}
+
+// ─── Core functions ──────────────────────────────────────────
+
+/**
+ * Build ultra-simple 5-field summary for LLM consumption.
+ */
+export function buildLlmSummary(entity: any): LlmSummary {
+    const asr = extractAsrData(entity);
+
+    // Name
+    const genericNames = ['Unknown', 'Entity', 'Unknown Entity', 'Entreprise Inconnue', 'Homepage', 'Welcome'];
+    const rawName = entity.display_name || entity.legal_name || '';
+    const name = (rawName && !genericNames.includes(rawName))
+        ? rawName
+        : (entity.website ? domainFromUrl(entity.website) : 'Unknown');
+
+    // Category (English label)
+    const sectorRaw = entity.sector_macro || 'General';
+    const category = SECTOR_LABELS[sectorRaw] || sectorRaw;
+
+    // Location
+    const countryCode = entity.country_legal || 'XX';
+    const location = COUNTRY_LABELS[countryCode] || (countryCode === 'XX' ? 'Global' : countryCode);
+
+    // What it does — derive from services + business_type
+    const services: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
+    const businessType: string = asr.identite?.business_type?.value || '';
+    let whatItDoes = '';
+    if (services.length > 0) {
+        const svcText = services.slice(0, 3).join(', ');
+        whatItDoes = businessType
+            ? `${businessType} providing ${svcText.toLowerCase()}.`
+            : `Provides ${svcText.toLowerCase()}.`;
+    } else if (businessType) {
+        whatItDoes = `${businessType} based in ${location}.`;
+    } else {
+        whatItDoes = `${category} organization.`;
+    }
+    whatItDoes = truncate(cleanText(whatItDoes), 200);
+
+    // For who — derive from target_audience
+    const rawAudience: string = Array.isArray(asr.offre?.target_audience?.value)
+        ? asr.offre.target_audience.value.join(', ')
+        : (asr.offre?.target_audience?.value || '');
+    let forWho = '';
+    if (rawAudience && rawAudience.length > 3) {
+        forWho = truncate(cleanText(rawAudience), 150);
+        if (!forWho.endsWith('.')) forWho += '.';
+    } else {
+        forWho = SECTOR_AUDIENCE_FALLBACK[category] || 'Businesses and professionals.';
+    }
+
+    return { name, what_it_does: whatItDoes, for_who: forWho, category, location };
+}
+
+// French country names for certificate page descriptions
+const COUNTRY_LABELS_FR: Record<string, string> = {
+    CH: 'Suisse', FR: 'France', DE: 'Allemagne', US: 'États-Unis',
+    GB: 'Royaume-Uni', IT: 'Italie', ES: 'Espagne', NL: 'Pays-Bas',
+    BE: 'Belgique', AT: 'Autriche', LU: 'Luxembourg', CA: 'Canada',
+    AU: 'Australie', JP: 'Japon', KR: 'Corée du Sud', CN: 'Chine',
+    SG: 'Singapour', HK: 'Hong Kong', IN: 'Inde', BR: 'Brésil',
+    SE: 'Suède', NO: 'Norvège', DK: 'Danemark', FI: 'Finlande',
+    IE: 'Irlande', PT: 'Portugal', PL: 'Pologne', CZ: 'Tchéquie',
+    IL: 'Israël', AE: 'Émirats arabes unis', SA: 'Arabie saoudite',
+    MX: 'Mexique', AR: 'Argentine', ZA: 'Afrique du Sud', MA: 'Maroc',
+    TW: 'Taïwan', NZ: 'Nouvelle-Zélande', RO: 'Roumanie', TR: 'Turquie',
+    GR: 'Grèce', EE: 'Estonie',
+};
+
+// French prepositions for countries ("en France", "aux États-Unis", "au Japon")
+function countryPreposition(cc: string): string {
+    const aux = ['US', 'AE', 'NL', 'PH', 'EAU'];
+    const au = ['JP', 'CA', 'BR', 'MX', 'PT', 'DK', 'LU', 'MA', 'RO', 'VN'];
+    if (aux.includes(cc)) return 'aux';
+    if (au.includes(cc)) return 'au';
+    return 'en';
+}
+
+/**
+ * Build 2-4 sentence plain text description (French) for certificate pages.
+ */
+export function buildPlainTextDescription(entity: any): string {
+    const summary = buildLlmSummary(entity);
+    const asr = extractAsrData(entity);
+
+    const cc = entity.country_legal || 'XX';
+    const locationFr = COUNTRY_LABELS_FR[cc] || (cc === 'XX' ? '' : cc);
+    const prep = countryPreposition(cc);
+
+    // Phrase 1: identity + what it does (use sector label, not raw sector_macro)
+    const services: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
+    const businessType: string = asr.identite?.business_type?.value || '';
+    const sectorLabel = summary.category; // already English-clean label
+
+    let phrase1 = '';
+    if (services.length > 0) {
+        const svcFr = services.slice(0, 3).join(', ');
+        if (businessType) {
+            phrase1 = `${summary.name} est ${addArticle(businessType)} qui propose ${svcFr.toLowerCase()}.`;
+        } else {
+            phrase1 = `${summary.name} propose ${svcFr.toLowerCase()}.`;
+        }
+    } else if (businessType) {
+        phrase1 = `${summary.name} est ${addArticle(businessType)}.`;
+    } else {
+        phrase1 = `${summary.name} est une entreprise du secteur ${sectorLabel}.`;
+    }
+
+    // Phrase 2: audience (if available)
+    const rawAudience = Array.isArray(asr.offre?.target_audience?.value)
+        ? asr.offre.target_audience.value.join(', ')
+        : (asr.offre?.target_audience?.value || '');
+    const phrase2 = rawAudience && rawAudience.length > 3
+        ? `Elle s'adresse principalement ${rawAudience.startsWith('aux') || rawAudience.startsWith('à') ? '' : 'à '}${rawAudience.toLowerCase()}.`
+        : '';
+
+    // Phrase 3: location in French (if not "Global" / unknown)
+    const phrase3 = locationFr
+        ? `Basée ${prep} ${locationFr}.`
+        : '';
+
+    return [phrase1, phrase2, phrase3].filter(Boolean).join(' ');
+}
+
+/** Add French article before business type */
+function addArticle(bt: string): string {
+    const lower = bt.toLowerCase();
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'é', 'è', 'ê'];
+    if (vowels.some(v => lower.startsWith(v))) return `un ${bt.toLowerCase()}`;
+    return `un ${bt.toLowerCase()}`;
+}

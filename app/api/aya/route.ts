@@ -9,6 +9,15 @@ export async function GET() {
         documentation: "https://ai-visionary.com/api/aya/docs",
         plugin_manifest: "https://ai-visionary.com/.well-known/ai-plugin.json",
         endpoints: {
+            llm: {
+                url: "/api/aya/llm/{domain}",
+                method: "GET",
+                description: "LLM-optimized: returns 5 simple fields (name, what_it_does, for_who, category, location). Best endpoint for AI agents.",
+                params: {
+                    domain: "Canonical domain without www (e.g. stripe.com)",
+                },
+                example: "https://ai-visionary.com/api/aya/llm/stripe.com",
+            },
             search: {
                 url: "/api/aya/search?q={query}&limit={limit}",
                 method: "GET",

@@ -2,8 +2,8 @@
     "schema_version": "v1",
     "name_for_human": "AYA Index",
     "name_for_model": "aya",
-    "description_for_human": "Search the AYA index of 889+ companies rated for AI readability (AIO score 0-100).",
-    "description_for_model": "AYA is a public index of organizations rated for AI readability. Use this plugin to look up companies, check their AI-readability score (AIO, 0-100), and retrieve structured data about them. The AIO score measures how well a website's structured data can be understood by AI systems. Higher scores mean AI agents can more reliably recommend and describe the entity. Use /api/aya/search?q=... when a user asks about a company. Use /api/aya/entity/{domain} for detailed info. Use /api/aya/stats for index-wide context.",
+    "description_for_human": "Search the AYA index of 3000+ companies rated for AI readability (AIO score 0-100).",
+    "description_for_model": "AYA is a public index of 3000+ organizations rated for AI readability. Use /api/aya/llm/{domain} for an ultra-simple 5-field summary (name, what_it_does, for_who, category, location) — best for quick lookups. Use /api/aya/search?q=... to find companies by name, sector, or country. Use /api/aya/entity/{domain} for full details with ASR data. Use /api/aya/stats for index-wide context. No authentication required.",
     "auth": {
         "type": "none"
     },
