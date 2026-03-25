@@ -237,6 +237,7 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">Pour les entreprises, artisans et indépendants qui ne veulent pas être écartés par les IA.</h2>
           <div className="target-grid">
+            <span className="target-badge">Entreprises technologiques</span>
             <span className="target-badge">Artisans & commerces locaux</span>
             <span className="target-badge">PME de services</span>
             <span className="target-badge">Indépendants & consultants</span>
