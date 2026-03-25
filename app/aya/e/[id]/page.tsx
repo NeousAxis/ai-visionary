@@ -51,15 +51,20 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
         ? rawDisplayName
         : (entity.website ? entity.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : "Identité Web Certifiée");
 
-    // Build description from extract fields (correct paths for FieldNode<T> structure)
+    // Build description — Gemini enrichment takes priority over raw scraper data
+    const enrichment = entity.asr_payload?.enrichment || {};
+    const geminiFr: string = enrichment.gemini_description_fr || '';
+    const geminiEn: string = enrichment.gemini_description || '';
     const services = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
     const businessType = asrData.identite?.business_type?.value || entity.sector_macro || "";
     const audience = asrData.offre?.target_audience?.value || "";
-    const description = services.length > 0
-        ? `${businessType ? `${businessType} — ` : ""}${services.slice(0, 3).join(", ")}${audience ? `. S'adresse à ${audience}.` : "."}`
-        : (businessType
-            ? `${businessType}. Entité certifiée avec présence sémantique active auprès du consensus AYO.`
-            : "Certification de présence sémantique active. Cette entité a validé son existence et ses champs d'expertise auprès du consensus AYO.");
+    const description = (geminiFr || geminiEn)
+        ? (geminiFr || geminiEn)
+        : (services.length > 0
+            ? `${businessType ? `${businessType} — ` : ""}${services.slice(0, 3).join(", ")}${audience ? `. S'adresse à ${audience}.` : "."}`
+            : (businessType
+                ? `${businessType}. Entité certifiée avec présence sémantique active auprès du consensus AYO.`
+                : "Certification de présence sémantique active. Cette entité a validé son existence et ses champs d'expertise auprès du consensus AYO."));
 
     // Bug 3 fix: gather keywords from more sources (bot entities have different data paths)
     const serviceKeywords = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
