@@ -4,19 +4,22 @@ import AyaRegistryClient from '@/app/components/AyaRegistryClient';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 
-export const metadata: Metadata = {
-    title: 'Registre AYA — 3000+ entreprises indexees pour l\'IA',
-    description:
-        'Le registre public AYA regroupe plus de 3000 entreprises indexees et certifiees pour leur lisibilite IA. Consultez les scores AIO, les donnees structurees et les certificats de chaque entite.',
-    openGraph: {
-        title: 'Registre AYA — 3000+ entreprises indexees | AI Visionary',
-        description:
-            'Explorez le registre public AYA : plus de 3000 entreprises notees sur leur lisibilite par les IA (ChatGPT, Gemini, Claude).',
-        url: 'https://ai-visionary.com/aya',
-        siteName: 'AI Visionary',
-        type: 'website',
-    },
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const stats = await db.getAyaEntitiesPaginated({ page: 1, pageSize: 1 });
+    const total = stats.total || 0;
+    const rounded = Math.floor(total / 100) * 100;
+    return {
+        title: `Registre AYA — ${rounded}+ entreprises indexees pour l'IA`,
+        description: `Le registre public AYA regroupe plus de ${rounded} entreprises indexees et certifiees pour leur lisibilite IA. Consultez les scores AIO, les donnees structurees et les certificats de chaque entite.`,
+        openGraph: {
+            title: `Registre AYA — ${rounded}+ entreprises indexees | AI Visionary`,
+            description: `Explorez le registre public AYA : plus de ${rounded} entreprises notees sur leur lisibilite par les IA (ChatGPT, Gemini, Claude).`,
+            url: 'https://ai-visionary.com/aya',
+            siteName: 'AI Visionary',
+            type: 'website',
+        },
+    };
+}
 
 // Force dynamic rendering (no static cache)
 export const dynamic = 'force-dynamic';
