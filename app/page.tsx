@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import Footer from './components/Footer';
+import StatsBar from './components/StatsBar';
 // AyoChat widget REMOVED from Home Page.
 import PaymentSuccessModal from './components/PaymentSuccessModal';
 
@@ -75,18 +76,7 @@ export default function Home() {
         textAlign: 'center',
       }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '60px', flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>3&apos;300+</div>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>Entreprises index&eacute;es</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>9</div>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>IA compatibles</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>70+</div>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>Pays couverts</div>
-          </div>
+          <StatsBar />
         </div>
       </section>
 
