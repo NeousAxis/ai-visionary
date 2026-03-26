@@ -47,12 +47,17 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
         ? validUntilRaw.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
         : '\u2014';
 
-    // Build checkout URLs with entity info
-    const email = entity.contact_email || '';
+    // Build checkout URLs — if email missing, redirect to diagnostic instead
+    const email = entity.contact_email || entity.email || '';
     const url = entity.website || '';
+    const hasRequiredInfo = email && url;
     const checkoutBase = `/api/create-checkout`;
-    const proCheckoutUrl = `${checkoutBase}?email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&packType=PRO&aid=${entityId}`;
-    const ayaCheckoutUrl = `${checkoutBase}?email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&packType=AYA_SUB&aid=${entityId}`;
+    const proCheckoutUrl = hasRequiredInfo
+        ? `${checkoutBase}?email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&packType=PRO&aid=${entityId}`
+        : `/diagnostic`;
+    const ayaCheckoutUrl = hasRequiredInfo
+        ? `${checkoutBase}?email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&packType=AYA_SUB&aid=${entityId}`
+        : `/diagnostic`;
 
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
