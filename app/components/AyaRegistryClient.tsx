@@ -144,17 +144,13 @@ export default function AyaRegistryClient({
                         <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{certifiedCount + indexedCount}</span>
                         <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Entreprises dans l&apos;index</span>
                     </div>
-                    {certifiedCount > 0 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></span>
-                            <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#22c55e' }}>{certifiedCount}</span>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Certifi&eacute;es ASR</span>
-                        </div>
-                    )}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#94a3b8' }}></span>
-                        <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: '#64748b' }}>{indexedCount}</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Index&eacute;es AYA</span>
+                        <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>9</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>IA compatibles</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>73+</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Pays couverts</span>
                     </div>
                 </div>
             </div>

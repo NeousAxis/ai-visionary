@@ -674,10 +674,8 @@ export const database = {
             } else if (sort === 'country') {
                 query = query.order('country_legal', { ascending: true, nullsFirst: false });
             } else {
-                // 'default' and 'certified': certified first (payment_completed DESC), then by created_at DESC
-                query = query
-                    .order('payment_completed', { ascending: false, nullsFirst: false })
-                    .order('created_at', { ascending: false });
+                // 'default': newest first (dynamic feel). 'certified': certified only (filtered above)
+                query = query.order('created_at', { ascending: false });
             }
 
             // Apply pagination
