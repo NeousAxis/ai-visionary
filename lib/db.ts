@@ -699,6 +699,202 @@ export const database = {
             return { data: [], total: 0, certifiedCount: 0, indexedCount: 0 };
         }
     },
+
+    // ========================================================================
+    // LIFECYCLE MANAGEMENT — Expiry, reviews, subscriptions
+    // ========================================================================
+
+    /**
+     * Get entities expiring within N days (payment_completed=true, valid_until approaching)
+     */
+    getExpiringEntities: async (daysUntilExpiry: number): Promise<any[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+
+        try {
+            const now = new Date().toISOString();
+            const futureDate = new Date(Date.now() + daysUntilExpiry * 24 * 60 * 60 * 1000).toISOString();
+
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('*')
+                .eq('payment_completed', true)
+                .not('valid_until', 'is', null)
+                .gte('valid_until', now)
+                .lte('valid_until', futureDate)
+                .order('valid_until', { ascending: true });
+
+            if (error) {
+                console.error('❌ [Supabase] getExpiringEntities Error:', error);
+                return [];
+            }
+
+            return data || [];
+        } catch (error) {
+            console.error('❌ [Supabase] getExpiringEntities Error:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Get entities needing annual review (next_review_due <= now, reminder not yet sent)
+     * Only certified entities (payment_completed = true)
+     */
+    getEntitiesNeedingReview: async (): Promise<any[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+
+        try {
+            const now = new Date().toISOString();
+
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('*')
+                .eq('payment_completed', true)
+                .lte('next_review_due', now)
+                .or('renewal_reminder_sent.is.null,renewal_reminder_sent.eq.false')
+                .order('next_review_due', { ascending: true });
+
+            if (error) {
+                console.error('❌ [Supabase] getEntitiesNeedingReview Error:', error);
+                return [];
+            }
+
+            return data || [];
+        } catch (error) {
+            console.error('❌ [Supabase] getEntitiesNeedingReview Error:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Update lifecycle fields on an AYA entity
+     */
+    updateEntityLifecycle: async (
+        entityId: string,
+        fields: Partial<{
+            pack_type: string;
+            subscription_id: string;
+            subscription_status: string;
+            next_review_due: string;
+            renewal_reminder_sent: boolean;
+            renewal_reminder_sent_at: string;
+            valid_until: string;
+            payment_completed: boolean;
+            aya_status: string;
+            expiry_reminder_7d_sent: boolean;
+            expiry_reminder_7d_sent_at: string;
+            expiry_reminder_30d_sent: boolean;
+            expiry_reminder_30d_sent_at: string;
+            expiry_reminder_90d_sent: boolean;
+            expiry_reminder_90d_sent_at: string;
+        }>
+    ): Promise<boolean> => {
+        if (!isSupabaseConfigured()) return false;
+        const client = getSupabase();
+        if (!client) return false;
+
+        try {
+            const { error } = await client
+                .from('aya_registry')
+                .update({ ...fields, updated_at: new Date().toISOString() })
+                .eq('entity_id', entityId);
+
+            if (error) {
+                console.error(`❌ [Supabase] updateEntityLifecycle Error for ${entityId}:`, error);
+                return false;
+            }
+
+            console.log(`💾 [Supabase] Lifecycle updated for entity: ${entityId}`);
+            return true;
+        } catch (error) {
+            console.error(`❌ [Supabase] updateEntityLifecycle Error for ${entityId}:`, error);
+            return false;
+        }
+    },
+
+    /**
+     * Find an AYA entity by Stripe subscription_id
+     */
+    getEntityBySubscriptionId: async (subscriptionId: string): Promise<any | null> => {
+        if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
+
+        try {
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('*')
+                .eq('subscription_id', subscriptionId)
+                .limit(1)
+                .single();
+
+            if (error) {
+                if (error.code === 'PGRST116') return null; // No rows
+                console.error('❌ [Supabase] getEntityBySubscriptionId Error:', error);
+                return null;
+            }
+
+            return data;
+        } catch (error) {
+            console.error('❌ [Supabase] getEntityBySubscriptionId Error:', error);
+            return null;
+        }
+    },
+
+    /**
+     * Mark expired entities (valid_until < now) as no longer active
+     * Returns the list of entity IDs that were expired
+     */
+    markEntitiesExpired: async (): Promise<string[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+
+        try {
+            const now = new Date().toISOString();
+
+            // First, get the entities that will be expired (for logging)
+            const { data: toExpire, error: fetchErr } = await client
+                .from('aya_registry')
+                .select('entity_id, display_name, website, valid_until')
+                .eq('payment_completed', true)
+                .not('valid_until', 'is', null)
+                .lt('valid_until', now);
+
+            if (fetchErr) {
+                console.error('❌ [Supabase] markEntitiesExpired fetch Error:', fetchErr);
+                return [];
+            }
+
+            if (!toExpire || toExpire.length === 0) return [];
+
+            const entityIds = toExpire.map((e: any) => e.entity_id);
+
+            // Update all expired entities
+            const { error: updateErr } = await client
+                .from('aya_registry')
+                .update({
+                    payment_completed: false,
+                    subscription_status: 'expired',
+                    updated_at: now,
+                })
+                .in('entity_id', entityIds);
+
+            if (updateErr) {
+                console.error('❌ [Supabase] markEntitiesExpired update Error:', updateErr);
+                return [];
+            }
+
+            console.log(`⏰ [Supabase] Marked ${entityIds.length} entities as expired`);
+            return entityIds;
+        } catch (error) {
+            console.error('❌ [Supabase] markEntitiesExpired Error:', error);
+            return [];
+        }
+    },
 };
 
 // Export as 'db' for backward compatibility
