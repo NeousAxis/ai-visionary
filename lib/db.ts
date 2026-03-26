@@ -293,6 +293,36 @@ export const database = {
     },
 
     /**
+     * Update an existing AYA entity's data fields using .update() (NOT .upsert())
+     * Safe: will NOT create a new row if entity_id doesn't exist.
+     */
+    updateEntityData: async (entityId: string, data: Record<string, any>): Promise<boolean> => {
+        if (!isSupabaseConfigured()) {
+            console.log(`⚠️ DB Disabled: Skipping AYA update for ${entityId}`);
+            return false;
+        }
+        const client = getSupabase();
+        if (!client) return false;
+        try {
+            const { aya_entity_id: _drop, ...cleanData } = data as any;
+            const { error } = await client
+                .from('aya_registry')
+                .update({ ...cleanData, updated_at: new Date().toISOString() })
+                .eq('entity_id', entityId);
+
+            if (error) {
+                console.error('❌ [Supabase] AYA updateEntityData Error:', error);
+                return false;
+            }
+            console.log(`💾 [Supabase] AYA Entity data updated (safe): ${entityId}`);
+            return true;
+        } catch (error) {
+            console.error('❌ [Supabase] AYA updateEntityData Error:', error);
+            return false;
+        }
+    },
+
+    /**
      * Get all entities from AYA Registry (certified + indexed)
      * Sorted: payment_completed=true first, then by score DESC
      */
@@ -784,6 +814,7 @@ export const database = {
             valid_until: string;
             payment_completed: boolean;
             aya_status: string;
+            contact_email: string;
             expiry_reminder_7d_sent: boolean;
             expiry_reminder_7d_sent_at: string;
             expiry_reminder_30d_sent: boolean;

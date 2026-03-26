@@ -18,8 +18,11 @@ const FOOTER = `
 </div>`;
 
 function wrapEmail(headerTitle: string, headerSubtitle: string, bodyHtml: string): string {
-    return `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
-    <meta charset="utf-8">
+    return `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"></head>
+<body style="margin: 0; padding: 20px; background: #f4f4f4;">
+<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
 
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
         <h1 style="color: #fff; margin: 0; font-size: 22px;">${headerTitle}</h1>
@@ -30,7 +33,9 @@ function wrapEmail(headerTitle: string, headerSubtitle: string, bodyHtml: string
         ${bodyHtml}
     </div>
 
-    ${FOOTER}`;
+    ${FOOTER}
+</body>
+</html>`;
 }
 
 function ctaButton(label: string, url: string, color: string = '#4A919E'): string {

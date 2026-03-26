@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
             updateFields.contact_email = contactEmail.trim();
         }
 
-        await db.updateEntityRecommendability(entityId, updateFields);
+        await db.updateEntityData(entityId, updateFields);
 
         logger.info('UPDATE_SUCCESS', `Entity ${entityId} updated successfully`, {
             legalName: legalName.trim(),

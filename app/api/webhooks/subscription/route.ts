@@ -3,10 +3,15 @@ import Stripe from 'stripe';
 import { Resend } from 'resend';
 import { db } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
+import { buildPaymentFailedEmail, buildCancellationEmail } from '@/lib/email-templates';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
+// Bug 3 fix: conditional Resend init (no placeholder fallback)
+const resend = process.env.RESEND_API_KEY
+    ? new Resend(process.env.RESEND_API_KEY)
+    : null;
 
 const HANDLED_EVENTS = new Set([
     'customer.subscription.updated',
@@ -14,60 +19,12 @@ const HANDLED_EVENTS = new Set([
     'customer.subscription.deleted',
 ]);
 
-// --- EMAIL TEMPLATES ---
-
-function buildPaymentFailedEmail(entityName: string, portalUrl: string): string {
-    return `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
-    <div style="background: linear-gradient(135deg, #991b1b 0%, #CE6A6B 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 22px;">&#9888;&#65039; Paiement échoué</h1>
-        <p style="color: #fecaca; margin: 10px 0 0; font-size: 14px;">Votre abonnement AYA nécessite une action</p>
-    </div>
-    <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
-        <p>Bonjour,</p>
-        <p>Le dernier paiement pour l'abonnement AYA de <strong>${entityName}</strong> a échoué.</p>
-        <p>Sans action de votre part, votre inscription au registre AYA sera suspendue et les IA ne pourront plus consulter votre fiche certifiée.</p>
-        <div style="text-align: center; margin: 25px 0;">
-            <a href="${portalUrl}" style="background: #4A919E; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Mettre à jour mon moyen de paiement</a>
-        </div>
-        <p style="font-size: 13px; color: #6b7280;">Si vous avez des questions, répondez directement à cet email.</p>
-    </div>
-    <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
-        <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Rendez votre entreprise visible par les IA
-        </p>
-    </div>
-</div>`;
-}
-
-function buildCancelledEmail(entityName: string, diagnosticUrl: string): string {
-    return `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
-    <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 22px;">Abonnement AYA annulé</h1>
-        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Nous sommes tristes de vous voir partir</p>
-    </div>
-    <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
-        <p>Bonjour,</p>
-        <p>Votre abonnement AYA pour <strong>${entityName}</strong> a été annulé.</p>
-        <p>Votre fiche sera retirée du registre certifié AYA. Les assistants IA (ChatGPT, Claude, Gemini, Perplexity...) ne pourront plus consulter votre certificat AYA.</p>
-        <p>Vous pouvez vous réinscrire à tout moment en relançant un diagnostic :</p>
-        <div style="text-align: center; margin: 25px 0;">
-            <a href="${diagnosticUrl}" style="background: #4A919E; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 15px;">Relancer un diagnostic</a>
-        </div>
-        <p style="font-size: 13px; color: #6b7280;">Merci d'avoir fait partie du registre AYA.</p>
-    </div>
-    <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
-        <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Rendez votre entreprise visible par les IA
-        </p>
-    </div>
-</div>`;
-}
-
 // --- MAIN HANDLER ---
 
 export async function POST(req: NextRequest) {
     const stripeKey = process.env.STRIPE_SECRET_KEY;
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    // Bug 2 fix: dedicated subscription webhook secret with fallback
+    const webhookSecret = process.env.STRIPE_SUBSCRIPTION_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET || '';
     let stripe: Stripe | null = null;
 
     if (stripeKey) stripe = new Stripe(stripeKey);
@@ -157,8 +114,9 @@ export async function POST(req: NextRequest) {
             });
 
             // Send payment failed email
-            const customerEmail = entity.email || invoice.customer_email;
-            if (customerEmail) {
+            // Bug 11 fix: use entity email only (no Stripe customer cast)
+            const customerEmail = entity.contact_email || entity.email || invoice.customer_email;
+            if (customerEmail && resend) {
                 const portalUrl = 'https://ai-visionary.com/diagnostic';
                 try {
                     await resend.emails.send({
@@ -175,8 +133,10 @@ export async function POST(req: NextRequest) {
                     const emailMessage = emailErr instanceof Error ? emailErr.message : 'Unknown email error';
                     logger.error('PAYMENT_FAILED_EMAIL_ERROR', `Failed to send payment failed email: ${emailMessage}`, { entityId: entity.entity_id });
                 }
-            } else {
+            } else if (!customerEmail) {
                 logger.warn('PAYMENT_FAILED_NO_EMAIL', `No email for entity ${entity.entity_id}, cannot send payment failed notification`, { entityId: entity.entity_id });
+            } else if (!resend) {
+                logger.warn('PAYMENT_FAILED_NO_RESEND', 'Resend not configured, skipping payment failed email', { entityId: entity.entity_id });
             }
 
             return NextResponse.json({ received: true, action: 'payment_failed_processed' });
@@ -201,15 +161,16 @@ export async function POST(req: NextRequest) {
             });
 
             // Send cancellation email
-            const customerEmail = entity.email || (subscription.customer as Stripe.Customer)?.email;
-            if (customerEmail) {
+            // Bug 11 fix: use entity email only (no Stripe customer cast)
+            const customerEmail = entity.contact_email || entity.email;
+            if (customerEmail && resend) {
                 const diagnosticUrl = 'https://ai-visionary.com/diagnostic';
                 try {
                     await resend.emails.send({
                         from: 'registry@ai-visionary.com',
                         to: customerEmail,
                         subject: `Abonnement AYA annulé — ${entity.display_name || 'votre entreprise'}`,
-                        html: buildCancelledEmail(
+                        html: buildCancellationEmail(
                             entity.display_name || 'votre entreprise',
                             diagnosticUrl,
                         ),
@@ -219,8 +180,10 @@ export async function POST(req: NextRequest) {
                     const emailMessage = emailErr instanceof Error ? emailErr.message : 'Unknown email error';
                     logger.error('SUB_CANCELLED_EMAIL_ERROR', `Failed to send cancellation email: ${emailMessage}`, { entityId: entity.entity_id });
                 }
-            } else {
+            } else if (!customerEmail) {
                 logger.warn('SUB_CANCELLED_NO_EMAIL', `No email for entity ${entity.entity_id}, cannot send cancellation notification`, { entityId: entity.entity_id });
+            } else if (!resend) {
+                logger.warn('SUB_CANCELLED_NO_RESEND', 'Resend not configured, skipping cancellation email', { entityId: entity.entity_id });
             }
 
             logger.info('SUB_DELETED_OK', `Entity ${entity.entity_id} marked as canceled, payment_completed=false`);
