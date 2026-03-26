@@ -98,14 +98,24 @@ Companies:
 
 Return ONLY the JSON array:"""
 
-    try:
-        resp = model.generate_content(prompt)
-        text = resp.text.strip()
-        match = re.search(r'\[.*\]', text, re.DOTALL)
-        results = json.loads(match.group()) if match else [None] * len(batch)
-    except Exception as ex:
-        print(f"  ERROR batch {bn}: {ex}", flush=True)
-        time.sleep(5)
+    results = None
+    for attempt in range(3):
+        try:
+            resp = model.generate_content(prompt)
+            text = resp.text.strip()
+            match = re.search(r'\[.*\]', text, re.DOTALL)
+            results = json.loads(match.group()) if match else [None] * len(batch)
+            break
+        except Exception as ex:
+            if "429" in str(ex) and attempt < 2:
+                wait = 30 * (attempt + 1)
+                print(f"  ⏳ Rate limit 429 — retry in {wait}s (attempt {attempt+1}/3)", flush=True)
+                time.sleep(wait)
+                continue
+            print(f"  ERROR batch {bn}: {ex}", flush=True)
+            time.sleep(5)
+            break
+    if not results:
         continue
 
     for entity, kws in zip(batch, results):
@@ -114,22 +124,15 @@ Return ONLY the JSON array:"""
             continue
         eid = entity["entity_id"]
         try:
-            full = sb.table("aya_registry").select("*").eq("entity_id", eid).single().execute()
-            if not full.data:
-                failed += 1
-                continue
-            row = full.data
-            payload = row.get("asr_payload") or {}
+            payload = entity.get("asr_payload") or {}
             if isinstance(payload, str):
                 try: payload = json.loads(payload)
                 except: payload = {}
             payload.setdefault("enrichment", {})["gemini_keywords"] = kws
-            sb.table("aya_registry").delete().eq("entity_id", eid).execute()
-            new_row = {k: v for k, v in row.items() if k != "website_normalized"}
-            new_row["asr_payload"] = payload
-            sb.table("aya_registry").insert(new_row).execute()
+            sb.table("aya_registry").update({"asr_payload": payload}).eq("entity_id", eid).execute()
             done += 1
         except Exception as ex:
+            print(f"  FAIL update {eid}: {ex}", flush=True)
             failed += 1
 
     sample = results[0][:4] if results and results[0] else "?"

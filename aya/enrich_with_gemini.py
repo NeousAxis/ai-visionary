@@ -65,17 +65,23 @@ Companies:
 
 Return ONLY a JSON array of strings. Example: ["Desc 1.", "Desc 2."]"""
 
-    try:
-        response = model.generate_content(prompt)
-        text = response.text.strip()
-        match = re.search(r'\[.*\]', text, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        return [None] * len(entities)
-    except Exception as ex:
-        print(f"  ERROR Gemini: {ex}")
-        time.sleep(5)
-        return [None] * len(entities)
+    for attempt in range(3):
+        try:
+            response = model.generate_content(prompt)
+            text = response.text.strip()
+            match = re.search(r'\[.*\]', text, re.DOTALL)
+            if match:
+                return json.loads(match.group())
+            return [None] * len(entities)
+        except Exception as ex:
+            if "429" in str(ex) and attempt < 2:
+                wait = 30 * (attempt + 1)
+                print(f"  ⏳ Rate limit 429 — retry in {wait}s (attempt {attempt+1}/3)")
+                time.sleep(wait)
+                continue
+            print(f"  ERROR Gemini: {ex}")
+            time.sleep(5)
+            return [None] * len(entities)
 
 
 def main():
