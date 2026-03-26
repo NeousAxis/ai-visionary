@@ -7,6 +7,7 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { db } from '@/lib/db';
 import { sanitizeExtract } from '@/lib/ayo-generators';
 import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
+import { verifyUpdateToken } from '@/lib/update-token';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -31,12 +32,18 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { entityId } = body;
+        const { entityId, token } = body;
 
         // --- Validate ---
         if (!entityId || typeof entityId !== 'string') {
             logger.warn('REGEN_MISSING_ID', 'Missing entityId');
             return NextResponse.json({ error: 'entityId requis' }, { status: 400 });
+        }
+
+        // --- Verify auth token (Bug 2&3 fix) ---
+        if (!token || !verifyUpdateToken(token, entityId)) {
+            logger.warn('REGEN_INVALID_TOKEN', `Invalid or expired token for entity ${entityId}`);
+            return NextResponse.json({ error: 'Token invalide ou expire. Rechargez la page.' }, { status: 401 });
         }
 
         logger.info('REGEN_START', `Regenerating files for entity ${entityId}`);

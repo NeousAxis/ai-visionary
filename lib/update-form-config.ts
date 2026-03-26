@@ -249,14 +249,6 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         maxLength: 200,
         hint: "Fourchette ou modèle de prix (pas de montants exacts obligatoires).",
       },
-      {
-        name: "description",
-        label: "Description de votre activité",
-        type: "textarea",
-        placeholder: "Décrivez en quelques phrases ce que fait votre entreprise...",
-        maxLength: 1000,
-        hint: "Cette description sera utilisée pour les IA qui vous recommandent.",
-      },
     ],
   },
 

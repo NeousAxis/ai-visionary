@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import type { BlockDefinition } from '@/lib/update-form-config';
-import { SECTOR_OPTIONS, COUNTRY_OPTIONS } from '@/lib/update-form-config';
 
 interface UpdateFormProps {
   entityId: string;
@@ -12,6 +11,7 @@ interface UpdateFormProps {
   currentScore: number | null;
   initialValues: Record<string, Record<string, any>>;
   blockDefinitions: BlockDefinition[];
+  updateToken: string;
 }
 
 interface SubmitResult {
@@ -28,12 +28,16 @@ export default function UpdateFormClient({
   currentScore,
   initialValues,
   blockDefinitions,
+  updateToken,
 }: UpdateFormProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>(initialValues);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState<SubmitResult | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
+  const [regenSuccess, setRegenSuccess] = useState(false);
+  const [regenError, setRegenError] = useState('');
 
   // ---- helpers ----
 
@@ -57,10 +61,36 @@ export default function UpdateFormClient({
     const vals = formData[block.key] || {};
     return block.fields.filter(f => {
       const v = vals[f.name];
-      if (v === undefined || v === null || v === '' || v === false) return false;
+      if (v === undefined || v === null) return false;
+      // Bug 8 fix: for boolean fields, false IS a valid filled value
+      if (f.type === 'boolean') return typeof v === 'boolean';
+      if (v === '' || v === false) return false;
       if (Array.isArray(v) && v.length === 0) return false;
       return true;
     }).length;
+  };
+
+  /** Handle ASR file regeneration (Bug 1 fix: proper POST instead of GET redirect) */
+  const handleRegenerate = async () => {
+    setRegenerating(true);
+    setRegenError('');
+    try {
+      const res = await fetch('/api/regenerate-files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entityId, token: updateToken }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRegenSuccess(true);
+      } else {
+        setRegenError(data.error || 'Erreur lors de la regeneration');
+      }
+    } catch {
+      setRegenError('Erreur reseau');
+    } finally {
+      setRegenerating(false);
+    }
   };
 
   // ---- submit ----
@@ -92,7 +122,7 @@ export default function UpdateFormClient({
       const res = await fetch('/api/update-entity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entityId, blocks }),
+        body: JSON.stringify({ entityId, blocks, token: updateToken }),
       });
 
       const data = await res.json().catch(() => ({ error: 'Erreur inconnue' }));
@@ -188,24 +218,33 @@ export default function UpdateFormClient({
             Voir mon certificat AYA
           </a>
 
-          {isPro && (
+          {isPro && !regenSuccess && (
             <button
-              onClick={() => {
-                window.location.href = `/api/regenerate-asr?entityId=${entityId}`;
-              }}
+              onClick={handleRegenerate}
+              disabled={regenerating}
               style={{
-                background: '#212E53',
+                background: regenerating ? '#9ca3af' : '#212E53',
                 color: 'white',
                 padding: '12px 28px',
                 borderRadius: '8px',
                 border: 'none',
                 fontWeight: 'bold',
                 fontSize: '0.95rem',
-                cursor: 'pointer',
+                cursor: regenerating ? 'wait' : 'pointer',
               }}
             >
-              Regenerer mes fichiers ASR
+              {regenerating ? 'Regeneration en cours...' : 'Regenerer mes fichiers ASR'}
             </button>
+          )}
+          {regenSuccess && (
+            <p style={{ color: '#16a34a', fontSize: '0.9rem', fontWeight: '600' }}>
+              Fichiers regeneres et envoyes par email !
+            </p>
+          )}
+          {regenError && (
+            <p style={{ color: '#991b1b', fontSize: '0.9rem' }}>
+              {regenError}
+            </p>
           )}
         </div>
       </div>
@@ -407,11 +446,7 @@ export default function UpdateFormClient({
 
           // -- select (sector or country) --
           if (field.type === 'select') {
-            const options = field.options
-              ? field.options
-              : field.name === 'country'
-                ? COUNTRY_OPTIONS.map(c => ({ value: c.value, label: c.label }))
-                : SECTOR_OPTIONS.map(s => ({ value: s.value, label: s.label }));
+            const options = field.options ?? [];
 
             return (
               <div key={field.name} style={fieldWrapStyle}>

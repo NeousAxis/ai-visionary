@@ -56,18 +56,22 @@ export function formDataToAyoExtract(
       const rawValue = formValues[fieldDef.name];
       if (rawValue === undefined || rawValue === null) continue;
 
-      // Determine if value is "empty" (skip if so)
-      if (isEmptyValue(rawValue)) continue;
+      // Bug 7 fix: check emptiness with field type awareness
+      if (isEmptyValue(rawValue, fieldDef.type)) continue;
 
       const fieldKey = fieldDef.name as keyof typeof targetBlock;
       const existingField = targetBlock[fieldKey] as
         | FieldNode<unknown>
         | undefined;
 
+      // Bug 5 fix: determine q value based on content quality
+      const coerced = coerceValue(rawValue, fieldDef.type);
+      const q = determineFormQuality(coerced, fieldDef.type);
+
       // Build the field node
       const node: FieldNode<unknown> = {
-        value: coerceValue(rawValue, fieldDef.type),
-        q: 1 as Quality, // Client-declared data = q=1
+        value: coerced,
+        q,
         evidence: existingField?.evidence ?? [],
       };
 
@@ -169,8 +173,15 @@ function isFieldNode(val: unknown): boolean {
   return "value" in (val as Record<string, unknown>);
 }
 
-function isEmptyValue(val: unknown): boolean {
-  if (val === "" || val === null || val === undefined) return true;
+/**
+ * Bug 7 fix: field-type-aware emptiness check.
+ * For boolean fields, false is a valid value (not empty).
+ */
+function isEmptyValue(val: unknown, fieldType?: string): boolean {
+  if (val === null || val === undefined) return true;
+  // Boolean fields: false is a valid filled value, not empty
+  if (fieldType === "boolean") return typeof val !== "boolean";
+  if (val === "" || val === false) return true;
   if (Array.isArray(val) && val.length === 0) return true;
   if (
     Array.isArray(val) &&
@@ -178,6 +189,25 @@ function isEmptyValue(val: unknown): boolean {
   )
     return true;
   return false;
+}
+
+/**
+ * Bug 5 fix: determine quality value based on content type and richness.
+ * - Boolean fields: q=0.5 (self-declared, not verified)
+ * - Text fields < 10 chars: q=0.5
+ * - Text fields >= 10 chars: q=1
+ * - Array fields with >= 2 items: q=1, else q=0.5
+ * - Date fields: q=1
+ */
+function determineFormQuality(
+  value: string | string[] | boolean,
+  fieldType: string
+): Quality {
+  if (typeof value === "boolean") return 0.5;
+  if (fieldType === "date") return 1;
+  if (Array.isArray(value)) return value.length >= 2 ? 1 : 0.5;
+  if (typeof value === "string") return value.trim().length >= 10 ? 1 : 0.5;
+  return 0.5;
 }
 
 function coerceValue(

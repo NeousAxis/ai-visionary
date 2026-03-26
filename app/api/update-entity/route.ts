@@ -3,6 +3,7 @@ import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { db } from '@/lib/db';
 import { computeAioScore, type AyoExtract, type Quality } from '@/lib/aio-score-engine';
+import { verifyUpdateToken } from '@/lib/update-token';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,22 @@ const VALID_BLOCKS = [
     'identite', 'offre', 'processus_methodes', 'engagements_conformite',
     'indicateurs', 'contenus_pedagogiques', 'structure_technique',
 ] as const;
+
+/**
+ * Determine quality value based on the data type and content (Bug 5 fix).
+ * - Boolean fields: q=0.5 (self-declared, not verified)
+ * - Text fields < 10 chars: q=0.5
+ * - Text fields >= 10 chars: q=1
+ * - Array fields with >= 2 items: q=1, else q=0.5
+ * - Date fields: q=1
+ */
+function determineQuality(value: unknown, fieldType?: string): Quality {
+    if (typeof value === 'boolean') return 0.5;
+    if (fieldType === 'date') return 1;
+    if (Array.isArray(value)) return value.length >= 2 ? 1 : 0.5;
+    if (typeof value === 'string') return value.trim().length >= 10 ? 1 : 0.5;
+    return 0.5;
+}
 
 /**
  * Convert form blocks into {value, q, evidence} FieldNode format
@@ -64,8 +81,12 @@ function mergeBlocksIntoPayload(
             // Skip empty arrays
             if (Array.isArray(rawValue) && rawValue.length === 0) continue;
 
-            // Convert to FieldNode format with q=1
-            mergedBlock[field] = toFieldNode(rawValue);
+            // Bug 7 fix: do NOT skip false booleans — false is a valid value
+            // (the checks above already handle null/undefined/empty string)
+
+            // Bug 5 fix: determine q value based on content quality
+            const q = determineQuality(rawValue);
+            mergedBlock[field] = toFieldNode(rawValue, q);
         }
 
         merged[blockName] = mergedBlock;
@@ -186,12 +207,18 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { entityId, blocks } = body;
+        const { entityId, blocks, token } = body;
 
         // --- Validate entityId ---
         if (!entityId || typeof entityId !== 'string') {
             logger.warn('UPDATE_MISSING_ID', 'Missing entityId in request body');
             return NextResponse.json({ error: 'entityId requis' }, { status: 400 });
+        }
+
+        // --- Verify auth token (Bug 2&3 fix) ---
+        if (!token || !verifyUpdateToken(token, entityId)) {
+            logger.warn('UPDATE_INVALID_TOKEN', `Invalid or expired token for entity ${entityId}`);
+            return NextResponse.json({ error: 'Token invalide ou expire. Rechargez la page.' }, { status: 401 });
         }
 
         // --- Validate blocks object ---
@@ -236,6 +263,16 @@ export async function POST(req: NextRequest) {
         const oldScore = entity.asr_score || 0;
 
         const mergedData = mergeBlocksIntoPayload(existingData, blocks);
+
+        // Bug 6 fix: preserve existing structure_technique scan values
+        // (has_sitemap, mobile_optimized, has_jsonld, has_asr come from scanner, not form)
+        const existingTech = existingData.structure_technique || {};
+        if (!mergedData.structure_technique) mergedData.structure_technique = {};
+        for (const scanField of ['has_sitemap', 'mobile_optimized', 'has_jsonld', 'has_asr'] as const) {
+            if (!mergedData.structure_technique[scanField] && existingTech[scanField]) {
+                mergedData.structure_technique[scanField] = existingTech[scanField];
+            }
+        }
 
         // --- Recalculate AIO score ---
         const extract = buildExtractFromData(mergedData, entity);

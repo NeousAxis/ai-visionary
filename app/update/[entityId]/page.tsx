@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import UpdateFormClient from './UpdateFormClient';
 import { BLOCK_DEFINITIONS } from '@/lib/update-form-config';
 import { extractFormValues } from '@/lib/form-to-extract';
+import { generateUpdateToken } from '@/lib/update-token';
 
 export const revalidate = 0;
 
@@ -37,16 +38,26 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
   // Extract the raw AyoExtract.fields from asr_payload.data
   const rawPayloadData = entity.asr_payload?.data?.fields ?? entity.asr_payload?.data ?? undefined;
 
-  // Build initial form values from the entity data
-  const initialValues = extractFormValues(rawPayloadData as Record<string, unknown> | undefined);
+  // Bug 11 fix: use extractFormValues with entity overrides (single source of truth)
+  const initialValues = extractFormValues(
+    rawPayloadData as Record<string, unknown> | undefined,
+    {
+      display_name: entity.display_name || undefined,
+      legal_name: entity.legal_name || undefined,
+      contact_email: entity.contact_email || undefined,
+      country_legal: entity.country_legal || undefined,
+      sector_macro: entity.sector_macro || undefined,
+    }
+  );
 
-  // Inject entity-level fallbacks for fields that may not be in asr_payload
-  if (!initialValues.identite) initialValues.identite = {};
-  if (!initialValues.identite.name) initialValues.identite.name = entity.display_name || '';
-  if (!initialValues.identite.legal_name) initialValues.identite.legal_name = entity.legal_name || '';
-  if (!initialValues.identite.contact_email) initialValues.identite.contact_email = entity.contact_email || '';
-  if (!initialValues.identite.country) initialValues.identite.country = entity.country_legal || '';
-  if (!initialValues.identite.business_type) initialValues.identite.business_type = entity.sector_macro || '';
+  // Bug 9 fix: derive pack_type from available data
+  const packType = (entity as any).pack_type
+    || ((entity as any).stripe_product_id?.includes('PRO') ? 'PRO'
+      : entity.payment_completed ? 'AYA_SUB'
+      : null);
+
+  // Generate signed token for auth (Bug 2&3)
+  const updateToken = generateUpdateToken(entity.entity_id);
 
   return (
     <main style={{ minHeight: '100vh', background: '#fafafa' }}>
@@ -80,11 +91,12 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
           <UpdateFormClient
             entityId={entity.entity_id}
             entityName={name}
-            packType={(entity as any).pack_type || null}
+            packType={packType}
             entityEmail={entity.contact_email || ''}
             currentScore={entity.asr_score ?? null}
             initialValues={initialValues}
             blockDefinitions={BLOCK_DEFINITIONS}
+            updateToken={updateToken}
           />
         </div>
       </section>

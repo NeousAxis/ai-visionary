@@ -8,6 +8,9 @@
     },
     "app/api/regenerate-files/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/update-entity/route.ts": {
+      "maxDuration": 30
     }
   },
   "crons": [
