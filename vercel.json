@@ -5,6 +5,9 @@
     },
     "app/api/chat/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/regenerate-files/route.ts": {
+      "maxDuration": 60
     }
   },
   "crons": [

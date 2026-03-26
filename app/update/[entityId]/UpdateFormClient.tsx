@@ -1,243 +1,590 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import type { BlockDefinition } from '@/lib/update-form-config';
+import { SECTOR_OPTIONS, COUNTRY_OPTIONS } from '@/lib/update-form-config';
 
-interface UpdateFormClientProps {
-    currentValues: {
-        entityId: string;
-        legalName: string;
-        sector: string;
-        services: string;
-        targetAudience: string;
-        country: string;
-        contactEmail: string;
-    };
-    sectorOptions: string[];
-    countryOptions: { code: string; label: string }[];
+interface UpdateFormProps {
+  entityId: string;
+  entityName: string;
+  packType: string | null;
+  entityEmail: string;
+  currentScore: number | null;
+  initialValues: Record<string, Record<string, any>>;
+  blockDefinitions: BlockDefinition[];
 }
 
-export default function UpdateFormClient({ currentValues, sectorOptions, countryOptions }: UpdateFormClientProps) {
-    const [formData, setFormData] = useState(currentValues);
-    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-    const [errorMessage, setErrorMessage] = useState('');
+interface SubmitResult {
+  newScore: number;
+  oldScore: number;
+  entityId: string;
+}
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    };
+export default function UpdateFormClient({
+  entityId,
+  entityName,
+  packType,
+  entityEmail,
+  currentScore,
+  initialValues,
+  blockDefinitions,
+}: UpdateFormProps) {
+  const [activeTab, setActiveTab] = useState(0);
+  const [formData, setFormData] = useState<Record<string, Record<string, any>>>(initialValues);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [result, setResult] = useState<SubmitResult | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setStatus('loading');
-        setErrorMessage('');
+  // ---- helpers ----
 
-        try {
-            const res = await fetch('/api/update-entity', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+  const getBlockValue = useCallback(
+    (blockKey: string, fieldName: string) => formData[blockKey]?.[fieldName] ?? '',
+    [formData],
+  );
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({ error: 'Erreur inconnue' }));
-                throw new Error(data.error || `Erreur ${res.status}`);
-            }
+  const setBlockValue = useCallback(
+    (blockKey: string, fieldName: string, value: unknown) => {
+      setFormData(prev => ({
+        ...prev,
+        [blockKey]: { ...prev[blockKey], [fieldName]: value },
+      }));
+    },
+    [],
+  );
 
-            setStatus('success');
-        } catch (err: any) {
-            setStatus('error');
-            setErrorMessage(err.message || 'Une erreur est survenue.');
+  /** Count how many fields in a block have a non-empty value */
+  const filledCount = (block: BlockDefinition): number => {
+    const vals = formData[block.key] || {};
+    return block.fields.filter(f => {
+      const v = vals[f.name];
+      if (v === undefined || v === null || v === '' || v === false) return false;
+      if (Array.isArray(v) && v.length === 0) return false;
+      return true;
+    }).length;
+  };
+
+  // ---- submit ----
+
+  const handleSubmit = async () => {
+    setStatus('loading');
+    setErrorMessage('');
+
+    // Build payload: convert array textareas back to arrays
+    const blocks: Record<string, Record<string, unknown>> = {};
+    for (const block of blockDefinitions) {
+      const vals = formData[block.key] || {};
+      const cleaned: Record<string, unknown> = {};
+      for (const field of block.fields) {
+        if (field.type === 'readonly') continue;
+        let v = vals[field.name];
+        if (field.type === 'array' && typeof v === 'string') {
+          v = v
+            .split('\n')
+            .map((s: string) => s.trim())
+            .filter(Boolean);
         }
-    };
-
-    if (status === 'success') {
-        return (
-            <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>&#10003;</div>
-                <h2 style={{ color: 'var(--text-main)', marginBottom: '0.5rem' }}>Donnees mises a jour</h2>
-                <p style={{ color: 'var(--text-body)', marginBottom: '1.5rem' }}>
-                    Vos informations ont ete enregistrees avec succes. Votre certificat AYA sera mis a jour sous peu.
-                </p>
-                <a
-                    href={`/aya/e/${currentValues.entityId}`}
-                    style={{
-                        display: 'inline-block',
-                        background: 'var(--primary-color)',
-                        color: 'white',
-                        padding: '12px 24px',
-                        borderRadius: 'var(--radius-sm)',
-                        textDecoration: 'none',
-                        fontWeight: 'bold',
-                    }}
-                >
-                    Voir mon certificat AYA
-                </a>
-            </div>
-        );
+        cleaned[field.name] = v;
+      }
+      blocks[block.key] = cleaned;
     }
 
-    const inputStyle: React.CSSProperties = {
-        width: '100%',
-        padding: '10px 14px',
-        borderRadius: 'var(--radius-sm)',
-        border: '1px solid var(--border-light)',
-        fontSize: '0.95rem',
-        color: 'var(--text-main)',
-        background: 'var(--bg-main)',
-        outline: 'none',
-        boxSizing: 'border-box',
-    };
+    try {
+      const res = await fetch('/api/update-entity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entityId, blocks }),
+      });
 
-    const labelStyle: React.CSSProperties = {
-        display: 'block',
-        fontSize: '0.85rem',
-        fontWeight: '600',
-        color: 'var(--text-muted)',
-        marginBottom: '6px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-    };
+      const data = await res.json().catch(() => ({ error: 'Erreur inconnue' }));
 
-    const fieldStyle: React.CSSProperties = {
-        marginBottom: '1.25rem',
-    };
+      if (!res.ok) {
+        throw new Error(data.error || `Erreur ${res.status}`);
+      }
+
+      setResult({
+        newScore: data.newScore ?? data.score ?? 0,
+        oldScore: currentScore ?? 0,
+        entityId,
+      });
+      setStatus('success');
+    } catch (err: unknown) {
+      setStatus('error');
+      setErrorMessage(err instanceof Error ? err.message : 'Une erreur est survenue.');
+    }
+  };
+
+  // ---- success panel ----
+
+  if (status === 'success' && result) {
+    const delta = result.newScore - result.oldScore;
+    const deltaColor = delta > 0 ? '#16a34a' : delta < 0 ? '#CE6A6B' : '#4A919E';
+    const isPro = packType === 'pro' || packType === 'PRO';
 
     return (
-        <div className="card">
-            <h3 style={{
-                fontSize: '1.2rem',
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                marginBottom: '1.5rem',
-                borderBottom: '1px solid var(--border-light)',
-                paddingBottom: '1rem',
+      <div style={{
+        background: '#fff',
+        borderRadius: '12px',
+        border: '1px solid #e5e7eb',
+        padding: '3rem 2rem',
+        textAlign: 'center',
+        maxWidth: '600px',
+        margin: '0 auto',
+      }}>
+        <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>&#10003;</div>
+        <h2 style={{ color: '#212E53', fontSize: '1.5rem', marginBottom: '0.75rem' }}>
+          Donnees mises a jour !
+        </h2>
+
+        {/* Score comparison */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1rem',
+          margin: '1.5rem 0',
+          flexWrap: 'wrap',
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ancien score</div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#9ca3af' }}>{result.oldScore}/100</div>
+          </div>
+          <div style={{ fontSize: '1.5rem', color: deltaColor }}>&#8594;</div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Nouveau score</div>
+            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4A919E' }}>{result.newScore}/100</div>
+          </div>
+          {delta !== 0 && (
+            <div style={{
+              background: delta > 0 ? '#dcfce7' : '#fee2e2',
+              color: deltaColor,
+              padding: '4px 12px',
+              borderRadius: '999px',
+              fontWeight: 'bold',
+              fontSize: '0.9rem',
             }}>
-                Mettre a jour vos donnees
-            </h3>
-
-            <form onSubmit={handleSubmit}>
-                <div style={fieldStyle}>
-                    <label htmlFor="legalName" style={labelStyle}>Nom legal</label>
-                    <input
-                        type="text"
-                        id="legalName"
-                        name="legalName"
-                        value={formData.legalName}
-                        onChange={handleChange}
-                        required
-                        style={inputStyle}
-                        placeholder="Nom officiel de l'entite"
-                    />
-                </div>
-
-                <div style={fieldStyle}>
-                    <label htmlFor="sector" style={labelStyle}>Secteur d&apos;activite</label>
-                    <select
-                        id="sector"
-                        name="sector"
-                        value={formData.sector}
-                        onChange={handleChange}
-                        style={inputStyle}
-                    >
-                        {sectorOptions.map(s => (
-                            <option key={s} value={s}>{s}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div style={fieldStyle}>
-                    <label htmlFor="services" style={labelStyle}>Services principaux</label>
-                    <textarea
-                        id="services"
-                        name="services"
-                        value={formData.services}
-                        onChange={handleChange}
-                        rows={3}
-                        style={{ ...inputStyle, resize: 'vertical' }}
-                        placeholder="Ex: Consulting, Developpement web, Formation IA (separes par des virgules)"
-                    />
-                </div>
-
-                <div style={fieldStyle}>
-                    <label htmlFor="targetAudience" style={labelStyle}>Public cible</label>
-                    <textarea
-                        id="targetAudience"
-                        name="targetAudience"
-                        value={formData.targetAudience}
-                        onChange={handleChange}
-                        rows={2}
-                        style={{ ...inputStyle, resize: 'vertical' }}
-                        placeholder="Ex: PME, startups, grands comptes"
-                    />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
-                    <div>
-                        <label htmlFor="country" style={labelStyle}>Pays</label>
-                        <select
-                            id="country"
-                            name="country"
-                            value={formData.country}
-                            onChange={handleChange}
-                            style={inputStyle}
-                        >
-                            <option value="">-- Selectionner --</option>
-                            {countryOptions.map(c => (
-                                <option key={c.code} value={c.code}>{c.label}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="contactEmail" style={labelStyle}>Email de contact</label>
-                        <input
-                            type="email"
-                            id="contactEmail"
-                            name="contactEmail"
-                            value={formData.contactEmail}
-                            onChange={handleChange}
-                            style={inputStyle}
-                            placeholder="contact@exemple.com"
-                        />
-                    </div>
-                </div>
-
-                {status === 'error' && (
-                    <div style={{
-                        background: '#FEE2E2',
-                        border: '1px solid #FECACA',
-                        color: '#991B1B',
-                        padding: '10px 14px',
-                        borderRadius: 'var(--radius-sm)',
-                        marginBottom: '1rem',
-                        fontSize: '0.9rem',
-                    }}>
-                        {errorMessage}
-                    </div>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={status === 'loading'}
-                    style={{
-                        width: '100%',
-                        padding: '14px',
-                        background: status === 'loading' ? 'var(--text-muted)' : 'var(--primary-color)',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 'var(--radius-sm)',
-                        fontSize: '1rem',
-                        fontWeight: 'bold',
-                        cursor: status === 'loading' ? 'wait' : 'pointer',
-                        transition: 'background 0.2s',
-                    }}
-                >
-                    {status === 'loading' ? 'Enregistrement...' : 'Mettre a jour mes donnees'}
-                </button>
-
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '1rem', textAlign: 'center', fontStyle: 'italic' }}>
-                    Vos donnees seront mises a jour dans le registre AYA et votre score AIO sera recalcule.
-                </p>
-            </form>
+              {delta > 0 ? '+' : ''}{delta}
+            </div>
+          )}
         </div>
+
+        <p style={{ color: '#6b7280', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+          Votre certificat AYA et vos donnees dans le registre ont ete mis a jour.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+          <a
+            href={`/aya/e/${entityId}`}
+            style={{
+              display: 'inline-block',
+              background: '#4A919E',
+              color: 'white',
+              padding: '12px 28px',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontWeight: 'bold',
+              fontSize: '0.95rem',
+            }}
+          >
+            Voir mon certificat AYA
+          </a>
+
+          {isPro && (
+            <button
+              onClick={() => {
+                window.location.href = `/api/regenerate-asr?entityId=${entityId}`;
+              }}
+              style={{
+                background: '#212E53',
+                color: 'white',
+                padding: '12px 28px',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 'bold',
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+              }}
+            >
+              Regenerer mes fichiers ASR
+            </button>
+          )}
+        </div>
+      </div>
     );
+  }
+
+  // ---- styles ----
+
+  const tabBarStyle: React.CSSProperties = {
+    display: 'flex',
+    overflowX: 'auto',
+    gap: '4px',
+    borderBottom: '2px solid #e5e7eb',
+    marginBottom: '1.5rem',
+    paddingBottom: '0',
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: '8px',
+    border: '1px solid #e5e7eb',
+    fontSize: '0.95rem',
+    color: '#212E53',
+    background: '#fff',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    color: '#6b7280',
+    marginBottom: '6px',
+  };
+
+  const hintStyle: React.CSSProperties = {
+    fontSize: '0.75rem',
+    color: '#9ca3af',
+    marginTop: '4px',
+    fontStyle: 'italic',
+  };
+
+  const fieldWrapStyle: React.CSSProperties = {
+    marginBottom: '1.25rem',
+  };
+
+  // ---- render ----
+
+  const currentBlock = blockDefinitions[activeTab];
+
+  return (
+    <div style={{
+      background: '#fff',
+      borderRadius: '12px',
+      border: '1px solid #e5e7eb',
+      overflow: 'hidden',
+    }}>
+      {/* Header */}
+      <div style={{
+        background: '#212E53',
+        color: 'white',
+        padding: '1.25rem 1.5rem',
+      }}>
+        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>
+          Mise a jour — {entityName}
+        </h3>
+        <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', opacity: 0.7 }}>
+          {entityEmail} {currentScore !== null && `| Score actuel : ${currentScore}/100`}
+        </p>
+      </div>
+
+      {/* Tab bar */}
+      <div style={tabBarStyle}>
+        {blockDefinitions.map((block, i) => {
+          const isActive = i === activeTab;
+          const filled = filledCount(block);
+          const total = block.fields.length;
+
+          return (
+            <button
+              key={block.key}
+              onClick={() => setActiveTab(i)}
+              style={{
+                flex: '0 0 auto',
+                padding: '10px 14px',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: isActive ? '3px solid #4A919E' : '3px solid transparent',
+                color: isActive ? '#4A919E' : '#6b7280',
+                fontWeight: isActive ? '700' : '500',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s',
+              }}
+            >
+              <span>{block.icon}</span>
+              <span>{block.title}</span>
+              <span style={{
+                background: filled === total ? '#dcfce7' : '#f3f4f6',
+                color: filled === total ? '#16a34a' : '#6b7280',
+                fontSize: '0.65rem',
+                fontWeight: '700',
+                padding: '2px 6px',
+                borderRadius: '999px',
+              }}>
+                {filled}/{total}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Block content */}
+      <div style={{ padding: '1.5rem' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '1.25rem',
+          paddingBottom: '0.75rem',
+          borderBottom: '1px solid #f3f4f6',
+        }}>
+          <div>
+            <h4 style={{ margin: 0, color: '#212E53', fontSize: '1rem' }}>
+              {currentBlock.icon} {currentBlock.title}
+            </h4>
+            <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+              Poids dans le score : {currentBlock.weight}/100
+            </span>
+          </div>
+        </div>
+
+        {currentBlock.fields.map(field => {
+          const blockKey = currentBlock.key;
+          const value = getBlockValue(blockKey, field.name);
+
+          // -- readonly --
+          if (field.type === 'readonly') {
+            return (
+              <div key={field.name} style={fieldWrapStyle}>
+                <label style={labelStyle}>{field.label}</label>
+                <div style={{
+                  ...inputStyle,
+                  background: '#f9fafb',
+                  color: '#9ca3af',
+                  cursor: 'not-allowed',
+                }}>
+                  {value ? 'Oui (detecte)' : 'Non detecte'}
+                </div>
+                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+              </div>
+            );
+          }
+
+          // -- boolean --
+          if (field.type === 'boolean') {
+            return (
+              <div key={field.name} style={{ ...fieldWrapStyle, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={() => setBlockValue(blockKey, field.name, !value)}
+                  style={{
+                    width: '44px',
+                    height: '24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: value ? '#4A919E' : '#d1d5db',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    transition: 'background 0.2s',
+                    flexShrink: 0,
+                  }}
+                >
+                  <div style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: '#fff',
+                    position: 'absolute',
+                    top: '3px',
+                    left: value ? '23px' : '3px',
+                    transition: 'left 0.2s',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                  }} />
+                </button>
+                <div>
+                  <span style={{ fontSize: '0.9rem', color: '#212E53', fontWeight: '500' }}>{field.label}</span>
+                  {field.hint && <p style={{ ...hintStyle, marginTop: '2px' }}>{field.hint}</p>}
+                </div>
+              </div>
+            );
+          }
+
+          // -- select (sector or country) --
+          if (field.type === 'select') {
+            const options = field.options
+              ? field.options
+              : field.name === 'country'
+                ? COUNTRY_OPTIONS.map(c => ({ value: c.value, label: c.label }))
+                : SECTOR_OPTIONS.map(s => ({ value: s.value, label: s.label }));
+
+            return (
+              <div key={field.name} style={fieldWrapStyle}>
+                <label style={labelStyle}>{field.label}</label>
+                <select
+                  value={value || ''}
+                  onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="">-- Selectionner --</option>
+                  {options.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+              </div>
+            );
+          }
+
+          // -- date --
+          if (field.type === 'date') {
+            return (
+              <div key={field.name} style={fieldWrapStyle}>
+                <label style={labelStyle}>{field.label}</label>
+                <input
+                  type="date"
+                  value={value || ''}
+                  onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                  style={inputStyle}
+                />
+                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+              </div>
+            );
+          }
+
+          // -- array (textarea, one item per line) --
+          if (field.type === 'array') {
+            const textValue = Array.isArray(value) ? value.join('\n') : (value || '');
+            return (
+              <div key={field.name} style={fieldWrapStyle}>
+                <label style={labelStyle}>{field.label}</label>
+                <textarea
+                  value={textValue}
+                  onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                  rows={4}
+                  style={{ ...inputStyle, resize: 'vertical' }}
+                  placeholder={field.placeholder || 'Un element par ligne'}
+                />
+                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+              </div>
+            );
+          }
+
+          // -- textarea --
+          if (field.type === 'textarea') {
+            return (
+              <div key={field.name} style={fieldWrapStyle}>
+                <label style={labelStyle}>{field.label}</label>
+                <textarea
+                  value={value || ''}
+                  onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                  rows={3}
+                  style={{ ...inputStyle, resize: 'vertical' }}
+                  placeholder={field.placeholder}
+                />
+                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+              </div>
+            );
+          }
+
+          // -- text (default) --
+          return (
+            <div key={field.name} style={fieldWrapStyle}>
+              <label style={labelStyle}>{field.label}</label>
+              <input
+                type="text"
+                value={value || ''}
+                onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                style={inputStyle}
+                placeholder={field.placeholder}
+                required={field.required}
+              />
+              {field.hint && <p style={hintStyle}>{field.hint}</p>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Footer: nav + submit */}
+      <div style={{
+        padding: '1rem 1.5rem',
+        borderTop: '1px solid #e5e7eb',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
+      }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            type="button"
+            disabled={activeTab === 0}
+            onClick={() => setActiveTab(i => i - 1)}
+            style={{
+              padding: '8px 18px',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              background: activeTab === 0 ? '#f9fafb' : '#fff',
+              color: activeTab === 0 ? '#d1d5db' : '#212E53',
+              cursor: activeTab === 0 ? 'not-allowed' : 'pointer',
+              fontWeight: '500',
+              fontSize: '0.85rem',
+            }}
+          >
+            Precedent
+          </button>
+          {activeTab < blockDefinitions.length - 1 ? (
+            <button
+              type="button"
+              onClick={() => setActiveTab(i => i + 1)}
+              style={{
+                padding: '8px 18px',
+                borderRadius: '8px',
+                border: '1px solid #4A919E',
+                background: '#4A919E',
+                color: '#fff',
+                cursor: 'pointer',
+                fontWeight: '500',
+                fontSize: '0.85rem',
+              }}
+            >
+              Suivant
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={status === 'loading'}
+              style={{
+                padding: '8px 24px',
+                borderRadius: '8px',
+                border: 'none',
+                background: status === 'loading' ? '#9ca3af' : '#212E53',
+                color: '#fff',
+                cursor: status === 'loading' ? 'wait' : 'pointer',
+                fontWeight: '700',
+                fontSize: '0.9rem',
+              }}
+            >
+              {status === 'loading' ? 'Enregistrement...' : 'Enregistrer les modifications'}
+            </button>
+          )}
+        </div>
+
+        <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+          Bloc {activeTab + 1} / {blockDefinitions.length}
+        </span>
+      </div>
+
+      {/* Error banner */}
+      {status === 'error' && (
+        <div style={{
+          background: '#FEE2E2',
+          border: '1px solid #FECACA',
+          color: '#991B1B',
+          padding: '10px 14px',
+          margin: '0 1.5rem 1rem',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+        }}>
+          {errorMessage}
+        </div>
+      )}
+    </div>
+  );
 }
