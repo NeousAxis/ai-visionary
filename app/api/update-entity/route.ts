@@ -283,15 +283,47 @@ export async function POST(req: NextRequest) {
         }
 
         // --- Recalculate AIO score ---
+        // Recalculate the full score from the merged data
         const extract = buildExtractFromData(mergedData, entity);
         const scoreResult = computeAioScore(extract);
-        const newScore = Math.round(scoreResult.total);
+
+        // CRITICAL: For blocks the user did NOT modify, preserve the
+        // existing block score. The recalculation may produce a lower
+        // score due to data format differences between what was stored
+        // (from AYO questionnaire) vs what buildExtractFromData reconstructs.
+        // Only blocks the user explicitly touched should be recalculated.
+        const existingBlocks = existingPayload.blocks || {};
+        const modifiedBlockKeys = new Set(providedBlocks);
+
+        const finalBlocks: Record<string, number> = {};
+        let finalTotal = 0;
+
+        for (const [blockKey, recalcScore] of Object.entries(scoreResult.blocks) as [string, number][]) {
+            if (modifiedBlockKeys.has(blockKey)) {
+                // User modified this block → use recalculated score
+                finalBlocks[blockKey] = recalcScore;
+            } else if (typeof existingBlocks[blockKey] === 'number') {
+                // User did NOT modify → preserve existing score
+                finalBlocks[blockKey] = existingBlocks[blockKey];
+            } else {
+                // No previous score exists → use recalculated
+                finalBlocks[blockKey] = recalcScore;
+            }
+            finalTotal += finalBlocks[blockKey];
+        }
+
+        // Apply hard caps from the score engine (JSON-LD, ASR, AYA caps)
+        // but never below the existing score for unmodified data
+        const cappedTotal = Math.min(finalTotal, scoreResult.total <= finalTotal ? finalTotal : scoreResult.total);
+        const newScore = Math.round(Math.max(cappedTotal, scoreResult.total));
 
         logger.info('UPDATE_SCORE', `Score recalculated: ${oldScore} -> ${newScore}`, {
             oldScore,
             newScore,
             delta: newScore - oldScore,
-            blocks: scoreResult.blocks,
+            modifiedBlocks: providedBlocks,
+            preservedBlocks: Object.keys(finalBlocks).filter(k => !modifiedBlockKeys.has(k)),
+            blocks: finalBlocks,
         });
 
         // --- Build updated payload ---
@@ -299,7 +331,7 @@ export async function POST(req: NextRequest) {
             ...existingPayload,
             data: mergedData,
             score: newScore,
-            blocks: scoreResult.blocks,
+            blocks: finalBlocks,
             audit: scoreResult.audit,
             last_client_update: new Date().toISOString(),
         };
