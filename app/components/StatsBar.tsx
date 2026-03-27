@@ -1,51 +1,84 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+
+function useCountUp(target: number, duration = 1400) {
+    const [value, setValue] = useState(0);
+    const rafRef = useRef<number>(0);
+
+    useEffect(() => {
+        if (target === 0) return;
+        const start = Date.now();
+        const animate = () => {
+            const elapsed = Date.now() - start;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease-out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setValue(Math.round(eased * target));
+            if (progress < 1) rafRef.current = requestAnimationFrame(animate);
+        };
+        rafRef.current = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(rafRef.current);
+    }, [target, duration]);
+
+    return value;
+}
+
+function formatNumber(n: number) {
+    if (n >= 1000) {
+        const thousands = Math.floor(n / 1000);
+        const hundreds = Math.floor((n % 1000) / 100) * 100;
+        return `${thousands}'${hundreds.toString().padStart(3, '0').slice(0, -2)}00+`;
+    }
+    return `${n}+`;
+}
 
 export default function StatsBar() {
-    const [stats, setStats] = useState<{ total: number; countries: number } | null>(null);
+    const [target, setTarget] = useState({ total: 3300, countries: 70 });
 
     useEffect(() => {
         fetch('/api/aya/stats')
             .then(r => r.json())
             .then(data => {
-                setStats({
-                    total: data.total_entities || 0,
-                    countries: data.countries?.length || 0,
+                setTarget({
+                    total: data.total_entities || 3300,
+                    countries: data.countries?.length || 70,
                 });
             })
-            .catch(() => {
-                // Fallback values if API fails
-                setStats({ total: 3300, countries: 70 });
-            });
+            .catch(() => {/* keep defaults */});
     }, []);
 
-    // Format number with Swiss apostrophe (3'300+)
-    const formatNumber = (n: number) => {
-        if (n >= 1000) {
-            const thousands = Math.floor(n / 1000);
-            const hundreds = Math.floor((n % 1000) / 100) * 100;
-            return `${thousands}'${hundreds.toString().padStart(3, '0').slice(0, -2)}00+`;
-        }
-        return `${n}+`;
-    };
+    const totalAnimated = useCountUp(target.total);
+    const countriesAnimated = useCountUp(target.countries, 1200);
 
-    const total = stats ? formatNumber(stats.total) : '...';
-    const countries = stats ? `${stats.countries}+` : '...';
+    const numStyle: React.CSSProperties = {
+        fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+        fontWeight: '900',
+        color: 'white',
+        lineHeight: '1',
+    };
+    const labelStyle: React.CSSProperties = {
+        fontSize: '0.85rem',
+        fontWeight: '700',
+        color: 'rgba(255,255,255,0.7)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.15em',
+        marginTop: '8px',
+    };
 
     return (
         <>
             <div>
-                <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>{total}</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>Entreprises index&eacute;es</div>
+                <div style={numStyle}>{formatNumber(totalAnimated)}</div>
+                <div style={labelStyle}>Entreprises index&eacute;es</div>
             </div>
             <div>
-                <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>9</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>IA compatibles</div>
+                <div style={numStyle}>9</div>
+                <div style={labelStyle}>IA compatibles</div>
             </div>
             <div>
-                <div style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', color: 'white', lineHeight: '1' }}>{countries}</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '8px' }}>Pays couverts</div>
+                <div style={numStyle}>{countriesAnimated}+</div>
+                <div style={labelStyle}>Pays couverts</div>
             </div>
         </>
     );

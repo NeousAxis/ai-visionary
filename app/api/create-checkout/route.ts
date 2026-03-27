@@ -93,8 +93,9 @@ export async function GET(req: NextRequest) {
         });
 
         return NextResponse.redirect(session.url!);
-    } catch (_e: any) {
-        return new Response('Erreur lors de la creation du paiement', { status: 500 });
+    } catch (e: any) {
+        logger.error('CHECKOUT_GET_ERROR', e?.message || 'Unknown Stripe error', { packType, email });
+        return new Response(`Erreur lors de la creation du paiement: ${e?.message || 'inconnu'}`, { status: 500 });
     }
 }
 
