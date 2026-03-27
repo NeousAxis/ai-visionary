@@ -353,11 +353,24 @@ export async function POST(req: Request) {
         let analysisData: { score: number; extract: Record<string, unknown>; url: string; blocks?: Record<string, number> };
 
         if (dbAnalysis) {
+            const extractFields = dbAnalysis.data?.fields || {};
+            let blocks = dbAnalysis.data?.blocks;
+            // Recalculate blocks if missing or empty (renew flow stores fields but not blocks)
+            if (!blocks || Object.keys(blocks).length === 0) {
+                try {
+                    const scoreResult = computeAioScore({ fields: extractFields, source: { scan: { is_reachable: true } } } as any);
+                    blocks = {};
+                    for (const [k, v] of Object.entries(scoreResult.blocks)) {
+                        blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
+                    }
+                    logger.info('WEBHOOK_BLOCKS_RECALC', `Blocks recalculated from fields`, { total: scoreResult.total });
+                } catch { /* keep blocks empty */ }
+            }
             analysisData = {
                 score: dbAnalysis.score || 0,
-                extract: dbAnalysis.data?.fields || {},
+                extract: extractFields,
                 url: dbAnalysis.url || analyzedUrl || "",
-                blocks: dbAnalysis.data?.blocks
+                blocks
             };
             logger.info('WEBHOOK_DATA_FOUND', `Analysis found, score=${analysisData.score}`, { score: analysisData.score, aid: analysisId });
         } else {
