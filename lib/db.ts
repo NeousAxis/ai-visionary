@@ -456,6 +456,29 @@ export const database = {
     },
 
     /**
+     * Retrieve an AYA Entity by contact_email (for renew webhook fallback)
+     */
+    getAyaEntityByContactEmail: async (email: string): Promise<any | null> => {
+        if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
+        try {
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('*')
+                .eq('contact_email', email)
+                .eq('payment_completed', true)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            if (error) return null;
+            return data;
+        } catch {
+            return null;
+        }
+    },
+
+    /**
      * OTP MANAGEMENT (One Time Password)
      */
     saveOTP: async (email: string, code: string): Promise<void> => {

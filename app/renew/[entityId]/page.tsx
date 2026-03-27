@@ -61,6 +61,19 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
     const url = entity.website || '';
     const hasRequiredInfo = !!(email && url);
 
+    // AYO model: pre-save entity data to `analyses` table before Stripe redirect
+    // so the webhook can find it via aid=entityId → db.getAnalysis(entityId)
+    if (hasRequiredInfo && entity.asr_payload) {
+        const payload = entity.asr_payload as any;
+        const fields = payload?.data?.fields || payload?.fields || payload?.data || {};
+        await db.saveAnalysis(entityId, {
+            url,
+            email,
+            score: entity.asr_score || 0,
+            data: { fields, blocks: payload?.blocks || {} },
+        });
+    }
+
     // Build Payment Link URLs server-side (no Stripe API call needed)
     // Stripe Payment Links accept ?prefilled_email=...&client_reference_id=...
     let proUrl = '';

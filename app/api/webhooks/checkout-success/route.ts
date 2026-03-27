@@ -260,7 +260,27 @@ export async function POST(req: Request) {
             }
         }
 
-        // 3b. RENEW FLOW FALLBACK: aid = AYA entity_id (not an analysis id)
+        // 3b. RENEW FLOW FALLBACK by contact_email: always available from Stripe, independent of client_reference_id
+        if (!dbAnalysis && customerEmail) {
+            try {
+                const ayaByEmail = await db.getAyaEntityByContactEmail(customerEmail);
+                if (ayaByEmail && (ayaByEmail.asr_payload || ayaByEmail.asr_score)) {
+                    const payload = ayaByEmail.asr_payload as any;
+                    const fields = payload?.data?.fields || payload?.fields || payload?.data || {};
+                    dbAnalysis = {
+                        score: ayaByEmail.asr_score || 0,
+                        url: ayaByEmail.website || analyzedUrl,
+                        data: { fields, blocks: payload?.blocks || {} }
+                    } as any;
+                    if (!analyzedUrl) analyzedUrl = ayaByEmail.website || '';
+                    logger.info('WEBHOOK_AYA_EMAIL_FALLBACK', `Found entity in aya_registry by contact_email: ${customerEmail}`, { score: ayaByEmail.asr_score, entityId: ayaByEmail.entity_id });
+                }
+            } catch (e) {
+                logger.warn('WEBHOOK_AYA_EMAIL_ERROR', `Failed to look up aya_registry by contact_email: ${e}`);
+            }
+        }
+
+        // 3c. RENEW FLOW FALLBACK: aid = AYA entity_id (not an analysis id)
         if (!dbAnalysis && analysisId) {
             try {
                 const ayaEntity = await db.getAyaEntityById(analysisId);
