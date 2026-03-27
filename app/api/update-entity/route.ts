@@ -81,6 +81,30 @@ function mergeBlocksIntoPayload(
             // Skip empty arrays — never overwrite existing data with empty
             if (Array.isArray(rawValue) && rawValue.length === 0) continue;
 
+            // Filter out negative declarations from arrays — "pas de X", "aucun",
+            // "non applicable", "N/A" are honest declarations of absence, not data.
+            // They should not overwrite existing data or penalize the score.
+            if (Array.isArray(rawValue)) {
+                const ABSENCE_PATTERNS = /^(pas de|aucun|non applicable|n\/a|néant|rien|none|no |not applicable|nothing)/i;
+                const filtered = rawValue.filter((item: unknown) => {
+                    if (typeof item !== 'string') return true;
+                    return !ABSENCE_PATTERNS.test(item.trim());
+                });
+                if (filtered.length === 0) continue; // All items were negative declarations → skip
+                if (filtered.length !== rawValue.length) {
+                    // Some items filtered out → use filtered array
+                    const q = determineQuality(filtered);
+                    mergedBlock[field] = toFieldNode(filtered, q);
+                    continue;
+                }
+            }
+
+            // Filter out negative declarations from strings
+            if (typeof rawValue === 'string') {
+                const ABSENCE_PATTERNS = /^(pas de|aucun|non applicable|n\/a|néant|rien|none|no |not applicable|nothing)/i;
+                if (ABSENCE_PATTERNS.test(rawValue.trim())) continue;
+            }
+
             // CRITICAL FIX: For boolean false, only write it if existing
             // value was also boolean (don't downgrade a true→false silently).
             // If the existing field has value=true and form sends false,
