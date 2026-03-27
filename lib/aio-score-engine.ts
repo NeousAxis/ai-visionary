@@ -2,7 +2,7 @@
 // lib/aio-score-engine.ts
 export type Quality = 0 | 0.5 | 1;
 
-type FieldNode<T> = { value: T; q: Quality; evidence: string[] };
+type FieldNode<T> = { value: T; q: Quality; evidence: string[]; na?: boolean };
 
 export type AyoExtract = {
     version: "AYO-EXTRACT-3.0";
@@ -131,16 +131,19 @@ export function computeAioScore(extract: AyoExtract) {
         const weight = WEIGHTS[block];
         const expected = EXPECTED_FIELDS[block];
 
-        const rawQs = expected.map((field) => {
+        const rawQs: number[] = [];
+        expected.forEach((field) => {
             const blockObj = extract.fields?.[block as keyof typeof extract.fields];
-            if (!blockObj) return 0;
+            if (!blockObj) { rawQs.push(0); return; }
 
             // @ts-expect-error index dynamic but safe by design
             const node = blockObj[field];
-            return qOf(node);
+            // N/A declared: exclude from both numerator AND denominator (neutral, not a penalty)
+            if (node?.na === true) return;
+            rawQs.push(qOf(node));
         });
 
-        const rawAvg = sum(rawQs) / expected.length; // 0..1
+        const rawAvg = rawQs.length > 0 ? sum(rawQs) / rawQs.length : 0; // 0..1
         const score = rawAvg * weight;
 
         blockScores[block] = { weight, raw: rawAvg, score };

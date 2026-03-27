@@ -56,10 +56,17 @@ export function formDataToAyoExtract(
       const rawValue = formValues[fieldDef.name];
       if (rawValue === undefined || rawValue === null) continue;
 
+      const fieldKey = fieldDef.name as keyof typeof targetBlock;
+
+      // N/A declaration: field explicitly declared not applicable — exclude from scoring
+      if (rawValue === '__NA__') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (targetBlock as any)[fieldKey] = { value: null, q: 0, na: true, evidence: ['client_na_declaration'] };
+        continue;
+      }
+
       // Bug 7 fix: check emptiness with field type awareness
       if (isEmptyValue(rawValue, fieldDef.type)) continue;
-
-      const fieldKey = fieldDef.name as keyof typeof targetBlock;
       const existingField = targetBlock[fieldKey] as
         | FieldNode<unknown>
         | undefined;

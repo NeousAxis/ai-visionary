@@ -79,19 +79,38 @@ export async function POST(req: NextRequest) {
         }
 
         // --- Build AyoExtract by merging form blocks into existing payload ---
-        // formDataToAyoExtract:
-        //   - starts from the existing AyoExtract (preserves all existing q values)
-        //   - only overwrites fields present in `blocks` (non-empty values)
-        //   - uses correct quality rules: select→q=1, date→q=1, boolean→q=0.5, etc.
-        //   - skips empty values (never downgrades existing data)
         const existingPayload = entity.asr_payload || {};
-        // entity.asr_payload IS the stored AyoExtract (version, source, fields at top level)
-        // OR it may be wrapped as { data: <AyoExtract> } depending on storage path.
-        // Resolve to the actual AyoExtract object.
-        const existingExtract: Partial<AyoExtract> =
-            (existingPayload.version && existingPayload.fields)
-                ? existingPayload                           // asr_payload IS the extract
-                : existingPayload.data || existingPayload;  // asr_payload.data is the extract
+
+        // Resolve the actual AyoExtract — three possible storage shapes:
+        //  A) asr_payload = { version, fields, source, ... }         → full AyoExtract at root
+        //  B) asr_payload = { data: { version, fields, source } }    → wrapped AyoExtract
+        //  C) asr_payload = { data: { identite, offre, ... } }       → OLD flat format (no fields wrapper)
+        //     In case C, data IS the fields object — wrap it into a proper AyoExtract.
+        let existingExtract: Partial<AyoExtract>;
+
+        if (existingPayload.version && existingPayload.fields) {
+            // Shape A
+            existingExtract = existingPayload as Partial<AyoExtract>;
+        } else {
+            const data = (existingPayload.data || existingPayload) as Record<string, unknown>;
+
+            if (data.fields && typeof data.fields === 'object') {
+                // Shape B — data already has a fields wrapper
+                existingExtract = data as Partial<AyoExtract>;
+            } else {
+                // Shape C — flat blocks (identite, offre, ...) ARE the fields
+                // Wrap them so formDataToAyoExtract can find extract.fields
+                const scan = (existingPayload.scan || {}) as AyoExtract['source']['scan'];
+                existingExtract = {
+                    version: 'AYO-EXTRACT-3.0',
+                    source: {
+                        url: entity.website || '',
+                        scan,
+                    },
+                    fields: data as unknown as AyoExtract['fields'],
+                };
+            }
+        }
 
         const oldScore = entity.asr_score || 0;
 

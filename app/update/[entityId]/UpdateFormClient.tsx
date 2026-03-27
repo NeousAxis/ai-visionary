@@ -117,13 +117,13 @@ export default function UpdateFormClient({
       for (const field of block.fields) {
         if (field.type === 'readonly') continue;
 
-        // Fields marked "Non applicable" → always count as a change, but don't
-        // send the value to the server (preserve existing data until the AIO
-        // engine supports explicit N/A signaling — see CLAUDE.md chantier).
+        // Fields marked "Non applicable" → send __NA__ marker to server.
+        // The scoring engine will exclude this field from the denominator (neutral, not a penalty).
         const naKey = `${block.key}.${field.name}`;
         if (naFields.has(naKey)) {
-          hasChanges = true; // user explicitly declared N/A — always a change
-          continue;          // don't overwrite existing data in the payload
+          hasChanges = true;
+          cleaned[field.name] = '__NA__';
+          continue;
         }
 
         let v = vals[field.name];

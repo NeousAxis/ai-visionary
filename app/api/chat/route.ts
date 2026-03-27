@@ -1752,8 +1752,9 @@ q=1 : Information SPÉCIFIQUE, VÉRIFIABLE et EXPLOITABLE par une IA.
   Exemples q=1 : "ISO 27001", "12 communes accompagnées", "3 étapes : audit, stratégie, implémentation", "RGPD + politique de confidentialité publiée"
 q=0.5 : Information PRÉSENTE mais VAGUE, GÉNÉRIQUE ou NON-VÉRIFIABLE.
   Exemples q=0.5 : "satisfaction client" (pas de chiffre), "RGPD" (mentionné seul sans preuve), "en phase de reconditionnement" (pas encore en place), "sur devis" (pas informatif), "bouche à oreille" (pas mesurable), "oui" sans détail
-q=0 : Information ABSENTE, NIÉE ou EXPLICITEMENT REFUSÉE.
-  Exemples q=0 : "non", "nous n'avons pas de glossaire", "pas applicable", champ laissé vide
+q=0 : Information ABSENTE ou INCONNUE (l'utilisateur ne sait pas ou n'a pas répondu).
+  Exemples q=0 : "non", "nous n'avons pas de glossaire", champ laissé vide, réponse évasive sans détail
+  ⚠️ ATTENTION : "pas de produit car nous ne vendons que des services" = na:true, PAS q=0
 
 RÈGLES SPÉCIFIQUES PAR CHAMP :
 - indicateurs.key_indicators : q=1 UNIQUEMENT si l'utilisateur donne des CHIFFRES CONCRETS ou des métriques mesurables (ex: "450 tonnes CO2 évitées", "500 clients", "12 communes"). Des termes vagues comme "satisfaction client", "bouche à oreille", "recommandabilité" = q=0.5 maximum.
@@ -1767,8 +1768,13 @@ RÈGLES SPÉCIFIQUES PAR CHAMP :
 - processus_methodes.process_steps : q=1 UNIQUEMENT si au moins 3 étapes distinctes et concrètes sont décrites.
 - indicateurs.last_review_date : q=1 UNIQUEMENT si une date est explicitement mentionnée. "Première soumission" ou "jamais" = q=0.
 
-⚠️ RÈGLE "[SKIP] Non applicable" : Si l'utilisateur répond "[SKIP] Non applicable" à une question, cela signifie que ce champ n'est PAS PERTINENT pour son activité.
-Dans ce cas : value = "__SKIPPED__", q = 0. NE PAS interpréter comme "aucun" ou "non". C'est un skip volontaire.
+⚠️ RÈGLE N/A EXPLICITE : Si l'utilisateur déclare que ce champ ne s'applique PAS à son activité
+(ex: "nous ne vendons pas de produits", "nous ne faisons que des services", "pas de produit", "[SKIP] Non applicable",
+"pas applicable à notre activité", "nous ne proposons pas X", "notre association n'a pas de X"),
+cela signifie que ce champ est HORS PÉRIMÈTRE — ce n'est pas un manque, c'est une réalité déclarée.
+Dans ce cas : { "value": null, "q": 0, "na": true }.
+NE PAS CONFONDRE avec "je ne sais pas" ou "information manquante" (= q=0 SANS na).
+"na": true signifie "déclaré non applicable", pas "inconnu".
 
 MAPPING DES RÉPONSES UTILISATEUR :
 - KPIs avec chiffres concrets -> indicateurs.key_indicators (q selon règles ci-dessus)
