@@ -104,24 +104,33 @@ export default function UpdateFormClient({
     setStatus('loading');
     setErrorMessage('');
 
-    // Build payload: ONLY include fields the user actually modified (dirty)
+    // Build payload: ONLY include fields whose VALUE actually changed
+    // Compare current value with initial value to detect real changes
     const blocks: Record<string, Record<string, unknown>> = {};
     for (const block of blockDefinitions) {
       const vals = formData[block.key] || {};
+      const initVals = initialValues[block.key] || {};
       const cleaned: Record<string, unknown> = {};
       let hasChanges = false;
       for (const field of block.fields) {
         if (field.type === 'readonly') continue;
-        const fieldKey = `${block.key}.${field.name}`;
-        // Only include fields the user actually touched
-        if (!dirtyFields.has(fieldKey)) continue;
         let v = vals[field.name];
+        const initV = initVals[field.name];
+
+        // Normalize array values for comparison
         if (field.type === 'array' && typeof v === 'string') {
-          v = v
-            .split('\n')
-            .map((s: string) => s.trim())
-            .filter(Boolean);
+          v = v.split('\n').map((s: string) => s.trim()).filter(Boolean);
         }
+        let initNorm = initV;
+        if (field.type === 'array' && typeof initV === 'string') {
+          initNorm = initV.split('\n').map((s: string) => s.trim()).filter(Boolean);
+        }
+
+        // Compare: skip if value hasn't actually changed
+        const vStr = JSON.stringify(v ?? '');
+        const iStr = JSON.stringify(initNorm ?? '');
+        if (vStr === iStr) continue;
+
         cleaned[field.name] = v;
         hasChanges = true;
       }
