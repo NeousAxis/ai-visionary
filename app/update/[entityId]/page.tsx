@@ -4,6 +4,7 @@ import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
 import type { Metadata } from 'next';
 import UpdateFormClient from './UpdateFormClient';
+import OtpGate from './OtpGate';
 import { BLOCK_DEFINITIONS } from '@/lib/update-form-config';
 import { extractFormValues } from '@/lib/form-to-extract';
 import { generateUpdateToken } from '@/lib/update-token';
@@ -100,19 +101,25 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
         </div>
       </section>
 
-      {/* FORM */}
+      {/* OTP AUTH + FORM */}
       <section style={{ paddingTop: '0', paddingBottom: '4rem' }}>
         <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1rem' }}>
-          <UpdateFormClient
+          <OtpGate
             entityId={entity.entity_id}
-            entityName={name}
-            packType={packType}
             entityEmail={entity.contact_email || ''}
-            currentScore={entity.asr_score ?? null}
-            initialValues={initialValues}
-            blockDefinitions={BLOCK_DEFINITIONS}
-            updateToken={updateToken}
-          />
+            entityName={name}
+          >
+            <UpdateFormClient
+              entityId={entity.entity_id}
+              entityName={name}
+              packType={packType}
+              entityEmail={entity.contact_email || ''}
+              currentScore={entity.asr_score ?? null}
+              initialValues={initialValues}
+              blockDefinitions={BLOCK_DEFINITIONS}
+              updateToken={updateToken}
+            />
+          </OtpGate>
         </div>
       </section>
     </main>

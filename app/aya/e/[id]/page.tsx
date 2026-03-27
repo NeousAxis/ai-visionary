@@ -283,10 +283,27 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                 </div>
                             </div>
 
-                            <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px dashed var(--border-light)' }}>
-                                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'right', fontStyle: 'italic' }}>
+                            <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px dashed var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                                     Dernière modification le : {new Date(entity.last_update).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' })}
                                 </p>
+                                {isCertified && (
+                                    <Link
+                                        href={`/update/${entity.entity_id}`}
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: '600',
+                                            color: 'var(--primary-color)',
+                                            textDecoration: 'none',
+                                            padding: '4px 12px',
+                                            borderRadius: '6px',
+                                            border: '1px solid var(--primary-color)',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        Mettre a jour
+                                    </Link>
+                                )}
                             </div>
                         </div>
 
