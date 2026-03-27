@@ -307,7 +307,7 @@ export const database = {
             const { aya_entity_id: _drop, ...cleanData } = data as any;
             const { error } = await client
                 .from('aya_registry')
-                .update({ ...cleanData, updated_at: new Date().toISOString() })
+                .update(cleanData)
                 .eq('entity_id', entityId);
 
             if (error) {
