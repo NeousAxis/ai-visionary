@@ -24,13 +24,17 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
 const getEntityId = (e: any): string => e.entity_id || e.aya_entity_id || e.id || '';
 const isCertified = (entity: any) => entity.payment_completed === true;
 
-/** Strip leading emojis/symbols and detect garbage names (Python lists, template artifacts). */
+/** Strip leading emojis/symbols and detect garbage names (Python lists, template artifacts, non-Latin). */
 function cleanDisplayName(name: string, fallback?: string): string {
     if (!name) return fallback || 'Entité';
     // Reject Python list artifacts: ['Home', 'Phones', ...]
     if (/^\[['"]/.test(name)) return fallback || 'Entité';
     // Reject template engine artifacts: {{ __('..., {%
     if (/^\{\{/.test(name) || /^\{%/.test(name)) return fallback || 'Entité';
+    // Reject names dominated by CJK / Arabic / non-Latin scripts (scraper artifact)
+    const nonLatin = (name.match(/[\u3000-\u9FFF\uAC00-\uD7AF\u0600-\u06FF\u0400-\u04FF]/gu) || []).length;
+    const latin = (name.match(/[a-zA-Z0-9]/g) || []).length;
+    if (nonLatin > latin && nonLatin > 2) return fallback || 'Entité';
     // Strip leading emojis (Unicode emoji ranges)
     let cleaned = name.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}]+\s*/gu, '');
     // Strip leading special chars: |, #, !, musical notes, etc.
