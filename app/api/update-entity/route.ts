@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Resend } from 'resend';
+import JSZip from 'jszip';
+import crypto from 'crypto';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { db } from '@/lib/db';
 import { computeAioScore, type AyoExtract } from '@/lib/aio-score-engine';
 import { verifyUpdateToken } from '@/lib/update-token';
 import { formDataToAyoExtract } from '@/lib/form-to-extract';
+import { sanitizeExtract } from '@/lib/ayo-generators';
+import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Block names matching the AyoExtract.fields keys
 const VALID_BLOCKS = [
@@ -205,9 +213,105 @@ export async function POST(req: NextRequest) {
             nextReviewDue: nextReviewDue.toISOString(),
         });
 
+        // --- Auto-regenerate PRO files if client has Pack PRO ---
+        const packType = (entity.pack_type || '').toLowerCase();
+        const isPro = packType === 'pro' || packType === 'pack pro';
+        const emailTarget = (contactEmail && typeof contactEmail === 'string' ? contactEmail : entity.contact_email) || '';
+        let filesEmailSent = false;
+
+        if (isPro && emailTarget && resend) {
+            try {
+                const entityNameForEmail = (displayName as string) || 'Entreprise';
+                const extractDataForGen = extract;
+
+                const { cleanedFields } = sanitizeExtract(extractDataForGen as unknown as Record<string, unknown>);
+                if (cleanedFields.length > 0) {
+                    logger.info('UPDATE_SANITIZE', `Cleaned ${cleanedFields.length} fields before regen`);
+                }
+
+                const asrId = `asr_${entityId.replace(/[^a-zA-Z0-9]/g, '').substring(0, 16)}_${crypto.randomUUID().replace(/-/g, '').substring(0, 8)}`;
+                const architecteInput: ArchitecteInput = {
+                    extractData: extractDataForGen as unknown as Record<string, unknown>,
+                    url: entity.website || '',
+                    email: emailTarget,
+                    mode: 'PRO',
+                    score: newScore,
+                    date: new Date().toISOString(),
+                    asrId,
+                };
+
+                const architecteResult = await generateProPack(architecteInput);
+                logger.info('UPDATE_REGEN', `Files generated: delivered=${architecteResult.delivered}`);
+
+                // Build ZIP
+                const zip = new JSZip();
+                zip.file('ASR-Protocol.json', JSON.stringify(architecteResult.files.asr, null, 2));
+                zip.file('manifest.json', JSON.stringify(architecteResult.files.manifest, null, 2));
+                zip.file('faq.json', JSON.stringify(architecteResult.files.faq, null, 2));
+                zip.file('glossary.json', JSON.stringify(architecteResult.files.glossary, null, 2));
+                zip.file('external_context.json', JSON.stringify(architecteResult.files.externalContext, null, 2));
+                const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+
+                const ayaLink = `https://www.ai-visionary.com/aya/e/${entityId}`;
+                const scoreColor = newScore >= 60 ? '#166534' : newScore >= 40 ? '#854d0e' : '#991b1b';
+                const delta = newScore - oldScore;
+                const deltaStr = delta > 0 ? `+${delta}` : `${delta}`;
+
+                const emailHtml = `<div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#333;max-width:640px;margin:0 auto">
+<div style="background:linear-gradient(135deg,#212E53 0%,#4A919E 100%);padding:30px;border-radius:12px 12px 0 0;text-align:center">
+<h1 style="color:#fff;margin:0;font-size:22px">Vos fichiers AYO mis a jour</h1>
+<p style="color:#BED3C3;margin:10px 0 0;font-size:14px">Suite a la mise a jour de vos donnees — ${entityNameForEmail}</p>
+</div>
+<div style="background:#fff;padding:25px;border:1px solid #e5e7eb">
+<p>Bonjour,</p>
+<p>Suite a la mise a jour de vos informations, nous avons regenere vos 5 fichiers ASR pour <strong>${entityNameForEmail}</strong>.</p>
+<div style="background:#f0fdf4;padding:20px;border-radius:8px;margin:20px 0;text-align:center;border:2px solid #86efac">
+<p style="margin:0;font-size:14px;color:#666">Nouveau Score AIO</p>
+<p style="margin:5px 0;font-size:42px;font-weight:bold;color:${scoreColor}">${newScore} / 100</p>
+${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534' : '#991b1b'}">${deltaStr} points</p>` : ''}
+</div>
+<div style="background:#f9fafb;padding:15px;border-radius:8px;border:1px solid #e5e7eb">
+<h3 style="margin-top:0;color:#212E53">Fichiers regeneres (joints en ZIP)</h3>
+<ul style="list-style:none;padding:0;margin:0;font-size:14px;line-height:2">
+<li>&#128081; <strong>ASR-Protocol.json</strong> — Identite semantique mise a jour</li>
+<li>&#9881;&#65039; <strong>manifest.json</strong> — Politique de recommandation IA</li>
+<li>&#128172; <strong>faq.json</strong> — FAQ structuree</li>
+<li>&#128214; <strong>glossary.json</strong> — Vocabulaire metier</li>
+<li>&#127760; <strong>external_context.json</strong> — Signaux et contexte</li>
+</ul>
+</div>
+<p style="margin-top:20px;text-align:center">
+<a href="${ayaLink}" style="background:#4A919E;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Voir mon certificat AYA</a>
+</p>
+<div style="background:#e3f2fd;padding:15px;border-radius:8px;margin:20px 0;border:1px solid #bbdefb">
+<p style="margin:0;font-size:13px"><strong>Rappel :</strong> Remplacez les anciens fichiers sur votre site par ceux joints a cet email pour mettre a jour votre visibilite IA.</p>
+</div>
+</div>
+<div style="background:#f9fafb;padding:15px;border-radius:0 0 12px 12px;text-align:center;border:1px solid #e5e7eb;border-top:0">
+<p style="font-size:12px;color:#9ca3af;margin:0"><a href="https://ai-visionary.com" style="color:#4A919E;text-decoration:none">AI Visionary</a> — Rendez votre entreprise visible par les IA</p>
+</div>
+</div>`;
+
+                await resend.emails.send({
+                    from: 'AYO Delivery <delivery@ai-visionary.com>',
+                    to: [emailTarget],
+                    subject: `Vos fichiers AYO mis a jour — ${entityNameForEmail}`,
+                    attachments: [{ filename: 'AYO_Pack_PRO_Updated.zip', content: zipBuffer }],
+                    html: emailHtml,
+                });
+
+                filesEmailSent = true;
+                logger.info('UPDATE_FILES_SENT', `Updated PRO files sent to ${emailTarget}`);
+            } catch (regenErr: unknown) {
+                const msg = regenErr instanceof Error ? regenErr.message : 'Unknown';
+                logger.warn('UPDATE_REGEN_FAILED', `File regeneration failed (update still saved): ${msg}`);
+            }
+        }
+
         return NextResponse.json({
             success: true,
             message: 'Donnees mises a jour avec succes',
+            filesEmailSent,
             oldScore,
             newScore,
             nextReviewDue: nextReviewDue.toISOString(),

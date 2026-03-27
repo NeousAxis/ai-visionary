@@ -18,6 +18,7 @@ interface SubmitResult {
   newScore: number;
   oldScore: number;
   entityId: string;
+  filesEmailSent?: boolean;
 }
 
 export default function UpdateFormClient({
@@ -168,6 +169,7 @@ export default function UpdateFormClient({
         newScore: data.newScore ?? data.score ?? 0,
         oldScore: currentScore ?? 0,
         entityId,
+        filesEmailSent: data.filesEmailSent ?? false,
       });
       setStatus('success');
     } catch (err: unknown) {
@@ -230,9 +232,23 @@ export default function UpdateFormClient({
           )}
         </div>
 
-        <p style={{ color: '#6b7280', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+        <p style={{ color: '#6b7280', fontSize: '0.95rem', marginBottom: result.filesEmailSent ? '0.75rem' : '1.5rem' }}>
           Votre certificat AYA et vos donnees dans le registre ont ete mis a jour.
         </p>
+
+        {result.filesEmailSent && (
+          <div style={{
+            background: '#f0fdf4',
+            border: '1px solid #86efac',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '1.5rem',
+            fontSize: '0.9rem',
+            color: '#166534',
+          }}>
+            &#128386; Vos nouveaux fichiers ASR ont ete regeneres et envoyes par email.
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
           <a
