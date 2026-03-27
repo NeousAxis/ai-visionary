@@ -246,7 +246,9 @@ export default function UpdateFormClient({
             fontSize: '0.9rem',
             color: '#166534',
           }}>
-            &#128386; Vos nouveaux fichiers ASR ont ete regeneres et envoyes par email.
+            &#128386; {isPro
+              ? 'Vos nouveaux fichiers ASR ont ete regeneres et envoyes par email.'
+              : 'Un email de confirmation a ete envoye a votre adresse.'}
           </div>
         )}
 

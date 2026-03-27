@@ -306,6 +306,54 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
                 const msg = regenErr instanceof Error ? regenErr.message : 'Unknown';
                 logger.warn('UPDATE_REGEN_FAILED', `File regeneration failed (update still saved): ${msg}`);
             }
+        } else if (!isPro && emailTarget && resend) {
+            // AYA subscription clients: send simple confirmation email (no files)
+            try {
+                const entityNameForEmail = (displayName as string) || 'Entreprise';
+                const ayaLink = `https://www.ai-visionary.com/aya/e/${entityId}`;
+                const delta = newScore - oldScore;
+                const deltaStr = delta > 0 ? `+${delta}` : `${delta}`;
+                const scoreColor = newScore >= 60 ? '#166534' : newScore >= 40 ? '#854d0e' : '#991b1b';
+
+                const confirmationHtml = `<div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#333;max-width:640px;margin:0 auto">
+<div style="background:linear-gradient(135deg,#212E53 0%,#4A919E 100%);padding:30px;border-radius:12px 12px 0 0;text-align:center">
+<h1 style="color:#fff;margin:0;font-size:22px">Mise a jour confirmee</h1>
+<p style="color:#BED3C3;margin:10px 0 0;font-size:14px">${entityNameForEmail} — Registre AYA</p>
+</div>
+<div style="background:#fff;padding:25px;border:1px solid #e5e7eb">
+<p>Bonjour,</p>
+<p>Vos donnees dans le registre AYA ont ete mises a jour avec succes pour <strong>${entityNameForEmail}</strong>.</p>
+<div style="background:#f0fdf4;padding:20px;border-radius:8px;margin:20px 0;text-align:center;border:2px solid #86efac">
+<p style="margin:0;font-size:14px;color:#666">Nouveau Score AIO</p>
+<p style="margin:5px 0;font-size:42px;font-weight:bold;color:${scoreColor}">${newScore} / 100</p>
+${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534' : '#991b1b'}">${deltaStr} points</p>` : ''}
+</div>
+<p>Votre fiche dans le registre a ete mise a jour et est visible par les assistants IA.</p>
+<p style="margin-top:20px;text-align:center">
+<a href="${ayaLink}" style="background:#4A919E;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Voir mon certificat AYA</a>
+</p>
+<div style="background:#fef9e7;padding:15px;border-radius:8px;margin:20px 0;border:1px solid #fde68a">
+<p style="margin:0;font-size:13px">&#128161; <strong>Conseil :</strong> Pour ameliorer encore votre score, passez au Pack PRO (499 CHF) pour obtenir vos 5 fichiers ASR a installer sur votre site.</p>
+</div>
+</div>
+<div style="background:#f9fafb;padding:15px;border-radius:0 0 12px 12px;text-align:center;border:1px solid #e5e7eb;border-top:0">
+<p style="font-size:12px;color:#9ca3af;margin:0"><a href="https://ai-visionary.com" style="color:#4A919E;text-decoration:none">AI Visionary</a> — Rendez votre entreprise visible par les IA</p>
+</div>
+</div>`;
+
+                await resend.emails.send({
+                    from: 'AYO Delivery <delivery@ai-visionary.com>',
+                    to: [emailTarget],
+                    subject: `Mise a jour confirmee — ${entityNameForEmail}`,
+                    html: confirmationHtml,
+                });
+
+                filesEmailSent = true;
+                logger.info('UPDATE_CONFIRM_SENT', `Confirmation email sent to ${emailTarget} (AYA sub)`);
+            } catch (emailErr: unknown) {
+                const msg = emailErr instanceof Error ? emailErr.message : 'Unknown';
+                logger.warn('UPDATE_CONFIRM_FAILED', `Confirmation email failed (update still saved): ${msg}`);
+            }
         }
 
         return NextResponse.json({
