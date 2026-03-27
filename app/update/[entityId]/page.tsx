@@ -108,6 +108,7 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
             entityId={entity.entity_id}
             entityEmail={entity.contact_email || ''}
             entityName={name}
+            entityWebsite={entity.website || ''}
           >
             <UpdateFormClient
               entityId={entity.entity_id}

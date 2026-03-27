@@ -6,19 +6,21 @@ interface OtpGateProps {
   entityId: string;
   entityEmail: string;
   entityName: string;
+  entityWebsite: string;
   children: React.ReactNode;
 }
 
-export default function OtpGate({ entityId, entityEmail, entityName, children }: OtpGateProps) {
+export default function OtpGate({ entityId, entityEmail, entityName, entityWebsite, children }: OtpGateProps) {
   const [step, setStep] = useState<'email' | 'code' | 'verified'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Mask the entity email for display: "in**@ec****.org"
+  // Mask the entity email for display: only show domain extension
+  // e.g. "info@eclore-asso.org" → "****@****.org"
   const maskedEmail = entityEmail
-    ? entityEmail.replace(/^(.{2})(.*)(@.{2})(.*)(\..+)$/, '$1**$3****$5')
+    ? entityEmail.replace(/^.+@.+(\.\w+)$/, '****@****$1')
     : '';
 
   const handleSendOtp = async () => {
@@ -36,10 +38,12 @@ export default function OtpGate({ entityId, entityEmail, entityName, children }:
 
     setLoading(true);
     try {
+      // The send-otp API expects a URL, not an email.
+      // It finds the entity by URL and sends the OTP to its contact_email.
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ url: entityWebsite }),
       });
       const data = await res.json();
       if (!res.ok) {
