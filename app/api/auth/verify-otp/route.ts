@@ -19,10 +19,14 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { url, code } = body;
+        const { url, code, email: directEmail } = body;
 
-        if (!url || !code) {
-            return NextResponse.json({ error: "Parametres manquants." }, { status: 400 });
+        if (!code) {
+            return NextResponse.json({ error: "Code requis." }, { status: 400 });
+        }
+
+        if (!url && !directEmail) {
+            return NextResponse.json({ error: "Email ou URL requis." }, { status: 400 });
         }
 
         // Validate OTP format with Zod
@@ -31,17 +35,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Format de code invalide." }, { status: 400 });
         }
 
-        logger.info('OTP_VERIFY_START', `Verify attempt for ${url}`);
+        let email: string;
 
-        // 1. Get Admin Email
-        const client = await db.getAyaEntityByUrl(url);
-
-        if (!client || !client.contact_email) {
-            logger.warn('OTP_ENTITY_NOT_FOUND', `No entity for ${url}`);
-            return NextResponse.json({ error: "Entite non trouvee." }, { status: 404 });
+        if (directEmail) {
+            // MODE 2: Direct email verification (from update form OTP gate)
+            logger.info('OTP_VERIFY_START', `Verify attempt for direct email`);
+            email = directEmail.trim();
+        } else {
+            // MODE 1: URL-based lookup (original flow)
+            logger.info('OTP_VERIFY_START', `Verify attempt for ${url}`);
+            const client = await db.getAyaEntityByUrl(url);
+            if (!client || !client.contact_email) {
+                logger.warn('OTP_ENTITY_NOT_FOUND', `No entity for ${url}`);
+                return NextResponse.json({ error: "Entite non trouvee." }, { status: 404 });
+            }
+            email = client.contact_email;
         }
-
-        const email = client.contact_email;
 
         // 2. Verify Code
         const isValid = await db.verifyOTP(email, code);

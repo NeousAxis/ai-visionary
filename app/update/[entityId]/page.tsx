@@ -95,7 +95,7 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
       <section style={{ paddingTop: '2rem', paddingBottom: '1.5rem', textAlign: 'center' }}>
         <div className="container">
           <p style={{ color: '#4A919E', fontWeight: 'bold', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-            Mise a jour annuelle
+            Mise a jour
           </p>
           <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', color: '#212E53', marginBottom: '0.5rem', fontWeight: '800' }}>
             {name}
