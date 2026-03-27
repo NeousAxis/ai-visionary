@@ -38,12 +38,11 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
 
     setLoading(true);
     try {
-      // The send-otp API expects a URL, not an email.
-      // It finds the entity by URL and sends the OTP to its contact_email.
+      // Send OTP directly to the verified email address
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: entityWebsite }),
+        body: JSON.stringify({ email: email.trim(), entityId }),
       });
       const data = await res.json();
       if (!res.ok) {

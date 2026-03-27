@@ -36,6 +36,11 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
 
   const name = entity.display_name || entity.legal_name || 'Entite';
 
+  // Get the OWNER email (the one used during registration/payment),
+  // NOT the company contact email. The owner email is in the analyses table.
+  const ownerEmail = await db.getRegistrationEmail(entity.website || '');
+  const authEmail = ownerEmail || entity.contact_email || '';
+
   // Extract the raw AyoExtract.fields from asr_payload.data
   const rawPayloadData = entity.asr_payload?.data?.fields ?? entity.asr_payload?.data ?? undefined;
 
@@ -106,7 +111,7 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
         <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1rem' }}>
           <OtpGate
             entityId={entity.entity_id}
-            entityEmail={entity.contact_email || ''}
+            entityEmail={authEmail}
             entityName={name}
             entityWebsite={entity.website || ''}
           >

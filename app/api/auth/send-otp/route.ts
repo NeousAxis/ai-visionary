@@ -19,34 +19,60 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { url } = body;
+        const { url, email, entityId } = body;
 
-        if (!url) {
-            return NextResponse.json({ error: "URL is required" }, { status: 400 });
+        let adminEmail: string | null = null;
+        let entityName: string = '';
+
+        if (email && entityId) {
+            // MODE 2: Direct email + entityId (from update form OTP gate)
+            // Verify that this email matches the registration email for this entity
+            logger.info('OTP_SEND_START', `OTP request for entity ${entityId} with email`);
+
+            const entity = await db.getAyaEntityById(entityId);
+            if (!entity) {
+                logger.warn('OTP_ENTITY_NOT_FOUND', `Entity not found: ${entityId}`);
+                return NextResponse.json({ error: "Entite introuvable." }, { status: 404 });
+            }
+
+            // Check email matches: registration email (from analyses) or contact_email
+            const registrationEmail = await db.getRegistrationEmail(entity.website || '');
+            const validEmails = [registrationEmail, entity.contact_email]
+                .filter(Boolean)
+                .map((e: string) => e.toLowerCase());
+
+            if (!validEmails.includes(email.trim().toLowerCase())) {
+                logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match entity ${entityId}`);
+                return NextResponse.json({ error: "Cet email ne correspond pas a celui enregistre pour cette entite." }, { status: 403 });
+            }
+
+            adminEmail = email.trim();
+            entityName = entity.display_name || entity.legal_name || '';
+        } else if (url) {
+            // MODE 1: URL-based lookup (original flow)
+            const parsed = urlSchema.safeParse(url);
+            if (!parsed.success) {
+                logger.warn('OTP_INVALID_URL', `Invalid URL format: ${url}`);
+                return NextResponse.json({ error: "URL invalide" }, { status: 400 });
+            }
+
+            logger.info('OTP_SEND_START', `OTP request for ${url}`);
+
+            const client = await db.getAyaEntityByUrl(url);
+            if (!client) {
+                logger.warn('OTP_ENTITY_NOT_FOUND', `No entity for ${url}`);
+                return NextResponse.json({ error: "Entity not found." }, { status: 404 });
+            }
+
+            adminEmail = client.contact_email;
+            entityName = client.display_name || client.legal_name || '';
+        } else {
+            return NextResponse.json({ error: "Email ou URL requis." }, { status: 400 });
         }
-
-        // Validate URL format
-        const parsed = urlSchema.safeParse(url);
-        if (!parsed.success) {
-            logger.warn('OTP_INVALID_URL', `Invalid URL format: ${url}`);
-            return NextResponse.json({ error: "URL invalide" }, { status: 400 });
-        }
-
-        logger.info('OTP_SEND_START', `OTP request for ${url}`);
-
-        // 1. Find Admin Email associated with this entity
-        const client = await db.getAyaEntityByUrl(url);
-
-        if (!client) {
-            logger.warn('OTP_ENTITY_NOT_FOUND', `No entity for ${url}`);
-            return NextResponse.json({ error: "Entity not found." }, { status: 404 });
-        }
-
-        const adminEmail = client.contact_email;
 
         if (!adminEmail) {
-            logger.error('OTP_NO_EMAIL', `No email found for ${url}`);
-            return NextResponse.json({ error: "No admin email linked to this entity." }, { status: 400 });
+            logger.error('OTP_NO_EMAIL', `No email found`);
+            return NextResponse.json({ error: "Aucun email associe a cette entite." }, { status: 400 });
         }
 
         // 2. Generate 6-digit Code
@@ -63,7 +89,7 @@ export async function POST(req: NextRequest) {
             html: `
             <div style="font-family: sans-serif; padding: 20px; color: #333;">
                 <h2>Authentification Sécurisée</h2>
-                <p>Vous avez demandé un accès administrateur pour <strong>${client.display_name || url}</strong>.</p>
+                <p>Vous avez demandé un accès administrateur pour <strong>${entityName || 'votre entité'}</strong>.</p>
                 <p>Voici votre code unique (valable 10 minutes) :</p>
                 <div style="background-color: #f4f4f4; padding: 15px; font-size: 24px; letter-spacing: 5px; font-weight: bold; text-align: center; border-radius: 8px; border: 1px solid #ddd;">
                     ${code}

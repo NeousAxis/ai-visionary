@@ -365,6 +365,30 @@ export const database = {
     /**
      * Retrieve an AYA Entity by its ID
      */
+    /**
+     * Get the email used during registration (from analyses table).
+     * This is the OWNER's email, not the company contact email.
+     */
+    getRegistrationEmail: async (url: string): Promise<string | null> => {
+        if (!isSupabaseConfigured()) return null;
+        const client = getSupabase();
+        if (!client) return null;
+        try {
+            const normalized = url.replace(/\/+$/, '').toLowerCase();
+            const { data } = await client
+                .from('analyses')
+                .select('email')
+                .or(`url.ilike.%${normalized.replace(/^https?:\/\/(www\.)?/, '')}%`)
+                .not('email', 'is', null)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+            return data?.email || null;
+        } catch {
+            return null;
+        }
+    },
+
     getAyaEntityById: async (id: string): Promise<any | null> => {
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
