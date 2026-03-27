@@ -2,26 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { db } from '@/lib/db';
-import { computeAioScore, type AyoExtract, type Quality } from '@/lib/aio-score-engine';
+import { computeAioScore, type AyoExtract } from '@/lib/aio-score-engine';
 import { verifyUpdateToken } from '@/lib/update-token';
+import { formDataToAyoExtract } from '@/lib/form-to-extract';
 
 export const dynamic = 'force-dynamic';
-
-/**
- * Expected body format:
- * {
- *   entityId: string,
- *   blocks: {
- *     identite?: { name?, legal_name?, business_type?, city?, country?, contact_email?, contact_phone? },
- *     offre?: { services?: string[], products?: string[], use_cases?: string[], target_audience?, pricing_indication? },
- *     processus_methodes?: { process_steps?: string[], delivery_mode?, geographies_served?, quality_assurance? },
- *     engagements_conformite?: { policies?: string[], frameworks?: string[], certifications?: string[], security_measures?: string[] },
- *     indicateurs?: { key_indicators?: any[], last_review_date? },
- *     contenus_pedagogiques?: { has_faq?: boolean, has_glossary?: boolean, has_documentation?: boolean },
- *     structure_technique?: { has_asr?: boolean, has_jsonld?: boolean, has_sitemap?: boolean, mobile_optimized?: boolean }
- *   }
- * }
- */
 
 // Block names matching the AyoExtract.fields keys
 const VALID_BLOCKS = [
@@ -30,215 +15,11 @@ const VALID_BLOCKS = [
 ] as const;
 
 /**
- * Determine quality value based on the data type and content (Bug 5 fix).
- * - Boolean fields: q=0.5 (self-declared, not verified)
- * - Text fields < 10 chars: q=0.5
- * - Text fields >= 10 chars: q=1
- * - Array fields with >= 2 items: q=1, else q=0.5
- * - Date fields: q=1
- */
-function determineQuality(value: unknown, fieldType?: string): Quality {
-    if (typeof value === 'boolean') return 0.5;
-    if (fieldType === 'date') return 1;
-    if (Array.isArray(value)) return value.length >= 2 ? 1 : 0.5;
-    if (typeof value === 'string') return value.trim().length >= 10 ? 1 : 0.5;
-    return 0.5;
-}
-
-/**
- * Convert form blocks into {value, q, evidence} FieldNode format
- * compatible with AyoExtract.fields
- */
-function toFieldNode<T>(value: T, q: Quality = 1): { value: T; q: Quality; evidence: string[] } {
-    return { value, q, evidence: ['client_update'] };
-}
-
-/**
- * Deep-merge form block data into existing asr_payload.data,
- * converting raw values to {value, q:1, evidence} format.
- * Only non-null, non-undefined fields from formBlocks are merged.
- */
-function mergeBlocksIntoPayload(
-    existing: Record<string, any>,
-    formBlocks: Record<string, Record<string, any>>
-): Record<string, any> {
-    const merged = { ...existing };
-
-    for (const blockName of VALID_BLOCKS) {
-        const formBlock = formBlocks[blockName];
-        if (!formBlock || typeof formBlock !== 'object') continue;
-
-        const existingBlock = merged[blockName] || {};
-        const mergedBlock = { ...existingBlock };
-
-        for (const [field, rawValue] of Object.entries(formBlock)) {
-            // Skip null/undefined values (don't overwrite existing data)
-            if (rawValue === null || rawValue === undefined) continue;
-
-            // Skip empty strings — never overwrite existing data with empty
-            if (typeof rawValue === 'string' && rawValue.trim() === '') continue;
-
-            // Skip empty arrays — never overwrite existing data with empty
-            if (Array.isArray(rawValue) && rawValue.length === 0) continue;
-
-            // Filter out negative declarations from arrays — "pas de X", "aucun",
-            // "non applicable", "N/A" are honest declarations of absence, not data.
-            // They should not overwrite existing data or penalize the score.
-            if (Array.isArray(rawValue)) {
-                const ABSENCE_PATTERNS = /^(pas de|aucun|non applicable|n\/a|néant|rien|none|no |not applicable|nothing)/i;
-                const filtered = rawValue.filter((item: unknown) => {
-                    if (typeof item !== 'string') return true;
-                    return !ABSENCE_PATTERNS.test(item.trim());
-                });
-                if (filtered.length === 0) continue; // All items were negative declarations → skip
-                if (filtered.length !== rawValue.length) {
-                    // Some items filtered out → use filtered array
-                    const q = determineQuality(filtered);
-                    mergedBlock[field] = toFieldNode(filtered, q);
-                    continue;
-                }
-            }
-
-            // Filter out negative declarations from strings
-            if (typeof rawValue === 'string') {
-                const ABSENCE_PATTERNS = /^(pas de|aucun|non applicable|n\/a|néant|rien|none|no |not applicable|nothing)/i;
-                if (ABSENCE_PATTERNS.test(rawValue.trim())) continue;
-            }
-
-            // CRITICAL FIX: For boolean false, only write it if existing
-            // value was also boolean (don't downgrade a true→false silently).
-            // If the existing field has value=true and form sends false,
-            // that means the user actively toggled it OFF → allow.
-            // But if there's no existing field at all, false is just a default → skip.
-            if (typeof rawValue === 'boolean' && rawValue === false) {
-                const existingFieldValue = existingBlock[field]?.value;
-                // Only write false if there was a previous true (user toggled OFF)
-                if (existingFieldValue !== true) continue;
-            }
-
-            // Bug 5 fix: determine q value based on content quality
-            const q = determineQuality(rawValue);
-            mergedBlock[field] = toFieldNode(rawValue, q);
-        }
-
-        merged[blockName] = mergedBlock;
-    }
-
-    return merged;
-}
-
-/**
- * Build a minimal AyoExtract from merged data for score calculation.
- * Fills missing fields with empty FieldNodes (q=0) so the score engine
- * doesn't crash on missing properties.
- */
-function buildExtractFromData(
-    data: Record<string, any>,
-    entity: any
-): AyoExtract {
-    const emptyStr = (): { value: string; q: Quality; evidence: string[] } =>
-        ({ value: '', q: 0, evidence: [] });
-    const emptyArr = (): { value: string[]; q: Quality; evidence: string[] } =>
-        ({ value: [], q: 0, evidence: [] });
-    const emptyBool = (): { value: boolean; q: Quality; evidence: string[] } =>
-        ({ value: false, q: 0, evidence: [] });
-    const emptyAny = (): { value: any[]; q: Quality; evidence: string[] } =>
-        ({ value: [], q: 0, evidence: [] });
-
-    const get = (block: string, field: string) => data?.[block]?.[field];
-
-    // Determine scan flags from entity metadata
-    // The scan object uses camelCase keys (from aio-scanner.ts)
-    const asrPayload = entity.asr_payload || {};
-    const scanData = asrPayload.scan || {};
-
-    // Helper: check if a field has a truthy value (boolean true OR non-empty string)
-    const hasTruthyValue = (block: string, field: string): boolean => {
-        const node = get(block, field);
-        if (!node) return false;
-        const v = node.value ?? node;
-        return v === true || (typeof v === 'string' && v.trim().length > 0);
-    };
-
-    return {
-        version: 'AYO-EXTRACT-3.0',
-        source: {
-            url: entity.website || '',
-            scan: {
-                // Support both camelCase (from scanner) and snake_case
-                is_reachable: scanData.isReachable ?? scanData.is_reachable ?? true,
-                has_jsonld: scanData.hasJsonLd ?? scanData.has_jsonld ?? hasTruthyValue('structure_technique', 'has_jsonld'),
-                jsonld_count: scanData.jsonLdCount ?? scanData.jsonld_count ?? null,
-                has_asr_file: scanData.hasAsrFile ?? scanData.has_asr_file ?? hasTruthyValue('structure_technique', 'has_asr'),
-                has_faq_content: scanData.hasFaqContent ?? scanData.has_faq_content ?? hasTruthyValue('contenus_pedagogiques', 'has_faq'),
-                has_faq_schema: scanData.hasFaqSchema ?? scanData.has_faq_schema ?? false,
-                is_aya_registered: scanData.isAyaRegistered ?? entity.payment_completed === true,
-            },
-        },
-        fields: {
-            identite: {
-                name: get('identite', 'name') || emptyStr(),
-                legal_name: get('identite', 'legal_name') || emptyStr(),
-                business_type: get('identite', 'business_type') || emptyStr(),
-                city: get('identite', 'city') || emptyStr(),
-                country: get('identite', 'country') || emptyStr(),
-                contact_email: get('identite', 'contact_email') || emptyStr(),
-                contact_phone: get('identite', 'contact_phone') || emptyStr(),
-            },
-            offre: {
-                services: get('offre', 'services') || emptyArr(),
-                products: get('offre', 'products') || emptyArr(),
-                use_cases: get('offre', 'use_cases') || emptyArr(),
-                target_audience: get('offre', 'target_audience') || emptyStr(),
-                pricing_indication: get('offre', 'pricing_indication') || emptyStr(),
-            },
-            processus_methodes: {
-                process_steps: get('processus_methodes', 'process_steps') || emptyArr(),
-                delivery_mode: get('processus_methodes', 'delivery_mode') || emptyStr(),
-                geographies_served: get('processus_methodes', 'geographies_served') || emptyStr(),
-                quality_assurance: get('processus_methodes', 'quality_assurance') || emptyStr(),
-            },
-            engagements_conformite: {
-                policies: get('engagements_conformite', 'policies') || emptyArr(),
-                frameworks: get('engagements_conformite', 'frameworks') || emptyArr(),
-                certifications: get('engagements_conformite', 'certifications') || emptyArr(),
-                security_measures: get('engagements_conformite', 'security_measures') || emptyArr(),
-            },
-            indicateurs: {
-                key_indicators: get('indicateurs', 'key_indicators') || emptyAny(),
-                last_review_date: get('indicateurs', 'last_review_date') || emptyStr(),
-            },
-            contenus_pedagogiques: {
-                has_faq: get('contenus_pedagogiques', 'has_faq') || emptyBool(),
-                has_glossary: get('contenus_pedagogiques', 'has_glossary') || emptyBool(),
-                has_documentation: get('contenus_pedagogiques', 'has_documentation') || emptyBool(),
-            },
-            structure_technique: {
-                has_asr: get('structure_technique', 'has_asr') || emptyBool(),
-                has_jsonld: get('structure_technique', 'has_jsonld') || emptyBool(),
-                has_sitemap: get('structure_technique', 'has_sitemap') || emptyBool(),
-                mobile_optimized: get('structure_technique', 'mobile_optimized') || emptyBool(),
-            },
-            contextual_signals: {
-                pricing_level: emptyStr(),
-                access_mode: emptyStr(),
-                service_mode: emptyArr(),
-                schedule_type: emptyArr(),
-            },
-            recommandation: {
-                contextual_relevance: { value: [], q: 0, evidence: [] },
-                selection_conditions: { value: { required: [], exclusion: [] }, q: 0, evidence: [] },
-                ai_simulation: { value: [], q: 0, evidence: [] },
-            },
-        },
-    };
-}
-
-/**
  * POST /api/update-entity
  *
  * Updates an existing AYA entity's data (certified clients only).
- * Accepts full 7-block data, recalculates AIO score, resets next_review_due.
+ * Accepts changed 7-block data, merges with existing AyoExtract,
+ * recalculates AIO score, saves to Supabase.
  */
 export async function POST(req: NextRequest) {
     // Rate limit: 5 requests/min per IP
@@ -257,7 +38,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'entityId requis' }, { status: 400 });
         }
 
-        // --- Verify auth token (Bug 2&3 fix) ---
+        // --- Verify auth token ---
         if (!token || !verifyUpdateToken(token, entityId)) {
             logger.warn('UPDATE_INVALID_TOKEN', `Invalid or expired token for entity ${entityId}`);
             return NextResponse.json({ error: 'Token invalide ou expire. Rechargez la page.' }, { status: 401 });
@@ -280,9 +61,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        logger.info('UPDATE_START', `Updating entity ${entityId}`, {
-            blocksProvided: providedBlocks,
-        });
+        logger.info('UPDATE_START', `Updating entity ${entityId}`, { blocksProvided: providedBlocks });
 
         // --- Fetch entity and verify certification ---
         const entity = await db.getAyaEntityById(entityId);
@@ -299,48 +78,26 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // --- Deep-merge form blocks into existing asr_payload.data ---
+        // --- Build AyoExtract by merging form blocks into existing payload ---
+        // formDataToAyoExtract:
+        //   - starts from the existing AyoExtract (preserves all existing q values)
+        //   - only overwrites fields present in `blocks` (non-empty values)
+        //   - uses correct quality rules: select→q=1, date→q=1, boolean→q=0.5, etc.
+        //   - skips empty values (never downgrades existing data)
         const existingPayload = entity.asr_payload || {};
-        // The data structure is { fields: { identite, offre, ... } } (AyoExtract format)
-        // OR { identite, offre, ... } directly (legacy format).
-        // Drill into .fields when present — same logic as page.tsx extractFormValues().
-        const rawData = existingPayload.data || {};
-        const existingData = (rawData.fields && typeof rawData.fields === 'object')
-            ? rawData.fields
-            : rawData;
+        // entity.asr_payload IS the stored AyoExtract (version, source, fields at top level)
+        // OR it may be wrapped as { data: <AyoExtract> } depending on storage path.
+        // Resolve to the actual AyoExtract object.
+        const existingExtract: Partial<AyoExtract> =
+            (existingPayload.version && existingPayload.fields)
+                ? existingPayload                           // asr_payload IS the extract
+                : existingPayload.data || existingPayload;  // asr_payload.data is the extract
+
         const oldScore = entity.asr_score || 0;
 
-        const mergedData = mergeBlocksIntoPayload(existingData, blocks);
-
-        // Bug 6 fix: preserve existing structure_technique scan values
-        // (has_sitemap, mobile_optimized, has_jsonld, has_asr come from scanner, not form)
-        const existingTech = existingData.structure_technique || {};
-        if (!mergedData.structure_technique) mergedData.structure_technique = {};
-        for (const scanField of ['has_sitemap', 'mobile_optimized', 'has_jsonld', 'has_asr'] as const) {
-            if (!mergedData.structure_technique[scanField] && existingTech[scanField]) {
-                mergedData.structure_technique[scanField] = existingTech[scanField];
-            }
-        }
+        const extract = formDataToAyoExtract(blocks, existingExtract);
 
         // --- Recalculate AIO score ---
-        // Always recalculate the full score via the AIO engine.
-        // The score is DETERMINISTIC — same data = same score.
-        // If the score changes, it's because the data changed.
-        const extract = buildExtractFromData(mergedData, entity);
-
-        // DEBUG: Log what the score engine receives vs what's in the DB
-        // to find data format mismatches causing score drops
-        logger.info('UPDATE_EXTRACT_DEBUG', 'Extract built for scoring', {
-            identite_name: extract.fields.identite.name,
-            identite_business_type: extract.fields.identite.business_type,
-            identite_country: extract.fields.identite.country,
-            offre_services: extract.fields.offre.services,
-            scan: extract.source.scan,
-            raw_identite_keys: Object.keys(mergedData.identite || {}),
-            raw_identite_name_type: typeof mergedData.identite?.name,
-            raw_identite_name_value: JSON.stringify(mergedData.identite?.name)?.substring(0, 200),
-        });
-
         const scoreResult = computeAioScore(extract);
         const newScore = Math.round(scoreResult.total);
 
@@ -349,46 +106,55 @@ export async function POST(req: NextRequest) {
             newScore,
             delta: newScore - oldScore,
             blocks: scoreResult.blocks,
-            audit: scoreResult.audit ? JSON.stringify(scoreResult.audit).substring(0, 500) : 'none',
         });
 
-        // --- Build updated payload ---
-        const updatedPayload = {
-            ...existingPayload,
-            data: mergedData,
-            score: newScore,
-            blocks: scoreResult.blocks,
-            audit: scoreResult.audit,
-            last_client_update: new Date().toISOString(),
-        };
+        // --- Build updated asr_payload to store ---
+        // Preserve original storage structure (wrap in .data if that's how it was stored)
+        let updatedPayload: Record<string, unknown>;
+        if (existingPayload.version && existingPayload.fields) {
+            // Was stored flat — update in-place
+            updatedPayload = {
+                ...existingPayload,
+                ...extract,
+                score: newScore,
+                blocks: scoreResult.blocks,
+                last_client_update: new Date().toISOString(),
+            };
+        } else {
+            // Was stored as { data: <extract>, ... }
+            updatedPayload = {
+                ...existingPayload,
+                data: extract,
+                score: newScore,
+                blocks: scoreResult.blocks,
+                last_client_update: new Date().toISOString(),
+            };
+        }
 
-        // --- Calculate next review due date (NOW + 365 days) ---
+        // --- Calculate next review due date ---
         const nextReviewDue = new Date();
         nextReviewDue.setDate(nextReviewDue.getDate() + 365);
 
         // --- Extract top-level fields for Supabase columns ---
+        const identite = extract.fields?.identite;
+        const offre = extract.fields?.offre;
+
         const displayName =
-            mergedData.identite?.name?.value ||
-            mergedData.identite?.legal_name?.value ||
+            identite?.name?.value ||
+            identite?.legal_name?.value ||
             entity.display_name;
         const legalName =
-            mergedData.identite?.legal_name?.value ||
-            mergedData.identite?.name?.value ||
+            identite?.legal_name?.value ||
+            identite?.name?.value ||
             entity.legal_name;
-        const country = mergedData.identite?.country?.value || entity.country_legal;
-        const contactEmail =
-            mergedData.identite?.contact_email?.value || entity.contact_email;
-
-        // Resolve sector from business_type or first service
-        const businessType = mergedData.identite?.business_type?.value || '';
-        const firstService = mergedData.offre?.services?.value?.[0] || '';
+        const country = identite?.country?.value || entity.country_legal;
+        const contactEmail = identite?.contact_email?.value || entity.contact_email;
+        const businessType = (identite?.business_type?.value as string) || '';
+        const firstService = (offre?.services?.value as string[])?.[0] || '';
         const sector = businessType || firstService || entity.sector_macro;
 
         // --- Update Supabase ---
-        // NOTE: Only include columns that EXIST in aya_registry table.
-        // Columns like next_review_due, renewal_reminder_sent are planned
-        // but not yet created — will be added in Sprint 8 (Session 7).
-        const updateFields: Record<string, any> = {
+        const updateFields: Record<string, unknown> = {
             display_name: displayName,
             legal_name: legalName,
             sector_macro: sector,
@@ -427,8 +193,10 @@ export async function POST(req: NextRequest) {
             newScore,
             nextReviewDue: nextReviewDue.toISOString(),
         });
-    } catch (error: any) {
-        logger.error('UPDATE_ERROR', error.message || 'Unknown error');
+
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        logger.error('UPDATE_ERROR', message);
         return NextResponse.json(
             { error: 'Une erreur est survenue lors de la mise a jour' },
             { status: 500 }
