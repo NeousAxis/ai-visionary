@@ -41,7 +41,7 @@ function formatNumber(n: number) {
 }
 
 export default function StatsBar() {
-    const [target, setTarget] = useState({ total: 3300, countries: 70 });
+    const [target, setTarget] = useState({ total: 0, countries: 0 });
 
     useEffect(() => {
         fetch('/api/aya/stats')
