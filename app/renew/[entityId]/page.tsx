@@ -70,7 +70,7 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
             url,
             email,
             score: entity.asr_score || 0,
-            data: { fields, blocks: payload?.blocks || {} },
+            data: { fields, blocks: payload?.blocks || {}, aya_entity_id: entityId },
         });
     }
 

@@ -347,6 +347,9 @@ export async function POST(req: Request) {
             }
         }
 
+        // Extract existing AYA entity ID if saved during renew flow (page.tsx embeds it)
+        const existingAyaEntityId: string = (dbAnalysis as any)?.data?.aya_entity_id || '';
+
         let analysisData: { score: number; extract: Record<string, unknown>; url: string; blocks?: Record<string, number> };
 
         if (dbAnalysis) {
@@ -428,6 +431,7 @@ export async function POST(req: Request) {
         try {
             const { registerOrUpdateEntity } = await import('@/lib/aya/registry');
             ayaId = await registerOrUpdateEntity({
+                ...(existingAyaEntityId ? { aya_entity_id: existingAyaEntityId } : {}),
                 legal_name: entityName,
                 display_name: entityName,
                 entity_type: resolvedEntityType,
@@ -438,7 +442,7 @@ export async function POST(req: Request) {
                 contact_email: customerEmail,
                 asr_payload: { data: analysisData.extract } as any
             }, packType === 'AYA_SUB' ? 'subscription' : 'purchase');
-            logger.info('WEBHOOK_AYA_OK', `AYA registered: ${ayaId} (${entityName})`, { ayaId, entityName });
+            logger.info('WEBHOOK_AYA_OK', `AYA registered: ${ayaId} (${entityName})`, { ayaId, entityName, existingAyaEntityId });
         } catch (e: unknown) {
             const message = e instanceof Error ? e.message : 'Unknown error';
             logger.error('WEBHOOK_AYA_ERROR', message, { session_id });
@@ -446,6 +450,7 @@ export async function POST(req: Request) {
             try {
                 const { registerOrUpdateEntity } = await import('@/lib/aya/registry');
                 ayaId = await registerOrUpdateEntity({
+                    ...(existingAyaEntityId ? { aya_entity_id: existingAyaEntityId } : {}),
                     legal_name: entityName,
                     display_name: entityName,
                     entity_type: resolvedEntityType,
