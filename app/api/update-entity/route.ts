@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
         );
         if (providedBlocks.length === 0) {
             return NextResponse.json(
-                { error: 'Au moins un bloc valide requis (identite, offre, processus_methodes, etc.)' },
+                { error: 'Aucune modification detectee. Modifiez au moins un champ avant d\'enregistrer.' },
                 { status: 400 }
             );
         }
