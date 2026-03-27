@@ -205,6 +205,8 @@ function determineFormQuality(
 ): Quality {
   if (typeof value === "boolean") return 0.5;
   if (fieldType === "date") return 1;
+  // Select fields (country, sector) are structured choices — always q=1
+  if (fieldType === "select") return 1;
   if (Array.isArray(value)) return value.length >= 2 ? 1 : 0.5;
   if (typeof value === "string") return value.trim().length >= 10 ? 1 : 0.5;
   return 0.5;

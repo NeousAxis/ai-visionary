@@ -42,6 +42,8 @@ export default function UpdateFormClient({
   const [unlockedUrls, setUnlockedUrls] = useState<Set<string>>(new Set());
   // Track which fields the user has actually modified (dirty tracking)
   const [dirtyFields, setDirtyFields] = useState<Set<string>>(new Set());
+  // Track fields marked as "Non applicable" by the user
+  const [naFields, setNaFields] = useState<Set<string>>(new Set());
 
   // ---- helpers ----
 
@@ -114,6 +116,16 @@ export default function UpdateFormClient({
       let hasChanges = false;
       for (const field of block.fields) {
         if (field.type === 'readonly') continue;
+
+        // Fields marked "Non applicable" → always count as a change, but don't
+        // send the value to the server (preserve existing data until the AIO
+        // engine supports explicit N/A signaling — see CLAUDE.md chantier).
+        const naKey = `${block.key}.${field.name}`;
+        if (naFields.has(naKey)) {
+          hasChanges = true; // user explicitly declared N/A — always a change
+          continue;          // don't overwrite existing data in the payload
+        }
+
         let v = vals[field.name];
         const initV = initVals[field.name];
 
@@ -560,35 +572,108 @@ export default function UpdateFormClient({
 
           // -- array (textarea, one item per line) --
           if (field.type === 'array') {
-            const textValue = Array.isArray(value) ? value.join('\n') : (value || '');
+            const naKey = `${blockKey}.${field.name}`;
+            const isNA = naFields.has(naKey);
+            const textValue = isNA ? '' : (Array.isArray(value) ? value.join('\n') : (value || ''));
             return (
               <div key={field.name} style={fieldWrapStyle}>
-                <label style={labelStyle}>{field.label}</label>
-                <textarea
-                  value={textValue}
-                  onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
-                  rows={4}
-                  style={{ ...inputStyle, resize: 'vertical' }}
-                  placeholder={field.placeholder || 'Un element par ligne'}
-                />
-                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>{field.label}</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNaFields(prev => {
+                        const next = new Set(prev);
+                        if (next.has(naKey)) {
+                          next.delete(naKey);
+                        } else {
+                          next.add(naKey);
+                          // Clear the field value when marking N/A
+                          setBlockValue(blockKey, field.name, []);
+                        }
+                        return next;
+                      });
+                    }}
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: '600',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      border: isNA ? '1px solid #4A919E' : '1px solid #d1d5db',
+                      background: isNA ? '#E0F2F1' : '#fff',
+                      color: isNA ? '#4A919E' : '#9ca3af',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {isNA ? '✓ Non applicable' : 'Non applicable'}
+                  </button>
+                </div>
+                {isNA ? (
+                  <div style={{
+                    ...inputStyle,
+                    background: '#f9fafb',
+                    color: '#9ca3af',
+                    fontStyle: 'italic',
+                    padding: '12px 14px',
+                  }}>
+                    Ce champ ne s'applique pas a votre activite.
+                  </div>
+                ) : (
+                  <textarea
+                    value={textValue}
+                    onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                    rows={4}
+                    style={{ ...inputStyle, resize: 'vertical' }}
+                    placeholder={field.placeholder || 'Un element par ligne'}
+                  />
+                )}
+                {!isNA && field.hint && <p style={hintStyle}>{field.hint}</p>}
               </div>
             );
           }
 
           // -- textarea --
           if (field.type === 'textarea') {
+            const naKey = `${blockKey}.${field.name}`;
+            const isNA = naFields.has(naKey);
             return (
               <div key={field.name} style={fieldWrapStyle}>
-                <label style={labelStyle}>{field.label}</label>
-                <textarea
-                  value={value || ''}
-                  onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
-                  rows={3}
-                  style={{ ...inputStyle, resize: 'vertical' }}
-                  placeholder={field.placeholder}
-                />
-                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>{field.label}</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNaFields(prev => {
+                        const next = new Set(prev);
+                        if (next.has(naKey)) next.delete(naKey);
+                        else { next.add(naKey); setBlockValue(blockKey, field.name, ''); }
+                        return next;
+                      });
+                    }}
+                    style={{
+                      fontSize: '0.7rem', fontWeight: '600', padding: '2px 8px', borderRadius: '4px',
+                      border: isNA ? '1px solid #4A919E' : '1px solid #d1d5db',
+                      background: isNA ? '#E0F2F1' : '#fff',
+                      color: isNA ? '#4A919E' : '#9ca3af', cursor: 'pointer',
+                    }}
+                  >
+                    {isNA ? '✓ Non applicable' : 'Non applicable'}
+                  </button>
+                </div>
+                {isNA ? (
+                  <div style={{ ...inputStyle, background: '#f9fafb', color: '#9ca3af', fontStyle: 'italic' }}>
+                    Ce champ ne s'applique pas a votre activite.
+                  </div>
+                ) : (
+                  <textarea
+                    value={value || ''}
+                    onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                    rows={3}
+                    style={{ ...inputStyle, resize: 'vertical' }}
+                    placeholder={field.placeholder}
+                  />
+                )}
+                {!isNA && field.hint && <p style={hintStyle}>{field.hint}</p>}
               </div>
             );
           }

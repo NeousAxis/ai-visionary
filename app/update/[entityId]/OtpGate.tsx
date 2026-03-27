@@ -17,10 +17,10 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Mask the entity email for display: only show domain extension
-  // e.g. "info@eclore-asso.org" → "****@****.org"
-  const maskedEmail = entityEmail
-    ? entityEmail.replace(/^.+@.+(\.\w+)$/, '****@****$1')
+  // Show only the domain extension as hint (e.g. "****@****.org")
+  // Never reveal the actual email prefix to avoid easy reconstruction.
+  const emailDomainHint = entityEmail
+    ? entityEmail.replace(/^[^@]+@[^.]+(\.\w+(?:\.\w+)*)$/, '****@****$1')
     : '';
 
   const handleSendOtp = async () => {
@@ -30,15 +30,10 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
       return;
     }
 
-    // Check email matches entity (case-insensitive)
-    if (email.trim().toLowerCase() !== entityEmail.toLowerCase()) {
-      setError('Cet email ne correspond pas a celui enregistre pour cette entite.');
-      return;
-    }
-
+    // No client-side email check — the server validates against both
+    // the registration email (analyses table) and the contact email.
     setLoading(true);
     try {
-      // Send OTP directly to the verified email address
       const res = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -131,7 +126,7 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
 
       <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
         {step === 'email'
-          ? <>Pour modifier les donnees de <strong>{entityName}</strong>, veuillez confirmer votre email{maskedEmail ? <> ({maskedEmail})</> : ''}.</>
+          ? <>Pour modifier les donnees de <strong>{entityName}</strong>, entrez l&apos;adresse email utilisee lors de votre inscription{emailDomainHint ? <> (se termine par {emailDomainHint.replace(/^\*{4}@\*{4}/, '')})</> : ''}.</>
           : <>Un code a 6 chiffres a ete envoye a <strong>{email}</strong>. Verifiez votre boite de reception.</>
         }
       </p>
