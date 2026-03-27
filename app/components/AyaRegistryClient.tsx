@@ -24,6 +24,20 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
 const getEntityId = (e: any): string => e.entity_id || e.aya_entity_id || e.id || '';
 const isCertified = (entity: any) => entity.payment_completed === true;
 
+/** Strip leading emojis/symbols and detect garbage names (Python lists, template artifacts). */
+function cleanDisplayName(name: string, fallback?: string): string {
+    if (!name) return fallback || 'Entité';
+    // Reject Python list artifacts: ['Home', 'Phones', ...]
+    if (/^\[['"]/.test(name)) return fallback || 'Entité';
+    // Reject template engine artifacts: {{ __('..., {%
+    if (/^\{\{/.test(name) || /^\{%/.test(name)) return fallback || 'Entité';
+    // Strip leading emojis (Unicode emoji ranges)
+    let cleaned = name.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}]+\s*/gu, '');
+    // Strip leading special chars: |, #, !, musical notes, etc.
+    cleaned = cleaned.replace(/^[|#!\s]+/, '').trim();
+    return cleaned || fallback || name;
+}
+
 interface AyaRegistryClientProps {
     entities: any[];
     totalEntities: number;
@@ -242,7 +256,7 @@ export default function AyaRegistryClient({
                                         {/* NAME */}
                                         <Link href={`/aya/e/${getEntityId(entity)}`} style={{ textDecoration: 'none' }}>
                                             <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: 'var(--text-main)', cursor: 'pointer' }}>
-                                                {entity.display_name || entity.legal_name || "Entit\u00e9"}
+                                                {cleanDisplayName(entity.display_name || entity.legal_name, entity.website?.replace(/^https?:\/\//, '').split('/')[0])}
                                             </h3>
                                         </Link>
 

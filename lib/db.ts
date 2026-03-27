@@ -720,6 +720,16 @@ export const database = {
                 query = query.eq('payment_completed', true);
             }
 
+            // Exclude NSFW and garbage entries
+            query = query
+                .not('display_name', 'ilike', '%porn%')
+                .not('display_name', 'ilike', '% sex %')
+                .not('display_name', 'ilike', '%xxx%')
+                .not('display_name', 'ilike', '%escort%')
+                .not('display_name', 'ilike', '%onlyfans%')
+                .not('display_name', 'ilike', "['%")   // Python lists
+                .not('display_name', 'ilike', '{{%');  // Template artifacts
+
             // Apply sort order
             if (sort === 'alpha') {
                 query = query.order('display_name', { ascending: true, nullsFirst: false });
