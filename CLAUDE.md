@@ -2023,4 +2023,5 @@ Les données AYA existent sur **4 sources convergentes** (principe : "si un LLM 
 | Page renouvellement `/renew/[entityId]` : finaliser avec Stripe Checkout | 🟡 Haute |
 | Tester le flux OTP complet (envoi email réel via Resend) | 🔴 Critique |
 | Tester la régénération des fichiers ASR après mise à jour | 🟡 Haute |
+| **Moteur AIO : champs "non applicable"** — Quand un client déclare explicitement qu'un champ ne s'applique pas (ex: "pas de produit" pour une asso qui ne vend que des services), ce champ doit sortir du calcul du bloc. Son poids est redistribué sur les autres champs du même bloc. Ce n'est PAS un champ "manquant" (q=0), c'est un champ "déclaré non applicable". Affecte `aio-score-engine.ts` (moteur) + `chat/route.ts` (questionnaire AYO) + `update-entity/route.ts` (mise à jour). Chaque champ array/texte du formulaire devrait avoir une option "Non applicable" qui marque le champ comme `n/a` au lieu de vide. **Attention** : ne pas confondre avec "je ne sais pas" (= manquant, pénalisable) vs "ça ne s'applique pas à mon activité" (= non applicable, neutre). | 🔴 Critique |
 | Dashboard client (futur) : espace personnel OTP | 🟢 Moyenne |
