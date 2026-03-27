@@ -208,6 +208,15 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                 <p style={{ fontSize: '1rem', lineHeight: '1.7', color: 'var(--text-body)' }}>
                     {buildPlainTextDescription(entity)}
                 </p>
+                {!isCertified && (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                        ⚠️ Cette fiche a été générée automatiquement par le bot AYA. Les informations peuvent être inexactes.{' '}
+                        <Link href="/diagnostic" style={{ color: 'var(--primary-color)', textDecoration: 'underline' }}>
+                            Revendiquez cette fiche
+                        </Link>{' '}
+                        pour corriger et certifier vos données.
+                    </p>
+                )}
             </section>
 
             {/* MAIN CONTENT - REUSING GRID & CARDS */}
