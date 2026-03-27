@@ -40,6 +40,8 @@ export default function UpdateFormClient({
   const [regenError, setRegenError] = useState('');
   // Track which url_locked fields are unlocked for editing
   const [unlockedUrls, setUnlockedUrls] = useState<Set<string>>(new Set());
+  // Track which fields the user has actually modified (dirty tracking)
+  const [dirtyFields, setDirtyFields] = useState<Set<string>>(new Set());
 
   // ---- helpers ----
 
@@ -50,6 +52,7 @@ export default function UpdateFormClient({
 
   const setBlockValue = useCallback(
     (blockKey: string, fieldName: string, value: unknown) => {
+      setDirtyFields(prev => new Set(prev).add(`${blockKey}.${fieldName}`));
       setFormData(prev => ({
         ...prev,
         [blockKey]: { ...prev[blockKey], [fieldName]: value },
@@ -101,13 +104,17 @@ export default function UpdateFormClient({
     setStatus('loading');
     setErrorMessage('');
 
-    // Build payload: convert array textareas back to arrays
+    // Build payload: ONLY include fields the user actually modified (dirty)
     const blocks: Record<string, Record<string, unknown>> = {};
     for (const block of blockDefinitions) {
       const vals = formData[block.key] || {};
       const cleaned: Record<string, unknown> = {};
+      let hasChanges = false;
       for (const field of block.fields) {
         if (field.type === 'readonly') continue;
+        const fieldKey = `${block.key}.${field.name}`;
+        // Only include fields the user actually touched
+        if (!dirtyFields.has(fieldKey)) continue;
         let v = vals[field.name];
         if (field.type === 'array' && typeof v === 'string') {
           v = v
@@ -116,8 +123,11 @@ export default function UpdateFormClient({
             .filter(Boolean);
         }
         cleaned[field.name] = v;
+        hasChanges = true;
       }
-      blocks[block.key] = cleaned;
+      if (hasChanges) {
+        blocks[block.key] = cleaned;
+      }
     }
 
     try {

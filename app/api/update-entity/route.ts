@@ -75,14 +75,22 @@ function mergeBlocksIntoPayload(
             // Skip null/undefined values (don't overwrite existing data)
             if (rawValue === null || rawValue === undefined) continue;
 
-            // Skip empty strings
+            // Skip empty strings — never overwrite existing data with empty
             if (typeof rawValue === 'string' && rawValue.trim() === '') continue;
 
-            // Skip empty arrays
+            // Skip empty arrays — never overwrite existing data with empty
             if (Array.isArray(rawValue) && rawValue.length === 0) continue;
 
-            // Bug 7 fix: do NOT skip false booleans — false is a valid value
-            // (the checks above already handle null/undefined/empty string)
+            // CRITICAL FIX: For boolean false, only write it if existing
+            // value was also boolean (don't downgrade a true→false silently).
+            // If the existing field has value=true and form sends false,
+            // that means the user actively toggled it OFF → allow.
+            // But if there's no existing field at all, false is just a default → skip.
+            if (typeof rawValue === 'boolean' && rawValue === false) {
+                const existingFieldValue = existingBlock[field]?.value;
+                // Only write false if there was a previous true (user toggled OFF)
+                if (existingFieldValue !== true) continue;
+            }
 
             // Bug 5 fix: determine q value based on content quality
             const q = determineQuality(rawValue);
