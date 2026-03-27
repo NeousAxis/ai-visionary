@@ -124,21 +124,31 @@ function buildExtractFromData(
     const get = (block: string, field: string) => data?.[block]?.[field];
 
     // Determine scan flags from entity metadata
+    // The scan object uses camelCase keys (from aio-scanner.ts)
     const asrPayload = entity.asr_payload || {};
     const scanData = asrPayload.scan || {};
+
+    // Helper: check if a field has a truthy value (boolean true OR non-empty string)
+    const hasTruthyValue = (block: string, field: string): boolean => {
+        const node = get(block, field);
+        if (!node) return false;
+        const v = node.value ?? node;
+        return v === true || (typeof v === 'string' && v.trim().length > 0);
+    };
 
     return {
         version: 'AYO-EXTRACT-3.0',
         source: {
             url: entity.website || '',
             scan: {
-                is_reachable: scanData.is_reachable ?? true,
-                has_jsonld: scanData.has_jsonld ?? (get('structure_technique', 'has_jsonld')?.value === true),
-                jsonld_count: scanData.jsonld_count ?? null,
-                has_asr_file: scanData.has_asr_file ?? (get('structure_technique', 'has_asr')?.value === true),
-                has_faq_content: scanData.has_faq_content ?? (get('contenus_pedagogiques', 'has_faq')?.value === true),
-                has_faq_schema: scanData.has_faq_schema ?? false,
-                is_aya_registered: entity.payment_completed === true,
+                // Support both camelCase (from scanner) and snake_case
+                is_reachable: scanData.isReachable ?? scanData.is_reachable ?? true,
+                has_jsonld: scanData.hasJsonLd ?? scanData.has_jsonld ?? hasTruthyValue('structure_technique', 'has_jsonld'),
+                jsonld_count: scanData.jsonLdCount ?? scanData.jsonld_count ?? null,
+                has_asr_file: scanData.hasAsrFile ?? scanData.has_asr_file ?? hasTruthyValue('structure_technique', 'has_asr'),
+                has_faq_content: scanData.hasFaqContent ?? scanData.has_faq_content ?? hasTruthyValue('contenus_pedagogiques', 'has_faq'),
+                has_faq_schema: scanData.hasFaqSchema ?? scanData.has_faq_schema ?? false,
+                is_aya_registered: scanData.isAyaRegistered ?? entity.payment_completed === true,
             },
         },
         fields: {
