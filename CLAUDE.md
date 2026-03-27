@@ -324,7 +324,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | **Session 5** | Sprint 6 | ✅ Fix webhook + Bug Score 0 + emails + fusion PaymentHandler | ~3h | 🟡 Moyen | Non |
 | **Session 6** | Sprint 7 | ❌ Modules sémantiques — affiner les sanitizers, améliorer la qualité des 5 fichiers Pack PRO | ~3h | 🟡 Moyen | Non |
 | **Session 7** | Sprint 8 | ✅ Formulaire MAJ client 7 blocs + OTP + email PRO/AYA + boutons Mettre à jour/Renouveler + qualité registre | ~3h | 🟡 Moyen | Non |
-| **Session 8** | Sprint 9 + 10 | ❌ UI/SEO/sitemap/robots + pages légales + tests E2E automatisés + nettoyage | ~3h | 🟢 Faible | Non |
+| **Session 8** | Sprint 9 + 10 | ❌ UI/SEO/sitemap/robots + pages légales complètes (LPD suisse) + sitemap dynamique + tests E2E + nettoyage code mort | ~3h | 🟢 Faible | Non |
 
 **Protocole pour chaque session** :
 1. Vérifier la branche : `git checkout fix/remediation`
@@ -349,7 +349,8 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 5 | ✅ **TERMINÉE** | 2026-03-15 | PaymentSuccessModal: stop calling webhook from browser (UX fix — users saw false "erreur technique"). Webhook: refuse empty generation, send apology email + return 422. Light-report: remove fake block scores. create-checkout: include analysisId in client_reference_id. |
 | Session 6 | ✅ **TERMINÉE** | 2026-03-24 | Modules sémantiques — sanitizers fichiers PRO, ayo-semantics, external-context DÉJÀ FAITS. **NE PLUS TOUCHER AU PACK PRO NI À AYO.** |
 | Session 7 | ✅ **TERMINÉE** | 2026-03-27 | Formulaire MAJ 7 blocs + OTP gate + email PRO (ZIP fichiers) + email AYA (confirmation) + boutons Mettre à jour/Renouveler sur certificats + disclaimer INDEXÉ + filtre NSFW registre + `cleanDisplayName()` (emojis, japonais, listes Python) + StatsBar 0→4400+ animation immédiate. Branche `main`. |
-| Session 8 | ✅ **TERMINÉE** | 2026-03-27 | Fix webhook flux renouvellement : recalcul blocs AIO depuis fields quand blocks={} (renew flow). Template email dédié `buildAyaSubEmailHtml` (score + blocs + certificat, sans contenu PRO). Template PRO inchangé. PRO ✅ + AYA sub ✅ confirmés en test. |
+| **Fix Webhook Renew** | ✅ **TERMINÉ** | 2026-03-27 | Fix flux renouvellement complet : page /renew + RenewButtons (POST create-checkout) + recalcul blocs AIO depuis fields quand blocks={} + `buildAyaSubEmailHtml` dédié (score + blocs + certificat AYA, sans contenu PRO) + `existingAyaEntityId` passé au registry (update au lieu de créer). PRO ✅ + AYA sub ✅ confirmés en test. |
+| Session 8 | ❌ Pas commencée | — | UI/SEO + mentions légales complètes + sitemap dynamique + tests E2E |
 | **Bot AYA** | ✅ **LIVE** | 2026-03-24 | **~3000+ entités** dans Supabase (5430 domaines scrapés, 6672 dans domains.txt). API compacte (6 champs LLM). Keywords auto extraits. 9 IA connectées (ChatGPT GPT Store, Claude MCP, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama). OpenAPI spec + ai-plugin.json + MCP server. Fix certificat (INDEXÉ au lieu d'EXPIRÉ, date epoch, keywords). README GitHub rewrite "AYA inside". Page /developers avec 9 IA + fichiers intégration. **→ Voir section 16 pour le reste** |
 | **Signal LLM** | ✅ **TERMINÉ** | 2026-03-25 | 4 chantiers Signal LLM : endpoint `/api/aya/llm/{domain}`, texte brut certificats, export GitHub dataset, domination Web3/AI. Enrichissement Gemini 3339/3339 (EN+FR). Filtre garbage 120 termes. 57 noms mojibake fixés. 3 entités supprimées. Trigger Supabase droppé. GitHub dataset public (3306 fichiers). HuggingFace ré-exporté. Mots-clés Gemini 3338/3339 (fix_keywords.py). Pagination serveur /aya (20/page, URL-based). Cache CDN 4 routes API. BackButton certificats. `AyaRegistryClient.tsx` composant client. **→ Voir sections 18 + 18.9** |
 
