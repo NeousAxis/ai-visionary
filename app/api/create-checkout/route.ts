@@ -5,18 +5,15 @@ import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { emailSchema, urlSchema } from '@/lib/validators';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 // SECURITY: Stripe Price IDs from env vars (no hardcoded secrets)
-// ┌──────────────────────────────────────────────────────────────┐
-// │ Produit Stripe         │ Tarif         │ Env var             │
-// ├──────────────────────────────────────────────────────────────┤
-// │ PACK PLATEFORME        │ 19 CHF/mois   │ STRIPE_PRICE_AYA   │
-// │ PACK PRO               │ 499 CHF       │ STRIPE_PRICE_PRO   │
-// └──────────────────────────────────────────────────────────────┘
-// packType côté frontend : 'AYA_SUB' → PACK PLATEFORME, 'PRO' → PACK PRO
-// Payment Links are configured via STRIPE_LINK_* env vars
 const PRICE_AYA = process.env.STRIPE_PRICE_AYA || process.env.STRIPE_PRICE_AYA_SUB || '';
 const PRICE_PRO = process.env.STRIPE_PRICE_PRO || '';
+
+// Initialize Stripe once at module level (connection pool reuse, avoids cold-start reconnects)
+const stripeKey = process.env.STRIPE_SECRET_KEY || '';
+const stripe = stripeKey ? new Stripe(stripeKey, { maxNetworkRetries: 1 }) : null;
 
 /**
  * 🛒 CREATE STRIPE CHECKOUT SESSION
@@ -52,11 +49,9 @@ export async function GET(req: NextRequest) {
 
     logger.info('CHECKOUT_GET_START', `Creating checkout for ${email}`, { packType });
 
-    try {
-        const stripeKey = process.env.STRIPE_SECRET_KEY;
-        if (!stripeKey) throw new Error('Stripe not configured');
-        const stripe = new Stripe(stripeKey);
+    if (!stripe) return new Response('Stripe not configured', { status: 500 });
 
+    try {
         const payload: Record<string, string> = { u: url, e: email };
         if (analysisId) payload.aid = analysisId;
         const clientReferenceId = Buffer.from(JSON.stringify(payload)).toString('base64');
@@ -71,7 +66,6 @@ export async function GET(req: NextRequest) {
             priceId = PRICE_PRO;
             mode = 'payment';
         } else {
-            // Unknown pack type — reject
             logger.warn('CHECKOUT_UNKNOWN_PACK', `Unknown packType: ${packType}`);
             return new Response('Pack inconnu', { status: 400 });
         }
@@ -82,7 +76,7 @@ export async function GET(req: NextRequest) {
         }
 
         const session = await stripe.checkout.sessions.create({
-            mode: mode,
+            mode,
             line_items: [{ price: priceId, quantity: 1 }],
             success_url: `https://ai-visionary.com?session_id={CHECKOUT_SESSION_ID}&pack=${packType === 'PRO' ? 'pro' : 'plateforme'}`,
             cancel_url: 'https://ai-visionary.com',
@@ -94,8 +88,8 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.redirect(session.url!);
     } catch (e: any) {
-        logger.error('CHECKOUT_GET_ERROR', e?.message || 'Unknown Stripe error', { packType, email });
-        return new Response(`Erreur lors de la creation du paiement: ${e?.message || 'inconnu'}`, { status: 500 });
+        logger.error('CHECKOUT_GET_ERROR', `${e?.type || 'unknown'}: ${e?.message}`, { packType });
+        return new Response(`Erreur Stripe (${e?.type || 'connection'}): ${e?.message || 'inconnu'}`, { status: 500 });
     }
 }
 
@@ -123,12 +117,9 @@ export async function POST(req: NextRequest) {
 
         logger.info('CHECKOUT_POST_START', `Creating checkout for ${email}`, { packType });
 
-        const stripeKey = process.env.STRIPE_SECRET_KEY;
-        if (!stripeKey) {
+        if (!stripe) {
             return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 });
         }
-
-        const stripe = new Stripe(stripeKey);
 
         // Encode URL + Email + AnalysisId in Base64 for client_reference_id
         const payload: Record<string, string> = { u: url, e: email };
@@ -186,9 +177,9 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: any) {
-        logger.error('CHECKOUT_ERROR', error.message || 'Unknown error');
+        logger.error('CHECKOUT_ERROR', `${error?.type || 'unknown'}: ${error?.message}`, { code: error?.code });
         return NextResponse.json({
-            error: 'Erreur lors de la creation du paiement'
+            error: `Stripe ${error?.type || 'error'}: ${error?.message || 'inconnu'}`
         }, { status: 500 });
     }
 }

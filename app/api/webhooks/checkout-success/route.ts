@@ -394,6 +394,7 @@ export async function POST(req: Request) {
                 sector_macro: resolvedSector,
                 website: analysisData.url,
                 asr_score: Math.round(analysisData.score || 0),
+                contact_email: customerEmail,
                 asr_payload: { data: analysisData.extract } as any
             }, packType === 'AYA_SUB' ? 'subscription' : 'purchase');
             logger.info('WEBHOOK_AYA_OK', `AYA registered: ${ayaId} (${entityName})`, { ayaId, entityName });
@@ -411,6 +412,7 @@ export async function POST(req: Request) {
                     sector_macro: resolvedSector,
                     website: analysisData.url,
                     asr_score: Math.round(analysisData.score || 0),
+                    contact_email: customerEmail,
                     asr_payload: { data: analysisData.extract } as any
                 }, packType === 'AYA_SUB' ? 'subscription' : 'purchase');
                 logger.info('WEBHOOK_AYA_RETRY_OK', `AYA retry success: ${ayaId}`, { ayaId });

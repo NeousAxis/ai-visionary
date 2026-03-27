@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
+import RenewButtons from './RenewButtons';
 import type { Metadata } from 'next';
 
 export const revalidate = 0;
@@ -37,7 +38,16 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
 
     const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : null;
     const isCertified = entity.payment_completed === true;
-    const packType = entity.pack_type || (entity.stripe_product_id?.includes('PRO') ? 'PRO' : 'PLATEFORME');
+
+    // Detect pack type: pack_type in DB is often null, so use valid_until as heuristic
+    // PRO = 3 years (>13 months away), PLATEFORME = monthly (<2 months)
+    const rawPackType = entity.pack_type || '';
+    const isProByPackType = rawPackType && ['pro', 'pack pro', 'pack_pro'].includes(rawPackType.toLowerCase());
+    const validUntilDate = entity.valid_until ? new Date(entity.valid_until) : null;
+    const monthsUntilExpiry = validUntilDate ? (validUntilDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30) : 0;
+    const isProByDate = monthsUntilExpiry > 12; // PRO = 3 years = ~36 months
+    const isPro = isProByPackType || isProByDate;
+    const packLabel = isCertified ? (isPro ? 'PRO' : 'PLATEFORME') : 'INDEXE';
 
     // Expiry date
     const validUntilRaw = entity.valid_until ? new Date(entity.valid_until) : null;
@@ -47,17 +57,9 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
         ? validUntilRaw.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
         : '\u2014';
 
-    // Build checkout URLs — if email missing, redirect to diagnostic instead
     const email = entity.contact_email || entity.email || '';
     const url = entity.website || '';
-    const hasRequiredInfo = email && url;
-    const checkoutBase = `/api/create-checkout`;
-    const proCheckoutUrl = hasRequiredInfo
-        ? `${checkoutBase}?email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&packType=PRO&aid=${entityId}`
-        : `/diagnostic`;
-    const ayaCheckoutUrl = hasRequiredInfo
-        ? `${checkoutBase}?email=${encodeURIComponent(email)}&url=${encodeURIComponent(url)}&packType=AYA_SUB&aid=${entityId}`
-        : `/diagnostic`;
+    const hasRequiredInfo = !!(email && url);
 
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
@@ -107,7 +109,7 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                             <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>
                                 <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>Pack</p>
                                 <p style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1.1rem' }}>
-                                    {isCertified ? (packType === 'PRO' ? 'PRO' : 'PLATEFORME') : 'INDEXE'}
+                                    {packLabel}
                                 </p>
                             </div>
                             <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>
@@ -144,117 +146,12 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                     </div>
 
                     {/* Renewal options */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-
-                        {/* PRO Card */}
-                        <div className="card" style={{ position: 'relative', border: '2px solid #D97706' }}>
-                            <div style={{
-                                position: 'absolute',
-                                top: '-12px',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                background: '#D97706',
-                                color: 'white',
-                                padding: '4px 12px',
-                                borderRadius: '20px',
-                                fontSize: '0.75rem',
-                                fontWeight: 'bold',
-                                whiteSpace: 'nowrap',
-                            }}>
-                                RECOMMANDE
-                            </div>
-                            <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
-                                <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontSize: '1.2rem' }}>Pack PRO</h4>
-                                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#D97706', marginBottom: '0.25rem' }}>499 CHF</p>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>paiement unique</p>
-
-                                <ul style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-body)', listStyle: 'none', padding: '0', marginBottom: '1.5rem' }}>
-                                    <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        5 fichiers ASR complets
-                                    </li>
-                                    <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        3 ans de registre AYA inclus
-                                    </li>
-                                    <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        Propriete totale des fichiers
-                                    </li>
-                                    <li style={{ display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        Score AIO recalcule
-                                    </li>
-                                </ul>
-
-                                <a
-                                    href={proCheckoutUrl}
-                                    style={{
-                                        display: 'block',
-                                        width: '100%',
-                                        padding: '12px',
-                                        background: '#D97706',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: 'var(--radius-sm)',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 'bold',
-                                        textDecoration: 'none',
-                                        textAlign: 'center',
-                                    }}
-                                >
-                                    Renouveler Pack PRO
-                                </a>
-                            </div>
-                        </div>
-
-                        {/* AYA Sub Card */}
-                        <div className="card" style={{ border: '2px solid var(--primary-color)' }}>
-                            <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
-                                <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontSize: '1.2rem' }}>Abonnement AYA</h4>
-                                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '0.25rem' }}>19 CHF</p>
-                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>par mois</p>
-
-                                <ul style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-body)', listStyle: 'none', padding: '0', marginBottom: '1.5rem' }}>
-                                    <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        Registre AYA actif
-                                    </li>
-                                    <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        ASR heberge par AI Visionary
-                                    </li>
-                                    <li style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        Mises a jour incluses
-                                    </li>
-                                    <li style={{ display: 'flex', alignItems: 'start', gap: '8px' }}>
-                                        <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
-                                        Priorite IA
-                                    </li>
-                                </ul>
-
-                                <a
-                                    href={ayaCheckoutUrl}
-                                    style={{
-                                        display: 'block',
-                                        width: '100%',
-                                        padding: '12px',
-                                        background: 'var(--primary-color)',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: 'var(--radius-sm)',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 'bold',
-                                        textDecoration: 'none',
-                                        textAlign: 'center',
-                                    }}
-                                >
-                                    S&apos;abonner a AYA
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <RenewButtons
+                        email={email}
+                        url={url}
+                        entityId={entityId}
+                        hasRequiredInfo={hasRequiredInfo}
+                    />
 
                     {/* Footer help */}
                     <div style={{ marginTop: '2rem', textAlign: 'center' }}>

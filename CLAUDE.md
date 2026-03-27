@@ -2,7 +2,7 @@
 
 > **IMPORTANT** : Ce fichier est lu automatiquement par Claude Code à chaque nouvelle conversation.
 > Il contient TOUTE la connaissance nécessaire pour reprendre le travail sur ce projet.
-> Dernière mise à jour : 25 mars 2026, 23h00
+> Dernière mise à jour : 27 mars 2026, 22h00
 
 ---
 
@@ -305,7 +305,7 @@ Le plan complet est dans **`PLAN-ACTION-AYO-COMPLET.md`** (20 sections, ~1460 li
 | Sprint 5 | ✅ Terminé (Session 4, 19-23 mars 2026) |
 | Sprint 6 | ✅ Terminé (Session 5, 15 mars 2026) |
 | Sprint 7 | ✅ Terminé (Session 6, 24 mars 2026) |
-| Sprint 8 | ❌ Pas commencé (Session 7) |
+| Sprint 8 | ✅ Terminé (Session 7, 27 mars 2026) |
 | Sprint 9 | ❌ Pas commencé (Session 8) |
 | Sprint 10 | ❌ Pas commencé (Session 8) |
 
@@ -323,7 +323,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | **Session 4** | Sprint 5 | ✅ **REWRITE QUESTIONNAIRE** — Questions statiques (ENRICHMENT_TEMPLATES), scoring strict, sanitizers fichiers, migration Supabase | ~8h | 🔴 Critique | Fait avec Cyril |
 | **Session 5** | Sprint 6 | ✅ Fix webhook + Bug Score 0 + emails + fusion PaymentHandler | ~3h | 🟡 Moyen | Non |
 | **Session 6** | Sprint 7 | ❌ Modules sémantiques — affiner les sanitizers, améliorer la qualité des 5 fichiers Pack PRO | ~3h | 🟡 Moyen | Non |
-| **Session 7** | Sprint 8 | ❌ Pages AYA + certificat + cycle de vie client (MAJ, renouvellements, crons) — page /aya 404 à créer | ~3h | 🟡 Moyen | Non |
+| **Session 7** | Sprint 8 | ✅ Formulaire MAJ client 7 blocs + OTP + email PRO/AYA + boutons Mettre à jour/Renouveler + qualité registre | ~3h | 🟡 Moyen | Non |
 | **Session 8** | Sprint 9 + 10 | ❌ UI/SEO/sitemap/robots + pages légales + tests E2E automatisés + nettoyage | ~3h | 🟢 Faible | Non |
 
 **Protocole pour chaque session** :
@@ -348,7 +348,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 4 | ✅ **TERMINÉE** | 2026-03-19→23 | Rewrite complet questionnaire : questions statiques (ENRICHMENT_TEMPLATES), migration Firestore→Supabase, scoring strict (cap 78), sanitizers fichiers (form contamination, marketing, Etc., MAJUSCULES), suppression questions de preuve, fix multi-select+Autre, ~400 lignes dead code supprimées (/simplify) |
 | Session 5 | ✅ **TERMINÉE** | 2026-03-15 | PaymentSuccessModal: stop calling webhook from browser (UX fix — users saw false "erreur technique"). Webhook: refuse empty generation, send apology email + return 422. Light-report: remove fake block scores. create-checkout: include analysisId in client_reference_id. |
 | Session 6 | ✅ **TERMINÉE** | 2026-03-24 | Modules sémantiques — sanitizers fichiers PRO, ayo-semantics, external-context DÉJÀ FAITS. **NE PLUS TOUCHER AU PACK PRO NI À AYO.** |
-| Session 7 | 🔄 En cours | 2026-03-27 | Formulaire MAJ client 7 blocs + OTP auth + scoring stable. Branche `feature/client-update-flow`. |
+| Session 7 | ✅ **TERMINÉE** | 2026-03-27 | Formulaire MAJ 7 blocs + OTP gate + email PRO (ZIP fichiers) + email AYA (confirmation) + boutons Mettre à jour/Renouveler sur certificats + disclaimer INDEXÉ + filtre NSFW registre + `cleanDisplayName()` (emojis, japonais, listes Python) + StatsBar 0→4400+ animation immédiate. Branche `main`. |
 | Session 8 | ❌ Pas commencée | — | UI/SEO + mentions légales + sitemap dynamique |
 | **Bot AYA** | ✅ **LIVE** | 2026-03-24 | **~3000+ entités** dans Supabase (5430 domaines scrapés, 6672 dans domains.txt). API compacte (6 champs LLM). Keywords auto extraits. 9 IA connectées (ChatGPT GPT Store, Claude MCP, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama). OpenAPI spec + ai-plugin.json + MCP server. Fix certificat (INDEXÉ au lieu d'EXPIRÉ, date epoch, keywords). README GitHub rewrite "AYA inside". Page /developers avec 9 IA + fichiers intégration. **→ Voir section 16 pour le reste** |
 | **Signal LLM** | ✅ **TERMINÉ** | 2026-03-25 | 4 chantiers Signal LLM : endpoint `/api/aya/llm/{domain}`, texte brut certificats, export GitHub dataset, domination Web3/AI. Enrichissement Gemini 3339/3339 (EN+FR). Filtre garbage 120 termes. 57 noms mojibake fixés. 3 entités supprimées. Trigger Supabase droppé. GitHub dataset public (3306 fichiers). HuggingFace ré-exporté. Mots-clés Gemini 3338/3339 (fix_keywords.py). Pagination serveur /aya (20/page, URL-based). Cache CDN 4 routes API. BackButton certificats. `AyaRegistryClient.tsx` composant client. **→ Voir sections 18 + 18.9** |
@@ -2013,7 +2013,7 @@ Les données AYA existent sur **4 sources convergentes** (principe : "si un LLM 
 | Champs URL modifiables par défaut | Risque de modifier accidentellement les liens | Type `url_locked` : grisé par défaut, bouton crayon pour déverrouiller |
 | Accès non authentifié au formulaire | N'importe qui avec l'entityId pouvait modifier les données | OTP Gate : vérification email avant accès |
 
-### 19.6 Ce qui reste à faire (Session 7 suite)
+### 19.6 Ce qui reste à faire (Session 8)
 
 | Tâche | Priorité |
 |-------|----------|
@@ -2021,7 +2021,66 @@ Les données AYA existent sur **4 sources convergentes** (principe : "si un LLM 
 | Webhooks Stripe : `invoice.payment_failed`, `customer.subscription.deleted` | 🟡 Haute |
 | Expiration Pack PRO (3 ans) : rappels + page renouvellement | 🟡 Haute |
 | Page renouvellement `/renew/[entityId]` : finaliser avec Stripe Checkout | 🟡 Haute |
-| Tester le flux OTP complet (envoi email réel via Resend) | 🔴 Critique |
-| Tester la régénération des fichiers ASR après mise à jour | 🟡 Haute |
-| **Moteur AIO : champs "non applicable"** — Quand un client déclare explicitement qu'un champ ne s'applique pas (ex: "pas de produit" pour une asso qui ne vend que des services), ce champ doit sortir du calcul du bloc. Son poids est redistribué sur les autres champs du même bloc. Ce n'est PAS un champ "manquant" (q=0), c'est un champ "déclaré non applicable". Affecte `aio-score-engine.ts` (moteur) + `chat/route.ts` (questionnaire AYO) + `update-entity/route.ts` (mise à jour). Chaque champ array/texte du formulaire devrait avoir une option "Non applicable" qui marque le champ comme `n/a` au lieu de vide. **Attention** : ne pas confondre avec "je ne sais pas" (= manquant, pénalisable) vs "ça ne s'applique pas à mon activité" (= non applicable, neutre). | 🔴 Critique |
+| SEO metadata sur toutes les pages (<title>, <meta description>, Open Graph) | 🟡 Haute |
+| Compléter pages légales (confidentialité + mentions) | 🟡 Haute |
+| sitemap.ts dynamique depuis Supabase | 🟡 Haute |
 | Dashboard client (futur) : espace personnel OTP | 🟢 Moyenne |
+
+### 19.7 Améliorations qualité registre (session 7, suite)
+
+#### Email post-mise à jour
+
+- **Clients PRO** (`pack_type` contient "pro") : génération des 5 fichiers + ZIP + envoi email avec pièce jointe. `maxDuration = 120` sur `update-entity/route.ts`.
+- **Clients AYA sub** (non PRO) : email de confirmation avec score avant/après.
+- `UpdateFormClient.tsx` affiche un bandeau vert selon `filesEmailSent` dans la réponse API.
+- Les erreurs email sont catchées silencieusement — la mise à jour réussit même si l'email échoue.
+
+#### Bouton "Renouveler" sur les certificats
+
+- Ajouté à côté de "Mettre à jour" pour les entités certifiées (`isCertified`)
+- Couleur coral (#CE6A6B), lien vers `/renew/[entityId]`
+- Les deux boutons sont dans un `<div style={{ display: 'flex', gap: '8px' }}>`
+
+#### Disclaimer sur les pages INDEXÉ
+
+- Paragraphe affiché pour les entités `!isCertified` sur `/aya/e/[id]`
+- Texte : "Cette fiche a été générée automatiquement par le bot AYA..."
+- Lien "Revendiquez cette fiche" → `/diagnostic`
+
+#### Filtre NSFW dans `db.getAyaEntitiesPaginated()`
+
+Chaîne `.not()` sur Supabase avant le retour :
+```typescript
+.not('display_name', 'ilike', '%porn%')
+.not('display_name', 'ilike', '% sex %')
+.not('display_name', 'ilike', '%xxx%')
+.not('display_name', 'ilike', '%escort%')
+.not('display_name', 'ilike', '%onlyfans%')
+.not('display_name', 'ilike', "['%")    // Python lists
+.not('display_name', 'ilike', '{{%')    // Template artifacts
+```
+
+#### `cleanDisplayName()` dans `AyaRegistryClient.tsx`
+
+Fonction client-side qui nettoie les noms avant affichage :
+- Rejette les listes Python `['item']` → fallback domain
+- Rejette les templates `{{` ou `{%` → fallback domain
+- Rejette les noms à dominante CJK/arabe/cyrillique (nonLatin > latin && nonLatin > 2) → fallback domain
+- Strip les emojis en tête (`\p{Emoji_Presentation}`)
+- Strip les `|#!` en tête
+
+#### StatsBar animation 0 → 4400+
+
+- `StatsBar.tsx` : `useState({ total: 4400, countries: 73 })` comme valeur initiale (réaliste)
+- Animation démarre immédiatement au chargement (0 → 4400)
+- L'API `/api/aya/stats` corrige silencieusement si la vraie valeur diffère
+- `useCountUp` utilise `fromRef` pour animer depuis la valeur courante, pas depuis 0
+- `app/page.tsx` est `"use client"` → impossible de faire SSR fetch des stats
+
+#### Détection PRO dans `update-entity/route.ts`
+
+```typescript
+const isPro = entity.pack_type &&
+    ['pro', 'pack pro', 'pack_pro'].includes(entity.pack_type.toLowerCase());
+```
+Génère les fichiers uniquement si `isPro && email`.

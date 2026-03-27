@@ -11,6 +11,9 @@
     },
     "app/api/update-entity/route.ts": {
       "maxDuration": 30
+    },
+    "app/api/create-checkout/route.ts": {
+      "maxDuration": 30
     }
   },
   "crons": [
