@@ -61,6 +61,22 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
     const url = entity.website || '';
     const hasRequiredInfo = !!(email && url);
 
+    // Build Payment Link URLs server-side (no Stripe API call needed)
+    // Stripe Payment Links accept ?prefilled_email=...&client_reference_id=...
+    let proUrl = '';
+    let ayaUrl = '';
+    if (hasRequiredInfo) {
+        const payload = Buffer.from(JSON.stringify({ u: url, e: email, aid: entityId })).toString('base64');
+        const proLinkBase = process.env.STRIPE_LINK_PRO || '';
+        const ayaLinkBase = process.env.STRIPE_LINK_AYA_SUB || process.env.STRIPE_LINK_AYA || '';
+        if (proLinkBase) {
+            proUrl = `${proLinkBase}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${encodeURIComponent(payload)}`;
+        }
+        if (ayaLinkBase) {
+            ayaUrl = `${ayaLinkBase}?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${encodeURIComponent(payload)}`;
+        }
+    }
+
     return (
         <main style={{ minHeight: '100vh', background: 'var(--bg-main)' }}>
             {/* NAV */}
@@ -151,6 +167,8 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                         url={url}
                         entityId={entityId}
                         hasRequiredInfo={hasRequiredInfo}
+                        proUrl={proUrl}
+                        ayaUrl={ayaUrl}
                     />
 
                     {/* Footer help */}

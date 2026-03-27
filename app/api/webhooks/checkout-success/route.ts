@@ -260,7 +260,27 @@ export async function POST(req: Request) {
             }
         }
 
-        // 3b. FALLBACK: Read from scan_states collection if analysis not found
+        // 3b. RENEW FLOW FALLBACK: aid = AYA entity_id (not an analysis id)
+        if (!dbAnalysis && analysisId) {
+            try {
+                const ayaEntity = await db.getAyaEntityById(analysisId);
+                if (ayaEntity && (ayaEntity.asr_payload || ayaEntity.asr_score)) {
+                    const payload = ayaEntity.asr_payload as any;
+                    // Support both storage shapes: { data: { fields } } or { fields }
+                    const fields = payload?.data?.fields || payload?.fields || payload?.data || {};
+                    dbAnalysis = {
+                        score: ayaEntity.asr_score || 0,
+                        url: ayaEntity.website || analyzedUrl,
+                        data: { fields, blocks: payload?.blocks || {} }
+                    } as any;
+                    logger.info('WEBHOOK_AYA_ENTITY_FALLBACK', `Found entity in aya_registry: ${analysisId}`, { score: ayaEntity.asr_score });
+                }
+            } catch (e) {
+                logger.warn('WEBHOOK_AYA_ENTITY_ERROR', `Failed to look up aya_registry by id: ${e}`);
+            }
+        }
+
+        // 3c. FALLBACK: Read from scan_states collection if analysis not found
         if (!dbAnalysis && analyzedUrl) {
             try {
                 const scanState = await db.getScanState(analyzedUrl);
@@ -352,7 +372,8 @@ export async function POST(req: Request) {
                 logger.error('WEBHOOK_ERROR_EMAIL_FAILED', `Failed to send error notification: ${emailErr}`);
             }
 
-            return NextResponse.json({ error: 'Analysis data not found', session_id }, { status: 422 });
+            // Return 200 so Stripe doesn't retry (which would send the apology email again)
+            return NextResponse.json({ received: true, warning: 'Analysis data not found', session_id }, { status: 200 });
         }
 
         // Resolve entity name (multiple fallbacks to avoid "Entity" or "Entreprise Inconnue")

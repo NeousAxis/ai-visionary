@@ -7,9 +7,11 @@ interface RenewButtonsProps {
     url: string;
     entityId: string;
     hasRequiredInfo: boolean;
+    proUrl?: string;
+    ayaUrl?: string;
 }
 
-function useCheckout(email: string, url: string, entityId: string) {
+function useCheckout(email: string, url: string, entityId: string, proUrl?: string, ayaUrl?: string) {
     const [loading, setLoading] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +22,15 @@ function useCheckout(email: string, url: string, entityId: string) {
         }
         setLoading(packType);
         setError(null);
+
+        // Prefer direct Payment Link redirect (no Stripe API call needed)
+        const directUrl = packType === 'PRO' ? proUrl : ayaUrl;
+        if (directUrl) {
+            window.location.href = directUrl;
+            return;
+        }
+
+        // Fallback: create checkout session via API
         try {
             const res = await fetch('/api/create-checkout', {
                 method: 'POST',
@@ -40,8 +51,8 @@ function useCheckout(email: string, url: string, entityId: string) {
     return { loading, error, checkout };
 }
 
-export default function RenewButtons({ email, url, entityId, hasRequiredInfo }: RenewButtonsProps) {
-    const { loading, error, checkout } = useCheckout(email, url, entityId);
+export default function RenewButtons({ email, url, entityId, hasRequiredInfo, proUrl, ayaUrl }: RenewButtonsProps) {
+    const { loading, error, checkout } = useCheckout(email, url, entityId, proUrl, ayaUrl);
 
     const btnBase: React.CSSProperties = {
         display: 'block',
