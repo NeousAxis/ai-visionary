@@ -8,7 +8,8 @@ export type FieldType =
   | "boolean"
   | "select"
   | "date"
-  | "readonly";
+  | "readonly"
+  | "url_locked";
 
 export interface FieldDefinition {
   /** Machine name matching AyoExtract fields key */
@@ -370,9 +371,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       {
         name: "faq_url",
         label: "Lien vers votre FAQ",
-        type: "text",
+        type: "url_locked",
         placeholder: "https://example.com/faq",
-        hint: "URL de votre page FAQ (optionnel).",
+        hint: "Cliquez sur le crayon pour modifier le lien.",
       },
       {
         name: "has_glossary",
@@ -383,9 +384,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       {
         name: "glossary_url",
         label: "Lien vers votre glossaire",
-        type: "text",
+        type: "url_locked",
         placeholder: "https://example.com/glossaire",
-        hint: "URL de votre page glossaire (optionnel).",
+        hint: "Cliquez sur le crayon pour modifier le lien.",
       },
       {
         name: "has_documentation",
@@ -396,9 +397,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       {
         name: "documentation_url",
         label: "Lien vers votre documentation",
-        type: "text",
+        type: "url_locked",
         placeholder: "https://example.com/docs",
-        hint: "URL de votre documentation (optionnel).",
+        hint: "Cliquez sur le crayon pour modifier le lien.",
       },
     ],
   },

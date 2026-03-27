@@ -319,6 +319,9 @@ export async function POST(req: NextRequest) {
         const sector = businessType || firstService || entity.sector_macro;
 
         // --- Update Supabase ---
+        // NOTE: Only include columns that EXIST in aya_registry table.
+        // Columns like next_review_due, renewal_reminder_sent are planned
+        // but not yet created — will be added in Sprint 8 (Session 7).
         const updateFields: Record<string, any> = {
             display_name: displayName,
             legal_name: legalName,
@@ -328,9 +331,6 @@ export async function POST(req: NextRequest) {
                 : entity.country_legal,
             asr_payload: updatedPayload,
             asr_score: newScore,
-            last_update: new Date().toISOString(),
-            next_review_due: nextReviewDue.toISOString(),
-            renewal_reminder_sent: false,
         };
 
         if (contactEmail && typeof contactEmail === 'string' && contactEmail.trim()) {

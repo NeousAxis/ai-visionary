@@ -50,6 +50,21 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
     }
   );
 
+  // Pre-fill document URLs: check asr_payload for stored URLs, or derive from website
+  const website = entity.website || '';
+  const baseUrl = website.replace(/\/+$/, '');
+  const pedagBlock = initialValues.contenus_pedagogiques || {};
+  if (!pedagBlock.faq_url && pedagBlock.has_faq) {
+    pedagBlock.faq_url = `${baseUrl}/.ayo/faq.json`;
+  }
+  if (!pedagBlock.glossary_url && pedagBlock.has_glossary) {
+    pedagBlock.glossary_url = `${baseUrl}/.ayo/glossary.json`;
+  }
+  if (!pedagBlock.documentation_url && pedagBlock.has_documentation) {
+    pedagBlock.documentation_url = `${baseUrl}/.ayo/docs.json`;
+  }
+  initialValues.contenus_pedagogiques = pedagBlock;
+
   // Bug 9 fix: derive pack_type from available data
   const packType = (entity as any).pack_type
     || ((entity as any).stripe_product_id?.includes('PRO') ? 'PRO'

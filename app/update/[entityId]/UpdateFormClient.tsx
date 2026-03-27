@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { BlockDefinition } from '@/lib/update-form-config';
+import type { BlockDefinition, FieldDefinition } from '@/lib/update-form-config';
 
 interface UpdateFormProps {
   entityId: string;
@@ -38,6 +38,8 @@ export default function UpdateFormClient({
   const [regenerating, setRegenerating] = useState(false);
   const [regenSuccess, setRegenSuccess] = useState(false);
   const [regenError, setRegenError] = useState('');
+  // Track which url_locked fields are unlocked for editing
+  const [unlockedUrls, setUnlockedUrls] = useState<Set<string>>(new Set());
 
   // ---- helpers ----
 
@@ -302,7 +304,6 @@ export default function UpdateFormClient({
       background: '#fff',
       borderRadius: '12px',
       border: '1px solid #e5e7eb',
-      overflow: 'hidden',
     }}>
       {/* Header */}
       <div style={{
@@ -399,6 +400,62 @@ export default function UpdateFormClient({
                   cursor: 'not-allowed',
                 }}>
                   {value ? 'Oui (detecte)' : 'Non detecte'}
+                </div>
+                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+              </div>
+            );
+          }
+
+          // -- url_locked (grayed out by default, toggle to edit) --
+          if (field.type === 'url_locked') {
+            const urlKey = `${blockKey}.${field.name}`;
+            const isUnlocked = unlockedUrls.has(urlKey);
+            return (
+              <div key={field.name} style={fieldWrapStyle}>
+                <label style={labelStyle}>{field.label}</label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input
+                    type="url"
+                    value={value || ''}
+                    onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
+                    disabled={!isUnlocked}
+                    style={{
+                      ...inputStyle,
+                      flex: 1,
+                      background: isUnlocked ? '#fff' : '#f3f4f6',
+                      color: isUnlocked ? '#212E53' : '#9ca3af',
+                      cursor: isUnlocked ? 'text' : 'not-allowed',
+                    }}
+                    placeholder={field.placeholder}
+                  />
+                  <button
+                    type="button"
+                    title={isUnlocked ? 'Verrouiller' : 'Modifier le lien'}
+                    onClick={() => {
+                      setUnlockedUrls(prev => {
+                        const next = new Set(prev);
+                        if (next.has(urlKey)) next.delete(urlKey);
+                        else next.add(urlKey);
+                        return next;
+                      });
+                    }}
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      border: '1px solid #e5e7eb',
+                      background: isUnlocked ? '#4A919E' : '#fff',
+                      color: isUnlocked ? '#fff' : '#6b7280',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {isUnlocked ? '🔓' : '✏️'}
+                  </button>
                 </div>
                 {field.hint && <p style={hintStyle}>{field.hint}</p>}
               </div>

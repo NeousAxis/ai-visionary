@@ -235,6 +235,7 @@ function coerceValue(
     case "textarea":
     case "select":
     case "date":
+    case "url_locked":
     default:
       return String(raw).trim();
   }
