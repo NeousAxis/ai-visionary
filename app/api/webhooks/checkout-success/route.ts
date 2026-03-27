@@ -47,6 +47,99 @@ function detectPackType(session: Stripe.Checkout.Session): string {
 // Both the webhook and test endpoint use the same module.
 
 /**
+ * Build HTML email for AYA subscription activation
+ */
+function buildAyaSubEmailHtml(params: {
+    name: string;
+    url: string;
+    score: number;
+    ayaId: string;
+    blocks: Record<string, number>;
+}): string {
+    const { name, url, score, ayaId, blocks } = params;
+    const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
+
+    const blockLabels: Record<string, { label: string; max: number }> = {
+        identite: { label: "Identité & Ancrage", max: 10 },
+        offre: { label: "Clarté de l'Offre", max: 20 },
+        processus_methodes: { label: "Processus & Méthodes", max: 15 },
+        engagements_conformite: { label: "Confiance & Conformité", max: 15 },
+        indicateurs: { label: "Preuve Sociale & Métriques", max: 20 },
+        contenus_pedagogiques: { label: "Pédagogie & Supports", max: 10 },
+        structure_technique: { label: "Socle Technique AIO", max: 10 }
+    };
+
+    const scoreRows = Object.entries(blockLabels).map(([key, { label, max }]) => {
+        const val = blocks?.[key] ?? 0;
+        const pct = Math.round((val / max) * 100);
+        const color = pct >= 70 ? '#166534' : pct >= 40 ? '#854d0e' : '#991b1b';
+        const bg = pct >= 70 ? '#dcfce7' : pct >= 40 ? '#fef9c3' : '#fee2e2';
+        const icon = pct >= 70 ? '&#9989;' : pct >= 40 ? '&#9888;&#65039;' : '&#10060;';
+        return `<div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:8px; border-radius:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:${color}; font-size:14px;">${icon} ${label}</strong>
+                <span style="font-size:12px; background:#fff; padding:2px 8px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${val}/${max}</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    return `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
+    <meta charset="utf-8">
+
+    <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#127760; Votre abonnement AYA est activé !</h1>
+        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Votre entité est maintenant visible par les IA</p>
+    </div>
+
+    <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
+        <p>Bonjour,</p>
+        <p>Votre abonnement AYA est confirmé pour <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).</p>
+
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #86efac;">
+            <p style="margin:0; font-size: 14px; color: #666;">Score AIO</p>
+            <p style="margin: 5px 0; font-size: 42px; font-weight: bold; color: ${score >= 60 ? '#166534' : score >= 40 ? '#854d0e' : '#991b1b'};">${Math.round(score)} / 100</p>
+        </div>
+
+        <h3 style="color:#212E53; margin-top:25px;">&#128202; Détail par bloc</h3>
+        ${scoreRows}
+
+        <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bfdbfe;">
+            <h3 style="margin-top:0; color: #1e40af;">&#127760; Votre Certificat AYA est actif</h3>
+            <p style="font-size: 14px;">Votre entité est enregistrée dans le <strong>Registre AYA</strong> — consultable par toutes les IA.</p>
+            <p style="text-align: center; margin: 15px 0;">
+                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Voir mon certificat AYA</a>
+            </p>
+            <p style="font-size: 12px; color: #666; text-align: center;">
+                <a href="${ayaLink}" style="color: #4A919E;">${ayaLink}</a>
+            </p>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #86efac; margin: 20px 0;">
+            <h4 style="margin-top:0; color: #166534;">&#10003; Ce que comprend votre abonnement</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; line-height: 2;">
+                <li>&#9989; Inscription dans le Registre AYA (visible par ChatGPT, Claude, Gemini...)</li>
+                <li>&#9989; ASR hébergé sur ai-visionary.com</li>
+                <li>&#9989; Mises à jour incluses</li>
+                <li>&#9989; Priorité dans les recommandations IA</li>
+            </ul>
+        </div>
+
+        <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
+            <h4 style="margin-top:0; color: #e65100;">&#128172; Une question ?</h4>
+            <p style="font-size: 13px; margin-bottom: 0; font-weight: bold;">Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
+        </div>
+    </div>
+
+    <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
+        <p style="font-size: 12px; color: #9ca3af; margin: 0;">
+            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Rendez votre entreprise visible par les IA
+        </p>
+    </div>
+</div>`;
+}
+
+
+/**
  * Build a professional HTML email for PRO pack delivery
  */
 function buildProEmailHtml(params: {
@@ -485,8 +578,8 @@ export async function POST(req: Request) {
             await resend.emails.send({
                 from: 'AYO Registry <registry@ai-visionary.com>',
                 to: [customerEmail],
-                subject: `✅ Activation AYA — ${entityName}`,
-                html: buildProEmailHtml({
+                subject: `✅ Abonnement AYA activé — ${entityName}`,
+                html: buildAyaSubEmailHtml({
                     name: entityName,
                     url: analysisData.url,
                     score: analysisData.score,
