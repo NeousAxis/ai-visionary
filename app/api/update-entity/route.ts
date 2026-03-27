@@ -301,7 +301,13 @@ export async function POST(req: NextRequest) {
 
         // --- Deep-merge form blocks into existing asr_payload.data ---
         const existingPayload = entity.asr_payload || {};
-        const existingData = existingPayload.data || {};
+        // The data structure is { fields: { identite, offre, ... } } (AyoExtract format)
+        // OR { identite, offre, ... } directly (legacy format).
+        // Drill into .fields when present — same logic as page.tsx extractFormValues().
+        const rawData = existingPayload.data || {};
+        const existingData = (rawData.fields && typeof rawData.fields === 'object')
+            ? rawData.fields
+            : rawData;
         const oldScore = entity.asr_score || 0;
 
         const mergedData = mergeBlocksIntoPayload(existingData, blocks);
