@@ -1,12 +1,13 @@
+"use client";
 
 import React from 'react';
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import LanguageToggle from './LanguageToggle';
 
-export default async function Footer() {
-    const t = await getTranslations('nav');
-    const tf = await getTranslations('footer');
+export default function Footer() {
+    const t = useTranslations('nav');
+    const tf = useTranslations('footer');
 
     return (
         <footer className="footer">

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Footer from '../components/Footer';
+
 import FAQ from '../components/FAQ';
 import type { Metadata } from 'next';
 
@@ -185,8 +185,6 @@ export default function ComprendrePage() {
             {/* FAQ */}
             <FAQ />
 
-            {/* Footer */}
-            <Footer />
         </main>
     );
 }

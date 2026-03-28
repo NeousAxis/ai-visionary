@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { Suspense } from 'react';
-import Footer from './components/Footer';
+
 import StatsBar from './components/StatsBar';
 // AyoChat widget REMOVED from Home Page.
 import PaymentSuccessModal from './components/PaymentSuccessModal';
@@ -353,7 +353,6 @@ export default function Home() {
         </div>
       </section>
 
-      <Footer />
     </main >
   );
 }

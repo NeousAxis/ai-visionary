@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import Footer from './components/Footer';
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -77,6 +78,7 @@ export default async function RootLayout({
         />
         <NextIntlClientProvider messages={messages}>
           {children}
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>
