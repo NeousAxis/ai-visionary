@@ -2,7 +2,7 @@
 
 > **IMPORTANT** : Ce fichier est lu automatiquement par Claude Code à chaque nouvelle conversation.
 > Il contient TOUTE la connaissance nécessaire pour reprendre le travail sur ce projet.
-> Dernière mise à jour : 27 mars 2026, 22h00
+> Dernière mise à jour : 28 mars 2026
 
 ---
 
@@ -306,8 +306,8 @@ Le plan complet est dans **`PLAN-ACTION-AYO-COMPLET.md`** (20 sections, ~1460 li
 | Sprint 6 | ✅ Terminé (Session 5, 15 mars 2026) |
 | Sprint 7 | ✅ Terminé (Session 6, 24 mars 2026) |
 | Sprint 8 | ✅ Terminé (Session 7, 27 mars 2026) |
-| Sprint 9 | ❌ Pas commencé (Session 8) |
-| Sprint 10 | ❌ Pas commencé (Session 8) |
+| Sprint 9 | ✅ Terminé (Session 8, 25 mars 2026) |
+| Sprint 10 | ✅ Terminé (Session 8, 25 mars 2026) |
 
 ### Organisation du travail en SESSIONS
 
@@ -324,7 +324,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | **Session 5** | Sprint 6 | ✅ Fix webhook + Bug Score 0 + emails + fusion PaymentHandler | ~3h | 🟡 Moyen | Non |
 | **Session 6** | Sprint 7 | ❌ Modules sémantiques — affiner les sanitizers, améliorer la qualité des 5 fichiers Pack PRO | ~3h | 🟡 Moyen | Non |
 | **Session 7** | Sprint 8 | ✅ Formulaire MAJ client 7 blocs + OTP + email PRO/AYA + boutons Mettre à jour/Renouveler + qualité registre | ~3h | 🟡 Moyen | Non |
-| **Session 8** | Sprint 9 + 10 | ❌ UI/SEO/sitemap/robots + pages légales complètes (LPD suisse) + sitemap dynamique + tests E2E + nettoyage code mort | ~3h | 🟢 Faible | Non |
+| **Session 8** | Sprint 9 + 10 | ✅ UI/SEO/sitemap/robots + pages légales complètes (LPD suisse) + sitemap dynamique + nettoyage code mort | ~3h | 🟢 Faible | Non |
 
 **Protocole pour chaque session** :
 1. Vérifier la branche : `git checkout fix/remediation`
@@ -350,8 +350,8 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 6 | ✅ **TERMINÉE** | 2026-03-24 | Modules sémantiques — sanitizers fichiers PRO, ayo-semantics, external-context DÉJÀ FAITS. **NE PLUS TOUCHER AU PACK PRO NI À AYO.** |
 | Session 7 | ✅ **TERMINÉE** | 2026-03-27 | Formulaire MAJ 7 blocs + OTP gate + email PRO (ZIP fichiers) + email AYA (confirmation) + boutons Mettre à jour/Renouveler sur certificats + disclaimer INDEXÉ + filtre NSFW registre + `cleanDisplayName()` (emojis, japonais, listes Python) + StatsBar 0→4400+ animation immédiate. Branche `main`. |
 | **Fix Webhook Renew** | ✅ **TERMINÉ** | 2026-03-27 | Fix flux renouvellement complet : page /renew + RenewButtons (POST create-checkout) + recalcul blocs AIO depuis fields quand blocks={} + `buildAyaSubEmailHtml` dédié (score + blocs + certificat AYA, sans contenu PRO) + `existingAyaEntityId` passé au registry (update au lieu de créer). PRO ✅ + AYA sub ✅ confirmés en test. |
-| Session 8 | ❌ Pas commencée | — | UI/SEO + mentions légales complètes + sitemap dynamique + tests E2E |
-| **Bot AYA** | ✅ **LIVE** | 2026-03-24 | **~3000+ entités** dans Supabase (5430 domaines scrapés, 6672 dans domains.txt). API compacte (6 champs LLM). Keywords auto extraits. 9 IA connectées (ChatGPT GPT Store, Claude MCP, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama). OpenAPI spec + ai-plugin.json + MCP server. Fix certificat (INDEXÉ au lieu d'EXPIRÉ, date epoch, keywords). README GitHub rewrite "AYA inside". Page /developers avec 9 IA + fichiers intégration. **→ Voir section 16 pour le reste** |
+| Session 8 | ✅ **TERMINÉE** | 2026-03-25 | SEO metadata 8 pages + generateMetadata dynamique certificats + sitemap dynamique Supabase (3339+ URLs) + confidentialité LPD/RGPD 13 sections + mentions légales 10 sections + robots.ts mis à jour. |
+| **Bot AYA** | ✅ **LIVE** | 2026-03-24 | **~3300+ entités** dans Supabase (6766 domaines dans domains.txt). API compacte LLM-friendly. Keywords Gemini. OpenAPI spec + ai-plugin.json. Fix certificat (INDEXÉ au lieu d'EXPIRÉ, date epoch, keywords). README GitHub rewrite "AYA inside". Page /developers. **→ Voir section 16 pour le reste** |
 | **Signal LLM** | ✅ **TERMINÉ** | 2026-03-25 | 4 chantiers Signal LLM : endpoint `/api/aya/llm/{domain}`, texte brut certificats, export GitHub dataset, domination Web3/AI. Enrichissement Gemini 3339/3339 (EN+FR). Filtre garbage 120 termes. 57 noms mojibake fixés. 3 entités supprimées. Trigger Supabase droppé. GitHub dataset public (3306 fichiers). HuggingFace ré-exporté. Mots-clés Gemini 3338/3339 (fix_keywords.py). Pagination serveur /aya (20/page, URL-based). Cache CDN 4 routes API. BackButton certificats. `AyaRegistryClient.tsx` composant client. **→ Voir sections 18 + 18.9** |
 
 > **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
@@ -1006,8 +1006,7 @@ L'entonnoir de conversion est :
 - Page certificat `/aya/e/[id]` — fix INDEXÉ (plus EXPIRÉ), fix date epoch, keywords depuis blocs AIO
 - API AYA compacte (6 champs LLM) sur Vercel (search, entity, stats, docs, live)
 - Page `/developers` — 9 IA connectées, stats, fichiers d'intégration
-- **9 IA connectées** : ChatGPT (GPT Store + OpenAPI), Claude (MCP server), Gemini (function calling), Mistral (tool use), Grok, Perplexity, DeepSeek, Qwen, Llama
-- `ai-plugin.json` + `openapi.json` + MCP server + function declarations Gemini + tool definitions Mistral
+- `ai-plugin.json` + `openapi.json` — découverte passive par les IA via crawl web (stratégie couche invisible)
 - README GitHub rewrite "AYA inside" (https://github.com/NeousAxis/ai-visionary)
 - Bot AYA : **5430 domaines** scrapés (6672 dans domains.txt), pipeline concurrent, extraction auto mots-clés, détection pays hreflang+phone
 - Génération et envoi des 5 fichiers PRO en ZIP
@@ -1045,61 +1044,43 @@ L'entonnoir de conversion est :
 | Valider les données ASR_DERIVED — score cohérent, champs non vides | 🟡 Haute |
 | ~~Fix tri page /aya — vrai mélange aléatoire~~ | ✅ Fixé (24 mars 2026) |
 
-**A3. Connecter l'API aux IA (distribution)**
+**A3. Stratégie distribution — COUCHE INVISIBLE**
 
-| Tâche | Priorité |
-|-------|----------|
-| **ChatGPT** — soumettre au GPT Store (ai-plugin.json prêt) | 🔴 Critique |
-| **Anthropic/Claude** — créer un MCP server AYA | 🔴 Critique |
-| **Google Gemini** — intégration via function calling / Extensions | 🟡 Haute |
-| **Perplexity** — soumettre comme source de données structurées | 🟡 Haute |
-| **Mistral** — intégration via tool use / plugins | 🟡 Haute |
-| **IA chinoises** (DeepSeek, Qwen, Baidu ERNIE) — adapter doc, soumettre | 🟢 Moyenne |
-| Monitoring — tracker les appels API par source (quel IA utilise AYA) | 🟢 Moyenne |
+> AYA n'est PAS une destination. C'est une couche invisible de données structurées. Les IA la trouvent en crawlant le web. Personne n'a besoin de "venir sur AYA". **PAS de soumission active aux IA, PAS de MCP server — stratégie abandonnée.**
+
+La distribution repose sur 4 sources convergentes déjà en place :
+- **API LLM-friendly** `ai-visionary.com/api/aya/llm/{domain}` ✅
+- **Pages HTML texte brut** sur chaque certificat (crawlable) ✅
+- **GitHub dataset** — 3306 fichiers JSON publics ✅
+- **HuggingFace dataset** — CSV + JSONL, CC-BY-4.0 ✅
+
+| Tâche | Priorité | Statut |
+|-------|----------|--------|
+| Scraper 6766 domaines + enrichir via registres du commerce (Zefix CH, Sirene FR, Companies House UK) | 🔴 Critique | ❌ |
+| Campagne email entreprises indexées | 🟡 Haute | ❌ |
+| Monitoring — tracker les appels API par source | 🟢 Moyenne | ❌ |
+| Soumission There's An AI For That (Cyril) | 🟢 Moyenne | ❌ |
 
 #### B. PRODUIT AYO — Sessions 7-8 (NE PLUS TOUCHER AU PACK PRO NI À AYO)
 
 > **Session 6 (Sprint 7) = ✅ TERMINÉE** — modules sémantiques, sanitizers, ayo-semantics, external-context DÉJÀ FAITS.
 
-**B1. Session 7 — Sprint 8 : Cycle de vie client (section 14.11)**
+**B1. Session 7 — ✅ TERMINÉE** (26-27 mars 2026)
+Formulaire MAJ 7 blocs + OTP gate + emails PRO/AYA + boutons Mettre à jour/Renouveler + page /renew + webhooks renouvellement.
 
-| Tâche | Priorité |
-|-------|----------|
-| MAJ annuelle : rappels email J-30, J-7, J-0 + page MAJ pré-remplie | 🟡 Haute |
-| Renouvellement AYA Sub : webhooks Stripe `invoice.payment_failed`, `customer.subscription.deleted` | 🟡 Haute |
-| Expiration Pack PRO (3 ans) : rappels J-90, J-30, J-7 + page renouvellement | 🟡 Haute |
-| Cron jobs Vercel : 4 crons pour rappels et synchronisation | 🟡 Haute |
-| Dashboard client (futur) : espace personnel OTP | 🟢 Moyenne |
-| Améliorer page certificat : JSON-LD, blocs score, statut visuel | 🟡 Haute |
-
-**Fichiers à créer** :
-- `app/update/[entityId]/page.tsx`, `app/renew/[entityId]/page.tsx`
-- `app/api/update-entity/route.ts`, `app/api/cron/review-reminders/route.ts`
-- `app/api/cron/expiry-reminders/route.ts`, `app/api/cron/expire-entities/route.ts`
-- `app/api/webhooks/subscription/route.ts`
-
-**B3. Session 8 — Sprint 9+10 : UI/SEO + Pages légales + Tests (section 14.12)**
-
-| Tâche | Priorité |
-|-------|----------|
-| SEO metadata sur toutes les pages (<title>, <meta description>, Open Graph) | 🟡 Haute |
-| JSON-LD Organization sur la homepage | 🟡 Haute |
-| Compléter page confidentialité (RGPD suisse LPD, cookies, sous-traitants) | 🟡 Haute |
-| Compléter mentions légales (éditeur, hébergeur Vercel) | 🟡 Haute |
-| sitemap.ts dynamique depuis Supabase `aya_registry` | 🟡 Haute |
-| Migration progressive styles inline → Tailwind | 🟢 Moyenne |
-| Tests E2E automatisés | 🟢 Moyenne |
-| Nettoyage code mort final | 🟢 Moyenne |
+**B3. Session 8 — ✅ TERMINÉE** (25 mars 2026)
+SEO metadata toutes les pages + sitemap dynamique Supabase + confidentialité LPD/RGPD + mentions légales + robots.ts.
 
 ---
 
-### ORDRE DE PRIORITÉ RECOMMANDÉ
+### ORDRE DE PRIORITÉ (état 28 mars 2026)
 
-1. **IMMÉDIAT** — Fix bugs page /aya (noms, secteurs, tri)
-2. **SEMAINE 1** — Augmenter à 3'000+ entreprises
-3. **SEMAINE 2** — Connecter API aux IA (ChatGPT GPT Store, MCP Claude)
-4. **SEMAINE 3** — Session 6 (modules sémantiques) + Session 7 (cycle de vie)
-5. **SEMAINE 4** — Session 8 (SEO, légal, tests) + atteindre 5'000-10'000 entreprises
+> **Tous les sprints sont terminés.** Le produit AYO est complet. La priorité est désormais la croissance.
+
+1. **IMMÉDIAT** — Scraper 6766 domaines + enrichir via registres du commerce → objectif 10k entités
+2. **SEMAINE 1** — Campagne email entreprises indexées (template prêt)
+3. **CONTINU** — Re-exporter GitHub + HuggingFace après chaque batch
+4. **FUTUR** — Toggle EN/FR (i18n) + Soumission There's An AI For That (Cyril)
 
 ---
 
@@ -1274,8 +1255,8 @@ Web3 pour sécuriser et automatiser des applications décentralisées.</p>
 | 8 | Re-exporter dataset HuggingFace après batch | ❌ | Après chaque batch |
 | 9 | Toggle EN/FR sur le site | ❌ | Session dédiée |
 | 10 | Atteindre 10'000+ entreprises | ❌ | Continu |
-| 11 | Session 7 — Cycle de vie client | ❌ | Session dédiée |
-| 12 | Session 8 — SEO/Légal | ❌ | Session dédiée |
+| 11 | Session 7 — Cycle de vie client | ✅ | 2026-03-27 |
+| 12 | Session 8 — SEO/Légal | ✅ | 2026-03-25 |
 
 ---
 
@@ -1533,17 +1514,16 @@ BOT (scraping) → BASE (Supabase) → API AYA (Vercel) → IA (ChatGPT, Claude,
 | Améliorer la détection de secteur (13 catégories → plus précis) | 🟡 Haute | ❌ |
 | Valider les données ASR_DERIVED — score cohérent, champs non vides | 🟡 Haute | ❌ |
 
-#### OBJECTIF 3 — Connecter l'API aux IA (distribution)
+#### OBJECTIF 3 — Distribution (stratégie COUCHE INVISIBLE)
+
+> **PAS de soumission active. PAS de MCP server. Stratégie abandonnée.**
+> Les IA trouvent AYA en crawlant le web. On rend les données irresistibles, pas visibles.
 
 | Tâche | Priorité | Statut |
 |-------|----------|--------|
-| **ChatGPT** — soumettre au GPT Store (ai-plugin.json déjà prêt) | 🔴 Critique | ❌ |
-| **Anthropic/Claude** — créer un MCP server AYA | 🔴 Critique | ❌ |
-| **Google Gemini** — intégration via function calling / Extensions | 🟡 Haute | ❌ |
-| **Perplexity** — soumettre comme source de données structurées | 🟡 Haute | ❌ |
-| **Mistral** — intégration via tool use / plugins | 🟡 Haute | ❌ |
-| **IA chinoises** (DeepSeek, Qwen, Baidu ERNIE) — adapter la doc, soumettre | 🟢 Moyenne | ❌ |
-| **Monitoring** — tracker les appels API par source (quel IA utilise AYA) | 🟢 Moyenne | ❌ |
+| Campagne email entreprises indexées (template prêt dans CLAUDE.md) | 🟡 Haute | ❌ |
+| Monitoring — tracker les appels API par source | 🟢 Moyenne | ❌ |
+| Soumission There's An AI For That (Cyril) | 🟢 Moyenne | ❌ |
 
 > **Décision API (23 mars 2026)** : L'API AYA publique est en routes Next.js `/api/aya/*` sur Vercel (gratuit, même infra). L'API FastAPI locale (`aya/api/main.py`) reste pour le dev/test.
 
@@ -1809,9 +1789,9 @@ Les données AYA existent sur **4 sources convergentes** (principe : "si un LLM 
 | 5 | **Pagination serveur page /aya** — 20 entités/page, URL-based (?page=X&q=X&sort=X), BackButton history.back() | 🔴 Critique UX | ✅ FAIT |
 | 6 | Toggle EN/FR sur le site (i18n) | 🟡 Haute | ❌ Session dédiée |
 | 7 | Campagne email entreprises indexées | 🟡 Haute | ❌ |
-| 8 | Session 7 — Cycle de vie client | 🟡 Haute | ❌ Session dédiée |
-| 9 | Session 8 — SEO/Légal | 🟡 Haute | ❌ Session dédiée |
-| 10 | Enrichissement registres du commerce — Zefix (CH), Sirene (FR), Companies House (UK) | 🟢 Long terme | ❌ |
+| 8 | Session 7 — Cycle de vie client | ✅ | 2026-03-27 |
+| 9 | Session 8 — SEO/Légal | ✅ | 2026-03-25 |
+| 10 | Enrichissement registres du commerce — Zefix (CH), Sirene (FR), Companies House (UK) | 🔴 Critique | ❌ — va avec le scraping bot |
 | 11 | Atteindre 10'000+ entreprises | 🟢 Long terme | ❌ |
 
 ### 18.9 Session Signal LLM — Suite (25 mars 2026, après-midi/soir)
