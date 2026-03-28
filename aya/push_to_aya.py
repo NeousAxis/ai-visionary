@@ -169,6 +169,16 @@ def main():
         name = entity["display_name"][:40]
 
         try:
+            # PROTECT: Never overwrite paying customers' data
+            existing = supabase.table("aya_registry").select(
+                "entity_id, payment_completed, contact_email"
+            ).eq("entity_id", entity["entity_id"]).execute()
+
+            if existing.data and existing.data[0].get("payment_completed"):
+                print(f"[{i}/{len(records)}] PROTECTED: {name} (paying customer — skipped)")
+                skipped += 1
+                continue
+
             # Delete existing bot entry (if any), then insert fresh
             supabase.table("aya_registry").delete().eq(
                 "entity_id", entity["entity_id"]

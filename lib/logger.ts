@@ -7,7 +7,7 @@ import crypto from 'crypto';
 // ============================================================
 
 export type LogLevel = 'info' | 'warn' | 'error' | 'critical';
-export type LogSource = 'chat' | 'webhook' | 'scanner' | 'crypto' | 'db' | 'auth' | 'admin' | 'checkout' | 'email' | 'system' | 'stripe' | 'cron' | 'update-entity' | 'lifecycle' | 'regenerate-files';
+export type LogSource = 'chat' | 'webhook' | 'scanner' | 'crypto' | 'db' | 'auth' | 'admin' | 'checkout' | 'email' | 'system' | 'stripe' | 'cron' | 'update-entity' | 'update-owner' | 'lifecycle' | 'regenerate-files';
 
 interface LogEntry {
     correlation_id: string;

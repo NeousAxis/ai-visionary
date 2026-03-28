@@ -8,10 +8,13 @@ interface UpdateFormProps {
   entityName: string;
   packType: string | null;
   entityEmail: string;
+  entityWebsite: string;
+  ownerEmailMasked?: string;
   currentScore: number | null;
   initialValues: Record<string, Record<string, any>>;
   blockDefinitions: BlockDefinition[];
   updateToken: string;
+  adminAccount?: { nom: string; prenom: string; email_pro: string };
 }
 
 interface SubmitResult {
@@ -26,10 +29,13 @@ export default function UpdateFormClient({
   entityName,
   packType,
   entityEmail,
+  entityWebsite,
+  ownerEmailMasked,
   currentScore,
   initialValues,
   blockDefinitions,
   updateToken,
+  adminAccount,
 }: UpdateFormProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>(initialValues);
@@ -797,6 +803,260 @@ export default function UpdateFormClient({
           fontSize: '0.9rem',
         }}>
           {errorMessage}
+        </div>
+      )}
+
+      {/* Admin account section */}
+      <AdminAccountSection
+        entityId={entityId}
+        entityWebsite={entityWebsite}
+        initialAdmin={adminAccount || { nom: '', prenom: '', email_pro: '' }}
+        updateToken={updateToken}
+      />
+
+      {/* Delegation section */}
+      <DelegateAccess
+        entityId={entityId}
+        ownerEmailMasked={ownerEmailMasked || ''}
+        updateToken={updateToken}
+      />
+    </div>
+  );
+}
+
+/* --- Admin Account Section --- */
+function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToken }: {
+  entityId: string;
+  entityWebsite: string;
+  initialAdmin: { nom: string; prenom: string; email_pro: string };
+  updateToken: string;
+}) {
+  const [admin, setAdmin] = useState(initialAdmin);
+  const [adminStatus, setAdminStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [adminError, setAdminError] = useState('');
+
+  // Extract domain from entity website
+  let entityDomain = '';
+  try {
+    const url = new URL(entityWebsite.startsWith('http') ? entityWebsite : `https://${entityWebsite}`);
+    entityDomain = url.hostname.replace(/^www\./, '').toLowerCase();
+  } catch { /* ignore */ }
+
+  const validateEmailDomain = (email: string): boolean => {
+    if (!email.trim()) return true; // empty is OK (not required yet)
+    const domain = email.trim().toLowerCase().split('@')[1] || '';
+    return domain === entityDomain;
+  };
+
+  const handleSaveAdmin = async () => {
+    setAdminError('');
+
+    if (admin.email_pro.trim() && !validateEmailDomain(admin.email_pro)) {
+      setAdminError(`L'email professionnel doit appartenir au domaine ${entityDomain}`);
+      return;
+    }
+
+    setAdminStatus('loading');
+    try {
+      const res = await fetch('/api/update-entity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entityId,
+          blocks: {},
+          adminAccount: {
+            admin_nom: admin.nom.trim(),
+            admin_prenom: admin.prenom.trim(),
+            admin_email_pro: admin.email_pro.trim().toLowerCase(),
+          },
+          token: updateToken,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      setAdminStatus('success');
+      setTimeout(() => setAdminStatus('idle'), 3000);
+    } catch (err: unknown) {
+      setAdminError(err instanceof Error ? err.message : 'Erreur');
+      setAdminStatus('error');
+    }
+  };
+
+  const emailValid = !admin.email_pro.trim() || validateEmailDomain(admin.email_pro);
+
+  return (
+    <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #e5e7eb' }}>
+      <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: '#212E53', fontWeight: '600' }}>
+        👤 Administrateur du compte
+      </h4>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+        <div>
+          <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Nom</label>
+          <input
+            type="text"
+            value={admin.nom}
+            onChange={e => setAdmin({ ...admin, nom: e.target.value })}
+            placeholder="Leger"
+            style={{
+              width: '100%', padding: '8px 12px', borderRadius: '6px',
+              border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box',
+            }}
+          />
+        </div>
+        <div>
+          <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Prenom</label>
+          <input
+            type="text"
+            value={admin.prenom}
+            onChange={e => setAdmin({ ...admin, prenom: e.target.value })}
+            placeholder="Cyril"
+            style={{
+              width: '100%', padding: '8px 12px', borderRadius: '6px',
+              border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box',
+            }}
+          />
+        </div>
+      </div>
+
+      <div style={{ marginTop: '0.75rem' }}>
+        <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>
+          Email professionnel <span style={{ color: '#9ca3af' }}>(@{entityDomain})</span>
+        </label>
+        <input
+          type="email"
+          value={admin.email_pro}
+          onChange={e => setAdmin({ ...admin, email_pro: e.target.value })}
+          placeholder={`prenom@${entityDomain}`}
+          style={{
+            width: '100%', padding: '8px 12px', borderRadius: '6px',
+            border: `1px solid ${emailValid ? '#d1d5db' : '#ef4444'}`, fontSize: '0.85rem',
+            boxSizing: 'border-box',
+          }}
+        />
+        {!emailValid && (
+          <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '4px 0 0' }}>
+            L&apos;email doit appartenir au domaine {entityDomain}
+          </p>
+        )}
+      </div>
+
+      <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button
+          onClick={handleSaveAdmin}
+          disabled={adminStatus === 'loading' || !emailValid}
+          style={{
+            padding: '8px 20px', borderRadius: '6px', border: 'none',
+            background: adminStatus === 'loading' ? '#9ca3af' : '#4A919E',
+            color: '#fff', fontWeight: '600', fontSize: '0.85rem',
+            cursor: adminStatus === 'loading' || !emailValid ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {adminStatus === 'loading' ? 'Enregistrement...' : 'Enregistrer'}
+        </button>
+        {adminStatus === 'success' && (
+          <span style={{ color: '#16a34a', fontSize: '0.8rem' }}>✅ Enregistre</span>
+        )}
+      </div>
+
+      {adminError && (
+        <p style={{ color: '#991B1B', fontSize: '0.8rem', marginTop: '0.5rem' }}>{adminError}</p>
+      )}
+    </div>
+  );
+}
+
+/* --- Delegate Access Section --- */
+function DelegateAccess({ entityId, ownerEmailMasked, updateToken }: {
+  entityId: string;
+  ownerEmailMasked: string;
+  updateToken: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [delegateStatus, setDelegateStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [delegateError, setDelegateError] = useState('');
+
+  const handleDelegate = async () => {
+    if (!newEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim())) {
+      setDelegateError('Format email invalide.');
+      return;
+    }
+
+    if (!confirm(`Transferer l'acces de gestion a ${newEmail.trim()} ?\n\nL'ancien proprietaire ne pourra plus se connecter.`)) {
+      return;
+    }
+
+    setDelegateStatus('loading');
+    setDelegateError('');
+
+    try {
+      const res = await fetch('/api/update-owner-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ entityId, newOwnerEmail: newEmail.trim(), token: updateToken }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      setDelegateStatus('success');
+    } catch (err: unknown) {
+      setDelegateError(err instanceof Error ? err.message : 'Erreur');
+      setDelegateStatus('error');
+    }
+  };
+
+  return (
+    <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e5e7eb' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          background: 'none', border: 'none', color: '#6b7280', fontSize: '0.8rem',
+          cursor: 'pointer', textDecoration: 'underline', padding: 0,
+        }}
+      >
+        {open ? 'Masquer' : 'Transferer l\'acces a un autre email'}
+      </button>
+
+      {open && (
+        <div style={{ marginTop: '0.75rem' }}>
+          {delegateStatus === 'success' ? (
+            <div style={{ background: '#dcfce7', padding: '10px 14px', borderRadius: '8px', color: '#166534', fontSize: '0.85rem' }}>
+              Acces transfere avec succes. Le nouveau proprietaire pourra se connecter avec son email.
+            </div>
+          ) : (
+            <>
+              <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0 0 0.5rem' }}>
+                Proprietaire actuel : <strong>{ownerEmailMasked}</strong>
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={e => setNewEmail(e.target.value)}
+                  placeholder="nouvel-email@exemple.com"
+                  style={{
+                    flex: 1, padding: '8px 12px', borderRadius: '6px',
+                    border: '1px solid #d1d5db', fontSize: '0.85rem',
+                  }}
+                />
+                <button
+                  onClick={handleDelegate}
+                  disabled={delegateStatus === 'loading'}
+                  style={{
+                    padding: '8px 16px', borderRadius: '6px', border: 'none',
+                    background: delegateStatus === 'loading' ? '#9ca3af' : '#CE6A6B',
+                    color: '#fff', fontWeight: '600', fontSize: '0.85rem',
+                    cursor: delegateStatus === 'loading' ? 'wait' : 'pointer',
+                  }}
+                >
+                  {delegateStatus === 'loading' ? '...' : 'Transferer'}
+                </button>
+              </div>
+              {delegateError && (
+                <p style={{ color: '#991B1B', fontSize: '0.8rem', marginTop: '0.5rem' }}>{delegateError}</p>
+              )}
+            </>
+          )}
         </div>
       )}
     </div>

@@ -479,6 +479,29 @@ export const database = {
     },
 
     /**
+     * Update the owner_email for an entity (delegation of access)
+     */
+    updateOwnerEmail: async (entityId: string, newOwnerEmail: string): Promise<boolean> => {
+        if (!isSupabaseConfigured()) return false;
+        const client = getSupabase();
+        if (!client) return false;
+        try {
+            const { error } = await client
+                .from('aya_registry')
+                .update({ owner_email: newOwnerEmail.trim().toLowerCase() })
+                .eq('entity_id', entityId);
+            if (error) {
+                console.error('❌ [Supabase] updateOwnerEmail Error:', error);
+                return false;
+            }
+            console.log(`✅ [Supabase] owner_email updated for ${entityId}`);
+            return true;
+        } catch {
+            return false;
+        }
+    },
+
+    /**
      * OTP MANAGEMENT (One Time Password)
      */
     saveOTP: async (email: string, code: string): Promise<void> => {

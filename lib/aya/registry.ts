@@ -86,6 +86,8 @@ export async function registerOrUpdateEntity(
         payment_completed: true, // Entité visible sur AYA uniquement après paiement
         pack_type: mode === 'purchase' ? 'PRO' : 'AYA_SUB',
         contact_email: entityData.contact_email || existingData.contact_email,
+        // owner_email = Stripe payer email. Once set, never overwrite automatically.
+        owner_email: existingData.owner_email || entityData.contact_email || existingData.contact_email,
 
         asr_payload: entityData.asr_payload || existingData.asr_payload || { version: "1.0", data: {}, signature: { hash: "", public_key: "" } },
 

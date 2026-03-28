@@ -13,7 +13,11 @@ export interface AyaEntity {
     asr_score?: number;    // Score de qualité de l'information (0-100)
     payment_completed?: boolean; // Entité visible sur AYA uniquement après paiement
     pack_type?: string;           // 'PRO' | 'AYA_SUB' — pack acheté
-    contact_email?: string;       // Email du client (pour OTP gate + notifications)
+    contact_email?: string;       // Email de contact public de l'entreprise (affiché sur le certificat)
+    owner_email?: string;         // Email du proprietaire (payeur Stripe, seul autorisé pour OTP + mises à jour)
+    admin_nom?: string;           // Nom de l'administrateur du compte
+    admin_prenom?: string;        // Prénom de l'administrateur du compte
+    admin_email_pro?: string;     // Email pro (doit avoir le même domaine que le site de l'entité)
 
     // Temporalité (CRUCIAL POUR LES BOTS)
     created_at: string;      // ISO Date - Ne bouge jamais

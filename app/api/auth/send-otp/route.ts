@@ -35,18 +35,21 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: "Entite introuvable." }, { status: 404 });
             }
 
-            // Check email matches: registration email (from analyses) or contact_email
-            const registrationEmail = await db.getRegistrationEmail(entity.website || '');
-            const validEmails = [registrationEmail, entity.contact_email]
-                .filter(Boolean)
-                .map((e: string) => e.toLowerCase());
+            // SECURITY: Only the owner_email (Stripe payer) can authenticate
+            const ownerEmail = entity.owner_email;
 
-            if (!validEmails.includes(email.trim().toLowerCase())) {
-                logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match entity ${entityId}`);
+            if (!ownerEmail) {
+                logger.warn('OTP_NO_OWNER', `No owner_email set for entity ${entityId}`);
+                return NextResponse.json({ error: "Aucun email proprietaire enregistre pour cette entite. Contactez support@ai-visionary.com." }, { status: 403 });
+            }
+
+            const inputEmail = email.trim().toLowerCase();
+            if (inputEmail !== ownerEmail.toLowerCase()) {
+                logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match owner for entity ${entityId}`);
                 return NextResponse.json({ error: "Cet email ne correspond pas a celui enregistre pour cette entite." }, { status: 403 });
             }
 
-            adminEmail = email.trim();
+            adminEmail = ownerEmail;
             entityName = entity.display_name || entity.legal_name || '';
         } else if (url) {
             // MODE 1: URL-based lookup (original flow)

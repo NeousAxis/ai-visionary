@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { entityId, blocks, token } = body;
+        const { entityId, blocks, token, adminAccount } = body;
 
         // --- Validate entityId ---
         if (!entityId || typeof entityId !== 'string') {
@@ -194,6 +194,16 @@ export async function POST(req: NextRequest) {
 
         if (contactEmail && typeof contactEmail === 'string' && contactEmail.trim()) {
             updateFields.contact_email = contactEmail.trim();
+        }
+
+        // SECURITY: owner_email can ONLY be changed via the dedicated delegation endpoint
+        delete updateFields.owner_email;
+
+        // Admin account fields (separate from AIO scoring)
+        if (adminAccount && typeof adminAccount === 'object') {
+            if (adminAccount.admin_nom) updateFields.admin_nom = String(adminAccount.admin_nom).trim();
+            if (adminAccount.admin_prenom) updateFields.admin_prenom = String(adminAccount.admin_prenom).trim();
+            if (adminAccount.admin_email_pro) updateFields.admin_email_pro = String(adminAccount.admin_email_pro).trim().toLowerCase();
         }
 
         const updated = await db.updateEntityData(entityId, updateFields);

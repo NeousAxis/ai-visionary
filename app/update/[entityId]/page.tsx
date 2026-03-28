@@ -36,10 +36,8 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
 
   const name = entity.display_name || entity.legal_name || 'Entite';
 
-  // Get the OWNER email (the one used during registration/payment),
-  // NOT the company contact email. The owner email is in the analyses table.
-  const ownerEmail = await db.getRegistrationEmail(entity.website || '');
-  const authEmail = ownerEmail || entity.contact_email || '';
+  // SECURITY: Only owner_email (Stripe payer) can authenticate for updates
+  const authEmail = entity.owner_email || '';
 
   // Extract the raw AyoExtract.fields from asr_payload.data
   const rawPayloadData = entity.asr_payload?.data?.fields ?? entity.asr_payload?.data ?? undefined;
@@ -120,10 +118,17 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
               entityName={name}
               packType={packType}
               entityEmail={entity.contact_email || ''}
+              entityWebsite={entity.website || ''}
+              ownerEmailMasked={authEmail ? authEmail.replace(/^(.{2})[^@]*/, '$1***') : ''}
               currentScore={entity.asr_score ?? null}
               initialValues={initialValues}
               blockDefinitions={BLOCK_DEFINITIONS}
               updateToken={updateToken}
+              adminAccount={{
+                nom: entity.admin_nom || '',
+                prenom: entity.admin_prenom || '',
+                email_pro: entity.admin_email_pro || '',
+              }}
             />
           </OtpGate>
         </div>
