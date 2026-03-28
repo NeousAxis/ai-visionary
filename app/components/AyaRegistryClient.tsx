@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import LanguageToggle from './LanguageToggle';
 
 type SortMode = 'default' | 'alpha' | 'score' | 'country' | 'certified';
 
@@ -128,6 +129,10 @@ export default function AyaRegistryClient({
                     <p className="subheadline" style={{ maxWidth: '700px', margin: '0 auto' }}>
                         {t('heroSub')}
                     </p>
+
+                    <div style={{ marginTop: '16px' }}>
+                        <LanguageToggle />
+                    </div>
 
                     {/* SEARCH BAR */}
                     <div style={{ maxWidth: '600px', margin: '40px auto 0', position: 'relative' }}>
