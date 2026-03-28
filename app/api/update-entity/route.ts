@@ -58,11 +58,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'blocks requis (objet avec les 7 blocs AIO)' }, { status: 400 });
         }
 
-        // Verify at least one valid block is present
+        // Verify at least one valid block OR admin account fields are present
         const providedBlocks = Object.keys(blocks).filter((k) =>
             (VALID_BLOCKS as readonly string[]).includes(k)
         );
-        if (providedBlocks.length === 0) {
+        const hasAdminData = adminAccount && typeof adminAccount === 'object' &&
+            (adminAccount.admin_nom || adminAccount.admin_prenom || adminAccount.admin_email_pro);
+        if (providedBlocks.length === 0 && !hasAdminData) {
             return NextResponse.json(
                 { error: 'Aucune modification detectee. Modifiez au moins un champ avant d\'enregistrer.' },
                 { status: 400 }

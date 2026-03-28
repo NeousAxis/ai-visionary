@@ -897,7 +897,7 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
             type="text"
             value={admin.nom}
             onChange={e => setAdmin({ ...admin, nom: e.target.value })}
-            placeholder="Leger"
+            placeholder="Nom"
             style={{
               width: '100%', padding: '8px 12px', borderRadius: '6px',
               border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box',
@@ -910,7 +910,7 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
             type="text"
             value={admin.prenom}
             onChange={e => setAdmin({ ...admin, prenom: e.target.value })}
-            placeholder="Cyril"
+            placeholder="Prenom"
             style={{
               width: '100%', padding: '8px 12px', borderRadius: '6px',
               border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box',
@@ -927,7 +927,7 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
           type="email"
           value={admin.email_pro}
           onChange={e => setAdmin({ ...admin, email_pro: e.target.value })}
-          placeholder={`prenom@${entityDomain}`}
+          placeholder={`votre-email@${entityDomain}`}
           style={{
             width: '100%', padding: '8px 12px', borderRadius: '6px',
             border: `1px solid ${emailValid ? '#d1d5db' : '#ef4444'}`, fontSize: '0.85rem',
