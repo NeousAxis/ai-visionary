@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function BackButton() {
     const router = useRouter();
+    const t = useTranslations('nav');
 
     return (
         <button
@@ -25,7 +27,7 @@ export default function BackButton() {
                 padding: 0,
             }}
         >
-            &#x2715; FERMER
+            &#x2715; {t('close')}
         </button>
     );
 }

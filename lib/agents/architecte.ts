@@ -14,6 +14,7 @@ import { generateManifestJson, generateFaqJson, generateGlossaryJson, generateEx
 import { generateRealAsrJson } from '../ayo-crypto';
 import { validateProPack, applyCorrections, type ProPackFiles, type QCResult } from './controle-qualite';
 import type { AnalysteResult } from './analyste';
+import type { Locale } from '../ayo-system-prompt';
 
 export interface ArchitecteInput {
     /** Données extraites du questionnaire + scan */
@@ -183,6 +184,7 @@ export interface StructureRecommendationsResult {
 export function buildStructureRecommendations(
     extractData: any,
     scoreResult: AnalysteResult,
+    locale: Locale = 'fr',
 ): StructureRecommendationsResult {
     const recommendations: StructureRecommendation[] = [];
     const fields = extractData?.fields || {};
@@ -303,12 +305,22 @@ export function buildStructureRecommendations(
     const currentScore = scoreResult.total;
 
     let summary: string;
-    if (currentScore < 30) {
-        summary = `Votre visibilité IA est très faible (${currentScore}/100). ${criticalCount} fichier(s) critique(s) manquent pour que les IA puissent vous identifier et vous recommander. Le Pack PRO pourrait augmenter votre score de +${estimatedGain} points.`;
-    } else if (currentScore < 60) {
-        summary = `Votre base existe (${currentScore}/100) mais les IA ne peuvent pas encore vous recommander de manière fiable. Les 5 fichiers PRO structurent vos données pour un gain estimé de +${estimatedGain} points.`;
+    if (locale === 'en') {
+        if (currentScore < 30) {
+            summary = `Your AI visibility is very low (${currentScore}/100). ${criticalCount} critical file(s) are missing for AIs to identify and recommend you. The PRO Pack could increase your score by +${estimatedGain} points.`;
+        } else if (currentScore < 60) {
+            summary = `Your foundation exists (${currentScore}/100) but AIs cannot yet reliably recommend you. The 5 PRO files structure your data for an estimated gain of +${estimatedGain} points.`;
+        } else {
+            summary = `Good foundation (${currentScore}/100). PRO files lock in your visibility and prevent hallucinations. Estimated gain: +${estimatedGain} points.`;
+        }
     } else {
-        summary = `Bonne base (${currentScore}/100). Les fichiers PRO verrouillent votre visibilité et empêchent les hallucinations. Gain estimé : +${estimatedGain} points.`;
+        if (currentScore < 30) {
+            summary = `Votre visibilité IA est très faible (${currentScore}/100). ${criticalCount} fichier(s) critique(s) manquent pour que les IA puissent vous identifier et vous recommander. Le Pack PRO pourrait augmenter votre score de +${estimatedGain} points.`;
+        } else if (currentScore < 60) {
+            summary = `Votre base existe (${currentScore}/100) mais les IA ne peuvent pas encore vous recommander de manière fiable. Les 5 fichiers PRO structurent vos données pour un gain estimé de +${estimatedGain} points.`;
+        } else {
+            summary = `Bonne base (${currentScore}/100). Les fichiers PRO verrouillent votre visibilité et empêchent les hallucinations. Gain estimé : +${estimatedGain} points.`;
+        }
     }
 
     return { recommendations, summary, estimatedScoreGain: estimatedGain };
@@ -318,14 +330,22 @@ export function buildStructureRecommendations(
  * Formate les recommandations de l'Architecte en texte Markdown pour le message AYO.
  * Utilisé dans la réponse FINAL_ANALYSIS pour personnaliser le pitch PRO.
  */
-export function formatRecommendationsForChat(result: StructureRecommendationsResult): string {
+export function formatRecommendationsForChat(result: StructureRecommendationsResult, locale: Locale = 'fr'): string {
     const lines: string[] = [];
 
-    lines.push(`💡 **ANALYSE STRUCTURELLE — AGENT ARCHITECTE**`);
-    lines.push('');
-    lines.push(result.summary);
-    lines.push('');
-    lines.push(`**Vos 5 fichiers PRO personnalisés :**`);
+    if (locale === 'en') {
+        lines.push(`💡 **STRUCTURAL ANALYSIS — ARCHITECT AGENT**`);
+        lines.push('');
+        lines.push(result.summary);
+        lines.push('');
+        lines.push(`**Your 5 personalized PRO files:**`);
+    } else {
+        lines.push(`💡 **ANALYSE STRUCTURELLE — AGENT ARCHITECTE**`);
+        lines.push('');
+        lines.push(result.summary);
+        lines.push('');
+        lines.push(`**Vos 5 fichiers PRO personnalisés :**`);
+    }
 
     for (const rec of result.recommendations) {
         const priorityTag = rec.priority === 1 ? ' ⚡' : '';
@@ -334,7 +354,11 @@ export function formatRecommendationsForChat(result: StructureRecommendationsRes
 
     if (result.estimatedScoreGain > 0) {
         lines.push('');
-        lines.push(`📈 **Gain estimé : +${result.estimatedScoreGain} points** sur votre score AIO.`);
+        if (locale === 'en') {
+            lines.push(`📈 **Estimated gain: +${result.estimatedScoreGain} points** on your AIO score.`);
+        } else {
+            lines.push(`📈 **Gain estimé : +${result.estimatedScoreGain} points** sur votre score AIO.`);
+        }
     }
 
     return lines.join('\n');

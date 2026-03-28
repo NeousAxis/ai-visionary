@@ -1,22 +1,28 @@
+"use client";
 
 import React from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import LanguageToggle from './LanguageToggle';
 
 export default function Footer() {
+    const t = useTranslations('nav');
+    const tf = useTranslations('footer');
     return (
         <footer className="footer">
             <div className="container">
 
                 <div className="footer-links">
-                    <Link href="/">Accueil</Link>
-                    <Link href="/aya">Registre AYA</Link>
-                    <Link href="/ai-et-votre-entreprise">IA & votre entreprise</Link>
-                    <Link href="/developers">API &amp; D&eacute;veloppeurs</Link>
-                    <a href="mailto:hello@ai-visionary.com">Contact</a>
-                    <Link href="/mentions">Mentions</Link>
-                    <Link href="/confidentialite">Confidentialit&eacute;</Link>
+                    <Link href="/">{t('home')}</Link>
+                    <Link href="/aya">{t('ayaRegistry')}</Link>
+                    <Link href="/ai-et-votre-entreprise">{t('aiAndBusiness')}</Link>
+                    <Link href="/developers">{t('apiDevelopers')}</Link>
+                    <a href="mailto:hello@ai-visionary.com">{t('contact')}</a>
+                    <Link href="/mentions">{t('legal')}</Link>
+                    <Link href="/confidentialite">{t('privacy')}</Link>
+                    <LanguageToggle />
                 </div>
-                <p className="footer-copy">© 2026 AI VISIONARY. Tous droits réservés. 🇨🇭 Basée à Genève</p>
+                <p className="footer-copy">{tf('copyright')}</p>
             </div>
         </footer>
     );

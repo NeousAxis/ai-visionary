@@ -21,6 +21,7 @@
 import type { ScannerResult } from './scanner';
 import type { AnalysteResult } from './analyste';
 import type { BlocQuestion } from './greffier';
+import type { Locale } from '../ayo-system-prompt';
 
 // --- ÉTATS ---
 
@@ -260,25 +261,44 @@ export function getNextAction(session: AyoSession): AyoAction {
  */
 export const WELCOME_MESSAGE = `👋 Bonjour, ici AYO. Initialisation du protocole AIO Light. Je vais établir votre Diagnostic de Visibilité IA (Gratuit). Pour cela, indiquez-moi simplement l'URL principale de votre site web.`;
 
+export const WELCOME_MESSAGE_EN = `👋 Hello, this is AYO. Initializing the AIO Light protocol. I will run your AI Visibility Diagnostic (Free). Simply provide me with your main website URL.`;
+
+export function getWelcomeMessage(locale: Locale = 'fr'): string {
+    return locale === 'en' ? WELCOME_MESSAGE_EN : WELCOME_MESSAGE;
+}
+
 /**
  * Message de demande d'email.
  */
 export const EMAIL_REQUEST = `📧 Pour vous envoyer votre rapport détaillé, j'ai besoin de votre email professionnel.`;
+export const EMAIL_REQUEST_EN = `📧 To send you your detailed report, I need your professional email.`;
+
+export function getEmailRequest(locale: Locale = 'fr'): string {
+    return locale === 'en' ? EMAIL_REQUEST_EN : EMAIL_REQUEST;
+}
 
 /**
  * Génère le message de score initial avec transparence du cap.
  */
-export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'enrichi'): string {
+export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'enrichi', locale: Locale = 'fr'): string {
     const lines: string[] = [];
 
-    if (phase === 'initial') {
-        lines.push(`📊 **SCORE INITIAL AIO : ${result.total} / 100**`);
+    if (locale === 'en') {
+        if (phase === 'initial') {
+            lines.push(`📊 **INITIAL AIO SCORE: ${result.total} / 100**`);
+        } else {
+            lines.push(`📊 **FINAL AIO SCORE: ${result.total} / 100**`);
+        }
     } else {
-        lines.push(`📊 **SCORE FINAL AIO : ${result.total} / 100**`);
+        if (phase === 'initial') {
+            lines.push(`📊 **SCORE INITIAL AIO : ${result.total} / 100**`);
+        } else {
+            lines.push(`📊 **SCORE FINAL AIO : ${result.total} / 100**`);
+        }
     }
 
-    // Blocs détaillés
-    const blockLabels: Record<string, string> = {
+    // Detailed blocks
+    const blockLabelsFr: Record<string, string> = {
         identite: 'Identité & Ancrage',
         offre: 'Clarté de l\'Offre',
         processus_methodes: 'Processus & Méthodes',
@@ -287,6 +307,18 @@ export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'e
         contenus_pedagogiques: 'Pédagogie & Supports',
         structure_technique: 'Socle Technique AIO',
     };
+
+    const blockLabelsEn: Record<string, string> = {
+        identite: 'Identity & Anchoring',
+        offre: 'Offer Clarity',
+        processus_methodes: 'Processes & Methods',
+        engagements_conformite: 'Trust & Compliance',
+        indicateurs: 'Social Proof & Metrics',
+        contenus_pedagogiques: 'Educational Content',
+        structure_technique: 'AIO Technical Foundation',
+    };
+
+    const blockLabels = locale === 'en' ? blockLabelsEn : blockLabelsFr;
 
     const blockWeights: Record<string, number> = {
         identite: 10, offre: 20, processus_methodes: 15,
@@ -300,12 +332,18 @@ export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'e
         lines.push(`🔎 ${label} : ${score}/${max}`);
     }
 
-    // Transparence du cap
+    // Cap transparency
     if (result.capApplied && result.capReason) {
         lines.push('');
-        lines.push(`📊 **SCORE BRUT : ${result.rawTotal} / 100**`);
-        lines.push(`⚠️ **PLAFOND TECHNIQUE** : ${result.capReason}`);
-        lines.push(`💡 Le Pack PRO installe les fichiers techniques qui lèvent ce plafond.`);
+        if (locale === 'en') {
+            lines.push(`📊 **RAW SCORE: ${result.rawTotal} / 100**`);
+            lines.push(`⚠️ **TECHNICAL CAP**: ${result.capReason}`);
+            lines.push(`💡 The PRO Pack installs the technical files that lift this cap.`);
+        } else {
+            lines.push(`📊 **SCORE BRUT : ${result.rawTotal} / 100**`);
+            lines.push(`⚠️ **PLAFOND TECHNIQUE** : ${result.capReason}`);
+            lines.push(`💡 Le Pack PRO installe les fichiers techniques qui lèvent ce plafond.`);
+        }
     }
 
     return lines.join('\n');
@@ -314,9 +352,15 @@ export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'e
 /**
  * Génère le message de delta (avant/après questionnaire).
  */
-export function formatDeltaMessage(before: AnalysteResult, after: AnalysteResult): string {
+export function formatDeltaMessage(before: AnalysteResult, after: AnalysteResult, locale: Locale = 'fr'): string {
     const delta = Math.round((after.total - before.total) * 10) / 10;
     const sign = delta >= 0 ? '+' : '';
+
+    if (locale === 'en') {
+        return `📊 **AIO Score: ${before.total} → ${after.total} (${sign}${delta})**
+
+Your answers have enriched your profile. The collected data now allows generating structured files for AIs.`;
+    }
 
     return `📊 **Score AIO : ${before.total} → ${after.total} (${sign}${delta})**
 
@@ -359,6 +403,8 @@ export interface ConversationSignals {
     totalQueueBlocks: number;
     /** Index du bloc suivant dans la queue */
     queueIndex: number;
+    /** Locale for i18n (default 'fr') */
+    locale: Locale;
 }
 
 /**

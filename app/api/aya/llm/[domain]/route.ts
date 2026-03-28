@@ -25,7 +25,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ doma
             return NextResponse.json({ error: 'Entity not found', domain }, { status: 404 });
         }
 
-        const summary = buildLlmSummary(entity);
+        const langParam = req.nextUrl.searchParams.get('lang');
+        const lang: 'fr' | 'en' = langParam === 'fr' ? 'fr' : 'en';
+        const summary = buildLlmSummary(entity, lang);
 
         return NextResponse.json(summary, {
             headers: {

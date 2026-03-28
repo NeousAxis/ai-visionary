@@ -126,6 +126,66 @@ export async function generateSemanticAssets(extract: AyoExtract): Promise<Seman
 }
 
 /**
+ * Generate faithful bilingual descriptions for a certified entity.
+ * Called by the webhook after AYA registration.
+ * Creates gemini_description (EN) and gemini_description_fr (FR) from the client's actual data.
+ * Also generates gemini_keywords and gemini_keywords_fr.
+ */
+export async function generateCertifiedTranslations(
+    entityName: string,
+    businessType: string,
+    services: string[],
+    audience: string,
+    location: string,
+    originalLocale: 'fr' | 'en' = 'fr',
+): Promise<{ gemini_description: string; gemini_description_fr: string; gemini_keywords: string[]; gemini_keywords_fr: string[] }> {
+    const logger = createLogger(generateCorrelationId(), 'system');
+    try {
+        const model = getModel();
+        const svcText = services.length > 0 ? services.join(', ') : '';
+        const context = [
+            entityName ? `Name: ${entityName}` : '',
+            businessType ? `Type: ${businessType}` : '',
+            svcText ? `Services: ${svcText}` : '',
+            audience ? `Audience: ${audience}` : '',
+            location ? `Location: ${location}` : '',
+        ].filter(Boolean).join('\n');
+
+        const { text } = await generateText({
+            model,
+            prompt: `You are a professional business translator. Given this company information:
+
+${context}
+
+Generate a JSON object with exactly 4 fields:
+1. "description_en": A faithful 1-2 sentence description in English. Do NOT simplify or generalize — preserve the exact business terminology and specialization.
+2. "description_fr": A faithful 1-2 sentence description in French. Same rule — preserve exact terminology.
+3. "keywords_en": An array of 6-8 English business keywords for this company.
+4. "keywords_fr": An array of 6-8 French business keywords for this company (adapted to French business vocabulary, not literal translations).
+
+IMPORTANT: These descriptions will be read by AI systems. They must be accurate and specific, not generic summaries.
+
+Return ONLY valid JSON, no markdown.`,
+            abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
+        });
+
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('No JSON in Gemini response');
+        const parsed = JSON.parse(match[0]);
+
+        return {
+            gemini_description: parsed.description_en || '',
+            gemini_description_fr: parsed.description_fr || '',
+            gemini_keywords: Array.isArray(parsed.keywords_en) ? parsed.keywords_en : [],
+            gemini_keywords_fr: Array.isArray(parsed.keywords_fr) ? parsed.keywords_fr : [],
+        };
+    } catch (e) {
+        logger.error('TRANSLATION_FAIL', `Failed to generate translations for ${entityName}: ${e instanceof Error ? e.message : 'unknown'}`);
+        return { gemini_description: '', gemini_description_fr: '', gemini_keywords: [], gemini_keywords_fr: [] };
+    }
+}
+
+/**
  * Helpers de formatage pour respecter les standards Schema.org
  */
 

@@ -14,6 +14,8 @@
  * - Les questions (→ GREFFIER)
  */
 
+import type { Locale } from '../ayo-system-prompt';
+
 // --- STRIPE CONFIG ---
 
 export const STRIPE_PRICES = {
@@ -78,8 +80,29 @@ export function buildStripeLinks(url: string, email: string): { pro: string; aya
 /**
  * Génère le message de présentation des packs pour AYO.
  */
-export function buildPackPresentation(url: string, email: string): string {
+export function buildPackPresentation(url: string, email: string, locale: Locale = 'fr'): string {
     const links = buildStripeLinks(url, email);
+
+    if (locale === 'en') {
+        return `💡**NEXT STEP**: Your profile is complete, but for AIs to actually read and recommend you, this data needs to be transformed into **structured semantic files** (ASR, FAQ, Glossary, Manifest, Context).
+
+Choose your certification level:
+
+👉 [💎 **AYA Subscription** (19 CHF/month)](${links.ayaSub})
+- ✅ **Active AYA Registry**: Your entity appears in the trust registry
+- ✅ **Hosted Data**: We host your ASR/FAQ files on our secure infrastructure
+- ✅ **Updates included**: Continuous data refreshing
+- ✅ **Priority in AI recommendations**
+
+👉 [🚀 **PRO Pack** (499 CHF)](${links.pro})
+- 👑 **ASR-Protocol.json** (signed)
+- 📋 **manifest.json**
+- ❓ **faq.json**
+- 📖 **glossary.json**
+- 🌐 **external_context.json**
+- ✅ **3 YEARS of AYA Registry included**
+- ✅ **Full file ownership** (no lock-in)`;
+    }
 
     return `💡**PROCHAINE ÉTAPE**: Votre profil est complet, mais pour que les IA puissent réellement vous lire et vous recommander, il faut transformer ces données en **fichiers sémantiques structurés** (ASR, FAQ, Glossaire, Manifest, Contexte).
 
@@ -106,11 +129,12 @@ Choisissez votre niveau de certification :
 /**
  * Encode les données client pour Stripe client_reference_id.
  */
-export function encodeClientReference(data: { url: string; email: string; analysisId?: string }): string {
+export function encodeClientReference(data: { url: string; email: string; analysisId?: string; locale?: string }): string {
     const payload: Record<string, string> = {};
     if (data.url) payload.u = data.url;
     if (data.email) payload.e = data.email;
     if (data.analysisId) payload.aid = data.analysisId;
+    if (data.locale) payload.l = data.locale;
 
     return Buffer.from(JSON.stringify(payload)).toString('base64url');
 }
@@ -118,7 +142,7 @@ export function encodeClientReference(data: { url: string; email: string; analys
 /**
  * Décode le client_reference_id Stripe.
  */
-export function decodeClientReference(b64: string): { url?: string; email?: string; analysisId?: string } {
+export function decodeClientReference(b64: string): { url?: string; email?: string; analysisId?: string; locale?: string } {
     try {
         // Support both base64 and base64url encoding
         const payload = JSON.parse(Buffer.from(b64, 'base64url').toString('utf-8'));
@@ -126,6 +150,7 @@ export function decodeClientReference(b64: string): { url?: string; email?: stri
             url: payload.u,
             email: payload.e,
             analysisId: payload.aid,
+            locale: payload.l,
         };
     } catch {
         return {};

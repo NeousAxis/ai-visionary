@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export default function PaymentSuccessModal() {
     const searchParams = useSearchParams();
+    const t = useTranslations('payment');
     const [showModal, setShowModal] = useState(false);
     const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
     const [packType, setPackType] = useState<'plateforme' | 'pro'>('plateforme');
@@ -78,10 +80,10 @@ export default function PaymentSuccessModal() {
                                     borderRadius: '50%', animation: 'spin 1s linear infinite',
                                 }} />
                                 <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
-                                    Préparation en cours...
+                                    {t('processingTitle')}
                                 </h2>
                                 <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.95rem', marginTop: '6px' }}>
-                                    Nous préparons vos fichiers AIO
+                                    {t('processingSubtitle')}
                                 </p>
                             </>
                         )}
@@ -97,10 +99,10 @@ export default function PaymentSuccessModal() {
                                     </svg>
                                 </div>
                                 <h2 style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
-                                    Paiement validé !
+                                    {t('successTitle')}
                                 </h2>
                                 <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1rem', marginTop: '8px', fontWeight: 500 }}>
-                                    Votre Pack <strong>{packType === 'pro' ? 'PRO' : 'Plateforme'}</strong> est activé
+                                    {t('packActivated', { pack: packType === 'pro' ? 'PRO' : 'Plateforme' })}
                                 </p>
                             </>
                         )}
@@ -116,7 +118,7 @@ export default function PaymentSuccessModal() {
                                     </svg>
                                 </div>
                                 <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
-                                    Erreur technique
+                                    {t('errorTitle')}
                                 </h2>
                             </>
                         )}
@@ -160,12 +162,12 @@ export default function PaymentSuccessModal() {
                                         </div>
                                         <div style={{ flex: 1 }}>
                                             <h3 style={{ color: '#212E53', fontSize: '1rem', fontWeight: 700, margin: '0 0 6px 0' }}>
-                                                Fichiers envoyés par email
+                                                {t('filesSentTitle')}
                                             </h3>
                                             {packType === 'pro' ? (
                                                 <>
                                                     <p style={{ color: '#324066', fontSize: '0.9rem', margin: '0 0 10px 0', lineHeight: 1.5 }}>
-                                                        Vos <strong style={{ color: '#4A919E' }}>5 fichiers PRO</strong> ont été envoyés :
+                                                        {t('proFilesSent')}
                                                     </p>
                                                     <div style={{
                                                         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px',
@@ -180,7 +182,7 @@ export default function PaymentSuccessModal() {
                                                 </>
                                             ) : (
                                                 <p style={{ color: '#324066', fontSize: '0.9rem', margin: 0, lineHeight: 1.5 }}>
-                                                    Votre fichier <strong style={{ color: '#4A919E' }}>ASR-Protocol.json</strong> a été envoyé.
+                                                    {t('platformFileSent')}
                                                 </p>
                                             )}
                                         </div>
@@ -192,7 +194,7 @@ export default function PaymentSuccessModal() {
                                     textAlign: 'center', color: '#64748B', fontSize: '0.85rem',
                                     marginBottom: '24px', fontStyle: 'italic',
                                 }}>
-                                    Pensez à vérifier vos spams si vous ne recevez rien.
+                                    {t('spamReminder')}
                                 </p>
 
                                 {/* CTA button */}
@@ -218,7 +220,7 @@ export default function PaymentSuccessModal() {
                                         e.currentTarget.style.boxShadow = '0 4px 14px rgba(74, 145, 158, 0.3)';
                                     }}
                                 >
-                                    Retour à l&apos;accueil
+                                    {t('backHome')}
                                 </button>
                             </>
                         )}
@@ -226,8 +228,7 @@ export default function PaymentSuccessModal() {
                         {status === 'error' && (
                             <div style={{ textAlign: 'center' }}>
                                 <p style={{ color: '#324066', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '20px' }}>
-                                    Votre paiement a été reçu mais nous rencontrons un problème technique.
-                                    Nos équipes sont notifiées.
+                                    {t('errorBody')}
                                 </p>
                                 <a
                                     href="mailto:hello@ai-visionary.com"
@@ -239,7 +240,7 @@ export default function PaymentSuccessModal() {
                                         transition: 'all 0.2s',
                                     }}
                                 >
-                                    Contacter le support
+                                    {t('contactSupport')}
                                 </a>
                             </div>
                         )}

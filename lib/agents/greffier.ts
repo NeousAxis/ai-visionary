@@ -41,46 +41,96 @@ export interface BlocQuestion {
  * Génère une question de validation STATIQUE (sans LLM) pour les données scannées lowConfidence.
  * Format : "Le scan a détecté X. Est-ce exact ?" avec options Oui/Non.
  */
+import type { Locale } from '../ayo-system-prompt';
+
 // Labels humains pour les blocs et champs (module-level pour éviter recréation)
-const BLOCK_LABELS: Record<string, string> = {
-    'identite': 'Identité & Ancrage',
-    'offre': 'Clarté de l\'Offre',
-    'processus_methodes': 'Processus & Méthodes',
-    'engagements_conformite': 'Confiance & Conformité',
-    'indicateurs': 'Preuve Sociale & Métriques',
-    'contenus_pedagogiques': 'Pédagogie & Supports',
-    'external_context': 'Contexte Externe',
+const BLOCK_LABELS: Record<string, Record<string, string>> = {
+    fr: {
+        'identite': 'Identité & Ancrage',
+        'offre': 'Clarté de l\'Offre',
+        'processus_methodes': 'Processus & Méthodes',
+        'engagements_conformite': 'Confiance & Conformité',
+        'indicateurs': 'Preuve Sociale & Métriques',
+        'contenus_pedagogiques': 'Pédagogie & Supports',
+        'external_context': 'Contexte Externe',
+    },
+    en: {
+        'identite': 'Identity & Anchoring',
+        'offre': 'Offer Clarity',
+        'processus_methodes': 'Processes & Methods',
+        'engagements_conformite': 'Trust & Compliance',
+        'indicateurs': 'Social Proof & Metrics',
+        'contenus_pedagogiques': 'Educational Content',
+        'external_context': 'External Context',
+    },
 };
 
-const FIELD_LABELS: Record<string, string> = {
-    'services': 'les services suivants',
-    'products': 'les produits suivants',
-    'target_audience': 'le public cible suivant',
-    'use_cases': 'le cas d\'usage suivant',
-    'pricing_indication': 'la tarification suivante',
-    'process_steps': 'les étapes suivantes',
-    'delivery_mode': 'que votre service est principalement',
-    'quality_assurance': 'que votre assurance qualité repose sur',
-    'certifications': 'les certifications suivantes',
-    'frameworks': 'les frameworks suivants',
-    'policies': 'les politiques suivantes',
-    'security_measures': 'les mesures de sécurité suivantes',
-    'key_indicators': 'les indicateurs suivants',
-    'has_faq': 'la présence d\'une FAQ',
-    'has_glossary': 'la présence d\'un glossaire',
-    'has_documentation': 'la présence de documentation',
-    'keywords': 'les mots-clés suivants',
-    'channels': 'les canaux suivants',
-    'intents': 'les intentions utilisateurs suivantes',
-    'city': 'que vous êtes basé à',
-    'country': 'que votre pays est',
-    'name': 'le nom',
-    'legal_name': 'le nom légal',
-    'business_type': 'le type d\'activité',
-    'geographies_served': 'la zone géographique servie',
+const FIELD_LABELS: Record<string, Record<string, string>> = {
+    fr: {
+        'services': 'les services suivants',
+        'products': 'les produits suivants',
+        'target_audience': 'le public cible suivant',
+        'use_cases': 'le cas d\'usage suivant',
+        'pricing_indication': 'la tarification suivante',
+        'process_steps': 'les étapes suivantes',
+        'delivery_mode': 'que votre service est principalement',
+        'quality_assurance': 'que votre assurance qualité repose sur',
+        'certifications': 'les certifications suivantes',
+        'frameworks': 'les frameworks suivants',
+        'policies': 'les politiques suivantes',
+        'security_measures': 'les mesures de sécurité suivantes',
+        'key_indicators': 'les indicateurs suivants',
+        'has_faq': 'la présence d\'une FAQ',
+        'has_glossary': 'la présence d\'un glossaire',
+        'has_documentation': 'la présence de documentation',
+        'keywords': 'les mots-clés suivants',
+        'channels': 'les canaux suivants',
+        'intents': 'les intentions utilisateurs suivantes',
+        'city': 'que vous êtes basé à',
+        'country': 'que votre pays est',
+        'name': 'le nom',
+        'legal_name': 'le nom légal',
+        'business_type': 'le type d\'activité',
+        'geographies_served': 'la zone géographique servie',
+    },
+    en: {
+        'services': 'the following services',
+        'products': 'the following products',
+        'target_audience': 'the following target audience',
+        'use_cases': 'the following use case',
+        'pricing_indication': 'the following pricing',
+        'process_steps': 'the following steps',
+        'delivery_mode': 'that your service is primarily',
+        'quality_assurance': 'that your quality assurance relies on',
+        'certifications': 'the following certifications',
+        'frameworks': 'the following frameworks',
+        'policies': 'the following policies',
+        'security_measures': 'the following security measures',
+        'key_indicators': 'the following indicators',
+        'has_faq': 'the presence of a FAQ',
+        'has_glossary': 'the presence of a glossary',
+        'has_documentation': 'the presence of documentation',
+        'keywords': 'the following keywords',
+        'channels': 'the following channels',
+        'intents': 'the following user intents',
+        'city': 'that you are based in',
+        'country': 'that your country is',
+        'name': 'the name',
+        'legal_name': 'the legal name',
+        'business_type': 'the business type',
+        'geographies_served': 'the geographic area served',
+    },
 };
 
-export const ENRICHMENT_TEMPLATES: Record<string, {text: string, options?: string[], inputType?: string, customLabel?: string, allowMultiple?: boolean}> = {
+interface EnrichmentTemplate {
+    text: string;
+    options?: string[];
+    inputType?: string;
+    customLabel?: string;
+    allowMultiple?: boolean;
+}
+
+const ENRICHMENT_TEMPLATES_FR: Record<string, EnrichmentTemplate> = {
     // Identité
     'name': { text: "Quel est le nom commercial de votre entreprise ?", inputType: 'text', customLabel: "Nom commercial..." },
     'country': { text: "Dans quel pays votre entreprise est-elle basée ?", options: ["France", "Suisse", "Belgique", "Canada", "Luxembourg"], allowMultiple: false },
@@ -120,6 +170,54 @@ export const ENRICHMENT_TEMPLATES: Record<string, {text: string, options?: strin
     'intents': { text: "Quelles questions vos clients potentiels posent-ils aux IA pour trouver un service comme le vôtre ?", inputType: 'text', customLabel: "Questions types..." },
 };
 
+const ENRICHMENT_TEMPLATES_EN: Record<string, EnrichmentTemplate> = {
+    // Identity
+    'name': { text: "What is the commercial name of your business?", inputType: 'text', customLabel: "Business name..." },
+    'country': { text: "In which country is your business based?", options: ["France", "Switzerland", "Belgium", "Canada", "Luxembourg", "United States", "United Kingdom", "Germany"], allowMultiple: false },
+    'legal_name': { text: "What is the legal name of your company (as it appears on official documents)?", inputType: 'text', customLabel: "Legal name..." },
+    'business_type': { text: "What is the legal form of your company?", options: ["LLC", "Corporation", "Sole Proprietorship", "Partnership", "Non-Profit", "Other"], allowMultiple: false },
+    'city': { text: "In which city are you primarily based?", inputType: 'text', customLabel: "City..." },
+    'contact_email': { text: "What is the main contact email address for your company?", inputType: 'text', customLabel: "Enter your email..." },
+    'contact_phone': { text: "What is the main contact phone number for your company?", inputType: 'text', customLabel: "Enter your number..." },
+    // Offer
+    'target_audience': { text: "Who are your target clients? (e.g.: SMBs, individuals, developers, agencies...)", inputType: 'text', customLabel: "Describe your target..." },
+    'services': { text: "What are your main services? (list 3 to 5 services)", inputType: 'text', customLabel: "Describe your services..." },
+    'products': { text: "What are your main products? (list 3 to 5 products)", inputType: 'text', customLabel: "Describe your products..." },
+    'pricing_indication': { text: "How are your prices structured?", options: ["Monthly subscription", "Hourly rate", "Project-based", "Custom quote", "Free / Freemium"], allowMultiple: true },
+    'use_cases': { text: "Give 2-3 concrete examples of problems you solve for your clients.", inputType: 'text', customLabel: "Concrete use cases..." },
+    // Processes & Methods
+    'process_steps': { text: "Could you describe the main steps of your process or methodology?", inputType: 'text', customLabel: "Describe your process..." },
+    'delivery_mode': { text: "How do you deliver your services?", options: ["100% online", "On-site only", "Hybrid (online + on-site)", "Physical delivery"], allowMultiple: false },
+    'geographies_served': { text: "In which geographic areas do you offer your services?", inputType: 'text', customLabel: "Geographic areas..." },
+    'quality_assurance': { text: "Do you have a quality control process?", options: ["Yes", "No"], allowMultiple: false },
+    // Trust & Compliance
+    'certifications': { text: "Do you hold any specific certifications (ISO, GDPR, B Corp, etc.)?", options: ["Yes", "No"], allowMultiple: false },
+    'frameworks': { text: "Are you compliant with any specific compliance frameworks?", options: ["GDPR", "SOC 2", "PCI DSS", "Agile / Scrum", "ITIL", "None"], allowMultiple: true },
+    'security_measures': { text: "What security measures have you implemented to protect your clients' data?", inputType: 'text', customLabel: "Security measures..." },
+    'policies': { text: "What policies do you have in place?", options: ["Privacy Policy", "Legal Notice", "Terms of Service", "Code of Ethics", "None"], allowMultiple: true },
+    // Indicators
+    'key_indicators': { text: "What are your key performance indicators (KPIs)? (number of clients, satisfaction rate, etc.)", inputType: 'text', customLabel: "Key indicators..." },
+    'last_review_date': { text: "When was the last time your information (website, services, pricing) was updated?", options: ["Less than a month", "1 to 3 months", "3 to 6 months", "More than 6 months"] },
+    'testimonials': { text: "Do you have satisfied client testimonials?", options: ["Yes", "No"], allowMultiple: false },
+    'certifications_count': { text: "How many professional certifications do you hold?", options: ["None", "1 to 2", "3 to 5", "More than 5"], allowMultiple: false },
+    // Educational Content
+    'has_faq': { text: "Do you have a FAQ section on your website?", options: ["Yes", "No"] },
+    'has_glossary': { text: "Do you have a glossary or lexicon on your website?", options: ["Yes", "No"] },
+    'has_documentation': { text: "Do you offer documentation or guides for your clients?", options: ["Yes", "No"] },
+    // External Context
+    'keywords': { text: "What keywords best describe your company and offering?", inputType: 'text', customLabel: "Keywords..." },
+    'channels': { text: "On which channels are you present?", options: ["Website", "LinkedIn", "Instagram", "Google Business", "Professional Directories"], allowMultiple: true },
+    'intents': { text: "What questions do your potential clients ask AIs to find a service like yours?", inputType: 'text', customLabel: "Typical questions..." },
+};
+
+/** Get the enrichment templates for a locale */
+export function getEnrichmentTemplates(locale: Locale = 'fr'): Record<string, EnrichmentTemplate> {
+    return locale === 'en' ? ENRICHMENT_TEMPLATES_EN : ENRICHMENT_TEMPLATES_FR;
+}
+
+/** Default export for backward compatibility — always French */
+export const ENRICHMENT_TEMPLATES = ENRICHMENT_TEMPLATES_FR;
+
 /** Field names that use text input (derived from ENRICHMENT_TEMPLATES) */
 export const TEXT_INPUT_FIELD_NAMES = Object.entries(ENRICHMENT_TEMPLATES)
     .filter(([, t]) => t.inputType === 'text')
@@ -137,18 +235,28 @@ export const BOOLEAN_FIELD_NAMES = Object.entries(ENRICHMENT_TEMPLATES)
 export function buildEnrichmentQuestion(
     blockName: string,
     fieldName: string,
+    locale: Locale = 'fr',
 ): string {
-    const template = ENRICHMENT_TEMPLATES[fieldName];
-    const blocLabel = BLOCK_LABELS[blockName] || blockName;
+    const templates = getEnrichmentTemplates(locale);
+    const template = templates[fieldName];
+    const blocLabels = BLOCK_LABELS[locale] || BLOCK_LABELS.fr;
+    const blocLabel = blocLabels[blockName] || blockName;
 
-    // Fallback si le champ n'a pas de template
-    const questionText = template?.text || `Pourriez-vous préciser l'information suivante : "${fieldName}" ?`;
+    // Fallback if the field has no template
+    const fallbackText = locale === 'en'
+        ? `Could you provide the following information: "${fieldName}"?`
+        : `Pourriez-vous préciser l'information suivante : "${fieldName}" ?`;
+    const questionText = template?.text || fallbackText;
     const hasOptions = template?.options && template.options.length > 0;
     const isTextInput = template?.inputType === 'text' || !hasOptions;
 
+    const introText = locale === 'en'
+        ? `Let's move to the section: **${blocLabel}**`
+        : `Passons à la section : **${blocLabel}**`;
+
     const questionBlock = {
         type: "question_block",
-        intro: `Passons à la section : **${blocLabel}**`,
+        intro: introText,
         questions: [{
             id: `q_${blockName}_${fieldName}`,
             text: questionText,
@@ -167,14 +275,18 @@ export function buildValidationQuestion(
     blockName: string,
     fieldName: string,
     detectedValue: string | string[],
+    locale: Locale = 'fr',
 ): string {
-    // Formater la valeur détectée
+    // Format the detected value
     let displayValue: string;
     if (Array.isArray(detectedValue)) {
         if (detectedValue.length <= 3) {
             displayValue = detectedValue.join(', ');
         } else {
-            displayValue = detectedValue.slice(0, 3).join(', ') + ` et ${detectedValue.length - 3} autre(s)`;
+            const moreText = locale === 'en'
+                ? `and ${detectedValue.length - 3} more`
+                : `et ${detectedValue.length - 3} autre(s)`;
+            displayValue = detectedValue.slice(0, 3).join(', ') + ` ${moreText}`;
         }
     } else {
         displayValue = detectedValue.length > 150
@@ -182,19 +294,33 @@ export function buildValidationQuestion(
             : detectedValue;
     }
 
-    const fieldLabel = FIELD_LABELS[fieldName] || `l'information suivante pour "${fieldName}"`;
-    const blocLabel = BLOCK_LABELS[blockName.split('.')[0]] || blockName;
+    const fieldLabels = FIELD_LABELS[locale] || FIELD_LABELS.fr;
+    const blocLabels = BLOCK_LABELS[locale] || BLOCK_LABELS.fr;
+    const fieldLabel = fieldLabels[fieldName] || (locale === 'en' ? `the following information for "${fieldName}"` : `l'information suivante pour "${fieldName}"`);
+    const blocLabel = blocLabels[blockName.split('.')[0]] || blockName;
+
+    const introText = locale === 'en'
+        ? `Let's move to the section: **${blocLabel}**`
+        : `Passons à la section : **${blocLabel}**`;
+
+    const questionText = locale === 'en'
+        ? `The scan detected ${fieldLabel}: ${displayValue}.\nIs this correct?`
+        : `Le scan a détecté ${fieldLabel} : ${displayValue}.\nEst-ce exact ?`;
+
+    const optionYes = locale === 'en' ? "✅ Yes, that's correct" : "✅ Oui, c'est exact";
+    const optionNo = locale === 'en' ? "❌ No, that's not correct" : "❌ Non, ce n'est pas exact";
+    const customLbl = locale === 'en' ? "Specify or correct" : "Préciser ou corriger";
 
     const questionBlock = {
         type: "question_block",
-        intro: `Passons à la section : **${blocLabel}**`,
+        intro: introText,
         questions: [{
             id: `validation_${blockName.replace('.', '_')}_${fieldName}`,
-            text: `Le scan a détecté ${fieldLabel} : ${displayValue}.\nEst-ce exact ?`,
-            options: ["✅ Oui, c'est exact", "❌ Non, ce n'est pas exact"],
+            text: questionText,
+            options: [optionYes, optionNo],
             allowCustom: true,
             allowMultiple: false,
-            customLabel: "Préciser ou corriger"
+            customLabel: customLbl
         }]
     };
 

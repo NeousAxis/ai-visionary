@@ -38,7 +38,15 @@ function sanitizeDisplayText(text: string | undefined): string {
         .replace(/,{2,}/g, ',')
         .replace(/^[\s,]+|[\s,]+$/g, '')
         .trim();
-    return cleaned.length >= 5 ? cleaned : "Continuons l'analyse.";
+    return cleaned.length >= 5 ? cleaned : "...";
+}
+
+/** Read locale from NEXT_LOCALE cookie, default to 'fr' */
+function getLocaleFromCookie(): 'fr' | 'en' {
+    if (typeof document === 'undefined') return 'fr';
+    const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]*)/);
+    const val = match ? match[1] : '';
+    return val === 'en' ? 'en' : 'fr';
 }
 
 export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
@@ -47,6 +55,7 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [locale, setLocale] = useState<'fr' | 'en'>('fr');
 
     // Widget Specific State
     const [isOpen, setIsOpen] = useState(mode === 'fullscreen');
@@ -55,6 +64,66 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Read locale from cookie on mount
+    useEffect(() => {
+        setLocale(getLocaleFromCookie());
+    }, []);
+
+    // i18n helper for chat UI strings
+    const t = (key: string): string => {
+        const strings: Record<string, Record<string, string>> = {
+            fr: {
+                greeting: "👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.\n\nJe vais établir votre **Diagnostic de Visibilité IA (Gratuit)**.\nPour cela, indiquez-moi simplement l'URL principale de votre site web.\n\n**1. Quelle est votre URL ?**",
+                greetingHtml1: "👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.",
+                greetingHtml2: "Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.",
+                greetingHtml3: "Pour cela, indiquez-moi simplement l'URL principale de votre site web.",
+                greetingHtml4: "<strong>1. Quelle est votre URL ?</strong>",
+                thinking: "AYO réfléchit...",
+                analyzing: "Analyse AIO Finale en cours...",
+                analyzingSub: "Traitement des données et simulation IA.\nCela peut prendre 30 secondes...",
+                placeholder: "Écrivez votre réponse ici...",
+                validate: "✓ Valider",
+                skip: "⏭️ Non applicable à mon activité",
+                multipleChoices: "Plusieurs choix possibles",
+                back: "← Retour à la question précédente",
+                other: "Autre réponse / Préciser...",
+                stepValidated: "Étape validée.",
+                emptyResponse: "Réponse vide de l'IA",
+                continueAnalysis: "Continuons l'analyse.",
+                step1: "Questionnaire",
+                step2: "Analyse",
+                step3: "Choix ASR",
+                step4: "Finalisation",
+                step5: "Livraison",
+            },
+            en: {
+                greeting: "👋 Hello, this is AYO. Initializing the AIO Light protocol.\n\nI will run your **AI Visibility Diagnostic (Free)**.\nSimply provide me with your main website URL.\n\n**1. What is your URL?**",
+                greetingHtml1: "👋 Hello, this is AYO. Initializing the AIO Light protocol.",
+                greetingHtml2: "I will run your <strong>AI Visibility Diagnostic (Free)</strong>.",
+                greetingHtml3: "Simply provide me with your main website URL.",
+                greetingHtml4: "<strong>1. What is your URL?</strong>",
+                thinking: "AYO is thinking...",
+                analyzing: "Final AIO Analysis in progress...",
+                analyzingSub: "Processing data and AI simulation.\nThis may take 30 seconds...",
+                placeholder: "Write your answer here...",
+                validate: "✓ Validate",
+                skip: "⏭️ Not applicable to my business",
+                multipleChoices: "Multiple choices allowed",
+                back: "← Back to previous question",
+                other: "Other answer / Specify...",
+                stepValidated: "Step validated.",
+                emptyResponse: "Empty AI response",
+                continueAnalysis: "Let's continue the analysis.",
+                step1: "Questionnaire",
+                step2: "Analysis",
+                step3: "ASR Choice",
+                step4: "Finalization",
+                step5: "Delivery",
+            }
+        };
+        return strings[locale]?.[key] || strings.fr[key] || key;
+    };
 
     // Auto-scroll helper
     const scrollToBottom = () => {
@@ -136,12 +205,7 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
 
         const INITIAL_BOT_MESSAGE = {
             role: 'assistant',
-            content: `👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.
-
-Je vais établir votre Diagnostic de Visibilité IA (Gratuit).
-Pour cela, indiquez-moi simplement l'URL principale de votre site web.
-
-1. Quelle est votre URL ?`
+            content: t('greeting'),
         };
 
         try {
@@ -150,7 +214,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [INITIAL_BOT_MESSAGE, ...messages, userMessage]
+                    messages: [INITIAL_BOT_MESSAGE, ...messages, userMessage],
+                    locale,
                 })
             });
 
@@ -168,7 +233,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             // 3. READ JSON RESPONSE
             const data = await response.json();
 
-            if (!data.text) throw new Error("Réponse vide de l'IA");
+            if (!data.text) throw new Error(t('emptyResponse'));
 
             // CHECK FOR PROGRESSIVE CONTENT (Analysis split by |||)
             if (data.text.includes('|||')) {
@@ -263,11 +328,11 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
         }
 
         const steps = [
-            { num: 1, label: "Questionnaire" },
-            { num: 2, label: "Analyse" },
-            { num: 3, label: "Choix ASR" },
-            { num: 4, label: "Finalisation" },
-            { num: 5, label: "Livraison" }
+            { num: 1, label: t('step1') },
+            { num: 2, label: t('step2') },
+            { num: 3, label: t('step3') },
+            { num: 4, label: t('step4') },
+            { num: 5, label: t('step5') }
         ];
 
         return (
@@ -351,7 +416,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             if (!isLast) {
                 return (
                     <div className="text-sm text-gray-500 italic border-l-2 border-teal-500 pl-3">
-                        {qcmData.intro || "Étape validée."}
+                        {qcmData.intro || t('stepValidated')}
                     </div>
                 );
             }
@@ -413,7 +478,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             disabled={isLoading}
                             className="mb-3 px-4 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2"
                         >
-                            ← Retour à la question précédente
+                            {t('back')}
                         </button>
                     )}
 
@@ -498,7 +563,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    Plusieurs choix possibles
+                                                    {t('multipleChoices')}
                                                 </span>
                                             </div>
                                         )}
@@ -609,7 +674,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     : 'bg-slate-300 cursor-not-allowed'
                                                     }`}
                                             >
-                                                ✓ Valider
+                                                {t('validate')}
                                             </button>
 
                                             {/* NON APPLICABLE - Skip Button */}
@@ -627,7 +692,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                     disabled={isLoading}
                                                     className="mt-1 !px-6 !py-2.5 !rounded-lg text-[13px] font-medium text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 bg-transparent hover:bg-slate-50 transition-all duration-200 self-start"
                                                 >
-                                                    ⏭️ Non applicable à mon activité
+                                                    {t('skip')}
                                                 </button>
                                             )}
                                         </div>
@@ -671,7 +736,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         className="group flex items-center justify-between !gap-6 w-full !px-6 !py-5 !rounded-2xl border border-dashed border-slate-300 hover:border-amber-400 bg-white hover:bg-amber-50 transition-all duration-200 shadow-sm text-left col-span-full"
                                                     >
                                                         <span className="text-[16px] font-medium text-slate-500 italic group-hover:text-amber-700 transition-colors">
-                                                            {q.customLabel || "Autre réponse / Préciser..."}
+                                                            {q.customLabel || t('other')}
                                                         </span>
                                                         <svg className="w-5 h-5 text-slate-300 group-hover:text-amber-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -686,7 +751,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                                                         disabled={isLoading}
                                                         className="col-span-full !px-6 !py-2.5 !rounded-lg text-[13px] font-medium text-slate-400 hover:text-slate-600 border border-slate-200 hover:border-slate-300 bg-transparent hover:bg-slate-50 transition-all duration-200 self-start"
                                                     >
-                                                        ⏭️ Non applicable à mon activité
+                                                        {t('skip')}
                                                     </button>
                                                 )}
                                             </div>
@@ -781,12 +846,9 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
             <ProgressBar />
 
             <div className="chat-messages-area">
-                <div className="msg-bubble msg-ai">
-                    👋 Bonjour, ici AYO. Initialisation du protocole AIO Light.<br /><br />
-                    Je vais établir votre <strong>Diagnostic de Visibilité IA (Gratuit)</strong>.<br />
-                    Pour cela, indiquez-moi simplement l'URL principale de votre site web.<br /><br />
-                    <strong>1. Quelle est votre URL ?</strong>
-                </div>
+                <div className="msg-bubble msg-ai" dangerouslySetInnerHTML={{ __html:
+                    `${t('greetingHtml1')}<br /><br />${t('greetingHtml2')}<br />${t('greetingHtml3')}<br /><br />${t('greetingHtml4')}`
+                }} />
 
                 {messages.map((m) => (
                     <div
@@ -801,7 +863,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                 {isLoading && (
                     <div className="msg-bubble msg-ai" style={{ opacity: 0.7 }}>
                         <div className="loader" style={{ borderColor: '#4A919E', borderTopColor: 'transparent', width: '15px', height: '15px', marginRight: '10px' }}></div>
-                        AYO réfléchit...
+                        {t('thinking')}
                     </div>
                 )}
 
@@ -815,8 +877,8 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             animation: 'spin 1s linear infinite'
                         }}></div>
                         <div>
-                            <strong>Analyse AIO Finale en cours...</strong><br />
-                            <span style={{ fontSize: '0.85rem', color: '#666' }}>Traitement des données et simulation IA.<br />Cela peut prendre 30 secondes...</span>
+                            <strong>{t('analyzing')}</strong><br />
+                            <span style={{ fontSize: '0.85rem', color: '#666' }}>{t('analyzingSub').split('\n').map((line, i) => <span key={i}>{line}<br /></span>)}</span>
                         </div>
                         <style jsx>{`
                             @keyframes spin {
@@ -843,7 +905,7 @@ Pour cela, indiquez-moi simplement l'URL principale de votre site web.
                             className="chat-input"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Écrivez votre réponse ici..."
+                            placeholder={t('placeholder')}
                             disabled={isLoading}
                             autoFocus
                         />

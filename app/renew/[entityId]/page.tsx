@@ -4,6 +4,7 @@ import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
 import RenewButtons from './RenewButtons';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 export const revalidate = 0;
 
@@ -25,6 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ entityId:
 export default async function RenewPage({ params }: { params: Promise<{ entityId: string }> }) {
     const { entityId } = await params;
     const entity = await db.getAyaEntityById(entityId);
+    const t = await getTranslations('renew');
 
     if (!entity) {
         return notFound();
@@ -62,7 +64,7 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
     const hasRequiredInfo = !!(email && url);
 
     // AYO model: pre-save entity data to `analyses` table before Stripe redirect
-    // so the webhook can find it via aid=entityId → db.getAnalysis(entityId)
+    // so the webhook can find it via aid=entityId -> db.getAnalysis(entityId)
     if (hasRequiredInfo && entity.asr_payload) {
         const payload = entity.asr_payload as any;
         const fields = payload?.data?.fields || payload?.fields || payload?.data || {};
@@ -105,13 +107,13 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
             <section className="section" style={{ paddingTop: '2rem', paddingBottom: '2rem', textAlign: 'center' }}>
                 <div className="container">
                     <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
-                        Renouvellement
+                        {t('title')}
                     </p>
                     <h1 className="headline" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: '0.5rem' }}>
                         {name}
                     </h1>
                     <p style={{ color: 'var(--text-body)', fontSize: '1rem', maxWidth: '500px', margin: '0 auto' }}>
-                        Renouvelez votre certification pour continuer a etre visible et recommande par les IA.
+                        {t('subtitle')}
                     </p>
                 </div>
             </section>
@@ -131,24 +133,24 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                             borderBottom: '1px solid var(--border-light)',
                             paddingBottom: '1rem',
                         }}>
-                            Votre situation actuelle
+                            {t('currentSituation')}
                         </h3>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                             <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>
-                                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>Pack</p>
+                                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('packLabel')}</p>
                                 <p style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1.1rem' }}>
                                     {packLabel}
                                 </p>
                             </div>
                             <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>
-                                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>Score AIO</p>
+                                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('scoreLabel')}</p>
                                 <p style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1.1rem' }}>
                                     {score !== null ? `${score}/100` : '\u2014'}
                                 </p>
                             </div>
                             <div style={{ textAlign: 'center', padding: '1rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>
-                                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>Expiration</p>
+                                <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('expirationLabel')}</p>
                                 <p style={{
                                     fontWeight: 'bold',
                                     fontSize: '1.1rem',
@@ -169,7 +171,7 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                                 fontSize: '0.9rem',
                                 textAlign: 'center',
                             }}>
-                                Votre certification a expire. Renouvelez pour maintenir votre visibilite aupres des IA.
+                                {t('expiredMessage')}
                             </div>
                         )}
                     </div>
@@ -187,7 +189,7 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                     {/* Footer help */}
                     <div style={{ marginTop: '2rem', textAlign: 'center' }}>
                         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                            Une question ? Contactez-nous a{' '}
+                            {t('contactQuestion')}{' '}
                             <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>
                                 hello@ai-visionary.com
                             </a>

@@ -7,7 +7,7 @@ import { Resend } from 'resend';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
 // registerOrUpdateEntity imported on-demand from '@/lib/aya/registry'
-import { getSystemPrompt } from '@/lib/ayo-system-prompt';
+import { getSystemPrompt, type Locale } from '@/lib/ayo-system-prompt';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { sanitizeForPrompt } from '@/lib/sanitize';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
@@ -92,9 +92,11 @@ export async function POST(req: Request) {
     const logger = createLogger(correlationId, 'chat');
 
     try {
-        const { messages } = await req.json();
+        const body = await req.json();
+        const { messages } = body;
+        const locale: Locale = body.locale === 'en' ? 'en' : 'fr';
         const lastMessage = messages[messages.length - 1];
-        logger.info('CHAT_START', `New chat request, ${messages.length} messages`);
+        logger.info('CHAT_START', `New chat request, ${messages.length} messages, locale=${locale}`);
 
 
         // 1. DYNAMIC PROVIDER SELECTION (GEMINI ONLY - FORCE AYO)
@@ -348,6 +350,7 @@ export async function POST(req: Request) {
             isUpdateProfile: isUpdateProfile_sm,
             totalQueueBlocks: 0, // Updated later in CONTINUE_QUESTIONING when queue is built
             queueIndex: Math.max(0, questionsAskedCountEarly - 3),
+            locale,
         };
 
         // 🎯 STATE MACHINE: Derive state from conversation signals
@@ -1033,18 +1036,21 @@ GÉNÈRE CE JSON MAINTENANT :
 
             const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
-            let transparencySummary = `🛰️ SCAN TERMINÉ\n\n`;
+            const isEn = locale === 'en';
+            let transparencySummary = isEn ? `🛰️ SCAN COMPLETE\n\n` : `🛰️ SCAN TERMINÉ\n\n`;
 
             if (detectedInfos.length > 0) {
-                transparencySummary += `✅ ${detectedInfos.length} INFORMATIONS DÉTECTÉES :\n\n`;
+                transparencySummary += isEn
+                    ? `✅ ${detectedInfos.length} INFORMATION(S) DETECTED:\n\n`
+                    : `✅ ${detectedInfos.length} INFORMATIONS DÉTECTÉES :\n\n`;
                 detectedInfos.forEach((info) => {
                     const label = questionLabels[info.question_id - 1] || `Info ${info.question_id}`;
                     let value = info.answer && info.answer !== 'null'
                         ? (info.answer.length > 50 ? info.answer.substring(0, 50) + '...' : info.answer)
-                        : 'Détecté';
+                        : (isEn ? 'Detected' : 'Détecté');
 
                     if (info.confidence === 'low') {
-                        value += ' (À valider)';
+                        value += isEn ? ' (To validate)' : ' (À valider)';
                     }
 
                     transparencySummary += `• ${label} : ${value}\n`;
@@ -1053,21 +1059,31 @@ GÉNÈRE CE JSON MAINTENANT :
             }
 
             // Add initial 7-bloc score display (from AYO Router formatScoreMessage)
-            transparencySummary += formatScoreMessage(initialScore, 'initial') + '\n\n';
+            transparencySummary += formatScoreMessage(initialScore, 'initial', locale) + '\n\n';
 
             const weakBlocks = Object.entries(initialScore.audit || {})
                 .filter(([, v]: [string, any]) => v.status === 'error' || v.status === 'warning')
                 .map(([, v]: [string, any]) => v.label);
 
             if (weakBlocks.length > 0) {
-                transparencySummary += `⚠️ **BLOCS À AMÉLIORER** : ${weakBlocks.join(', ')}\n`;
+                transparencySummary += isEn
+                    ? `⚠️ **BLOCKS TO IMPROVE**: ${weakBlocks.join(', ')}\n`
+                    : `⚠️ **BLOCS À AMÉLIORER** : ${weakBlocks.join(', ')}\n`;
             }
 
-            transparencySummary += `\n**Ce que cela signifie :**\n`;
-            transparencySummary += `Votre entreprise possède des informations, mais elles ne sont pas structurées de manière lisible par les IA (ChatGPT, Gemini, Claude...). Résultat : ces IA ne peuvent ni vous identifier clairement, ni vous recommander.\n\n`;
-            transparencySummary += `**Ce que nous allons faire :**\n`;
-            transparencySummary += `Je vais vous poser plusieurs questions ciblées. Vos réponses me permettront de créer des fichiers structurés (ASR) qui rendront votre entreprise **lisible**, donc **visible**, et en conséquence **recommandable** par les IA.\n\n`;
-            transparencySummary += `➡️ Mais avant tout...`;
+            if (isEn) {
+                transparencySummary += `\n**What this means:**\n`;
+                transparencySummary += `Your business has information, but it is not structured in a way that is readable by AIs (ChatGPT, Gemini, Claude...). As a result, these AIs can neither clearly identify you nor recommend you.\n\n`;
+                transparencySummary += `**What we will do:**\n`;
+                transparencySummary += `I will ask you several targeted questions. Your answers will allow me to create structured files (ASR) that will make your business **readable**, thus **visible**, and consequently **recommendable** by AIs.\n\n`;
+                transparencySummary += `➡️ But first...`;
+            } else {
+                transparencySummary += `\n**Ce que cela signifie :**\n`;
+                transparencySummary += `Votre entreprise possède des informations, mais elles ne sont pas structurées de manière lisible par les IA (ChatGPT, Gemini, Claude...). Résultat : ces IA ne peuvent ni vous identifier clairement, ni vous recommander.\n\n`;
+                transparencySummary += `**Ce que nous allons faire :**\n`;
+                transparencySummary += `Je vais vous poser plusieurs questions ciblées. Vos réponses me permettront de créer des fichiers structurés (ASR) qui rendront votre entreprise **lisible**, donc **visible**, et en conséquence **recommandable** par les IA.\n\n`;
+                transparencySummary += `➡️ Mais avant tout...`;
+            }
 
             // 4. First question: Ownership validation
             // Include scan_state in the response for CONTINUE_QUESTIONING to use
@@ -1075,24 +1091,24 @@ GÉNÈRE CE JSON MAINTENANT :
                 console.log("🎯 All questions auto-answered! Triggering FINAL_ANALYSIS...");
                 finalResponseText = JSON.stringify({
                     type: "question_block",
-                    intro: transparencySummary + "\n\n✅ **Toutes les informations ont été collectées !**",
-                    // scan_state persisted in Firestore (not sent to client)
+                    intro: transparencySummary + (isEn ? "\n\n✅ **All information has been collected!**" : "\n\n✅ **Toutes les informations ont été collectées !**"),
                     questions: [{
                         id: "ownership_confirm",
-                        text: "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
-                        options: ["Oui, c'est mon site", "Non"],
+                        text: isEn ? "Do you confirm that this website belongs to you or that you are authorized to analyze it?" : "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
+                        options: isEn ? ["Yes, it's my site", "No"] : ["Oui, c'est mon site", "Non"],
                         allowCustom: false
                     }]
                 });
             } else {
                 finalResponseText = JSON.stringify({
                     type: "question_block",
-                    intro: transparencySummary + `\n\n⚠️ **Important** : AYO sert à structurer votre vérité, pas à la fabriquer. Les IA vérifient vos déclarations par recoupement. Toute incohérence vous classerait comme "Source Non Fiable".`,
-                    // scan_state persisted in Firestore (not sent to client)
+                    intro: transparencySummary + (isEn
+                        ? `\n\n⚠️ **Important**: AYO is designed to structure your truth, not to fabricate it. AIs verify your declarations through cross-referencing. Any inconsistency would classify you as an "Unreliable Source".`
+                        : `\n\n⚠️ **Important** : AYO sert à structurer votre vérité, pas à la fabriquer. Les IA vérifient vos déclarations par recoupement. Toute incohérence vous classerait comme "Source Non Fiable".`),
                     questions: [{
                         id: "ownership_confirm",
-                        text: "Confirmez-vous que ce site vous appartient et que les données sont exactes ?",
-                        options: ["✅ Oui, c'est mon site", "Non"],
+                        text: isEn ? "Do you confirm that this website belongs to you and that the data is accurate?" : "Confirmez-vous que ce site vous appartient et que les données sont exactes ?",
+                        options: isEn ? ["✅ Yes, it's my site", "No"] : ["✅ Oui, c'est mon site", "Non"],
                         allowCustom: false
                     }]
                 });
@@ -1128,8 +1144,10 @@ GÉNÈRE CE JSON MAINTENANT :
                 const lastUserMsg = lastMessage.content.toLowerCase();
 
                 // If user said NO
-                if (lastUserMsg.includes('non') || lastUserMsg === 'non') {
-                    finalResponseText = `❌ **Analyse interrompue**\n\nJe ne peux pas continuer cette analyse.\n\n**Règle de conformité** : Seules les personnes responsables ou autorisées de l'entreprise analysée peuvent réaliser un diagnostic AYO.\n\nSi vous pensez qu'il s'agit d'une erreur, veuillez relancer une nouvelle analyse avec la bonne URL.`;
+                if (lastUserMsg.includes('non') || lastUserMsg === 'non' || lastUserMsg === 'no') {
+                    finalResponseText = locale === 'en'
+                        ? `❌ **Analysis interrupted**\n\nI cannot continue this analysis.\n\n**Compliance rule**: Only authorized persons from the analyzed company can run an AYO diagnostic.\n\nIf you think this is an error, please restart a new analysis with the correct URL.`
+                        : `❌ **Analyse interrompue**\n\nJe ne peux pas continuer cette analyse.\n\n**Règle de conformité** : Seules les personnes responsables ou autorisées de l'entreprise analysée peuvent réaliser un diagnostic AYO.\n\nSi vous pensez qu'il s'agit d'une erreur, veuillez relancer une nouvelle analyse avec la bonne URL.`;
 
                     // Return immediately, stop the flow
                     return new Response(JSON.stringify({ text: finalResponseText }), {
@@ -1142,10 +1160,19 @@ GÉNÈRE CE JSON MAINTENANT :
                 console.log("✅ Ownership confirmed. Showing WARNING Block...");
 
                 // NEW BLOCK: Educational Warning before proceeding
-                finalResponseText = JSON.stringify({
-                    type: "question_block",
-                    intro: `💡 **Excellente décision.**
-                    
+                const truthIntro = locale === 'en'
+                    ? `💡 **Excellent decision.**
+
+Technically, if you lie, AYO will generate your ASR file with the provided information (so your technical certification will be valid).
+
+⚠️ **BUT this is a dangerous strategy.** AIs (ChatGPT, Gemini) work through **Evidence Cross-Referencing**:
+1. They read your Declaration (ASR).
+2. They compare it to your Observable Reality (Website, Reviews).
+3. If there is a contradiction (e.g.: you declare "World Leader" but your site is empty), the AI will detect a **Critical Inconsistency**.
+
+🛑 **Result:** Instead of being recommended, you will be classified as an "Unreliable Source" (Probable Hallucination). AYO is designed to structure your truth, not to fabricate it.`
+                    : `💡 **Excellente décision.**
+
 Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).
 
 ⚠️ **MAIS c'est une stratégie dangereuse.** Les IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :
@@ -1153,11 +1180,15 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
 2. Elles la comparent à votre Réalité Observable (Site Web, Avis).
 3. S'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.
 
-🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
+🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`;
+
+                finalResponseText = JSON.stringify({
+                    type: "question_block",
+                    intro: truthIntro,
                     questions: [{
                         id: "truth_confirmation",
-                        text: "Avez-vous bien compris l'importance de déclarer des informations exactes ?",
-                        options: ["✅ J'ai compris, je poursuis l'analyse", "❌ Annuler"],
+                        text: locale === 'en' ? "Do you understand the importance of declaring accurate information?" : "Avez-vous bien compris l'importance de déclarer des informations exactes ?",
+                        options: locale === 'en' ? ["✅ I understand, let's continue", "❌ Cancel"] : ["✅ J'ai compris, je poursuis l'analyse", "❌ Annuler"],
                         allowCustom: false
                     }]
                 });
@@ -1640,7 +1671,8 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     finalResponseText = buildValidationQuestion(
                         nextBlockName.split('.')[0],
                         fieldName,
-                        detectedValue
+                        detectedValue,
+                        locale
                     );
                     console.log(`✅ VALIDATION STATIQUE pour ${nextBlockName} (pas de LLM)`);
                 } else {
@@ -1650,6 +1682,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 finalResponseText = buildEnrichmentQuestion(
                     enBlockName,
                     enFieldName,
+                    locale,
                 );
                 console.log(`✅ ENRICHISSEMENT STATIQUE pour ${nextBlockName} (pas de LLM)`);
 
@@ -2241,35 +2274,47 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
 
                 // 5. BUILD FINAL RESPONSE TEXT (via Agent Architecte)
                 // L'Architecte analyse les lacunes et génère des recommandations personnalisées
-                const architecteRecommendations = buildStructureRecommendations(extractJson, scoreResult);
-                const architecteText = formatRecommendationsForChat(architecteRecommendations);
+                const architecteRecommendations = buildStructureRecommendations(extractJson, scoreResult, locale);
+                const architecteText = formatRecommendationsForChat(architecteRecommendations, locale);
                 logger.info('ARCHITECTE_RECOMMENDATIONS', `Architecte: ${architecteRecommendations.recommendations.length} recs, gain estimé +${architecteRecommendations.estimatedScoreGain}pts`, {
                     criticalFiles: architecteRecommendations.recommendations.filter(r => r.priority === 1).length,
                     estimatedGain: architecteRecommendations.estimatedScoreGain,
                 });
 
-                finalResponseText = `✅ Audit de Visibilité IA terminé.
-Calcul du score en cours...
-|||
-🔎 Identité & Ancrage : ${scoreResult.blocks.identite}/10
-|||
-🔎 Offre : ${scoreResult.blocks.offre}/20
-|||
-🔎 Processus & Méthodes : ${scoreResult.blocks.processus_methodes}/15
-|||
-🔎 Engagements & Conformité : ${scoreResult.blocks.engagements_conformite}/15
-|||
-🔎 Indicateurs : ${scoreResult.blocks.indicateurs}/20
-|||
-🔎 Contenus pédagogiques : ${scoreResult.blocks.contenus_pedagogiques}/10
-|||
-🔎 Structure technique : ${scoreResult.blocks.structure_technique}/10
-|||
-📊 SCORE FINAL AIO : ${scoreResult.total} / 100
-${scoreResult.capApplied ? `\n⚠️ **Plafond appliqué** : ${scoreResult.capReason} (score brut : ${scoreResult.rawTotal}/100)` : ''}
+                const isEnFinal = locale === 'en';
+                const blockLabelsForFinal = isEnFinal
+                    ? { identite: 'Identity & Anchoring', offre: 'Offer Clarity', processus_methodes: 'Processes & Methods', engagements_conformite: 'Trust & Compliance', indicateurs: 'Social Proof & Metrics', contenus_pedagogiques: 'Educational Content', structure_technique: 'AIO Technical Foundation' }
+                    : { identite: 'Identité & Ancrage', offre: 'Offre', processus_methodes: 'Processus & Méthodes', engagements_conformite: 'Engagements & Conformité', indicateurs: 'Indicateurs', contenus_pedagogiques: 'Contenus pédagogiques', structure_technique: 'Structure technique' };
+                const capText = scoreResult.capApplied
+                    ? (isEnFinal
+                        ? `\n⚠️ **Cap applied**: ${scoreResult.capReason} (raw score: ${scoreResult.rawTotal}/100)`
+                        : `\n⚠️ **Plafond appliqué** : ${scoreResult.capReason} (score brut : ${scoreResult.rawTotal}/100)`)
+                    : '';
+                const lockedText = isEnFinal
+                    ? `🔒 DETAILED RESULTS LOCKED\n(Critical explanations and corrections have been generated but are hidden).`
+                    : `🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ\n(Les explications critiques et les correctifs ont été générés mais sont masqués).`;
 
-🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
-(Les explications critiques et les correctifs ont été générés mais sont masqués).
+                finalResponseText = `${isEnFinal ? '✅ AI Visibility Audit complete.' : '✅ Audit de Visibilité IA terminé.'}
+${isEnFinal ? 'Calculating score...' : 'Calcul du score en cours...'}
+|||
+🔎 ${blockLabelsForFinal.identite} : ${scoreResult.blocks.identite}/10
+|||
+🔎 ${blockLabelsForFinal.offre} : ${scoreResult.blocks.offre}/20
+|||
+🔎 ${blockLabelsForFinal.processus_methodes} : ${scoreResult.blocks.processus_methodes}/15
+|||
+🔎 ${blockLabelsForFinal.engagements_conformite} : ${scoreResult.blocks.engagements_conformite}/15
+|||
+🔎 ${blockLabelsForFinal.indicateurs} : ${scoreResult.blocks.indicateurs}/20
+|||
+🔎 ${blockLabelsForFinal.contenus_pedagogiques} : ${scoreResult.blocks.contenus_pedagogiques}/10
+|||
+🔎 ${blockLabelsForFinal.structure_technique} : ${scoreResult.blocks.structure_technique}/10
+|||
+📊 ${isEnFinal ? 'FINAL AIO SCORE' : 'SCORE FINAL AIO'} : ${scoreResult.total} / 100
+${capText}
+
+${lockedText}
 |||
 ${architecteText}
 |||
@@ -2284,14 +2329,16 @@ ${(() => {
                         const safeSummary = (architecteRecommendations.summary || '')
                             .replace(/[{}[\]"]/g, '')
                             .replace(/\s*:\s*/g, ' - ');
-                        const packIntro = `PROCHAINE ETAPE\n\n${safeSummary}\n\nChoisissez votre niveau de certification`;
+                        const packIntro = isEnFinal
+                            ? `NEXT STEP\n\n${safeSummary}\n\nChoose your certification level`
+                            : `PROCHAINE ETAPE\n\n${safeSummary}\n\nChoisissez votre niveau de certification`;
                         const packQuestion = {
                             type: "question_block",
                             intro: packIntro,
                             questions: [{
                                 id: "pack_intention",
-                                text: "Selectionnez votre Pack pour activer votre recommandation",
-                                options: ["Abonnement AYA - 19 CHF/mois", "Pack PRO - 499 CHF (Propriete)"],
+                                text: isEnFinal ? "Select your Pack to activate your recommendation" : "Selectionnez votre Pack pour activer votre recommandation",
+                                options: isEnFinal ? ["AYA Subscription - 19 CHF/month", "PRO Pack - 499 CHF (Ownership)"] : ["Abonnement AYA - 19 CHF/mois", "Pack PRO - 499 CHF (Propriete)"],
                                 allowCustom: false,
                                 allowMultiple: false
                             }]
@@ -2442,10 +2489,15 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                 console.log(`🎯 TARGET PLAN: ${selectedPlan}`);
 
                 // Generate Redirect Link (via Vendeur agent)
+                // Read locale from NEXT_LOCALE cookie (set by i18n toggle)
+                const cookieHeader = req.headers.get('cookie') || '';
+                const localeMatch = cookieHeader.match(/NEXT_LOCALE=(fr|en)/);
+                const chatLocale = localeMatch ? localeMatch[1] : 'fr';
                 const clientRef = encodeClientReference({
                     url: detectedUrl || "unknown",
                     email: userEmail,
                     analysisId: sessionAsrId,
+                    locale: chatLocale,
                 });
                 const stripeSuffix = `?client_reference_id=${clientRef}&prefilled_email=${encodeURIComponent(userEmail)}`;
                 logger.info('STRIPE_LINK', `Stripe link generated with aid=${sessionAsrId}, email=${userEmail}`);
@@ -2533,7 +2585,7 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
             detectedUrl = 'https://' + detectedUrl;
         }
 
-        const finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail);
+        const finalSystemPrompt = getSystemPrompt(sessionAsrId, sessionDate, detectedUrl, detectedEmail, false, locale);
 
         // -----------------------------------------------------------------------
         // FINAL FALLBACK: GENERIC CHAT (INTELLIGENT REPLIES)

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface OtpGateProps {
   entityId: string;
@@ -10,7 +11,8 @@ interface OtpGateProps {
   children: React.ReactNode;
 }
 
-export default function OtpGate({ entityId, entityEmail, entityName, entityWebsite, children }: OtpGateProps) {
+export default function OtpGate({ entityId, entityEmail, entityName, children }: OtpGateProps) {
+  const t = useTranslations('otp');
   const [step, setStep] = useState<'email' | 'code' | 'verified'>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -26,7 +28,7 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
   const handleSendOtp = async () => {
     setError('');
     if (!email.trim()) {
-      setError('Veuillez entrer votre email.');
+      setError(t('errorEmptyEmail'));
       return;
     }
 
@@ -41,11 +43,11 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'envoi du code.');
+        throw new Error(data.error || t('errorSendFailed'));
       }
       setStep('code');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erreur reseau.');
+      setError(err instanceof Error ? err.message : t('errorNetwork'));
     } finally {
       setLoading(false);
     }
@@ -54,7 +56,7 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
   const handleVerifyOtp = async () => {
     setError('');
     if (!code.trim() || code.trim().length < 4) {
-      setError('Veuillez entrer le code recu par email.');
+      setError(t('errorEmptyCode'));
       return;
     }
 
@@ -67,11 +69,11 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Code invalide ou expire.');
+        throw new Error(data.error || t('errorInvalidCode'));
       }
       setStep('verified');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erreur reseau.');
+      setError(err instanceof Error ? err.message : t('errorNetwork'));
     } finally {
       setLoading(false);
     }
@@ -106,6 +108,10 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
     cursor: loading ? 'wait' : 'pointer',
   };
 
+  const domainHintText = emailDomainHint
+    ? t('domainHintSuffix', { hint: emailDomainHint.replace(/^\*{4}@\*{4}/, '') })
+    : '';
+
   return (
     <div style={{
       background: '#fff',
@@ -117,17 +123,17 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
       textAlign: 'center',
     }}>
       <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>
-        {step === 'email' ? '🔐' : '📧'}
+        {step === 'email' ? '\uD83D\uDD10' : '\uD83D\uDCE7'}
       </div>
 
       <h2 style={{ color: '#212E53', fontSize: '1.3rem', marginBottom: '0.5rem' }}>
-        {step === 'email' ? 'Verification d\'identite' : 'Entrez le code recu'}
+        {step === 'email' ? t('title') : t('enterCodeTitle')}
       </h2>
 
       <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.5' }}>
         {step === 'email'
-          ? <>Pour modifier les donnees de <strong>{entityName}</strong>, entrez l&apos;adresse email utilisee lors de votre inscription{emailDomainHint ? <> (se termine par {emailDomainHint.replace(/^\*{4}@\*{4}/, '')})</> : ''}.</>
-          : <>Un code a 6 chiffres a ete envoye a <strong>{email}</strong>. Verifiez votre boite de reception.</>
+          ? t('descModify', { entityName, domainHint: domainHintText })
+          : t('codeSentDesc', { email })
         }
       </p>
 
@@ -138,12 +144,12 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
-            placeholder="votre@email.com"
+            placeholder={t('emailPlaceholder')}
             style={inputStyle}
             autoFocus
           />
           <button onClick={handleSendOtp} disabled={loading} style={btnStyle}>
-            {loading ? 'Envoi en cours...' : 'Envoyer le code de verification'}
+            {loading ? t('sending') : t('sendCode')}
           </button>
         </div>
       )}
@@ -160,13 +166,13 @@ export default function OtpGate({ entityId, entityEmail, entityName, entityWebsi
             autoFocus
           />
           <button onClick={handleVerifyOtp} disabled={loading} style={btnStyle}>
-            {loading ? 'Verification...' : 'Verifier'}
+            {loading ? t('verifying') : t('verify')}
           </button>
           <button
             onClick={() => { setStep('email'); setCode(''); setError(''); }}
             style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
           >
-            Renvoyer le code
+            {t('resend')}
           </button>
         </div>
       )}

@@ -146,8 +146,9 @@ function filterGarbageServices(services: string[]): string[] {
 
 /**
  * Build ultra-simple 5-field summary for LLM consumption.
+ * @param locale 'en' (default, backward-compat) or 'fr'
  */
-export function buildLlmSummary(entity: any): LlmSummary {
+export function buildLlmSummary(entity: any, locale: 'fr' | 'en' = 'en'): LlmSummary {
     const asr = extractAsrData(entity);
 
     // Name
@@ -161,9 +162,10 @@ export function buildLlmSummary(entity: any): LlmSummary {
     const sectorRaw = entity.sector_macro || 'General';
     const category = SECTOR_LABELS[sectorRaw] || sectorRaw;
 
-    // Location
+    // Location — locale-aware
     const countryCode = entity.country_legal || 'XX';
-    const location = COUNTRY_LABELS[countryCode] || (countryCode === 'XX' ? 'Global' : countryCode);
+    const countryMap = locale === 'fr' ? COUNTRY_LABELS_FR : COUNTRY_LABELS;
+    const location = countryMap[countryCode] || (countryCode === 'XX' ? 'Global' : countryCode);
 
     // What it does — derive from services + business_type, filter garbage
     const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
@@ -172,7 +174,9 @@ export function buildLlmSummary(entity: any): LlmSummary {
 
     // Priority 1: Gemini-enriched description (best quality)
     const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
-    const geminiDesc: string = enrichment.gemini_description || '';
+    const geminiDescFr: string = enrichment.gemini_description_fr || '';
+    const geminiDescEn: string = enrichment.gemini_description || '';
+    const geminiDesc = locale === 'fr' ? (geminiDescFr || geminiDescEn) : geminiDescEn;
 
     // Priority 2: meta description from scan
     const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
@@ -213,7 +217,7 @@ export function buildLlmSummary(entity: any): LlmSummary {
 }
 
 // French country names for certificate page descriptions
-const COUNTRY_LABELS_FR: Record<string, string> = {
+export const COUNTRY_LABELS_FR: Record<string, string> = {
     CH: 'Suisse', FR: 'France', DE: 'Allemagne', US: 'États-Unis',
     GB: 'Royaume-Uni', IT: 'Italie', ES: 'Espagne', NL: 'Pays-Bas',
     BE: 'Belgique', AT: 'Autriche', LU: 'Luxembourg', CA: 'Canada',
@@ -237,15 +241,14 @@ function countryPreposition(cc: string): string {
 }
 
 /**
- * Build 2-4 sentence plain text description (French) for certificate pages.
+ * Build 2-4 sentence plain text description for certificate pages.
+ * @param locale 'fr' (default, backward-compat) or 'en'
  */
-export function buildPlainTextDescription(entity: any): string {
-    const summary = buildLlmSummary(entity);
+export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'fr'): string {
+    const summary = buildLlmSummary(entity, locale);
     const asr = extractAsrData(entity);
 
     const cc = entity.country_legal || 'XX';
-    const locationFr = COUNTRY_LABELS_FR[cc] || (cc === 'XX' ? '' : cc);
-    const prep = countryPreposition(cc);
 
     // Phrase 1: identity + what it does — filter garbage services
     const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
@@ -254,44 +257,88 @@ export function buildPlainTextDescription(entity: any): string {
     const sectorLabel = summary.category;
     const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
 
-    // Use Gemini description if available (best quality) — prefer FR for certificate pages
+    // Use Gemini description if available (best quality)
     const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
     const geminiFr: string = enrichment.gemini_description_fr || '';
     const geminiEn: string = enrichment.gemini_description || '';
-    const geminiDesc = geminiFr || geminiEn;
+    const geminiDesc = locale === 'fr' ? (geminiFr || geminiEn) : geminiEn;
 
     let phrase1 = '';
-    if (geminiDesc && geminiDesc.length > 10) {
-        phrase1 = `${summary.name} : ${cleanText(geminiDesc)}`;
-        if (!phrase1.endsWith('.')) phrase1 += '.';
-    } else if (services.length > 0) {
-        const svcFr = services.slice(0, 3).join(', ');
-        if (businessType) {
-            phrase1 = `${summary.name} est ${addArticle(businessType)} qui propose ${svcFr.toLowerCase()}.`;
+    let phrase2 = '';
+    let phrase3 = '';
+
+    if (locale === 'fr') {
+        // ─── French path (original behavior, unchanged) ───
+        const locationFr = COUNTRY_LABELS_FR[cc] || (cc === 'XX' ? '' : cc);
+        const prep = countryPreposition(cc);
+
+        if (geminiDesc && geminiDesc.length > 10) {
+            phrase1 = `${summary.name} : ${cleanText(geminiDesc)}`;
+            if (!phrase1.endsWith('.')) phrase1 += '.';
+        } else if (services.length > 0) {
+            const svcFr = services.slice(0, 3).join(', ');
+            if (businessType) {
+                phrase1 = `${summary.name} est ${addArticle(businessType)} qui propose ${svcFr.toLowerCase()}.`;
+            } else {
+                phrase1 = `${summary.name} propose ${svcFr.toLowerCase()}.`;
+            }
+        } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
+            phrase1 = `${summary.name} : ${cleanText(metaDesc)}`;
+            if (!phrase1.endsWith('.')) phrase1 += '.';
+        } else if (businessType) {
+            phrase1 = `${summary.name} est ${addArticle(businessType)}.`;
         } else {
-            phrase1 = `${summary.name} propose ${svcFr.toLowerCase()}.`;
+            phrase1 = `${summary.name} est une entreprise du secteur ${sectorLabel}.`;
         }
-    } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
-        phrase1 = `${summary.name} : ${cleanText(metaDesc)}`;
-        if (!phrase1.endsWith('.')) phrase1 += '.';
-    } else if (businessType) {
-        phrase1 = `${summary.name} est ${addArticle(businessType)}.`;
+
+        // Phrase 2: audience (FR)
+        const rawAudience = Array.isArray(asr.offre?.target_audience?.value)
+            ? asr.offre.target_audience.value.join(', ')
+            : (asr.offre?.target_audience?.value || '');
+        phrase2 = rawAudience && rawAudience.length > 3
+            ? `Elle s'adresse principalement ${rawAudience.startsWith('aux') || rawAudience.startsWith('à') ? '' : 'à '}${rawAudience.toLowerCase()}.`
+            : '';
+
+        // Phrase 3: location (FR)
+        phrase3 = locationFr
+            ? `Basée ${prep} ${locationFr}.`
+            : '';
     } else {
-        phrase1 = `${summary.name} est une entreprise du secteur ${sectorLabel}.`;
+        // ─── English path ───
+        const locationEn = COUNTRY_LABELS[cc] || (cc === 'XX' ? '' : cc);
+
+        if (geminiDesc && geminiDesc.length > 10) {
+            phrase1 = `${summary.name}: ${cleanText(geminiDesc)}`;
+            if (!phrase1.endsWith('.')) phrase1 += '.';
+        } else if (services.length > 0) {
+            const svcEn = services.slice(0, 3).join(', ');
+            if (businessType) {
+                phrase1 = `${summary.name} is a ${businessType.toLowerCase()} that provides ${svcEn.toLowerCase()}.`;
+            } else {
+                phrase1 = `${summary.name} provides ${svcEn.toLowerCase()}.`;
+            }
+        } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
+            phrase1 = `${summary.name}: ${cleanText(metaDesc)}`;
+            if (!phrase1.endsWith('.')) phrase1 += '.';
+        } else if (businessType) {
+            phrase1 = `${summary.name} is a ${businessType.toLowerCase()}.`;
+        } else {
+            phrase1 = `${summary.name} is a ${sectorLabel} company.`;
+        }
+
+        // Phrase 2: audience (EN)
+        const rawAudience = Array.isArray(asr.offre?.target_audience?.value)
+            ? asr.offre.target_audience.value.join(', ')
+            : (asr.offre?.target_audience?.value || '');
+        phrase2 = rawAudience && rawAudience.length > 3
+            ? `It primarily serves ${rawAudience.toLowerCase()}.`
+            : '';
+
+        // Phrase 3: location (EN)
+        phrase3 = locationEn
+            ? `Based in ${locationEn}.`
+            : '';
     }
-
-    // Phrase 2: audience (if available)
-    const rawAudience = Array.isArray(asr.offre?.target_audience?.value)
-        ? asr.offre.target_audience.value.join(', ')
-        : (asr.offre?.target_audience?.value || '');
-    const phrase2 = rawAudience && rawAudience.length > 3
-        ? `Elle s'adresse principalement ${rawAudience.startsWith('aux') || rawAudience.startsWith('à') ? '' : 'à '}${rawAudience.toLowerCase()}.`
-        : '';
-
-    // Phrase 3: location in French (if not "Global" / unknown)
-    const phrase3 = locationFr
-        ? `Basée ${prep} ${locationFr}.`
-        : '';
 
     return [phrase1, phrase2, phrase3].filter(Boolean).join(' ');
 }

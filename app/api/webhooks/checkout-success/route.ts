@@ -55,59 +55,101 @@ function buildAyaSubEmailHtml(params: {
     score: number;
     ayaId: string;
     blocks: Record<string, number>;
+    locale?: 'fr' | 'en';
 }): string {
-    const { name, url, score, ayaId, blocks } = params;
+    const { name, url, score, ayaId, blocks, locale = 'fr' } = params;
     const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
+    const en = locale === 'en';
 
-    const blockLabels: Record<string, { label: string; max: number }> = {
-        identite: { label: "Identité & Ancrage", max: 10 },
-        offre: { label: "Clarté de l'Offre", max: 20 },
-        processus_methodes: { label: "Processus & Méthodes", max: 15 },
-        engagements_conformite: { label: "Confiance & Conformité", max: 15 },
-        indicateurs: { label: "Preuve Sociale & Métriques", max: 20 },
-        contenus_pedagogiques: { label: "Pédagogie & Supports", max: 10 },
-        structure_technique: { label: "Socle Technique AIO", max: 10 }
+    const blockLabelsI18n: Record<string, { fr: string; en: string; max: number }> = {
+        identite: { fr: "Identit&eacute; &amp; Ancrage", en: "Identity &amp; Anchoring", max: 10 },
+        offre: { fr: "Clart&eacute; de l&rsquo;Offre", en: "Offer Clarity", max: 20 },
+        processus_methodes: { fr: "Processus &amp; M&eacute;thodes", en: "Process &amp; Methods", max: 15 },
+        engagements_conformite: { fr: "Confiance &amp; Conformit&eacute;", en: "Trust &amp; Compliance", max: 15 },
+        indicateurs: { fr: "Preuve Sociale &amp; M&eacute;triques", en: "Social Proof &amp; Metrics", max: 20 },
+        contenus_pedagogiques: { fr: "P&eacute;dagogie &amp; Supports", en: "Educational Content", max: 10 },
+        structure_technique: { fr: "Socle Technique AIO", en: "AIO Technical Foundation", max: 10 }
     };
 
-    const scoreRows = Object.entries(blockLabels).map(([key, { label, max }]) => {
+    const scoreRows = Object.entries(blockLabelsI18n).map(([key, bl]) => {
         const val = blocks?.[key] ?? 0;
-        const pct = Math.round((val / max) * 100);
+        const pct = Math.round((val / bl.max) * 100);
         const color = pct >= 70 ? '#166534' : pct >= 40 ? '#854d0e' : '#991b1b';
         const bg = pct >= 70 ? '#dcfce7' : pct >= 40 ? '#fef9c3' : '#fee2e2';
         const icon = pct >= 70 ? '&#9989;' : pct >= 40 ? '&#9888;&#65039;' : '&#10060;';
+        const label = en ? bl.en : bl.fr;
         return `<div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:8px; border-radius:4px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong style="color:${color}; font-size:14px;">${icon} ${label}</strong>
-                <span style="font-size:12px; background:#fff; padding:2px 8px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${val}/${max}</span>
+                <span style="font-size:12px; background:#fff; padding:2px 8px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${val}/${bl.max}</span>
             </div>
         </div>`;
     }).join('');
+
+    const t = {
+        headerTitle: en
+            ? '&#127760; Your AYA subscription is active!'
+            : '&#127760; Votre abonnement AYA est activ&eacute; !',
+        headerSubtitle: en
+            ? 'Your entity is now visible to AI systems'
+            : 'Votre entit&eacute; est maintenant visible par les IA',
+        greeting: en ? 'Hello,' : 'Bonjour,',
+        confirmed: en
+            ? `Your AYA subscription is confirmed for <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).`
+            : `Votre abonnement AYA est confirm&eacute; pour <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).`,
+        scoreLabel: en ? 'AIO Score' : 'Score AIO',
+        blockDetailTitle: en ? '&#128202; Score breakdown' : '&#128202; D&eacute;tail par bloc',
+        certTitle: en ? '&#127760; Your AYA Certificate is active' : '&#127760; Votre Certificat AYA est actif',
+        certDesc: en
+            ? 'Your entity is registered in the <strong>AYA Registry</strong> &mdash; accessible to all AI systems.'
+            : 'Votre entit&eacute; est enregistr&eacute;e dans le <strong>Registre AYA</strong> &mdash; consultable par toutes les IA.',
+        certCta: en ? 'View my AYA certificate' : 'Voir mon certificat AYA',
+        includesTitle: en ? '&#10003; Your subscription includes' : '&#10003; Ce que comprend votre abonnement',
+        includes: en ? [
+            '&#9989; Registration in the AYA Registry (visible to ChatGPT, Claude, Gemini...)',
+            '&#9989; ASR hosted on ai-visionary.com',
+            '&#9989; Updates included',
+            '&#9989; Priority in AI recommendations',
+        ] : [
+            '&#9989; Inscription dans le Registre AYA (visible par ChatGPT, Claude, Gemini...)',
+            '&#9989; ASR h&eacute;berg&eacute; sur ai-visionary.com',
+            '&#9989; Mises &agrave; jour incluses',
+            '&#9989; Priorit&eacute; dans les recommandations IA',
+        ],
+        questionTitle: en ? '&#128172; Any questions?' : '&#128172; Une question ?',
+        contactUs: en
+            ? 'Contact us: <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>'
+            : 'Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>',
+        footer: en
+            ? 'AI Visionary &mdash; Make your business visible to AI'
+            : 'AI Visionary &mdash; Rendez votre entreprise visible par les IA',
+    };
 
     return `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
     <meta charset="utf-8">
 
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#127760; Votre abonnement AYA est activé !</h1>
-        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Votre entité est maintenant visible par les IA</p>
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">${t.headerTitle}</h1>
+        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">${t.headerSubtitle}</p>
     </div>
 
     <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
-        <p>Bonjour,</p>
-        <p>Votre abonnement AYA est confirmé pour <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).</p>
+        <p>${t.greeting}</p>
+        <p>${t.confirmed}</p>
 
         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #86efac;">
-            <p style="margin:0; font-size: 14px; color: #666;">Score AIO</p>
+            <p style="margin:0; font-size: 14px; color: #666;">${t.scoreLabel}</p>
             <p style="margin: 5px 0; font-size: 42px; font-weight: bold; color: ${score >= 60 ? '#166534' : score >= 40 ? '#854d0e' : '#991b1b'};">${Math.round(score)} / 100</p>
         </div>
 
-        <h3 style="color:#212E53; margin-top:25px;">&#128202; Détail par bloc</h3>
+        <h3 style="color:#212E53; margin-top:25px;">${t.blockDetailTitle}</h3>
         ${scoreRows}
 
         <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bfdbfe;">
-            <h3 style="margin-top:0; color: #1e40af;">&#127760; Votre Certificat AYA est actif</h3>
-            <p style="font-size: 14px;">Votre entité est enregistrée dans le <strong>Registre AYA</strong> — consultable par toutes les IA.</p>
+            <h3 style="margin-top:0; color: #1e40af;">${t.certTitle}</h3>
+            <p style="font-size: 14px;">${t.certDesc}</p>
             <p style="text-align: center; margin: 15px 0;">
-                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Voir mon certificat AYA</a>
+                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">${t.certCta}</a>
             </p>
             <p style="font-size: 12px; color: #666; text-align: center;">
                 <a href="${ayaLink}" style="color: #4A919E;">${ayaLink}</a>
@@ -115,24 +157,21 @@ function buildAyaSubEmailHtml(params: {
         </div>
 
         <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #86efac; margin: 20px 0;">
-            <h4 style="margin-top:0; color: #166534;">&#10003; Ce que comprend votre abonnement</h4>
+            <h4 style="margin-top:0; color: #166534;">${t.includesTitle}</h4>
             <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; line-height: 2;">
-                <li>&#9989; Inscription dans le Registre AYA (visible par ChatGPT, Claude, Gemini...)</li>
-                <li>&#9989; ASR hébergé sur ai-visionary.com</li>
-                <li>&#9989; Mises à jour incluses</li>
-                <li>&#9989; Priorité dans les recommandations IA</li>
+                ${t.includes.map(item => `<li>${item}</li>`).join('\n                ')}
             </ul>
         </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
-            <h4 style="margin-top:0; color: #e65100;">&#128172; Une question ?</h4>
-            <p style="font-size: 13px; margin-bottom: 0; font-weight: bold;">Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
+            <h4 style="margin-top:0; color: #e65100;">${t.questionTitle}</h4>
+            <p style="font-size: 13px; margin-bottom: 0; font-weight: bold;">${t.contactUs}</p>
         </div>
     </div>
 
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Rendez votre entreprise visible par les IA
+            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">${t.footer}</a>
         </p>
     </div>
 </div>`;
@@ -148,106 +187,162 @@ function buildProEmailHtml(params: {
     score: number;
     ayaId: string;
     blocks: Record<string, number>;
+    locale?: 'fr' | 'en';
 }): string {
-    const { name, url, score, ayaId, blocks } = params;
+    const { name, url, score, ayaId, blocks, locale = 'fr' } = params;
     const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
+    const en = locale === 'en';
 
-    const blockLabels: Record<string, { label: string; max: number }> = {
-        identite: { label: "Identité & Ancrage", max: 10 },
-        offre: { label: "Clarté de l'Offre", max: 20 },
-        processus_methodes: { label: "Processus & Méthodes", max: 15 },
-        engagements_conformite: { label: "Confiance & Conformité", max: 15 },
-        indicateurs: { label: "Preuve Sociale & Métriques", max: 20 },
-        contenus_pedagogiques: { label: "Pédagogie & Supports", max: 10 },
-        structure_technique: { label: "Socle Technique AIO", max: 10 }
+    const blockLabelsI18n: Record<string, { fr: string; en: string; max: number }> = {
+        identite: { fr: "Identit&eacute; &amp; Ancrage", en: "Identity &amp; Anchoring", max: 10 },
+        offre: { fr: "Clart&eacute; de l&rsquo;Offre", en: "Offer Clarity", max: 20 },
+        processus_methodes: { fr: "Processus &amp; M&eacute;thodes", en: "Process &amp; Methods", max: 15 },
+        engagements_conformite: { fr: "Confiance &amp; Conformit&eacute;", en: "Trust &amp; Compliance", max: 15 },
+        indicateurs: { fr: "Preuve Sociale &amp; M&eacute;triques", en: "Social Proof &amp; Metrics", max: 20 },
+        contenus_pedagogiques: { fr: "P&eacute;dagogie &amp; Supports", en: "Educational Content", max: 10 },
+        structure_technique: { fr: "Socle Technique AIO", en: "AIO Technical Foundation", max: 10 }
     };
 
-    const scoreRows = Object.entries(blockLabels).map(([key, { label, max }]) => {
+    const scoreRows = Object.entries(blockLabelsI18n).map(([key, bl]) => {
         const val = blocks?.[key] ?? 0;
-        const pct = Math.round((val / max) * 100);
+        const pct = Math.round((val / bl.max) * 100);
         const color = pct >= 70 ? '#166534' : pct >= 40 ? '#854d0e' : '#991b1b';
         const bg = pct >= 70 ? '#dcfce7' : pct >= 40 ? '#fef9c3' : '#fee2e2';
         const icon = pct >= 70 ? '&#9989;' : pct >= 40 ? '&#9888;&#65039;' : '&#10060;';
+        const label = en ? bl.en : bl.fr;
         return `<div style="background:${bg}; border-left:4px solid ${color}; padding:10px; margin-bottom:8px; border-radius:4px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <strong style="color:${color}; font-size:14px;">${icon} ${label}</strong>
-                <span style="font-size:12px; background:#fff; padding:2px 8px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${val}/${max}</span>
+                <span style="font-size:12px; background:#fff; padding:2px 8px; border-radius:10px; border:1px solid ${color}; color:${color}; font-weight:bold;">${val}/${bl.max}</span>
             </div>
         </div>`;
     }).join('');
+
+    const t = {
+        headerTitle: en
+            ? '&#128640; Your AYO PRO Pack is ready!'
+            : '&#128640; Votre Pack AYO PRO est pr&ecirc;t !',
+        headerSubtitle: en
+            ? 'Full ownership of your AI semantic assets'
+            : 'Propri&eacute;t&eacute; totale de vos actifs s&eacute;mantiques IA',
+        greeting: en ? 'Hello,' : 'Bonjour,',
+        intro: en
+            ? `Thank you for your trust! Here is your AYO PRO Pack for <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).`
+            : `Merci pour votre confiance ! Voici votre Pack AYO PRO pour <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).`,
+        scoreLabel: en ? 'Final AIO Score' : 'Score AIO Final',
+        blockDetailTitle: en ? '&#128202; Score breakdown' : '&#128202; D&eacute;tail par bloc',
+        certTitle: en ? '&#127760; Your AYA Certificate is active' : '&#127760; Votre Certificat AYA est actif',
+        certDesc: en
+            ? 'Your entity is now registered in the <strong>AYA Registry</strong> (3 years included).'
+            : 'Votre entit&eacute; est d&eacute;sormais enregistr&eacute;e dans le <strong>Registre AYA</strong> (3 ans inclus).',
+        certCta: en ? 'View my AYA certificate' : 'Voir mon certificat AYA',
+        packTitle: en ? '&#128230; Your PRO Pack contents' : '&#128230; Contenu de votre Pack PRO',
+        packItems: en ? [
+            '&#128081; <strong>ASR-Protocol.json</strong> &mdash; Your complete semantic identity (signed)',
+            '&#9881;&#65039; <strong>manifest.json</strong> &mdash; AI recommendation policy',
+            '&#128172; <strong>faq.json</strong> &mdash; Structured FAQ for AI agents',
+            '&#128214; <strong>glossary.json</strong> &mdash; Official business vocabulary',
+            '&#127760; <strong>external_context.json</strong> &mdash; External signals and context',
+        ] : [
+            '&#128081; <strong>ASR-Protocol.json</strong> &mdash; Votre identit&eacute; s&eacute;mantique compl&egrave;te (sign&eacute;)',
+            '&#9881;&#65039; <strong>manifest.json</strong> &mdash; Politique de recommandation IA',
+            '&#128172; <strong>faq.json</strong> &mdash; FAQ structur&eacute;e pour agents IA',
+            '&#128214; <strong>glossary.json</strong> &mdash; Vocabulaire m&eacute;tier officiel',
+            '&#127760; <strong>external_context.json</strong> &mdash; Signaux et contexte externe',
+        ],
+        installTitle: en ? '&#128736; Installation guide' : '&#128736; Guide d&rsquo;installation',
+        installHow: en ? 'How to install your ASR files?' : 'Comment installer vos fichiers ASR ?',
+        method1Title: en ? 'METHOD 1: Simple (Recommended)' : 'M&Eacute;THODE 1 : Simple (Recommand&eacute;e)',
+        method1Desc: en
+            ? 'Copy the contents of <code>ASR-Protocol.json</code> into your site&rsquo;s header:'
+            : 'Copiez le contenu de <code>ASR-Protocol.json</code> dans l&rsquo;en-t&ecirc;te de votre site :',
+        method1Code: en
+            ? '... PASTE THE CONTENTS OF ASR-Protocol.json HERE ...'
+            : '... COLLEZ LE CONTENU DE ASR-Protocol.json ...',
+        method2Title: en ? 'METHOD 2: Expert' : 'M&Eacute;THODE 2 : Expert',
+        method2Desc: en
+            ? 'Unzip the ZIP file and place all files in a <code>.ayo/</code> folder at your site&rsquo;s root.'
+            : 'D&eacute;compressez le ZIP et placez tous les fichiers dans un dossier <code>.ayo/</code> &agrave; la racine de votre site.',
+        helpTitle: en ? '&#127384; Need help?' : '&#127384; Besoin d&rsquo;aide ?',
+        helpDesc: en
+            ? 'Our team is available to assist you with the installation.'
+            : 'Notre &eacute;quipe est disponible pour vous accompagner dans l&rsquo;installation.',
+        contactUs: en
+            ? 'Contact us: <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>'
+            : 'Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>',
+        footer: en
+            ? 'AI Visionary &mdash; Make your business visible to AI'
+            : 'AI Visionary &mdash; Rendez votre entreprise visible par les IA',
+    };
 
     return `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
     <meta charset="utf-8">
 
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#128640; Votre Pack AYO PRO est prêt !</h1>
-        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Propriété totale de vos actifs sémantiques IA</p>
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">${t.headerTitle}</h1>
+        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">${t.headerSubtitle}</p>
     </div>
 
     <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
-        <p>Bonjour,</p>
-        <p>Merci pour votre confiance ! Voici votre Pack AYO PRO pour <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).</p>
+        <p>${t.greeting}</p>
+        <p>${t.intro}</p>
 
         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #86efac;">
-            <p style="margin:0; font-size: 14px; color: #666;">Score AIO Final</p>
+            <p style="margin:0; font-size: 14px; color: #666;">${t.scoreLabel}</p>
             <p style="margin: 5px 0; font-size: 42px; font-weight: bold; color: ${score >= 60 ? '#166534' : score >= 40 ? '#854d0e' : '#991b1b'};">${Math.round(score)} / 100</p>
         </div>
 
-        <h3 style="color:#212E53; margin-top:25px;">&#128202; Détail par bloc</h3>
+        <h3 style="color:#212E53; margin-top:25px;">${t.blockDetailTitle}</h3>
         ${scoreRows}
 
         <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bfdbfe;">
-            <h3 style="margin-top:0; color: #1e40af;">&#127760; Votre Certificat AYA est actif</h3>
-            <p style="font-size: 14px;">Votre entité est désormais enregistrée dans le <strong>Registre AYA</strong> (3 ans inclus).</p>
+            <h3 style="margin-top:0; color: #1e40af;">${t.certTitle}</h3>
+            <p style="font-size: 14px;">${t.certDesc}</p>
             <p style="text-align: center; margin: 15px 0;">
-                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Voir mon certificat AYA</a>
+                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">${t.certCta}</a>
             </p>
             <p style="font-size: 12px; color: #666; text-align: center;">
                 <a href="${ayaLink}" style="color: #4A919E;">${ayaLink}</a>
             </p>
         </div>
 
-        <h3 style="color:#212E53;">&#128230; Contenu de votre Pack PRO</h3>
+        <h3 style="color:#212E53;">${t.packTitle}</h3>
         <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
             <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; line-height: 2;">
-                <li>&#128081; <strong>ASR-Protocol.json</strong> — Votre identité sémantique complète (signé)</li>
-                <li>&#9881;&#65039; <strong>manifest.json</strong> — Politique de recommandation IA</li>
-                <li>&#128172; <strong>faq.json</strong> — FAQ structurée pour agents IA</li>
-                <li>&#128214; <strong>glossary.json</strong> — Vocabulaire métier officiel</li>
-                <li>&#127760; <strong>external_context.json</strong> — Signaux et contexte externe</li>
+                ${t.packItems.map(item => `<li>${item}</li>`).join('\n                ')}
             </ul>
         </div>
 
         <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bbdefb;">
-            <h3 style="margin-top:0; color: #0d47a1;">&#128736; Guide d'installation</h3>
-            <p style="font-size: 14px; font-weight: bold;">Comment installer vos fichiers ASR ?</p>
+            <h3 style="margin-top:0; color: #0d47a1;">${t.installTitle}</h3>
+            <p style="font-size: 14px; font-weight: bold;">${t.installHow}</p>
 
             <div style="background: #fff; padding: 12px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #bbdefb;">
-                <h4 style="margin: 0 0 8px; color: #0277bd;">MÉTHODE 1 : Simple (Recommandée)</h4>
-                <p style="margin: 0; font-size: 13px;">Copiez le contenu de <code>ASR-Protocol.json</code> dans l'en-tête de votre site :</p>
+                <h4 style="margin: 0 0 8px; color: #0277bd;">${t.method1Title}</h4>
+                <p style="margin: 0; font-size: 13px;">${t.method1Desc}</p>
                 <div style="background: #f5f5f5; padding: 8px; margin-top: 8px; font-family: monospace; font-size: 11px; border: 1px dashed #ccc; color: #555;">
                     &lt;script type="application/ld+json"&gt;<br>
-                    ... COLLEZ LE CONTENU DE ASR-Protocol.json ...<br>
+                    ${t.method1Code}<br>
                     &lt;/script&gt;
                 </div>
             </div>
 
             <div style="background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #bbdefb;">
-                <h4 style="margin: 0 0 8px; color: #0277bd;">MÉTHODE 2 : Expert</h4>
-                <p style="margin: 0; font-size: 13px;">Décompressez le ZIP et placez tous les fichiers dans un dossier <code>.ayo/</code> à la racine de votre site.</p>
+                <h4 style="margin: 0 0 8px; color: #0277bd;">${t.method2Title}</h4>
+                <p style="margin: 0; font-size: 13px;">${t.method2Desc}</p>
             </div>
         </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
-            <h4 style="margin-top:0; color: #e65100;">&#127384; Besoin d'aide ?</h4>
-            <p style="font-size: 13px; margin-bottom: 0;">Notre équipe est disponible pour vous accompagner dans l'installation.</p>
-            <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
+            <h4 style="margin-top:0; color: #e65100;">${t.helpTitle}</h4>
+            <p style="font-size: 13px; margin-bottom: 0;">${t.helpDesc}</p>
+            <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">${t.contactUs}</p>
         </div>
     </div>
 
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Rendez votre entreprise visible par les IA
+            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">${t.footer}</a>
         </p>
     </div>
 </div>`;
@@ -297,6 +392,7 @@ export async function POST(req: Request) {
         let customerEmail = session.customer_details?.email || session.customer_email || "";
         let analyzedUrl = "";
         let analysisId = "";
+        let locale: 'fr' | 'en' = 'fr';
 
         if (session.client_reference_id) {
             try {
@@ -304,6 +400,7 @@ export async function POST(req: Request) {
                 if (payload.e) customerEmail = payload.e;
                 if (payload.u) analyzedUrl = payload.u;
                 if (payload.aid) analysisId = payload.aid;
+                if (payload.l === 'en') locale = 'en';
                 logger.info('WEBHOOK_PAYLOAD_DECODED', `Decoded client_reference_id`, payload);
             } catch { /* Invalid base64 — not critical */ }
         }
@@ -474,11 +571,28 @@ export async function POST(req: Request) {
 
             // Send an apology email to the customer instead of empty files
             try {
-                await resend.emails.send({
-                    from: 'AYO Support <hello@ai-visionary.com>',
-                    to: [customerEmail],
-                    subject: `⚠️ Votre commande AYO est en cours de traitement`,
-                    html: `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
+                const apologySubject = locale === 'en'
+                    ? `⚠️ Your AYO order is being processed`
+                    : `⚠️ Votre commande AYO est en cours de traitement`;
+                const apologyHtml = locale === 'en'
+                    ? `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
+                        <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                            <h1 style="color: #fff; margin: 0; font-size: 22px;">Your payment has been received</h1>
+                        </div>
+                        <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
+                            <p>Hello,</p>
+                            <p>Thank you for your purchase! Your payment has been successfully confirmed.</p>
+                            <p>Our systems are finalizing the generation of your files. You will receive them by email within the next few minutes.</p>
+                            <p>If you don't receive anything within an hour, please contact us:</p>
+                            <p style="text-align: center; margin: 20px 0;">
+                                <a href="mailto:hello@ai-visionary.com" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contact support</a>
+                            </p>
+                        </div>
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
+                            <p style="font-size: 12px; color: #9ca3af; margin: 0;">AI Visionary — Ref: ${session_id.substring(0, 20)}</p>
+                        </div>
+                    </div>`
+                    : `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
                         <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
                             <h1 style="color: #fff; margin: 0; font-size: 22px;">Votre paiement a bien été reçu</h1>
                         </div>
@@ -494,7 +608,12 @@ export async function POST(req: Request) {
                         <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
                             <p style="font-size: 12px; color: #9ca3af; margin: 0;">AI Visionary — Ref: ${session_id.substring(0, 20)}</p>
                         </div>
-                    </div>`
+                    </div>`;
+                await resend.emails.send({
+                    from: 'AYO Support <hello@ai-visionary.com>',
+                    to: [customerEmail],
+                    subject: apologySubject,
+                    html: apologyHtml
                 });
                 logger.info('WEBHOOK_ERROR_EMAIL_SENT', `Error notification sent to ${customerEmail}`);
             } catch (emailErr) {
@@ -549,6 +668,39 @@ export async function POST(req: Request) {
                 asr_payload: { data: analysisData.extract } as any
             }, packType === 'AYA_SUB' ? 'subscription' : 'purchase');
             logger.info('WEBHOOK_AYA_OK', `AYA registered: ${ayaId} (${entityName})`, { ayaId, entityName, existingAyaEntityId });
+
+            // Generate faithful bilingual descriptions for certified entity
+            try {
+                const { generateCertifiedTranslations } = await import('@/lib/ayo-semantics');
+                const extract = analysisData.extract || {};
+                const fields = (extract.fields || extract) as Record<string, any>;
+                const translations = await generateCertifiedTranslations(
+                    entityName,
+                    fields.identite?.business_type?.value || '',
+                    Array.isArray(fields.offre?.services?.value) ? fields.offre.services.value : [],
+                    typeof fields.offre?.target_audience?.value === 'string' ? fields.offre.target_audience.value : '',
+                    resolvedCountryLegal || 'CH',
+                    locale as 'fr' | 'en',
+                );
+                if (translations.gemini_description && ayaId) {
+                    const existingEntity = await db.getAyaEntityById(ayaId);
+                    if (existingEntity) {
+                        const payload = { ...existingEntity.asr_payload };
+                        if (!payload.enrichment) payload.enrichment = {};
+                        payload.enrichment.gemini_description = translations.gemini_description;
+                        payload.enrichment.gemini_description_fr = translations.gemini_description_fr;
+                        payload.enrichment.gemini_keywords = translations.gemini_keywords;
+                        payload.enrichment.gemini_keywords_fr = translations.gemini_keywords_fr;
+                        payload.enrichment.enriched_at = new Date().toISOString();
+                        await db.updateEntityData(ayaId, { asr_payload: payload });
+                        logger.info('WEBHOOK_TRANSLATIONS_OK', `Bilingual descriptions generated for ${entityName}`);
+                    }
+                }
+            } catch (translationErr) {
+                // Non-blocking — entity is registered, translations can be generated later
+                logger.warn('WEBHOOK_TRANSLATIONS_FAIL', `Translation generation failed for ${entityName}: ${translationErr instanceof Error ? translationErr.message : 'unknown'}`);
+            }
+
         } catch (e: unknown) {
             const message = e instanceof Error ? e.message : 'Unknown error';
             logger.error('WEBHOOK_AYA_ERROR', message, { session_id });
@@ -575,16 +727,20 @@ export async function POST(req: Request) {
 
         // 5. DELIVERY
         if (packType === 'AYA_SUB') {
+            const ayaSubject = locale === 'en'
+                ? `✅ AYA subscription activated — ${entityName}`
+                : `✅ Abonnement AYA activé — ${entityName}`;
             await resend.emails.send({
                 from: 'AYO Registry <registry@ai-visionary.com>',
                 to: [customerEmail],
-                subject: `✅ Abonnement AYA activé — ${entityName}`,
+                subject: ayaSubject,
                 html: buildAyaSubEmailHtml({
                     name: entityName,
                     url: analysisData.url,
                     score: analysisData.score,
                     ayaId,
-                    blocks: analysisData.blocks || {}
+                    blocks: analysisData.blocks || {},
+                    locale
                 })
             });
             logger.info('WEBHOOK_EMAIL_SUB', `Sub email sent to ${customerEmail}`);
@@ -648,7 +804,8 @@ export async function POST(req: Request) {
                     url: analysisData.url,
                     score: analysisData.score,
                     ayaId,
-                    blocks: analysisData.blocks || {}
+                    blocks: analysisData.blocks || {},
+                    locale
                 });
                 logger.info('WEBHOOK_HTML_BUILT', `Email HTML built (${emailHtml.length} chars)`, { zipSize: zipBuffer.length });
             } catch (htmlErr: any) {
@@ -657,10 +814,13 @@ export async function POST(req: Request) {
             }
 
             try {
+                const proSubject = locale === 'en'
+                    ? `📥 Your AYO PRO Pack — ${entityName}`
+                    : `📥 Votre Pack AYO PRO — ${entityName}`;
                 const emailResult = await resend.emails.send({
                     from: 'AYO Delivery <delivery@ai-visionary.com>',
                     to: [customerEmail],
-                    subject: `📥 Votre Pack AYO PRO — ${entityName}`,
+                    subject: proSubject,
                     attachments: [{ filename: 'AYO_Pack_PRO.zip', content: zipBuffer }],
                     html: emailHtml
                 });

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { BlockDefinition, FieldDefinition } from '@/lib/update-form-config';
+import { useTranslations } from 'next-intl';
+import type { BlockDefinition } from '@/lib/update-form-config';
 
 interface UpdateFormProps {
   entityId: string;
@@ -37,6 +38,8 @@ export default function UpdateFormClient({
   updateToken,
   adminAccount,
 }: UpdateFormProps) {
+  const t = useTranslations('update');
+  const tForm = useTranslations('form');
   const [activeTab, setActiveTab] = useState(0);
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>(initialValues);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -98,10 +101,10 @@ export default function UpdateFormClient({
       if (data.success) {
         setRegenSuccess(true);
       } else {
-        setRegenError(data.error || 'Erreur lors de la regeneration');
+        setRegenError(data.error || t('regenError'));
       }
     } catch {
-      setRegenError('Erreur reseau');
+      setRegenError(t('networkError'));
     } finally {
       setRegenerating(false);
     }
@@ -124,7 +127,7 @@ export default function UpdateFormClient({
       for (const field of block.fields) {
         if (field.type === 'readonly') continue;
 
-        // Fields marked "Non applicable" → send __NA__ marker to server.
+        // Fields marked "Non applicable" -> send __NA__ marker to server.
         // The scoring engine will exclude this field from the denominator (neutral, not a penalty).
         const naKey = `${block.key}.${field.name}`;
         if (naFields.has(naKey)) {
@@ -165,7 +168,7 @@ export default function UpdateFormClient({
         body: JSON.stringify({ entityId, blocks, token: updateToken }),
       });
 
-      const data = await res.json().catch(() => ({ error: 'Erreur inconnue' }));
+      const data = await res.json().catch(() => ({ error: t('genericError') }));
 
       if (!res.ok) {
         throw new Error(data.error || `Erreur ${res.status}`);
@@ -180,7 +183,7 @@ export default function UpdateFormClient({
       setStatus('success');
     } catch (err: unknown) {
       setStatus('error');
-      setErrorMessage(err instanceof Error ? err.message : 'Une erreur est survenue.');
+      setErrorMessage(err instanceof Error ? err.message : t('genericError'));
     }
   };
 
@@ -203,7 +206,7 @@ export default function UpdateFormClient({
       }}>
         <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>&#10003;</div>
         <h2 style={{ color: '#212E53', fontSize: '1.5rem', marginBottom: '0.75rem' }}>
-          Donnees mises a jour !
+          {t('successTitle')}
         </h2>
 
         {/* Score comparison */}
@@ -216,12 +219,12 @@ export default function UpdateFormClient({
           flexWrap: 'wrap',
         }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ancien score</div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('oldScoreLabel')}</div>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#9ca3af' }}>{result.oldScore}/100</div>
           </div>
           <div style={{ fontSize: '1.5rem', color: deltaColor }}>&#8594;</div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Nouveau score</div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('newScoreLabel')}</div>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4A919E' }}>{result.newScore}/100</div>
           </div>
           {delta !== 0 && (
@@ -239,7 +242,7 @@ export default function UpdateFormClient({
         </div>
 
         <p style={{ color: '#6b7280', fontSize: '0.95rem', marginBottom: result.filesEmailSent ? '0.75rem' : '1.5rem' }}>
-          Votre certificat AYA et vos donnees dans le registre ont ete mis a jour.
+          {t('certificateUpdated')}
         </p>
 
         {result.filesEmailSent && (
@@ -252,9 +255,7 @@ export default function UpdateFormClient({
             fontSize: '0.9rem',
             color: '#166534',
           }}>
-            &#128386; {isPro
-              ? 'Vos nouveaux fichiers ASR ont ete regeneres et envoyes par email.'
-              : 'Un email de confirmation a ete envoye a votre adresse.'}
+            &#128386; {isPro ? t('filesRegenSentPro') : t('filesRegenSentAya')}
           </div>
         )}
 
@@ -272,7 +273,7 @@ export default function UpdateFormClient({
               fontSize: '0.95rem',
             }}
           >
-            Voir mon certificat AYA
+            {t('viewCertificate')}
           </a>
 
           {isPro && !regenSuccess && (
@@ -290,12 +291,12 @@ export default function UpdateFormClient({
                 cursor: regenerating ? 'wait' : 'pointer',
               }}
             >
-              {regenerating ? 'Regeneration en cours...' : 'Regenerer mes fichiers ASR'}
+              {regenerating ? t('regenerating') : t('regenerateFiles')}
             </button>
           )}
           {regenSuccess && (
             <p style={{ color: '#16a34a', fontSize: '0.9rem', fontWeight: '600' }}>
-              Fichiers regeneres et envoyes par email !
+              {t('filesRegenSuccess')}
             </p>
           )}
           {regenError && (
@@ -367,10 +368,10 @@ export default function UpdateFormClient({
         padding: '1.25rem 1.5rem',
       }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>
-          Mise a jour — {entityName}
+          {t('headerTitle', { name: entityName })}
         </h3>
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', opacity: 0.7 }}>
-          {entityEmail} {currentScore !== null && `| Score actuel : ${currentScore}/100`}
+          {entityEmail} {currentScore !== null && `| ${t('currentScoreLabel', { score: String(currentScore) })}`}
         </p>
       </div>
 
@@ -403,7 +404,7 @@ export default function UpdateFormClient({
               }}
             >
               <span>{block.icon}</span>
-              <span>{block.title}</span>
+              <span>{tForm(block.titleKey)}</span>
               <span style={{
                 background: filled === total ? '#dcfce7' : '#f3f4f6',
                 color: filled === total ? '#16a34a' : '#6b7280',
@@ -431,10 +432,10 @@ export default function UpdateFormClient({
         }}>
           <div>
             <h4 style={{ margin: 0, color: '#212E53', fontSize: '1rem' }}>
-              {currentBlock.icon} {currentBlock.title}
+              {currentBlock.icon} {tForm(currentBlock.titleKey)}
             </h4>
             <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-              Poids dans le score : {currentBlock.weight}/100
+              {t('weightLabel', { weight: String(currentBlock.weight) })}
             </span>
           </div>
         </div>
@@ -447,16 +448,16 @@ export default function UpdateFormClient({
           if (field.type === 'readonly') {
             return (
               <div key={field.name} style={fieldWrapStyle}>
-                <label style={labelStyle}>{field.label}</label>
+                <label style={labelStyle}>{tForm(field.labelKey)}</label>
                 <div style={{
                   ...inputStyle,
                   background: '#f9fafb',
                   color: '#9ca3af',
                   cursor: 'not-allowed',
                 }}>
-                  {value ? 'Oui (detecte)' : 'Non detecte'}
+                  {value ? t('readonlyYes') : t('readonlyNo')}
                 </div>
-                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+                {field.hintKey && <p style={hintStyle}>{tForm(field.hintKey)}</p>}
               </div>
             );
           }
@@ -467,7 +468,7 @@ export default function UpdateFormClient({
             const isUnlocked = unlockedUrls.has(urlKey);
             return (
               <div key={field.name} style={fieldWrapStyle}>
-                <label style={labelStyle}>{field.label}</label>
+                <label style={labelStyle}>{tForm(field.labelKey)}</label>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <input
                     type="url"
@@ -485,7 +486,7 @@ export default function UpdateFormClient({
                   />
                   <button
                     type="button"
-                    title={isUnlocked ? 'Verrouiller' : 'Modifier le lien'}
+                    title={isUnlocked ? t('lockUrl') : t('unlockUrl')}
                     onClick={() => {
                       setUnlockedUrls(prev => {
                         const next = new Set(prev);
@@ -509,10 +510,10 @@ export default function UpdateFormClient({
                       flexShrink: 0,
                     }}
                   >
-                    {isUnlocked ? '🔓' : '✏️'}
+                    {isUnlocked ? '\uD83D\uDD13' : '\u270F\uFE0F'}
                   </button>
                 </div>
-                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+                {field.hintKey && <p style={hintStyle}>{tForm(field.hintKey)}</p>}
               </div>
             );
           }
@@ -549,8 +550,8 @@ export default function UpdateFormClient({
                   }} />
                 </button>
                 <div>
-                  <span style={{ fontSize: '0.9rem', color: '#212E53', fontWeight: '500' }}>{field.label}</span>
-                  {field.hint && <p style={{ ...hintStyle, marginTop: '2px' }}>{field.hint}</p>}
+                  <span style={{ fontSize: '0.9rem', color: '#212E53', fontWeight: '500' }}>{tForm(field.labelKey)}</span>
+                  {field.hintKey && <p style={{ ...hintStyle, marginTop: '2px' }}>{tForm(field.hintKey)}</p>}
                 </div>
               </div>
             );
@@ -562,18 +563,18 @@ export default function UpdateFormClient({
 
             return (
               <div key={field.name} style={fieldWrapStyle}>
-                <label style={labelStyle}>{field.label}</label>
+                <label style={labelStyle}>{tForm(field.labelKey)}</label>
                 <select
                   value={value || ''}
                   onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
                   style={inputStyle}
                 >
-                  <option value="">-- Selectionner --</option>
+                  <option value="">{t('selectPlaceholder')}</option>
                   {options.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>{tForm(opt.labelKey)}</option>
                   ))}
                 </select>
-                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+                {field.hintKey && <p style={hintStyle}>{tForm(field.hintKey)}</p>}
               </div>
             );
           }
@@ -582,14 +583,14 @@ export default function UpdateFormClient({
           if (field.type === 'date') {
             return (
               <div key={field.name} style={fieldWrapStyle}>
-                <label style={labelStyle}>{field.label}</label>
+                <label style={labelStyle}>{tForm(field.labelKey)}</label>
                 <input
                   type="date"
                   value={value || ''}
                   onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
                   style={inputStyle}
                 />
-                {field.hint && <p style={hintStyle}>{field.hint}</p>}
+                {field.hintKey && <p style={hintStyle}>{tForm(field.hintKey)}</p>}
               </div>
             );
           }
@@ -602,7 +603,7 @@ export default function UpdateFormClient({
             return (
               <div key={field.name} style={fieldWrapStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>{field.label}</label>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>{tForm(field.labelKey)}</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -629,7 +630,7 @@ export default function UpdateFormClient({
                       cursor: 'pointer',
                     }}
                   >
-                    {isNA ? '✓ Non applicable' : 'Non applicable'}
+                    {isNA ? t('naButtonActive') : t('naButton')}
                   </button>
                 </div>
                 {isNA ? (
@@ -640,7 +641,7 @@ export default function UpdateFormClient({
                     fontStyle: 'italic',
                     padding: '12px 14px',
                   }}>
-                    Ce champ ne s'applique pas a votre activite.
+                    {t('naFieldMessage')}
                   </div>
                 ) : (
                   <textarea
@@ -648,10 +649,10 @@ export default function UpdateFormClient({
                     onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
                     rows={4}
                     style={{ ...inputStyle, resize: 'vertical' }}
-                    placeholder={field.placeholder || 'Un element par ligne'}
+                    placeholder={field.placeholder || t('onePerLine')}
                   />
                 )}
-                {!isNA && field.hint && <p style={hintStyle}>{field.hint}</p>}
+                {!isNA && field.hintKey && <p style={hintStyle}>{tForm(field.hintKey)}</p>}
               </div>
             );
           }
@@ -663,7 +664,7 @@ export default function UpdateFormClient({
             return (
               <div key={field.name} style={fieldWrapStyle}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <label style={{ ...labelStyle, marginBottom: 0 }}>{field.label}</label>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>{tForm(field.labelKey)}</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -681,12 +682,12 @@ export default function UpdateFormClient({
                       color: isNA ? '#4A919E' : '#9ca3af', cursor: 'pointer',
                     }}
                   >
-                    {isNA ? '✓ Non applicable' : 'Non applicable'}
+                    {isNA ? t('naButtonActive') : t('naButton')}
                   </button>
                 </div>
                 {isNA ? (
                   <div style={{ ...inputStyle, background: '#f9fafb', color: '#9ca3af', fontStyle: 'italic' }}>
-                    Ce champ ne s'applique pas a votre activite.
+                    {t('naFieldMessage')}
                   </div>
                 ) : (
                   <textarea
@@ -697,7 +698,7 @@ export default function UpdateFormClient({
                     placeholder={field.placeholder}
                   />
                 )}
-                {!isNA && field.hint && <p style={hintStyle}>{field.hint}</p>}
+                {!isNA && field.hintKey && <p style={hintStyle}>{tForm(field.hintKey)}</p>}
               </div>
             );
           }
@@ -705,7 +706,7 @@ export default function UpdateFormClient({
           // -- text (default) --
           return (
             <div key={field.name} style={fieldWrapStyle}>
-              <label style={labelStyle}>{field.label}</label>
+              <label style={labelStyle}>{tForm(field.labelKey)}</label>
               <input
                 type="text"
                 value={value || ''}
@@ -714,7 +715,7 @@ export default function UpdateFormClient({
                 placeholder={field.placeholder}
                 required={field.required}
               />
-              {field.hint && <p style={hintStyle}>{field.hint}</p>}
+              {field.hintKey && <p style={hintStyle}>{tForm(field.hintKey)}</p>}
             </div>
           );
         })}
@@ -746,7 +747,7 @@ export default function UpdateFormClient({
               fontSize: '0.85rem',
             }}
           >
-            Precedent
+            {t('previousBtn')}
           </button>
           {activeTab < blockDefinitions.length - 1 ? (
             <button
@@ -763,7 +764,7 @@ export default function UpdateFormClient({
                 fontSize: '0.85rem',
               }}
             >
-              Suivant
+              {t('nextBtn')}
             </button>
           ) : (
             <button
@@ -781,13 +782,13 @@ export default function UpdateFormClient({
                 fontSize: '0.9rem',
               }}
             >
-              {status === 'loading' ? 'Enregistrement...' : 'Enregistrer les modifications'}
+              {status === 'loading' ? t('saving') : t('saveBtn')}
             </button>
           )}
         </div>
 
         <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-          Bloc {activeTab + 1} / {blockDefinitions.length}
+          {t('blockOf', { current: String(activeTab + 1), total: String(blockDefinitions.length) })}
         </span>
       </div>
 
@@ -831,6 +832,7 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
   initialAdmin: { nom: string; prenom: string; email_pro: string };
   updateToken: string;
 }) {
+  const t = useTranslations('update');
   const [admin, setAdmin] = useState(initialAdmin);
   const [adminStatus, setAdminStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [adminError, setAdminError] = useState('');
@@ -852,7 +854,7 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
     setAdminError('');
 
     if (admin.email_pro.trim() && !validateEmailDomain(admin.email_pro)) {
-      setAdminError(`L'email professionnel doit appartenir au domaine ${entityDomain}`);
+      setAdminError(t('adminEmailDomainError', { domain: entityDomain }));
       return;
     }
 
@@ -873,11 +875,11 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur');
+      if (!res.ok) throw new Error(data.error || t('genericError'));
       setAdminStatus('success');
       setTimeout(() => setAdminStatus('idle'), 3000);
     } catch (err: unknown) {
-      setAdminError(err instanceof Error ? err.message : 'Erreur');
+      setAdminError(err instanceof Error ? err.message : t('genericError'));
       setAdminStatus('error');
     }
   };
@@ -887,17 +889,17 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
   return (
     <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid #e5e7eb' }}>
       <h4 style={{ margin: '0 0 1rem', fontSize: '0.95rem', color: '#212E53', fontWeight: '600' }}>
-        👤 Administrateur du compte
+        \uD83D\uDC64 {t('adminTitle')}
       </h4>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
         <div>
-          <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Nom</label>
+          <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>{t('adminNameLabel')}</label>
           <input
             type="text"
             value={admin.nom}
             onChange={e => setAdmin({ ...admin, nom: e.target.value })}
-            placeholder="Nom"
+            placeholder={t('adminNameLabel')}
             style={{
               width: '100%', padding: '8px 12px', borderRadius: '6px',
               border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box',
@@ -905,12 +907,12 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
           />
         </div>
         <div>
-          <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Prenom</label>
+          <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>{t('adminFirstNameLabel')}</label>
           <input
             type="text"
             value={admin.prenom}
             onChange={e => setAdmin({ ...admin, prenom: e.target.value })}
-            placeholder="Prenom"
+            placeholder={t('adminFirstNameLabel')}
             style={{
               width: '100%', padding: '8px 12px', borderRadius: '6px',
               border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box',
@@ -921,7 +923,7 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
 
       <div style={{ marginTop: '0.75rem' }}>
         <label style={{ fontSize: '0.8rem', color: '#6b7280', display: 'block', marginBottom: '4px' }}>
-          Email professionnel <span style={{ color: '#9ca3af' }}>(@{entityDomain})</span>
+          {t('adminEmailLabel')} <span style={{ color: '#9ca3af' }}>(@{entityDomain})</span>
         </label>
         <input
           type="email"
@@ -936,7 +938,7 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
         />
         {!emailValid && (
           <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '4px 0 0' }}>
-            L&apos;email doit appartenir au domaine {entityDomain}
+            {t('adminEmailMustBeDomain', { domain: entityDomain })}
           </p>
         )}
       </div>
@@ -952,10 +954,10 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
             cursor: adminStatus === 'loading' || !emailValid ? 'not-allowed' : 'pointer',
           }}
         >
-          {adminStatus === 'loading' ? 'Enregistrement...' : 'Enregistrer'}
+          {adminStatus === 'loading' ? t('saving') : t('adminSave')}
         </button>
         {adminStatus === 'success' && (
-          <span style={{ color: '#16a34a', fontSize: '0.8rem' }}>✅ Enregistre</span>
+          <span style={{ color: '#16a34a', fontSize: '0.8rem' }}>{t('adminSaved')}</span>
         )}
       </div>
 
@@ -972,6 +974,7 @@ function DelegateAccess({ entityId, ownerEmailMasked, updateToken }: {
   ownerEmailMasked: string;
   updateToken: string;
 }) {
+  const t = useTranslations('update');
   const [open, setOpen] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [delegateStatus, setDelegateStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -979,11 +982,11 @@ function DelegateAccess({ entityId, ownerEmailMasked, updateToken }: {
 
   const handleDelegate = async () => {
     if (!newEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail.trim())) {
-      setDelegateError('Format email invalide.');
+      setDelegateError(t('delegateEmailError'));
       return;
     }
 
-    if (!confirm(`Transferer l'acces de gestion a ${newEmail.trim()} ?\n\nL'ancien proprietaire ne pourra plus se connecter.`)) {
+    if (!confirm(t('delegateConfirm', { email: newEmail.trim() }))) {
       return;
     }
 
@@ -997,10 +1000,10 @@ function DelegateAccess({ entityId, ownerEmailMasked, updateToken }: {
         body: JSON.stringify({ entityId, newOwnerEmail: newEmail.trim(), token: updateToken }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur');
+      if (!res.ok) throw new Error(data.error || t('genericError'));
       setDelegateStatus('success');
     } catch (err: unknown) {
-      setDelegateError(err instanceof Error ? err.message : 'Erreur');
+      setDelegateError(err instanceof Error ? err.message : t('genericError'));
       setDelegateStatus('error');
     }
   };
@@ -1014,26 +1017,26 @@ function DelegateAccess({ entityId, ownerEmailMasked, updateToken }: {
           cursor: 'pointer', textDecoration: 'underline', padding: 0,
         }}
       >
-        {open ? 'Masquer' : 'Transferer l\'acces a un autre email'}
+        {open ? t('delegateToggleHide') : t('delegateToggle')}
       </button>
 
       {open && (
         <div style={{ marginTop: '0.75rem' }}>
           {delegateStatus === 'success' ? (
             <div style={{ background: '#dcfce7', padding: '10px 14px', borderRadius: '8px', color: '#166534', fontSize: '0.85rem' }}>
-              Acces transfere avec succes. Le nouveau proprietaire pourra se connecter avec son email.
+              {t('delegateSuccess')}
             </div>
           ) : (
             <>
               <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: '0 0 0.5rem' }}>
-                Proprietaire actuel : <strong>{ownerEmailMasked}</strong>
+                {t('delegateCurrentOwner')} <strong>{ownerEmailMasked}</strong>
               </p>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="email"
                   value={newEmail}
                   onChange={e => setNewEmail(e.target.value)}
-                  placeholder="nouvel-email@exemple.com"
+                  placeholder={t('delegateEmailPlaceholder')}
                   style={{
                     flex: 1, padding: '8px 12px', borderRadius: '6px',
                     border: '1px solid #d1d5db', fontSize: '0.85rem',
@@ -1049,7 +1052,7 @@ function DelegateAccess({ entityId, ownerEmailMasked, updateToken }: {
                     cursor: delegateStatus === 'loading' ? 'wait' : 'pointer',
                   }}
                 >
-                  {delegateStatus === 'loading' ? '...' : 'Transferer'}
+                  {delegateStatus === 'loading' ? t('delegateTransferring') : t('delegateTransferBtn')}
                 </button>
               </div>
               {delegateError && (

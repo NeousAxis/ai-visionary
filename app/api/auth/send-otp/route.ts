@@ -20,6 +20,11 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { url, email, entityId } = body;
+        // Read locale from request body or NEXT_LOCALE cookie, default to 'fr'
+        const cookieHeader = req.headers.get('cookie') || '';
+        const cookieLocaleMatch = cookieHeader.match(/NEXT_LOCALE=(fr|en)/);
+        const locale: 'fr' | 'en' = body.locale === 'en' ? 'en' : (cookieLocaleMatch?.[1] === 'en' ? 'en' : 'fr');
+        const en = locale === 'en';
 
         let adminEmail: string | null = null;
         let entityName: string = '';
@@ -85,20 +90,27 @@ export async function POST(req: NextRequest) {
         await db.saveOTP(adminEmail, code);
 
         // 4. Send Email via Resend
+        const otpSubject = en
+            ? `🔒 Your security code: ${code}`
+            : `🔒 Votre code de sécurité : ${code}`;
+        const entityLabel = entityName || (en ? 'your entity' : 'votre entité');
         const { error } = await resend.emails.send({
             from: 'AI Visionary Security <security@ai-visionary.com>',
             to: [adminEmail],
-            subject: `🔒 Votre code de sécurité : ${code}`,
+            subject: otpSubject,
             html: `
             <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                <h2>Authentification Sécurisée</h2>
-                <p>Vous avez demandé un accès administrateur pour <strong>${entityName || 'votre entité'}</strong>.</p>
-                <p>Voici votre code unique (valable 10 minutes) :</p>
+                <h2>${en ? 'Secure Authentication' : 'Authentification Sécurisée'}</h2>
+                <p>${en
+                    ? `You requested admin access for <strong>${entityLabel}</strong>.`
+                    : `Vous avez demandé un accès administrateur pour <strong>${entityLabel}</strong>.`
+                }</p>
+                <p>${en ? 'Here is your one-time code (valid for 10 minutes):' : 'Voici votre code unique (valable 10 minutes) :'}</p>
                 <div style="background-color: #f4f4f4; padding: 15px; font-size: 24px; letter-spacing: 5px; font-weight: bold; text-align: center; border-radius: 8px; border: 1px solid #ddd;">
                     ${code}
                 </div>
                 <p style="margin-top: 20px; font-size: 12px; color: #666;">
-                    Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.
+                    ${en ? 'If you did not request this, please ignore this email.' : "Si vous n'êtes pas à l'origine de cette demande, ignorez cet email."}
                 </p>
             </div>
             `,

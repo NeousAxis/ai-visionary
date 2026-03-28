@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface RenewButtonsProps {
     email: string;
@@ -39,11 +40,11 @@ function useCheckout(email: string, url: string, entityId: string, proUrl?: stri
             });
             const data = await res.json();
             if (!res.ok || !data.url) {
-                throw new Error(data.error || 'Erreur lors de la creation du paiement');
+                throw new Error(data.error || 'Error');
             }
             window.location.href = data.url;
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : 'Erreur inattendue. Veuillez reessayer.');
+            setError(e instanceof Error ? e.message : 'Error');
             setLoading(null);
         }
     }
@@ -52,6 +53,7 @@ function useCheckout(email: string, url: string, entityId: string, proUrl?: stri
 }
 
 export default function RenewButtons({ email, url, entityId, hasRequiredInfo, proUrl, ayaUrl }: RenewButtonsProps) {
+    const t = useTranslations('renew');
     const { loading, error, checkout } = useCheckout(email, url, entityId, proUrl, ayaUrl);
 
     const btnBase: React.CSSProperties = {
@@ -67,6 +69,20 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
         cursor: loading ? 'wait' : 'pointer',
         opacity: loading ? 0.7 : 1,
     };
+
+    const proFeatures = [
+        t('proFeature1'),
+        t('proFeature2'),
+        t('proFeature3'),
+        t('proFeature4'),
+    ];
+
+    const ayaFeatures = [
+        t('ayaFeature1'),
+        t('ayaFeature2'),
+        t('ayaFeature3'),
+        t('ayaFeature4'),
+    ];
 
     return (
         <>
@@ -84,7 +100,7 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                     {error}
                     <br />
                     <a href="mailto:hello@ai-visionary.com" style={{ color: '#991B1B', fontWeight: 'bold' }}>
-                        Contactez-nous si le probleme persiste
+                        {t('contactError')}
                     </a>
                 </div>
             )}
@@ -97,14 +113,14 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                         background: '#D97706', color: 'white', padding: '4px 12px', borderRadius: '20px',
                         fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap',
                     }}>
-                        RECOMMANDE
+                        {t('recommended')}
                     </div>
                     <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
-                        <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontSize: '1.2rem' }}>Pack PRO</h4>
-                        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#D97706', marginBottom: '0.25rem' }}>499 CHF</p>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>paiement unique</p>
+                        <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontSize: '1.2rem' }}>{t('proTitle')}</h4>
+                        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#D97706', marginBottom: '0.25rem' }}>{t('proPrice')}</p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{t('proUnit')}</p>
                         <ul style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-body)', listStyle: 'none', padding: '0', marginBottom: '1.5rem' }}>
-                            {['5 fichiers ASR complets', '3 ans de registre AYA inclus', 'Propriete totale des fichiers', 'Score AIO recalcule'].map(item => (
+                            {proFeatures.map(item => (
                                 <li key={item} style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
                                     <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
                                     {item}
@@ -117,11 +133,11 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                                 disabled={!!loading}
                                 style={{ ...btnBase, background: '#D97706' }}
                             >
-                                {loading === 'PRO' ? 'Redirection...' : 'Renouveler Pack PRO'}
+                                {loading === 'PRO' ? t('redirecting') : t('renewPro')}
                             </button>
                         ) : (
                             <a href="/diagnostic" style={{ ...btnBase, background: '#D97706', textDecoration: 'none', display: 'block' }}>
-                                Faire un diagnostic
+                                {t('doDiagnostic')}
                             </a>
                         )}
                     </div>
@@ -130,11 +146,11 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                 {/* AYA Sub */}
                 <div className="card" style={{ border: '2px solid var(--primary-color)' }}>
                     <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
-                        <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontSize: '1.2rem' }}>Abonnement AYA</h4>
-                        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '0.25rem' }}>19 CHF</p>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>par mois</p>
+                        <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontSize: '1.2rem' }}>{t('ayaSubTitle')}</h4>
+                        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '0.25rem' }}>{t('ayaSubPrice')}</p>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{t('ayaSubUnit')}</p>
                         <ul style={{ textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-body)', listStyle: 'none', padding: '0', marginBottom: '1.5rem' }}>
-                            {["Registre AYA actif", "ASR heberge par AI Visionary", "Mises a jour incluses", "Priorite IA"].map(item => (
+                            {ayaFeatures.map(item => (
                                 <li key={item} style={{ marginBottom: '8px', display: 'flex', alignItems: 'start', gap: '8px' }}>
                                     <span style={{ color: 'var(--primary-color)', flexShrink: 0 }}>&#10003;</span>
                                     {item}
@@ -147,11 +163,11 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                                 disabled={!!loading}
                                 style={{ ...btnBase, background: 'var(--primary-color)' }}
                             >
-                                {loading === 'AYA_SUB' ? 'Redirection...' : "S\u2019abonner a AYA"}
+                                {loading === 'AYA_SUB' ? t('redirecting') : t('renewAya')}
                             </button>
                         ) : (
                             <a href="/diagnostic" style={{ ...btnBase, background: 'var(--primary-color)', textDecoration: 'none', display: 'block' }}>
-                                Faire un diagnostic
+                                {t('doDiagnostic')}
                             </a>
                         )}
                     </div>

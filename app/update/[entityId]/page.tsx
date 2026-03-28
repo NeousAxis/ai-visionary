@@ -8,6 +8,7 @@ import OtpGate from './OtpGate';
 import { BLOCK_DEFINITIONS } from '@/lib/update-form-config';
 import { extractFormValues } from '@/lib/form-to-extract';
 import { generateUpdateToken } from '@/lib/update-token';
+import { getTranslations } from 'next-intl/server';
 
 export const revalidate = 0;
 
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ entityId:
 export default async function UpdatePage({ params }: { params: Promise<{ entityId: string }> }) {
   const { entityId } = await params;
   const entity = await db.getAyaEntityById(entityId);
+  const t = await getTranslations('update');
 
   if (!entity || !entity.payment_completed) {
     return notFound();
@@ -93,13 +95,13 @@ export default async function UpdatePage({ params }: { params: Promise<{ entityI
       <section style={{ paddingTop: '2rem', paddingBottom: '1.5rem', textAlign: 'center' }}>
         <div className="container">
           <p style={{ color: '#4A919E', fontWeight: 'bold', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-            Mise a jour
+            {t('pageLabel')}
           </p>
           <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', color: '#212E53', marginBottom: '0.5rem', fontWeight: '800' }}>
             {name}
           </h1>
           <p style={{ color: '#6b7280', fontSize: '1rem', maxWidth: '550px', margin: '0 auto' }}>
-            Completez vos 7 blocs AIO pour maximiser votre score de lisibilite IA et votre visibilite aupres des assistants intelligents.
+            {t('heroSubtitle')}
           </p>
         </div>
       </section>
