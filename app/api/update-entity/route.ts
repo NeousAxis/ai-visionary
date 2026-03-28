@@ -221,7 +221,7 @@ export async function POST(req: NextRequest) {
 
         if (isPro && emailTarget && resend) {
             try {
-                const entityNameForEmail = (displayName as string) || 'Entreprise';
+                const entityNameForEmail = (displayName as string) || 'Company';
                 const extractDataForGen = extract;
 
                 const { cleanedFields } = sanitizeExtract(extractDataForGen as unknown as Record<string, unknown>);
@@ -259,43 +259,43 @@ export async function POST(req: NextRequest) {
 
                 const emailHtml = `<div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#333;max-width:640px;margin:0 auto">
 <div style="background:linear-gradient(135deg,#212E53 0%,#4A919E 100%);padding:30px;border-radius:12px 12px 0 0;text-align:center">
-<h1 style="color:#fff;margin:0;font-size:22px">Vos fichiers AYO mis a jour</h1>
-<p style="color:#BED3C3;margin:10px 0 0;font-size:14px">Suite a la mise a jour de vos donnees — ${entityNameForEmail}</p>
+<h1 style="color:#fff;margin:0;font-size:22px">Your AYO files have been updated</h1>
+<p style="color:#BED3C3;margin:10px 0 0;font-size:14px">Following your data update — ${entityNameForEmail}</p>
 </div>
 <div style="background:#fff;padding:25px;border:1px solid #e5e7eb">
-<p>Bonjour,</p>
-<p>Suite a la mise a jour de vos informations, nous avons regenere vos 5 fichiers ASR pour <strong>${entityNameForEmail}</strong>.</p>
+<p>Hello,</p>
+<p>Following the update of your information, we have regenerated your 5 ASR files for <strong>${entityNameForEmail}</strong>.</p>
 <div style="background:#f0fdf4;padding:20px;border-radius:8px;margin:20px 0;text-align:center;border:2px solid #86efac">
-<p style="margin:0;font-size:14px;color:#666">Nouveau Score AIO</p>
+<p style="margin:0;font-size:14px;color:#666">New AIO Score</p>
 <p style="margin:5px 0;font-size:42px;font-weight:bold;color:${scoreColor}">${newScore} / 100</p>
 ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534' : '#991b1b'}">${deltaStr} points</p>` : ''}
 </div>
 <div style="background:#f9fafb;padding:15px;border-radius:8px;border:1px solid #e5e7eb">
-<h3 style="margin-top:0;color:#212E53">Fichiers regeneres (joints en ZIP)</h3>
+<h3 style="margin-top:0;color:#212E53">Regenerated files (attached as ZIP)</h3>
 <ul style="list-style:none;padding:0;margin:0;font-size:14px;line-height:2">
-<li>&#128081; <strong>ASR-Protocol.json</strong> — Identite semantique mise a jour</li>
-<li>&#9881;&#65039; <strong>manifest.json</strong> — Politique de recommandation IA</li>
-<li>&#128172; <strong>faq.json</strong> — FAQ structuree</li>
-<li>&#128214; <strong>glossary.json</strong> — Vocabulaire metier</li>
-<li>&#127760; <strong>external_context.json</strong> — Signaux et contexte</li>
+<li>&#128081; <strong>ASR-Protocol.json</strong> — Updated semantic identity</li>
+<li>&#9881;&#65039; <strong>manifest.json</strong> — AI recommendation policy</li>
+<li>&#128172; <strong>faq.json</strong> — Structured FAQ</li>
+<li>&#128214; <strong>glossary.json</strong> — Business vocabulary</li>
+<li>&#127760; <strong>external_context.json</strong> — External signals and context</li>
 </ul>
 </div>
 <p style="margin-top:20px;text-align:center">
-<a href="${ayaLink}" style="background:#4A919E;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Voir mon certificat AYA</a>
+<a href="${ayaLink}" style="background:#4A919E;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">View my AYA certificate</a>
 </p>
 <div style="background:#e3f2fd;padding:15px;border-radius:8px;margin:20px 0;border:1px solid #bbdefb">
-<p style="margin:0;font-size:13px"><strong>Rappel :</strong> Remplacez les anciens fichiers sur votre site par ceux joints a cet email pour mettre a jour votre visibilite IA.</p>
+<p style="margin:0;font-size:13px"><strong>Reminder:</strong> Replace the old files on your site with the ones attached to this email to update your AI visibility.</p>
 </div>
 </div>
 <div style="background:#f9fafb;padding:15px;border-radius:0 0 12px 12px;text-align:center;border:1px solid #e5e7eb;border-top:0">
-<p style="font-size:12px;color:#9ca3af;margin:0"><a href="https://ai-visionary.com" style="color:#4A919E;text-decoration:none">AI Visionary</a> — Rendez votre entreprise visible par les IA</p>
+<p style="font-size:12px;color:#9ca3af;margin:0"><a href="https://ai-visionary.com" style="color:#4A919E;text-decoration:none">AI Visionary</a> — Make your business visible to AI</p>
 </div>
 </div>`;
 
                 await resend.emails.send({
                     from: 'AYO Delivery <delivery@ai-visionary.com>',
                     to: [emailTarget],
-                    subject: `Vos fichiers AYO mis a jour — ${entityNameForEmail}`,
+                    subject: `Your AYO files have been updated — ${entityNameForEmail}`,
                     attachments: [{ filename: 'AYO_Pack_PRO_Updated.zip', content: zipBuffer }],
                     html: emailHtml,
                 });
@@ -309,7 +309,7 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
         } else if (!isPro && emailTarget && resend) {
             // AYA subscription clients: send simple confirmation email (no files)
             try {
-                const entityNameForEmail = (displayName as string) || 'Entreprise';
+                const entityNameForEmail = (displayName as string) || 'Company';
                 const ayaLink = `https://www.ai-visionary.com/aya/e/${entityId}`;
                 const delta = newScore - oldScore;
                 const deltaStr = delta > 0 ? `+${delta}` : `${delta}`;
@@ -317,34 +317,34 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
 
                 const confirmationHtml = `<div style="font-family:'Helvetica Neue',Arial,sans-serif;color:#333;max-width:640px;margin:0 auto">
 <div style="background:linear-gradient(135deg,#212E53 0%,#4A919E 100%);padding:30px;border-radius:12px 12px 0 0;text-align:center">
-<h1 style="color:#fff;margin:0;font-size:22px">Mise a jour confirmee</h1>
-<p style="color:#BED3C3;margin:10px 0 0;font-size:14px">${entityNameForEmail} — Registre AYA</p>
+<h1 style="color:#fff;margin:0;font-size:22px">Update confirmed</h1>
+<p style="color:#BED3C3;margin:10px 0 0;font-size:14px">${entityNameForEmail} — AYA Registry</p>
 </div>
 <div style="background:#fff;padding:25px;border:1px solid #e5e7eb">
-<p>Bonjour,</p>
-<p>Vos donnees dans le registre AYA ont ete mises a jour avec succes pour <strong>${entityNameForEmail}</strong>.</p>
+<p>Hello,</p>
+<p>Your data in the AYA registry has been successfully updated for <strong>${entityNameForEmail}</strong>.</p>
 <div style="background:#f0fdf4;padding:20px;border-radius:8px;margin:20px 0;text-align:center;border:2px solid #86efac">
-<p style="margin:0;font-size:14px;color:#666">Nouveau Score AIO</p>
+<p style="margin:0;font-size:14px;color:#666">New AIO Score</p>
 <p style="margin:5px 0;font-size:42px;font-weight:bold;color:${scoreColor}">${newScore} / 100</p>
 ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534' : '#991b1b'}">${deltaStr} points</p>` : ''}
 </div>
-<p>Votre fiche dans le registre a ete mise a jour et est visible par les assistants IA.</p>
+<p>Your listing in the registry has been updated and is now visible to AI assistants.</p>
 <p style="margin-top:20px;text-align:center">
-<a href="${ayaLink}" style="background:#4A919E;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Voir mon certificat AYA</a>
+<a href="${ayaLink}" style="background:#4A919E;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">View my AYA certificate</a>
 </p>
 <div style="background:#fef9e7;padding:15px;border-radius:8px;margin:20px 0;border:1px solid #fde68a">
-<p style="margin:0;font-size:13px">&#128161; <strong>Conseil :</strong> Pour ameliorer encore votre score, passez au Pack PRO (499 CHF) pour obtenir vos 5 fichiers ASR a installer sur votre site.</p>
+<p style="margin:0;font-size:13px">&#128161; <strong>Tip:</strong> To further improve your score, upgrade to the PRO Pack (499 CHF) to get your 5 ASR files to install on your site.</p>
 </div>
 </div>
 <div style="background:#f9fafb;padding:15px;border-radius:0 0 12px 12px;text-align:center;border:1px solid #e5e7eb;border-top:0">
-<p style="font-size:12px;color:#9ca3af;margin:0"><a href="https://ai-visionary.com" style="color:#4A919E;text-decoration:none">AI Visionary</a> — Rendez votre entreprise visible par les IA</p>
+<p style="font-size:12px;color:#9ca3af;margin:0"><a href="https://ai-visionary.com" style="color:#4A919E;text-decoration:none">AI Visionary</a> — Make your business visible to AI</p>
 </div>
 </div>`;
 
                 await resend.emails.send({
                     from: 'AYO Delivery <delivery@ai-visionary.com>',
                     to: [emailTarget],
-                    subject: `Mise a jour confirmee — ${entityNameForEmail}`,
+                    subject: `Update confirmed — ${entityNameForEmail}`,
                     html: confirmationHtml,
                 });
 

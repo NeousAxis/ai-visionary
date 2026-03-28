@@ -6,13 +6,13 @@ import FAQ from '../components/FAQ';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'L\'IA et votre entreprise — Comment les IA comprennent votre activite',
+    title: 'AI and Your Business — How AI Systems Understand Your Organization',
     description:
-        'Decouvrez comment les intelligences artificielles (ChatGPT, Gemini, Claude) interpretent les informations de votre entreprise et pourquoi structurer vos donnees change leur comportement.',
+        'Discover how artificial intelligence (ChatGPT, Gemini, Claude) interprets information about your business and why structuring your data changes their behavior.',
     openGraph: {
-        title: 'L\'IA et votre entreprise | AI Visionary',
+        title: 'AI and Your Business | AI Visionary',
         description:
-            'Comment les IA comprennent votre entreprise et pourquoi la structuration de vos donnees est essentielle pour etre recommande.',
+            'How AI systems understand your business and why structuring your data is essential to being recommended.',
         url: 'https://ai-visionary.com/ai-et-votre-entreprise',
         siteName: 'AI Visionary',
         type: 'website',
@@ -25,7 +25,7 @@ export default function ComprendrePage() {
             {/* Header / Nav */}
             <nav className="container" style={{ padding: '2rem 1rem' }}>
                 <Link href="/" className="btn btn-secondary">
-                    ← Retour à l&apos;accueil
+                    ← Back to home
                 </Link>
             </nav>
 
@@ -33,131 +33,131 @@ export default function ComprendrePage() {
             <section className="section" style={{ paddingTop: '1rem', paddingBottom: '1rem' }}>
                 <div className="container hero-content">
                     <h1 className="headline" style={{ fontSize: '3rem' }}>
-                        Comment les IA comprennent votre entreprise
+                        How AI Systems Understand Your Business
                     </h1>
                     <div className="subheadline">
                         <p className="highlight">
-                            De plus en plus de personnes posent leurs questions directement à des intelligences artificielles.
+                            More and more people ask their questions directly to artificial intelligence.
                         </p>
                         <p>
-                            Cette page explique ce que les IA peuvent comprendre de votre entreprise, et pourquoi structurer vos informations change leur comportement, sans SEO, sans publicité, sans classement.
+                            This page explains what AI can understand about your business, and why structuring your information changes their behavior — without SEO, without advertising, without rankings.
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* 1. Avant ASR */}
+            {/* 1. Before ASR */}
             <section className="section">
                 <div className="container">
                     <div className="card" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
-                        <h2 style={{ marginBottom: '1rem', color: '#ef4444' }}>1. Avant une déclaration structurée : ce que l’IA perçoit</h2>
+                        <h2 style={{ marginBottom: '1rem', color: '#ef4444' }}>1. Before a Structured Declaration: What AI Perceives</h2>
                         <p style={{ marginBottom: '1rem' }}>
-                            Sans cadre explicite, une IA lit votre site comme un humain : des textes narratifs, des valeurs, des intentions, des formulations parfois ambiguës.
+                            Without an explicit framework, an AI reads your website like a human: narrative text, values, intentions, and sometimes ambiguous phrasing.
                         </p>
-                        <p style={{ marginBottom: '1rem' }}><strong>Pour une IA, cela implique :</strong></p>
+                        <p style={{ marginBottom: '1rem' }}><strong>For an AI, this implies:</strong></p>
                         <ul className="clean-list" style={{ marginBottom: '1rem' }}>
-                            <li>Un risque d’interprétation,</li>
-                            <li>Une peur d’inventer un rôle, une compétence, un statut,</li>
-                            <li>Des réponses prudentes, vagues, ou une absence de citation.</li>
+                            <li>A risk of misinterpretation,</li>
+                            <li>A fear of inventing a role, a skill, or a status,</li>
+                            <li>Cautious, vague responses, or a complete absence of citation.</li>
                         </ul>
-                        <p className="highlight" style={{ color: '#ef4444' }}>👉 Par prudence, l’IA évite de vous nommer… ou hallucine avec retenue.</p>
+                        <p className="highlight" style={{ color: '#ef4444' }}>👉 Out of caution, the AI avoids naming you… or hallucinates with restraint.</p>
                     </div>
                 </div>
             </section>
 
-            {/* 2. Après ASR */}
+            {/* 2. After ASR */}
             <section className="section">
                 <div className="container">
                     <div className="card" style={{ borderColor: 'rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.05)' }}>
-                        <h2 style={{ marginBottom: '1rem', color: '#10b981' }}>2. Après une déclaration structurée et scellée : ce qui change</h2>
+                        <h2 style={{ marginBottom: '1rem', color: '#10b981' }}>2. After a Structured and Sealed Declaration: What Changes</h2>
                         <p style={{ marginBottom: '1rem' }}>
-                            Avec une déclaration explicite (ASR – AI Singular Record), votre entreprise devient pour l’IA :
+                            With an explicit declaration (ASR – AI Singular Record), your business becomes for the AI:
                         </p>
                         <ul className="clean-list" style={{ marginBottom: '1rem' }}>
-                            <li>Une entité clairement bornée,</li>
-                            <li>Un périmètre d’activité déclaré,</li>
-                            <li>Une source stable, non ambiguë.</li>
+                            <li>A clearly bounded entity,</li>
+                            <li>A declared scope of activity,</li>
+                            <li>A stable, unambiguous source.</li>
                         </ul>
-                        <p className="highlight" style={{ color: '#10b981' }}>👉 L’IA peut alors oser nommer, oser citer, oser mentionner votre entreprise sans inventer, sans extrapoler, sans promettre.</p>
+                        <p className="highlight" style={{ color: '#10b981' }}>👉 The AI can then dare to name, dare to cite, dare to mention your business without inventing, without extrapolating, without making promises.</p>
                     </div>
                 </div>
             </section>
 
-            {/* 3. Cas concrets */}
+            {/* 3. Concrete cases */}
             <section className="section">
                 <div className="container">
-                    <h2 className="section-title">Dans quels cas concrets une IA peut vous citer</h2>
+                    <h2 className="section-title">Concrete Cases Where an AI Can Cite You</h2>
 
                     <div className="process-steps">
-                        {/* Cas 1 */}
+                        {/* Case 1 */}
                         <div className="step">
-                            <span className="step-number" style={{ fontSize: '1.5rem', opacity: 0.7 }}>Cas 1</span>
-                            <h4>Question factuelle / exploratoire</h4>
-                            <p style={{ fontStyle: 'italic', marginBottom: '0.5rem' }}>« Quelles entreprises ou organisations travaillent sur [votre domaine] dans [votre région] ? »</p>
+                            <span className="step-number" style={{ fontSize: '1.5rem', opacity: 0.7 }}>Case 1</span>
+                            <h4>Factual / Exploratory Question</h4>
+                            <p style={{ fontStyle: 'italic', marginBottom: '0.5rem' }}>&ldquo;What companies or organizations work on [your field] in [your region]?&rdquo;</p>
                             <ul className="clean-list" style={{ fontSize: '0.9rem' }}>
-                                <li style={{ color: '#ef4444' }}><strong>Sans cadre :</strong> réponse générique, acteurs non nommés.</li>
-                                <li style={{ color: '#10b981' }}><strong>Avec ASR :</strong> l’IA peut mentionner votre entreprise comme acteur déclaré, sans jugement.</li>
+                                <li style={{ color: '#ef4444' }}><strong>Without a framework:</strong> generic response, actors not named.</li>
+                                <li style={{ color: '#10b981' }}><strong>With ASR:</strong> the AI can mention your business as a declared actor, without judgment.</li>
                             </ul>
                         </div>
 
-                        {/* Cas 2 */}
+                        {/* Case 2 */}
                         <div className="step">
-                            <span className="step-number" style={{ fontSize: '1.5rem', opacity: 0.7 }}>Cas 2</span>
-                            <h4>Question d’orientation (sans recommandation)</h4>
-                            <p style={{ fontStyle: 'italic', marginBottom: '0.5rem' }}>« Existe-t-il des structures qui proposent [type de service] ? »</p>
-                            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>Les IA évitent les recommandations (“la meilleure”). Mais elles peuvent :</p>
+                            <span className="step-number" style={{ fontSize: '1.5rem', opacity: 0.7 }}>Case 2</span>
+                            <h4>Guidance Question (Without Recommendation)</h4>
+                            <p style={{ fontStyle: 'italic', marginBottom: '0.5rem' }}>&ldquo;Are there organizations that offer [type of service]?&rdquo;</p>
+                            <p style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>AI systems avoid recommendations (&ldquo;the best&rdquo;). But they can:</p>
                             <ul className="clean-list" style={{ fontSize: '0.9rem' }}>
-                                <li>Décrire des types d’acteurs,</li>
-                                <li>Citer des exemples déclarés.</li>
+                                <li>Describe types of actors,</li>
+                                <li>Cite declared examples.</li>
                             </ul>
-                            <p className="highlight" style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: '#10b981' }}>👉 Votre entreprise devient mentionnable, car son périmètre est clair.</p>
+                            <p className="highlight" style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: '#10b981' }}>👉 Your business becomes mentionable, because its scope is clear.</p>
                         </div>
 
-                        {/* Cas 3 */}
+                        {/* Case 3 */}
                         <div className="step">
-                            <span className="step-number" style={{ fontSize: '1.5rem', opacity: 0.7 }}>Cas 3</span>
-                            <h4>Question professionnelle ou institutionnelle</h4>
-                            <p style={{ fontStyle: 'italic', marginBottom: '0.5rem' }}>« Comment des organisations peuvent-elles aborder [un enjeu précis] ? »</p>
+                            <span className="step-number" style={{ fontSize: '1.5rem', opacity: 0.7 }}>Case 3</span>
+                            <h4>Professional or Institutional Question</h4>
+                            <p style={{ fontStyle: 'italic', marginBottom: '0.5rem' }}>&ldquo;How can organizations approach [a specific challenge]?&rdquo;</p>
                             <ul className="clean-list" style={{ fontSize: '0.9rem' }}>
-                                <li style={{ color: '#ef4444' }}><strong>Sans déclaration :</strong> méthodes génériques.</li>
-                                <li style={{ color: '#10b981' }}><strong>Avec déclaration :</strong> l’IA peut pointer des acteurs qui déclarent intervenir sur ce sujet, dont votre entreprise.</li>
+                                <li style={{ color: '#ef4444' }}><strong>Without a declaration:</strong> generic methods.</li>
+                                <li style={{ color: '#10b981' }}><strong>With a declaration:</strong> the AI can point to actors that declare involvement in this topic, including your business.</li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* 4. Pourquoi l'IA n'hallucine plus */}
+            {/* 4. Why AI no longer hallucinates */}
             <section className="section">
                 <div className="container">
                     <div className="grid-2">
                         <div className="card">
-                            <h3>4. Pourquoi l’IA n’hallucine plus quand tout est déclaré</h3>
-                            <p style={{ marginTop: '1rem' }}>Parce qu’une déclaration structurée :</p>
+                            <h3>4. Why AI No Longer Hallucinates When Everything Is Declared</h3>
+                            <p style={{ marginTop: '1rem' }}>Because a structured declaration:</p>
                             <ul className="clean-list">
-                                <li>Dit ce que vous êtes,</li>
-                                <li>Dit ce que vous faites,</li>
-                                <li>Dit aussi ce que vous ne déclarez pas.</li>
+                                <li>States what you are,</li>
+                                <li>States what you do,</li>
+                                <li>Also states what you do not declare.</li>
                             </ul>
-                            <p style={{ marginTop: '1rem' }}><strong>L’IA n’a plus besoin de :</strong></p>
+                            <p style={{ marginTop: '1rem' }}><strong>The AI no longer needs to:</strong></p>
                             <ul className="clean-list">
-                                <li>Combler les vides,</li>
-                                <li>Interpréter votre discours,</li>
-                                <li>Projeter des compétences implicites.</li>
+                                <li>Fill in the gaps,</li>
+                                <li>Interpret your messaging,</li>
+                                <li>Project implicit competencies.</li>
                             </ul>
-                            <p className="highlight" style={{ marginTop: '1rem' }}>👉 Moins de liberté d’interprétation = plus de citations possibles.</p>
+                            <p className="highlight" style={{ marginTop: '1rem' }}>👉 Less interpretive freedom = more possible citations.</p>
                         </div>
 
                         <div className="card">
-                            <h3>5. Ce qui déclenche réellement la mention par une IA</h3>
-                            <p style={{ marginTop: '1rem', color: '#ef4444', textDecoration: 'line-through' }}>Pas le SEO. Pas la popularité. Pas un score marketing.</p>
-                            <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>Mais :</p>
+                            <h3>5. What Actually Triggers an AI Mention</h3>
+                            <p style={{ marginTop: '1rem', color: '#ef4444', textDecoration: 'line-through' }}>Not SEO. Not popularity. Not a marketing score.</p>
+                            <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>But:</p>
                             <ul className="clean-list">
-                                <li><strong>Correspondance sémantique claire :</strong> La question posée correspond exactement à ce que vous déclarez.</li>
-                                <li><strong>Faible risque d’erreur :</strong> L’IA peut répondre sans extrapoler.</li>
-                                <li><strong>Contexte neutre :</strong> Les IA préfèrent décrire, mentionner, illustrer, plutôt que recommander.</li>
+                                <li><strong>Clear semantic match:</strong> The question asked corresponds exactly to what you declare.</li>
+                                <li><strong>Low risk of error:</strong> The AI can answer without extrapolating.</li>
+                                <li><strong>Neutral context:</strong> AI systems prefer to describe, mention, and illustrate rather than recommend.</li>
                             </ul>
-                            <p className="highlight" style={{ marginTop: '1rem' }}>👉 Être mentionnable est le prérequis à toute visibilité IA.</p>
+                            <p className="highlight" style={{ marginTop: '1rem' }}>👉 Being mentionable is the prerequisite for any AI visibility.</p>
                         </div>
                     </div>
                 </div>
@@ -166,17 +166,17 @@ export default function ComprendrePage() {
             {/* Conclusion */}
             <section className="section cta-final-section">
                 <div className="container">
-                    <h2 className="section-title">À retenir</h2>
+                    <h2 className="section-title">Key Takeaway</h2>
                     <p className="final-phrase" style={{ fontSize: '1.5rem', fontStyle: 'italic', maxWidth: '800px', margin: '0 auto' }}>
-                        &quot;Les IA ne citent pas ce qui est le plus visible.<br />
-                        Elles citent ce qu&apos;elles peuvent comprendre sans se tromper.&quot;
+                        &quot;AI systems don&apos;t cite what is most visible.<br />
+                        They cite what they can understand without making mistakes.&quot;
                     </p>
                     <p style={{ marginTop: '2rem', color: 'var(--text-muted)' }}>
-                        C’est exactement le rôle d’une déclaration structurée et scellée.
+                        That is exactly the role of a structured and sealed declaration.
                     </p>
                     <div style={{ marginTop: '3rem' }}>
                         <Link href="/" className="btn btn-primary">
-                            Comprendre comment AYO peut vous aider
+                            Understand how AYO can help you
                         </Link>
                     </div>
                 </div>
@@ -190,4 +190,3 @@ export default function ComprendrePage() {
         </main>
     );
 }
-

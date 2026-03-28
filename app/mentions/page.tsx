@@ -3,13 +3,13 @@ import Footer from '../components/Footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Mentions l\u00e9gales | AI Visionary',
+    title: 'Legal Notice | AI Visionary',
     description:
-        'Mentions l\u00e9gales du site ai-visionary.com. \u00c9diteur : AI Visionary (Cyril Leger), Gen\u00e8ve, Suisse. H\u00e9bergement : Vercel Inc. Propri\u00e9t\u00e9 intellectuelle et droit applicable.',
+        'Legal notice for ai-visionary.com. Publisher: AI Visionary (Cyril Leger), Geneva, Switzerland. Hosting: Vercel Inc. Intellectual property and applicable law.',
     openGraph: {
-        title: 'Mentions l\u00e9gales | AI Visionary',
+        title: 'Legal Notice | AI Visionary',
         description:
-            'Informations l\u00e9gales d\'AI Visionary : \u00e9diteur, h\u00e9bergeur, propri\u00e9t\u00e9 intellectuelle et droit applicable suisse.',
+            'Legal information for AI Visionary: publisher, hosting provider, intellectual property, and applicable Swiss law.',
         url: 'https://ai-visionary.com/mentions',
         siteName: 'AI Visionary',
         type: 'website',
@@ -24,165 +24,163 @@ export default function MentionsPage() {
         <main>
             <nav className="container" style={{ padding: '2rem 1rem' }}>
                 <Link href="/" className="btn btn-secondary">
-                    &larr; Retour &agrave; l&apos;accueil
+                    &larr; Back to home
                 </Link>
             </nav>
 
             <section className="section">
                 <div className="container" style={{ maxWidth: '800px' }}>
-                    <h1 className="section-title">Mentions L&eacute;gales</h1>
+                    <h1 className="section-title">Legal Notice</h1>
                     <div className="card" style={{ lineHeight: '1.8' }}>
 
-                        {/* 1. &Eacute;diteur */}
-                        <h2 style={{ ...h2Style, marginTop: '0' }}>1. &Eacute;diteur du site</h2>
+                        {/* 1. Publisher */}
+                        <h2 style={{ ...h2Style, marginTop: '0' }}>1. Website Publisher</h2>
                         <p>
                             <strong>AI Visionary</strong><br />
-                            Entreprise individuelle fond&eacute;e et dirig&eacute;e par <strong>Cyril Leger</strong><br />
-                            Sp&eacute;cialit&eacute; : structuration de donn&eacute;es pour la lisibilit&eacute; IA (AI-readability Intelligence Optimization)<br />
-                            Si&egrave;ge : Gen&egrave;ve, Suisse<br />
-                            Email : <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a><br />
-                            Site internet : <a href="https://ai-visionary.com" style={{ color: 'var(--primary-color)' }}>ai-visionary.com</a>
+                            Sole proprietorship founded and managed by <strong>Cyril Leger</strong><br />
+                            Specialty: data structuring for AI readability (AI-readability Intelligence Optimization)<br />
+                            Registered office: Geneva, Switzerland<br />
+                            Email: <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a><br />
+                            Website: <a href="https://ai-visionary.com" style={{ color: 'var(--primary-color)' }}>ai-visionary.com</a>
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Directeur de la publication : <strong>Cyril Leger</strong>
+                            Publication director: <strong>Cyril Leger</strong>
                         </p>
 
-                        {/* 2. H&eacute;bergement */}
-                        <h2 style={h2Style}>2. H&eacute;bergement</h2>
+                        {/* 2. Hosting */}
+                        <h2 style={h2Style}>2. Hosting</h2>
                         <p>
-                            Le site <strong>ai-visionary.com</strong> est h&eacute;berg&eacute; par :
+                            The website <strong>ai-visionary.com</strong> is hosted by:
                         </p>
                         <p style={{ marginTop: '10px' }}>
                             <strong>Vercel Inc.</strong><br />
                             440 N Barranca Ave #4133<br />
                             Covina, CA 91723<br />
-                            &Eacute;tats-Unis<br />
-                            Site : <a href="https://vercel.com" style={{ color: 'var(--primary-color)' }} target="_blank" rel="noopener noreferrer">vercel.com</a>
+                            United States<br />
+                            Website: <a href="https://vercel.com" style={{ color: 'var(--primary-color)' }} target="_blank" rel="noopener noreferrer">vercel.com</a>
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Les donn&eacute;es applicatives sont stock&eacute;es via <strong>Supabase Inc.</strong> (base de donn&eacute;es PostgreSQL h&eacute;berg&eacute;e aux &Eacute;tats-Unis).
+                            Application data is stored via <strong>Supabase Inc.</strong> (PostgreSQL database hosted in the United States).
                         </p>
 
-                        {/* 3. Propri&eacute;t&eacute; intellectuelle */}
-                        <h2 style={h2Style}>3. Propri&eacute;t&eacute; intellectuelle</h2>
+                        {/* 3. Intellectual Property */}
+                        <h2 style={h2Style}>3. Intellectual Property</h2>
                         <p>
-                            L&apos;ensemble du contenu du site ai-visionary.com &mdash; textes, images, graphismes, logos,
-                            ic&ocirc;nes, code source, algorithmes de scoring, protocoles de structuration &mdash; est prot&eacute;g&eacute;
-                            par le droit d&apos;auteur et rel&egrave;ve de la l&eacute;gislation suisse et internationale sur
-                            la propri&eacute;t&eacute; intellectuelle.
+                            All content on ai-visionary.com &mdash; texts, images, graphics, logos,
+                            icons, source code, scoring algorithms, structuring protocols &mdash; is protected
+                            by copyright and is subject to Swiss and international intellectual property law.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Les d&eacute;nominations suivantes sont des marques et/ou noms commerciaux d&apos;AI Visionary :
+                            The following names are trademarks and/or trade names of AI Visionary:
                         </p>
                         <ul style={ulStyle}>
-                            <li><strong>AYO</strong> : agent IA de diagnostic de lisibilit&eacute; IA</li>
-                            <li><strong>AYA</strong> : registre public d&apos;entit&eacute;s index&eacute;es et certifi&eacute;es</li>
-                            <li><strong>AIO</strong> (AI-readability Intelligence Optimization) : score de lisibilit&eacute; IA de 0 &agrave; 100</li>
-                            <li><strong>ASR</strong> (AI Singular Record) : fichier d&apos;identit&eacute; num&eacute;rique sign&eacute; cryptographiquement</li>
+                            <li><strong>AYO</strong>: AI diagnostic agent for AI readability</li>
+                            <li><strong>AYA</strong>: public registry of indexed and certified entities</li>
+                            <li><strong>AIO</strong> (AI-readability Intelligence Optimization): AI readability score from 0 to 100</li>
+                            <li><strong>ASR</strong> (AI Singular Record): cryptographically signed digital identity file</li>
                         </ul>
                         <p style={{ marginTop: '10px' }}>
-                            Toute reproduction, repr&eacute;sentation, modification, publication ou adaptation de tout ou partie
-                            des &eacute;l&eacute;ments du site, quel que soit le moyen ou le proc&eacute;d&eacute;, est interdite
-                            sans l&apos;autorisation &eacute;crite pr&eacute;alable d&apos;AI Visionary.
+                            Any reproduction, representation, modification, publication, or adaptation of all or part
+                            of the site&apos;s content, by any means or process, is prohibited
+                            without the prior written authorization of AI Visionary.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Toute exploitation non autoris&eacute;e du site ou de ses contenus sera consid&eacute;r&eacute;e comme
-                            constitutive d&apos;une contrefa&ccedil;on et poursuivie conform&eacute;ment aux dispositions des
-                            articles 61 et suivants de la Loi f&eacute;d&eacute;rale sur le droit d&apos;auteur (LDA).
+                            Any unauthorized use of the site or its content will be deemed an infringement
+                            and prosecuted in accordance with Articles 61 et seq. of the Federal Act on Copyright (CopA).
                         </p>
 
-                        {/* 4. Donn&eacute;es du Registre AYA */}
-                        <h2 style={h2Style}>4. Donn&eacute;es du Registre AYA</h2>
+                        {/* 4. AYA Registry Data */}
+                        <h2 style={h2Style}>4. AYA Registry Data</h2>
                         <p>
-                            Le registre AYA contient des donn&eacute;es d&apos;entreprises collect&eacute;es &agrave; partir de sources
-                            publiquement accessibles sur internet. Ces donn&eacute;es sont mises &agrave; disposition via une API ouverte
-                            sous licence <strong>CC-BY-4.0</strong> (Creative Commons Attribution).
+                            The AYA registry contains business data collected from
+                            publicly accessible sources on the internet. This data is made available via an open API
+                            under the <strong>CC-BY-4.0</strong> (Creative Commons Attribution) license.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Les scores AIO sont calcul&eacute;s automatiquement et ne constituent pas une &eacute;valuation commerciale,
-                            financi&egrave;re ou qualitative de l&apos;entreprise concern&eacute;e. Ils mesurent exclusivement
-                            le degr&eacute; de lisibilit&eacute; du site web par les syst&egrave;mes d&apos;intelligence artificielle.
+                            AIO scores are calculated automatically and do not constitute a commercial,
+                            financial, or qualitative assessment of the business concerned. They measure exclusively
+                            the degree to which a website is readable by artificial intelligence systems.
                         </p>
 
-                        {/* 5. Limitation de responsabilit&eacute; */}
-                        <h2 style={h2Style}>5. Limitation de responsabilit&eacute;</h2>
+                        {/* 5. Limitation of Liability */}
+                        <h2 style={h2Style}>5. Limitation of Liability</h2>
                         <p>
-                            AI Visionary s&apos;efforce de fournir des informations exactes et &agrave; jour sur le site
-                            ai-visionary.com. Toutefois, AI Visionary ne peut garantir l&apos;exactitude, la compl&eacute;tude
-                            ou l&apos;actualit&eacute; des informations diffus&eacute;es.
+                            AI Visionary endeavors to provide accurate and up-to-date information on
+                            ai-visionary.com. However, AI Visionary cannot guarantee the accuracy, completeness,
+                            or currency of the information published.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            En cons&eacute;quence, AI Visionary d&eacute;cline toute responsabilit&eacute; :
+                            Accordingly, AI Visionary disclaims all liability:
                         </p>
                         <ul style={ulStyle}>
-                            <li>Pour toute impr&eacute;cision, inexactitude ou omission portant sur les informations du site.</li>
-                            <li>Pour tout dommage direct ou indirect r&eacute;sultant de l&apos;utilisation du site ou de l&apos;impossibilit&eacute; d&apos;y acc&eacute;der.</li>
-                            <li>Pour tout dommage r&eacute;sultant de l&apos;utilisation du score AIO &agrave; des fins commerciales, contractuelles ou juridiques.</li>
-                            <li>Pour le contenu des sites tiers vers lesquels des liens hypertextes peuvent renvoyer depuis le site.</li>
-                            <li>Pour toute interruption du service, qu&apos;elle soit volontaire (maintenance) ou involontaire (panne, force majeure).</li>
+                            <li>For any inaccuracy, error, or omission in the information on the site.</li>
+                            <li>For any direct or indirect damage resulting from use of the site or inability to access it.</li>
+                            <li>For any damage resulting from use of the AIO score for commercial, contractual, or legal purposes.</li>
+                            <li>For the content of third-party websites that may be linked from the site.</li>
+                            <li>For any interruption of service, whether voluntary (maintenance) or involuntary (outage, force majeure).</li>
                         </ul>
                         <p style={{ marginTop: '10px' }}>
-                            Le diagnostic AIO et les fichiers ASR sont fournis &agrave; titre informatif et de structuration technique.
-                            Ils ne constituent en aucun cas un conseil juridique, financier ou commercial.
+                            The AIO diagnostic and ASR files are provided for informational and technical structuring purposes.
+                            They do not constitute legal, financial, or commercial advice.
                         </p>
 
-                        {/* 6. Liens hypertextes */}
-                        <h2 style={h2Style}>6. Liens hypertextes</h2>
+                        {/* 6. Hyperlinks */}
+                        <h2 style={h2Style}>6. Hyperlinks</h2>
                         <p>
-                            Le site ai-visionary.com peut contenir des liens vers des sites tiers. AI Visionary n&apos;exerce
-                            aucun contr&ocirc;le sur le contenu de ces sites et n&apos;assume aucune responsabilit&eacute; quant
-                            &agrave; leur contenu ou leurs pratiques en mati&egrave;re de protection des donn&eacute;es.
+                            The site ai-visionary.com may contain links to third-party websites. AI Visionary
+                            exercises no control over the content of these sites and assumes no liability regarding
+                            their content or data protection practices.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            La cr&eacute;ation de liens hypertextes vers le site ai-visionary.com est libre, sous r&eacute;serve
-                            de ne pas utiliser la technique du &laquo; framing &raquo; ou toute autre technique portant atteinte
-                            &agrave; l&apos;image d&apos;AI Visionary.
+                            Creating hyperlinks to ai-visionary.com is permitted, provided that the
+                            &ldquo;framing&rdquo; technique or any other technique that damages
+                            the image of AI Visionary is not used.
                         </p>
 
-                        {/* 7. Disponibilit&eacute; du service */}
-                        <h2 style={h2Style}>7. Disponibilit&eacute; du service</h2>
+                        {/* 7. Service Availability */}
+                        <h2 style={h2Style}>7. Service Availability</h2>
                         <p>
-                            AI Visionary s&apos;efforce d&apos;assurer la disponibilit&eacute; du site 24h/24 et 7j/7.
-                            Cependant, l&apos;acc&egrave;s au site peut &ecirc;tre interrompu &agrave; tout moment, sans pr&eacute;avis,
-                            pour des raisons de maintenance, de mise &agrave; jour ou pour toute autre raison technique.
-                            AI Visionary ne saurait &ecirc;tre tenue responsable de ces interruptions.
+                            AI Visionary endeavors to ensure that the site is available 24/7.
+                            However, access to the site may be interrupted at any time, without notice,
+                            for maintenance, updates, or any other technical reason.
+                            AI Visionary shall not be held liable for such interruptions.
                         </p>
 
-                        {/* 8. Droit applicable */}
-                        <h2 style={h2Style}>8. Droit applicable et juridiction comp&eacute;tente</h2>
+                        {/* 8. Applicable Law */}
+                        <h2 style={h2Style}>8. Applicable Law and Jurisdiction</h2>
                         <p>
-                            Les pr&eacute;sentes mentions l&eacute;gales sont r&eacute;gies par le <strong>droit suisse</strong>.
+                            This legal notice is governed by <strong>Swiss law</strong>.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Tout litige relatif &agrave; l&apos;interpr&eacute;tation ou &agrave; l&apos;ex&eacute;cution des pr&eacute;sentes
-                            sera soumis &agrave; la comp&eacute;tence exclusive des <strong>tribunaux du canton de Gen&egrave;ve, Suisse</strong>,
-                            sous r&eacute;serve des dispositions imp&eacute;ratives applicables aux consommateurs r&eacute;sidant dans
-                            l&apos;Union europ&eacute;enne.
+                            Any dispute relating to the interpretation or execution of this notice
+                            shall be submitted to the exclusive jurisdiction of the <strong>courts of the Canton of Geneva, Switzerland</strong>,
+                            subject to mandatory provisions applicable to consumers residing in
+                            the European Union.
                         </p>
 
-                        {/* 9. Cr&eacute;dits */}
-                        <h2 style={h2Style}>9. Cr&eacute;dits</h2>
+                        {/* 9. Credits */}
+                        <h2 style={h2Style}>9. Credits</h2>
                         <ul style={ulStyle}>
-                            <li>Conception et d&eacute;veloppement : <strong>AI Visionary</strong> (Cyril Leger), Gen&egrave;ve</li>
-                            <li>H&eacute;bergement : <strong>Vercel Inc.</strong></li>
-                            <li>Intelligence artificielle : <strong>Google Gemini</strong> (g&eacute;n&eacute;ration de contenu s&eacute;mantique)</li>
-                            <li>Paiements : <strong>Stripe Inc.</strong></li>
+                            <li>Design and development: <strong>AI Visionary</strong> (Cyril Leger), Geneva</li>
+                            <li>Hosting: <strong>Vercel Inc.</strong></li>
+                            <li>Artificial intelligence: <strong>Google Gemini</strong> (semantic content generation)</li>
+                            <li>Payments: <strong>Stripe Inc.</strong></li>
                         </ul>
 
                         {/* 10. Contact */}
                         <h2 style={h2Style}>10. Contact</h2>
                         <p>
-                            Pour toute question concernant les pr&eacute;sentes mentions l&eacute;gales :
+                            For any questions regarding this legal notice:
                         </p>
                         <p style={{ marginTop: '10px' }}>
                             <strong>AI Visionary</strong><br />
                             Cyril Leger<br />
-                            Gen&egrave;ve, Suisse<br />
-                            Email : <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a>
+                            Geneva, Switzerland<br />
+                            Email: <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a>
                         </p>
 
                         <p style={{ marginTop: '30px', fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                            Derni&egrave;re mise &agrave; jour : 25 mars 2026
+                            Last updated: March 25, 2026
                         </p>
                     </div>
                 </div>
