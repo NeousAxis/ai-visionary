@@ -443,15 +443,11 @@ def estimate_aio_score(blocks: dict, has_jsonld: bool, has_sitemap: bool) -> dic
     raw_total = round(raw_total, 1)
 
     # Hard caps (Bible AIO)
-    cap_applied = False
-    cap_reason = None
-    final_score = raw_total
-
-    if not has_jsonld:
-        if final_score > 50:
-            final_score = 50
-            cap_applied = True
-            cap_reason = "no_jsonld_no_aya"
+    # Bot entities NEVER have ASR files (ASR is only generated for paying clients)
+    # Therefore bot entities are always capped at 50, regardless of JSON-LD status
+    final_score = min(raw_total, 50)
+    cap_applied = raw_total > 50
+    cap_reason = "no_asr_bot_entity" if cap_applied else None
 
     return {
         "raw_score": raw_total,
