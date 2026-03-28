@@ -60,13 +60,13 @@ function buildAyaSubEmailHtml(params: {
     const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
 
     const blockLabels: Record<string, { label: string; max: number }> = {
-        identite: { label: "Identity & Anchoring", max: 10 },
-        offre: { label: "Offer Clarity", max: 20 },
-        processus_methodes: { label: "Processes & Methods", max: 15 },
-        engagements_conformite: { label: "Trust & Compliance", max: 15 },
-        indicateurs: { label: "Social Proof & Metrics", max: 20 },
-        contenus_pedagogiques: { label: "Educational Content", max: 10 },
-        structure_technique: { label: "Technical AIO Foundation", max: 10 }
+        identite: { label: "Identité & Ancrage", max: 10 },
+        offre: { label: "Clarté de l'Offre", max: 20 },
+        processus_methodes: { label: "Processus & Méthodes", max: 15 },
+        engagements_conformite: { label: "Confiance & Conformité", max: 15 },
+        indicateurs: { label: "Preuve Sociale & Métriques", max: 20 },
+        contenus_pedagogiques: { label: "Pédagogie & Supports", max: 10 },
+        structure_technique: { label: "Socle Technique AIO", max: 10 }
     };
 
     const scoreRows = Object.entries(blockLabels).map(([key, { label, max }]) => {
@@ -87,27 +87,27 @@ function buildAyaSubEmailHtml(params: {
     <meta charset="utf-8">
 
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#127760; Your AYA subscription is now active!</h1>
-        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Your entity is now visible to AI assistants</p>
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#127760; Votre abonnement AYA est activé !</h1>
+        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Votre entité est maintenant visible par les IA</p>
     </div>
 
     <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
-        <p>Hello,</p>
-        <p>Your AYA subscription is confirmed for <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).</p>
+        <p>Bonjour,</p>
+        <p>Votre abonnement AYA est confirmé pour <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).</p>
 
         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #86efac;">
-            <p style="margin:0; font-size: 14px; color: #666;">AIO Score</p>
+            <p style="margin:0; font-size: 14px; color: #666;">Score AIO</p>
             <p style="margin: 5px 0; font-size: 42px; font-weight: bold; color: ${score >= 60 ? '#166534' : score >= 40 ? '#854d0e' : '#991b1b'};">${Math.round(score)} / 100</p>
         </div>
 
-        <h3 style="color:#212E53; margin-top:25px;">&#128202; Score breakdown by block</h3>
+        <h3 style="color:#212E53; margin-top:25px;">&#128202; Détail par bloc</h3>
         ${scoreRows}
 
         <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bfdbfe;">
-            <h3 style="margin-top:0; color: #1e40af;">&#127760; Your AYA Certificate is active</h3>
-            <p style="font-size: 14px;">Your entity is registered in the <strong>AYA Registry</strong> — accessible by all AI assistants.</p>
+            <h3 style="margin-top:0; color: #1e40af;">&#127760; Votre Certificat AYA est actif</h3>
+            <p style="font-size: 14px;">Votre entité est enregistrée dans le <strong>Registre AYA</strong> — consultable par toutes les IA.</p>
             <p style="text-align: center; margin: 15px 0;">
-                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">View my AYA certificate</a>
+                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Voir mon certificat AYA</a>
             </p>
             <p style="font-size: 12px; color: #666; text-align: center;">
                 <a href="${ayaLink}" style="color: #4A919E;">${ayaLink}</a>
@@ -115,24 +115,24 @@ function buildAyaSubEmailHtml(params: {
         </div>
 
         <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #86efac; margin: 20px 0;">
-            <h4 style="margin-top:0; color: #166534;">&#10003; What your subscription includes</h4>
+            <h4 style="margin-top:0; color: #166534;">&#10003; Ce que comprend votre abonnement</h4>
             <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; line-height: 2;">
-                <li>&#9989; Registered in the AYA Registry (visible by ChatGPT, Claude, Gemini...)</li>
-                <li>&#9989; ASR hosted on ai-visionary.com</li>
-                <li>&#9989; Updates included</li>
-                <li>&#9989; Priority in AI recommendations</li>
+                <li>&#9989; Inscription dans le Registre AYA (visible par ChatGPT, Claude, Gemini...)</li>
+                <li>&#9989; ASR hébergé sur ai-visionary.com</li>
+                <li>&#9989; Mises à jour incluses</li>
+                <li>&#9989; Priorité dans les recommandations IA</li>
             </ul>
         </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
-            <h4 style="margin-top:0; color: #e65100;">&#128172; Have a question?</h4>
-            <p style="font-size: 13px; margin-bottom: 0; font-weight: bold;">Contact us: <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
+            <h4 style="margin-top:0; color: #e65100;">&#128172; Une question ?</h4>
+            <p style="font-size: 13px; margin-bottom: 0; font-weight: bold;">Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
         </div>
     </div>
 
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Make your business visible to AI
+            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Rendez votre entreprise visible par les IA
         </p>
     </div>
 </div>`;
@@ -153,13 +153,13 @@ function buildProEmailHtml(params: {
     const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
 
     const blockLabels: Record<string, { label: string; max: number }> = {
-        identite: { label: "Identity & Anchoring", max: 10 },
-        offre: { label: "Offer Clarity", max: 20 },
-        processus_methodes: { label: "Processes & Methods", max: 15 },
-        engagements_conformite: { label: "Trust & Compliance", max: 15 },
-        indicateurs: { label: "Social Proof & Metrics", max: 20 },
-        contenus_pedagogiques: { label: "Educational Content", max: 10 },
-        structure_technique: { label: "Technical AIO Foundation", max: 10 }
+        identite: { label: "Identité & Ancrage", max: 10 },
+        offre: { label: "Clarté de l'Offre", max: 20 },
+        processus_methodes: { label: "Processus & Méthodes", max: 15 },
+        engagements_conformite: { label: "Confiance & Conformité", max: 15 },
+        indicateurs: { label: "Preuve Sociale & Métriques", max: 20 },
+        contenus_pedagogiques: { label: "Pédagogie & Supports", max: 10 },
+        structure_technique: { label: "Socle Technique AIO", max: 10 }
     };
 
     const scoreRows = Object.entries(blockLabels).map(([key, { label, max }]) => {
@@ -180,74 +180,74 @@ function buildProEmailHtml(params: {
     <meta charset="utf-8">
 
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#128640; Your AYO PRO Pack is ready!</h1>
-        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Full ownership of your AI semantic assets</p>
+        <h1 style="color: #fff; margin: 0; font-size: 24px;">&#128640; Votre Pack AYO PRO est prêt !</h1>
+        <p style="color: #BED3C3; margin: 10px 0 0; font-size: 14px;">Propriété totale de vos actifs sémantiques IA</p>
     </div>
 
     <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
-        <p>Hello,</p>
-        <p>Thank you for your trust! Here is your AYO PRO Pack for <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).</p>
+        <p>Bonjour,</p>
+        <p>Merci pour votre confiance ! Voici votre Pack AYO PRO pour <strong>${name}</strong> (<a href="${url}" style="color:#4A919E;">${url}</a>).</p>
 
         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #86efac;">
-            <p style="margin:0; font-size: 14px; color: #666;">Final AIO Score</p>
+            <p style="margin:0; font-size: 14px; color: #666;">Score AIO Final</p>
             <p style="margin: 5px 0; font-size: 42px; font-weight: bold; color: ${score >= 60 ? '#166534' : score >= 40 ? '#854d0e' : '#991b1b'};">${Math.round(score)} / 100</p>
         </div>
 
-        <h3 style="color:#212E53; margin-top:25px;">&#128202; Score breakdown by block</h3>
+        <h3 style="color:#212E53; margin-top:25px;">&#128202; Détail par bloc</h3>
         ${scoreRows}
 
         <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bfdbfe;">
-            <h3 style="margin-top:0; color: #1e40af;">&#127760; Your AYA Certificate is active</h3>
-            <p style="font-size: 14px;">Your entity is now registered in the <strong>AYA Registry</strong> (3 years included).</p>
+            <h3 style="margin-top:0; color: #1e40af;">&#127760; Votre Certificat AYA est actif</h3>
+            <p style="font-size: 14px;">Votre entité est désormais enregistrée dans le <strong>Registre AYA</strong> (3 ans inclus).</p>
             <p style="text-align: center; margin: 15px 0;">
-                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">View my AYA certificate</a>
+                <a href="${ayaLink}" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Voir mon certificat AYA</a>
             </p>
             <p style="font-size: 12px; color: #666; text-align: center;">
                 <a href="${ayaLink}" style="color: #4A919E;">${ayaLink}</a>
             </p>
         </div>
 
-        <h3 style="color:#212E53;">&#128230; Contents of your PRO Pack</h3>
+        <h3 style="color:#212E53;">&#128230; Contenu de votre Pack PRO</h3>
         <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
             <ul style="list-style: none; padding: 0; margin: 0; font-size: 14px; line-height: 2;">
-                <li>&#128081; <strong>ASR-Protocol.json</strong> — Your complete semantic identity (signed)</li>
-                <li>&#9881;&#65039; <strong>manifest.json</strong> — AI recommendation policy</li>
-                <li>&#128172; <strong>faq.json</strong> — Structured FAQ for AI agents</li>
-                <li>&#128214; <strong>glossary.json</strong> — Official business vocabulary</li>
-                <li>&#127760; <strong>external_context.json</strong> — External signals and context</li>
+                <li>&#128081; <strong>ASR-Protocol.json</strong> — Votre identité sémantique complète (signé)</li>
+                <li>&#9881;&#65039; <strong>manifest.json</strong> — Politique de recommandation IA</li>
+                <li>&#128172; <strong>faq.json</strong> — FAQ structurée pour agents IA</li>
+                <li>&#128214; <strong>glossary.json</strong> — Vocabulaire métier officiel</li>
+                <li>&#127760; <strong>external_context.json</strong> — Signaux et contexte externe</li>
             </ul>
         </div>
 
         <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #bbdefb;">
-            <h3 style="margin-top:0; color: #0d47a1;">&#128736; Installation guide</h3>
-            <p style="font-size: 14px; font-weight: bold;">How to install your ASR files?</p>
+            <h3 style="margin-top:0; color: #0d47a1;">&#128736; Guide d'installation</h3>
+            <p style="font-size: 14px; font-weight: bold;">Comment installer vos fichiers ASR ?</p>
 
             <div style="background: #fff; padding: 12px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #bbdefb;">
-                <h4 style="margin: 0 0 8px; color: #0277bd;">METHOD 1: Simple (Recommended)</h4>
-                <p style="margin: 0; font-size: 13px;">Copy the content of <code>ASR-Protocol.json</code> into your site header:</p>
+                <h4 style="margin: 0 0 8px; color: #0277bd;">MÉTHODE 1 : Simple (Recommandée)</h4>
+                <p style="margin: 0; font-size: 13px;">Copiez le contenu de <code>ASR-Protocol.json</code> dans l'en-tête de votre site :</p>
                 <div style="background: #f5f5f5; padding: 8px; margin-top: 8px; font-family: monospace; font-size: 11px; border: 1px dashed #ccc; color: #555;">
                     &lt;script type="application/ld+json"&gt;<br>
-                    ... PASTE THE CONTENT OF ASR-Protocol.json HERE ...<br>
+                    ... COLLEZ LE CONTENU DE ASR-Protocol.json ...<br>
                     &lt;/script&gt;
                 </div>
             </div>
 
             <div style="background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #bbdefb;">
-                <h4 style="margin: 0 0 8px; color: #0277bd;">METHOD 2: Developer</h4>
-                <p style="margin: 0; font-size: 13px;">Unzip the ZIP and place all files in a <code>.ayo/</code> folder at the root of your site.</p>
+                <h4 style="margin: 0 0 8px; color: #0277bd;">MÉTHODE 2 : Expert</h4>
+                <p style="margin: 0; font-size: 13px;">Décompressez le ZIP et placez tous les fichiers dans un dossier <code>.ayo/</code> à la racine de votre site.</p>
             </div>
         </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border: 1px solid #ffe0b2;">
-            <h4 style="margin-top:0; color: #e65100;">&#127384; Need help?</h4>
-            <p style="font-size: 13px; margin-bottom: 0;">Our team is available to help you with the installation.</p>
-            <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">Contact us: <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
+            <h4 style="margin-top:0; color: #e65100;">&#127384; Besoin d'aide ?</h4>
+            <p style="font-size: 13px; margin-bottom: 0;">Notre équipe est disponible pour vous accompagner dans l'installation.</p>
+            <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
         </div>
     </div>
 
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Make your business visible to AI
+            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — Rendez votre entreprise visible par les IA
         </p>
     </div>
 </div>`;
@@ -477,18 +477,18 @@ export async function POST(req: Request) {
                 await resend.emails.send({
                     from: 'AYO Support <hello@ai-visionary.com>',
                     to: [customerEmail],
-                    subject: `⚠️ Your AYO order is being processed`,
+                    subject: `⚠️ Votre commande AYO est en cours de traitement`,
                     html: `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
                         <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
-                            <h1 style="color: #fff; margin: 0; font-size: 22px;">Your payment has been received</h1>
+                            <h1 style="color: #fff; margin: 0; font-size: 22px;">Votre paiement a bien été reçu</h1>
                         </div>
                         <div style="background: #fff; padding: 25px; border: 1px solid #e5e7eb;">
-                            <p>Hello,</p>
-                            <p>Thank you for your purchase! Your payment has been confirmed successfully.</p>
-                            <p>Our systems are finalizing the generation of your files. You will receive them by email within the next few minutes.</p>
-                            <p>If you receive nothing within the hour, please contact us:</p>
+                            <p>Bonjour,</p>
+                            <p>Merci pour votre achat ! Votre paiement a été confirmé avec succès.</p>
+                            <p>Nos systèmes sont en train de finaliser la génération de vos fichiers. Vous les recevrez par email dans les prochaines minutes.</p>
+                            <p>Si vous ne recevez rien dans l'heure, contactez-nous :</p>
                             <p style="text-align: center; margin: 20px 0;">
-                                <a href="mailto:hello@ai-visionary.com" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contact support</a>
+                                <a href="mailto:hello@ai-visionary.com" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contacter le support</a>
                             </p>
                         </div>
                         <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
@@ -509,7 +509,7 @@ export async function POST(req: Request) {
         const ext = analysisData.extract as Record<string, any>;
         const entityName = ext.identite?.name?.value
             || ext.identite?.legal_name?.value
-            || "Company";
+            || "Entreprise";
 
         // 4. REGISTRY AYA
         // Extract entity metadata from analysis data (instead of defaulting to CH/company/General)
@@ -578,7 +578,7 @@ export async function POST(req: Request) {
             await resend.emails.send({
                 from: 'AYO Registry <registry@ai-visionary.com>',
                 to: [customerEmail],
-                subject: `✅ AYA subscription activated — ${entityName}`,
+                subject: `✅ Abonnement AYA activé — ${entityName}`,
                 html: buildAyaSubEmailHtml({
                     name: entityName,
                     url: analysisData.url,
@@ -660,7 +660,7 @@ export async function POST(req: Request) {
                 const emailResult = await resend.emails.send({
                     from: 'AYO Delivery <delivery@ai-visionary.com>',
                     to: [customerEmail],
-                    subject: `📥 Your AYO PRO Pack — ${entityName}`,
+                    subject: `📥 Votre Pack AYO PRO — ${entityName}`,
                     attachments: [{ filename: 'AYO_Pack_PRO.zip', content: zipBuffer }],
                     html: emailHtml
                 });

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
 import type { BlockDefinition, FieldDefinition } from '@/lib/update-form-config';
 
 interface UpdateFormProps {
@@ -32,7 +31,6 @@ export default function UpdateFormClient({
   blockDefinitions,
   updateToken,
 }: UpdateFormProps) {
-  const t = useTranslations('update');
   const [activeTab, setActiveTab] = useState(0);
   const [formData, setFormData] = useState<Record<string, Record<string, any>>>(initialValues);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -199,7 +197,7 @@ export default function UpdateFormClient({
       }}>
         <div style={{ fontSize: '3.5rem', marginBottom: '0.5rem' }}>&#10003;</div>
         <h2 style={{ color: '#212E53', fontSize: '1.5rem', marginBottom: '0.75rem' }}>
-          {t('successTitle')}
+          Donnees mises a jour !
         </h2>
 
         {/* Score comparison */}
@@ -212,12 +210,12 @@ export default function UpdateFormClient({
           flexWrap: 'wrap',
         }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('oldScore')}</div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Ancien score</div>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#9ca3af' }}>{result.oldScore}/100</div>
           </div>
           <div style={{ fontSize: '1.5rem', color: deltaColor }}>&#8594;</div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('newScore')}</div>
+            <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Nouveau score</div>
             <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4A919E' }}>{result.newScore}/100</div>
           </div>
           {delta !== 0 && (
@@ -235,7 +233,7 @@ export default function UpdateFormClient({
         </div>
 
         <p style={{ color: '#6b7280', fontSize: '0.95rem', marginBottom: result.filesEmailSent ? '0.75rem' : '1.5rem' }}>
-          {t('successDesc')}
+          Votre certificat AYA et vos donnees dans le registre ont ete mis a jour.
         </p>
 
         {result.filesEmailSent && (
@@ -248,7 +246,9 @@ export default function UpdateFormClient({
             fontSize: '0.9rem',
             color: '#166534',
           }}>
-            &#128386; {isPro ? t('filesRegenSent') : t('confirmationSent')}
+            &#128386; {isPro
+              ? 'Vos nouveaux fichiers ASR ont ete regeneres et envoyes par email.'
+              : 'Un email de confirmation a ete envoye a votre adresse.'}
           </div>
         )}
 
@@ -266,7 +266,7 @@ export default function UpdateFormClient({
               fontSize: '0.95rem',
             }}
           >
-            {t('viewCertificate')}
+            Voir mon certificat AYA
           </a>
 
           {isPro && !regenSuccess && (
@@ -284,12 +284,12 @@ export default function UpdateFormClient({
                 cursor: regenerating ? 'wait' : 'pointer',
               }}
             >
-              {regenerating ? t('regenerating') : t('regenerateBtn')}
+              {regenerating ? 'Regeneration en cours...' : 'Regenerer mes fichiers ASR'}
             </button>
           )}
           {regenSuccess && (
             <p style={{ color: '#16a34a', fontSize: '0.9rem', fontWeight: '600' }}>
-              {t('regenSuccess')}
+              Fichiers regeneres et envoyes par email !
             </p>
           )}
           {regenError && (
@@ -361,10 +361,10 @@ export default function UpdateFormClient({
         padding: '1.25rem 1.5rem',
       }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>
-          {t('headerTitle', { entityName })}
+          Mise a jour — {entityName}
         </h3>
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', opacity: 0.7 }}>
-          {entityEmail} {currentScore !== null && `| ${t('currentScoreLabel')} ${currentScore}/100`}
+          {entityEmail} {currentScore !== null && `| Score actuel : ${currentScore}/100`}
         </p>
       </div>
 
@@ -428,7 +428,7 @@ export default function UpdateFormClient({
               {currentBlock.icon} {currentBlock.title}
             </h4>
             <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-              {t('blockWeight', { weight: currentBlock.weight })}
+              Poids dans le score : {currentBlock.weight}/100
             </span>
           </div>
         </div>
@@ -448,7 +448,7 @@ export default function UpdateFormClient({
                   color: '#9ca3af',
                   cursor: 'not-allowed',
                 }}>
-                  {value ? t('detectedYes') : t('detectedNo')}
+                  {value ? 'Oui (detecte)' : 'Non detecte'}
                 </div>
                 {field.hint && <p style={hintStyle}>{field.hint}</p>}
               </div>
@@ -562,7 +562,7 @@ export default function UpdateFormClient({
                   onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
                   style={inputStyle}
                 >
-                  <option value="">{t('selectPlaceholder')}</option>
+                  <option value="">-- Selectionner --</option>
                   {options.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
@@ -623,7 +623,7 @@ export default function UpdateFormClient({
                       cursor: 'pointer',
                     }}
                   >
-                    {isNA ? t('naLabelActive') : t('naLabel')}
+                    {isNA ? '✓ Non applicable' : 'Non applicable'}
                   </button>
                 </div>
                 {isNA ? (
@@ -634,7 +634,7 @@ export default function UpdateFormClient({
                     fontStyle: 'italic',
                     padding: '12px 14px',
                   }}>
-                    {t('naFieldDesc')}
+                    Ce champ ne s'applique pas a votre activite.
                   </div>
                 ) : (
                   <textarea
@@ -642,7 +642,7 @@ export default function UpdateFormClient({
                     onChange={e => setBlockValue(blockKey, field.name, e.target.value)}
                     rows={4}
                     style={{ ...inputStyle, resize: 'vertical' }}
-                    placeholder={field.placeholder || t('arrayPlaceholder')}
+                    placeholder={field.placeholder || 'Un element par ligne'}
                   />
                 )}
                 {!isNA && field.hint && <p style={hintStyle}>{field.hint}</p>}
@@ -675,12 +675,12 @@ export default function UpdateFormClient({
                       color: isNA ? '#4A919E' : '#9ca3af', cursor: 'pointer',
                     }}
                   >
-                    {isNA ? t('naLabelActive') : t('naLabel')}
+                    {isNA ? '✓ Non applicable' : 'Non applicable'}
                   </button>
                 </div>
                 {isNA ? (
                   <div style={{ ...inputStyle, background: '#f9fafb', color: '#9ca3af', fontStyle: 'italic' }}>
-                    {t('naFieldDesc')}
+                    Ce champ ne s'applique pas a votre activite.
                   </div>
                 ) : (
                   <textarea
@@ -740,7 +740,7 @@ export default function UpdateFormClient({
               fontSize: '0.85rem',
             }}
           >
-            {t('prevBtn')}
+            Precedent
           </button>
           {activeTab < blockDefinitions.length - 1 ? (
             <button
@@ -757,7 +757,7 @@ export default function UpdateFormClient({
                 fontSize: '0.85rem',
               }}
             >
-              {t('nextBtn')}
+              Suivant
             </button>
           ) : (
             <button
@@ -775,13 +775,13 @@ export default function UpdateFormClient({
                 fontSize: '0.9rem',
               }}
             >
-              {status === 'loading' ? t('saving') : t('saveBtn')}
+              {status === 'loading' ? 'Enregistrement...' : 'Enregistrer les modifications'}
             </button>
           )}
         </div>
 
         <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
-          {t('blockCounter', { current: activeTab + 1, total: blockDefinitions.length })}
+          Bloc {activeTab + 1} / {blockDefinitions.length}
         </span>
       </div>
 

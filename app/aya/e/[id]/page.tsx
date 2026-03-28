@@ -3,7 +3,6 @@ import { db } from '@/lib/db';
 import { buildPlainTextDescription } from '@/lib/aya/llm-format';
 import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
-import { getTranslations, getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 
 // Force dynamic
@@ -53,18 +52,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function CertificatePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const entity = await db.getAyaEntityById(id);
-    const t = await getTranslations('certificate');
-    const locale = await getLocale();
-    const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
 
     if (!entity) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
                 <div className="text-center max-w-md mx-auto p-8">
-                    <h1 className="text-2xl font-bold text-[#212E53] mb-4">{t('notFound')}</h1>
-                    <p className="text-slate-600 mb-6">{t('notFoundDesc')}</p>
+                    <h1 className="text-2xl font-bold text-[#212E53] mb-4">Certificat non trouvé</h1>
+                    <p className="text-slate-600 mb-6">Ce certificat AYA n&apos;existe pas ou a été supprimé.</p>
                     <Link href="/aya" className="inline-block px-6 py-3 bg-[#4A919E] text-white rounded-lg hover:bg-[#3a7a85] transition-colors">
-                        {t('viewRegistry')}
+                        Voir le Registre AYA
                     </Link>
                 </div>
             </div>
@@ -76,12 +72,12 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     const hasValidDate = entity.valid_until && new Date(entity.valid_until).getFullYear() >= 2020;
     const isValid = hasValidDate ? new Date(entity.valid_until) > new Date() : false;
 
-    const creationDate = new Date(entity.created_at).toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' });
+    const creationDate = new Date(entity.created_at).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
 
     // Bug 2 fix: protect against aberrant dates (epoch 1970, null, etc.)
     const validUntilRaw = entity.valid_until ? new Date(entity.valid_until) : null;
     const validUntilDate = (validUntilRaw && validUntilRaw.getFullYear() >= 2020)
-        ? validUntilRaw.toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
+        ? validUntilRaw.toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' })
         : '\u2014';
 
     // Fix: Respect 0 score, show "—" if undefined (no fake 100)
@@ -188,7 +184,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
             <section className="section" style={{ paddingTop: '2rem', paddingBottom: '4rem', textAlign: 'center' }}>
                 <div className="container">
                     <p style={{ color: 'var(--primary-color)', fontWeight: 'bold', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                        {t('officialRegistry')}
+                        Registre Officiel AYA
                     </p>
 
                     <h1 className="headline" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem' }}>
@@ -196,8 +192,8 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                     </h1>
 
                     <div className="subheadline" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                        <span>📍 {t(`countries.${entity.country_legal as 'CH' | 'FR' | 'BE' | 'DE' | 'IT' | 'ES' | 'LU' | 'CA' | 'US' | 'GB' | 'MA'}`) || entity.country_legal}</span>
-                        <span>🏢 {t(`entityTypes.${entity.entity_type as 'company' | 'association' | 'individual' | 'public_body'}`) || entity.entity_type}</span>
+                        <span>📍 {({'CH':'Suisse','FR':'France','BE':'Belgique','DE':'Allemagne','IT':'Italie','ES':'Espagne','LU':'Luxembourg','CA':'Canada','US':'États-Unis','GB':'Royaume-Uni','MA':'Maroc'} as Record<string,string>)[entity.country_legal] || entity.country_legal}</span>
+                        <span>🏢 {({'company':'Entreprise','association':'Association','individual':'Indépendant','public_body':'Organisme Public'} as Record<string,string>)[entity.entity_type] || entity.entity_type}</span>
                         {entity.website && (
                             <a href={entity.website} target="_blank" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>
                                 🔗 {entity.website.replace(/^https?:\/\//, '')}
@@ -214,11 +210,11 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                 </p>
                 {!isCertified && (
                     <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                        {t('botDisclaimer')}{' '}
+                        ⚠️ Cette fiche a été générée automatiquement par le bot AYA. Les informations peuvent être inexactes.{' '}
                         <Link href="/diagnostic" style={{ color: 'var(--primary-color)', textDecoration: 'underline' }}>
-                            {t('claimProfile')}
+                            Revendiquez cette fiche
                         </Link>{' '}
-                        {t('claimDesc')}
+                        pour corriger et certifier vos données.
                     </p>
                 )}
             </section>
@@ -232,12 +228,12 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                         {/* LEFT: IDENTITY CARD */}
                         <div className="card">
                             <h3 style={{ fontSize: '1.2rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
-                                {t('identificationTitle')}
+                                Identification
                             </h3>
 
                             <div style={{ marginBottom: '2rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                    <span style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{t('currentStatus')}</span>
+                                    <span style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>Statut Actuel</span>
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                         <span style={{
                                             padding: '4px 12px',
@@ -247,7 +243,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                             background: isCertified && isValid ? 'var(--bg-accent)' : isCertified ? '#FEE2E2' : '#F1F5F9',
                                             color: isCertified && isValid ? 'var(--primary-color)' : isCertified ? '#EF4444' : '#64748B'
                                         }}>
-                                            {isCertified && isValid ? t('statusCertifiedActive') : isCertified ? t('statusExpired') : t('statusIndexed')}
+                                            {isCertified && isValid ? '● CERTIFIÉ ACTIF' : isCertified ? '● EXPIRÉ' : '● INDEXÉ'}
                                         </span>
                                         {isCertified && (
                                             <span style={{
@@ -258,27 +254,27 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                                 background: packType === 'PRO' ? '#FEF3C7' : 'var(--bg-accent)',
                                                 color: packType === 'PRO' ? '#D97706' : 'var(--primary-color)'
                                             }}>
-                                                {packType === 'PRO' ? t('packPro') : t('packPlatform')}
+                                                {packType === 'PRO' ? '👑 PRO' : '📋 PLATEFORME'}
                                             </span>
                                         )}
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div>
-                                        <span style={{ color: 'var(--text-muted)' }}>{t('aioScore')}</span>
+                                        <span style={{ color: 'var(--text-muted)' }}>Score AIO (Lisibilité IA)</span>
                                     </div>
                                     <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-main)' }}>
                                         {score !== null ? score : '—'}<span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>/100</span>
                                     </span>
                                 </div>
                                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '5px', fontStyle: 'italic', lineHeight: '1.3', borderLeft: '2px solid var(--border-light)', paddingLeft: '8px' }}>
-                                    {t('scoreNote')}
+                                    * Ce score mesure la lisibilité de l'entreprise par les IA (ChatGPT, Gemini, Claude...). Plus le score est élevé, plus l'entreprise est visible et recommandable.
                                 </p>
                             </div>
 
                             <div style={{ background: 'var(--bg-main)', padding: '15px', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem' }}>
                                 <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px', letterSpacing: '0.05em' }}>
-                                    {t('publicKey')}
+                                    Clé Publique (AYA ID)
                                 </p>
                                 <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', wordBreak: 'break-all', color: 'var(--text-main)' }}>
                                     {entity.aya_entity_id}
@@ -287,18 +283,18 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                                 <div>
-                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>{t('issueDate')}</p>
+                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>Date d'émission</p>
                                     <p style={{ fontWeight: '600' }}>{creationDate}</p>
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>{t('validity')}</p>
+                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '5px' }}>Validité</p>
                                     <p style={{ fontWeight: '600', color: isCertified && isValid ? 'var(--primary-color)' : 'inherit' }}>{validUntilDate}</p>
                                 </div>
                             </div>
 
                             <div style={{ marginTop: '15px', paddingTop: '15px', borderTop: '1px dashed var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                                    {t('lastModified')} {new Date(entity.last_update).toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    Dernière modification le : {new Date(entity.last_update).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' })}
                                 </p>
                                 {isCertified && (
                                     <div style={{ display: 'flex', gap: '8px' }}>
@@ -315,7 +311,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                                 whiteSpace: 'nowrap',
                                             }}
                                         >
-                                            {t('updateButton')}
+                                            Mettre a jour
                                         </Link>
                                         <Link
                                             href={`/renew/${entity.entity_id}`}
@@ -330,7 +326,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                                 whiteSpace: 'nowrap',
                                             }}
                                         >
-                                            {t('renewButton')}
+                                            Renouveler
                                         </Link>
                                     </div>
                                 )}
@@ -341,7 +337,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                         <div className="card">
                             <h3 style={{ fontSize: '1.2rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
                                 <span style={{ width: '10px', height: '10px', background: 'var(--primary-color)', borderRadius: '50%' }}></span>
-                                {t('semanticTitle')}
+                                Données Sémantiques (IA)
                             </h3>
 
                             <div style={{ marginBottom: '2rem' }}>
@@ -352,7 +348,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
 
                             <div style={{ marginBottom: '2rem' }}>
                                 <p style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 'bold', marginBottom: '10px', letterSpacing: '0.05em' }}>
-                                    {t('indexedKeywords')}
+                                    Mots-Clés Indexés
                                 </p>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                                     {keywords.length > 0 ? keywords.map((kw: string, i: number) => (
@@ -367,13 +363,13 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                         }}>
                                             #{kw}
                                         </span>
-                                    )) : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('noKeywords')}</span>}
+                                    )) : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Aucun mot-clé défini.</span>}
                                 </div>
                             </div>
 
                             <div>
                                 <p style={{ fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 'bold', marginBottom: '10px', letterSpacing: '0.05em' }}>
-                                    {t('supportedProtocols')}
+                                    Protocoles Supportés
                                 </p>
                                 <ul style={{ fontSize: '0.95rem', color: 'var(--text-body)' }}>
                                     <li style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>

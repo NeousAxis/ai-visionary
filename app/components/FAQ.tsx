@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
 
 const FaqItem = ({ question, children }: { question: string, children: React.ReactNode }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -55,81 +54,80 @@ const FaqItem = ({ question, children }: { question: string, children: React.Rea
 };
 
 export default function FAQ() {
-    const t = useTranslations('faq');
-
     return (
         <section id="faq" className="section faq-section" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
             <div className="container" style={{ maxWidth: '800px' }}>
                 <h2 className="section-title" style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    {t('title')}
+                    FAQ — Comment AI-VISIONARY rend votre entreprise compréhensible par les IA
                 </h2>
 
-                <FaqItem question={t('q1')}>
-                    <p><strong>{t('a1p1')}</strong></p>
+                <FaqItem question="1. Pourquoi les IA se trompent-elles souvent quand elles parlent des entreprises ?">
+                    <p><strong>Parce que la majorité des sites sont écrits pour des humains, pas pour des IA.</strong></p>
                     <ul style={{ margin: '1rem 0', paddingLeft: '1.5rem' }}>
-                        <li>{t('a1l1')}</li>
-                        <li>{t('a1l2')}</li>
+                        <li>Les IA lisent des récits, des valeurs, des formulations ambiguës, des promesses implicites.</li>
+                        <li>Elles doivent alors interpréter, compléter, ou deviner.</li>
                     </ul>
-                    <p>{t('a1p2')}</p>
-                    <p style={{ marginTop: '1rem', color: 'var(--text-main)', fontWeight: '600' }}>{t('a1p3')}</p>
+                    <p>C’est là que naissent les erreurs, les approximations, ou les silences prudents.</p>
+                    <p style={{ marginTop: '1rem', color: 'var(--text-main)', fontWeight: '600' }}>AI-VISIONARY part d’un principe simple :<br />👉 Une IA ne devrait jamais avoir à deviner ce qu’est une entreprise.</p>
                 </FaqItem>
 
-                <FaqItem question={t('q2')}>
-                    <p><strong>{t('a2p1')}</strong></p>
-                    <p style={{ marginTop: '0.5rem' }}>{t('a2p2')}</p>
+                <FaqItem question="2. Qu’est-ce que fait concrètement AYO ?">
+                    <p><strong>AYO crée un ASR — AI Singular Record.</strong></p>
+                    <p style={{ marginTop: '0.5rem' }}>Un ASR est une déclaration officielle et structurée de votre entreprise : ce que vous êtes, ce que vous faites, et ce que vous ne déclarez pas.</p>
                     <ul style={{ margin: '1rem 0', paddingLeft: '1.5rem' }}>
-                        <li>{t('a2l1')}</li>
-                        <li>{t('a2l2')}</li>
-                        <li>{t('a2l3')}</li>
+                        <li>Ce n’est ni du SEO,</li>
+                        <li>ni un texte marketing,</li>
+                        <li>ni un classement.</li>
                     </ul>
-                    <p>{t('a2p3')}</p>
+                    <p>C’est un point de référence stable, lisible par les IA, qui réduit drastiquement le risque d’hallucination.</p>
                 </FaqItem>
 
-                <FaqItem question={t('q3')}>
-                    <p><strong>{t('a3p1')}</strong></p>
-                    <p style={{ marginTop: '0.5rem' }}>{t('a3p2')}</p>
+                <FaqItem question="3. Pourquoi l’ASR est-il scellé cryptographiquement ?">
+                    <p><strong>Parce qu’une déclaration n’a de valeur que si elle est stable.</strong></p>
+                    <p style={{ marginTop: '0.5rem' }}>Le scellement cryptographique garantit que :</p>
                     <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
-                        <li>{t('a3l1')}</li>
-                        <li>{t('a3l2')}</li>
-                        <li>{t('a3l3')}</li>
+                        <li>L’ASR n’a pas été modifié,</li>
+                        <li>Il correspond à une version précise,</li>
+                        <li>Il provient bien de l’autorité AI-VISIONARY.</li>
                     </ul>
-                    <p style={{ marginTop: '1rem', color: 'var(--text-main)' }}>{t('a3p3')}</p>
-                    <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>{t('a3p4')}</p>
+                    <p style={{ marginTop: '1rem', color: 'var(--text-main)' }}>👉 Le sceau ne “certifie pas la qualité” de l’entreprise.<br />👉 Il empêche simplement l’altération et l’ambiguïté.</p>
+                    <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>Pour une IA, cela transforme un texte incertain en source fiable.</p>
                 </FaqItem>
 
-                <FaqItem question={t('q4')}>
-                    <p><strong>{t('a4p1')}</strong></p>
-                    <p style={{ color: 'var(--primary-color)', margin: '0.5rem 0' }}>{t('a4p2')}</p>
+                <FaqItem question="4. Quel est le rôle exact de AYA par rapport à AYO ?">
+                    <p><strong>AYA est une base de données consultable, comparable à un moteur de recherche, mais avec une différence fondamentale :</strong></p>
+                    <p style={{ color: 'var(--primary-color)', margin: '0.5rem 0' }}>👉 Ce n’est pas la popularité qui permet de trouver une entreprise, mais la manière dont ses données sont structurées.</p>
 
-                    <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>{t('a4p3')}</p>
+                    <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>AYO intervient en amont :</p>
                     <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
-                        <li>{t('a4l1')}</li>
-                        <li>{t('a4l2')}</li>
-                        <li>{t('a4l3')}</li>
+                        <li>Il structure les informations d’une entreprise,</li>
+                        <li>Il les rend explicites et non ambiguës,</li>
+                        <li>Il produit un ASR lisible par les IA.</li>
                     </ul>
 
-                    <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>{t('a4p4')}</p>
+                    <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>AYA intervient en aval :</p>
                     <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
-                        <li>{t('a4l4')}</li>
-                        <li>{t('a4l5')}</li>
-                        <li>{t('a4l6')}</li>
+                        <li>Il indexe ces données structurées,</li>
+                        <li>Il permet de les interroger par contenu réel, pas par mots-clés vagues,</li>
+                        <li>Il ne classe pas “les meilleurs” et ne recommande pas.</li>
                     </ul>
 
-                    <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>{t('a4p5')}</p>
+                    <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>Concrètement, AYA permet de trouver des entreprises qui déclarent exactement ce que vous cherchez, parce que leurs données sont structurées de manière comparable, et non parce qu’elles sont connues.</p>
                 </FaqItem>
 
-                <FaqItem question={t('q5')}>
-                    <p><strong>{t('a5p1')}</strong></p>
-                    <p>{t('a5p2')}</p>
+                <FaqItem question="5. Est-ce que cela garantit que mon entreprise sera citée par les IA ?">
+                    <p><strong>Non. Et toute promesse inverse serait trompeuse.</strong></p>
+                    <p>AI-VISIONARY ne garantit : ni trafic, ni recommandation, ni visibilité automatique.</p>
 
-                    <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>{t('a5p3')}</p>
-                    <p>{t('a5p4')}</p>
-                    <p style={{ marginTop: '0.5rem', color: 'var(--text-main)' }}>{t('a5p5')}</p>
+                    <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>Ce qu’il garantit, en revanche, c’est ceci :</p>
+                    <p>Votre entreprise devient mentionnable par une IA, parce qu’elle est claire, bornée et non ambiguë.</p>
+                    <p style={{ marginTop: '0.5rem', color: 'var(--text-main)' }}>Les IA citent ce qu’elles peuvent comprendre sans se tromper, pas ce qui crie le plus fort.</p>
                 </FaqItem>
 
                 <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'rgba(139, 92, 246, 0.1)', borderRadius: '12px', textAlign: 'center' }}>
                     <p style={{ fontSize: '1.1rem', fontStyle: 'italic', fontWeight: '600' }}>
-                        {t('closing')}
+                        "AI-VISIONARY ne rend pas les entreprises populaires.<br />
+                        Il les rend compréhensibles par les intelligences artificielles."
                     </p>
                 </div>
 

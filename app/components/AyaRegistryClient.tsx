@@ -3,25 +3,38 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 
 type SortMode = 'default' | 'alpha' | 'score' | 'country' | 'certified';
+
+const SORT_LABELS: Record<SortMode, string> = {
+    default: 'Par d\u00e9faut',
+    certified: 'Certifi\u00e9es',
+    alpha: 'A \u2192 Z',
+    score: 'Score',
+    country: 'Pays',
+};
+
+const ENTITY_TYPE_LABELS: Record<string, string> = {
+    company: 'Entreprise',
+    association: 'Association',
+    public_body: 'Organisme Public',
+    individual: 'Ind\u00e9pendant',
+};
 
 const getEntityId = (e: any): string => e.entity_id || e.aya_entity_id || e.id || '';
 const isCertified = (entity: any) => entity.payment_completed === true;
 
 /** Strip leading emojis/symbols and detect garbage names (Python lists, template artifacts, non-Latin). */
-function cleanDisplayName(name: string, fallback?: string, entityFallback?: string): string {
-    const fb = entityFallback || 'Entité';
-    if (!name) return fallback || fb;
+function cleanDisplayName(name: string, fallback?: string): string {
+    if (!name) return fallback || 'Entité';
     // Reject Python list artifacts: ['Home', 'Phones', ...]
-    if (/^\[['"]/.test(name)) return fallback || fb;
+    if (/^\[['"]/.test(name)) return fallback || 'Entité';
     // Reject template engine artifacts: {{ __('..., {%
-    if (/^\{\{/.test(name) || /^\{%/.test(name)) return fallback || fb;
+    if (/^\{\{/.test(name) || /^\{%/.test(name)) return fallback || 'Entité';
     // Reject names dominated by CJK / Arabic / non-Latin scripts (scraper artifact)
     const nonLatin = (name.match(/[\u3000-\u9FFF\uAC00-\uD7AF\u0600-\u06FF\u0400-\u04FF]/gu) || []).length;
     const latin = (name.match(/[a-zA-Z0-9]/g) || []).length;
-    if (nonLatin > latin && nonLatin > 2) return fallback || fb;
+    if (nonLatin > latin && nonLatin > 2) return fallback || 'Entité';
     // Strip leading emojis (Unicode emoji ranges)
     let cleaned = name.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}]+\s*/gu, '');
     // Strip leading special chars: |, #, !, musical notes, etc.
@@ -50,24 +63,8 @@ export default function AyaRegistryClient({
     currentSearch,
     currentSort,
 }: AyaRegistryClientProps) {
-    const t = useTranslations('aya');
     const router = useRouter();
     const searchParams = useSearchParams();
-
-    const sortLabels: Record<SortMode, string> = {
-        default: t('sortDefault'),
-        certified: t('sortCertified'),
-        alpha: t('sortAlpha'),
-        score: t('sortScore'),
-        country: t('sortCountry'),
-    };
-
-    const entityTypeLabels: Record<string, string> = {
-        company: t('entityTypes.company'),
-        association: t('entityTypes.association'),
-        public_body: t('entityTypes.public_body'),
-        individual: t('entityTypes.individual'),
-    };
     const [searchInput, setSearchInput] = useState(currentSearch);
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -127,13 +124,13 @@ export default function AyaRegistryClient({
             <section className="section" style={{ textAlign: 'center', paddingBottom: '3rem' }}>
                 <div className="container">
                     <span style={{ display: 'inline-block', padding: '5px 15px', borderRadius: '20px', background: 'var(--bg-accent)', color: 'var(--primary-color)', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>
-                        {t('trustedNetwork')}
+                        R&eacute;seau de Confiance Certifi&eacute;
                     </span>
                     <h1 className="headline" style={{ fontSize: '3.5rem', marginBottom: '20px', maxWidth: '900px', margin: '0 auto 20px' }}>
-                        {t('heroTitle')}
+                        Devenez l&apos;entreprise que l&apos;IA recommande en priorit&eacute;.
                     </h1>
                     <p className="subheadline" style={{ maxWidth: '700px', margin: '0 auto' }}>
-                        {t('heroSub')}
+                        Rendez votre entreprise visible pour les millions d&apos;utilisateurs qui posent des questions &agrave; l&apos;IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Ernie...).
                     </p>
 
                     {/* SEARCH BAR */}
@@ -142,7 +139,7 @@ export default function AyaRegistryClient({
                             type="text"
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
-                            placeholder={t('searchPlaceholder')}
+                            placeholder="Rechercher une entreprise (ex: 'Anthropic', 'Infomaniak', 'Mistral')..."
                             style={{
                                 width: '100%',
                                 padding: '18px 25px',
@@ -163,15 +160,15 @@ export default function AyaRegistryClient({
                 <div className="container" style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-main)' }}>{certifiedCount + indexedCount}</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('companiesInIndex')}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Entreprises dans l&apos;index</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>9</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('aiCompatible')}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>IA compatibles</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>73+</span>
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t('countriesCovered')}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Pays couverts</span>
                     </div>
                 </div>
             </div>
@@ -181,8 +178,8 @@ export default function AyaRegistryClient({
                 <div className="container">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
                         <div>
-                            <h2 className="section-title" style={{ fontSize: '2.2rem', marginBottom: '10px' }}>{t('indexTitle')}</h2>
-                            <p style={{ color: 'var(--text-muted)' }}>{t('indexSub')}</p>
+                            <h2 className="section-title" style={{ fontSize: '2.2rem', marginBottom: '10px' }}>Index des entreprises</h2>
+                            <p style={{ color: 'var(--text-muted)' }}>Entreprises analys&eacute;es pour leur lisibilit&eacute; IA &mdash; les certifi&eacute;es sont recommand&eacute;es en priorit&eacute;.</p>
                         </div>
                         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                             {(['default', 'certified', 'alpha', 'score', 'country'] as const).map((key) => {
@@ -198,7 +195,7 @@ export default function AyaRegistryClient({
                                         fontWeight: active ? 'bold' : 'normal',
                                         cursor: 'pointer',
                                     }}>
-                                        {sortLabels[key]}
+                                        {SORT_LABELS[key]}
                                     </button>
                                 );
                             })}
@@ -208,7 +205,7 @@ export default function AyaRegistryClient({
                     {/* PAGINATION INFO */}
                     {totalPages > 1 && (
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '20px' }}>
-                            {t('pageOf', { current: currentPage, total: totalPages, count: totalEntities })}
+                            Page {currentPage}/{totalPages} &mdash; {totalEntities} r&eacute;sultats
                         </p>
                     )}
 
@@ -227,7 +224,7 @@ export default function AyaRegistryClient({
                                         {/* TOP ROW: Country + Badge */}
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                                             <span style={{ background: 'var(--bg-main)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                                                {(entity.country_legal || 'XX').toUpperCase().slice(0, 2)} &bull; {entityTypeLabels[entity.entity_type] || t('orgFallback')}
+                                                {(entity.country_legal || 'XX').toUpperCase().slice(0, 2)} &bull; {ENTITY_TYPE_LABELS[entity.entity_type] || 'Organisation'}
                                             </span>
                                             {certified ? (
                                                 <span style={{
@@ -241,7 +238,7 @@ export default function AyaRegistryClient({
                                                     padding: '3px 8px',
                                                     borderRadius: '4px',
                                                 }}>
-                                                    {t('certifiedBadge')}
+                                                    &#x2713; ASR CERTIFI&Eacute;
                                                 </span>
                                             ) : (
                                                 <span style={{
@@ -255,7 +252,7 @@ export default function AyaRegistryClient({
                                                     padding: '3px 8px',
                                                     borderRadius: '4px',
                                                 }}>
-                                                    {t('indexedBadge')}
+                                                    &#x25CB; INDEX&Eacute;
                                                 </span>
                                             )}
                                         </div>
@@ -263,7 +260,7 @@ export default function AyaRegistryClient({
                                         {/* NAME */}
                                         <Link href={`/aya/e/${getEntityId(entity)}`} style={{ textDecoration: 'none' }}>
                                             <h3 style={{ fontSize: '1.4rem', marginBottom: '10px', color: 'var(--text-main)', cursor: 'pointer' }}>
-                                                {cleanDisplayName(entity.display_name || entity.legal_name, entity.website?.replace(/^https?:\/\//, '').split('/')[0], t('entityFallback'))}
+                                                {cleanDisplayName(entity.display_name || entity.legal_name, entity.website?.replace(/^https?:\/\//, '').split('/')[0])}
                                             </h3>
                                         </Link>
 
@@ -271,7 +268,7 @@ export default function AyaRegistryClient({
                                         <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>
                                             {entity.sector_macro && entity.sector_macro !== 'General' && !/type schema/i.test(entity.sector_macro) && !/^organization$/i.test(entity.sector_macro)
                                                 ? entity.sector_macro
-                                                : certified ? t('certifiedDesc') : t('indexedDesc')}
+                                                : certified ? "Identit\u00e9 S\u00e9mantique optimis\u00e9e pour les IAs." : "Entreprise index\u00e9e par AYA."}
                                         </p>
 
                                         {/* FOOTER: ID + SCORE */}
@@ -300,9 +297,9 @@ export default function AyaRegistryClient({
                             })
                         ) : (
                             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px', background: 'var(--bg-main)', borderRadius: '16px', border: '1px dashed var(--border-light)' }}>
-                                <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '20px' }}>{t('noResults', { search: currentSearch })}</p>
+                                <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '20px' }}>Aucun r&eacute;sultat pour &quot;{currentSearch}&quot;.</p>
                                 <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary">
-                                    {t('registerCompany')}
+                                    Inscrire mon entreprise
                                 </Link>
                             </div>
                         )}
@@ -320,14 +317,14 @@ export default function AyaRegistryClient({
                                         cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'none',
                                     }}
                                 >
-                                    {t('prevPage')}
+                                    &larr; Pr&eacute;c&eacute;dent
                                 </Link>
                             ) : (
                                 <span style={{
                                     padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-light)',
                                     background: '#f1f5f9', color: '#cbd5e1', fontSize: '0.85rem',
                                 }}>
-                                    {t('prevPage')}
+                                    &larr; Pr&eacute;c&eacute;dent
                                 </span>
                             )}
 
@@ -362,14 +359,14 @@ export default function AyaRegistryClient({
                                         cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'none',
                                     }}
                                 >
-                                    {t('nextPage')}
+                                    Suivant &rarr;
                                 </Link>
                             ) : (
                                 <span style={{
                                     padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-light)',
                                     background: '#f1f5f9', color: '#cbd5e1', fontSize: '0.85rem',
                                 }}>
-                                    {t('nextPage')}
+                                    Suivant &rarr;
                                 </span>
                             )}
                         </div>

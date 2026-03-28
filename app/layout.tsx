@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
-import Footer from './components/Footer';
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -38,16 +35,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
-
   return (
-    <html lang={locale}>
+    <html lang="fr">
       <head>
         <link rel="icon" href="/icon-v2.png" sizes="any" />
         <link rel="apple-touch-icon" href="/icon-v2.png" />
@@ -76,10 +70,7 @@ export default async function RootLayout({
             })
           }}
         />
-        <NextIntlClientProvider messages={messages}>
-          {children}
-          <Footer />
-        </NextIntlClientProvider>
+        {children}
       </body>
     </html>
   );

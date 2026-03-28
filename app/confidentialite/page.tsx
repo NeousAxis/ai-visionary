@@ -1,15 +1,15 @@
 import Link from 'next/link';
-
+import Footer from '../components/Footer';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Privacy Policy | AI Visionary',
+    title: 'Politique de confidentialit\u00e9 | AI Visionary',
     description:
-        'Privacy Policy of AI Visionary. Data protection, user rights (Swiss nFADP + GDPR), sub-processors, cookies, data retention periods.',
+        'Politique de confidentialit\u00e9 d\'AI Visionary. Protection des donn\u00e9es, droits des utilisateurs (LPD suisse + RGPD), sous-traitants, cookies, dur\u00e9e de conservation.',
     openGraph: {
-        title: 'Privacy Policy | AI Visionary',
+        title: 'Politique de confidentialit\u00e9 | AI Visionary',
         description:
-            'Learn how AI Visionary protects your personal data. Compliant with Swiss nFADP and European GDPR.',
+            'D\u00e9couvrez comment AI Visionary prot\u00e8ge vos donn\u00e9es personnelles. Conforme \u00e0 la LPD suisse et au RGPD europ\u00e9en.',
         url: 'https://ai-visionary.com/confidentialite',
         siteName: 'AI Visionary',
         type: 'website',
@@ -28,339 +28,340 @@ export default function ConfidentialitePage() {
         <main>
             <nav className="container" style={{ padding: '2rem 1rem' }}>
                 <Link href="/" className="btn btn-secondary">
-                    &larr; Back to home
+                    &larr; Retour &agrave; l&apos;accueil
                 </Link>
             </nav>
 
             <section className="section">
                 <div className="container" style={{ maxWidth: '800px' }}>
-                    <h1 className="section-title">Privacy Policy</h1>
+                    <h1 className="section-title">Politique de Confidentialit&eacute;</h1>
                     <div className="card" style={{ lineHeight: '1.8' }}>
 
                         <p style={{ marginBottom: '20px', color: 'var(--text-muted)' }}>
-                            AI Visionary is committed to protecting the privacy of its users.
-                            This policy describes the personal data we collect,
-                            how we use it, and the rights you have.
+                            AI Visionary s&apos;engage &agrave; prot&eacute;ger la vie priv&eacute;e de ses utilisateurs.
+                            La pr&eacute;sente politique d&eacute;crit les donn&eacute;es personnelles que nous collectons,
+                            comment nous les utilisons et les droits dont vous disposez.
                         </p>
 
-                        {/* 1. Data Controller */}
-                        <h2 style={{ ...h2Style, marginTop: '10px' }}>1. Data Controller</h2>
+                        {/* 1. Responsable du traitement */}
+                        <h2 style={{ ...h2Style, marginTop: '10px' }}>1. Responsable du traitement</h2>
                         <p>
                             <strong>AI Visionary</strong><br />
-                            Founded and managed by Cyril Leger<br />
-                            Geneva, Switzerland<br />
-                            Email: <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a><br />
-                            Website: <a href="https://ai-visionary.com" style={{ color: 'var(--primary-color)' }}>ai-visionary.com</a>
+                            Fond&eacute;e et dirig&eacute;e par Cyril Leger<br />
+                            Gen&egrave;ve, Suisse<br />
+                            Email : <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a><br />
+                            Site : <a href="https://ai-visionary.com" style={{ color: 'var(--primary-color)' }}>ai-visionary.com</a>
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            AI Visionary acts as data controller within the meaning of the Swiss Federal Act
-                            on Data Protection (nFADP, entered into force on 1 September 2023) and,
-                            for users residing in the European Economic Area, within the meaning of the
-                            General Data Protection Regulation (GDPR &mdash; EU Regulation 2016/679).
+                            AI Visionary agit en qualit&eacute; de responsable du traitement au sens de la Loi f&eacute;d&eacute;rale
+                            suisse sur la protection des donn&eacute;es (nLPD, entr&eacute;e en vigueur le 1er septembre 2023) et,
+                            pour les utilisateurs r&eacute;sidant dans l&apos;Espace &eacute;conomique europ&eacute;en, au sens du
+                            R&egrave;glement g&eacute;n&eacute;ral sur la protection des donn&eacute;es (RGPD &mdash; R&egrave;glement UE 2016/679).
                         </p>
 
-                        {/* 2. Data Collected */}
-                        <h2 style={h2Style}>2. Personal Data Collected</h2>
-                        <p>In the course of providing our services, we collect the following categories of data:</p>
+                        {/* 2. Donn&eacute;es collect&eacute;es */}
+                        <h2 style={h2Style}>2. Donn&eacute;es personnelles collect&eacute;es</h2>
+                        <p>Dans le cadre de nos services, nous collectons les cat&eacute;gories de donn&eacute;es suivantes :</p>
 
-                        <h3 style={h3Style}>2.1 AYO Diagnostic (AI Chatbot)</h3>
+                        <h3 style={h3Style}>2.1 Diagnostic AYO (chatbot IA)</h3>
                         <ul style={ulStyle}>
-                            <li><strong>Analyzed website URL</strong>: the web address provided by the user for the diagnostic.</li>
-                            <li><strong>Questionnaire responses</strong>: declarative information about the business (services, certifications, target audience, indicators, etc.).</li>
-                            <li><strong>Data extracted from the website</strong>: publicly accessible content (title, meta description, JSON-LD, sitemap).</li>
-                            <li><strong>Calculated AIO score</strong>: result of the AI readability diagnostic (score from 0 to 100).</li>
+                            <li><strong>URL du site analys&eacute;</strong> : adresse web fournie par l&apos;utilisateur pour le diagnostic.</li>
+                            <li><strong>R&eacute;ponses au questionnaire</strong> : informations d&eacute;claratives sur l&apos;entreprise (services, certifications, public cible, indicateurs, etc.).</li>
+                            <li><strong>Donn&eacute;es extraites du site</strong> : contenu publiquement accessible (titre, m&eacute;ta-description, JSON-LD, sitemap).</li>
+                            <li><strong>Score AIO calcul&eacute;</strong> : r&eacute;sultat du diagnostic de lisibilit&eacute; IA (score de 0 &agrave; 100).</li>
                         </ul>
 
-                        <h3 style={h3Style}>2.2 Identification and Contact</h3>
+                        <h3 style={h3Style}>2.2 Identification et contact</h3>
                         <ul style={ulStyle}>
-                            <li><strong>Email address</strong>: used for sending results, authentication (OTP), and service-related communications.</li>
-                            <li><strong>Business name</strong>: as declared by the user or automatically detected on the analyzed website.</li>
+                            <li><strong>Adresse email</strong> : utilis&eacute;e pour l&apos;envoi des r&eacute;sultats, l&apos;authentification (OTP) et les communications li&eacute;es au service.</li>
+                            <li><strong>Nom de l&apos;entreprise</strong> : tel que d&eacute;clar&eacute; par l&apos;utilisateur ou d&eacute;tect&eacute; automatiquement sur le site analys&eacute;.</li>
                         </ul>
 
-                        <h3 style={h3Style}>2.3 Payment</h3>
+                        <h3 style={h3Style}>2.3 Paiement</h3>
                         <ul style={ulStyle}>
-                            <li><strong>Transaction information</strong>: processed exclusively by <strong>Stripe</strong> (PCI-DSS Level 1 certified). We store <strong>no payment card data</strong>.</li>
-                            <li>Only the Stripe customer ID, amount, currency, and transaction status are retained on our side.</li>
+                            <li><strong>Informations de transaction</strong> : trait&eacute;es exclusivement par <strong>Stripe</strong> (certifi&eacute; PCI-DSS niveau 1). Nous ne stockons <strong>aucune donn&eacute;e de carte bancaire</strong>.</li>
+                            <li>Seuls l&apos;identifiant client Stripe, le montant, la devise et le statut de la transaction sont conserv&eacute;s de notre c&ocirc;t&eacute;.</li>
                         </ul>
 
-                        <h3 style={h3Style}>2.4 AYA Registry</h3>
+                        <h3 style={h3Style}>2.4 Registre AYA</h3>
                         <ul style={ulStyle}>
-                            <li>Business name, sector, country, URL, AIO score, generated ASR files, keywords.</li>
-                            <li>This data is <strong>publicly accessible</strong> in the AYA registry, which is the very purpose of the service.</li>
+                            <li>Nom de l&apos;entreprise, secteur d&apos;activit&eacute;, pays, URL, score AIO, fichiers ASR g&eacute;n&eacute;r&eacute;s, mots-cl&eacute;s.</li>
+                            <li>Ces donn&eacute;es sont <strong>publiquement accessibles</strong> dans le registre AYA, ce qui constitue la finalit&eacute; m&ecirc;me du service.</li>
                         </ul>
 
-                        <h3 style={h3Style}>2.5 Technical Data</h3>
+                        <h3 style={h3Style}>2.5 Donn&eacute;es techniques</h3>
                         <ul style={ulStyle}>
-                            <li><strong>IP address</strong>: used temporarily for security purposes (rate limiting, abuse prevention). Not retained beyond the session.</li>
-                            <li><strong>Server logs</strong>: managed by Vercel, retained for a maximum of 30 days.</li>
+                            <li><strong>Adresse IP</strong> : utilis&eacute;e temporairement pour la s&eacute;curit&eacute; (rate limiting, pr&eacute;vention des abus). Non conserv&eacute;e au-del&agrave; de la session.</li>
+                            <li><strong>Logs serveur</strong> : g&eacute;r&eacute;s par Vercel, conserv&eacute;s 30 jours maximum.</li>
                         </ul>
 
-                        {/* 3. Legal Bases */}
-                        <h2 style={h2Style}>3. Legal Bases for Processing</h2>
-                        <p>We process your data on the following legal bases:</p>
+                        {/* 3. Bases l&eacute;gales */}
+                        <h2 style={h2Style}>3. Bases l&eacute;gales du traitement</h2>
+                        <p>Nous traitons vos donn&eacute;es sur les bases l&eacute;gales suivantes :</p>
                         <table style={tableStyle}>
                             <thead>
                                 <tr>
-                                    <th style={thStyle}>Purpose</th>
-                                    <th style={thStyle}>Legal Basis</th>
+                                    <th style={thStyle}>Finalit&eacute;</th>
+                                    <th style={thStyle}>Base l&eacute;gale</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td style={tdStyle}>Performing the AIO diagnostic</td>
-                                    <td style={tdStyle}>Performance of contract (Art. 6.1.b GDPR / Art. 31 nFADP)</td>
+                                    <td style={tdStyle}>R&eacute;alisation du diagnostic AIO</td>
+                                    <td style={tdStyle}>Ex&eacute;cution du contrat (art. 6.1.b RGPD / art. 31 nLPD)</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>Registration in the AYA Registry</td>
-                                    <td style={tdStyle}>Performance of contract</td>
+                                    <td style={tdStyle}>Inscription au Registre AYA</td>
+                                    <td style={tdStyle}>Ex&eacute;cution du contrat</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>Generation and delivery of ASR files</td>
-                                    <td style={tdStyle}>Performance of contract</td>
+                                    <td style={tdStyle}>G&eacute;n&eacute;ration et envoi des fichiers ASR</td>
+                                    <td style={tdStyle}>Ex&eacute;cution du contrat</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>Payment processing</td>
-                                    <td style={tdStyle}>Performance of contract / Legal obligation</td>
+                                    <td style={tdStyle}>Traitement du paiement</td>
+                                    <td style={tdStyle}>Ex&eacute;cution du contrat / Obligation l&eacute;gale</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>Service security (rate limiting, logs)</td>
-                                    <td style={tdStyle}>Legitimate interest (Art. 6.1.f GDPR)</td>
+                                    <td style={tdStyle}>S&eacute;curit&eacute; du service (rate limiting, logs)</td>
+                                    <td style={tdStyle}>Int&eacute;r&ecirc;t l&eacute;gitime (art. 6.1.f RGPD)</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>Service improvement</td>
-                                    <td style={tdStyle}>Legitimate interest</td>
+                                    <td style={tdStyle}>Am&eacute;lioration du service</td>
+                                    <td style={tdStyle}>Int&eacute;r&ecirc;t l&eacute;gitime</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>Automatic indexing in the AYA registry (AYA Bot)</td>
-                                    <td style={tdStyle}>Legitimate interest (publicly accessible data on the internet)</td>
+                                    <td style={tdStyle}>Indexation automatique dans le registre AYA (Bot AYA)</td>
+                                    <td style={tdStyle}>Int&eacute;r&ecirc;t l&eacute;gitime (donn&eacute;es publiquement accessibles sur internet)</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        {/* 4. Sub-processors */}
-                        <h2 style={h2Style}>4. Sub-Processors and Data Transfers</h2>
-                        <p>We engage the following sub-processors to provide our services:</p>
+                        {/* 4. Sous-traitants */}
+                        <h2 style={h2Style}>4. Sous-traitants et transferts de donn&eacute;es</h2>
+                        <p>Nous faisons appel aux sous-traitants suivants pour fournir nos services :</p>
                         <div style={{ overflowX: 'auto' }}>
                             <table style={tableStyle}>
                                 <thead>
                                     <tr>
-                                        <th style={thStyle}>Sub-Processor</th>
-                                        <th style={thStyle}>Purpose</th>
-                                        <th style={thStyle}>Location</th>
-                                        <th style={thStyle}>Safeguards</th>
+                                        <th style={thStyle}>Sous-traitant</th>
+                                        <th style={thStyle}>Finalit&eacute;</th>
+                                        <th style={thStyle}>Localisation</th>
+                                        <th style={thStyle}>Garanties</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td style={tdStyle}><strong>Supabase Inc.</strong></td>
-                                        <td style={tdStyle}>PostgreSQL database (analyses, AYA registry, sessions)</td>
-                                        <td style={tdStyle}>United States</td>
-                                        <td style={tdStyle}>DPA, SOC 2 Type II, encryption at rest and in transit</td>
+                                        <td style={tdStyle}>Base de donn&eacute;es PostgreSQL (analyses, registre AYA, sessions)</td>
+                                        <td style={tdStyle}>&Eacute;tats-Unis</td>
+                                        <td style={tdStyle}>DPA, SOC 2 Type II, chiffrement au repos et en transit</td>
                                     </tr>
                                     <tr>
                                         <td style={tdStyle}><strong>Stripe Inc.</strong></td>
-                                        <td style={tdStyle}>Payment card processing</td>
-                                        <td style={tdStyle}>United States / Ireland</td>
-                                        <td style={tdStyle}>PCI-DSS Level 1, Standard Contractual Clauses (SCCs)</td>
+                                        <td style={tdStyle}>Traitement des paiements par carte bancaire</td>
+                                        <td style={tdStyle}>&Eacute;tats-Unis / Irlande</td>
+                                        <td style={tdStyle}>PCI-DSS niveau 1, clauses contractuelles types (CCT)</td>
                                     </tr>
                                     <tr>
                                         <td style={tdStyle}><strong>Resend Inc.</strong></td>
-                                        <td style={tdStyle}>Transactional email sending (results, confirmations, OTP)</td>
-                                        <td style={tdStyle}>United States</td>
-                                        <td style={tdStyle}>DPA, TLS encryption</td>
+                                        <td style={tdStyle}>Envoi d&apos;emails transactionnels (r&eacute;sultats, confirmations, OTP)</td>
+                                        <td style={tdStyle}>&Eacute;tats-Unis</td>
+                                        <td style={tdStyle}>DPA, chiffrement TLS</td>
                                     </tr>
                                     <tr>
                                         <td style={tdStyle}><strong>Vercel Inc.</strong></td>
-                                        <td style={tdStyle}>Website hosting and serverless API functions</td>
-                                        <td style={tdStyle}>United States (global CDN)</td>
-                                        <td style={tdStyle}>DPA, SOC 2 Type II, HTTPS encryption</td>
+                                        <td style={tdStyle}>H&eacute;bergement du site web et des fonctions API serverless</td>
+                                        <td style={tdStyle}>&Eacute;tats-Unis (CDN mondial)</td>
+                                        <td style={tdStyle}>DPA, SOC 2 Type II, chiffrement HTTPS</td>
                                     </tr>
                                     <tr>
                                         <td style={tdStyle}><strong>Google LLC (Gemini)</strong></td>
-                                        <td style={tdStyle}>Semantic content generation (FAQ, glossary, enriched descriptions via AI)</td>
-                                        <td style={tdStyle}>United States</td>
-                                        <td style={tdStyle}>Google Cloud DPA, data anonymized before transmission</td>
+                                        <td style={tdStyle}>G&eacute;n&eacute;ration de contenu s&eacute;mantique (FAQ, glossaire, descriptions enrichies via IA)</td>
+                                        <td style={tdStyle}>&Eacute;tats-Unis</td>
+                                        <td style={tdStyle}>DPA Google Cloud, donn&eacute;es anonymis&eacute;es avant transmission</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <p style={{ marginTop: '15px' }}>
-                            Some sub-processors are located outside Switzerland and the European Economic Area (EEA).
-                            Data transfers are governed by Standard Contractual Clauses (SCCs) approved
-                            by the European Commission and/or adequacy decisions, in accordance with
-                            Articles 16–17 of the nFADP and Chapter V of the GDPR.
+                            Certains sous-traitants sont situ&eacute;s en dehors de la Suisse et de l&apos;Espace &eacute;conomique europ&eacute;en (EEE).
+                            Les transferts de donn&eacute;es sont encadr&eacute;s par des clauses contractuelles types (CCT) approuv&eacute;es
+                            par la Commission europ&eacute;enne et/ou des d&eacute;cisions d&apos;ad&eacute;quation, conform&eacute;ment
+                            aux articles 16-17 de la nLPD et au chapitre V du RGPD.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Your data is <strong>never sold to third parties</strong>. It is shared with
-                            sub-processors only to the extent strictly necessary to provide the service.
+                            Vos donn&eacute;es ne sont <strong>jamais revendues &agrave; des tiers</strong>. Elles ne sont transmises
+                            aux sous-traitants que dans la mesure strictement n&eacute;cessaire &agrave; la fourniture du service.
                         </p>
 
                         {/* 5. Cookies */}
-                        <h2 style={h2Style}>5. Cookies and Tracking Technologies</h2>
-                        <p>AI Visionary takes a <strong>minimalist</strong> approach to cookies:</p>
+                        <h2 style={h2Style}>5. Cookies et technologies de suivi</h2>
+                        <p>AI Visionary adopte une approche <strong>minimaliste</strong> en mati&egrave;re de cookies :</p>
                         <ul style={ulStyle}>
-                            <li><strong>Strictly necessary cookies</strong>: technical cookies set by Vercel
-                                for application operation (routing, session). These do not require consent
-                                in accordance with Art. 45c para. 2 TCA and Art. 5(3) of the ePrivacy Directive.</li>
-                            <li><strong>Payment cookies</strong>: Stripe may set technical cookies during the
-                                payment process for fraud prevention.</li>
+                            <li><strong>Cookies strictement n&eacute;cessaires</strong> : cookies techniques d&eacute;pos&eacute;s par Vercel
+                                pour le fonctionnement de l&apos;application (routage, session). Ils ne n&eacute;cessitent pas de consentement
+                                conform&eacute;ment &agrave; l&apos;art. 45c al. 2 LTC et &agrave; l&apos;art. 5(3) de la directive ePrivacy.</li>
+                            <li><strong>Cookies de paiement</strong> : Stripe peut d&eacute;poser des cookies techniques lors du processus
+                                de paiement pour la pr&eacute;vention de la fraude.</li>
                         </ul>
                         <p style={{ marginTop: '10px' }}>
-                            We use <strong>no tracking, advertising, or analytics cookies</strong>.
-                            No Google Analytics, Facebook Pixel, or third-party trackers are present on this site.
+                            Nous n&apos;utilisons <strong>aucun cookie de tra&ccedil;age, publicitaire ou analytique</strong>.
+                            Aucun Google Analytics, Facebook Pixel, ni traceur tiers n&apos;est pr&eacute;sent sur ce site.
                         </p>
 
-                        {/* 6. Retention */}
-                        <h2 style={h2Style}>6. Data Retention Periods</h2>
+                        {/* 6. Dur&eacute;e de conservation */}
+                        <h2 style={h2Style}>6. Dur&eacute;e de conservation des donn&eacute;es</h2>
                         <table style={tableStyle}>
                             <thead>
                                 <tr>
-                                    <th style={thStyle}>Data Type</th>
-                                    <th style={thStyle}>Retention Period</th>
+                                    <th style={thStyle}>Type de donn&eacute;es</th>
+                                    <th style={thStyle}>Dur&eacute;e de conservation</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td style={tdStyle}>AYO analyses and diagnostics</td>
-                                    <td style={tdStyle}>2 years after last interaction</td>
+                                    <td style={tdStyle}>Analyses et diagnostics AYO</td>
+                                    <td style={tdStyle}>2 ans apr&egrave;s la derni&egrave;re interaction</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>AYA Registry (Platform Pack &mdash; subscription)</td>
-                                    <td style={tdStyle}>Duration of active subscription + 30 days after cancellation</td>
+                                    <td style={tdStyle}>Registre AYA (Pack Plateforme &mdash; abonnement)</td>
+                                    <td style={tdStyle}>Dur&eacute;e de l&apos;abonnement actif + 30 jours apr&egrave;s r&eacute;siliation</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>AYA Registry (PRO Pack)</td>
-                                    <td style={tdStyle}>3 years + 30 days after expiration</td>
+                                    <td style={tdStyle}>Registre AYA (Pack PRO)</td>
+                                    <td style={tdStyle}>3 ans + 30 jours apr&egrave;s expiration</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>AYA Registry (bot-indexed entities)</td>
-                                    <td style={tdStyle}>Indefinite (public data). Deletion upon request within 72 hours.</td>
+                                    <td style={tdStyle}>Registre AYA (entit&eacute;s index&eacute;es par le bot)</td>
+                                    <td style={tdStyle}>Ind&eacute;finie (donn&eacute;es publiques). Suppression sur demande sous 72h.</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>System and security logs</td>
-                                    <td style={tdStyle}>90 days</td>
+                                    <td style={tdStyle}>Logs syst&egrave;me et s&eacute;curit&eacute;</td>
+                                    <td style={tdStyle}>90 jours</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>OTP codes (authentication)</td>
-                                    <td style={tdStyle}>10 minutes (automatic expiration)</td>
+                                    <td style={tdStyle}>Codes OTP (authentification)</td>
+                                    <td style={tdStyle}>10 minutes (expiration automatique)</td>
                                 </tr>
                                 <tr>
-                                    <td style={tdStyle}>Billing data</td>
-                                    <td style={tdStyle}>10 years (Swiss statutory accounting obligations)</td>
+                                    <td style={tdStyle}>Donn&eacute;es de facturation</td>
+                                    <td style={tdStyle}>10 ans (obligations l&eacute;gales comptables suisses)</td>
                                 </tr>
                             </tbody>
                         </table>
                         <p style={{ marginTop: '10px' }}>
-                            Upon expiration of these periods, data is deleted or irreversibly anonymized.
+                            &Agrave; l&apos;expiration de ces d&eacute;lais, les donn&eacute;es sont supprim&eacute;es ou anonymis&eacute;es de mani&egrave;re irr&eacute;versible.
                         </p>
 
-                        {/* 7. Security */}
-                        <h2 style={h2Style}>7. Data Security</h2>
-                        <p>We implement the following technical and organizational measures:</p>
+                        {/* 7. S&eacute;curit&eacute; */}
+                        <h2 style={h2Style}>7. S&eacute;curit&eacute; des donn&eacute;es</h2>
+                        <p>Nous mettons en oeuvre les mesures techniques et organisationnelles suivantes :</p>
                         <ul style={ulStyle}>
-                            <li>HTTPS encryption (TLS 1.3) for all communications.</li>
-                            <li>Encryption at rest for database data (Supabase / PostgreSQL).</li>
-                            <li>Ed25519 cryptographic signing of ASR files to guarantee their authenticity and integrity.</li>
-                            <li>One-time code (OTP) authentication sent by email.</li>
-                            <li>Protection against SSRF attacks, injections, and brute force (rate limiting).</li>
-                            <li>Data access limited to the strict minimum (principle of least privilege).</li>
-                            <li>No password storage (passwordless authentication via OTP).</li>
+                            <li>Chiffrement HTTPS (TLS 1.3) pour toutes les communications.</li>
+                            <li>Chiffrement au repos des donn&eacute;es en base de donn&eacute;es (Supabase / PostgreSQL).</li>
+                            <li>Signature cryptographique Ed25519 des fichiers ASR pour garantir leur authenticit&eacute; et leur int&eacute;grit&eacute;.</li>
+                            <li>Authentification par code &agrave; usage unique (OTP) envoy&eacute; par email.</li>
+                            <li>Protection contre les attaques SSRF, les injections et la force brute (rate limiting).</li>
+                            <li>Acc&egrave;s aux donn&eacute;es limit&eacute; au strict n&eacute;cessaire (principe du moindre privil&egrave;ge).</li>
+                            <li>Aucun stockage de mots de passe (authentification sans mot de passe par OTP).</li>
                         </ul>
 
-                        {/* 8. Your Rights */}
-                        <h2 style={h2Style}>8. Your Rights</h2>
+                        {/* 8. Vos droits */}
+                        <h2 style={h2Style}>8. Vos droits</h2>
                         <p>
-                            Under the Swiss nFADP and the GDPR (for EEA residents),
-                            you have the following rights:
+                            Conform&eacute;ment &agrave; la nLPD suisse et au RGPD (pour les r&eacute;sidents de l&apos;EEE),
+                            vous disposez des droits suivants :
                         </p>
                         <ul style={ulStyle}>
-                            <li><strong>Right of access</strong> (Art. 25 nFADP / Art. 15 GDPR): obtain a copy of your personal data and information about its processing.</li>
-                            <li><strong>Right to rectification</strong> (Art. 32 nFADP / Art. 16 GDPR): have inaccurate or incomplete data corrected.</li>
-                            <li><strong>Right to erasure</strong> (Art. 17 GDPR): request deletion of your data when it is no longer necessary for processing.</li>
-                            <li><strong>Right to data portability</strong> (Art. 28 nFADP / Art. 20 GDPR): receive your data in a structured, machine-readable format (JSON).</li>
-                            <li><strong>Right to object</strong> (Art. 21 GDPR): object to processing based on legitimate interest.</li>
-                            <li><strong>Right to restriction of processing</strong> (Art. 18 GDPR): request restriction of processing in certain circumstances.</li>
-                            <li><strong>Right to withdraw consent</strong>: withdraw your consent at any time, without affecting the lawfulness of prior processing.</li>
+                            <li><strong>Droit d&apos;acc&egrave;s</strong> (art. 25 nLPD / art. 15 RGPD) : obtenir une copie de vos donn&eacute;es personnelles et des informations sur leur traitement.</li>
+                            <li><strong>Droit de rectification</strong> (art. 32 nLPD / art. 16 RGPD) : faire corriger des donn&eacute;es inexactes ou incompl&egrave;tes.</li>
+                            <li><strong>Droit &agrave; l&apos;effacement</strong> (art. 17 RGPD) : demander la suppression de vos donn&eacute;es lorsqu&apos;elles ne sont plus n&eacute;cessaires au traitement.</li>
+                            <li><strong>Droit &agrave; la portabilit&eacute;</strong> (art. 28 nLPD / art. 20 RGPD) : recevoir vos donn&eacute;es dans un format structur&eacute; et lisible par machine (JSON).</li>
+                            <li><strong>Droit d&apos;opposition</strong> (art. 21 RGPD) : vous opposer au traitement fond&eacute; sur l&apos;int&eacute;r&ecirc;t l&eacute;gitime.</li>
+                            <li><strong>Droit &agrave; la limitation du traitement</strong> (art. 18 RGPD) : demander la restriction du traitement dans certaines circonstances.</li>
+                            <li><strong>Droit au retrait du consentement</strong> : retirer votre consentement &agrave; tout moment, sans affecter la lic&eacute;it&eacute; du traitement ant&eacute;rieur.</li>
                         </ul>
 
-                        <h3 style={h3Style}>How to Exercise Your Rights</h3>
+                        <h3 style={h3Style}>Comment exercer vos droits</h3>
                         <p>
-                            Send your request by email to <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a> specifying
-                            your identity and the nature of your request. We will respond within
-                            <strong> 30 days</strong> (extendable to 60 days for complex requests, with prior notification).
+                            Adressez votre demande par email &agrave; <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a> en
+                            pr&eacute;cisant votre identit&eacute; et la nature de votre demande. Nous r&eacute;pondrons dans un d&eacute;lai
+                            de <strong>30 jours</strong> (extensible &agrave; 60 jours en cas de demande complexe, avec notification pr&eacute;alable).
                         </p>
 
-                        <h3 style={h3Style}>Complaint to a Supervisory Authority</h3>
-                        <p>If you believe your rights are not being respected, you may lodge a complaint with:</p>
+                        <h3 style={h3Style}>R&eacute;clamation aupr&egrave;s d&apos;une autorit&eacute; de surveillance</h3>
+                        <p>Si vous estimez que vos droits ne sont pas respect&eacute;s, vous pouvez introduire une r&eacute;clamation aupr&egrave;s de :</p>
                         <ul style={ulStyle}>
-                            <li><strong>Switzerland</strong>: Federal Data Protection and Information Commissioner (FDPIC) &mdash; <a href="https://www.edoeb.admin.ch" style={{ color: 'var(--primary-color)' }} target="_blank" rel="noopener noreferrer">edoeb.admin.ch</a></li>
-                            <li><strong>European Union / EEA</strong>: the competent supervisory authority in your country of residence.</li>
+                            <li><strong>Suisse</strong> : Pr&eacute;pos&eacute; f&eacute;d&eacute;ral &agrave; la protection des donn&eacute;es et &agrave; la transparence (PFPDT) &mdash; <a href="https://www.edoeb.admin.ch" style={{ color: 'var(--primary-color)' }} target="_blank" rel="noopener noreferrer">edoeb.admin.ch</a></li>
+                            <li><strong>Union europ&eacute;enne / EEE</strong> : l&apos;autorit&eacute; de contr&ocirc;le comp&eacute;tente de votre pays de r&eacute;sidence.</li>
                         </ul>
 
-                        {/* 9. AYA Bot */}
-                        <h2 style={h2Style}>9. Automatic Indexing (AYA Bot)</h2>
+                        {/* 9. Bot AYA */}
+                        <h2 style={h2Style}>9. Indexation automatique (Bot AYA)</h2>
                         <p>
-                            The AYA registry may automatically index businesses from data
-                            <strong> publicly accessible</strong> on the internet (website content, JSON-LD data,
-                            sitemaps). This processing is based on our legitimate interest in
-                            building a reference registry for AI agents (Art. 6.1.f GDPR).
+                            Le registre AYA peut indexer automatiquement des entreprises &agrave; partir de donn&eacute;es
+                            <strong> publiquement accessibles</strong> sur internet (contenu de sites web, donn&eacute;es JSON-LD,
+                            sitemaps). Ce traitement est fond&eacute; sur notre int&eacute;r&ecirc;t l&eacute;gitime &agrave;
+                            constituer un registre de r&eacute;f&eacute;rence pour les agents IA (art. 6.1.f RGPD).
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            If your business is indexed in the AYA registry and you wish to have it removed,
-                            send an email to <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a> indicating
-                            the relevant URL. Deletion will be completed within <strong>72 hours</strong>.
+                            Si votre entreprise est index&eacute;e dans le registre AYA et que vous souhaitez la retirer,
+                            envoyez un email &agrave; <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a> en
+                            indiquant l&apos;URL concern&eacute;e. La suppression sera effectu&eacute;e sous <strong>72 heures</strong>.
                         </p>
 
-                        {/* 10. Minors */}
-                        <h2 style={h2Style}>10. Protection of Minors</h2>
+                        {/* 10. Mineurs */}
+                        <h2 style={h2Style}>10. Protection des mineurs</h2>
                         <p>
-                            Our services are intended exclusively for professionals and businesses. We do not
-                            knowingly collect data about persons under the age of 16. If you become aware that
-                            a minor has provided personal data, please contact us for immediate deletion.
+                            Nos services s&apos;adressent exclusivement aux professionnels et entreprises. Nous ne collectons
+                            pas sciemment de donn&eacute;es concernant des personnes de moins de 16 ans. Si vous constatez qu&apos;un
+                            mineur a fourni des donn&eacute;es personnelles, contactez-nous pour leur suppression imm&eacute;diate.
                         </p>
 
-                        {/* 11. Changes */}
-                        <h2 style={h2Style}>11. Changes to This Policy</h2>
+                        {/* 11. Modifications */}
+                        <h2 style={h2Style}>11. Modifications de cette politique</h2>
                         <p>
-                            We reserve the right to modify this privacy policy at any time.
-                            Changes take effect upon publication on this page.
-                            In the event of a material change, we will notify affected users by email.
+                            Nous nous r&eacute;servons le droit de modifier cette politique de confidentialit&eacute; &agrave; tout moment.
+                            Les modifications entrent en vigueur d&egrave;s leur publication sur cette page.
+                            En cas de modification substantielle, nous en informerons les utilisateurs concern&eacute;s par email.
                         </p>
 
-                        {/* 12. Applicable Law */}
-                        <h2 style={h2Style}>12. Applicable Law and Jurisdiction</h2>
+                        {/* 12. Droit applicable */}
+                        <h2 style={h2Style}>12. Droit applicable et for juridique</h2>
                         <p>
-                            This privacy policy is governed by <strong>Swiss law</strong>,
-                            in particular the Federal Act on Data Protection (nFADP).
+                            La pr&eacute;sente politique de confidentialit&eacute; est soumise au <strong>droit suisse</strong>,
+                            en particulier &agrave; la Loi f&eacute;d&eacute;rale sur la protection des donn&eacute;es (nLPD).
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            For users residing in the European Union or the European Economic Area,
-                            the provisions of the GDPR apply in addition.
+                            Pour les utilisateurs r&eacute;sidant dans l&apos;Union europ&eacute;enne ou l&apos;Espace &eacute;conomique
+                            europ&eacute;en, les dispositions du RGPD s&apos;appliquent en compl&eacute;ment.
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            Any dispute relating to data protection shall be submitted to the competent courts
-                            of the <strong>Canton of Geneva, Switzerland</strong>, subject to mandatory jurisdictional
-                            rules applicable to consumers residing in the EU/EEA.
+                            Tout litige relatif &agrave; la protection des donn&eacute;es sera soumis aux tribunaux comp&eacute;tents
+                            du <strong>canton de Gen&egrave;ve, Suisse</strong>, sous r&eacute;serve des r&egrave;gles imp&eacute;ratives
+                            de comp&eacute;tence applicables aux consommateurs r&eacute;sidant dans l&apos;UE/EEE.
                         </p>
 
                         {/* 13. Contact */}
                         <h2 style={h2Style}>13. Contact</h2>
                         <p>
-                            For any questions regarding the protection of your personal data or to exercise your rights:
+                            Pour toute question relative &agrave; la protection de vos donn&eacute;es personnelles ou pour exercer vos droits :
                         </p>
                         <p style={{ marginTop: '10px' }}>
-                            <strong>AI Visionary &mdash; Data Protection</strong><br />
+                            <strong>AI Visionary &mdash; Protection des donn&eacute;es</strong><br />
                             Cyril Leger<br />
-                            Geneva, Switzerland<br />
-                            Email: <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a>
+                            Gen&egrave;ve, Suisse<br />
+                            Email : <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a>
                         </p>
 
                         <p style={{ marginTop: '30px', fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                            Last updated: March 25, 2026
+                            Derni&egrave;re mise &agrave; jour : 25 mars 2026
                         </p>
                     </div>
                 </div>
             </section>
+            <Footer />
         </main>
     );
 }

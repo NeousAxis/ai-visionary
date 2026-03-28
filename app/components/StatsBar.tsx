@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useTranslations } from 'next-intl';
 
 function useCountUp(target: number, duration = 1400) {
     const [value, setValue] = useState(0);
@@ -42,7 +41,6 @@ function formatNumber(n: number) {
 }
 
 export default function StatsBar() {
-    const t = useTranslations('stats');
     const [target, setTarget] = useState({ total: 4400, countries: 73 });
 
     useEffect(() => {
@@ -79,15 +77,15 @@ export default function StatsBar() {
         <>
             <div>
                 <div style={numStyle}>{formatNumber(totalAnimated)}</div>
-                <div style={labelStyle}>{t('companies')}</div>
+                <div style={labelStyle}>Entreprises index&eacute;es</div>
             </div>
             <div>
                 <div style={numStyle}>9</div>
-                <div style={labelStyle}>{t('aiCompatible')}</div>
+                <div style={labelStyle}>IA compatibles</div>
             </div>
             <div>
                 <div style={numStyle}>{countriesAnimated}+</div>
-                <div style={labelStyle}>{t('countries')}</div>
+                <div style={labelStyle}>Pays couverts</div>
             </div>
         </>
     );

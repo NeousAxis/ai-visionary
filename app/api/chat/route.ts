@@ -371,7 +371,7 @@ export async function POST(req: Request) {
             if (!client) {
                 // Fallback if URL lost: Asks user to re-identify or go to home
                 return new Response(JSON.stringify({
-                    text: `🔒 **Session Expired.**\n\nI cannot find your session URL. Please enter your URL to access your client space.`,
+                    text: `🔒 **Session Expirée.**\n\nJe ne retrouve pas votre URL de session. Veuillez entrer votre URL pour accéder à votre espace client.`,
                     buttons: []
                 }), { status: 200 });
             }
@@ -383,11 +383,11 @@ export async function POST(req: Request) {
                 // Do NOT return. Let it fall through to SCAN logic.
             } else {
                 return new Response(JSON.stringify({
-                    text: `🎉 **GREAT NEWS! YOU ARE ALREADY AN AYA CLIENT.**\n\nThe entity **${client.display_name || client.legal_name}** is registered and certified in the AYA Registry.\n\nWhat would you like to do?`,
+                    text: `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${client.display_name || client.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :`,
                     buttons: [
-                        { label: "Update my profile 🔄", action: `update_profile|${ec_url}` },
-                        { label: "View my certificate 📜", action: "view_certificate", url: client.aya_entity_id ? `https://www.ai-visionary.com/aya/e/${client.aya_entity_id}` : undefined },
-                        { label: "Manage my subscription ⚙️", action: "manage_subscription" }
+                        { label: "Mettre à jour ma fiche 🔄", action: `update_profile|${ec_url}` },
+                        { label: "Voir mon certificat 📜", action: "view_certificate", url: client.aya_entity_id ? `https://www.ai-visionary.com/aya/e/${client.aya_entity_id}` : undefined },
+                        { label: "Gérer mon abonnement ⚙️", action: "manage_subscription" }
                     ]
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
             }
@@ -435,14 +435,14 @@ export async function POST(req: Request) {
             } else {
                 console.warn(`⚠️ No email found for ${detectedUrl} in DB.`);
                 // If we really can't find it, we shouldn't even offer the button ideally, but let's keep flow.
-                maskedEmail = "unknown (contact support)";
+                maskedEmail = "inconnu (contactez le support)";
             }
 
             return new Response(JSON.stringify({
-                text: `🔒 **Security Required**\n\nTo access the confidential data for **${detectedUrl}**, I need to verify that you are the administrator.\n\nI can send a temporary code to the known email address (**${maskedEmail}**).`,
+                text: `🔒 **Sécurité Requise**\n\nPour accéder aux données confidentielles de **${detectedUrl}**, je dois vérifier que vous êtes bien l'administrateur.\n\nJe peux envoyer un code temporaire à l'email connu (**${maskedEmail}**).`,
                 buttons: [
-                    { label: "Send security code 📨", action: `send_otp|${detectedUrl}` },
-                    { label: "Cancel", action: `main_menu|${detectedUrl}` }
+                    { label: "Envoyer le code de sécurité 📨", action: `send_otp|${detectedUrl}` },
+                    { label: "Annuler", action: `main_menu|${detectedUrl}` }
                 ]
             }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
@@ -487,15 +487,15 @@ export async function POST(req: Request) {
                 const { error } = await resend.emails.send({
                     from: 'AI Visionary Security <security@ai-visionary.com>',
                     to: [targetEmail],
-                    subject: `🔒 Your security code: ${code}`,
+                    subject: `🔒 Votre code de sécurité : ${code}`,
                     html: `
                     <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                        <h2>AYO Security Code</h2>
-                        <p>Here is your verification code for <strong>${targetUrl}</strong>:</p>
+                        <h2>Code de Sécurité AYO</h2>
+                        <p>Voici votre code de vérification pour <strong>${targetUrl}</strong> :</p>
                         <div style="background-color: #f3f4f6; padding: 15px; font-size: 24px; letter-spacing: 5px; font-weight: bold; text-align: center; border-radius: 8px; margin: 20px 0;">
                             ${code}
                         </div>
-                        <p style="font-size: 12px; color: #666;">Valid for 10 minutes. Do not share it.</p>
+                        <p style="font-size: 12px; color: #666;">Valide 10 minutes. Ne le partagez pas.</p>
                     </div>
                     `
                 });
@@ -503,15 +503,15 @@ export async function POST(req: Request) {
                 if (error) console.error("Resend Error", error);
 
                 return new Response(JSON.stringify({
-                    text: `✅ **Code Sent!**\n\nPlease check your inbox at **${targetEmail.substring(0, 3)}***@...**\n\n👉 **Enter the 6-digit code below:**`,
+                    text: `✅ **Code Envoyé !**\n\nVeuillez consulter la boîte mail **${targetEmail.substring(0, 3)}***@...**\n\n👉 **Entrez le code à 6 chiffres ci-dessous :**`,
                     buttons: []
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
             } else {
                 console.error(`❌ OTP Error: No email found for ${targetUrl}`);
                 return new Response(JSON.stringify({
-                    text: `❌ **Error:** No administrator email found for this site.\n\nWe cannot verify your identity automatically.`,
-                    buttons: [{ label: "Contact Support 📧", url: "mailto:hello@ai-visionary.com?subject=OTP Authentication Issue" }]
+                    text: `❌ **Erreur :** Aucun email administrateur trouvé pour ce site.\n\nNous ne pouvons pas vérifier votre identité automatiquement.`,
+                    buttons: [{ label: "Contacter le Support 📧", url: "mailto:hello@ai-visionary.com?subject=Problème Authentification OTP" }]
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
             }
         }
@@ -557,19 +557,19 @@ export async function POST(req: Request) {
                     }
 
                     return new Response(JSON.stringify({
-                        text: `🔓 **Identity Confirmed.**\n\nYou now have temporary secure access to your management space.`,
+                        text: `🔓 **Identité Confirmée.**\n\nVous avez maintenant un accès sécurisé temporaire à votre espace de gestion.`,
                         buttons: [
-                            { label: "Access Client Portal 🔒", url: successUrl },
-                            { label: "Update my profile 🔄", action: `update_profile|${detectedUrl}` },
-                            { label: "Back to Menu", action: `main_menu|${detectedUrl}` }
+                            { label: "Accéder au Portail Client 🔒", url: successUrl },
+                            { label: "Mettre à jour ma fiche 🔄", action: `update_profile|${detectedUrl}` },
+                            { label: "Retour Menu", action: `main_menu|${detectedUrl}` }
                         ]
                     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
                 } else {
                     return new Response(JSON.stringify({
-                        text: `⛔ **Incorrect or Expired Code.**\n\nPlease try again or request a new code.`,
+                        text: `⛔ **Code Incorrect ou Expiré.**\n\nVeuillez réessayer ou demander un nouveau code.`,
                         buttons: [
-                            { label: "Resend a code 📨", action: `send_otp|${detectedUrl}` }
+                            { label: "Renvoyer un code 📨", action: `send_otp|${detectedUrl}` }
                         ]
                     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
                 }
@@ -580,9 +580,9 @@ export async function POST(req: Request) {
         // GUARD: Only trigger when NOT in active questionnaire to prevent hijacking mid-interview
         if (!hasScanInHistory && lowText.match(/(men[st]|mentir|fausse|fake|triche|vérité|honnête)/)) {
             return new Response(JSON.stringify({
-                text: `💡 **Excellent question.**\n\nTechnically, if you lie, AYO will generate your ASR file with the information provided (so your technical certification will be valid).\n\n⚠️ **BUT it is a dangerous strategy.**\nAIs (ChatGPT, Gemini) operate through **Cross-Reference of Evidence**:\n\n1. They read your **Declaration (ASR)**.\n2. They compare it to your **Observable Reality** (Website, Reviews, Databases).\n\nIf there is a contradiction (e.g. you declare "World Leader" but your site is empty), the AI will detect a **Critical Inconsistency**.\n\n🛑 **Result:** Instead of being recommended, you will be classified as an "Unreliable Source" (Probable Hallucination). AYO is meant to structure your truth, not fabricate it.`,
+                text: `💡 **Excellente question.**\n\nTechniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).\n\n⚠️ **MAIS c'est une stratégie dangereuse.**\nLes IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :\n\n1. Elles lisent votre **Déclaration (ASR)**.\n2. Elles la comparent à votre **Réalité Observable** (Site Web, Avis, Base de données).\n\nS'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.\n\n🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
                 buttons: [
-                    { label: "Understood, let's continue ✅", action: `main_menu|${detectedUrl}` }
+                    { label: "Bien compris, continuons ✅", action: `main_menu|${detectedUrl}` }
                 ]
             }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
@@ -590,8 +590,8 @@ export async function POST(req: Request) {
         // 🛡️ CRITICAL INTELLIGENT ROUTING: CERTIFICATE VIEW
         if (lowText.includes("view_certificate") || lowText.includes("voir mon certificat") || lowText.includes("mon certificat")) {
             return new Response(JSON.stringify({
-                text: `📜 **Your AIO Compliance Certificate**\n\nYour certificate is publicly accessible at the following address:\n👉 **[View my Official Certificate](https://ai-visionary.com/aya)**\n\nIt attests to your AI-compatible data structure.`,
-                buttons: [{ label: "Back", action: "back" }]
+                text: `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/aya)**\n\nIl atteste de votre structure de donnée compatible IA.`,
+                buttons: [{ label: "Retour", action: "back" }]
             }), { status: 200 });
         }
 
@@ -668,7 +668,7 @@ export async function POST(req: Request) {
             }
 
             if (!urlValidated) {
-                finalResponseText = `❌ **Site Not Found**\n\nUnable to access **${urlToScan}**.\n\n**Possible causes:**\n- The domain does not exist\n- The site is offline\n- The URL is incorrectly formatted\n\nPlease check the URL and try again.`;
+                finalResponseText = `❌ **Site Introuvable**\n\nImpossible d'accéder à **${urlToScan}**.\n\n**Causes possibles :**\n- Le domaine n'existe pas\n- Le site est hors ligne\n- L'URL est mal formatée\n\nVeuillez vérifier l'URL et réessayer.`;
                 return new Response(JSON.stringify({ text: finalResponseText }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' }
@@ -817,20 +817,20 @@ GÉNÈRE CE JSON MAINTENANT :
             ];
 
             const questionLabels = [
-                // Identity (7)
-                "Name", "Country", "Legal name", "Sector", "City", "Email", "Phone",
-                // Offer (5)
-                "Audience", "Services", "Products", "Pricing", "Use cases",
-                // Processes (4)
-                "Methodology", "Delivery mode", "Service area", "Quality",
-                // Compliance (4)
-                "Certifications", "Networks & federations", "Security", "Policies",
-                // Indicators (2)
-                "Indicators", "Last update date",
-                // Educational (3)
-                "FAQ", "Glossary", "Documentation",
-                // External context (2)
-                "Keywords", "Search intents"
+                // Identité (7)
+                "Nom", "Pays", "Nom légal", "Secteur", "Ville", "Email", "Téléphone",
+                // Offre (5)
+                "Audience", "Services", "Produits", "Tarifs", "Cas d'usage",
+                // Processus (4)
+                "Méthodologie", "Mode de livraison", "Zone d'intervention", "Qualité",
+                // Conformité (4)
+                "Certifications", "Réseaux & fédérations", "Sécurité", "Politiques",
+                // Indicateurs (2)
+                "Indicateurs", "Date mise à jour",
+                // Pédagogie (3)
+                "FAQ", "Glossaire", "Documentation",
+                // Contexte externe (2)
+                "Mots-clés", "Intentions de recherche"
             ];
 
             // Build scan_state object (SINGLE SOURCE OF TRUTH)
@@ -1033,21 +1033,21 @@ GÉNÈRE CE JSON MAINTENANT :
 
             const missingInfos = extractedAnswers.filter(a => a.confidence === 'low' || a.confidence === 'unknown');
 
-            let transparencySummary = `🛰️ SCAN COMPLETE\n\n`;
+            let transparencySummary = `🛰️ SCAN TERMINÉ\n\n`;
 
             if (detectedInfos.length > 0) {
-                transparencySummary += `✅ ${detectedInfos.length} ITEMS DETECTED:\n\n`;
+                transparencySummary += `✅ ${detectedInfos.length} INFORMATIONS DÉTECTÉES :\n\n`;
                 detectedInfos.forEach((info) => {
                     const label = questionLabels[info.question_id - 1] || `Info ${info.question_id}`;
                     let value = info.answer && info.answer !== 'null'
                         ? (info.answer.length > 50 ? info.answer.substring(0, 50) + '...' : info.answer)
-                        : 'Detected';
+                        : 'Détecté';
 
                     if (info.confidence === 'low') {
-                        value += ' (To validate)';
+                        value += ' (À valider)';
                     }
 
-                    transparencySummary += `• ${label}: ${value}\n`;
+                    transparencySummary += `• ${label} : ${value}\n`;
                 });
                 transparencySummary += `\n`;
             }
@@ -1060,14 +1060,14 @@ GÉNÈRE CE JSON MAINTENANT :
                 .map(([, v]: [string, any]) => v.label);
 
             if (weakBlocks.length > 0) {
-                transparencySummary += `⚠️ **BLOCKS TO IMPROVE**: ${weakBlocks.join(', ')}\n`;
+                transparencySummary += `⚠️ **BLOCS À AMÉLIORER** : ${weakBlocks.join(', ')}\n`;
             }
 
-            transparencySummary += `\n**What this means:**\n`;
-            transparencySummary += `Your business has information, but it is not structured in a way that is readable by AIs (ChatGPT, Gemini, Claude...). As a result, these AIs cannot clearly identify you or recommend you.\n\n`;
-            transparencySummary += `**What we will do:**\n`;
-            transparencySummary += `I will ask you several targeted questions. Your answers will allow me to create structured files (ASR) that will make your business **readable**, therefore **visible**, and consequently **recommendable** by AIs.\n\n`;
-            transparencySummary += `➡️ But first...`;
+            transparencySummary += `\n**Ce que cela signifie :**\n`;
+            transparencySummary += `Votre entreprise possède des informations, mais elles ne sont pas structurées de manière lisible par les IA (ChatGPT, Gemini, Claude...). Résultat : ces IA ne peuvent ni vous identifier clairement, ni vous recommander.\n\n`;
+            transparencySummary += `**Ce que nous allons faire :**\n`;
+            transparencySummary += `Je vais vous poser plusieurs questions ciblées. Vos réponses me permettront de créer des fichiers structurés (ASR) qui rendront votre entreprise **lisible**, donc **visible**, et en conséquence **recommandable** par les IA.\n\n`;
+            transparencySummary += `➡️ Mais avant tout...`;
 
             // 4. First question: Ownership validation
             // Include scan_state in the response for CONTINUE_QUESTIONING to use
@@ -1075,24 +1075,24 @@ GÉNÈRE CE JSON MAINTENANT :
                 console.log("🎯 All questions auto-answered! Triggering FINAL_ANALYSIS...");
                 finalResponseText = JSON.stringify({
                     type: "question_block",
-                    intro: transparencySummary + "\n\n✅ **All information has been collected!**",
+                    intro: transparencySummary + "\n\n✅ **Toutes les informations ont été collectées !**",
                     // scan_state persisted in Firestore (not sent to client)
                     questions: [{
                         id: "ownership_confirm",
-                        text: "Do you confirm that this site belongs to you or that you are authorized to analyze it?",
-                        options: ["Yes, it's my site", "No"],
+                        text: "Confirmez-vous que ce site vous appartient ou que vous êtes autorisé(e) à l'analyser ?",
+                        options: ["Oui, c'est mon site", "Non"],
                         allowCustom: false
                     }]
                 });
             } else {
                 finalResponseText = JSON.stringify({
                     type: "question_block",
-                    intro: transparencySummary + `\n\n⚠️ **Important**: AYO is meant to structure your truth, not fabricate it. AIs verify your declarations through cross-referencing. Any inconsistency would classify you as an "Unreliable Source".`,
+                    intro: transparencySummary + `\n\n⚠️ **Important** : AYO sert à structurer votre vérité, pas à la fabriquer. Les IA vérifient vos déclarations par recoupement. Toute incohérence vous classerait comme "Source Non Fiable".`,
                     // scan_state persisted in Firestore (not sent to client)
                     questions: [{
                         id: "ownership_confirm",
-                        text: "Do you confirm that this site belongs to you and that the data is accurate?",
-                        options: ["✅ Yes, it's my site", "No"],
+                        text: "Confirmez-vous que ce site vous appartient et que les données sont exactes ?",
+                        options: ["✅ Oui, c'est mon site", "Non"],
                         allowCustom: false
                     }]
                 });
@@ -1129,7 +1129,7 @@ GÉNÈRE CE JSON MAINTENANT :
 
                 // If user said NO
                 if (lastUserMsg.includes('non') || lastUserMsg === 'non') {
-                    finalResponseText = `❌ **Analysis interrupted**\n\nI cannot continue this analysis.\n\n**Compliance rule**: Only authorized representatives of the analyzed company can perform an AYO diagnostic.\n\nIf you think this is an error, please start a new analysis with the correct URL.`;
+                    finalResponseText = `❌ **Analyse interrompue**\n\nJe ne peux pas continuer cette analyse.\n\n**Règle de conformité** : Seules les personnes responsables ou autorisées de l'entreprise analysée peuvent réaliser un diagnostic AYO.\n\nSi vous pensez qu'il s'agit d'une erreur, veuillez relancer une nouvelle analyse avec la bonne URL.`;
 
                     // Return immediately, stop the flow
                     return new Response(JSON.stringify({ text: finalResponseText }), {
@@ -1144,20 +1144,20 @@ GÉNÈRE CE JSON MAINTENANT :
                 // NEW BLOCK: Educational Warning before proceeding
                 finalResponseText = JSON.stringify({
                     type: "question_block",
-                    intro: `💡 **Excellent decision.**
+                    intro: `💡 **Excellente décision.**
+                    
+Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).
 
-Technically, if you lie, AYO will generate your ASR file with the information provided (so your technical certification will be valid).
+⚠️ **MAIS c'est une stratégie dangereuse.** Les IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :
+1. Elles lisent votre Déclaration (ASR).
+2. Elles la comparent à votre Réalité Observable (Site Web, Avis).
+3. S'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.
 
-⚠️ **BUT it is a dangerous strategy.** AIs (ChatGPT, Gemini) operate through **Cross-Reference of Evidence**:
-1. They read your Declaration (ASR).
-2. They compare it to your Observable Reality (Website, Reviews).
-3. If there is a contradiction (e.g. you declare "World Leader" but your site is empty), the AI will detect a **Critical Inconsistency**.
-
-🛑 **Result:** Instead of being recommended, you will be classified as an "Unreliable Source" (Probable Hallucination). AYO is meant to structure your truth, not fabricate it.`,
+🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
                     questions: [{
                         id: "truth_confirmation",
-                        text: "Do you understand the importance of declaring accurate information?",
-                        options: ["✅ I understand, I continue the analysis", "❌ Cancel"],
+                        text: "Avez-vous bien compris l'importance de déclarer des informations exactes ?",
+                        options: ["✅ J'ai compris, je poursuis l'analyse", "❌ Annuler"],
                         allowCustom: false
                     }]
                 });
@@ -1177,8 +1177,8 @@ Technically, if you lie, AYO will generate your ASR file with the information pr
                 const userChoice = lastMessage.content.toLowerCase();
 
                 // If user wants to CANCEL
-                if (userChoice.includes("annuler") || userChoice.includes("cancel")) {
-                    finalResponseText = `❌ **Analysis cancelled.**\n\nYou can start a new analysis at any time by entering your website URL.`;
+                if (userChoice.includes("annuler")) {
+                    finalResponseText = `❌ **Analyse annulée.**\n\nVous pouvez relancer une analyse à tout moment en indiquant l'URL de votre site.`;
                     return new Response(JSON.stringify({ text: finalResponseText }), {
                         status: 200,
                         headers: { 'Content-Type': 'application/json' }
@@ -1494,11 +1494,11 @@ Technically, if you lie, AYO will generate your ASR file with the information pr
                     intro: "",
                     questions: [{
                         id: "activity_calibration",
-                        text: "Could you describe your business activity in a few sentences (500 characters max)?\nThis will help me better calibrate the following questions.",
+                        text: "Pourriez-vous décrire votre activité en quelques phrases (500 caractères max) ?\nCela m'aidera à mieux calibrer les questions suivantes.",
                         options: [],
                         allowCustom: true,
                         allowMultiple: false,
-                        customLabel: "Activity..."
+                        customLabel: "Activité..."
                     }]
                 });
             }
@@ -1598,12 +1598,12 @@ Technically, if you lie, AYO will generate your ASR file with the information pr
                             qTextLower.includes('processus') || qTextLower.includes('méthodologie') ||
                             qTextLower.includes('expliquez') || qTextLower.includes('précisez') ||
                             qIdLower.includes('process_steps') || qIdLower.includes('key_indicators');
-                        if (isDescriptionQuestion) q.customLabel = "Describe here...";
-                        else if (qTextLower.includes('email')) q.customLabel = "Enter your email...";
-                        else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Enter your phone number...";
-                        else if (qTextLower.includes('géographi')) q.customLabel = "Enter the geographic area...";
-                        else if (isUrlQuestion && !isDescriptionQuestion) q.customLabel = "Paste the URL here...";
-                        else q.customLabel = "Enter your answer...";
+                        if (isDescriptionQuestion) q.customLabel = "Décrivez ici...";
+                        else if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
+                        else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Saisissez votre numéro...";
+                        else if (qTextLower.includes('géographi')) q.customLabel = "Saisissez la zone géographique...";
+                        else if (isUrlQuestion && !isDescriptionQuestion) q.customLabel = "Collez l'URL ici...";
+                        else q.customLabel = "Saisissez votre réponse...";
                     }
                     console.warn("⚠️ VALIDATOR: champ texte → inputType text (pas de boutons)");
                 } else if (hasEvidenceOptions) {
@@ -2061,11 +2061,11 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                 if (!structuredAnalysis) {
                     console.warn("⚠️ Engine did not return audit blocks. Using fallback reconstruction.");
                     structuredAnalysis = {
-                        identite: { score: scoreResult.blocks.identite, max: 10, label: "Identity & Anchoring", status: "warning", observation: "Standard analysis." },
-                        offre: { score: scoreResult.blocks.offre, max: 20, label: "Offer Clarity", status: "warning", observation: "Standard analysis." },
-                        processus: { score: scoreResult.blocks.processus_methodes, max: 15, label: "Processes & Methods", status: "warning", observation: "Standard analysis." },
-                        confiance: { score: scoreResult.blocks.engagements_conformite, max: 15, label: "Trust & Compliance", status: "warning", observation: "Standard analysis." },
-                        technique: { score: scoreResult.blocks.structure_technique, max: 10, label: "Technical Foundation", status: "warning", observation: "Standard analysis." }
+                        identite: { score: scoreResult.blocks.identite, max: 10, label: "Identité & Ancrage", status: "warning", observation: "Analyse standard." },
+                        offre: { score: scoreResult.blocks.offre, max: 20, label: "Clarté de l'Offre", status: "warning", observation: "Analyse standard." },
+                        processus: { score: scoreResult.blocks.processus_methodes, max: 15, label: "Processus & Méthodes", status: "warning", observation: "Analyse standard." },
+                        confiance: { score: scoreResult.blocks.engagements_conformite, max: 15, label: "Confiance & Conformité", status: "warning", observation: "Analyse standard." },
+                        technique: { score: scoreResult.blocks.structure_technique, max: 10, label: "Socle Technique", status: "warning", observation: "Analyse standard." }
                     };
                 }
 
@@ -2248,28 +2248,28 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     estimatedGain: architecteRecommendations.estimatedScoreGain,
                 });
 
-                finalResponseText = `✅ AI Visibility Audit complete.
-Calculating score...
+                finalResponseText = `✅ Audit de Visibilité IA terminé.
+Calcul du score en cours...
 |||
-🔎 Identity & Anchoring: ${scoreResult.blocks.identite}/10
+🔎 Identité & Ancrage : ${scoreResult.blocks.identite}/10
 |||
-🔎 Offer Clarity: ${scoreResult.blocks.offre}/20
+🔎 Offre : ${scoreResult.blocks.offre}/20
 |||
-🔎 Processes & Methods: ${scoreResult.blocks.processus_methodes}/15
+🔎 Processus & Méthodes : ${scoreResult.blocks.processus_methodes}/15
 |||
-🔎 Trust & Compliance: ${scoreResult.blocks.engagements_conformite}/15
+🔎 Engagements & Conformité : ${scoreResult.blocks.engagements_conformite}/15
 |||
-🔎 Indicators: ${scoreResult.blocks.indicateurs}/20
+🔎 Indicateurs : ${scoreResult.blocks.indicateurs}/20
 |||
-🔎 Educational Content: ${scoreResult.blocks.contenus_pedagogiques}/10
+🔎 Contenus pédagogiques : ${scoreResult.blocks.contenus_pedagogiques}/10
 |||
-🔎 Technical Foundation: ${scoreResult.blocks.structure_technique}/10
+🔎 Structure technique : ${scoreResult.blocks.structure_technique}/10
 |||
-📊 FINAL AIO SCORE: ${scoreResult.total} / 100
-${scoreResult.capApplied ? `\n⚠️ **Cap applied**: ${scoreResult.capReason} (raw score: ${scoreResult.rawTotal}/100)` : ''}
+📊 SCORE FINAL AIO : ${scoreResult.total} / 100
+${scoreResult.capApplied ? `\n⚠️ **Plafond appliqué** : ${scoreResult.capReason} (score brut : ${scoreResult.rawTotal}/100)` : ''}
 
-🔒 DETAILED RESULTS LOCKED
-(Critical explanations and fixes have been generated but are hidden).
+🔒 RÉSULTAT DÉTAILLÉ VERROUILLÉ
+(Les explications critiques et les correctifs ont été générés mais sont masqués).
 |||
 ${architecteText}
 |||
@@ -2284,14 +2284,14 @@ ${(() => {
                         const safeSummary = (architecteRecommendations.summary || '')
                             .replace(/[{}[\]"]/g, '')
                             .replace(/\s*:\s*/g, ' - ');
-                        const packIntro = `NEXT STEP\n\n${safeSummary}\n\nChoose your certification level`;
+                        const packIntro = `PROCHAINE ETAPE\n\n${safeSummary}\n\nChoisissez votre niveau de certification`;
                         const packQuestion = {
                             type: "question_block",
                             intro: packIntro,
                             questions: [{
                                 id: "pack_intention",
-                                text: "Select your Pack to activate your recommendation",
-                                options: ["AYA Subscription - 19 CHF/month", "PRO Pack - 499 CHF (Ownership)"],
+                                text: "Selectionnez votre Pack pour activer votre recommandation",
+                                options: ["Abonnement AYA - 19 CHF/mois", "Pack PRO - 499 CHF (Propriete)"],
                                 allowCustom: false,
                                 allowMultiple: false
                             }]
@@ -2304,9 +2304,9 @@ ${(() => {
             } catch (err: unknown) {
                 const errMsg = err instanceof Error ? err.message : 'Unknown error';
                 logger.critical('FINAL_ANALYSIS_ERROR', errMsg, { stack: err instanceof Error ? err.stack : undefined });
-                finalResponseText = `⚠️ An error occurred while finalizing the analysis.
+                finalResponseText = `⚠️ Une erreur est survenue lors de la finalisation de l'analyse.
 
-Please try again or contact hello@ai-visionary.com.`;
+Veuillez réessayer ou contacter hello@ai-visionary.com.`;
             }
         } else if (!finalResponseText) {
             // 🎯 PACK SELECTION & SALES FUNNEL LOGIC
@@ -2322,16 +2322,16 @@ Please try again or contact hello@ai-visionary.com.`;
                 console.log("🎯 Selection: Abonnement AYA");
                 if (userContent.includes("valider") || userContent.includes("confirmer")) {
                     // Confirmation recue → demander l'email
-                    finalResponseText = `🔄 **Valid Choice: AYA SUBSCRIPTION (19 CHF/month).**\nYou are activating your priority presence in the AYA Registry.\n\n👉 **Enter your professional email to finalize the subscription:**\nEX: hello@your-domain.com`;
+                    finalResponseText = `🔄 **Choix Valide : ABONNEMENT AYA (19 CHF/mois).**\nVous activez votre presence prioritaire dans le Registre AYA.\n\n👉 **Entrez votre email professionnel pour finaliser l'abonnement :**\nEX : hello@votre-domaine.com`;
                 } else {
                     // Premiere selection → confirmation + explication + possibilite de changer
                     finalResponseText = JSON.stringify({
                         type: "question_block",
-                        intro: "AI-NATIVE VISIBILITY (SUBSCRIPTION)\n\nThe AYA Subscription is designed for businesses that want results without technical complexity.\n\nImmediate Benefits -\nActive AYA Registry, Hosted Data, Anti-Hallucination, Scalable.\n\nPrice - 19 CHF / month (No commitment)",
+                        intro: "VISIBILITE IA-NATIVE (ABONNEMENT)\n\nL'Abonnement AYA est concu pour les entreprises qui veulent des resultats sans complexite technique.\n\nBenefices Immediats -\nRegistre AYA Actif, Donnees Hebergees, Anti-Hallucination, Evolutif.\n\nTarif - 19 CHF / mois (Sans engagement)",
                         questions: [{
                             id: "confirm_subscription",
-                            text: "Your decision",
-                            options: ["Confirm SUBSCRIPTION (19 CHF/month)", "Switch to PRO PACK (499 CHF)"],
+                            text: "Votre decision",
+                            options: ["Valider l'ABONNEMENT (19 CHF/mois)", "Changer pour le PACK PRO (499 CHF)"],
                             allowCustom: false
                         }]
                     });
@@ -2341,7 +2341,7 @@ Please try again or contact hello@ai-visionary.com.`;
             else if (userContent.includes("pro") || userContent.includes("499") || userContent.includes("propriété")) {
                 console.log("🎯 Selection: Pack PRO");
                 if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("passer") || userContent.includes("upgrader")) {
-                    finalResponseText = `🚀 **Confirmed Choice: PRO PACK (Ownership).**\nFull ownership of your semantic assets. 3 years of Registry included.\n\n👉 **Enter your professional email to finalize the order (499 CHF):**`;
+                    finalResponseText = `🚀 **Choix Validé : PACK PRO (Propriété).**\nPropriété Totale de vos actifs sémantiques. 3 ans de Registre inclus.\n\n👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
                 } else {
                     // CHECK IF CLIENT IS EXISTING TO ADAPT BUTTON TEXT (Using detectedUrl)
                     let isExisting = false;
@@ -2357,23 +2357,23 @@ Please try again or contact hello@ai-visionary.com.`;
 
                     finalResponseText = JSON.stringify({
                         type: "question_block",
-                        intro: `**BECOME A REFERENCE (PRO PACK)**
+                        intro: `**DEVENIR UNE RÉFÉRENCE (PACK PRO)**
 
-You give your business the real opportunity to be visible and recommendable by AIs with full ownership of your assets.
+Vous offrez à votre entreprise la possibilité réelle d'être visible et recommandable par les IA avec une propriété totale de vos actifs.
 
-**Your 5 PRO files:**
-- 👑 **ASR-Protocol.json** → Advanced AI context & criteria (signed).
-- ⚙️ **manifest.json** → Strict recommendation policy.
-- 💬 **faq.json** → Contextual answers for LLMs.
-- 📖 **glossary.json** → Precise business vocabulary.
-- 🌐 **external_context.json** → Reviews and encapsulated signals.
-- 📄 **3 YEARS of AYA Registry included**.
+**Vos 5 fichiers PRO :**
+- 👑 **ASR-Protocol.json** → Contexte & critères IA avancés (signé).
+- ⚙️ **manifest.json** → Politique de recommandation stricte.
+- 💬 **faq.json** → Réponses contextuelles pour LLMs.
+- 📖 **glossary.json** → Vocabulaire métier précis.
+- 🌐 **external_context.json** → Avis et signaux encapsulés.
+- 📄 **3 ANS de Registre AYA inclus**.
 
-**Price: 499 CHF (One-time purchase)**`,
+**Tarif : 499 CHF (Achat unique)**`,
                         questions: [{
                             id: "confirm_pro",
-                            text: "Your final decision:",
-                            options: ["Confirm PRO PACK (499 CHF)", isExisting ? "Stay on my subscription" : "Get the SUBSCRIPTION (19 CHF)"],
+                            text: "Votre décision finale :",
+                            options: ["Valider le PACK PRO (499 CHF)", isExisting ? "Rester sur mon abonnement" : "Prendre l'ABONNEMENT (19 CHF)"],
                             allowCustom: false
                         }]
                     });
@@ -2455,35 +2455,35 @@ You give your business the real opportunity to be visible and recommendable by A
                     : `${STRIPE_LINKS.AYA_SUB}${stripeSuffix}`).replace(/\s/g, '');
 
                 if (selectedPlan === "PRO") {
-                    finalResponseText = `✅ **Email registered.**
+                    finalResponseText = `✅ **Email enregistré.**
 
-🚀 **Complete my PRO PACK - Ownership (499 CHF)**
+🚀 **Finaliser mon PACK PRO - Propriété (499 CHF)**
 
-**Your 5 PRO files:**
-👑 **ASR-Protocol.json** (signed)
+**Vos 5 fichiers PRO :**
+👑 **ASR-Protocol.json** (signé)
 ⚙️ **manifest.json**
 💬 **faq.json**
 📖 **glossary.json**
 🌐 **external_context.json**
-📜 + **3 Years of AYA Registry** included
+📜 + **3 Ans de Registre AYA** inclus
 
-👉 [Purchase my ASR files](${actionLink})
+👉 [Acheter mes fichiers ASR](${actionLink})
 
-*You will be redirected to our secure payment platform.*`;
+*Vous serez redirigé vers notre plateforme de paiement sécurisée.*`;
                 } else {
-                    finalResponseText = `✅ **Email registered.**
+                    finalResponseText = `✅ **Email enregistré.**
 
-🔄 **Complete my AYA SUBSCRIPTION (19 CHF/month)**
+🔄 **Finaliser mon ABONNEMENT AYA (19 CHF/mois)**
 
-**Your privileged access:**
-📡 **Active Presence** in the AYA Registry
-🛡 **Anti-Hallucination** (Verified data)
-⚡ **AI recommendation priority**
-🔄 **Unlimited updates**
+**Votre accès privilège :**
+📡 **Présence Active** dans le Registre AYA
+🛡 **Anti-Hallucination** (Données vérifiées)
+⚡ **Priorité de recommandation** IA
+🔄 **Mises à jour illimitées**
 
-👉 [Activate my Subscription now](${actionLink})
+👉 [Activer mon Abonnement maintenant](${actionLink})
 
-*You will be redirected to our secure payment platform.*`;
+*Vous serez redirigé vers notre plateforme de paiement sécurisée.*`;
                 }
             }
         }
@@ -2544,7 +2544,7 @@ You give your business the real opportunity to be visible and recommendable by A
             const chatResult = await generateText({
                 model: modelToUse,
                 temperature: 0.7, // More creative for chat
-                system: finalSystemPrompt + "\n\n⚠️ IMPORTANT: Stay focused on the AYO mission. If the user has not provided a URL, politely ask for it.",
+                system: finalSystemPrompt + "\n\n⚠️ IMPORTANT : Reste concentré sur la mission AYO. Si l'utilisateur n'a pas donné d'URL, demande-la poliment.",
                 messages: messages
             });
 
@@ -2560,7 +2560,7 @@ You give your business the real opportunity to be visible and recommendable by A
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error('CHAT_FATAL', message, { stack: error instanceof Error ? error.stack : undefined });
-        return new Response(JSON.stringify({ error: 'Internal server error.' }), {
+        return new Response(JSON.stringify({ error: 'Erreur interne du serveur.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
         });
