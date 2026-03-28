@@ -113,8 +113,9 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 | `app/api/webhooks/checkout-success/route.ts` | Webhook Stripe post-paiement → génère fichiers + email | ~477 | ✅ Score corrigé |
 | `app/api/create-checkout/route.ts` | Création session Stripe Checkout | 137 | OK |
 | `app/api/light-report/route.ts` | Envoi Pack Light gratuit | 234 | ⚠️ Scores reconstructs artificiellement |
-| `app/api/auth/send-otp/route.ts` | Envoi OTP par email | 82 | OK |
+| `app/api/auth/send-otp/route.ts` | Envoi OTP par email | 120 | ✅ Vérifie uniquement owner_email (plus de domain matching) |
 | `app/api/auth/verify-otp/route.ts` | Vérification OTP | 90 | ⚠️ Token basé sur ADMIN_SECRET |
+| `app/api/update-owner-email/route.ts` | Délégation accès propriétaire (change owner_email) | 55 | ✅ Créé session 9 |
 | `app/api/stripe/portal/route.ts` | Stripe Billing Portal | 89 | 🔴 SANS AUTHENTIFICATION |
 | `app/api/admin/logs/route.ts` | API admin logs Firestore | 66 | OK |
 | `app/api/admin/fix-sectors/route.ts` | Fix secteurs admin | — | OK |
@@ -144,7 +145,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 | `lib/validators.ts` | Schemas Zod (URL, email, OTP, SSRF) | — | ✅ Créé mais PAS encore appliqué |
 | `lib/sanitize.ts` | Sanitizer anti-injection LLM | — | ✅ OK |
 | `lib/aya/registry.ts` | Module registre AYA (registerOrUpdateEntity) | 125 | ✅ OK |
-| `lib/aya/schema.ts` | Interface AyaEntity (Firestore) | 43 | ✅ OK |
+| `lib/aya/schema.ts` | Interface AyaEntity (Supabase) | 45 | ✅ OK — owner_email + admin_nom/prenom/email_pro ajoutés |
 | `lib/asr-emit-mode.ts` | Blueprint pipeline ASR | 78 | 🔴 PSEUDO-CODE — pas implémenté |
 | `lib/asr-seal-spec.ts` | Interfaces TypeScript ASR | 45 | 🔴 TYPES SEULS |
 | `lib/asr-compliance-test.ts` | Blueprint test conformité ASR | 85 | 🔴 PSEUDO-CODE |
@@ -353,6 +354,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | Session 8 | ✅ **TERMINÉE** | 2026-03-25 | SEO metadata 8 pages + generateMetadata dynamique certificats + sitemap dynamique Supabase (3339+ URLs) + confidentialité LPD/RGPD 13 sections + mentions légales 10 sections + robots.ts mis à jour. |
 | **Bot AYA** | ✅ **LIVE** | 2026-03-24 | **~3300+ entités** dans Supabase (6766 domaines dans domains.txt). API compacte LLM-friendly. Keywords Gemini. OpenAPI spec + ai-plugin.json. Fix certificat (INDEXÉ au lieu d'EXPIRÉ, date epoch, keywords). README GitHub rewrite "AYA inside". Page /developers. **→ Voir section 16 pour le reste** |
 | **Signal LLM** | ✅ **TERMINÉ** | 2026-03-25 | 4 chantiers Signal LLM : endpoint `/api/aya/llm/{domain}`, texte brut certificats, export GitHub dataset, domination Web3/AI. Enrichissement Gemini 3339/3339 (EN+FR). Filtre garbage 120 termes. 57 noms mojibake fixés. 3 entités supprimées. Trigger Supabase droppé. GitHub dataset public (3306 fichiers). HuggingFace ré-exporté. Mots-clés Gemini 3338/3339 (fix_keywords.py). Pagination serveur /aya (20/page, URL-based). Cache CDN 4 routes API. BackButton certificats. `AyaRegistryClient.tsx` composant client. **→ Voir sections 18 + 18.9** |
+| **Session 9 — Sécurité propriétaire** | ✅ **TERMINÉE** | 2026-03-28 | Système `owner_email` : OTP n'accepte QUE l'email Stripe du payeur (plus de domain matching ni fallback contact_email). Section admin compte (Nom/Prénom/Email Pro avec validation domaine). Endpoint délégation `POST /api/update-owner-email`. Protection bot (`push_to_aya.py` skip `payment_completed=true`). Fix Éclore (description originale restaurée + contact_email corrigé). Exports GitHub (4435 JSON) + HuggingFace (4436 entités) re-générés. Branche `fix/otp-eclore-protection`. |
 
 > **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
 
@@ -791,17 +793,12 @@ Note : `ignoreBuildErrors: true` est activé dans `next.config.ts` — le build 
 - ✅ Les modules rate-limit et validators sont créés et prêts
 
 **Ce qui est cassé / problématique** :
-- 🔴 `verify-otp` utilise `ADMIN_SECRET` comme fallback pour signer les tokens → Il faut un `SESSION_SECRET` dédié
-- 🔴 Rate limiting et validation Zod ne sont appliqués **NULLE PART**
-- 🔴 Les endpoints debug ne sont PAS protégés
+- ✅ OTP vérifie uniquement `owner_email` (email Stripe payeur) — plus de domain matching ni fallback contact_email
+- ✅ Endpoint `/api/update-owner-email` pour délégation d'accès
+- ✅ `push_to_aya.py` ne touche jamais aux entités `payment_completed=true`
+- ✅ Guard dans `update-entity` : `owner_email` ne peut pas être modifié via le formulaire général
+- ⚠️ `verify-otp` contient du code mort Firestore (lignes 76-88) — inoffensif mais à nettoyer
 - 🔴 `Stripe Portal` n'a AUCUNE authentification
-
-**Reste à faire (Sprint 2-3)** :
-- Exiger `SESSION_SECRET` dédié
-- Appliquer rate limiting dans toutes les routes API
-- Appliquer validation Zod dans toutes les routes API
-- Protéger les endpoints debug avec `requireAdmin()`
-- Ajouter auth au Stripe Portal
 
 ---
 
@@ -1133,11 +1130,13 @@ SEO metadata toutes les pages + sitemap dynamique Supabase + confidentialité LP
 ### ORDRE DE PRIORITÉ (état 28 mars 2026)
 
 > **Tous les sprints sont terminés.** Le produit AYO est complet. La priorité est désormais la croissance.
+> **Session 9 (28 mars)** : Sécurité propriétaire (owner_email) + section admin + Éclore fix ✅
 
 1. **IMMÉDIAT** — Scraper 6766 domaines + enrichir via registres du commerce → objectif 10k entités
 2. **SEMAINE 1** — Campagne email entreprises indexées (template prêt)
-3. **CONTINU** — Re-exporter GitHub + HuggingFace après chaque batch
-4. **FUTUR** — Toggle EN/FR (i18n) + Soumission There's An AI For That (Cyril)
+3. **CONTINU** — Re-exporter GitHub + HuggingFace après chaque batch — ✅ Fait 28 mars (4435 GitHub, 4436 HuggingFace)
+4. **EN COURS** — Toggle EN/FR (i18n) — branche dédiée `feature/i18n-en-fr`
+5. **FUTUR** — Soumission There's An AI For That (Cyril)
 
 ---
 
