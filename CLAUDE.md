@@ -420,6 +420,10 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 - Dire "c'est fait" sans test E2E vérifié sur le site live
 - Pusher sur main sans accord explicite
 - Demander des preuves/URLs dans le questionnaire
+- **Travailler directement sur `main`** — TOUJOURS sur une branche feature/fix
+- **Déclarer "c'est corrigé" sans vérifier visuellement sur le site live**
+- **Modifier `buildPlainTextDescription` ou la page certificat sans tester 3 entités** : 1 certifiée FR, 1 bot anglophone, 1 bot francophone
+- **Utiliser `vercel --prod` sans vérifier avec `vercel alias set`** que `ai-visionary.com` pointe sur le bon déploiement
 
 ### Bugs corrigés récemment
 - ✅ Page `/aya` existe (mais manque pagination/filtres) → Session 7
@@ -995,6 +999,59 @@ L'entonnoir de conversion est :
 
 > **Date** : 25 mars 2026, 09h00
 > **Branche** : `main` (synchro avec `fix/remediation`)
+
+---
+
+## 20. SESSION I18N — ÉCHEC ET LEÇONS (28 mars 2026)
+
+> La session i18n du 28 mars a été abandonnée. La branche `fix/i18n-bilingual` est archivée.
+> La version FR-only (`main`, commit `f490cefb`) est restaurée en production.
+
+### Ce qui a été fait (et défait)
+- Toggle EN/FR avec `next-intl` et cookie `NEXT_LOCALE` — **code archivé sur `fix/i18n-bilingual`**
+- Architecture "Native + English" dans le webhook — **trop complexe, trop de bugs**
+- La branche `fix/i18n-bilingual` contient tout le code — **NE PAS MERGER dans main**
+
+### Sécurités que Claude N'A PAS PRISES et doit prendre la prochaine fois
+
+1. **Créer la branche AVANT de toucher le moindre fichier** : `git checkout -b feature/i18n-en-fr`
+2. **Vérifier `git branch` avant chaque commit** — Claude a commité directement sur `main` plusieurs fois
+3. **Tester sur 3 entités précises AVANT de déclarer "c'est fait"** :
+   - Association Éclore `eclore-asso.org` (certifiée PRO, données FR)
+   - `stripe.com` (bot-indexée anglophone)
+   - `credit-agricole.fr` (bot-indexée francophone)
+4. **Pour chaque changement dans `buildPlainTextDescription`** : vérifier les 3 entités EN et FR
+5. **Après `vercel --prod`** : toujours lancer `vercel alias set [url] ai-visionary.com`
+6. **Ne jamais déclarer "c'est corrigé" sans ouvrir le navigateur**
+
+### Plan correct pour le toggle EN/FR (prochaine session dédiée)
+
+**Avant de coder quoi que ce soit :**
+- Lancer `aya/enrich_keywords_fr.py` pour générer `gemini_keywords_fr` pour TOUTES les entités qui n'en ont pas encore — **prérequis obligatoire**
+
+**Implémentation (simple, sans nouvelle architecture)** :
+1. `next-intl` avec cookie `NEXT_LOCALE` (le code existe sur `fix/i18n-bilingual`, peut être réutilisé)
+2. `messages/fr.json` et `messages/en.json` : **labels UI uniquement** (pas les données entités)
+3. Toggle dans le header
+4. Logique d'affichage des descriptions :
+   - FR : `gemini_description_fr || gemini_description`
+   - EN : `gemini_description`
+   - **Aucune nouvelle architecture "Native + English"** — trop complexe
+5. Logique des keywords :
+   - FR : `gemini_keywords_fr || gemini_keywords`
+   - EN : `gemini_keywords`
+6. Pays : `COUNTRY_LABELS_FR[code]` en FR, `COUNTRY_LABELS[code]` en EN
+7. Tester les 3 entités ci-dessus avant tout commit
+8. Merger dans `main` seulement après validation de Cyril
+
+### Données manquantes à générer AVANT la prochaine session i18n
+
+| Champ | Couverture actuelle | Action requise |
+|-------|--------------------|--------------------|
+| `gemini_description` (EN) | ~100% ✅ | Rien |
+| `gemini_description_fr` (FR) | ~100% ✅ | Rien |
+| `gemini_keywords` (EN) | ~100% ✅ | Rien |
+| `gemini_keywords_fr` (FR) | **~0% pour entités certifiées avant mars 2026** ❌ | Lancer `aya/enrich_keywords_fr.py` |
 
 ---
 
