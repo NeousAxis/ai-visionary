@@ -90,11 +90,12 @@ export async function POST(req: Request) {
 
     const correlationId = generateCorrelationId();
     const logger = createLogger(correlationId, 'chat');
+    let locale: Locale = 'fr'; // default, overridden in try block
 
     try {
         const body = await req.json();
         const { messages } = body;
-        const locale: Locale = body.locale === 'en' ? 'en' : 'fr';
+        locale = body.locale === 'en' ? 'en' : 'fr';
         const lastMessage = messages[messages.length - 1];
         logger.info('CHAT_START', `New chat request, ${messages.length} messages, locale=${locale}`);
 
@@ -241,11 +242,11 @@ export async function POST(req: Request) {
             const isPedagogicalRequest = (content: string) => {
                 const lower = content.toLowerCase().trim();
                 // EXCLUSION: Refusals ARE answers (should increment step/index)
-                if (lower.match(/(débile|inutile|concerne pas|pas envie|sert a rien|non pertinent|stupide|pfff|n'importe quoi|ca me regarde pas)/)) return false;
+                if (lower.match(/(débile|inutile|concerne pas|pas envie|sert a rien|non pertinent|stupide|pfff|n'importe quoi|ca me regarde pas|useless|stupid|none of your business|don't care)/)) return false;
 
-                // DETECTION: Why/How/Explain
-                if (lower.match(/^(pourquoi|comment|expli|quel est l'interet|a quoi ca sert|c'est quoi|non je veux dire|attends)/)) return true;
-                if (lower.includes('?') && lower.length < 60 && !lower.includes('non') && !lower.includes('oui')) return true;
+                // DETECTION: Why/How/Explain (FR + EN)
+                if (lower.match(/^(pourquoi|comment|expli|quel est l'interet|a quoi ca sert|c'est quoi|non je veux dire|attends|why|how|explain|what is the point|what does|wait)/)) return true;
+                if (lower.includes('?') && lower.length < 60 && !lower.includes('non') && !lower.includes('oui') && !lower.includes('no') && !lower.includes('yes')) return true;
                 return false;
             };
 
@@ -331,7 +332,7 @@ export async function POST(req: Request) {
         }
 
         const lowText_sm = lastMessage.content.toLowerCase();
-        const isSalesIntent_sm = !!(lowText_sm.match(/(abonnement|pack pro|valider|upgrader|passer en)/));
+        const isSalesIntent_sm = !!(lowText_sm.match(/(abonnement|pack pro|valider|upgrader|passer en|subscription|upgrade|validate)/));
         const isUpdateProfile_sm = lowText_sm.includes("update_profile");
 
         // Build conversation signals for state machine
@@ -374,7 +375,9 @@ export async function POST(req: Request) {
             if (!client) {
                 // Fallback if URL lost: Asks user to re-identify or go to home
                 return new Response(JSON.stringify({
-                    text: `🔒 **Session Expirée.**\n\nJe ne retrouve pas votre URL de session. Veuillez entrer votre URL pour accéder à votre espace client.`,
+                    text: locale === 'en'
+                        ? `🔒 **Session Expired.**\n\nI cannot find your session URL. Please enter your URL to access your client area.`
+                        : `🔒 **Session Expirée.**\n\nJe ne retrouve pas votre URL de session. Veuillez entrer votre URL pour accéder à votre espace client.`,
                     buttons: []
                 }), { status: 200 });
             }
@@ -386,11 +389,13 @@ export async function POST(req: Request) {
                 // Do NOT return. Let it fall through to SCAN logic.
             } else {
                 return new Response(JSON.stringify({
-                    text: `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${client.display_name || client.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :`,
+                    text: locale === 'en'
+                        ? `🎉 **CONGRATULATIONS! YOU ARE ALREADY AN AYA CLIENT.**\n\nThe entity **${client.display_name || client.legal_name}** is registered and certified in the AYA Registry.\n\nWould you like to:`
+                        : `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${client.display_name || client.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :`,
                     buttons: [
-                        { label: "Mettre à jour ma fiche 🔄", action: `update_profile|${ec_url}` },
-                        { label: "Voir mon certificat 📜", action: "view_certificate", url: client.aya_entity_id ? `https://www.ai-visionary.com/aya/e/${client.aya_entity_id}` : undefined },
-                        { label: "Gérer mon abonnement ⚙️", action: "manage_subscription" }
+                        { label: locale === 'en' ? "Update my profile 🔄" : "Mettre à jour ma fiche 🔄", action: `update_profile|${ec_url}` },
+                        { label: locale === 'en' ? "View my certificate 📜" : "Voir mon certificat 📜", action: "view_certificate", url: client.aya_entity_id ? `https://www.ai-visionary.com/aya/e/${client.aya_entity_id}` : undefined },
+                        { label: locale === 'en' ? "Manage my subscription ⚙️" : "Gérer mon abonnement ⚙️", action: "manage_subscription" }
                     ]
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
             }
@@ -442,10 +447,12 @@ export async function POST(req: Request) {
             }
 
             return new Response(JSON.stringify({
-                text: `🔒 **Sécurité Requise**\n\nPour accéder aux données confidentielles de **${detectedUrl}**, je dois vérifier que vous êtes bien l'administrateur.\n\nJe peux envoyer un code temporaire à l'email connu (**${maskedEmail}**).`,
+                text: locale === 'en'
+                    ? `🔒 **Security Required**\n\nTo access confidential data for **${detectedUrl}**, I need to verify that you are the administrator.\n\nI can send a temporary code to the known email (**${maskedEmail}**).`
+                    : `🔒 **Sécurité Requise**\n\nPour accéder aux données confidentielles de **${detectedUrl}**, je dois vérifier que vous êtes bien l'administrateur.\n\nJe peux envoyer un code temporaire à l'email connu (**${maskedEmail}**).`,
                 buttons: [
-                    { label: "Envoyer le code de sécurité 📨", action: `send_otp|${detectedUrl}` },
-                    { label: "Annuler", action: `main_menu|${detectedUrl}` }
+                    { label: locale === 'en' ? "Send security code 📨" : "Envoyer le code de sécurité 📨", action: `send_otp|${detectedUrl}` },
+                    { label: locale === 'en' ? "Cancel" : "Annuler", action: `main_menu|${detectedUrl}` }
                 ]
             }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
@@ -490,8 +497,21 @@ export async function POST(req: Request) {
                 const { error } = await resend.emails.send({
                     from: 'AI Visionary Security <security@ai-visionary.com>',
                     to: [targetEmail],
-                    subject: `🔒 Votre code de sécurité : ${code}`,
-                    html: `
+                    subject: locale === 'en'
+                        ? `🔒 Your security code: ${code}`
+                        : `🔒 Votre code de sécurité : ${code}`,
+                    html: locale === 'en'
+                        ? `
+                    <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                        <h2>AYO Security Code</h2>
+                        <p>Here is your verification code for <strong>${targetUrl}</strong>:</p>
+                        <div style="background-color: #f3f4f6; padding: 15px; font-size: 24px; letter-spacing: 5px; font-weight: bold; text-align: center; border-radius: 8px; margin: 20px 0;">
+                            ${code}
+                        </div>
+                        <p style="font-size: 12px; color: #666;">Valid for 10 minutes. Do not share it.</p>
+                    </div>
+                    `
+                        : `
                     <div style="font-family: sans-serif; padding: 20px; color: #333;">
                         <h2>Code de Sécurité AYO</h2>
                         <p>Voici votre code de vérification pour <strong>${targetUrl}</strong> :</p>
@@ -506,15 +526,19 @@ export async function POST(req: Request) {
                 if (error) console.error("Resend Error", error);
 
                 return new Response(JSON.stringify({
-                    text: `✅ **Code Envoyé !**\n\nVeuillez consulter la boîte mail **${targetEmail.substring(0, 3)}***@...**\n\n👉 **Entrez le code à 6 chiffres ci-dessous :**`,
+                    text: locale === 'en'
+                        ? `✅ **Code Sent!**\n\nPlease check the mailbox **${targetEmail.substring(0, 3)}***@...**\n\n👉 **Enter the 6-digit code below:**`
+                        : `✅ **Code Envoyé !**\n\nVeuillez consulter la boîte mail **${targetEmail.substring(0, 3)}***@...**\n\n👉 **Entrez le code à 6 chiffres ci-dessous :**`,
                     buttons: []
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
             } else {
                 console.error(`❌ OTP Error: No email found for ${targetUrl}`);
                 return new Response(JSON.stringify({
-                    text: `❌ **Erreur :** Aucun email administrateur trouvé pour ce site.\n\nNous ne pouvons pas vérifier votre identité automatiquement.`,
-                    buttons: [{ label: "Contacter le Support 📧", url: "mailto:hello@ai-visionary.com?subject=Problème Authentification OTP" }]
+                    text: locale === 'en'
+                        ? `❌ **Error:** No administrator email found for this site.\n\nWe cannot verify your identity automatically.`
+                        : `❌ **Erreur :** Aucun email administrateur trouvé pour ce site.\n\nNous ne pouvons pas vérifier votre identité automatiquement.`,
+                    buttons: [{ label: locale === 'en' ? "Contact Support 📧" : "Contacter le Support 📧", url: "mailto:hello@ai-visionary.com?subject=Problème Authentification OTP" }]
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
             }
         }
@@ -560,19 +584,23 @@ export async function POST(req: Request) {
                     }
 
                     return new Response(JSON.stringify({
-                        text: `🔓 **Identité Confirmée.**\n\nVous avez maintenant un accès sécurisé temporaire à votre espace de gestion.`,
+                        text: locale === 'en'
+                            ? `🔓 **Identity Confirmed.**\n\nYou now have temporary secure access to your management area.`
+                            : `🔓 **Identité Confirmée.**\n\nVous avez maintenant un accès sécurisé temporaire à votre espace de gestion.`,
                         buttons: [
-                            { label: "Accéder au Portail Client 🔒", url: successUrl },
-                            { label: "Mettre à jour ma fiche 🔄", action: `update_profile|${detectedUrl}` },
-                            { label: "Retour Menu", action: `main_menu|${detectedUrl}` }
+                            { label: locale === 'en' ? "Access Client Portal 🔒" : "Accéder au Portail Client 🔒", url: successUrl },
+                            { label: locale === 'en' ? "Update my profile 🔄" : "Mettre à jour ma fiche 🔄", action: `update_profile|${detectedUrl}` },
+                            { label: locale === 'en' ? "Back to Menu" : "Retour Menu", action: `main_menu|${detectedUrl}` }
                         ]
                     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
                 } else {
                     return new Response(JSON.stringify({
-                        text: `⛔ **Code Incorrect ou Expiré.**\n\nVeuillez réessayer ou demander un nouveau code.`,
+                        text: locale === 'en'
+                            ? `⛔ **Incorrect or Expired Code.**\n\nPlease try again or request a new code.`
+                            : `⛔ **Code Incorrect ou Expiré.**\n\nVeuillez réessayer ou demander un nouveau code.`,
                         buttons: [
-                            { label: "Renvoyer un code 📨", action: `send_otp|${detectedUrl}` }
+                            { label: locale === 'en' ? "Resend a code 📨" : "Renvoyer un code 📨", action: `send_otp|${detectedUrl}` }
                         ]
                     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
                 }
@@ -581,20 +609,24 @@ export async function POST(req: Request) {
 
         // 🛡️ HANDLER: PEDAGOGICAL (TRUTH & CONSISTENCY)
         // GUARD: Only trigger when NOT in active questionnaire to prevent hijacking mid-interview
-        if (!hasScanInHistory && lowText.match(/(men[st]|mentir|fausse|fake|triche|vérité|honnête)/)) {
+        if (!hasScanInHistory && lowText.match(/(men[st]|mentir|fausse|fake|triche|vérité|honnête|lying|cheat|truth|honest)/)) {
             return new Response(JSON.stringify({
-                text: `💡 **Excellente question.**\n\nTechniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).\n\n⚠️ **MAIS c'est une stratégie dangereuse.**\nLes IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :\n\n1. Elles lisent votre **Déclaration (ASR)**.\n2. Elles la comparent à votre **Réalité Observable** (Site Web, Avis, Base de données).\n\nS'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.\n\n🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
+                text: locale === 'en'
+                    ? `💡 **Excellent question.**\n\nTechnically, if you lie, AYO will generate your ASR file with the provided information (so your technical certification will be valid).\n\n⚠️ **BUT this is a dangerous strategy.**\nAIs (ChatGPT, Gemini) work through **Evidence Cross-Referencing**:\n\n1. They read your **Declaration (ASR)**.\n2. They compare it to your **Observable Reality** (Website, Reviews, Databases).\n\nIf there is a contradiction (e.g.: you declare "World Leader" but your site is empty), the AI will detect a **Critical Inconsistency**.\n\n🛑 **Result:** Instead of being recommended, you will be classified as an "Unreliable Source" (Probable Hallucination). AYO is designed to structure your truth, not to fabricate it.`
+                    : `💡 **Excellente question.**\n\nTechniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informations fournies (donc votre certification technique sera valide).\n\n⚠️ **MAIS c'est une stratégie dangereuse.**\nLes IA (ChatGPT, Gemini) fonctionnent par **Recoupement de Preuves** :\n\n1. Elles lisent votre **Déclaration (ASR)**.\n2. Elles la comparent à votre **Réalité Observable** (Site Web, Avis, Base de données).\n\nS'il y a contradiction (ex: vous déclarez "Leader Mondial" mais votre site est vide), l'IA détectera une **Incohérence Critique**.\n\n🛑 **Résultat :** Au lieu d'être recommandé, vous serez classé comme "Source Non Fiable" (Hallucination Probable). AYO sert à structurer votre vérité, pas à la fabriquer.`,
                 buttons: [
-                    { label: "Bien compris, continuons ✅", action: `main_menu|${detectedUrl}` }
+                    { label: locale === 'en' ? "Understood, let's continue ✅" : "Bien compris, continuons ✅", action: `main_menu|${detectedUrl}` }
                 ]
             }), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
 
         // 🛡️ CRITICAL INTELLIGENT ROUTING: CERTIFICATE VIEW
-        if (lowText.includes("view_certificate") || lowText.includes("voir mon certificat") || lowText.includes("mon certificat")) {
+        if (lowText.includes("view_certificate") || lowText.includes("voir mon certificat") || lowText.includes("mon certificat") || lowText.includes("my certificate") || lowText.includes("view certificate")) {
             return new Response(JSON.stringify({
-                text: `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/aya)**\n\nIl atteste de votre structure de donnée compatible IA.`,
-                buttons: [{ label: "Retour", action: "back" }]
+                text: locale === 'en'
+                    ? `📜 **Your AIO Compliance Certificate**\n\nYour certificate is publicly accessible at the following address:\n👉 **[View my Official Certificate](https://ai-visionary.com/aya)**\n\nIt certifies your AI-compatible data structure.`
+                    : `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/aya)**\n\nIl atteste de votre structure de donnée compatible IA.`,
+                buttons: [{ label: locale === 'en' ? "Back" : "Retour", action: "back" }]
             }), { status: 200 });
         }
 
@@ -607,7 +639,9 @@ export async function POST(req: Request) {
         if ((isPostScore || isScoreShown) && (
             lowText.includes("abonnement") || lowText.includes("pack pro") ||
             lowText.includes("valider") || lowText.includes("je reste") ||
-            lowText.includes("passer en") || lowText.includes("upgrader"))) {
+            lowText.includes("passer en") || lowText.includes("upgrader") ||
+            lowText.includes("subscription") || lowText.includes("upgrade") ||
+            lowText.includes("validate") || lowText.includes("confirm"))) {
             ayoState = AyoState.PACK_SELECT;
         }
         if (lowText.includes("update_profile")) {
@@ -671,7 +705,9 @@ export async function POST(req: Request) {
             }
 
             if (!urlValidated) {
-                finalResponseText = `❌ **Site Introuvable**\n\nImpossible d'accéder à **${urlToScan}**.\n\n**Causes possibles :**\n- Le domaine n'existe pas\n- Le site est hors ligne\n- L'URL est mal formatée\n\nVeuillez vérifier l'URL et réessayer.`;
+                finalResponseText = locale === 'en'
+                    ? `❌ **Site Not Found**\n\nUnable to access **${urlToScan}**.\n\n**Possible causes:**\n- The domain does not exist\n- The site is offline\n- The URL is malformed\n\nPlease check the URL and try again.`
+                    : `❌ **Site Introuvable**\n\nImpossible d'accéder à **${urlToScan}**.\n\n**Causes possibles :**\n- Le domaine n'existe pas\n- Le site est hors ligne\n- L'URL est mal formatée\n\nVeuillez vérifier l'URL et réessayer.`;
                 return new Response(JSON.stringify({ text: finalResponseText }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' }
@@ -683,8 +719,87 @@ export async function POST(req: Request) {
             console.log(`📡 Deep scanning ${urlToScan}...`);
             const deepScanResult = await scanUrlForAioSignals(urlToScan);
 
-            // 2. ATTEMPT TO ANSWER the 16 critical questions via LLM extraction
-            const EXTRACTION_ATTEMPT_PROMPT = `
+            // 2. ATTEMPT TO ANSWER the 25 critical questions via LLM extraction
+            const EXTRACTION_ATTEMPT_PROMPT = locale === 'en' ? `
+You are AYO. You just scanned the site: ${urlToScan}
+
+SCAN DATA:
+- Title: "${sanitizeForPrompt(deepScanResult.metaTitle || 'Not detected', 200)}"
+- Description: "${sanitizeForPrompt(deepScanResult.metaDescription || 'Not detected', 500)}"
+- H1: ${sanitizeForPrompt(deepScanResult.h1?.join(', ') || 'None', 300)}
+- JSON-LD: ${deepScanResult.hasJsonLd ? 'YES' : 'NO'}
+- Extracted text: "${sanitizeForPrompt(deepScanResult.text || 'Empty', 15000)}"
+
+YOU ARE AN EXPERT IN WEB DATA EXTRACTION.
+
+CONFIDENCE STRATEGY (ANTI-BULLSHIT FILTER):
+
+1. **HIGH CONFIDENCE = TECHNICAL & LEGAL FACTS**
+   You trust 100% (confidence: "high") IF AND ONLY IF the information is FACTUAL, TECHNICAL or LEGAL, even in plain text.
+   - Examples: "Creative Commons License", "VAT ID...", "Price: $0", "Free", "Tel: +1...", "Address: New York".
+   - Examples: "LLC", "Inc.", "Copyright 2024".
+   - WHY: These are enforceable commitments, not marketing fluff.
+
+2. **LOW CONFIDENCE = MARKETING PROMISES & VAGUE CLAIMS**
+   You systematically doubt (confidence: "low") if the information is a SUBJECTIVE CLAIM, a PROMISE or a GENERIC SEO KEYWORD.
+   - Examples: "World leader", "Innovative solution", "Best service", "Unique expertise".
+   - Examples: A list of keywords without context ("AI, Blockchain, Crypto...").
+   - WHY: This is often SEO "noise" that needs human validation.
+
+3. **UNKNOWN (unknown)**: Information completely not found.
+
+CRITICAL TERMINOLOGY:
+ASR = "AI Singular Record" (NEVER "AYO Singular Record"). AYO is the AI assistant name, ASR is the file name.
+
+YOUR MISSION:
+Try to answer the 25 critical questions to build an ASR.
+
+THE 25 CRITICAL QUESTIONS:
+1. Exact name (Commercial identity)
+2. Country of establishment (Main location)
+3. Legal name (Registered name, company ID)
+4. Business type (Precise sector)
+5. City of headquarters
+6. Public contact email
+7. Contact phone
+8. Target audience (B2B, B2C, Government)
+9. List of services
+10. List of products (physical or digital)
+11. Pricing (REAL AMOUNTS with currency, e.g.: "19 CHF/month", "499 CHF one-shot", "from $50/h". ALWAYS include numbers, currency and frequency. NEVER respond only with categories like "Subscription" or "Fixed price".)
+12. Use cases (Why do people look for you? User intents)
+13. Methodology (Process, support steps)
+14. Delivery mode (Online, on-site, hybrid, workshops, training)
+15. Geographic area served
+16. Trust signals (Reviews, Guarantees, Quality)
+17. Certifications (Labels, Diplomas, Certs)
+18. Networks & federations (Trade associations, professional organizations)
+19. Security measures (Privacy, GDPR)
+20. Policies (Terms & conditions links or legal mentions)
+21. Success indicators (KPIs: Number of clients, tons CO2, revenue, measurable results)
+22. Last update date (Data freshness)
+23. Educational materials (White papers, FAQ, Platform, Documentation) — WARNING: do not confuse marketing EXAMPLES or illustrations (e.g.: "When a user asks 'Emergency plumber NYC'...") with real documentation. An example cited to illustrate a concept IS NOT documentation. Look for REAL guides, tutorials, white papers, "How to..." pages
+24. Search keywords (How your customers find you)
+25. Typical search intents (Queries your customers type on Google/AI)
+
+CRITICAL PRICING RULE (question 11):
+- Look for AMOUNTS in numbers in the extracted text (e.g.: "19 CHF", "499€", "$99/month").
+- ALWAYS include amount + currency + frequency.
+- NEVER return only categories without associated amounts.
+- Look for prices in ALL visible text on the page.
+- If amounts are visible on the page, confidence = "high".
+
+EXPECTED JSON FORMAT:
+{
+  "answers": [
+    {"question_id": 1, "answer": "Your answer or null", "confidence": "high|low|unknown"},
+    {"question_id": 2, "answer": "...", "confidence": "..."},
+    ...
+    {"question_id": 25, "answer": "...", "confidence": "..."}
+  ]
+}
+
+GENERATE THIS JSON NOW:
+` : `
 Tu es AYO. Tu viens de scanner le site : ${urlToScan}
 
 DONNÉES DU SCAN :
@@ -774,7 +889,7 @@ GÉNÈRE CE JSON MAINTENANT :
                         model: modelToUse,
                         temperature: 0.1,
                         system: EXTRACTION_ATTEMPT_PROMPT,
-                        messages: [{ role: 'user', content: `Extrait les réponses du scan de ${urlToScan}` }],
+                        messages: [{ role: 'user', content: locale === 'en' ? `Extract the answers from the scan of ${urlToScan}` : `Extrait les réponses du scan de ${urlToScan}` }],
                         abortSignal: AbortSignal.timeout(50000),
                     }),
                     new Promise<never>((_, reject) => setTimeout(() => reject(new Error('EXTRACTION_TIMEOUT')), 50000))
@@ -819,7 +934,22 @@ GÉNÈRE CE JSON MAINTENANT :
                 "external_context.keywords", "external_context.intents"
             ];
 
-            const questionLabels = [
+            const questionLabels = locale === 'en' ? [
+                // Identity (7)
+                "Name", "Country", "Legal name", "Sector", "City", "Email", "Phone",
+                // Offer (5)
+                "Audience", "Services", "Products", "Pricing", "Use cases",
+                // Processes (4)
+                "Methodology", "Delivery mode", "Service area", "Quality",
+                // Compliance (4)
+                "Certifications", "Networks & federations", "Security", "Policies",
+                // Indicators (2)
+                "Indicators", "Last update",
+                // Educational (3)
+                "FAQ", "Glossary", "Documentation",
+                // External context (2)
+                "Keywords", "Search intents"
+            ] : [
                 // Identité (7)
                 "Nom", "Pays", "Nom légal", "Secteur", "Ville", "Email", "Téléphone",
                 // Offre (5)
@@ -1208,8 +1338,10 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 const userChoice = lastMessage.content.toLowerCase();
 
                 // If user wants to CANCEL
-                if (userChoice.includes("annuler")) {
-                    finalResponseText = `❌ **Analyse annulée.**\n\nVous pouvez relancer une analyse à tout moment en indiquant l'URL de votre site.`;
+                if (userChoice.includes("annuler") || userChoice.includes("cancel")) {
+                    finalResponseText = locale === 'en'
+                        ? `❌ **Analysis cancelled.**\n\nYou can restart an analysis at any time by providing your website URL.`
+                        : `❌ **Analyse annulée.**\n\nVous pouvez relancer une analyse à tout moment en indiquant l'URL de votre site.`;
                     return new Response(JSON.stringify({ text: finalResponseText }), {
                         status: 200,
                         headers: { 'Content-Type': 'application/json' }
@@ -1491,7 +1623,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                             } else if (msg.role === 'user' && lastQuestionBlockField) {
                                 const answer = msg.content.trim();
                                 // Skip pure confirmations like "Oui c'est exact"
-                                if (!answer.match(/^(oui|non|ok|d'accord|exact|parfait|je confirme|c'est bon)/i) || answer.length > 30) {
+                                if (!answer.match(/^(oui|non|ok|d'accord|exact|parfait|je confirme|c'est bon|yes|no|correct|perfect|i confirm|that's right)/i) || answer.length > 30) {
                                     allUserAnswers[lastQuestionBlockField] = answer;
                                 }
                             }
@@ -1562,6 +1694,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     'ont été détectés. y a-t-il', 'ont été détectées. y a-t-il',
                     'ont ete detectes', 'ont ete detectees',
                     'd\'autres services importants', 'd\'autres produits importants',
+                    // EN parasites
+                    'are you ready', 'do you want to continue', 'shall we proceed',
+                    'ready to generate', 'generate your file', 'rate this exchange',
+                    'how do you find', 'were detected. are there',
+                    'other important services', 'other important products',
                 ];
                 const qTextCheck = (q.text || '').toLowerCase();
                 const qIdCheck = (q.id || '').toLowerCase();
@@ -1589,7 +1726,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 // Plus extra patterns not in templates
                 const BOOLEAN_FIELD_PATTERNS_EXTRA = ['has_sitemap', 'has_robots'];
                 // Questions starting with "Avez-vous", "Disposez-vous", "Possédez-vous" are YES/NO questions
-                const isYesNoQuestion = qTextLower.match(/^(avez-vous|disposez-vous|possédez-vous|avez vous|disposez vous|possédez vous)/);
+                const isYesNoQuestion = qTextLower.match(/^(avez-vous|disposez-vous|possédez-vous|avez vous|disposez vous|possédez vous|do you have|does your|is there|are there)/);
                 const isBooleanField = BOOLEAN_FIELD_NAMES.some(p => qIdLower.includes(p)) || BOOLEAN_FIELD_PATTERNS_EXTRA.some(p => qIdLower.includes(p)) || !!isYesNoQuestion;
 
                 // URL questions: only if no good options already exist (evidence questions have "Je n'ai pas de lien" etc.)
@@ -1616,7 +1753,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     qTextLower.includes('nom légal') || qTextLower.includes('raison sociale') ||
                     qTextLower.includes('collez') || qTextLower.includes('saisissez') ||
                     qTextLower.includes('décrivez') || qTextLower.includes('détaillez') ||
-                    qTextLower.includes('précisez') || qTextLower.includes('expliquez'));
+                    qTextLower.includes('précisez') || qTextLower.includes('expliquez') ||
+                    qTextLower.includes('geographic area') || qTextLower.includes('legal name') ||
+                    qTextLower.includes('paste') || qTextLower.includes('enter your') ||
+                    qTextLower.includes('describe') || qTextLower.includes('specify') ||
+                    qTextLower.includes('explain'));
 
                 // Pour les champs texte libre, TOUJOURS forcer inputType text
                 // (même si le LLM a généré des options comme "contact@ai-visionary.com")
@@ -1630,33 +1771,35 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                             qTextLower.includes('décri') || qTextLower.includes('détail') ||
                             qTextLower.includes('processus') || qTextLower.includes('méthodologie') ||
                             qTextLower.includes('expliquez') || qTextLower.includes('précisez') ||
+                            qTextLower.includes('describe') || qTextLower.includes('detail') ||
+                            qTextLower.includes('methodology') || qTextLower.includes('explain') ||
                             qIdLower.includes('process_steps') || qIdLower.includes('key_indicators');
-                        if (isDescriptionQuestion) q.customLabel = "Décrivez ici...";
-                        else if (qTextLower.includes('email')) q.customLabel = "Saisissez votre email...";
-                        else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = "Saisissez votre numéro...";
-                        else if (qTextLower.includes('géographi')) q.customLabel = "Saisissez la zone géographique...";
-                        else if (isUrlQuestion && !isDescriptionQuestion) q.customLabel = "Collez l'URL ici...";
-                        else q.customLabel = "Saisissez votre réponse...";
+                        if (isDescriptionQuestion) q.customLabel = locale === 'en' ? "Describe here..." : "Décrivez ici...";
+                        else if (qTextLower.includes('email')) q.customLabel = locale === 'en' ? "Enter your email..." : "Saisissez votre email...";
+                        else if (qTextLower.includes('téléphone') || qTextLower.includes('phone')) q.customLabel = locale === 'en' ? "Enter your number..." : "Saisissez votre numéro...";
+                        else if (qTextLower.includes('géographi') || qTextLower.includes('geograph')) q.customLabel = locale === 'en' ? "Enter the geographic area..." : "Saisissez la zone géographique...";
+                        else if (isUrlQuestion && !isDescriptionQuestion) q.customLabel = locale === 'en' ? "Paste the URL here..." : "Collez l'URL ici...";
+                        else q.customLabel = locale === 'en' ? "Enter your answer..." : "Saisissez votre réponse...";
                     }
                     console.warn("⚠️ VALIDATOR: champ texte → inputType text (pas de boutons)");
                 } else if (hasEvidenceOptions) {
                     // Questions de preuve : garder les options + forcer allowCustom + bon label
                     q.allowCustom = true;
-                    if (!q.customLabel) q.customLabel = "Autre méthode / Préciser...";
+                    if (!q.customLabel) q.customLabel = locale === 'en' ? "Other method / Specify..." : "Autre méthode / Préciser...";
                     console.warn("⚠️ VALIDATOR: question de preuve → options gardées + allowCustom");
-                } else if (isYesNoQuestion && (!q.options || q.options.length < 2 || !q.options.some((o: string) => o.toLowerCase().includes('non')))) {
+                } else if (isYesNoQuestion && (!q.options || q.options.length < 2 || !q.options.some((o: string) => o.toLowerCase().includes('non') || o.toLowerCase().includes('no')))) {
                     // Questions Avez-vous/Disposez-vous DOIVENT avoir Oui + Non
-                    q.options = ["Oui", "Non"];
+                    q.options = locale === 'en' ? ["Yes", "No"] : ["Oui", "Non"];
                     q.allowCustom = true;
                     console.warn("⚠️ VALIDATOR: question Oui/Non forcée (Avez-vous...)");
                 } else if (!q.options || q.options.length === 0) {
-                    q.options = ["Oui", "Non"];
+                    q.options = locale === 'en' ? ["Yes", "No"] : ["Oui", "Non"];
                     q.allowCustom = true;
                     console.warn("⚠️ VALIDATOR: 0 options → fallback Oui/Non");
                 } else if (q.options.length === 1) {
                     const singleOpt = q.options[0].toLowerCase();
-                    if (singleOpt.includes('autre') || singleOpt.includes('préciser') || singleOpt.includes('ajouter')) {
-                        q.options = ["Oui", "Non"];
+                    if (singleOpt.includes('autre') || singleOpt.includes('préciser') || singleOpt.includes('ajouter') || singleOpt.includes('other') || singleOpt.includes('specify') || singleOpt.includes('add')) {
+                        q.options = locale === 'en' ? ["Yes", "No"] : ["Oui", "Non"];
                         q.allowCustom = true;
                         console.warn("⚠️ VALIDATOR: seule option → fallback Oui/Non");
                     }
@@ -1935,7 +2078,9 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                         system: EXTRACTION_PROMPT,
                         abortSignal: AbortSignal.timeout(90000),
                         messages: [
-                            { role: 'user', content: "Extract JSON now. N'oublie pas de mettre q=1 si l'information est trouvée, particulièrement depuis le USER CONTEXT." },
+                            { role: 'user', content: locale === 'en'
+                                ? "Extract JSON now. Do not forget to set q=1 when information is found, especially from USER CONTEXT."
+                                : "Extract JSON now. N'oublie pas de mettre q=1 si l'information est trouvée, particulièrement depuis le USER CONTEXT." },
                             { role: 'user', content: `USER CONTEXT (ANSWERS TO QUESTIONNAIRE) - PRIORITIZE THIS INFO AND SET q=1:\n"${userAnswersContext}"` }
                         ]
                     });
@@ -2187,7 +2332,7 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                             const fieldPath = QUESTION_TO_FIELD[qId];
                             if (!fieldPath || !answer || typeof answer !== 'string') continue;
                             // Skip confirmation-only answers
-                            if (answer.match(/^(oui|non|ok|exact|parfait|je confirme|c'est bon)$/i)) continue;
+                            if (answer.match(/^(oui|non|ok|exact|parfait|je confirme|c'est bon|yes|no|correct|perfect|i confirm|that's right)$/i)) continue;
 
                             const [bloc, field] = fieldPath.split('.');
                             if (!bloc || !field || !fields[bloc]) continue;
@@ -2353,9 +2498,9 @@ ${(() => {
             } catch (err: unknown) {
                 const errMsg = err instanceof Error ? err.message : 'Unknown error';
                 logger.critical('FINAL_ANALYSIS_ERROR', errMsg, { stack: err instanceof Error ? err.stack : undefined });
-                finalResponseText = `⚠️ Une erreur est survenue lors de la finalisation de l'analyse.
-
-Veuillez réessayer ou contacter hello@ai-visionary.com.`;
+                finalResponseText = locale === 'en'
+                    ? `⚠️ An error occurred during the analysis finalization.\n\nPlease try again or contact hello@ai-visionary.com.`
+                    : `⚠️ Une erreur est survenue lors de la finalisation de l'analyse.\n\nVeuillez réessayer ou contacter hello@ai-visionary.com.`;
             }
         } else if (!finalResponseText) {
             // 🎯 PACK SELECTION & SALES FUNNEL LOGIC
@@ -2367,30 +2512,38 @@ Veuillez réessayer ou contacter hello@ai-visionary.com.`;
 
             // 1. INTENTION DETECTION & CONFIRMATION
             // 🔄 CASE: ABONNEMENT AYA (19 CHF / MOIS)
-            if (userContent.includes("abonnement") || (userContent.includes("aya") && userContent.includes("19"))) {
+            if (userContent.includes("abonnement") || userContent.includes("subscription") || (userContent.includes("aya") && userContent.includes("19"))) {
                 console.log("🎯 Selection: Abonnement AYA");
-                if (userContent.includes("valider") || userContent.includes("confirmer")) {
+                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("validate") || userContent.includes("confirm")) {
                     // Confirmation recue → demander l'email
-                    finalResponseText = `🔄 **Choix Valide : ABONNEMENT AYA (19 CHF/mois).**\nVous activez votre presence prioritaire dans le Registre AYA.\n\n👉 **Entrez votre email professionnel pour finaliser l'abonnement :**\nEX : hello@votre-domaine.com`;
+                    finalResponseText = locale === 'en'
+                        ? `🔄 **Valid Choice: AYA SUBSCRIPTION (19 CHF/month).**\nYou activate your priority presence in the AYA Registry.\n\n👉 **Enter your professional email to finalize the subscription:**\nEX: hello@your-domain.com`
+                        : `🔄 **Choix Valide : ABONNEMENT AYA (19 CHF/mois).**\nVous activez votre presence prioritaire dans le Registre AYA.\n\n👉 **Entrez votre email professionnel pour finaliser l'abonnement :**\nEX : hello@votre-domaine.com`;
                 } else {
                     // Premiere selection → confirmation + explication + possibilite de changer
                     finalResponseText = JSON.stringify({
                         type: "question_block",
-                        intro: "VISIBILITE IA-NATIVE (ABONNEMENT)\n\nL'Abonnement AYA est concu pour les entreprises qui veulent des resultats sans complexite technique.\n\nBenefices Immediats -\nRegistre AYA Actif, Donnees Hebergees, Anti-Hallucination, Evolutif.\n\nTarif - 19 CHF / mois (Sans engagement)",
+                        intro: locale === 'en'
+                            ? "AI-NATIVE VISIBILITY (SUBSCRIPTION)\n\nThe AYA Subscription is designed for businesses that want results without technical complexity.\n\nImmediate Benefits -\nActive AYA Registry, Hosted Data, Anti-Hallucination, Scalable.\n\nPrice - 19 CHF / month (No commitment)"
+                            : "VISIBILITE IA-NATIVE (ABONNEMENT)\n\nL'Abonnement AYA est concu pour les entreprises qui veulent des resultats sans complexite technique.\n\nBenefices Immediats -\nRegistre AYA Actif, Donnees Hebergees, Anti-Hallucination, Evolutif.\n\nTarif - 19 CHF / mois (Sans engagement)",
                         questions: [{
                             id: "confirm_subscription",
-                            text: "Votre decision",
-                            options: ["Valider l'ABONNEMENT (19 CHF/mois)", "Changer pour le PACK PRO (499 CHF)"],
+                            text: locale === 'en' ? "Your decision" : "Votre decision",
+                            options: locale === 'en'
+                                ? ["Validate SUBSCRIPTION (19 CHF/month)", "Switch to PRO PACK (499 CHF)"]
+                                : ["Valider l'ABONNEMENT (19 CHF/mois)", "Changer pour le PACK PRO (499 CHF)"],
                             allowCustom: false
                         }]
                     });
                 }
             }
             // 🚀 CASE: PACK PRO (499 CHF)
-            else if (userContent.includes("pro") || userContent.includes("499") || userContent.includes("propriété")) {
+            else if (userContent.includes("pro") || userContent.includes("499") || userContent.includes("propriété") || userContent.includes("ownership")) {
                 console.log("🎯 Selection: Pack PRO");
-                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("passer") || userContent.includes("upgrader")) {
-                    finalResponseText = `🚀 **Choix Validé : PACK PRO (Propriété).**\nPropriété Totale de vos actifs sémantiques. 3 ans de Registre inclus.\n\n👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
+                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("passer") || userContent.includes("upgrader") || userContent.includes("validate") || userContent.includes("confirm") || userContent.includes("upgrade")) {
+                    finalResponseText = locale === 'en'
+                        ? `🚀 **Valid Choice: PRO PACK (Ownership).**\nTotal Ownership of your semantic assets. 3 years of Registry included.\n\n👉 **Enter your professional email to finalize the order (499 CHF):**`
+                        : `🚀 **Choix Validé : PACK PRO (Propriété).**\nPropriété Totale de vos actifs sémantiques. 3 ans de Registre inclus.\n\n👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
                 } else {
                     // CHECK IF CLIENT IS EXISTING TO ADAPT BUTTON TEXT (Using detectedUrl)
                     let isExisting = false;
@@ -2404,9 +2557,24 @@ Veuillez réessayer ou contacter hello@ai-visionary.com.`;
                         isExisting = messages.some((m: any) => m.content.includes("DÉJÀ CLIENT"));
                     }
 
+                    const isEn = locale === 'en';
                     finalResponseText = JSON.stringify({
                         type: "question_block",
-                        intro: `**DEVENIR UNE RÉFÉRENCE (PACK PRO)**
+                        intro: isEn
+                            ? `**BECOME A REFERENCE (PRO PACK)**
+
+You give your business the real opportunity to be visible and recommendable by AIs with total ownership of your assets.
+
+**Your 5 PRO files:**
+- 👑 **ASR-Protocol.json** → Advanced AI context & criteria (signed).
+- ⚙️ **manifest.json** → Strict recommendation policy.
+- 💬 **faq.json** → Contextual answers for LLMs.
+- 📖 **glossary.json** → Precise business vocabulary.
+- 🌐 **external_context.json** → Reviews and encapsulated signals.
+- 📄 **3 YEARS of AYA Registry included**.
+
+**Price: 499 CHF (One-time purchase)**`
+                            : `**DEVENIR UNE RÉFÉRENCE (PACK PRO)**
 
 Vous offrez à votre entreprise la possibilité réelle d'être visible et recommandable par les IA avec une propriété totale de vos actifs.
 
@@ -2421,8 +2589,10 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
 **Tarif : 499 CHF (Achat unique)**`,
                         questions: [{
                             id: "confirm_pro",
-                            text: "Votre décision finale :",
-                            options: ["Valider le PACK PRO (499 CHF)", isExisting ? "Rester sur mon abonnement" : "Prendre l'ABONNEMENT (19 CHF)"],
+                            text: isEn ? "Your final decision:" : "Votre décision finale :",
+                            options: isEn
+                                ? ["Validate PRO PACK (499 CHF)", isExisting ? "Keep my subscription" : "Take SUBSCRIPTION (19 CHF)"]
+                                : ["Valider le PACK PRO (499 CHF)", isExisting ? "Rester sur mon abonnement" : "Prendre l'ABONNEMENT (19 CHF)"],
                             allowCustom: false
                         }]
                     });
@@ -2509,7 +2679,23 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                     : `${STRIPE_LINKS.AYA_SUB}${stripeSuffix}`).replace(/\s/g, '');
 
                 if (selectedPlan === "PRO") {
-                    finalResponseText = `✅ **Email enregistré.**
+                    finalResponseText = locale === 'en'
+                        ? `✅ **Email registered.**
+
+🚀 **Finalize my PRO PACK - Ownership (499 CHF)**
+
+**Your 5 PRO files:**
+👑 **ASR-Protocol.json** (signed)
+⚙️ **manifest.json**
+💬 **faq.json**
+📖 **glossary.json**
+🌐 **external_context.json**
+📜 + **3 Years of AYA Registry** included
+
+👉 [Buy my ASR files](${actionLink})
+
+*You will be redirected to our secure payment platform.*`
+                        : `✅ **Email enregistré.**
 
 🚀 **Finaliser mon PACK PRO - Propriété (499 CHF)**
 
@@ -2525,7 +2711,21 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
 
 *Vous serez redirigé vers notre plateforme de paiement sécurisée.*`;
                 } else {
-                    finalResponseText = `✅ **Email enregistré.**
+                    finalResponseText = locale === 'en'
+                        ? `✅ **Email registered.**
+
+🔄 **Finalize my AYA SUBSCRIPTION (19 CHF/month)**
+
+**Your privileged access:**
+📡 **Active Presence** in the AYA Registry
+🛡 **Anti-Hallucination** (Verified Data)
+⚡ **AI recommendation priority**
+🔄 **Unlimited updates**
+
+👉 [Activate my Subscription now](${actionLink})
+
+*You will be redirected to our secure payment platform.*`
+                        : `✅ **Email enregistré.**
 
 🔄 **Finaliser mon ABONNEMENT AYA (19 CHF/mois)**
 
@@ -2598,7 +2798,9 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
             const chatResult = await generateText({
                 model: modelToUse,
                 temperature: 0.7, // More creative for chat
-                system: finalSystemPrompt + "\n\n⚠️ IMPORTANT : Reste concentré sur la mission AYO. Si l'utilisateur n'a pas donné d'URL, demande-la poliment.",
+                system: finalSystemPrompt + (locale === 'en'
+                    ? "\n\n⚠️ IMPORTANT: Stay focused on the AYO mission. If the user has not provided a URL, politely ask for it."
+                    : "\n\n⚠️ IMPORTANT : Reste concentré sur la mission AYO. Si l'utilisateur n'a pas donné d'URL, demande-la poliment."),
                 messages: messages
             });
 
@@ -2614,7 +2816,7 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error('CHAT_FATAL', message, { stack: error instanceof Error ? error.stack : undefined });
-        return new Response(JSON.stringify({ error: 'Erreur interne du serveur.' }), {
+        return new Response(JSON.stringify({ error: locale === 'en' ? 'Internal server error.' : 'Erreur interne du serveur.' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
         });
