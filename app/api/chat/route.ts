@@ -998,12 +998,11 @@ GÉNÈRE CE JSON MAINTENANT :
                     scanState.detected[key] = answer.answer;
                     scanState.confidence[key] = conf;
 
-                    if (conf >= 90) {
+                    if (conf >= 70) {
+                        // Threshold lowered from 90 to 70 (29 mars 2026)
+                        // Data with confidence >= 70 is auto-validated (no Yes/No question)
+                        // Rollback: change back to >= 90 for HIGH, add >= 70 for LOW
                         scanState.high_confidence_keys.push(key);
-                    } else if (conf >= 70) {
-                        // Low confidence: data found but uncertain.
-                        // Accepted as-is (not re-asked) but tracked separately.
-                        scanState.low_confidence_keys.push(key);
                     } else {
                         scanState.unknown_keys.push(key);
                     }
