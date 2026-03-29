@@ -86,4 +86,4 @@ Your business already exists online — but can AI assistants find and recommend
 
 Built in Geneva, Switzerland by [AI Visionary](https://www.ai-visionary.com) | 2026
 
-*AYA is a proprietary platform by AI Visionary. The business dataset is published under CC-BY-4.0 to enable systemic attraction — the platform code is not open source.*
+*AYA is a platform by AI Visionary. The business dataset is published under CC-BY-4.0 to enable systemic attraction.*
