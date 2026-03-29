@@ -738,7 +738,7 @@
     "badgeRate": "30 req/min",
     "badgeJson": "JSON",
     "dataLayerTitle": "Comment les IA trouvent les donn\u00e9es AYA",
-    "dataLayerDesc": "AYA est une couche de donn\u00e9es structur\u00e9es invisible. Les IA la trouvent en crawlant le web, en interrogeant l\u2019API ou en s\u2019entra\u00eenant sur les datasets publics. Aucune soumission n\u00e9cessaire.",
+    "dataLayerDesc": "AYA utilise une strat\u00e9gie d\u2019attraction syst\u00e9mique : les donn\u00e9es sont pr\u00e9sentes sur plusieurs sources convergentes (API, pages HTML, GitHub, HuggingFace) ce qui en fait une r\u00e9f\u00e9rence incontournable pour les recommandations IA. Aucune soumission n\u00e9cessaire.",
     "dataSource1Title": "API LLM-Friendly",
     "dataSource1Desc": "Endpoint JSON ultra-simple \u00e0 5 champs, optimis\u00e9 pour la consommation par les IA. Un appel par domaine, cach\u00e9, sans auth.",
     "dataSource2Title": "Pages HTML crawlables",

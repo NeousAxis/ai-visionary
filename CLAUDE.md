@@ -1060,7 +1060,7 @@ L'entonnoir de conversion est :
 - Page certificat `/aya/e/[id]` — fix INDEXÉ (plus EXPIRÉ), fix date epoch, keywords depuis blocs AIO
 - API AYA compacte (6 champs LLM) sur Vercel (search, entity, stats, docs, live)
 - Page `/developers` — 9 IA connectées, stats, fichiers d'intégration
-- `ai-plugin.json` + `openapi.json` — découverte passive par les IA via crawl web (stratégie couche invisible)
+- `ai-plugin.json` + `openapi.json` — découverte passive par les IA via crawl web (stratégie d'attraction systémique)
 - README GitHub rewrite "AYA inside" (https://github.com/NeousAxis/ai-visionary)
 - Bot AYA : **5430 domaines** scrapés (6672 dans domains.txt), pipeline concurrent, extraction auto mots-clés, détection pays hreflang+phone
 - Génération et envoi des 5 fichiers PRO en ZIP
@@ -1098,9 +1098,9 @@ L'entonnoir de conversion est :
 | Valider les données ASR_DERIVED — score cohérent, champs non vides | 🟡 Haute |
 | ~~Fix tri page /aya — vrai mélange aléatoire~~ | ✅ Fixé (24 mars 2026) |
 
-**A3. Stratégie distribution — COUCHE INVISIBLE**
+**A3. Stratégie distribution — ATTRACTION SYSTÉMIQUE**
 
-> AYA n'est PAS une destination. C'est une couche invisible de données structurées. Les IA la trouvent en crawlant le web. Personne n'a besoin de "venir sur AYA". **PAS de soumission active aux IA, PAS de MCP server — stratégie abandonnée.**
+> AYA n'est PAS une destination. C'est une stratégie d'attraction systémique : les données sont présentes sur tellement de sources convergentes (API, HTML, GitHub, HuggingFace) que les IA les trouvent inévitablement. **PAS de soumission active aux IA, PAS de MCP server — stratégie abandonnée.**
 
 La distribution repose sur 4 sources convergentes déjà en place :
 - **API LLM-friendly** `ai-visionary.com/api/aya/llm/{domain}` ✅
@@ -1165,7 +1165,7 @@ AYO et AYA sont des **produits et services d'AI Visionary**.
 
 #### PRINCIPE
 
-AYA n'est PAS une destination. C'est une couche invisible de données structurées sur les entreprises. Les IA la trouvent en crawlant le web. Personne n'a besoin de "venir sur AYA".
+AYA n'est PAS une destination. C'est une stratégie d'attraction systémique : les données sont présentes sur plusieurs sources convergentes (API, pages HTML, GitHub, HuggingFace) ce qui en fait une référence incontournable pour les recommandations IA. Personne n'a besoin de "venir sur AYA".
 
 ---
 
@@ -1570,10 +1570,10 @@ BOT (scraping) → BASE (Supabase) → API AYA (Vercel) → IA (ChatGPT, Claude,
 | Améliorer la détection de secteur (13 catégories → plus précis) | 🟡 Haute | ❌ |
 | Valider les données ASR_DERIVED — score cohérent, champs non vides | 🟡 Haute | ❌ |
 
-#### OBJECTIF 3 — Distribution (stratégie COUCHE INVISIBLE)
+#### OBJECTIF 3 — Distribution (stratégie ATTRACTION SYSTÉMIQUE)
 
 > **PAS de soumission active. PAS de MCP server. Stratégie abandonnée.**
-> Les IA trouvent AYA en crawlant le web. On rend les données irresistibles, pas visibles.
+> Les données AYA sont présentes sur tellement de sources convergentes que les IA les trouvent inévitablement. C'est de l'attraction systémique.
 
 | Tâche | Priorité | Statut |
 |-------|----------|--------|

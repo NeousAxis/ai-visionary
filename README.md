@@ -14,7 +14,7 @@ AI crawls the web → finds AYA data (JSON-LD on 3000+ pages)
 AI returns verified, structured recommendations
 ```
 
-Every entity page on AYA embeds **JSON-LD structured data** — the standard format that AI systems read when they crawl the web. This makes AYA an invisible knowledge layer: AI assistants find and use the data automatically, without any manual integration.
+Every entity page on AYA embeds **JSON-LD structured data** — the standard format that AI systems read when they crawl the web. This makes AYA a systemic attraction layer: data is present across so many convergent sources (API, HTML pages, GitHub, HuggingFace) that AI assistants inevitably find and use it, without any manual integration.
 
 ## What's live today
 

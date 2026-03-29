@@ -738,7 +738,7 @@
     "badgeRate": "30 req/min",
     "badgeJson": "JSON",
     "dataLayerTitle": "How AIs Find AYA Data",
-    "dataLayerDesc": "AYA is an invisible structured data layer. AIs find it by crawling the web, querying the API, or training on public datasets. No submission needed.",
+    "dataLayerDesc": "AYA uses a systemic attraction strategy: data is present across multiple convergent sources (API, HTML pages, GitHub, HuggingFace) making it an unavoidable reference for AI recommendations. No submission needed.",
     "dataSource1Title": "API LLM-Friendly",
     "dataSource1Desc": "Ultra-simple 5-field JSON endpoint optimized for AI consumption. One call per domain, cached, no auth.",
     "dataSource2Title": "Crawlable HTML Pages",
