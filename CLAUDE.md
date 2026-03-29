@@ -420,6 +420,15 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 - Nettoyer MAJUSCULES, numérotation parasite, guillemets échappés
 - quality_assurance : filtrer promesses marketing
 
+### Smart Skip — Déduplication questions (Session 10, 29 mars 2026)
+- **Problème** : AYO demandait des infos déjà scannées (ex: "Quels sont vos produits ?" quand services détectés)
+- **Solution** : `RELATED_FIELD_SKIP_RULES` dans `chat/route.ts` — whitelist de paires source/target
+- **Logique** : si source a des données ET target n'en a pas → skip la question target
+- **Paires** : `services↔products` (bidirectionnel)
+- **Scoring** : neutre — le LLM d'extraction finale voit toujours tous les champs
+- **Rollback** : `RELATED_FIELD_SKIP_RULES = []` désactive instantanément
+- **ATTENTION** : NE PAS toucher `aio-score-engine.ts`, `greffier.ts`, ni les `EXPECTED_FIELDS`
+
 ### NE JAMAIS FAIRE
 - Modifier le CSS/design sans accord de Cyril
 - Générer des questions via LLM (utiliser templates statiques)

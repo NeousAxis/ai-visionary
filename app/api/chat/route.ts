@@ -1495,6 +1495,29 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             // Validation d'abord, enrichissement ensuite
             const combinedQueue = [...validationQueue, ...enrichmentQueue];
 
+            // SMART SKIP: Remove redundant questions when a related field already has data
+            // Rollback: set RELATED_FIELD_SKIP_RULES = [] to disable instantly
+            const RELATED_FIELD_SKIP_RULES: Array<{ source: string; target: string }> = [
+                { source: 'offre.services', target: 'offre.products' },
+                { source: 'offre.products', target: 'offre.services' },
+            ];
+
+            const hasData = (field: string) => highConfidenceKeys.includes(field) || lowConfidenceKeys.includes(field);
+            const fieldsToSkip = new Set<string>();
+            for (const rule of RELATED_FIELD_SKIP_RULES) {
+                if (hasData(rule.source) && !hasData(rule.target) && combinedQueue.includes(rule.target)) {
+                    fieldsToSkip.add(rule.target);
+                    console.log(`🔗 SMART SKIP: ${rule.target} skipped (covered by ${rule.source})`);
+                }
+            }
+            if (fieldsToSkip.size > 0) {
+                const before = combinedQueue.length;
+                const filtered = combinedQueue.filter(f => !fieldsToSkip.has(f));
+                combinedQueue.length = 0;
+                combinedQueue.push(...filtered);
+                console.log(`🔗 SMART SKIP: ${before - combinedQueue.length} question(s) removed`);
+            }
+
             // BUG FIX: Critical identity fields MUST always be in the queue even if scan missed them
             // This prevents contact_email from being silently dropped
             const MANDATORY_FIELDS = ['identite.contact_email', 'identite.legal_name', 'identite.contact_phone'];
