@@ -334,14 +334,22 @@ export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'e
 
     // Cap transparency
     if (result.capApplied && result.capReason) {
+        // Translate cap reason from FR (engine always returns FR) to EN if needed
+        const capReasonDisplay = locale === 'en'
+            ? (result.capReason || '')
+                .replace('Pas de JSON-LD structuré détecté', 'No structured JSON-LD detected')
+                .replace('score plafonné à', 'score capped at')
+                .replace('Pas de fichier ASR détecté', 'No ASR file detected')
+                .replace('Pas de preuve externe', 'No external proof')
+            : result.capReason;
         lines.push('');
         if (locale === 'en') {
             lines.push(`📊 **RAW SCORE: ${result.rawTotal} / 100**`);
-            lines.push(`⚠️ **TECHNICAL CAP**: ${result.capReason}`);
+            lines.push(`⚠️ **TECHNICAL CAP**: ${capReasonDisplay}`);
             lines.push(`💡 The PRO Pack installs the technical files that lift this cap.`);
         } else {
             lines.push(`📊 **SCORE BRUT : ${result.rawTotal} / 100**`);
-            lines.push(`⚠️ **PLAFOND TECHNIQUE** : ${result.capReason}`);
+            lines.push(`⚠️ **PLAFOND TECHNIQUE** : ${capReasonDisplay}`);
             lines.push(`💡 Le Pack PRO installe les fichiers techniques qui lèvent ce plafond.`);
         }
     }

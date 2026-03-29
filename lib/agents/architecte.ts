@@ -191,6 +191,7 @@ export function buildStructureRecommendations(
     let estimatedGain = 0;
 
     // 1. ASR-Protocol — Toujours prioritaire si pas de fichier ASR
+    const isEn = locale === 'en';
     const hasAsr = fields.structure_technique?.has_asr?.value === true;
     if (!hasAsr) {
         const techScore = scoreResult.blocks.structure_technique ?? 0;
@@ -201,15 +202,21 @@ export function buildStructureRecommendations(
             file: 'ASR-Protocol.json',
             icon: '👑',
             benefit: scoreResult.capApplied
-                ? `Lève le plafond technique (score brut ${scoreResult.rawTotal} → potentiel réel). Ce fichier est la carte d'identité IA de votre entreprise.`
-                : `Permet aux IA de vous identifier avec certitude. Actuellement, aucun fichier ASR n'est détecté sur votre site.`,
+                ? (isEn
+                    ? `Lifts the technical cap (raw score ${scoreResult.rawTotal} \u2192 real potential). This file is the AI identity card of your business.`
+                    : `Lève le plafond technique (score brut ${scoreResult.rawTotal} \u2192 potentiel réel). Ce fichier est la carte d'identité IA de votre entreprise.`)
+                : (isEn
+                    ? `Enables AIs to identify you with certainty. Currently, no ASR file is detected on your website.`
+                    : `Permet aux IA de vous identifier avec certitude. Actuellement, aucun fichier ASR n'est détecté sur votre site.`),
             priority: 1,
         });
     } else {
         recommendations.push({
             file: 'ASR-Protocol.json',
             icon: '👑',
-            benefit: `Mise à jour de votre ASR existant avec les données enrichies du questionnaire (version signée).`,
+            benefit: isEn
+                ? `Updates your existing ASR with enriched questionnaire data (signed version).`
+                : `Mise à jour de votre ASR existant avec les données enrichies du questionnaire (version signée).`,
             priority: 2,
         });
     }
@@ -222,14 +229,18 @@ export function buildStructureRecommendations(
         recommendations.push({
             file: 'manifest.json',
             icon: '⚙️',
-            benefit: `Définit les conditions de recommandation : quand et comment les IA doivent vous citer. ${identiteScore < 5 ? 'Votre identité est incomplète — le manifest comblera les lacunes.' : 'Optimise la précision des recommandations IA.'}`,
+            benefit: isEn
+                ? `Defines recommendation conditions: when and how AIs should cite you. ${identiteScore < 5 ? 'Your identity is incomplete \u2014 the manifest will fill the gaps.' : 'Optimizes the accuracy of AI recommendations.'}`
+                : `Définit les conditions de recommandation : quand et comment les IA doivent vous citer. ${identiteScore < 5 ? 'Votre identité est incomplète \u2014 le manifest comblera les lacunes.' : 'Optimise la précision des recommandations IA.'}`,
             priority: identiteScore < 5 ? 1 : 2,
         });
     } else {
         recommendations.push({
             file: 'manifest.json',
             icon: '⚙️',
-            benefit: `Politique de recommandation stricte pour contrôler comment les IA vous présentent.`,
+            benefit: isEn
+                ? `Strict recommendation policy to control how AIs present you.`
+                : `Politique de recommandation stricte pour contrôler comment les IA vous présentent.`,
             priority: 3,
         });
     }
@@ -242,14 +253,18 @@ export function buildStructureRecommendations(
         recommendations.push({
             file: 'faq.json',
             icon: '💬',
-            benefit: `Génère des réponses contextuelles que les IA (ChatGPT, Gemini, Claude) pourront utiliser directement. ${!hasFaq ? 'Aucune FAQ détectée actuellement.' : 'Votre FAQ existe mais n\'est pas structurée pour les LLMs.'}`,
+            benefit: isEn
+                ? `Generates contextual answers that AIs (ChatGPT, Gemini, Claude) can use directly. ${!hasFaq ? 'No FAQ currently detected.' : 'Your FAQ exists but is not structured for LLMs.'}`
+                : `Génère des réponses contextuelles que les IA (ChatGPT, Gemini, Claude) pourront utiliser directement. ${!hasFaq ? 'Aucune FAQ détectée actuellement.' : 'Votre FAQ existe mais n\'est pas structurée pour les LLMs.'}`,
             priority: !hasFaq ? 1 : 2,
         });
     } else {
         recommendations.push({
             file: 'faq.json',
             icon: '💬',
-            benefit: `FAQ enrichie et structurée au format LLM-native à partir de vos données.`,
+            benefit: isEn
+                ? `Enriched FAQ structured in LLM-native format from your data.`
+                : `FAQ enrichie et structurée au format LLM-native à partir de vos données.`,
             priority: 3,
         });
     }
@@ -261,14 +276,18 @@ export function buildStructureRecommendations(
         recommendations.push({
             file: 'glossary.json',
             icon: '📖',
-            benefit: `Vocabulaire métier précis pour éviter les hallucinations. Sans glossaire, les IA inventent leur propre terminologie pour vous décrire.`,
+            benefit: isEn
+                ? `Precise industry vocabulary to prevent hallucinations. Without a glossary, AIs invent their own terminology to describe you.`
+                : `Vocabulaire métier précis pour éviter les hallucinations. Sans glossaire, les IA inventent leur propre terminologie pour vous décrire.`,
             priority: 2,
         });
     } else {
         recommendations.push({
             file: 'glossary.json',
             icon: '📖',
-            benefit: `Glossaire enrichi et normalisé à partir de votre vocabulaire métier existant.`,
+            benefit: isEn
+                ? `Enriched and normalized glossary from your existing industry vocabulary.`
+                : `Glossaire enrichi et normalisé à partir de votre vocabulaire métier existant.`,
             priority: 3,
         });
     }
@@ -281,14 +300,18 @@ export function buildStructureRecommendations(
         recommendations.push({
             file: 'external_context.json',
             icon: '🌐',
-            benefit: `Encapsule vos avis, signaux de réputation et mots-clés dans un format lisible par les IA. ${!hasKeywords ? 'Aucun mot-clé de découverte détecté.' : 'Renforce votre autorité de marque.'}`,
+            benefit: isEn
+                ? `Encapsulates your reviews, reputation signals and keywords in an AI-readable format. ${!hasKeywords ? 'No discovery keywords detected.' : 'Strengthens your brand authority.'}`
+                : `Encapsule vos avis, signaux de réputation et mots-clés dans un format lisible par les IA. ${!hasKeywords ? 'Aucun mot-clé de découverte détecté.' : 'Renforce votre autorité de marque.'}`,
             priority: 2,
         });
     } else {
         recommendations.push({
             file: 'external_context.json',
             icon: '🌐',
-            benefit: `Signaux externes et mots-clés de découverte consolidés et signés.`,
+            benefit: isEn
+                ? `External signals and discovery keywords consolidated and signed.`
+                : `Signaux externes et mots-clés de découverte consolidés et signés.`,
             priority: 3,
         });
     }
