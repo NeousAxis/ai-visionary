@@ -1525,11 +1525,13 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     intro: "",
                     questions: [{
                         id: "activity_calibration",
-                        text: "Pourriez-vous décrire votre activité en quelques phrases (500 caractères max) ?\nCela m'aidera à mieux calibrer les questions suivantes.",
+                        text: locale === 'en'
+                            ? "Could you describe your business in a few sentences (500 characters max)?\nThis will help me better calibrate the following questions."
+                            : "Pourriez-vous décrire votre activité en quelques phrases (500 caractères max) ?\nCela m'aidera à mieux calibrer les questions suivantes.",
                         options: [],
                         allowCustom: true,
                         allowMultiple: false,
-                        customLabel: "Activité..."
+                        customLabel: locale === 'en' ? "Business activity..." : "Activité..."
                     }]
                 });
             }

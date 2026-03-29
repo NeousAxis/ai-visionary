@@ -96,6 +96,7 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
                 step3: "Choix ASR",
                 step4: "Finalisation",
                 step5: "Livraison",
+                title: "AYO Assistant IA",
             },
             en: {
                 greeting: "👋 Hello, this is AYO. Initializing the AIO Light protocol.\n\nI will run your **AI Visibility Diagnostic (Free)**.\nSimply provide me with your main website URL.\n\n**1. What is your URL?**",
@@ -120,6 +121,7 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
                 step3: "ASR Choice",
                 step4: "Finalization",
                 step5: "Delivery",
+                title: "AYO AI Assistant",
             }
         };
         return strings[locale]?.[key] || strings.fr[key] || key;
@@ -836,7 +838,7 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
             <div className="chat-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#4A919E' }}></div>
-                    <h4 style={{ margin: 0, color: 'var(--text-main)' }}>AYO Assistant IA</h4>
+                    <h4 style={{ margin: 0, color: 'var(--text-main)' }}>{t('title')}</h4>
                 </div>
                 {!isFullscreen && (
                     <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: 'var(--text-main)' }}>✕</button>
