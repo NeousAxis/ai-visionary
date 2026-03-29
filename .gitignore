@@ -50,6 +50,7 @@ ADMIN_SECRETS*
 # claude code
 .claude/
 CLAUDE.md
+MEMORY.md
 PLAN-ACTION-AYO-COMPLET.md
 
 # private data & generated files
