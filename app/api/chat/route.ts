@@ -1191,9 +1191,13 @@ GÉNÈRE CE JSON MAINTENANT :
             // Add initial 7-bloc score display (from AYO Router formatScoreMessage)
             transparencySummary += formatScoreMessage(initialScore, 'initial', locale) + '\n\n';
 
+            const blockLabelsMap: Record<string, Record<string, string>> = {
+                en: { identite: 'Identity & Anchoring', offre: 'Offer Clarity', processus_methodes: 'Processes & Methods', engagements_conformite: 'Trust & Compliance', indicateurs: 'Social Proof & Metrics', contenus_pedagogiques: 'Educational Content', structure_technique: 'AIO Technical Foundation' },
+                fr: { identite: 'Identité & Ancrage', offre: 'Clarté de l\'Offre', processus_methodes: 'Processus & Méthodes', engagements_conformite: 'Confiance & Conformité', indicateurs: 'Preuve Sociale & Métriques', contenus_pedagogiques: 'Pédagogie & Supports', structure_technique: 'Socle Technique AIO' },
+            };
             const weakBlocks = Object.entries(initialScore.audit || {})
                 .filter(([, v]: [string, any]) => v.status === 'error' || v.status === 'warning')
-                .map(([, v]: [string, any]) => v.label);
+                .map(([k]: [string, any]) => blockLabelsMap[locale]?.[k] || k);
 
             if (weakBlocks.length > 0) {
                 transparencySummary += isEn
@@ -2240,12 +2244,13 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                 // Fallback if engine didn't return audit (sanity check)
                 if (!structuredAnalysis) {
                     console.warn("⚠️ Engine did not return audit blocks. Using fallback reconstruction.");
+                    const obs = locale === 'en' ? "Standard analysis." : "Analyse standard.";
                     structuredAnalysis = {
-                        identite: { score: scoreResult.blocks.identite, max: 10, label: "Identité & Ancrage", status: "warning", observation: "Analyse standard." },
-                        offre: { score: scoreResult.blocks.offre, max: 20, label: "Clarté de l'Offre", status: "warning", observation: "Analyse standard." },
-                        processus: { score: scoreResult.blocks.processus_methodes, max: 15, label: "Processus & Méthodes", status: "warning", observation: "Analyse standard." },
-                        confiance: { score: scoreResult.blocks.engagements_conformite, max: 15, label: "Confiance & Conformité", status: "warning", observation: "Analyse standard." },
-                        technique: { score: scoreResult.blocks.structure_technique, max: 10, label: "Socle Technique", status: "warning", observation: "Analyse standard." }
+                        identite: { score: scoreResult.blocks.identite, max: 10, label: locale === 'en' ? "Identity & Anchoring" : "Identité & Ancrage", status: "warning", observation: obs },
+                        offre: { score: scoreResult.blocks.offre, max: 20, label: locale === 'en' ? "Offer Clarity" : "Clarté de l'Offre", status: "warning", observation: obs },
+                        processus: { score: scoreResult.blocks.processus_methodes, max: 15, label: locale === 'en' ? "Processes & Methods" : "Processus & Méthodes", status: "warning", observation: obs },
+                        confiance: { score: scoreResult.blocks.engagements_conformite, max: 15, label: locale === 'en' ? "Trust & Compliance" : "Confiance & Conformité", status: "warning", observation: obs },
+                        technique: { score: scoreResult.blocks.structure_technique, max: 10, label: locale === 'en' ? "Technical Foundation" : "Socle Technique", status: "warning", observation: obs }
                     };
                 }
 
