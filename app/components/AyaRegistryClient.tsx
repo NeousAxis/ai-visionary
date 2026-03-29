@@ -268,7 +268,7 @@ export default function AyaRegistryClient({
                                         {/* SECTOR */}
                                         <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>
                                             {entity.sector_macro && entity.sector_macro !== 'General' && !/type schema/i.test(entity.sector_macro) && !/^organization$/i.test(entity.sector_macro)
-                                                ? entity.sector_macro
+                                                ? (() => { try { return t(`sectors.${entity.sector_macro}`); } catch { return entity.sector_macro; } })()
                                                 : certified ? t('certifiedDesc') : t('indexedDesc')}
                                         </p>
 

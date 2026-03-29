@@ -1,4 +1,13 @@
 {
+  "meta": {
+    "defaultTitle": "AI VISIONARY \u2014 Make your business visible to AI",
+    "description": "Make your business readable, visible and recommendable by AI (ChatGPT, Gemini, Claude). Free diagnostic, certified ASR files, AYA Registry.",
+    "keywords": "AIO, AI visibility, ChatGPT, Gemini, Claude, ASR, AYA, AI optimization, AI Visionary, Geneva",
+    "ogTitle": "AI VISIONARY \u2014 Make your business visible to AI",
+    "ogDescription": "Free AI visibility diagnostic. Certified ASR files to be recommended by ChatGPT, Gemini, Claude and all AI agents.",
+    "twitterTitle": "AI VISIONARY \u2014 AI Visibility for your business",
+    "twitterDescription": "Make your business readable and recommendable by AI."
+  },
   "nav": {
     "home": "Home",
     "ayaRegistry": "AYA Registry",
@@ -222,6 +231,37 @@
       "association": "Association",
       "public_body": "Public Body",
       "individual": "Freelancer"
+    },
+    "sectors": {
+      "Technologie & SaaS": "Technology & SaaS",
+      "Finance & Assurance": "Finance & Insurance",
+      "Finance & Banque": "Finance & Banking",
+      "Sant\u00e9 & Pharma": "Healthcare & Pharma",
+      "Alimentation & Boissons": "Food & Beverage",
+      "Commerce & Retail": "Retail & E-commerce",
+      "E-commerce & Retail": "E-commerce & Retail",
+      "\u00c9ducation & Formation": "Education & Training",
+      "\u00c9nergie & Environnement": "Energy & Environment",
+      "Consulting & Services": "Consulting & Services",
+      "Conseil & Services Pro": "Consulting & Professional Services",
+      "M\u00e9dia & Communication": "Media & Communication",
+      "Transport & Logistique": "Transport & Logistics",
+      "Tourisme & Transport": "Tourism & Transport",
+      "Industrie & Manufacture": "Industry & Manufacturing",
+      "Industrie & Manufacturing": "Industry & Manufacturing",
+      "Immobilier & Construction": "Real Estate & Construction",
+      "Immobilier": "Real Estate",
+      "T\u00e9l\u00e9communications": "Telecommunications",
+      "Administration & Gouvernement": "Government & Public Sector",
+      "Administration & Public": "Administration & Public Sector",
+      "ONG & Associations": "Non-profit & NGO",
+      "Loisirs & Tourisme": "Leisure & Tourism",
+      "Blockchain & Web3": "Blockchain & Web3",
+      "Intelligence Artificielle": "Artificial Intelligence",
+      "Luxe & Mode": "Luxury & Fashion",
+      "Restauration & Alimentation": "Food & Restaurants",
+      "Non d\u00e9tect\u00e9": "Not detected",
+      "General": "General"
     }
   },
   "certificate": {
@@ -282,6 +322,10 @@
     "scoreAio": "AIO Score"
   },
   "diagnostic": {
+    "metaTitle": "Free AIO Diagnostic \u2014 Test your AI visibility",
+    "metaDescription": "Analyze your website\u2019s AI readability for free. AIO score from 0 to 100, personalized recommendations and ASR files to be recommended by ChatGPT, Gemini, Claude.",
+    "metaOgTitle": "Free AIO Diagnostic \u2014 AI Visionary",
+    "metaOgDescription": "Test for free whether your business is visible to AI. Instant AIO score, no commitment.",
     "backHome": "\u2190 Back to home",
     "footer": "\u00a9 2026 AI Visionary \u2022 \ud83c\udde8\ud83c\udded Based in Geneva",
     "chatTitle": "AYO AI Agent",
@@ -312,6 +356,9 @@
     "contactSupport": "Contact support"
   },
   "renew": {
+    "metaTitle": "Renew \u2014 {name} | AYA",
+    "metaDescription": "Renew your AYA certification for {name}.",
+    "metaFallbackName": "Entity",
     "title": "Renew your AYA presence",
     "subtitle": "Renew your certification to stay visible and recommended by AIs.",
     "currentSituation": "Your current situation",
@@ -319,6 +366,10 @@
     "scoreLabel": "AIO Score",
     "expirationLabel": "Expiration",
     "expiredMessage": "Your certification has expired. Renew to maintain your visibility with AIs.",
+    "fallbackName": "Entity",
+    "packLabelPro": "PRO",
+    "packLabelPlatform": "PLATFORM",
+    "packLabelIndexed": "INDEXED",
     "contactQuestion": "Any questions? Contact us at",
     "recommended": "RECOMMENDED",
     "proTitle": "PRO Pack",
@@ -344,7 +395,10 @@
     "proPrice_full": "499 CHF one-shot",
     "loading": "Loading...",
     "backRegistry": "\u2190 Back to registry",
-    "contactError": "Contact us if the issue persists"
+    "contactError": "Contact us if the issue persists",
+    "packActive": "Your {pack} is active until {date}. No renewal is necessary.",
+    "packExpiresSoon": "Your pack expires in {days} days. Renew now to maintain your certification.",
+    "noDowngrade": "You currently have a PRO pack. Upgrade is not necessary."
   },
   "update": {
     "title": "Update your data",

@@ -142,6 +142,56 @@ function filterGarbageServices(services: string[]): string[] {
     return filtered;
 }
 
+// ─── Shared entity data extraction ──────────────────────────
+
+interface EntityFields {
+    name: string;
+    category: string;
+    countryCode: string;
+    location: string;
+    services: string[];
+    businessType: string;
+    geminiDesc: string;
+    metaDesc: string;
+    rawAudience: string;
+}
+
+const GENERIC_NAMES = ['Unknown', 'Entity', 'Unknown Entity', 'Entreprise Inconnue', 'Homepage', 'Welcome'];
+
+/** Extract all commonly-needed fields from an entity, locale-aware. */
+function extractEntityFields(entity: any, locale: 'fr' | 'en'): EntityFields {
+    const asr = extractAsrData(entity);
+
+    const rawName = entity.display_name || entity.legal_name || '';
+    const name = (rawName && !GENERIC_NAMES.includes(rawName))
+        ? rawName
+        : (entity.website ? domainFromUrl(entity.website) : 'Unknown');
+
+    const sectorRaw = entity.sector_macro || 'General';
+    const category = SECTOR_LABELS[sectorRaw] || sectorRaw;
+
+    const countryCode = entity.country_legal || 'XX';
+    const countryMap = locale === 'fr' ? COUNTRY_LABELS_FR : COUNTRY_LABELS;
+    const location = countryMap[countryCode] || (countryCode === 'XX' ? 'Global' : countryCode);
+
+    const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
+    const services = filterGarbageServices(rawServices);
+    const businessType: string = asr.identite?.business_type?.value || '';
+
+    const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
+    const geminiDescFr: string = enrichment.gemini_description_fr || '';
+    const geminiDescEn: string = enrichment.gemini_description || '';
+    const geminiDesc = locale === 'fr' ? (geminiDescFr || geminiDescEn) : geminiDescEn;
+
+    const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
+
+    const rawAudience: string = Array.isArray(asr.offre?.target_audience?.value)
+        ? asr.offre.target_audience.value.join(', ')
+        : (asr.offre?.target_audience?.value || '');
+
+    return { name, category, countryCode, location, services, businessType, geminiDesc, metaDesc, rawAudience };
+}
+
 // ─── Core functions ──────────────────────────────────────────
 
 /**
@@ -149,71 +199,36 @@ function filterGarbageServices(services: string[]): string[] {
  * @param locale 'en' (default, backward-compat) or 'fr'
  */
 export function buildLlmSummary(entity: any, locale: 'fr' | 'en' = 'en'): LlmSummary {
-    const asr = extractAsrData(entity);
-
-    // Name
-    const genericNames = ['Unknown', 'Entity', 'Unknown Entity', 'Entreprise Inconnue', 'Homepage', 'Welcome'];
-    const rawName = entity.display_name || entity.legal_name || '';
-    const name = (rawName && !genericNames.includes(rawName))
-        ? rawName
-        : (entity.website ? domainFromUrl(entity.website) : 'Unknown');
-
-    // Category (English label)
-    const sectorRaw = entity.sector_macro || 'General';
-    const category = SECTOR_LABELS[sectorRaw] || sectorRaw;
-
-    // Location — locale-aware
-    const countryCode = entity.country_legal || 'XX';
-    const countryMap = locale === 'fr' ? COUNTRY_LABELS_FR : COUNTRY_LABELS;
-    const location = countryMap[countryCode] || (countryCode === 'XX' ? 'Global' : countryCode);
-
-    // What it does — derive from services + business_type, filter garbage
-    const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
-    const services = filterGarbageServices(rawServices);
-    const businessType: string = asr.identite?.business_type?.value || '';
-
-    // Priority 1: Gemini-enriched description (best quality)
-    const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
-    const geminiDescFr: string = enrichment.gemini_description_fr || '';
-    const geminiDescEn: string = enrichment.gemini_description || '';
-    const geminiDesc = locale === 'fr' ? (geminiDescFr || geminiDescEn) : geminiDescEn;
-
-    // Priority 2: meta description from scan
-    const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
+    const f = extractEntityFields(entity, locale);
 
     let whatItDoes = '';
-    if (geminiDesc && geminiDesc.length > 10) {
-        // Gemini description = highest quality
-        whatItDoes = cleanText(geminiDesc);
+    if (f.geminiDesc && f.geminiDesc.length > 10) {
+        whatItDoes = cleanText(f.geminiDesc);
         if (!whatItDoes.endsWith('.')) whatItDoes += '.';
-    } else if (services.length > 0) {
-        const svcText = services.slice(0, 3).join(', ');
-        whatItDoes = businessType
-            ? `${businessType} providing ${svcText.toLowerCase()}.`
+    } else if (f.services.length > 0) {
+        const svcText = f.services.slice(0, 3).join(', ');
+        whatItDoes = f.businessType
+            ? `${f.businessType} providing ${svcText.toLowerCase()}.`
             : `Provides ${svcText.toLowerCase()}.`;
-    } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
-        whatItDoes = cleanText(metaDesc);
+    } else if (f.metaDesc && f.metaDesc.length > 20 && f.metaDesc.length < 200) {
+        whatItDoes = cleanText(f.metaDesc);
         if (!whatItDoes.endsWith('.')) whatItDoes += '.';
-    } else if (businessType) {
-        whatItDoes = `${businessType} based in ${location}.`;
+    } else if (f.businessType) {
+        whatItDoes = `${f.businessType} based in ${f.location}.`;
     } else {
-        whatItDoes = `${category} company.`;
+        whatItDoes = `${f.category} company.`;
     }
     whatItDoes = truncate(cleanText(whatItDoes), 200);
 
-    // For who — derive from target_audience
-    const rawAudience: string = Array.isArray(asr.offre?.target_audience?.value)
-        ? asr.offre.target_audience.value.join(', ')
-        : (asr.offre?.target_audience?.value || '');
     let forWho = '';
-    if (rawAudience && rawAudience.length > 3) {
-        forWho = truncate(cleanText(rawAudience), 150);
+    if (f.rawAudience && f.rawAudience.length > 3) {
+        forWho = truncate(cleanText(f.rawAudience), 150);
         if (!forWho.endsWith('.')) forWho += '.';
     } else {
-        forWho = SECTOR_AUDIENCE_FALLBACK[category] || 'Businesses and professionals.';
+        forWho = SECTOR_AUDIENCE_FALLBACK[f.category] || 'Businesses and professionals.';
     }
 
-    return { name, what_it_does: whatItDoes, for_who: forWho, category, location };
+    return { name: f.name, what_it_does: whatItDoes, for_who: forWho, category: f.category, location: f.location };
 }
 
 // French country names for certificate page descriptions
@@ -242,111 +257,80 @@ function countryPreposition(cc: string): string {
 
 /**
  * Build 2-4 sentence plain text description for certificate pages.
+ * Uses extractEntityFields to avoid re-extracting data already available.
  * @param locale 'fr' (default, backward-compat) or 'en'
  */
 export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'fr'): string {
-    const summary = buildLlmSummary(entity, locale);
-    const asr = extractAsrData(entity);
-
-    const cc = entity.country_legal || 'XX';
-
-    // Phrase 1: identity + what it does — filter garbage services
-    const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
-    const services = filterGarbageServices(rawServices);
-    const businessType: string = asr.identite?.business_type?.value || '';
-    const sectorLabel = summary.category;
-    const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
-
-    // Use Gemini description if available (best quality)
-    const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
-    const geminiFr: string = enrichment.gemini_description_fr || '';
-    const geminiEn: string = enrichment.gemini_description || '';
-    const geminiDesc = locale === 'fr' ? (geminiFr || geminiEn) : geminiEn;
+    const f = extractEntityFields(entity, locale);
 
     let phrase1 = '';
     let phrase2 = '';
     let phrase3 = '';
 
+    // Phrase 1: identity + what it does (priority: gemini > services > meta > businessType > sector)
+    const hasGemini = f.geminiDesc && f.geminiDesc.length > 10;
+    const hasMeta = f.metaDesc && f.metaDesc.length > 20 && f.metaDesc.length < 200;
+
     if (locale === 'fr') {
-        // ─── French path (original behavior, unchanged) ───
-        const locationFr = COUNTRY_LABELS_FR[cc] || (cc === 'XX' ? '' : cc);
-        const prep = countryPreposition(cc);
+        const locationFr = COUNTRY_LABELS_FR[f.countryCode] || (f.countryCode === 'XX' ? '' : f.countryCode);
+        const prep = countryPreposition(f.countryCode);
 
-        if (geminiDesc && geminiDesc.length > 10) {
-            phrase1 = `${summary.name} : ${cleanText(geminiDesc)}`;
+        if (hasGemini) {
+            phrase1 = `${f.name} : ${cleanText(f.geminiDesc)}`;
             if (!phrase1.endsWith('.')) phrase1 += '.';
-        } else if (services.length > 0) {
-            const svcFr = services.slice(0, 3).join(', ');
-            if (businessType) {
-                phrase1 = `${summary.name} est ${addArticle(businessType)} qui propose ${svcFr.toLowerCase()}.`;
-            } else {
-                phrase1 = `${summary.name} propose ${svcFr.toLowerCase()}.`;
-            }
-        } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
-            phrase1 = `${summary.name} : ${cleanText(metaDesc)}`;
+        } else if (f.services.length > 0) {
+            const svcFr = f.services.slice(0, 3).join(', ');
+            phrase1 = f.businessType
+                ? `${f.name} est ${addArticle(f.businessType)} qui propose ${svcFr.toLowerCase()}.`
+                : `${f.name} propose ${svcFr.toLowerCase()}.`;
+        } else if (hasMeta) {
+            phrase1 = `${f.name} : ${cleanText(f.metaDesc)}`;
             if (!phrase1.endsWith('.')) phrase1 += '.';
-        } else if (businessType) {
-            phrase1 = `${summary.name} est ${addArticle(businessType)}.`;
+        } else if (f.businessType) {
+            phrase1 = `${f.name} est ${addArticle(f.businessType)}.`;
         } else {
-            phrase1 = `${summary.name} est une entreprise du secteur ${sectorLabel}.`;
+            phrase1 = `${f.name} est une entreprise du secteur ${f.category}.`;
         }
 
-        // Phrase 2: audience (FR)
-        const rawAudience = Array.isArray(asr.offre?.target_audience?.value)
-            ? asr.offre.target_audience.value.join(', ')
-            : (asr.offre?.target_audience?.value || '');
-        phrase2 = rawAudience && rawAudience.length > 3
-            ? `Elle s'adresse principalement ${rawAudience.startsWith('aux') || rawAudience.startsWith('à') ? '' : 'à '}${rawAudience.toLowerCase()}.`
+        phrase2 = f.rawAudience && f.rawAudience.length > 3
+            ? `Elle s'adresse principalement ${f.rawAudience.startsWith('aux') || f.rawAudience.startsWith('à') ? '' : 'à '}${f.rawAudience.toLowerCase()}.`
             : '';
 
-        // Phrase 3: location (FR)
-        phrase3 = locationFr
-            ? `Basée ${prep} ${locationFr}.`
-            : '';
+        phrase3 = locationFr ? `Basée ${prep} ${locationFr}.` : '';
     } else {
-        // ─── English path ───
-        const locationEn = COUNTRY_LABELS[cc] || (cc === 'XX' ? '' : cc);
+        const locationEn = COUNTRY_LABELS[f.countryCode] || (f.countryCode === 'XX' ? '' : f.countryCode);
 
-        if (geminiDesc && geminiDesc.length > 10) {
-            phrase1 = `${summary.name}: ${cleanText(geminiDesc)}`;
+        if (hasGemini) {
+            phrase1 = `${f.name}: ${cleanText(f.geminiDesc)}`;
             if (!phrase1.endsWith('.')) phrase1 += '.';
-        } else if (services.length > 0) {
-            const svcEn = services.slice(0, 3).join(', ');
-            if (businessType) {
-                phrase1 = `${summary.name} is a ${businessType.toLowerCase()} that provides ${svcEn.toLowerCase()}.`;
-            } else {
-                phrase1 = `${summary.name} provides ${svcEn.toLowerCase()}.`;
-            }
-        } else if (metaDesc && metaDesc.length > 20 && metaDesc.length < 200) {
-            phrase1 = `${summary.name}: ${cleanText(metaDesc)}`;
+        } else if (f.services.length > 0) {
+            const svcEn = f.services.slice(0, 3).join(', ');
+            phrase1 = f.businessType
+                ? `${f.name} is a ${f.businessType.toLowerCase()} that provides ${svcEn.toLowerCase()}.`
+                : `${f.name} provides ${svcEn.toLowerCase()}.`;
+        } else if (hasMeta) {
+            phrase1 = `${f.name}: ${cleanText(f.metaDesc)}`;
             if (!phrase1.endsWith('.')) phrase1 += '.';
-        } else if (businessType) {
-            phrase1 = `${summary.name} is a ${businessType.toLowerCase()}.`;
+        } else if (f.businessType) {
+            phrase1 = `${f.name} is a ${f.businessType.toLowerCase()}.`;
         } else {
-            phrase1 = `${summary.name} is a ${sectorLabel} company.`;
+            phrase1 = `${f.name} is a ${f.category} company.`;
         }
 
-        // Phrase 2: audience (EN)
-        const rawAudience = Array.isArray(asr.offre?.target_audience?.value)
-            ? asr.offre.target_audience.value.join(', ')
-            : (asr.offre?.target_audience?.value || '');
-        phrase2 = rawAudience && rawAudience.length > 3
-            ? `It primarily serves ${rawAudience.toLowerCase()}.`
+        phrase2 = f.rawAudience && f.rawAudience.length > 3
+            ? `It primarily serves ${f.rawAudience.toLowerCase()}.`
             : '';
 
-        // Phrase 3: location (EN)
-        phrase3 = locationEn
-            ? `Based in ${locationEn}.`
-            : '';
+        phrase3 = locationEn ? `Based in ${locationEn}.` : '';
     }
 
     return [phrase1, phrase2, phrase3].filter(Boolean).join(' ');
 }
 
-/** Add French article before business type */
+/** Add French indefinite article before business type ("une agence", "un cabinet") */
 function addArticle(bt: string): string {
     const lower = bt.toLowerCase();
-    const vowels = ['a', 'e', 'i', 'o', 'u', 'é', 'è', 'ê'];
-    if (vowels.some(v => lower.startsWith(v))) return `un ${bt.toLowerCase()}`;
-    return `un ${bt.toLowerCase()}`;
+    const feminine = ['agence', 'entreprise', 'société', 'association', 'organisation', 'fondation', 'plateforme', 'banque', 'compagnie', 'marque'];
+    const article = feminine.some(f => lower.startsWith(f)) ? 'une' : 'un';
+    return `${article} ${lower}`;
 }

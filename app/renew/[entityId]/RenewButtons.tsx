@@ -10,6 +10,9 @@ interface RenewButtonsProps {
     hasRequiredInfo: boolean;
     proUrl?: string;
     ayaUrl?: string;
+    isActive: boolean;
+    expiresSoon: boolean;
+    currentPackType: 'PRO' | 'AYA_SUB';
 }
 
 function useCheckout(email: string, url: string, entityId: string, proUrl?: string, ayaUrl?: string) {
@@ -52,7 +55,7 @@ function useCheckout(email: string, url: string, entityId: string, proUrl?: stri
     return { loading, error, checkout };
 }
 
-export default function RenewButtons({ email, url, entityId, hasRequiredInfo, proUrl, ayaUrl }: RenewButtonsProps) {
+export default function RenewButtons({ email, url, entityId, hasRequiredInfo, proUrl, ayaUrl, isActive, expiresSoon, currentPackType }: RenewButtonsProps) {
     const t = useTranslations('renew');
     const { loading, error, checkout } = useCheckout(email, url, entityId, proUrl, ayaUrl);
 
@@ -84,6 +87,14 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
         t('ayaFeature4'),
     ];
 
+    // Pack active and not expiring soon: hide all buttons
+    if (isActive && !expiresSoon) {
+        return null;
+    }
+
+    // PRO active (expiring soon or not): hide AYA option (no downgrade)
+    const hideAya = currentPackType === 'PRO' && isActive;
+
     return (
         <>
             {error && (
@@ -105,7 +116,7 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: hideAya ? '1fr' : '1fr 1fr', gap: '1.5rem', maxWidth: hideAya ? '400px' : undefined, margin: hideAya ? '0 auto' : undefined }}>
                 {/* PRO */}
                 <div className="card" style={{ position: 'relative', border: '2px solid #D97706' }}>
                     <div style={{
@@ -143,7 +154,8 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                     </div>
                 </div>
 
-                {/* AYA Sub */}
+                {/* AYA Sub — hidden if PRO active (no downgrade) */}
+                {!hideAya && (
                 <div className="card" style={{ border: '2px solid var(--primary-color)' }}>
                     <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
                         <h4 style={{ color: 'var(--text-main)', marginBottom: '0.25rem', fontSize: '1.2rem' }}>{t('ayaSubTitle')}</h4>
@@ -172,6 +184,7 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                         )}
                     </div>
                 </div>
+                )}
             </div>
         </>
     );

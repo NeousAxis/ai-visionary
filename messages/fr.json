@@ -1,4 +1,13 @@
 {
+  "meta": {
+    "defaultTitle": "AI VISIONARY \u2014 Rendez votre entreprise visible par l\u2019IA",
+    "description": "Rendez votre entreprise lisible, visible et recommandable par les IA (ChatGPT, Gemini, Claude). Diagnostic gratuit, fichiers ASR certifi\u00e9s, Registre AYA.",
+    "keywords": "AIO, visibilit\u00e9 IA, ChatGPT, Gemini, Claude, ASR, AYA, r\u00e9f\u00e9rencement IA, AI Visionary, Gen\u00e8ve",
+    "ogTitle": "AI VISIONARY \u2014 Rendez votre entreprise visible par l\u2019IA",
+    "ogDescription": "Diagnostic gratuit de visibilit\u00e9 IA. Fichiers ASR certifi\u00e9s pour \u00eatre recommand\u00e9 par ChatGPT, Gemini, Claude et tous les agents IA.",
+    "twitterTitle": "AI VISIONARY \u2014 Visibilit\u00e9 IA pour votre entreprise",
+    "twitterDescription": "Rendez votre entreprise lisible et recommandable par les IA."
+  },
   "nav": {
     "home": "Accueil",
     "ayaRegistry": "Registre AYA",
@@ -222,6 +231,37 @@
       "association": "Association",
       "public_body": "Organisme Public",
       "individual": "Ind\u00e9pendant"
+    },
+    "sectors": {
+      "Technologie & SaaS": "Technologie & SaaS",
+      "Finance & Assurance": "Finance & Assurance",
+      "Finance & Banque": "Finance & Banque",
+      "Sant\u00e9 & Pharma": "Sant\u00e9 & Pharma",
+      "Alimentation & Boissons": "Alimentation & Boissons",
+      "Commerce & Retail": "Commerce & Retail",
+      "E-commerce & Retail": "E-commerce & Retail",
+      "\u00c9ducation & Formation": "\u00c9ducation & Formation",
+      "\u00c9nergie & Environnement": "\u00c9nergie & Environnement",
+      "Consulting & Services": "Consulting & Services",
+      "Conseil & Services Pro": "Conseil & Services Pro",
+      "M\u00e9dia & Communication": "M\u00e9dia & Communication",
+      "Transport & Logistique": "Transport & Logistique",
+      "Tourisme & Transport": "Tourisme & Transport",
+      "Industrie & Manufacture": "Industrie & Manufacture",
+      "Industrie & Manufacturing": "Industrie & Manufacturing",
+      "Immobilier & Construction": "Immobilier & Construction",
+      "Immobilier": "Immobilier",
+      "T\u00e9l\u00e9communications": "T\u00e9l\u00e9communications",
+      "Administration & Gouvernement": "Administration & Gouvernement",
+      "Administration & Public": "Administration & Public",
+      "ONG & Associations": "ONG & Associations",
+      "Loisirs & Tourisme": "Loisirs & Tourisme",
+      "Blockchain & Web3": "Blockchain & Web3",
+      "Intelligence Artificielle": "Intelligence Artificielle",
+      "Luxe & Mode": "Luxe & Mode",
+      "Restauration & Alimentation": "Restauration & Alimentation",
+      "Non d\u00e9tect\u00e9": "Non d\u00e9tect\u00e9",
+      "General": "G\u00e9n\u00e9ral"
     }
   },
   "certificate": {
@@ -282,6 +322,10 @@
     "scoreAio": "Score AIO"
   },
   "diagnostic": {
+    "metaTitle": "Diagnostic AIO gratuit \u2014 Testez votre visibilit\u00e9 IA",
+    "metaDescription": "Analysez gratuitement la lisibilit\u00e9 IA de votre site web. Score AIO de 0 \u00e0 100, recommandations personnalis\u00e9es et fichiers ASR pour \u00eatre recommand\u00e9 par ChatGPT, Gemini, Claude.",
+    "metaOgTitle": "Diagnostic AIO gratuit \u2014 AI Visionary",
+    "metaOgDescription": "Testez gratuitement si votre entreprise est visible par les IA. Score AIO imm\u00e9diat, sans engagement.",
     "backHome": "\u2190 Retour \u00e0 l\u2019accueil",
     "footer": "\u00a9 2026 AI Visionary \u2022 \ud83c\udde8\ud83c\udded Bas\u00e9e \u00e0 Gen\u00e8ve",
     "chatTitle": "AYO Agent IA",
@@ -312,6 +356,9 @@
     "contactSupport": "Contacter le support"
   },
   "renew": {
+    "metaTitle": "Renouveler \u2014 {name} | AYA",
+    "metaDescription": "Renouvelez votre certification AYA pour {name}.",
+    "metaFallbackName": "Entit\u00e9",
     "title": "Renouveler votre pr\u00e9sence AYA",
     "subtitle": "Renouvelez votre certification pour continuer a etre visible et recommande par les IA.",
     "currentSituation": "Votre situation actuelle",
@@ -319,7 +366,11 @@
     "scoreLabel": "Score AIO",
     "expirationLabel": "Expiration",
     "expiredMessage": "Votre certification a expire. Renouvelez pour maintenir votre visibilite aupres des IA.",
-    "contactQuestion": "Une question ? Contactez-nous a",
+    "fallbackName": "Entit\u00e9",
+    "packLabelPro": "PRO",
+    "packLabelPlatform": "PLATEFORME",
+    "packLabelIndexed": "INDEX\u00c9",
+    "contactQuestion": "Une question ? Contactez-nous \u00e0",
     "recommended": "RECOMMANDE",
     "proTitle": "Pack PRO",
     "proPrice": "499 CHF",
@@ -344,7 +395,10 @@
     "proPrice_full": "499 CHF one-shot",
     "loading": "Chargement...",
     "backRegistry": "\u2190 Retour au registre",
-    "contactError": "Contactez-nous si le probleme persiste"
+    "contactError": "Contactez-nous si le probleme persiste",
+    "packActive": "Votre {pack} est actif jusqu\u2019au {date}. Aucun renouvellement necessaire.",
+    "packExpiresSoon": "Votre pack expire dans {days} jours. Renouvelez maintenant pour maintenir votre certification.",
+    "noDowngrade": "Vous avez actuellement un pack PRO. La mise a niveau n\u2019est pas necessaire."
   },
   "update": {
     "title": "Mettre \u00e0 jour vos donn\u00e9es",

@@ -4,22 +4,23 @@ import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
 import RenewButtons from './RenewButtons';
 import type { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 export const revalidate = 0;
 
 export async function generateMetadata({ params }: { params: Promise<{ entityId: string }> }): Promise<Metadata> {
     const { entityId } = await params;
     const entity = await db.getAyaEntityById(entityId);
+    const t = await getTranslations('renew');
 
     if (!entity) {
-        return { title: 'Renouvellement — Non disponible' };
+        return { title: t('metaTitle', { name: t('metaFallbackName') }) };
     }
 
-    const name = entity.display_name || entity.legal_name || 'Entite';
+    const name = entity.display_name || entity.legal_name || t('metaFallbackName');
     return {
-        title: `Renouveler — ${name} | AYA`,
-        description: `Renouvelez votre certification AYA pour ${name}.`,
+        title: t('metaTitle', { name }),
+        description: t('metaDescription', { name }),
     };
 }
 
@@ -27,6 +28,7 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
     const { entityId } = await params;
     const entity = await db.getAyaEntityById(entityId);
     const t = await getTranslations('renew');
+    const locale = await getLocale();
 
     if (!entity) {
         return notFound();
@@ -36,7 +38,7 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
     const rawName = entity.display_name || entity.legal_name;
     const name = (rawName && !genericNames.includes(rawName))
         ? rawName
-        : (entity.website ? entity.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : 'Entite');
+        : (entity.website ? entity.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : t('fallbackName'));
 
     const score = (entity.asr_score !== undefined && entity.asr_score !== null) ? entity.asr_score : null;
     const isCertified = entity.payment_completed === true;
@@ -49,14 +51,20 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
     const monthsUntilExpiry = validUntilDate ? (validUntilDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30) : 0;
     const isProByDate = monthsUntilExpiry > 12; // PRO = 3 years = ~36 months
     const isPro = isProByPackType || isProByDate;
-    const packLabel = isCertified ? (isPro ? 'PRO' : 'PLATEFORME') : 'INDEXE';
+    const packLabel = isCertified ? (isPro ? t('packLabelPro') : t('packLabelPlatform')) : t('packLabelIndexed');
 
-    // Expiry date
+    // Expiry date + lifecycle
+    const now = new Date();
     const validUntilRaw = entity.valid_until ? new Date(entity.valid_until) : null;
     const hasValidDate = validUntilRaw && validUntilRaw.getFullYear() >= 2020;
-    const isExpired = hasValidDate ? validUntilRaw > new Date() === false : false;
+    const isExpired = hasValidDate ? validUntilRaw > now === false : false;
+    const isActive = hasValidDate ? validUntilRaw > now : false;
+    const expiresInDays = hasValidDate ? Math.ceil((validUntilRaw.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+    const expiresSoon = isActive && expiresInDays <= 30;
+    const currentPackType = isPro ? 'PRO' : 'AYA_SUB';
+    const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
     const expiryDisplay = hasValidDate
-        ? validUntilRaw.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' })
+        ? validUntilRaw.toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })
         : '\u2014';
 
     const email = entity.contact_email || entity.email || '';
@@ -176,6 +184,36 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                         )}
                     </div>
 
+                    {/* Lifecycle messages */}
+                    {isActive && !expiresSoon && (
+                        <div style={{
+                            background: '#D1FAE5',
+                            border: '1px solid #6EE7B7',
+                            color: '#065F46',
+                            padding: '14px 18px',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: '0.9rem',
+                            textAlign: 'center',
+                            marginBottom: '1.5rem',
+                        }}>
+                            {t('packActive', { pack: packLabel, date: expiryDisplay })}
+                        </div>
+                    )}
+                    {expiresSoon && (
+                        <div style={{
+                            background: '#FEF3C7',
+                            border: '1px solid #FCD34D',
+                            color: '#92400E',
+                            padding: '14px 18px',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: '0.9rem',
+                            textAlign: 'center',
+                            marginBottom: '1.5rem',
+                        }}>
+                            {t('packExpiresSoon', { days: String(expiresInDays) })}
+                        </div>
+                    )}
+
                     {/* Renewal options */}
                     <RenewButtons
                         email={email}
@@ -184,6 +222,9 @@ export default async function RenewPage({ params }: { params: Promise<{ entityId
                         hasRequiredInfo={hasRequiredInfo}
                         proUrl={proUrl}
                         ayaUrl={ayaUrl}
+                        isActive={isActive}
+                        expiresSoon={expiresSoon}
+                        currentPackType={currentPackType}
                     />
 
                     {/* Footer help */}

@@ -1,41 +1,45 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 
-export const metadata: Metadata = {
-  metadataBase: new URL('https://ai-visionary.com'),
-  title: {
-    default: "AI VISIONARY — Rendez votre entreprise visible par l'IA",
-    template: "%s | AI VISIONARY",
-  },
-  description: "Rendez votre entreprise lisible, visible et recommandable par les IA (ChatGPT, Gemini, Claude). Diagnostic gratuit, fichiers ASR certifiés, Registre AYA.",
-  keywords: ["AIO", "visibilité IA", "ChatGPT", "Gemini", "Claude", "ASR", "AYA", "référencement IA", "AI Visionary", "Genève"],
-  authors: [{ name: "AI Visionary" }],
-  openGraph: {
-    type: "website",
-    locale: "fr_CH",
-    url: "https://ai-visionary.com",
-    siteName: "AI VISIONARY",
-    title: "AI VISIONARY — Rendez votre entreprise visible par l'IA",
-    description: "Diagnostic gratuit de visibilité IA. Fichiers ASR certifiés pour être recommandé par ChatGPT, Gemini, Claude et tous les agents IA.",
-    images: [{ url: "/icon-v2.png", width: 512, height: 512, alt: "AI Visionary Logo" }],
-  },
-  twitter: {
-    card: "summary",
-    title: "AI VISIONARY — Visibilité IA pour votre entreprise",
-    description: "Rendez votre entreprise lisible et recommandable par les IA.",
-    images: ["/icon-v2.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('meta');
+  const locale = await getLocale();
+  return {
+    metadataBase: new URL('https://ai-visionary.com'),
+    title: {
+      default: t('defaultTitle'),
+      template: "%s | AI VISIONARY",
+    },
+    description: t('description'),
+    keywords: t('keywords').split(', '),
+    authors: [{ name: "AI Visionary" }],
+    openGraph: {
+      type: "website",
+      locale: locale === 'fr' ? "fr_CH" : "en",
+      url: "https://ai-visionary.com",
+      siteName: "AI VISIONARY",
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      images: [{ url: "/icon-v2.png", width: 512, height: 512, alt: "AI Visionary Logo" }],
+    },
+    twitter: {
+      card: "summary",
+      title: t('twitterTitle'),
+      description: t('twitterDescription'),
+      images: ["/icon-v2.png"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

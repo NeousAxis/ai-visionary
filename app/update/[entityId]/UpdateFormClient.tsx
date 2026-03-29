@@ -50,8 +50,6 @@ export default function UpdateFormClient({
   const [regenError, setRegenError] = useState('');
   // Track which url_locked fields are unlocked for editing
   const [unlockedUrls, setUnlockedUrls] = useState<Set<string>>(new Set());
-  // Track which fields the user has actually modified (dirty tracking)
-  const [dirtyFields, setDirtyFields] = useState<Set<string>>(new Set());
   // Track fields marked as "Non applicable" by the user
   const [naFields, setNaFields] = useState<Set<string>>(new Set());
 
@@ -64,7 +62,6 @@ export default function UpdateFormClient({
 
   const setBlockValue = useCallback(
     (blockKey: string, fieldName: string, value: unknown) => {
-      setDirtyFields(prev => new Set(prev).add(`${blockKey}.${fieldName}`));
       setFormData(prev => ({
         ...prev,
         [blockKey]: { ...prev[blockKey], [fieldName]: value },

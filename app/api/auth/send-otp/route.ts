@@ -26,67 +26,49 @@ export async function POST(req: NextRequest) {
         const locale: 'fr' | 'en' = body.locale === 'en' ? 'en' : (cookieLocaleMatch?.[1] === 'en' ? 'en' : 'fr');
         const en = locale === 'en';
 
-        let adminEmail: string | null = null;
-        let entityName: string = '';
+        // Look up entity by entityId (MODE 2) or URL (MODE 1)
+        let entity: any = null;
+        let lookupLabel = '';
 
         if (email && entityId) {
-            // MODE 2: Direct email + entityId (from update form OTP gate)
-            // Verify that this email matches the registration email for this entity
-            logger.info('OTP_SEND_START', `OTP request for entity ${entityId} with email`);
-
-            const entity = await db.getAyaEntityById(entityId);
-            if (!entity) {
-                logger.warn('OTP_ENTITY_NOT_FOUND', `Entity not found: ${entityId}`);
-                return NextResponse.json({ error: "Entite introuvable." }, { status: 404 });
-            }
-
-            // SECURITY: Only the owner_email (Stripe payer) can authenticate
-            const ownerEmail = entity.owner_email;
-
-            if (!ownerEmail) {
-                logger.warn('OTP_NO_OWNER', `No owner_email set for entity ${entityId}`);
-                return NextResponse.json({ error: "Aucun email proprietaire enregistre pour cette entite. Contactez support@ai-visionary.com." }, { status: 403 });
-            }
-
-            const inputEmail = email.trim().toLowerCase();
-            if (inputEmail !== ownerEmail.toLowerCase()) {
-                logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match owner for entity ${entityId}`);
-                return NextResponse.json({ error: "Cet email ne correspond pas a celui enregistre pour cette entite." }, { status: 403 });
-            }
-
-            adminEmail = ownerEmail;
-            entityName = entity.display_name || entity.legal_name || '';
+            lookupLabel = `entity ${entityId}`;
+            logger.info('OTP_SEND_START', `OTP request for ${lookupLabel} with email`);
+            entity = await db.getAyaEntityById(entityId);
         } else if (url) {
-            // MODE 1: URL-based lookup (original flow)
             const parsed = urlSchema.safeParse(url);
             if (!parsed.success) {
                 logger.warn('OTP_INVALID_URL', `Invalid URL format: ${url}`);
                 return NextResponse.json({ error: "URL invalide" }, { status: 400 });
             }
-
-            logger.info('OTP_SEND_START', `OTP request for ${url}`);
-
-            const client = await db.getAyaEntityByUrl(url);
-            if (!client) {
-                logger.warn('OTP_ENTITY_NOT_FOUND', `No entity for ${url}`);
-                return NextResponse.json({ error: "Entity not found." }, { status: 404 });
-            }
-
-            // SECURITY: Use owner_email only, same as MODE 2
-            adminEmail = client.owner_email || null;
-            if (!adminEmail) {
-                logger.warn('OTP_NO_OWNER', `No owner_email set for entity at ${url}`);
-                return NextResponse.json({ error: "Aucun email proprietaire enregistre. Contactez support@ai-visionary.com." }, { status: 403 });
-            }
-            entityName = client.display_name || client.legal_name || '';
+            lookupLabel = url;
+            logger.info('OTP_SEND_START', `OTP request for ${lookupLabel}`);
+            entity = await db.getAyaEntityByUrl(url);
         } else {
             return NextResponse.json({ error: "Email ou URL requis." }, { status: 400 });
         }
 
-        if (!adminEmail) {
-            logger.error('OTP_NO_EMAIL', `No email found`);
-            return NextResponse.json({ error: "Aucun email associe a cette entite." }, { status: 400 });
+        if (!entity) {
+            logger.warn('OTP_ENTITY_NOT_FOUND', `Entity not found: ${lookupLabel}`);
+            return NextResponse.json({ error: "Entite introuvable." }, { status: 404 });
         }
+
+        // SECURITY: Only the owner_email (Stripe payer) can authenticate
+        const adminEmail = entity.owner_email;
+        if (!adminEmail) {
+            logger.warn('OTP_NO_OWNER', `No owner_email set for ${lookupLabel}`);
+            return NextResponse.json({ error: "Aucun email proprietaire enregistre pour cette entite. Contactez support@ai-visionary.com." }, { status: 403 });
+        }
+
+        // MODE 2: verify the provided email matches the owner
+        if (email && entityId) {
+            const inputEmail = email.trim().toLowerCase();
+            if (inputEmail !== adminEmail.toLowerCase()) {
+                logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match owner for ${lookupLabel}`);
+                return NextResponse.json({ error: "Cet email ne correspond pas a celui enregistre pour cette entite." }, { status: 403 });
+            }
+        }
+
+        const entityName = entity.display_name || entity.legal_name || '';
 
         // 2. Generate 6-digit Code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
