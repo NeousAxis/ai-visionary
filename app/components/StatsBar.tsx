@@ -82,8 +82,8 @@ export default function StatsBar() {
                 <div style={labelStyle}>{t('companies')}</div>
             </div>
             <div>
-                <div style={numStyle}>9</div>
-                <div style={labelStyle}>{t('aiCompatible')}</div>
+                <div style={numStyle}>4</div>
+                <div style={labelStyle}>{t('dataSources')}</div>
             </div>
             <div>
                 <div style={numStyle}>{countriesAnimated}+</div>

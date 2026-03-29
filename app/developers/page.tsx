@@ -20,6 +20,18 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function DevelopersPage() {
     const t = await getTranslations('developersPage');
 
+    let totalEntities = 4400;
+    let countriesCount = 73;
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+        const res = await fetch(`${baseUrl}/api/aya/stats`, { next: { revalidate: 600 } });
+        if (res.ok) {
+            const data = await res.json();
+            totalEntities = data.total_entities || totalEntities;
+            countriesCount = data.countries?.length || countriesCount;
+        }
+    } catch { /* keep defaults */ }
+
     const endpoints = [
         {
             method: 'GET',
@@ -75,9 +87,9 @@ export default async function DevelopersPage() {
             params: [],
             example: '/api/aya/stats',
             response: `{
-  "total_entities": 1815,
+  "total_entities": ${totalEntities},
   "certified_count": 3,
-  "indexed_count": 1812,
+  "indexed_count": ${totalEntities - 3},
   "scores": { "average": 57, "min": 20, "max": 85 },
   "sectors": [{ "sector": "Technologie & SaaS", "count": 620 }, ...],
   "countries": [{ "country": "CH", "count": 380 }, ...]
@@ -95,16 +107,39 @@ export default async function DevelopersPage() {
         { name: t('aioBlock7'), weight: 10 },
     ];
 
-    const connectedAIs = [
-        { name: 'ChatGPT', org: 'OpenAI', color: '#10a37f' },
-        { name: 'Claude', org: 'Anthropic', color: '#d97706' },
-        { name: 'Gemini', org: 'Google', color: '#4285f4' },
-        { name: 'Mistral AI', org: '', color: '#ff7000' },
-        { name: 'Grok', org: 'xAI', color: '#1d9bf0' },
-        { name: 'Perplexity', org: '', color: '#20b2aa' },
-        { name: 'DeepSeek', org: '', color: '#4f46e5' },
-        { name: 'Qwen', org: 'Alibaba', color: '#ff6a00' },
-        { name: 'Llama', org: 'Meta', color: '#0668e1' },
+    const dataSources = [
+        {
+            title: t('dataSource1Title'),
+            desc: t('dataSource1Desc'),
+            color: '#4A919E',
+            url: 'https://ai-visionary.com/api/aya/llm/{domain}',
+            linkHref: '/api/aya/llm/stripe.com',
+            external: false,
+        },
+        {
+            title: t('dataSource2Title'),
+            desc: t('dataSource2Desc'),
+            color: '#22c55e',
+            url: 'ai-visionary.com/aya',
+            linkHref: '/aya',
+            external: false,
+        },
+        {
+            title: t('dataSource3Title'),
+            desc: t('dataSource3Desc'),
+            color: '#333',
+            url: 'github.com/NeousAxis/aya-business-dataset',
+            linkHref: 'https://github.com/NeousAxis/aya-business-dataset',
+            external: true,
+        },
+        {
+            title: t('dataSource4Title'),
+            desc: t('dataSource4Desc'),
+            color: '#ff9d00',
+            url: 'huggingface.co/datasets/NeousAxis/aya-business-dataset',
+            linkHref: 'https://huggingface.co/datasets/NeousAxis/aya-business-dataset',
+            external: true,
+        },
     ];
 
     return (
@@ -121,16 +156,12 @@ export default async function DevelopersPage() {
                     {/* Stats */}
                     <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginBottom: '20px' }}>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>1815+</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{totalEntities.toLocaleString()}+</div>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('statsEntities')}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>40+</div>
+                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{countriesCount}+</div>
                             <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('statsCountries')}</div>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>9</div>
-                            <div style={{ fontSize: '0.75rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('statsAi')}</div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
                             <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>0 CHF</div>
@@ -148,39 +179,111 @@ export default async function DevelopersPage() {
 
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
 
-                {/* CONNECTED AIs */}
+                {/* HOW AIs FIND AYA DATA */}
                 <section style={{ padding: '30px 0' }}>
-                    <h2 style={{ fontSize: '1.4rem', color: '#212E53', borderBottom: '2px solid #4A919E', paddingBottom: '8px', marginBottom: '20px' }}>{t('connectedAiTitle')}</h2>
-                    <p style={{ color: '#64748b', marginBottom: '20px' }}>{t('connectedAiDesc')}</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-                        {connectedAIs.map((ai, i) => (
+                    <h2 style={{ fontSize: '1.4rem', color: '#212E53', borderBottom: '2px solid #4A919E', paddingBottom: '8px', marginBottom: '10px' }}>{t('dataLayerTitle')}</h2>
+                    <p style={{ color: '#64748b', marginBottom: '20px' }}>{t('dataLayerDesc')}</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '16px' }}>
+                        {dataSources.map((ds, i) => (
                             <div key={i} style={{
                                 background: 'white',
                                 border: '1px solid #e2e8f0',
+                                borderLeft: `4px solid ${ds.color}`,
                                 borderRadius: '10px',
-                                padding: '16px',
-                                textAlign: 'center',
-                                transition: 'box-shadow 0.2s',
+                                padding: '24px',
                             }}>
-                                <div style={{
-                                    width: '40px',
-                                    height: '40px',
-                                    borderRadius: '10px',
-                                    background: ai.color,
-                                    margin: '0 auto 10px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'white',
-                                    fontWeight: 'bold',
-                                    fontSize: '1.1rem',
-                                }}>
-                                    {ai.name[0]}
+                                <h3 style={{ fontSize: '1.05rem', color: '#212E53', marginBottom: '6px', marginTop: 0 }}>{ds.title}</h3>
+                                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '10px', lineHeight: 1.5 }}>{ds.desc}</p>
+                                <code style={{ fontSize: '0.8rem', color: ds.color, wordBreak: 'break-all' }}>{ds.url}</code>
+                                <div style={{ marginTop: '10px' }}>
+                                    {ds.external ? (
+                                        <a href={ds.linkHref} target="_blank" rel="noopener noreferrer" style={{ color: '#4A919E', fontSize: '0.85rem', textDecoration: 'none' }}>
+                                            {ds.linkHref.replace('https://', '')} &rarr;
+                                        </a>
+                                    ) : (
+                                        <Link href={ds.linkHref} style={{ color: '#4A919E', fontSize: '0.85rem', textDecoration: 'none' }}>
+                                            {ds.linkHref} &rarr;
+                                        </Link>
+                                    )}
                                 </div>
-                                <div style={{ fontWeight: '600', fontSize: '0.9rem', color: '#212E53' }}>{ai.name}</div>
-                                {ai.org && <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{ai.org}</div>}
                             </div>
                         ))}
+                    </div>
+
+                    {/* Scale statement */}
+                    <div style={{
+                        marginTop: '24px',
+                        background: '#f0fdfa',
+                        border: '1px solid #99f6e4',
+                        borderRadius: '8px',
+                        padding: '18px 24px',
+                        color: '#0f766e',
+                        fontSize: '0.95rem',
+                        lineHeight: 1.6,
+                    }}>
+                        {t('scaleStatement', { count: totalEntities.toLocaleString(), countries: String(countriesCount) })}
+                    </div>
+                </section>
+
+                {/* GITHUB & HUGGINGFACE DETAILS */}
+                <section style={{ padding: '20px 0 30px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '16px' }}>
+                        {/* GitHub */}
+                        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '24px' }}>
+                            <h3 style={{ fontSize: '1.1rem', color: '#212E53', marginTop: 0, marginBottom: '8px' }}>{t('githubTitle')}</h3>
+                            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '12px' }}>{t('githubDesc')}</p>
+                            <a
+                                href="https://github.com/NeousAxis/aya-business-dataset"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    display: 'inline-block',
+                                    background: '#24292f',
+                                    color: 'white',
+                                    padding: '6px 16px',
+                                    borderRadius: '6px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '600',
+                                    textDecoration: 'none',
+                                }}
+                            >
+                                {t('githubLink')} &rarr;
+                            </a>
+                        </div>
+                        {/* HuggingFace */}
+                        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '24px' }}>
+                            <h3 style={{ fontSize: '1.1rem', color: '#212E53', marginTop: 0, marginBottom: '8px' }}>{t('huggingfaceTitle')}</h3>
+                            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '12px' }}>{t('huggingfaceDesc')}</p>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <a
+                                    href="https://huggingface.co/datasets/NeousAxis/aya-business-dataset"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'inline-block',
+                                        background: '#ff9d00',
+                                        color: 'white',
+                                        padding: '6px 16px',
+                                        borderRadius: '6px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '600',
+                                        textDecoration: 'none',
+                                    }}
+                                >
+                                    {t('huggingfaceLink')} &rarr;
+                                </a>
+                                <span style={{
+                                    background: '#fef3c7',
+                                    color: '#92400e',
+                                    padding: '3px 10px',
+                                    borderRadius: '4px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 'bold',
+                                }}>
+                                    {t('licenseBadge')}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -319,6 +422,18 @@ export default async function DevelopersPage() {
                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <td style={{ padding: '10px' }}>OpenAPI Spec</td>
                                 <td style={{ padding: '10px' }}><a href="/.well-known/openapi.json" style={{ color: '#4A919E' }}>/.well-known/openapi.json</a></td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>{t('integrationLlmApi')}</td>
+                                <td style={{ padding: '10px' }}><a href="/api/aya/llm/stripe.com" style={{ color: '#4A919E' }}>/api/aya/llm/&#123;domain&#125;</a></td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>{t('integrationGithub')}</td>
+                                <td style={{ padding: '10px' }}><a href="https://github.com/NeousAxis/aya-business-dataset" target="_blank" rel="noopener noreferrer" style={{ color: '#4A919E' }}>github.com/NeousAxis/aya-business-dataset</a></td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <td style={{ padding: '10px' }}>{t('integrationHuggingface')}</td>
+                                <td style={{ padding: '10px' }}><a href="https://huggingface.co/datasets/NeousAxis/aya-business-dataset" target="_blank" rel="noopener noreferrer" style={{ color: '#4A919E' }}>huggingface.co/datasets/NeousAxis/aya-business-dataset</a></td>
                             </tr>
                             <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                                 <td style={{ padding: '10px' }}>MCP Server (Claude)</td>
