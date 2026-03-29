@@ -4,9 +4,9 @@
 
 When someone asks ChatGPT, Claude, Gemini or any AI _"find me a cybersecurity consultant in Switzerland"_, the AI needs structured, verified data to answer. That's what AYA provides.
 
-## Systemic Attraction Strategy
+## How AYA works — Systemic Attraction
 
-AYA doesn't connect to AIs — AIs find AYA by themselves. Data is present across multiple convergent sources, making it an unavoidable reference:
+AYA doesn't connect to AIs — AIs find AYA by themselves. Well-structured, public business data is present across multiple convergent sources to ensure AI bots find and use reliable, readable information about businesses:
 
 | Source | What | URL |
 |--------|------|-----|
