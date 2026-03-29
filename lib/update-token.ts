@@ -5,7 +5,8 @@
 
 import crypto from 'crypto';
 
-const SECRET = process.env.SESSION_SECRET || process.env.ADMIN_SECRET || '';
+// SECURITY: Never fall back to ADMIN_SECRET — separate keys for separate concerns
+const SECRET = process.env.SESSION_SECRET || '';
 
 /**
  * Generate a signed token for a given entityId.

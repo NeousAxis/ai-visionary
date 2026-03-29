@@ -72,7 +72,12 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ error: "Entity not found." }, { status: 404 });
             }
 
-            adminEmail = client.contact_email;
+            // SECURITY: Use owner_email only, same as MODE 2
+            adminEmail = client.owner_email || null;
+            if (!adminEmail) {
+                logger.warn('OTP_NO_OWNER', `No owner_email set for entity at ${url}`);
+                return NextResponse.json({ error: "Aucun email proprietaire enregistre. Contactez support@ai-visionary.com." }, { status: 403 });
+            }
             entityName = client.display_name || client.legal_name || '';
         } else {
             return NextResponse.json({ error: "Email ou URL requis." }, { status: 400 });
