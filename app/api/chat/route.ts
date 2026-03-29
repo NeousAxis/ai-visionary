@@ -1180,7 +1180,10 @@ GÉNÈRE CE JSON MAINTENANT :
                         ? (info.answer.length > 50 ? info.answer.substring(0, 50) + '...' : info.answer)
                         : (isEn ? 'Detected' : 'Détecté');
 
-                    if (info.confidence === 'low') {
+                    // Only show "(To validate)" if confidence is truly uncertain
+                    // With threshold at 70, LOW confidence fields are auto-validated
+                    // so no marker needed (they won't be asked)
+                    if (info.confidence !== 'high' && info.confidence !== 'low') {
                         value += isEn ? ' (To validate)' : ' (À valider)';
                     }
 
