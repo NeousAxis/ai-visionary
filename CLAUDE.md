@@ -2,7 +2,7 @@
 
 > **IMPORTANT** : Ce fichier est lu automatiquement par Claude Code à chaque nouvelle conversation.
 > Il contient TOUTE la connaissance nécessaire pour reprendre le travail sur ce projet.
-> Dernière mise à jour : 28 mars 2026
+> Dernière mise à jour : 29 mars 2026
 
 ---
 
@@ -355,6 +355,7 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 | **Bot AYA** | ✅ **LIVE** | 2026-03-24 | **~3300+ entités** dans Supabase (6766 domaines dans domains.txt). API compacte LLM-friendly. Keywords Gemini. OpenAPI spec + ai-plugin.json. Fix certificat (INDEXÉ au lieu d'EXPIRÉ, date epoch, keywords). README GitHub rewrite "AYA inside". Page /developers. **→ Voir section 16 pour le reste** |
 | **Signal LLM** | ✅ **TERMINÉ** | 2026-03-25 | 4 chantiers Signal LLM : endpoint `/api/aya/llm/{domain}`, texte brut certificats, export GitHub dataset, domination Web3/AI. Enrichissement Gemini 3339/3339 (EN+FR). Filtre garbage 120 termes. 57 noms mojibake fixés. 3 entités supprimées. Trigger Supabase droppé. GitHub dataset public (3306 fichiers). HuggingFace ré-exporté. Mots-clés Gemini 3338/3339 (fix_keywords.py). Pagination serveur /aya (20/page, URL-based). Cache CDN 4 routes API. BackButton certificats. `AyaRegistryClient.tsx` composant client. **→ Voir sections 18 + 18.9** |
 | **Session 9 — Sécurité propriétaire** | ✅ **TERMINÉE** | 2026-03-28 | Système `owner_email` : OTP n'accepte QUE l'email Stripe du payeur (plus de domain matching ni fallback contact_email). Section admin compte (Nom/Prénom/Email Pro avec validation domaine). Endpoint délégation `POST /api/update-owner-email`. Protection bot (`push_to_aya.py` skip `payment_completed=true`). Fix Éclore (description originale restaurée + contact_email corrigé). Exports GitHub (4435 JSON) + HuggingFace (4436 entités) re-générés. Branche `fix/otp-eclore-protection`. |
+| **Session 10 — i18n FR/EN complet** | ✅ **TERMINÉE** | 2026-03-29 | **i18n complet** : `next-intl` + cookie `NEXT_LOCALE`, `messages/fr.json` + `messages/en.json` (labels UI), toggle header toutes pages. Chatbot AYO bilingue (system prompt, questions, scoring). Emails bilingues (PRO/AYA/Light). Form config bilingue (`update-form-config.ts`). API LLM `?lang=fr\|en`. Pages certificat FR/EN (descriptions, keywords, pays, labels). **Translation agents** : `translate_certified.py` (descriptions fidèles certifiées), `keyword_dictionary.py` (16558 termes FR), `enrich_keywords_fr.py` + `run_keywords_fr_until_done.py` (100% keywords FR). **Bot scores capped 50** : `generator.py` + `fix_bot_scores.py` (1849 entités). **Developers page rewrite** : stats dynamiques, supprimé Connected AIs, ajouté attraction systémique + GitHub/HuggingFace docs. **Supprimé** `ai-plugin.json` + `openapi.json` (stratégie GPT Store abandonnée). README rewrite souverain. **Lifecycle renew** : pack actif = message + boutons cachés, pas de downgrade PRO→AYA. **Security** : OTP MODE 1 owner_email, update-token.ts sans ADMIN_SECRET fallback. **Simplify** : `extractEntityFields` shared, `addArticle` fix, dead code removed. Exports re-générés (4435 GitHub, 4436 HuggingFace). Branche `feature/i18n-en-fr`, pas encore mergée dans main. |
 
 > **METTRE À JOUR CE TABLEAU** après chaque session complétée (statut + date + notes).
 
@@ -364,11 +365,14 @@ Chaque session peut être lancée de manière autonome (Claude lit ce fichier et
 
 | Branche | Rôle |
 |---------|------|
-| `main` | Code de production (à jour au 13 mars 2026) |
-| `fix/remediation` | Branche de travail pour les 10 sprints |
+| `main` | Code de production (à jour au 28 mars 2026) |
+| `feature/i18n-en-fr` | **i18n FR/EN complet** — prête pour merge dans main (Session 10, 29 mars 2026) |
+| `fix/remediation` | Branche de travail pour les 10 sprints (terminés) |
+| `fix/i18n-bilingual` | Archivée — tentative i18n échouée du 28 mars, NE PAS MERGER |
+| `fix/otp-eclore-protection` | Session 9 — sécurité propriétaire (mergée) |
 | `restore-vercel-24jan` | Ancienne branche de travail (fusionnée dans main) |
 
-**Workflow** : Travailler sur `fix/remediation`, commiter souvent, ne merger dans `main` qu'après validation.
+**Workflow** : Travailler sur des branches feature/fix, commiter souvent, ne merger dans `main` qu'après validation.
 
 ---
 
@@ -999,76 +1003,78 @@ L'entonnoir de conversion est :
 
 ---
 
-## 20. SESSION I18N — ÉCHEC ET LEÇONS (28 mars 2026)
+## 20. SESSION I18N — RÉUSSIE (29 mars 2026)
 
-> La session i18n du 28 mars a été abandonnée. La branche `fix/i18n-bilingual` est archivée.
-> La version FR-only (`main`, commit `f490cefb`) est restaurée en production.
+> La session i18n du 28 mars avait échoué (branche `fix/i18n-bilingual` archivée).
+> La session du 29 mars a **réussi** sur branche `feature/i18n-en-fr`. En attente de merge dans `main`.
 
-### Ce qui a été fait (et défait)
-- Toggle EN/FR avec `next-intl` et cookie `NEXT_LOCALE` — **code archivé sur `fix/i18n-bilingual`**
-- Architecture "Native + English" dans le webhook — **trop complexe, trop de bugs**
-- La branche `fix/i18n-bilingual` contient tout le code — **NE PAS MERGER dans main**
+### Ce qui a été fait (Session 10, 29 mars 2026)
 
-### Sécurités que Claude N'A PAS PRISES et doit prendre la prochaine fois
+#### i18n complet FR/EN
+- `next-intl` avec cookie `NEXT_LOCALE` + `messages/fr.json` + `messages/en.json` (labels UI)
+- Toggle FR/EN dans le header de toutes les pages
+- Chatbot AYO bilingue : system prompt, questions statiques, scoring, réponses
+- Emails bilingues : templates PRO (ZIP + certificat), AYA sub (confirmation), Light report
+- Form config bilingue : `lib/update-form-config.ts` avec labels/hints/options EN+FR
+- API LLM `?lang=fr|en` : descriptions + keywords localisés
+- Pages certificat : descriptions Gemini FR/EN, keywords FR/EN, pays FR/EN, labels UI FR/EN
+- Page `/developers` : rewrite complet (stats dynamiques, supprimé "9 Connected AIs", ajouté attraction systémique + docs GitHub/HuggingFace)
 
-1. **Créer la branche AVANT de toucher le moindre fichier** : `git checkout -b feature/i18n-en-fr`
-2. **Vérifier `git branch` avant chaque commit** — Claude a commité directement sur `main` plusieurs fois
-3. **Tester sur 3 entités précises AVANT de déclarer "c'est fait"** :
-   - Association Éclore `eclore-asso.org` (certifiée PRO, données FR)
-   - `stripe.com` (bot-indexée anglophone)
-   - `credit-agricole.fr` (bot-indexée francophone)
-4. **Pour chaque changement dans `buildPlainTextDescription`** : vérifier les 3 entités EN et FR
-5. **Après `vercel --prod`** : toujours lancer `vercel alias set [url] ai-visionary.com`
-6. **Ne jamais déclarer "c'est corrigé" sans ouvrir le navigateur**
+#### Translation agents (scripts Python)
+- `aya/translate_certified.py` : traduction fidèle des descriptions certifiées (pas de réécriture)
+- `aya/keyword_dictionary.py` : dictionnaire 16558 termes anglais→français (batch lookup)
+- `aya/enrich_keywords_fr.py` : enrichissement keywords FR via Gemini (toutes entités)
+- `aya/run_keywords_fr_until_done.py` : boucle jusqu'à 100% de couverture keywords FR
+- **Résultat** : 100% des entités ont `gemini_keywords_fr` ✅
 
-### Plan correct pour le toggle EN/FR (prochaine session dédiée)
+#### Bot scores capped at 50
+- `aya/generator.py` : hard cap score 50 pour entités bot (pas de JSON-LD ni AYA)
+- `aya/fix_bot_scores.py` : script one-shot pour corriger les 1849 entités existantes
+- Cohérent avec la logique AIO : sans JSON-LD structuré → score max 50
 
-**Avant de coder quoi que ce soit :**
-- Lancer `aya/enrich_keywords_fr.py` pour générer `gemini_keywords_fr` pour TOUTES les entités qui n'en ont pas encore — **prérequis obligatoire**
+#### Autres changements
+- **Supprimé** `public/.well-known/ai-plugin.json` + `public/.well-known/openapi.json` (stratégie GPT Store abandonnée)
+- **README rewrite** : positionnement souverain et indépendant
+- **Lifecycle renew** : si pack actif → message informatif + boutons cachés, pas de downgrade PRO→AYA
+- **Security** : OTP MODE 1 utilise `owner_email` uniquement, `update-token.ts` supprimé fallback ADMIN_SECRET
+- **Simplify** : `extractEntityFields()` helper partagé, `addArticle()` bug fix, dead code `dirtyFields` removed
+- **Exports re-générés** : GitHub (4435 fichiers) + HuggingFace (4436 entités)
 
-**Implémentation (simple, sans nouvelle architecture)** :
-1. `next-intl` avec cookie `NEXT_LOCALE` (le code existe sur `fix/i18n-bilingual`, peut être réutilisé)
-2. `messages/fr.json` et `messages/en.json` : **labels UI uniquement** (pas les données entités)
-3. Toggle dans le header
-4. Logique d'affichage des descriptions :
-   - FR : `gemini_description_fr || gemini_description`
-   - EN : `gemini_description`
-   - **Aucune nouvelle architecture "Native + English"** — trop complexe
-5. Logique des keywords :
-   - FR : `gemini_keywords_fr || gemini_keywords`
-   - EN : `gemini_keywords`
-6. Pays : `COUNTRY_LABELS_FR[code]` en FR, `COUNTRY_LABELS[code]` en EN
-7. Tester les 3 entités ci-dessus avant tout commit
-8. Merger dans `main` seulement après validation de Cyril
+#### Données dans Supabase — État final
 
-### Données manquantes à générer AVANT la prochaine session i18n
+| Champ | Path | Couverture |
+|-------|------|-----------|
+| Description EN | `asr_payload.enrichment.gemini_description` | 100% ✅ |
+| Description FR | `asr_payload.enrichment.gemini_description_fr` | 100% ✅ |
+| Keywords EN | `asr_payload.enrichment.gemini_keywords` | 100% ✅ |
+| Keywords FR | `asr_payload.enrichment.gemini_keywords_fr` | 100% ✅ |
 
-| Champ | Couverture actuelle | Action requise |
-|-------|--------------------|--------------------|
-| `gemini_description` (EN) | ~100% ✅ | Rien |
-| `gemini_description_fr` (FR) | ~100% ✅ | Rien |
-| `gemini_keywords` (EN) | ~100% ✅ | Rien |
-| `gemini_keywords_fr` (FR) | **~0% pour entités certifiées avant mars 2026** ❌ | Lancer `aya/enrich_keywords_fr.py` |
+#### Branche
+- `feature/i18n-en-fr` — **prête, en attente de merge dans `main` après validation Cyril**
+- Ancienne branche `fix/i18n-bilingual` — archivée, ne pas utiliser
 
 ---
 
 ### ✅ CE QUI EST FAIT ET FONCTIONNE
 
-- Flux complet AYO : URL → scan → questions statiques → score strict → paiement Stripe → fichiers → email
+- **Site bilingue FR/EN** : toggle header, `next-intl` + cookie `NEXT_LOCALE`, toutes pages + chatbot + emails + formulaires + API
+- Flux complet AYO : URL → scan → questions statiques → score strict → paiement Stripe → fichiers → email (bilingue)
 - Stripe Checkout live (CHF, 2 offres : AYA 19 CHF/mois, PRO 499 CHF)
-- Registre AYA public : **~3000+ entités**, page `/aya` avec badges, pagination, tri shuffle, recherche
-- Page certificat `/aya/e/[id]` — fix INDEXÉ (plus EXPIRÉ), fix date epoch, keywords depuis blocs AIO
-- API AYA compacte (6 champs LLM) sur Vercel (search, entity, stats, docs, live)
-- Page `/developers` — 9 IA connectées, stats, fichiers d'intégration
-- `ai-plugin.json` + `openapi.json` — découverte passive par les IA via crawl web (stratégie d'attraction systémique)
-- README GitHub rewrite "AYA inside" (https://github.com/NeousAxis/ai-visionary)
-- Bot AYA : **5430 domaines** scrapés (6672 dans domains.txt), pipeline concurrent, extraction auto mots-clés, détection pays hreflang+phone
-- Génération et envoi des 5 fichiers PRO en ZIP
+- Registre AYA public : **~4400+ entités**, page `/aya` avec badges, pagination, tri shuffle, recherche
+- Page certificat `/aya/e/[id]` — fix INDEXÉ (plus EXPIRÉ), fix date epoch, keywords FR/EN depuis Gemini
+- API AYA compacte (6 champs LLM) sur Vercel (search, entity, stats, docs, live) + `?lang=fr|en`
+- Page `/developers` — stats dynamiques, attraction systémique, GitHub/HuggingFace docs
+- README GitHub souverain et indépendant (https://github.com/NeousAxis/ai-visionary)
+- Bot AYA : **6766 domaines** dans pipeline, scores bot cappés à 50, enrichissement Gemini 100% (descriptions EN+FR, keywords EN+FR)
+- Translation agents : `translate_certified.py`, `keyword_dictionary.py` (16558 termes), `enrich_keywords_fr.py`
+- Génération et envoi des 5 fichiers PRO en ZIP (emails bilingues)
 - Signature Ed25519 des ASR (clé rotée, env var)
 - Migration Firestore → Supabase
 - Questions statiques (ENRICHMENT_TEMPLATES), scoring strict (cap 78)
-- Sessions 1-5 terminées, sprints 1-6 terminés
-- OTP email, admin dashboard, logger, rate-limit, validators
+- Sessions 1-10 terminées, sprints 1-10 terminés
+- OTP email (owner_email only), admin dashboard, logger, rate-limit, validators
+- Lifecycle : formulaire MAJ 7 blocs + OTP gate + renouvellement + protection downgrade PRO→AYA
+- Exports : GitHub (4435 fichiers) + HuggingFace (4436 entités)
 
 ---
 
@@ -1127,16 +1133,18 @@ SEO metadata toutes les pages + sitemap dynamique Supabase + confidentialité LP
 
 ---
 
-### ORDRE DE PRIORITÉ (état 28 mars 2026)
+### ORDRE DE PRIORITÉ (état 29 mars 2026)
 
-> **Tous les sprints sont terminés.** Le produit AYO est complet. La priorité est désormais la croissance.
+> **Tous les sprints sont terminés.** Le produit AYO est complet et bilingue FR/EN. La priorité est désormais la croissance.
 > **Session 9 (28 mars)** : Sécurité propriétaire (owner_email) + section admin + Éclore fix ✅
+> **Session 10 (29 mars)** : i18n FR/EN complet + translation agents + bot scores cap 50 + developers rewrite + lifecycle renew ✅
 
-1. **IMMÉDIAT** — Scraper 6766 domaines + enrichir via registres du commerce → objectif 10k entités
-2. **SEMAINE 1** — Campagne email entreprises indexées (template prêt)
-3. **CONTINU** — Re-exporter GitHub + HuggingFace après chaque batch — ✅ Fait 28 mars (4435 GitHub, 4436 HuggingFace)
-4. **EN COURS** — Toggle EN/FR (i18n) — branche dédiée `feature/i18n-en-fr`
-5. **FUTUR** — Soumission There's An AI For That (Cyril)
+1. **IMMÉDIAT** — Merger `feature/i18n-en-fr` dans `main` après validation Cyril → deploy prod
+2. **IMMÉDIAT** — Scraper 6766 domaines + enrichir via registres du commerce → objectif 10k entités
+3. **SEMAINE 1** — Campagne email entreprises indexées (template prêt)
+4. **CONTINU** — Re-exporter GitHub + HuggingFace après chaque batch — ✅ Fait 29 mars (4435 GitHub, 4436 HuggingFace)
+5. **FAIT** — Toggle EN/FR (i18n) — ✅ branche `feature/i18n-en-fr` prête, en attente merge
+6. **FUTUR** — Soumission There's An AI For That (Cyril)
 
 ---
 
@@ -1309,7 +1317,7 @@ Web3 pour sécuriser et automatiser des applications décentralisées.</p>
 | 6 | Soumettre AYA sur There's An AI For That | ❌ | À faire (Cyril) |
 | 7 | Préparer campagne email entreprises IA/tech/crypto | ❌ | Après indexation |
 | 8 | Re-exporter dataset HuggingFace après batch | ❌ | Après chaque batch |
-| 9 | Toggle EN/FR sur le site | ❌ | Session dédiée |
+| 9 | Toggle EN/FR sur le site | ✅ | Session 10, 29 mars 2026 |
 | 10 | Atteindre 10'000+ entreprises | ❌ | Continu |
 | 11 | Session 7 — Cycle de vie client | ✅ | 2026-03-27 |
 | 12 | Session 8 — SEO/Légal | ✅ | 2026-03-25 |
@@ -1843,7 +1851,7 @@ Les données AYA existent sur **4 sources convergentes** (principe : "si un LLM 
 | 3 | Re-exporter HuggingFace avec données enrichies | 🟡 Haute | ✅ CSV + JSONL |
 | 4 | Scraper les 94 nouveaux domaines Web3/AI | 🟡 Haute | ✅ Mergés dans domains.txt |
 | 5 | **Pagination serveur page /aya** — 20 entités/page, URL-based (?page=X&q=X&sort=X), BackButton history.back() | 🔴 Critique UX | ✅ FAIT |
-| 6 | Toggle EN/FR sur le site (i18n) | 🟡 Haute | ❌ Session dédiée |
+| 6 | Toggle EN/FR sur le site (i18n) | 🟡 Haute | ✅ Session 10, 29 mars 2026 |
 | 7 | Campagne email entreprises indexées | 🟡 Haute | ❌ |
 | 8 | Session 7 — Cycle de vie client | ✅ | 2026-03-27 |
 | 9 | Session 8 — SEO/Légal | ✅ | 2026-03-25 |
@@ -1962,14 +1970,13 @@ Les données AYA existent sur **4 sources convergentes** (principe : "si un LLM 
 
 | # | Tâche | Priorité |
 |---|-------|----------|
-| 1 | Toggle EN/FR sur le site (i18n) | 🟡 Haute |
-| 2 | Campagne email entreprises indexées | 🟡 Haute |
-| 3 | Session 7 — Finir cycle de vie client (rappels email, crons, page renouvellement, webhooks Stripe subscription) | 🟡 Haute |
-| 4 | Session 8 — SEO/Légal/Tests | 🟡 Haute |
-| 5 | Enrichissement registres du commerce — Zefix (CH), Sirene (FR), Companies House (UK) | 🟢 Long terme |
-| 6 | Atteindre 10'000+ entreprises | 🟢 Long terme |
-| 7 | Soumission There's An AI For That | 🟢 Moyenne |
-| 8 | Re-exporter GitHub + HuggingFace après chaque nouveau batch | 🟢 Continue |
+| 1 | ~~Toggle EN/FR sur le site (i18n)~~ | ✅ Session 10, 29 mars |
+| 2 | Merger `feature/i18n-en-fr` dans `main` + deploy prod | 🔴 Immédiat |
+| 3 | Campagne email entreprises indexées | 🟡 Haute |
+| 4 | Enrichissement registres du commerce — Zefix (CH), Sirene (FR), Companies House (UK) | 🟢 Long terme |
+| 5 | Atteindre 10'000+ entreprises | 🟢 Long terme |
+| 6 | Soumission There's An AI For That | 🟢 Moyenne |
+| 7 | Re-exporter GitHub + HuggingFace après chaque nouveau batch | 🟢 Continue |
 
 ---
 

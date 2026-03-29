@@ -1667,7 +1667,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 // 🆕 VALIDATION STATIQUE : Si le prochain bloc est lowConfidence, question Oui/Non sans LLM
                 if (validationQueue.includes(nextBlockName)) {
                     const fieldName = nextBlockName.split('.')[1] || nextBlockName;
-                    const detectedValue = detectedValues[nextBlockName] || 'Information détectée';
+                    const detectedValue = detectedValues[nextBlockName] || (locale === 'en' ? 'Detected information' : 'Information détectée');
                     finalResponseText = buildValidationQuestion(
                         nextBlockName.split('.')[0],
                         fieldName,

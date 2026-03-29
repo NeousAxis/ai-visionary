@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import LanguageToggle from './LanguageToggle';
 
 type SortMode = 'default' | 'alpha' | 'score' | 'country' | 'certified';
@@ -38,6 +38,60 @@ function cleanDisplayName(name: string, fallback?: string, entityFallback?: stri
     return cleaned || fallback || name;
 }
 
+/** Inline sector translation: maps French DB values to English labels.
+ *  Using a simple dictionary avoids fragile next-intl dynamic key lookups
+ *  (keys with '&' and spaces break t() interpolation). */
+const SECTOR_EN: Record<string, string> = {
+    'Technologie & SaaS': 'Technology & SaaS',
+    'Finance & Assurance': 'Finance & Insurance',
+    'Finance & Banque': 'Finance & Banking',
+    'Santé & Pharma': 'Healthcare & Pharma',
+    'Alimentation & Boissons': 'Food & Beverage',
+    'Commerce & Retail': 'Retail & E-commerce',
+    'E-commerce & Retail': 'E-commerce & Retail',
+    'Éducation & Formation': 'Education & Training',
+    'Énergie & Environnement': 'Energy & Environment',
+    'Consulting & Services': 'Consulting & Services',
+    'Conseil & Services Pro': 'Consulting & Professional Services',
+    'Média & Communication': 'Media & Communication',
+    'Transport & Logistique': 'Transport & Logistics',
+    'Tourisme & Transport': 'Tourism & Transport',
+    'Industrie & Manufacture': 'Industry & Manufacturing',
+    'Industrie & Manufacturing': 'Industry & Manufacturing',
+    'Immobilier & Construction': 'Real Estate & Construction',
+    'Immobilier': 'Real Estate',
+    'Télécommunications': 'Telecommunications',
+    'Administration & Gouvernement': 'Government & Public Sector',
+    'Administration & Public': 'Administration & Public Sector',
+    'ONG & Associations': 'Non-profit & NGO',
+    'Loisirs & Tourisme': 'Leisure & Tourism',
+    'Blockchain & Web3': 'Blockchain & Web3',
+    'Intelligence Artificielle': 'Artificial Intelligence',
+    'Luxe & Mode': 'Luxury & Fashion',
+    'Restauration & Alimentation': 'Food & Restaurants',
+    'Non détecté': 'Not detected',
+    'General': 'General',
+    // Raw DB keys (from bot/webhook before normalization)
+    'services_entreprises': 'Business Services',
+    'technology': 'Technology',
+    'finance': 'Finance',
+    'health': 'Healthcare',
+    'education': 'Education',
+    'media': 'Media',
+    'retail': 'Retail',
+    'tourism': 'Tourism',
+    'industry': 'Industry',
+    'real_estate': 'Real Estate',
+    'food': 'Food & Restaurants',
+    'luxury': 'Luxury & Fashion',
+    'home_leisure': 'Home & Leisure',
+};
+
+function translateSector(sectorMacro: string, locale: string): string {
+    if (locale === 'en') return SECTOR_EN[sectorMacro] || sectorMacro;
+    return sectorMacro; // French values are already in the DB
+}
+
 interface AyaRegistryClientProps {
     entities: any[];
     totalEntities: number;
@@ -60,6 +114,7 @@ export default function AyaRegistryClient({
     currentSort,
 }: AyaRegistryClientProps) {
     const t = useTranslations('aya');
+    const locale = useLocale();
     const router = useRouter();
     const searchParams = useSearchParams();
     const [searchInput, setSearchInput] = useState(currentSearch);
@@ -268,7 +323,7 @@ export default function AyaRegistryClient({
                                         {/* SECTOR */}
                                         <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.5', flex: 1 }}>
                                             {entity.sector_macro && entity.sector_macro !== 'General' && !/type schema/i.test(entity.sector_macro) && !/^organization$/i.test(entity.sector_macro)
-                                                ? (() => { try { return t(`sectors.${entity.sector_macro}`); } catch { return entity.sector_macro; } })()
+                                                ? translateSector(entity.sector_macro, locale)
                                                 : certified ? t('certifiedDesc') : t('indexedDesc')}
                                         </p>
 

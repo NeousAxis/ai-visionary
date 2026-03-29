@@ -50,6 +50,18 @@ export const SECTOR_LABELS: Record<string, string> = {
     'Blockchain & Web3': 'Blockchain & Web3',
     'Intelligence Artificielle': 'Artificial Intelligence',
     'General': 'General',
+    // Raw DB keys (from bot/webhook before normalization)
+    'services_entreprises': 'Business Services',
+    'Conseil & Services Pro': 'Consulting & Professional Services',
+    'Finance & Banque': 'Finance & Banking',
+    'E-commerce & Retail': 'E-commerce & Retail',
+    'Tourisme & Transport': 'Tourism & Transport',
+    'Industrie & Manufacturing': 'Industry & Manufacturing',
+    'Immobilier': 'Real Estate',
+    'Administration & Public': 'Administration & Public Sector',
+    'Luxe & Mode': 'Luxury & Fashion',
+    'Restauration & Alimentation': 'Food & Restaurants',
+    'Non détecté': 'Not detected',
 };
 
 const SECTOR_AUDIENCE_FALLBACK: Record<string, string> = {
@@ -168,7 +180,7 @@ function extractEntityFields(entity: any, locale: 'fr' | 'en'): EntityFields {
         : (entity.website ? domainFromUrl(entity.website) : 'Unknown');
 
     const sectorRaw = entity.sector_macro || 'General';
-    const category = SECTOR_LABELS[sectorRaw] || sectorRaw;
+    const category = locale === 'en' ? (SECTOR_LABELS[sectorRaw] || sectorRaw) : sectorRaw;
 
     const countryCode = entity.country_legal || 'XX';
     const countryMap = locale === 'fr' ? COUNTRY_LABELS_FR : COUNTRY_LABELS;

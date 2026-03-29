@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
-import { buildPlainTextDescription, COUNTRY_LABELS, COUNTRY_LABELS_FR } from '@/lib/aya/llm-format';
+import { buildPlainTextDescription, COUNTRY_LABELS, COUNTRY_LABELS_FR, SECTOR_LABELS } from '@/lib/aya/llm-format';
 import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
 import type { Metadata } from 'next';
@@ -106,7 +106,8 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     const geminiFr: string = enrichment.gemini_description_fr || '';
     const geminiEn: string = enrichment.gemini_description || '';
     const services = Array.isArray(asrData.offre?.services?.value) ? asrData.offre.services.value : [];
-    const businessType = asrData.identite?.business_type?.value || entity.sector_macro || "";
+    const rawSector = entity.sector_macro || "";
+    const businessType = asrData.identite?.business_type?.value || (locale === 'en' ? (SECTOR_LABELS[rawSector] || rawSector) : rawSector);
     const audience = asrData.offre?.target_audience?.value || "";
     // Locale-aware description: FR prefers gemini_description_fr, EN prefers gemini_description
     const geminiDesc = locale === 'en' ? (geminiEn || geminiFr) : (geminiFr || geminiEn);
@@ -137,7 +138,8 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
         const declaredKeywords = Array.isArray(asrData.external_context?.keywords?.value) ? asrData.external_context.keywords.value : [];
         const blockOffreKw = Array.isArray(asrData.aio_blocks?.offre?.fields?.keywords_detected) ? asrData.aio_blocks.offre.fields.keywords_detected : [];
         const sectorEvidence = Array.isArray(asrData.sector?.evidence) ? asrData.sector.evidence : [];
-        const sectorFallback = entity.sector_macro && entity.sector_macro !== 'General' ? [entity.sector_macro] : [];
+        const sectorLabel = locale === 'en' ? (SECTOR_LABELS[entity.sector_macro] || entity.sector_macro) : entity.sector_macro;
+        const sectorFallback = sectorLabel && sectorLabel !== 'General' ? [sectorLabel] : [];
         keywords = [...new Set([
             ...declaredKeywords, ...serviceKeywords, ...useCaseKeywords,
             ...blockOffreKw, ...sectorEvidence, ...sectorFallback
