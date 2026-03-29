@@ -1167,6 +1167,73 @@ SEO metadata toutes les pages + sitemap dynamique Supabase + confidentialité LP
 | **Campagne email entreprises indexées** | Après indexation d'entreprises IA/tech/crypto/blockchain, leur envoyer un email pour les informer qu'elles sont dans le registre AYA. Angle : souveraineté vs GAFAM — les IA de Google/OpenAI décident qui est visible, AYA est l'alternative ouverte. Template email ci-dessous. |
 | **Soumission There's An AI For That** | S'inscrire sur https://theresanaiforthat.com/ et soumettre AYA comme outil IA. Newsletter hebdo avec 500K+ lecteurs dans l'écosystème IA. |
 
+### Chantier futur — AYO Evidence-Based (Refonte coeur questionnaire)
+
+#### Probleme actuel
+AYO fonctionne sur du **declaratif** : il demande "Avez-vous des certifications ?" -> l'utilisateur dit "Oui" -> q=0.5. Aucune preuve. Les IA ne peuvent pas recouper ces declarations.
+
+#### Vision cible
+AYO doit fonctionner sur des **preuves verifiables** :
+- Au lieu de "Avez-vous des certifications ?" -> "Lien vers votre page certifications ?"
+- Au lieu de "Avez-vous une FAQ ?" -> deja detecte par le scan, pas de question
+- Au lieu de "Quels sont vos services ?" -> deja scannes, demander un lien de confirmation
+- Les preuves (URLs, documents, references) permettent aux IA de recouper et valider
+- Un ASR base sur des preuves = q=1 (verifie) au lieu de q=0.5 (declare)
+
+#### Principe fondamental
+**Lisibilite = Recommandabilite**. Pour qu'une IA recommande une entreprise SANS halluciner, elle a besoin de :
+1. Des donnees structurees (ASR) — deja fait
+2. Des preuves recoupables (URLs, certifications verifiables, avis publics) — pas encore
+3. De la coherence entre la declaration et la realite observable — pas encore verifie automatiquement
+
+#### Ce qui change
+
+| Actuel (declaratif) | Cible (evidence-based) |
+|---------------------|----------------------|
+| "Avez-vous une FAQ ?" -> Oui/Non | Le scan detecte la FAQ -> q=1 automatique |
+| "Quels sont vos services ?" -> texte libre | Le scan extrait les services -> demande un lien de confirmation |
+| "Certifications ?" -> Oui/Non | "URL de votre page certifications ?" -> verifie automatiquement |
+| q=0.5 pour tout "Oui" | q=1 si preuve fournie, q=0.5 si declaration seule |
+| 15-20 questions | 5-8 questions ciblees (preuve uniquement) |
+
+#### Impact technique
+- `lib/agents/greffier.ts` : reecrire les ENRICHMENT_TEMPLATES pour demander des preuves
+- `app/api/chat/route.ts` : refondre la logique de queue (validation/enrichment -> evidence)
+- `lib/aio-score-engine.ts` : ajouter un score de confiance base sur les preuves fournies
+- `lib/aio-scanner.ts` : enrichir le scan pour verifier les URLs de preuve
+- `lib/ayo-system-prompt.ts` : adapter le prompt pour le mode evidence-based
+
+#### Dependances
+- Les fichiers PRO (5 fichiers ASR) dependent des donnees extraites
+- Les emails dependent des scores
+- Le registre AYA depend du scoring
+- Les pages certificat affichent les donnees extraites
+
+#### Risques
+- Changer le questionnaire = changer le coeur du produit
+- Le scoring doit rester coherent avec les entites deja certifiees
+- Les clients existants ne doivent pas voir leur score baisser
+- La transition doit etre progressive (pas de big bang)
+
+#### Pre-requis
+- Avoir le i18n stable (FR/EN) — fait
+- Avoir le lifecycle stable (renew, expiration) — fait
+- Avoir 10k+ entites dans le registre pour valider a l'echelle
+
+#### Estimation
+- Complexite : CRITIQUE — c'est le coeur du produit
+- Duree : 2-3 semaines de travail
+- Cyril DOIT etre present pour toutes les decisions de logique metier
+
+#### Fix temporaire applique (29 mars 2026)
+En attendant ce chantier :
+- Seuil de confiance monte de 85 -> 70 : les donnees scannees avec confidence >= 70 sont auto-validees (q=1, pas de question Yes/No)
+- Smart skip : services/products redondance eliminee
+- Resultat : ~7 questions redondantes en moins, questionnaire plus fluide
+- Rollback : remettre le seuil a 85 dans `app/api/chat/route.ts` (chercher `>= 70 ? 1 :`, remettre `>= 85 ? 1 :`)
+
+---
+
 ### STRATÉGIE COMMERCIALE — "AYA inside" (25 mars 2026)
 
 **Hiérarchie des marques** :
