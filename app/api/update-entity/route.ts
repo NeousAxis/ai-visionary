@@ -192,6 +192,7 @@ export async function POST(req: NextRequest) {
                 : entity.country_legal,
             asr_payload: updatedPayload,
             asr_score: newScore,
+            last_update: new Date().toISOString(),
         };
 
         if (contactEmail && typeof contactEmail === 'string' && contactEmail.trim()) {

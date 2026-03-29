@@ -187,12 +187,13 @@ export default function UpdateFormClient({
     }
   };
 
+  const isPro = packType === 'pro' || packType === 'PRO';
+
   // ---- success panel ----
 
   if (status === 'success' && result) {
     const delta = result.newScore - result.oldScore;
     const deltaColor = delta > 0 ? '#16a34a' : delta < 0 ? '#CE6A6B' : '#4A919E';
-    const isPro = packType === 'pro' || packType === 'PRO';
 
     return (
       <div style={{
@@ -276,34 +277,6 @@ export default function UpdateFormClient({
             {t('viewCertificate')}
           </a>
 
-          {isPro && !regenSuccess && (
-            <button
-              onClick={handleRegenerate}
-              disabled={regenerating}
-              style={{
-                background: regenerating ? '#9ca3af' : '#212E53',
-                color: 'white',
-                padding: '12px 28px',
-                borderRadius: '8px',
-                border: 'none',
-                fontWeight: 'bold',
-                fontSize: '0.95rem',
-                cursor: regenerating ? 'wait' : 'pointer',
-              }}
-            >
-              {regenerating ? t('regenerating') : t('regenerateFiles')}
-            </button>
-          )}
-          {regenSuccess && (
-            <p style={{ color: '#16a34a', fontSize: '0.9rem', fontWeight: '600' }}>
-              {t('filesRegenSuccess')}
-            </p>
-          )}
-          {regenError && (
-            <p style={{ color: '#991b1b', fontSize: '0.9rem' }}>
-              {regenError}
-            </p>
-          )}
         </div>
       </div>
     );
@@ -813,6 +786,11 @@ export default function UpdateFormClient({
         entityWebsite={entityWebsite}
         initialAdmin={adminAccount || { nom: '', prenom: '', email_pro: '' }}
         updateToken={updateToken}
+        isPro={isPro}
+        onRegenerate={handleRegenerate}
+        regenerating={regenerating}
+        regenSuccess={regenSuccess}
+        regenError={regenError}
       />
 
       {/* Delegation section */}
@@ -826,10 +804,15 @@ export default function UpdateFormClient({
 }
 
 /* --- Admin Account Section --- */
-function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToken }: {
+function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToken, isPro, onRegenerate, regenerating, regenSuccess, regenError }: {
   entityId: string;
   entityWebsite: string;
   initialAdmin: { nom: string; prenom: string; email_pro: string };
+  isPro?: boolean;
+  onRegenerate?: () => void;
+  regenerating?: boolean;
+  regenSuccess?: boolean;
+  regenError?: string;
   updateToken: string;
 }) {
   const t = useTranslations('update');
@@ -963,6 +946,27 @@ function AdminAccountSection({ entityId, entityWebsite, initialAdmin, updateToke
 
       {adminError && (
         <p style={{ color: '#991B1B', fontSize: '0.8rem', marginTop: '0.5rem' }}>{adminError}</p>
+      )}
+
+      {/* Regenerate ASR files — PRO only */}
+      {isPro && onRegenerate && (
+        <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
+          <button
+            onClick={onRegenerate}
+            disabled={regenerating || regenSuccess}
+            style={{
+              padding: '8px 20px', borderRadius: '6px', border: 'none',
+              background: regenerating ? '#9ca3af' : regenSuccess ? '#16a34a' : '#212E53',
+              color: '#fff', fontWeight: '600', fontSize: '0.85rem',
+              cursor: regenerating || regenSuccess ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {regenerating ? 'Regeneration...' : regenSuccess ? '✅ Fichiers envoyes' : 'Regenerer mes fichiers ASR'}
+          </button>
+          {regenError && (
+            <p style={{ color: '#991B1B', fontSize: '0.8rem', marginTop: '0.5rem' }}>{regenError}</p>
+          )}
+        </div>
       )}
     </div>
   );

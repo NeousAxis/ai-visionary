@@ -162,6 +162,12 @@ def main():
         eid = entity["entity_id"]
         enrichment = (entity.get("asr_payload") or {}).get("enrichment") or {}
 
+        # PROTECT: Never overwrite manually-set descriptions
+        if enrichment.get("translation_source") == "manual":
+            print(f"[{i}/{len(entities)}] PROTECTED {name} (manually set — never overwrite)")
+            skipped += 1
+            continue
+
         # Skip if already has faithful translations (unless --force)
         has_en = bool(enrichment.get("gemini_description"))
         has_fr = bool(enrichment.get("gemini_description_fr"))
