@@ -219,9 +219,11 @@ export async function POST(req: Request) {
         const assistantMessages = messages.filter((m: any) => m.role === 'assistant');
         const hasFinalScore = assistantMessages.some((m: any) =>
             m.content.includes("SCORE FINAL AIO") ||
+            m.content.includes("FINAL AIO SCORE") ||
             m.content.includes("Score Final AIO") ||
             m.content.includes("score final aio") ||
             m.content.includes("SCORE FINAL") ||
+            m.content.includes("FINAL SCORE") ||
             m.content.includes("pack_intention") ||
             m.content.includes("confirm_subscription") ||
             m.content.includes("confirm_pro")
