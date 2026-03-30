@@ -43,7 +43,10 @@ export async function GET(request: Request) {
         for (const entity of entities) {
             const entityId = entity.entity_id;
             const email = entity.contact_email || entity.email;
-            const name = entity.display_name || entity.legal_name || 'Votre entreprise';
+            // Locale: from entity metadata or default 'en'
+            const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
+            const en = locale === 'en';
+            const name = entity.display_name || entity.legal_name || (en ? 'Your business' : 'Votre entreprise');
 
             if (!email) {
                 logger.warn('skip', `No email for entity ${entityId} — skipping`);
@@ -62,8 +65,10 @@ export async function GET(request: Request) {
                     await resend.emails.send({
                         from: 'AI Visionary <hello@ai-visionary.com>',
                         to: email,
-                        subject: `${name} — Vos données AYA ont plus d'un an`,
-                        html: buildReviewReminderEmail(name, updateUrl),
+                        subject: en
+                            ? `${name} — Your AYA data is over a year old`
+                            : `${name} — Vos données AYA ont plus d'un an`,
+                        html: buildReviewReminderEmail(name, updateUrl, locale),
                     });
                 }
 

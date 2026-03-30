@@ -334,7 +334,7 @@ export async function POST(req: Request) {
         }
 
         const lowText_sm = lastMessage.content.toLowerCase();
-        const isSalesIntent_sm = !!(lowText_sm.match(/(abonnement|pack pro|valider|upgrader|passer en|subscription|upgrade|validate)/));
+        const isSalesIntent_sm = !!(lowText_sm.match(/(abonnement|pack pro|valider|upgrader|passer en|subscription|subscribe|s'abonner|upgrade|validate|obtenir le|get pro)/));
         const isUpdateProfile_sm = lowText_sm.includes("update_profile");
 
         // Build conversation signals for state machine
@@ -2553,9 +2553,9 @@ ${(() => {
 
             // 1. INTENTION DETECTION & CONFIRMATION
             // 🔄 CASE: ABONNEMENT AYA (19 CHF / MOIS)
-            if (userContent.includes("abonnement") || userContent.includes("subscription") || (userContent.includes("aya") && userContent.includes("19"))) {
+            if (userContent.includes("abonnement") || userContent.includes("subscription") || userContent.includes("subscribe") || userContent.includes("s'abonner") || (userContent.includes("aya") && userContent.includes("19"))) {
                 console.log("🎯 Selection: Abonnement AYA");
-                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("validate") || userContent.includes("confirm")) {
+                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("validate") || userContent.includes("confirm") || userContent.includes("subscribe to") || userContent.includes("s'abonner au")) {
                     // Confirmation recue → demander l'email
                     finalResponseText = locale === 'en'
                         ? `🔄 **Valid Choice: AYA SUBSCRIPTION (19 CHF/month).**\nYou activate your priority presence in the AYA Registry.\n\n👉 **Enter your professional email to finalize the subscription:**\nEX: hello@your-domain.com`
@@ -2571,8 +2571,8 @@ ${(() => {
                             id: "confirm_subscription",
                             text: locale === 'en' ? "Your decision" : "Votre decision",
                             options: locale === 'en'
-                                ? ["Validate SUBSCRIPTION (19 CHF/month)", "Switch to PRO PACK (499 CHF)"]
-                                : ["Valider l'ABONNEMENT (19 CHF/mois)", "Changer pour le PACK PRO (499 CHF)"],
+                                ? ["Subscribe to AYA Registry (19 CHF/mo)", "Switch to PRO PACK (499 CHF)"]
+                                : ["S'abonner au Registre AYA (19 CHF/mois)", "Changer pour le PACK PRO (499 CHF)"],
                             allowCustom: false
                         }]
                     });
@@ -2581,7 +2581,7 @@ ${(() => {
             // 🚀 CASE: PACK PRO (499 CHF)
             else if (userContent.includes("pro") || userContent.includes("499") || userContent.includes("propriété") || userContent.includes("ownership")) {
                 console.log("🎯 Selection: Pack PRO");
-                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("passer") || userContent.includes("upgrader") || userContent.includes("validate") || userContent.includes("confirm") || userContent.includes("upgrade")) {
+                if (userContent.includes("valider") || userContent.includes("confirmer") || userContent.includes("passer") || userContent.includes("upgrader") || userContent.includes("validate") || userContent.includes("confirm") || userContent.includes("upgrade") || userContent.includes("get pro") || userContent.includes("obtenir le")) {
                     finalResponseText = locale === 'en'
                         ? `🚀 **Valid Choice: PRO PACK (Ownership).**\nTotal Ownership of your semantic assets. 3 years of Registry included.\n\n👉 **Enter your professional email to finalize the order (499 CHF):**`
                         : `🚀 **Choix Validé : PACK PRO (Propriété).**\nPropriété Totale de vos actifs sémantiques. 3 ans de Registre inclus.\n\n👉 **Entrez votre email professionnel pour finaliser la commande (499 CHF) :**`;
@@ -2632,8 +2632,8 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
                             id: "confirm_pro",
                             text: isEn ? "Your final decision:" : "Votre décision finale :",
                             options: isEn
-                                ? ["Validate PRO PACK (499 CHF)", isExisting ? "Keep my subscription" : "Take SUBSCRIPTION (19 CHF)"]
-                                : ["Valider le PACK PRO (499 CHF)", isExisting ? "Rester sur mon abonnement" : "Prendre l'ABONNEMENT (19 CHF)"],
+                                ? ["Get PRO PACK (499 CHF)", isExisting ? "Keep my subscription" : "Subscribe to AYA Registry (19 CHF/mo)"]
+                                : ["Obtenir le PACK PRO (499 CHF)", isExisting ? "Rester sur mon abonnement" : "S'abonner au Registre AYA (19 CHF/mois)"],
                             allowCustom: false
                         }]
                     });

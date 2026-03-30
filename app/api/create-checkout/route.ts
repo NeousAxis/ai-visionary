@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     const url = searchParams.get('url');
     const packType = searchParams.get('packType');
     const analysisId = searchParams.get('aid');
+    const locale = searchParams.get('locale') === 'fr' ? 'fr' : 'en';
 
     if (!email || !url) {
         return new Response('Email and URL are required', { status: 400 });
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest) {
     if (!stripe) return new Response('Stripe not configured', { status: 500 });
 
     try {
-        const payload: Record<string, string> = { u: url, e: email };
+        const payload: Record<string, string> = { u: url, e: email, l: locale };
         if (analysisId) payload.aid = analysisId;
         const clientReferenceId = Buffer.from(JSON.stringify(payload)).toString('base64');
 
@@ -101,7 +102,8 @@ export async function POST(req: NextRequest) {
     const logger = createLogger(generateCorrelationId(), 'checkout');
 
     try {
-        const { email, url, packType, analysisId: aid } = await req.json();
+        const { email, url, packType, analysisId: aid, locale: reqLocale } = await req.json();
+        const locale = reqLocale === 'fr' ? 'fr' : 'en';
 
         if (!email || !url) {
             return NextResponse.json({ error: 'Missing email or url' }, { status: 400 });
@@ -122,7 +124,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Encode URL + Email + AnalysisId in Base64 for client_reference_id
-        const payload: Record<string, string> = { u: url, e: email };
+        const payload: Record<string, string> = { u: url, e: email, l: locale };
         if (aid) payload.aid = aid;
         const clientReferenceId = Buffer.from(JSON.stringify(payload)).toString('base64');
 

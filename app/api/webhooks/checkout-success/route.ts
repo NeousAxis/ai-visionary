@@ -57,7 +57,7 @@ function buildAyaSubEmailHtml(params: {
     blocks: Record<string, number>;
     locale?: 'fr' | 'en';
 }): string {
-    const { name, url, score, ayaId, blocks, locale = 'fr' } = params;
+    const { name, url, score, ayaId, blocks, locale = 'en' } = params;
     const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
     const en = locale === 'en';
 
@@ -392,7 +392,7 @@ export async function POST(req: Request) {
         let customerEmail = session.customer_details?.email || session.customer_email || "";
         let analyzedUrl = "";
         let analysisId = "";
-        let locale: 'fr' | 'en' = 'fr';
+        let locale: 'fr' | 'en' = 'en';
 
         if (session.client_reference_id) {
             try {
@@ -400,7 +400,8 @@ export async function POST(req: Request) {
                 if (payload.e) customerEmail = payload.e;
                 if (payload.u) analyzedUrl = payload.u;
                 if (payload.aid) analysisId = payload.aid;
-                if (payload.l === 'en') locale = 'en';
+                if (payload.l === 'fr') locale = 'fr';
+                else if (payload.l === 'en') locale = 'en';
                 logger.info('WEBHOOK_PAYLOAD_DECODED', `Decoded client_reference_id`, payload);
             } catch { /* Invalid base64 — not critical */ }
         }
@@ -628,7 +629,7 @@ export async function POST(req: Request) {
         const ext = analysisData.extract as Record<string, any>;
         const entityName = ext.identite?.name?.value
             || ext.identite?.legal_name?.value
-            || "Entreprise";
+            || (locale === 'fr' ? "Entreprise" : "Entity");
 
         // 4. REGISTRY AYA
         // Extract entity metadata from analysis data (instead of defaulting to CH/company/General)
@@ -746,6 +747,53 @@ export async function POST(req: Request) {
             logger.info('WEBHOOK_EMAIL_SUB', `Sub email sent to ${customerEmail}`);
 
         } else if (packType === 'PRO') {
+            // --- PRO SCORE LIFT: recalculate score without the hard cap ---
+            // When a client pays for PRO, they receive ASR files + JSON-LD.
+            // The original scan detected no JSON-LD (cap 50) and no ASR (cap 90),
+            // but after purchase these are provided. We recalculate the score
+            // with has_jsonld=true and has_asr_file=true so the email shows
+            // the real uncapped score the client is entitled to.
+            try {
+                const proExtract = {
+                    fields: ext,
+                    version: "AYO-EXTRACT-3.0" as const,
+                    source: {
+                        url: analysisData.url,
+                        scan: {
+                            is_reachable: true,
+                            has_jsonld: true,       // PRO pack includes JSON-LD via ASR
+                            jsonld_count: 1,
+                            has_asr_file: true,     // PRO pack delivers ASR files
+                            has_faq_content: ext?.contenus_pedagogiques?.has_faq?.value ?? false,
+                            has_faq_schema: false,
+                            is_aya_registered: true, // PRO clients are registered in AYA
+                        },
+                    },
+                };
+                const liftedScore = computeAioScore(proExtract as any);
+                const previousScore = analysisData.score;
+                analysisData.score = liftedScore.total;
+                analysisData.blocks = {};
+                for (const [k, v] of Object.entries(liftedScore.blocks)) {
+                    analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
+                }
+                logger.info('WEBHOOK_PRO_SCORE_LIFT', `Score recalculated for PRO: ${previousScore} -> ${liftedScore.total} (cap lifted)`, {
+                    previousScore, newScore: liftedScore.total, url: analysisData.url
+                });
+                // Also update AYA registry with the lifted score (it was set earlier with the capped score)
+                if (ayaId && ayaId !== 'pending') {
+                    try {
+                        await db.updateEntityData(ayaId, { asr_score: Math.round(liftedScore.total) });
+                        logger.info('WEBHOOK_PRO_AYA_SCORE_UPDATE', `AYA entity ${ayaId} score updated to ${liftedScore.total}`);
+                    } catch (updateErr) {
+                        logger.warn('WEBHOOK_PRO_AYA_SCORE_UPDATE_FAIL', `Failed to update AYA score: ${updateErr}`);
+                    }
+                }
+            } catch (liftErr) {
+                logger.warn('WEBHOOK_PRO_SCORE_LIFT_ERROR', `Failed to lift score for PRO, using original: ${liftErr}`);
+                // Non-blocking: keep original score if recalculation fails
+            }
+
             // SANITIZE DATA BEFORE GENERATION — uses shared sanitizer from @/lib/ayo-generators
             if (ext) {
                 const { cleanedFields } = sanitizeExtract(ext);

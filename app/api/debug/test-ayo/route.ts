@@ -6,6 +6,8 @@
  *
  * Usage: GET /api/debug/test-ayo?url=api-glossaries.com
  *        GET /api/debug/test-ayo?url=api-glossaries.com&email=test@test.com
+ *        GET /api/debug/test-ayo?url=api-glossaries.com&locale=en  (default: en)
+ *        GET /api/debug/test-ayo?url=api-glossaries.com&locale=fr
  *
  * Ce endpoint:
  * 1. Lit les données d'analyse depuis Firestore (comme le webhook)
@@ -43,6 +45,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const analyzedUrl = searchParams.get('url') || '';
     const customerEmail = searchParams.get('email') || 'test@test.com';
+    const locale: 'fr' | 'en' = searchParams.get('locale') === 'fr' ? 'fr' : 'en';
 
     if (!analyzedUrl) {
         return NextResponse.json({ error: 'Missing ?url= parameter' }, { status: 400 });
@@ -141,11 +144,11 @@ export async function GET(req: Request) {
 
         // 5. GENERATE ALL 5 PACK FILES — EXACT same functions as webhook (imported from @/lib/ayo-generators)
         const asrId = `asr_test_${crypto.randomUUID().replace(/-/g, '').substring(0, 16)}`;
-        const asr = await generateRealAsrJson(ext, finalScore, new Date().toISOString(), asrId, "PRO", analysisData.url);
-        const manifest = generateManifestJson(ext, analysisData.url);
-        const faq = generateFaqJson(ext, analysisData.url);
-        const glossary = generateGlossaryJson(ext);
-        const externalCtx = generateExternalContextJsonLocal(ext, analysisData.url);
+        const asr = await generateRealAsrJson(ext, finalScore, new Date().toISOString(), asrId, "PRO", analysisData.url, locale);
+        const manifest = generateManifestJson(ext, analysisData.url, locale);
+        const faq = generateFaqJson(ext, analysisData.url, locale);
+        const glossary = generateGlossaryJson(ext, locale);
+        const externalCtx = generateExternalContextJsonLocal(ext, analysisData.url, locale);
 
         // 6. RETURN ALL FILES + metadata
         return NextResponse.json({
@@ -154,6 +157,7 @@ export async function GET(req: Request) {
                 note: 'REAL AYO pipeline — same code as webhook (imported from @/lib/ayo-generators)',
                 entity: entityName,
                 url: analysisData.url,
+                locale,
                 score: Math.round(finalScore),
                 blocks: finalBlocks,
                 sanitized_fields: cleanedFields,

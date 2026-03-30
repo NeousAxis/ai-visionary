@@ -51,12 +51,17 @@ export async function GET(request: Request) {
             for (const entity of entities) {
                 const entityId = entity.entity_id;
                 const email = entity.contact_email || entity.email;
-                const name = entity.display_name || entity.legal_name || 'Votre entreprise';
+                const entityLocale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
+                const name = entity.display_name || entity.legal_name || (entityLocale === 'en' ? 'Your business' : 'Votre entreprise');
 
                 if (!email) {
                     logger.warn('skip', `No email for entity ${entityId} — skipping`);
                     continue;
                 }
+
+                // Locale: from entity metadata or default 'en'
+                const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
+                const en = locale === 'en';
 
                 // Check if we already sent this specific reminder tier
                 const alreadySent =
@@ -81,12 +86,15 @@ export async function GET(request: Request) {
 
                     if (resend) {
                         const renewUrl = `${BASE_URL}/renew/${entityId}`;
+                        const daysPlural = days > 1;
 
                         await resend.emails.send({
                             from: 'AI Visionary <hello@ai-visionary.com>',
                             to: email,
-                            subject: `${name} — Votre certificat AYA expire ${days <= 7 ? 'dans ' + days + ' jours' : 'bientot'}`,
-                            html: buildExpiryReminderEmail(name, days, renewUrl),
+                            subject: en
+                                ? `${name} — Your AYA certificate expires ${days <= 7 ? 'in ' + days + ' day' + (daysPlural ? 's' : '') : 'soon'}`
+                                : `${name} — Votre certificat AYA expire ${days <= 7 ? 'dans ' + days + ' jours' : 'bientot'}`,
+                            html: buildExpiryReminderEmail(name, days, renewUrl, locale),
                         });
                     }
 

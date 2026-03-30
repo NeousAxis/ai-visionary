@@ -28,11 +28,17 @@ export async function GET(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     try {
+        // Locale: from query param or default 'en'
+        const locale = searchParams.get('locale') === 'fr' ? 'fr' : 'en';
+        const en = locale === 'en';
+
         const data = await resend.emails.send({
             from: 'AI Visionary Debug <hello@ai-visionary.com>',
             to: [targetEmail],
-            subject: 'Test de Configuration Email AYO',
-            html: `<h1>Ceci est un test technique.</h1><p>Si vous recevez ceci, la configuration Email (Resend) fonctionne sur Vercel.</p>`
+            subject: en ? 'AYO Email Configuration Test' : 'Test de Configuration Email AYO',
+            html: en
+                ? `<h1>This is a technical test.</h1><p>If you receive this, the Email configuration (Resend) is working on Vercel.</p>`
+                : `<h1>Ceci est un test technique.</h1><p>Si vous recevez ceci, la configuration Email (Resend) fonctionne sur Vercel.</p>`
         });
 
         return NextResponse.json({

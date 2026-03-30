@@ -118,14 +118,20 @@ export async function POST(req: NextRequest) {
             const customerEmail = entity.contact_email || entity.email || invoice.customer_email;
             if (customerEmail && resend) {
                 const portalUrl = 'https://ai-visionary.com/diagnostic';
+                // Locale: from entity metadata or default 'en'
+                const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
+                const en = locale === 'en';
                 try {
                     await resend.emails.send({
                         from: 'registry@ai-visionary.com',
                         to: customerEmail,
-                        subject: `Paiement échoué — ${entity.display_name || 'votre abonnement AYA'}`,
+                        subject: en
+                            ? `Payment failed — ${entity.display_name || 'your AYA subscription'}`
+                            : `Paiement échoué — ${entity.display_name || 'votre abonnement AYA'}`,
                         html: buildPaymentFailedEmail(
-                            entity.display_name || 'votre entreprise',
+                            entity.display_name || (en ? 'your business' : 'votre entreprise'),
                             portalUrl,
+                            locale,
                         ),
                     });
                     logger.info('PAYMENT_FAILED_EMAIL_SENT', `Payment failed email sent to ${customerEmail}`, { entityId: entity.entity_id });
@@ -165,14 +171,20 @@ export async function POST(req: NextRequest) {
             const customerEmail = entity.contact_email || entity.email;
             if (customerEmail && resend) {
                 const diagnosticUrl = 'https://ai-visionary.com/diagnostic';
+                // Locale: from entity metadata or default 'en'
+                const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
+                const en = locale === 'en';
                 try {
                     await resend.emails.send({
                         from: 'registry@ai-visionary.com',
                         to: customerEmail,
-                        subject: `Abonnement AYA annulé — ${entity.display_name || 'votre entreprise'}`,
+                        subject: en
+                            ? `AYA subscription cancelled — ${entity.display_name || 'your business'}`
+                            : `Abonnement AYA annulé — ${entity.display_name || 'votre entreprise'}`,
                         html: buildCancellationEmail(
-                            entity.display_name || 'votre entreprise',
+                            entity.display_name || (en ? 'your business' : 'votre entreprise'),
                             diagnosticUrl,
+                            locale,
                         ),
                     });
                     logger.info('SUB_CANCELLED_EMAIL_SENT', `Cancellation email sent to ${customerEmail}`, { entityId: entity.entity_id });
