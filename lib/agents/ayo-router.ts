@@ -263,7 +263,7 @@ export const WELCOME_MESSAGE = `👋 Bonjour, ici AYO. Initialisation du protoco
 
 export const WELCOME_MESSAGE_EN = `👋 Hello, this is AYO. Initializing the AIO Light protocol. I will run your AI Visibility Diagnostic (Free). Simply provide me with your main website URL.`;
 
-export function getWelcomeMessage(locale: Locale = 'fr'): string {
+export function getWelcomeMessage(locale: Locale = 'en'): string {
     return locale === 'en' ? WELCOME_MESSAGE_EN : WELCOME_MESSAGE;
 }
 
@@ -273,14 +273,14 @@ export function getWelcomeMessage(locale: Locale = 'fr'): string {
 export const EMAIL_REQUEST = `📧 Pour vous envoyer votre rapport détaillé, j'ai besoin de votre email professionnel.`;
 export const EMAIL_REQUEST_EN = `📧 To send you your detailed report, I need your professional email.`;
 
-export function getEmailRequest(locale: Locale = 'fr'): string {
+export function getEmailRequest(locale: Locale = 'en'): string {
     return locale === 'en' ? EMAIL_REQUEST_EN : EMAIL_REQUEST;
 }
 
 /**
  * Génère le message de score initial avec transparence du cap.
  */
-export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'enrichi', locale: Locale = 'fr'): string {
+export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'enrichi', locale: Locale = 'en'): string {
     const lines: string[] = [];
 
     if (locale === 'en') {
@@ -360,7 +360,7 @@ export function formatScoreMessage(result: AnalysteResult, phase: 'initial' | 'e
 /**
  * Génère le message de delta (avant/après questionnaire).
  */
-export function formatDeltaMessage(before: AnalysteResult, after: AnalysteResult, locale: Locale = 'fr'): string {
+export function formatDeltaMessage(before: AnalysteResult, after: AnalysteResult, locale: Locale = 'en'): string {
     const delta = Math.round((after.total - before.total) * 10) / 10;
     const sign = delta >= 0 ? '+' : '';
 

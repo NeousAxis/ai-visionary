@@ -4,7 +4,7 @@
  * Each function returns a fully styled HTML email string
  * matching the existing email style from checkout-success webhook.
  *
- * All functions accept a `locale` param ('fr' | 'en', default 'fr').
+ * All functions accept a `locale` param ('fr' | 'en', default 'en').
  * FR output is identical to the pre-i18n version.
  *
  * Palette: navy #212E53, teal #4A919E, sage #BED3C3, coral #CE6A6B, salmon #EBACA2
@@ -30,7 +30,7 @@ const FOOTER_EN = `
     </div>
 </div>`;
 
-function wrapEmail(headerTitle: string, headerSubtitle: string, bodyHtml: string, locale: 'fr' | 'en' = 'fr'): string {
+function wrapEmail(headerTitle: string, headerSubtitle: string, bodyHtml: string, locale: 'fr' | 'en' = 'en'): string {
     const footer = locale === 'en' ? FOOTER_EN : FOOTER_FR;
     return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -62,7 +62,7 @@ function ctaButton(label: string, url: string, color: string = '#4A919E'): strin
  * Review reminder email — sent when entity data is over 1 year old.
  * Triggered at J-30, J-7, J-0 before next_review_due.
  */
-export function buildReviewReminderEmail(entityName: string, updateUrl: string, locale: 'fr' | 'en' = 'fr'): string {
+export function buildReviewReminderEmail(entityName: string, updateUrl: string, locale: 'fr' | 'en' = 'en'): string {
     const en = locale === 'en';
     return wrapEmail(
         en ? '&#128197; Annual update' : '&#128197; Mise &agrave; jour annuelle',
@@ -103,7 +103,7 @@ export function buildReviewReminderEmail(entityName: string, updateUrl: string, 
  * Expiry reminder email — sent before pack expiration.
  * Triggered at J-90, J-30, J-7 before aya_expiry_date.
  */
-export function buildExpiryReminderEmail(entityName: string, daysLeft: number, renewUrl: string, locale: 'fr' | 'en' = 'fr'): string {
+export function buildExpiryReminderEmail(entityName: string, daysLeft: number, renewUrl: string, locale: 'fr' | 'en' = 'en'): string {
     const en = locale === 'en';
     const urgencyColor = daysLeft <= 7 ? '#991B1B' : daysLeft <= 30 ? '#D97706' : '#4A919E';
     const urgencyBg = daysLeft <= 7 ? '#FEE2E2' : daysLeft <= 30 ? '#FEF3C7' : '#F0F9FF';
@@ -154,7 +154,7 @@ export function buildExpiryReminderEmail(entityName: string, daysLeft: number, r
  * Cancellation email — sent when a subscription is cancelled.
  * Triggered by Stripe webhook customer.subscription.deleted.
  */
-export function buildCancellationEmail(entityName: string, resubscribeUrl: string, locale: 'fr' | 'en' = 'fr'): string {
+export function buildCancellationEmail(entityName: string, resubscribeUrl: string, locale: 'fr' | 'en' = 'en'): string {
     const en = locale === 'en';
     return wrapEmail(
         en ? '&#128532; Subscription cancelled' : '&#128532; Abonnement annul&eacute;',
@@ -203,7 +203,7 @@ export function buildCancellationEmail(entityName: string, resubscribeUrl: strin
  * Payment failed email — sent when a subscription payment fails.
  * Triggered by Stripe webhook invoice.payment_failed.
  */
-export function buildPaymentFailedEmail(entityName: string, retryUrl: string, locale: 'fr' | 'en' = 'fr'): string {
+export function buildPaymentFailedEmail(entityName: string, retryUrl: string, locale: 'fr' | 'en' = 'en'): string {
     const en = locale === 'en';
     return wrapEmail(
         en ? '&#9888;&#65039; Payment failed' : '&#9888;&#65039; &Eacute;chec de paiement',

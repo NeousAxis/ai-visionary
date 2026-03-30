@@ -41,12 +41,12 @@ function sanitizeDisplayText(text: string | undefined): string {
     return cleaned.length >= 5 ? cleaned : "...";
 }
 
-/** Read locale from NEXT_LOCALE cookie, default to 'fr' */
+/** Read locale from NEXT_LOCALE cookie, default to 'en' */
 function getLocaleFromCookie(): 'fr' | 'en' {
-    if (typeof document === 'undefined') return 'fr';
+    if (typeof document === 'undefined') return 'en';
     const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]*)/);
     const val = match ? match[1] : '';
-    return val === 'en' ? 'en' : 'fr';
+    return val === 'fr' ? 'fr' : 'en';
 }
 
 export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
@@ -55,7 +55,7 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [locale, setLocale] = useState<'fr' | 'en'>('fr');
+    const [locale, setLocale] = useState<'fr' | 'en'>('en');
 
     // Widget Specific State
     const [isOpen, setIsOpen] = useState(mode === 'fullscreen');

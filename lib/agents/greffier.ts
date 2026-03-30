@@ -211,7 +211,7 @@ const ENRICHMENT_TEMPLATES_EN: Record<string, EnrichmentTemplate> = {
 };
 
 /** Get the enrichment templates for a locale */
-export function getEnrichmentTemplates(locale: Locale = 'fr'): Record<string, EnrichmentTemplate> {
+export function getEnrichmentTemplates(locale: Locale = 'en'): Record<string, EnrichmentTemplate> {
     return locale === 'en' ? ENRICHMENT_TEMPLATES_EN : ENRICHMENT_TEMPLATES_FR;
 }
 
@@ -235,7 +235,7 @@ export const BOOLEAN_FIELD_NAMES = Object.entries(ENRICHMENT_TEMPLATES)
 export function buildEnrichmentQuestion(
     blockName: string,
     fieldName: string,
-    locale: Locale = 'fr',
+    locale: Locale = 'en',
 ): string {
     const templates = getEnrichmentTemplates(locale);
     const template = templates[fieldName];
@@ -275,7 +275,7 @@ export function buildValidationQuestion(
     blockName: string,
     fieldName: string,
     detectedValue: string | string[],
-    locale: Locale = 'fr',
+    locale: Locale = 'en',
 ): string {
     // Format the detected value
     let displayValue: string;

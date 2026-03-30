@@ -270,9 +270,9 @@ function countryPreposition(cc: string): string {
 /**
  * Build 2-4 sentence plain text description for certificate pages.
  * Uses extractEntityFields to avoid re-extracting data already available.
- * @param locale 'fr' (default, backward-compat) or 'en'
+ * @param locale 'en' (default) or 'fr'
  */
-export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'fr'): string {
+export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'en'): string {
     const f = extractEntityFields(entity, locale);
 
     let phrase1 = '';

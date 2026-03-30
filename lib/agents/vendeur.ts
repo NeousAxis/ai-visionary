@@ -80,7 +80,7 @@ export function buildStripeLinks(url: string, email: string): { pro: string; aya
 /**
  * Génère le message de présentation des packs pour AYO.
  */
-export function buildPackPresentation(url: string, email: string, locale: Locale = 'fr'): string {
+export function buildPackPresentation(url: string, email: string, locale: Locale = 'en'): string {
     const links = buildStripeLinks(url, email);
 
     if (locale === 'en') {

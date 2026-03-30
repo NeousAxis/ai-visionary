@@ -187,7 +187,7 @@ export interface StructureRecommendationsResult {
 export function buildStructureRecommendations(
     extractData: any,
     scoreResult: AnalysteResult,
-    locale: Locale = 'fr',
+    locale: Locale = 'en',
 ): StructureRecommendationsResult {
     const recommendations: StructureRecommendation[] = [];
     const fields = extractData?.fields || {};
@@ -356,7 +356,7 @@ export function buildStructureRecommendations(
  * Formate les recommandations de l'Architecte en texte Markdown pour le message AYO.
  * Utilisé dans la réponse FINAL_ANALYSIS pour personnaliser le pitch PRO.
  */
-export function formatRecommendationsForChat(result: StructureRecommendationsResult, locale: Locale = 'fr'): string {
+export function formatRecommendationsForChat(result: StructureRecommendationsResult, locale: Locale = 'en'): string {
     const lines: string[] = [];
 
     if (locale === 'en') {

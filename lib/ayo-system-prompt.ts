@@ -17,7 +17,7 @@ export function getSystemPrompt(
     targetUrl: string = "",
     targetEmail: string = "",
     isAyaRegisteredByScanner: boolean = false,
-    locale: Locale = 'fr'
+    locale: Locale = 'en'
 ): string {
     // Generate Stripe Params (for Stripe links in the prompt)
     let stripeSuffix = "";
