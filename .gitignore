@@ -52,6 +52,7 @@ ADMIN_SECRETS*
 CLAUDE.md
 MEMORY.md
 PLAN-ACTION-AYO-COMPLET.md
+regles.md
 
 # private data & generated files
 __pycache__/

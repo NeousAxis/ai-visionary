@@ -133,39 +133,9 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 ## 4. CONVENTIONS & REGLES
 
-### Langue
-- **Code** : anglais (variables, fonctions, commentaires)
-- **UI / contenu** : francais (et anglais via i18n)
-- **Repondre a Cyril** : en francais
-
-### Style
-- Palette : teal (#4A919E), navy (#212E53), sage (#BED3C3), coral (#CE6A6B), salmon (#EBACA2)
-- UI moderne, tons doux
-- Inline styles legacy + migration Tailwind progressive
-
-### Securite
-- **JAMAIS** de secrets dans le code
-- **JAMAIS** de `console.log` avec des donnees sensibles
-- Utiliser `lib/logger.ts` pour le logging
-- Valider les inputs avec `lib/validators.ts`
-- Appliquer le rate limiting avec `lib/rate-limit.ts`
-
-### Git
-- Commiter souvent avec des messages descriptifs
-- Verifier `npm run build` avant de commiter
-- TOUJOURS sur une branche feature/fix, jamais sur `main`
-
-### NE JAMAIS FAIRE
-- Modifier le CSS/design sans accord de Cyril
-- Generer des questions via LLM (utiliser templates statiques)
-- Dire "c'est fait" sans test E2E verifie sur le site live
-- Pusher sur main sans accord explicite
-- Demander des preuves/URLs dans le questionnaire (attendre le chantier V4)
-- Declarer "c'est corrige" sans verifier visuellement sur le site live
-- Modifier `buildPlainTextDescription` ou la page certificat sans tester 3 entites : 1 certifiee FR, 1 bot anglophone, 1 bot francophone
-- Utiliser `vercel --prod` sans verifier avec `vercel alias set`
-- Toucher `aio-score-engine.ts`, `greffier.ts`, ni les `EXPECTED_FIELDS` sans accord
-- Coder sans planifier d'abord (Plan > Sous-agents > Orchestrateur > Verification)
+> **TOUTES les regles sont dans `regles.md`** — ce fichier est lu automatiquement par Claude Code.
+> Inclut : workflow obligatoire, interdictions, securite, langue, git, style, tests.
+> Regle critique : **Plan > Sous-agents > Orchestrateur > Verification INTEGRALE**
 
 ---
 
