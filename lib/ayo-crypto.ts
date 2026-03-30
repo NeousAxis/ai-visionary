@@ -82,7 +82,7 @@ const cleanValAsr = cleanVal;
 /**
  * Generates Real ASR JSON based on Tier (LIGHT, PLATEFORME, PRO)
  */
-export async function generateRealAsrJson(extractedData: any, scoreToUse: number, realDate: string, realAsrId: string | null = null, tier: 'LIGHT' | 'PLATEFORME' | 'PRO' | 'isProLegacy' = 'PLATEFORME', entityUrl?: string): Promise<any> {
+export async function generateRealAsrJson(extractedData: any, scoreToUse: number, realDate: string, realAsrId: string | null = null, tier: 'LIGHT' | 'PLATEFORME' | 'PRO' | 'isProLegacy' = 'PLATEFORME', entityUrl?: string, locale: 'fr' | 'en' = 'en'): Promise<any> {
 
     // Legacy support (boolean param)
     let mode = 'PLATEFORME';
@@ -96,6 +96,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // Safety check
     const data = extractedData || {};
+    const en = locale === 'en';
 
     // --- V3 BLOCKS CONSTRUCTION ---
     // Sanitize business_type: reject LLM placeholder values AND user garbage ("aucun", "non", etc.)
@@ -133,7 +134,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         ? { "@type": "AdministrativeArea", "name": deduplicateAreaName(appendInternational(geoServed)) }
         : (data.identite?.country?.value
             ? { "@type": "Country", "name": deduplicateAreaName(appendInternational(cleanValAsr(data.identite.country.value))) }
-            : { "@type": "AdministrativeArea", "name": deduplicateAreaName(appendInternational(cleanValAsr(data.identite?.city?.value) || "Non spécifié")) });
+            : { "@type": "AdministrativeArea", "name": deduplicateAreaName(appendInternational(cleanValAsr(data.identite?.city?.value) || (en ? "Not specified" : "Non spécifié"))) });
 
     // V3 Advanced Blocks (Only for PRO/PLATEFORME depending on strategy)
     // selectionConditions: build from actual data, not generic defaults
@@ -190,7 +191,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     };
 
     // Identity (Always present but stripped for LIGHT)
-    const entityName = cleanValAsr(data.identite?.name?.value) || "Entreprise Inconnue";
+    const entityName = cleanValAsr(data.identite?.name?.value) || (en ? "Unknown Entity" : "Entreprise Inconnue");
     // entityUrl: prefer explicit param, then try extract fields, then empty
     const resolvedEntityUrl = entityUrl || data.identite?.url?.value || data.url || "";
     const entityDescription = cleanValAsr(data.identite?.description?.value) || cleanValAsr(data.offre?.description?.value);
@@ -214,7 +215,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const legalNameVal = cleanValAsr(data.identite?.legal_name?.value);
         if (legalNameVal) identity.legalName = legalNameVal;
         const locationVal = cleanValAsr(data.identite?.country?.value);
-        identity.location = locationVal || "Non spécifié";
+        identity.location = locationVal || (en ? "Not specified" : "Non spécifié");
         identity.address = address;
         identity.areaServed = areaServed;
 
@@ -239,8 +240,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) identity.industry = fixUnmatchedBrackets(businessType);
         if (data.identite?.founding_year?.value) identity.foundingDate = data.identite.founding_year.value;
     } else {
-        identity.location = data.identite?.country?.value || "Inconnu";
-        identity.activity_detected = "Partiel (Needs Verification)";
+        identity.location = data.identite?.country?.value || (en ? "Unknown" : "Inconnu");
+        identity.activity_detected = en ? "Partial (Needs Verification)" : "Partiel (Vérification nécessaire)";
     }
 
     // Offer
@@ -255,7 +256,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const rawAudience = sanitizeFieldValue(cleanValAsr(data.offre?.target_audience?.value));
         const isAudienceSentence = rawAudience && ((rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience));
         // Correction 2: audience as array instead of string
-        const audienceString = isAudienceSentence ? "Grand public" : fixUnmatchedBrackets(rawAudience || "Grand public");
+        const defaultAudience = en ? "General public" : "Grand public";
+        const audienceString = isAudienceSentence ? defaultAudience : fixUnmatchedBrackets(rawAudience || defaultAudience);
         // Bug 5: Limit audience to max 15 segments, filter hallucinated/generic segments
         const HALLUCINATED_AUDIENCE_RE = /^(secteur de (la|l'|le|les)|secteur [a-zéèêëàâä])/i;
         offer.audience = filterGarbageEntries(audienceString.split(',')
@@ -264,7 +266,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             .filter((s: string) => !HALLUCINATED_AUDIENCE_RE.test(s))
             .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
             .slice(0, 15));
-        if (offer.audience.length === 0) offer.audience = ["Grand public"];
+        if (offer.audience.length === 0) offer.audience = [en ? "General public" : "Grand public"];
 
         // Correction 3: pricingIndication as structured object
         const rawPricing = cleanValAsr(data.offre?.pricing_indication?.value);
@@ -290,7 +292,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const processus: any = {};
     if (mode !== 'LIGHT') {
         // Bug fix: Filter out degraded process_steps (bare acronyms, too-short entries)
-        const ACRONYM_EXPANSIONS: Record<string, string> = {
+        const ACRONYM_EXPANSIONS: Record<string, string> = en ? {
+            "ASR": "ASR file generation (AI Singular Record)",
+            "JSON-LD": "Data structuring in JSON-LD",
+            "SEO": "Search engine optimization (SEO)",
+            "AYO": "AYO protocol activation",
+            "AYA": "Registration in the AYA registry",
+            "KPI": "Key performance indicators definition (KPI)",
+        } : {
             "ASR": "Génération du fichier ASR (AI Singular Record)",
             "JSON-LD": "Structuration des données en JSON-LD",
             "SEO": "Optimisation du référencement (SEO)",
@@ -353,7 +362,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         if (qaJoined.includes('cryptographique') || qaJoined.includes('signature cryptographique')) {
             const secMeasuresLower = (engagements.security_measures || []).map((s: string) => s.toLowerCase());
             if (!secMeasuresLower.some((s: string) => s.includes('cryptographique'))) {
-                engagements.security_measures = [...(engagements.security_measures || []), "Signature cryptographique"];
+                engagements.security_measures = [...(engagements.security_measures || []), en ? "Cryptographic signature" : "Signature cryptographique"];
             }
         }
     }
@@ -400,12 +409,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 level: validIndicators.length > 2 ? 3 : 2,
                 label: validIndicators.length > 2 ? "structured" : "emerging",
                 description: validIndicators.length > 2
-                    ? "Système de mesure structuré avec plusieurs indicateurs"
-                    : "Début de suivi avec quelques indicateurs en place",
+                    ? (en ? "Structured measurement system with multiple indicators" : "Système de mesure structuré avec plusieurs indicateurs")
+                    : (en ? "Early tracking with a few indicators in place" : "Début de suivi avec quelques indicateurs en place"),
                 progression_status: validIndicators.length > 2 ? "active" : "in_progress",
                 next_step: validIndicators.length > 2
-                    ? "Maintenir et affiner les indicateurs existants"
-                    : "Ajouter des indicateurs complémentaires"
+                    ? (en ? "Maintain and refine existing indicators" : "Maintenir et affiner les indicateurs existants")
+                    : (en ? "Add complementary indicators" : "Ajouter des indicateurs complémentaires")
             };
         } else {
             // Empty indicators: structured absence signal
@@ -419,9 +428,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             indicateurs.data_maturity = {
                 level: 1,
                 label: "initial",
-                description: "Aucun système de mesure actuellement en place",
+                description: en ? "No measurement system currently in place" : "Aucun système de mesure actuellement en place",
                 progression_status: "to_be_defined",
-                next_step: "Mettre en place un premier indicateur simple"
+                next_step: en ? "Set up a first simple indicator" : "Mettre en place un premier indicateur simple"
             };
         }
 
@@ -465,10 +474,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     if (scanHasJsonLd === false && !isAyaRegistered && scoreToUse === 50) {
         capApplied = true;
-        capReason = "Pas de JSON-LD structuré détecté — score plafonné à 50/100";
+        capReason = en
+            ? "No structured JSON-LD detected — score capped at 50/100"
+            : "Pas de JSON-LD structuré détecté — score plafonné à 50/100";
     } else if (!hasAsrFile && scoreToUse === 90) {
         capApplied = true;
-        capReason = "Pas de fichier ASR (AI Singular Record) — score plafonné à 90/100";
+        capReason = en
+            ? "No ASR file (AI Singular Record) — score capped at 90/100"
+            : "Pas de fichier ASR (AI Singular Record) — score plafonné à 90/100";
     }
 
     // Meta
@@ -651,7 +664,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     }
     else {
         // LIGHT — volontairement incomplet
-        asrContent.note = "VERSION DEMO - NON CERTIFIÉE - INVISIBLE POUR LES AGENTS IA COMMERCIAUX";
+        asrContent.note = en
+            ? "DEMO VERSION - NOT CERTIFIED - INVISIBLE TO COMMERCIAL AI AGENTS"
+            : "VERSION DEMO - NON CERTIFIÉE - INVISIBLE POUR LES AGENTS IA COMMERCIAUX";
     }
 
     // Sign ONLY if not LIGHT (or maybe sign light too? "ASR LIGHT... prouve l’existence") -> "NON SCELLE" usually.

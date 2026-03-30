@@ -31,6 +31,8 @@ export interface ArchitecteInput {
     date: string;
     /** ASR ID unique */
     asrId: string;
+    /** Langue des fichiers générés (default: 'en') */
+    locale?: Locale;
 }
 
 export interface ArchitecteOutput {
@@ -93,14 +95,15 @@ export async function generateProPack(input: ArchitecteInput): Promise<Architect
     let currentFiles: ProPackFiles;
     let qcResult: QCResult;
 
-    // Génération initiale
+    // Génération initiale — locale default 'en'
+    const locale = input.locale ?? 'en';
     const asrJson = await generateRealAsrJson(
-        input.extractData, input.score, input.date, input.asrId, input.mode, input.url
+        input.extractData, input.score, input.date, input.asrId, input.mode, input.url, locale
     );
-    const manifestJson = generateManifestJson(input.extractData, input.url);
-    const faqJson = generateFaqJson(input.extractData, input.url);
-    const glossaryJson = generateGlossaryJson(input.extractData);
-    const externalContextJson = generateExternalContextJsonLocal(input.extractData, input.url);
+    const manifestJson = generateManifestJson(input.extractData, input.url, locale);
+    const faqJson = generateFaqJson(input.extractData, input.url, locale);
+    const glossaryJson = generateGlossaryJson(input.extractData, locale);
+    const externalContextJson = generateExternalContextJsonLocal(input.extractData, input.url, locale);
 
     currentFiles = {
         asr: asrJson,
@@ -145,9 +148,9 @@ export async function generateProPack(input: ArchitecteInput): Promise<Architect
  * Génère uniquement le fichier ASR Light (pour le pack gratuit).
  */
 export async function generateLightPack(
-    extractData: any, score: number, date: string, asrId: string
+    extractData: any, score: number, date: string, asrId: string, locale: Locale = 'en'
 ): Promise<Record<string, unknown>> {
-    return generateRealAsrJson(extractData, score, date, asrId, 'LIGHT');
+    return generateRealAsrJson(extractData, score, date, asrId, 'LIGHT', undefined, locale);
 }
 
 // --- RECOMMANDATIONS STRUCTURELLES (PRÉ-VENTE) ---

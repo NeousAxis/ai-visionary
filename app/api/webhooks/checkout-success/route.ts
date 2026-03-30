@@ -764,6 +764,7 @@ export async function POST(req: Request) {
                 score: analysisData.score,
                 date: new Date().toISOString(),
                 asrId,
+                locale,
             };
 
             const architecteResult = await generateProPack(architecteInput);

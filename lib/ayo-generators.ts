@@ -602,6 +602,7 @@ export function isGarbageGlossaryTerm(term: string): boolean {
 
 /** Bug 8: Fix ASR glossary term description */
 const ASR_CANONICAL_DESCRIPTION = "AI Singular Record — fichier JSON-LD structuré et signé cryptographiquement constituant l'identité sémantique officielle d'une entité auprès des agents IA.";
+const ASR_CANONICAL_DESCRIPTION_EN = "AI Singular Record — a structured JSON-LD file, cryptographically signed, constituting an entity's official semantic identity for AI agents.";
 
 /**
  * Policy-specific definitions for glossary (not all policies are about "data protection")
@@ -622,18 +623,42 @@ const POLICY_DEFINITIONS: Record<string, string> = {
     'tls': "Protocole cryptographique assurant la confidentialité et l'intégrité des données échangées sur Internet.",
     'accessibilité': "Ensemble de bonnes pratiques visant à rendre un site web utilisable par tous, y compris les personnes en situation de handicap.",
 };
+const POLICY_DEFINITIONS_EN: Record<string, string> = {
+    'sitemap': "XML file listing a website's pages to facilitate crawling and indexing by search engines and AI agents.",
+    'robots.txt': "Directive file placed at a website's root, indicating which pages are allowed or disallowed for indexing bots.",
+    'robots': "Directive file placed at a website's root, indicating which pages are allowed or disallowed for indexing bots.",
+    'rgpd': "GDPR — General Data Protection Regulation. European regulatory framework governing the collection and processing of personal data.",
+    'gdpr': "General Data Protection Regulation. European regulatory framework governing the collection and processing of personal data.",
+    'confidentialité': "Policy governing the collection, processing and protection of users' personal data.",
+    "conditions d'utilisation": "Contractual document defining the terms of use for a service or platform.",
+    'cgu': "Terms of Use. Contractual document defining the rules for using a service or platform.",
+    'cgv': "Terms of Sale. Contractual document governing commercial terms between provider and clients.",
+    'mentions légales': "Mandatory legal page identifying the site publisher, host and service access conditions.",
+    'https': "Secure communication protocol encrypting exchanges between browser and server via an SSL/TLS certificate.",
+    'ssl': "Security certificate ensuring encryption of communications between the browser and web server.",
+    'tls': "Cryptographic protocol ensuring the confidentiality and integrity of data exchanged over the Internet.",
+    'accessibilité': "Set of best practices aimed at making a website usable by everyone, including people with disabilities.",
+    'privacy': "Policy governing the collection, processing and protection of users' personal data.",
+    'terms of use': "Contractual document defining the terms of use for a service or platform.",
+    'terms of service': "Contractual document defining the terms of use for a service or platform.",
+    'legal notice': "Mandatory legal page identifying the site publisher, host and service access conditions.",
+    'accessibility': "Set of best practices aimed at making a website usable by everyone, including people with disabilities.",
+};
 
 /** Strip diacritics so "mentions legales" matches "mentions légales" */
 function stripAccents(s: string): string {
     return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-function getPolicyDefinition(policy: string, entityName: string): string {
+function getPolicyDefinition(policy: string, entityName: string, locale: 'fr' | 'en' = 'en'): string {
     const lower = stripAccents(policy.toLowerCase().trim());
-    for (const [key, def] of Object.entries(POLICY_DEFINITIONS)) {
+    const dict = locale === 'en' ? POLICY_DEFINITIONS_EN : POLICY_DEFINITIONS;
+    for (const [key, def] of Object.entries(dict)) {
         if (lower.includes(stripAccents(key))) return def;
     }
-    return `Politique de conformité ${/^[aeiouhAEIOUHéÉàÀ]/.test(entityName) ? `d'${entityName}` : `de ${entityName}`} contribuant à la transparence et à la gouvernance de l'entité.`;
+    return locale === 'en'
+        ? `Compliance policy of ${entityName} contributing to the entity's transparency and governance.`
+        : `Politique de conformité ${/^[aeiouhAEIOUHéÉàÀ]/.test(entityName) ? `d'${entityName}` : `de ${entityName}`} contribuant à la transparence et à la gouvernance de l'entité.`;
 }
 
 /**
@@ -663,12 +688,42 @@ const SECURITY_DEFINITIONS: Record<string, string> = {
     'tls': "Protocole de chiffrement des communications réseau assurant la confidentialité et l'intégrité des données échangées entre un client et un serveur.",
 };
 
-function getSecurityDefinition(measure: string, entityName: string): string {
+const SECURITY_DEFINITIONS_EN: Record<string, string> = {
+    'charte ethique': "Document formalizing the entity's ethical commitments, particularly regarding responsible AI use, algorithmic transparency and respect for user rights.",
+    'charte éthique': "Document formalizing the entity's ethical commitments, particularly regarding responsible AI use, algorithmic transparency and respect for user rights.",
+    'mesures de securite informatique': "Set of technical and organizational measures (firewall, encryption, access control, regular audits) deployed to protect information systems against cyber threats and unauthorized access.",
+    'mesures de sécurité informatique': "Set of technical and organizational measures (firewall, encryption, access control, regular audits) deployed to protect information systems against cyber threats and unauthorized access.",
+    'donnees publiques uniquement': "Commitment to collect and process only publicly accessible data, without using private personal data or unconsented extraction techniques.",
+    'données publiques uniquement': "Commitment to collect and process only publicly accessible data, without using private personal data or unconsented extraction techniques.",
+    'chiffrement': "Security technique transforming data into an unreadable format without a decryption key, ensuring confidentiality of stored and transmitted information.",
+    'encryption': "Security technique transforming data into an unreadable format without a decryption key, ensuring confidentiality of stored and transmitted information.",
+    'pare-feu': "Network security device filtering incoming and outgoing traffic according to predefined rules to block unauthorized access.",
+    'firewall': "Network security device filtering incoming and outgoing traffic according to predefined rules to block unauthorized access.",
+    'sauvegarde': "Regular data and system backup procedure enabling restoration in case of incident, failure, or cyberattack.",
+    'backup': "Regular data and system backup procedure enabling restoration in case of incident, failure, or cyberattack.",
+    'authentification': "Identity verification mechanism before granting access to resources, which may include multiple factors (password, biometrics, token).",
+    'authentication': "Identity verification mechanism before granting access to resources, which may include multiple factors (password, biometrics, token).",
+    'audit': "Systematic and documented assessment of compliance and effectiveness of security measures, performed periodically to identify vulnerabilities.",
+    'anonymisation': "Irreversible process of removing identifying information from a dataset, making re-identification of individuals impossible.",
+    'anonymization': "Irreversible process of removing identifying information from a dataset, making re-identification of individuals impossible.",
+    'pseudonymisation': "Data protection technique replacing direct identifiers with pseudonyms, reducing risks while allowing certain processing operations.",
+    'pseudonymization': "Data protection technique replacing direct identifiers with pseudonyms, reducing risks while allowing certain processing operations.",
+    'signature cryptographique': "Integrity and authenticity verification mechanism using asymmetric encryption algorithms, guaranteeing that a document has not been altered since its creation.",
+    'cryptographic signature': "Integrity and authenticity verification mechanism using asymmetric encryption algorithms, guaranteeing that a document has not been altered since its creation.",
+    'ed25519': "Elliptic curve digital signature algorithm offering high security and performance, used to guarantee the authenticity and integrity of ASR files.",
+    'firebase': "Application development platform offering secure authentication, database, and hosting services, used as a trust infrastructure.",
+    'tls': "Cryptographic protocol ensuring the confidentiality and integrity of data exchanged between a client and server over a network.",
+};
+
+function getSecurityDefinition(measure: string, entityName: string, locale: 'fr' | 'en' = 'en'): string {
     const lower = stripAccents(measure.toLowerCase().trim());
-    for (const [key, def] of Object.entries(SECURITY_DEFINITIONS)) {
+    const dict = locale === 'en' ? SECURITY_DEFINITIONS_EN : SECURITY_DEFINITIONS;
+    for (const [key, def] of Object.entries(dict)) {
         if (lower.includes(stripAccents(key))) return def;
     }
-    return `Mesure de sécurité déployée par ${entityName} pour la protection des données et des systèmes. Signal de fiabilité technique dans le cadre de l'évaluation AIO.`;
+    return locale === 'en'
+        ? `Security measure deployed by ${entityName} for data and system protection. Technical reliability signal in the AIO evaluation framework.`
+        : `Mesure de sécurité déployée par ${entityName} pour la protection des données et des systèmes. Signal de fiabilité technique dans le cadre de l'évaluation AIO.`;
 }
 
 const BUSINESS_TYPE_PLACEHOLDER_RE = /^(type schema\.?org|schema\.?org|organisation|organization|non spécifié|activité non spécifiée|n\/a|undefined|null|)$/i;
@@ -766,8 +821,9 @@ export function sanitizeExtract(ext: Record<string, any>): { cleaned: Record<str
 }
 
 // --- GENERATOR: manifest.json ---
-export function generateManifestJson(data: any, url: string): any {
-    const name = cleanVal(data.identite?.name?.value) || "Entreprise";
+export function generateManifestJson(data: any, url: string, locale: 'fr' | 'en' = 'en'): any {
+    const en = locale === 'en';
+    const name = cleanVal(data.identite?.name?.value) || (en ? "Entity" : "Entreprise");
     const rawBT = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBT || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
@@ -780,7 +836,7 @@ export function generateManifestJson(data: any, url: string): any {
     const lowerMBT = businessType.toLowerCase();
     const manifestEntityType = isAssoManifest ? "NonProfitOrganization" : (lowerMBT.includes("cabinet") || lowerMBT.includes("bureau") ? "ProfessionalService" : "Organization");
 
-    const scope = services.length > 0 ? services.slice(0, 5) : ["Services professionnels"];
+    const scope = services.length > 0 ? services.slice(0, 5) : [en ? "Professional services" : "Services professionnels"];
     scope.push("AI Singular Record (ASR)");
 
     // Build compliance frameworks from actual data instead of hardcoding
@@ -837,8 +893,12 @@ export function generateManifestJson(data: any, url: string): any {
         },
         interpretationPolicy: {
             rule: "no-extrapolation",
-            description: "Toute interprétation doit se limiter strictement aux données déclarées dans les sources listées. Aucune inférence au-delà des faits déclarés n'est autorisée.",
-            fallback: "Si une information est absente, répondre 'non déclaré' plutôt qu'inventer."
+            description: en
+                ? "Any interpretation must be strictly limited to the data declared in the listed sources. No inference beyond declared facts is allowed."
+                : "Toute interprétation doit se limiter strictement aux données déclarées dans les sources listées. Aucune inférence au-delà des faits déclarés n'est autorisée.",
+            fallback: en
+                ? "If information is missing, respond 'not declared' rather than fabricating."
+                : "Si une information est absente, répondre 'non déclaré' plutôt qu'inventer."
         },
         recommendationPolicy: {
             scope: "contextual",
@@ -870,8 +930,9 @@ export function generateManifestJson(data: any, url: string): any {
 }
 
 // --- GENERATOR: faq.json ---
-export function generateFaqJson(data: any, url: string): any {
-    const name = cleanVal(data.identite?.name?.value) || "Notre entreprise";
+export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'en'): any {
+    const en = locale === 'en';
+    const name = cleanVal(data.identite?.name?.value) || (en ? "Our company" : "Notre entreprise");
     const rawBTfaq = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTfaq || ""));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
@@ -908,177 +969,228 @@ export function generateFaqJson(data: any, url: string): any {
     const hasDoc = (rawHasDoc === "__SKIPPED__" || rawHasDoc === "[SKIP] Non applicable") ? false : rawHasDoc;
 
     const isAssoFaq = isAssociation(businessType, name, url);
-    const entityType = isAssoFaq ? "une association" : "une entreprise";
-    const nameArticle = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
+    const entityType = en ? (isAssoFaq ? "a nonprofit organization" : "a company") : (isAssoFaq ? "une association" : "une entreprise");
+    const nameArticle = en ? `${name}'s` : (/^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`);
     const locationStr = [city, country].filter(Boolean).join(", ");
-    const eAccord = isAssoFaq ? "e" : "";
+    const eAccord = en ? "" : (isAssoFaq ? "e" : "");
 
     const qna: { q: string; a: string; category: string }[] = [];
 
-    // --- IDENTITÉ ---
-    // Si businessType est null/vide, ne pas générer "spécialisée dans [garbage]"
+    // --- IDENTITÉ / IDENTITY ---
     const btDescFaq = businessType
         ? (() => {
+            if (en) return ` specializing in ${businessType.toLowerCase()}`;
             const btLower = businessType.toLowerCase();
-            // "le bureau/cabinet X"
             if (btLower.startsWith("bureau") || btLower.startsWith("cabinet")) return ` spécialisée dans le ${btLower}`;
-            // Already has article: "la formation", "le conseil", "les services"
             if (/^(la |le |les |l')/.test(btLower)) return ` spécialisée dans ${btLower}`;
-            // Vowel-starting: "optimisation" → "l'optimisation"
             if (/^[aeiouhéèêëàâäôöùûüîïœæ]/i.test(btLower)) return ` spécialisée dans l'${btLower}`;
-            // Consonant-starting: add "le" as generic article
             return ` spécialisée dans le ${btLower}`;
         })()
         : "";
     qna.push({
-        q: `Qui est ${name} ?`,
-        a: `${name} est ${entityType}${btDescFaq}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""}`.trim(),
-        category: "Identité"
+        q: en ? `Who is ${name}?` : `Qui est ${name} ?`,
+        a: en
+            ? `${name} is ${entityType}${btDescFaq}${locationStr ? `, based in ${locationStr}` : ""}. ${legalName && legalName !== name ? `Legal name: ${legalName}. ` : ""}${services.length > 0 ? `Its main activity covers: ${services.slice(0, 3).join(", ")}.` : ""}`.trim()
+            : `${name} est ${entityType}${btDescFaq}${locationStr ? `, basée à ${locationStr}` : ""}. ${legalName && legalName !== name ? `Raison sociale : ${legalName}. ` : ""}${services.length > 0 ? `Son activité principale couvre : ${services.slice(0, 3).join(", ")}.` : ""}`.trim(),
+        category: en ? "Identity" : "Identité"
     });
 
     if (locationStr) {
         qna.push({
-            q: `Où se situe ${name} ?`,
-            a: `${name} est implanté${eAccord} à ${locationStr}.${geoServed ? ` Sa zone d'intervention couvre : ${geoServed}.` : ` L'activité se concentre principalement dans la région de ${city || country}.`}`,
-            category: "Identité"
+            q: en ? `Where is ${name} located?` : `Où se situe ${name} ?`,
+            a: en
+                ? `${name} is based in ${locationStr}.${geoServed ? ` Its service area covers: ${geoServed}.` : ` Operations are primarily focused in the ${city || country} region.`}`
+                : `${name} est implanté${eAccord} à ${locationStr}.${geoServed ? ` Sa zone d'intervention couvre : ${geoServed}.` : ` L'activité se concentre principalement dans la région de ${city || country}.`}`,
+            category: en ? "Identity" : "Identité"
         });
     }
 
-    // --- OFFRE ---
+    // --- OFFRE / OFFER ---
     if (services.length > 0) {
         qna.push({
-            q: `Quels services propose ${name} ?`,
-            a: `${name} propose ${services.length > 1 ? "plusieurs services" : "un service principal"} : ${services.join(", ")}.${products.length > 0 ? ` L'offre inclut également : ${products.join(", ")}.` : ""}`.trim(),
-            category: "Offre"
+            q: en ? `What services does ${name} offer?` : `Quels services propose ${name} ?`,
+            a: en
+                ? `${name} offers ${services.length > 1 ? "multiple services" : "one main service"}: ${services.join(", ")}.${products.length > 0 ? ` The offering also includes: ${products.join(", ")}.` : ""}`.trim()
+                : `${name} propose ${services.length > 1 ? "plusieurs services" : "un service principal"} : ${services.join(", ")}.${products.length > 0 ? ` L'offre inclut également : ${products.join(", ")}.` : ""}`.trim(),
+            category: en ? "Offer" : "Offre"
         });
     }
 
     if (useCases.length > 0) {
-        // Filter out "Etc." and reformulate naturally
         const cleanUseCases = useCases.filter(uc => !/^etc\.?$/i.test(uc.trim()));
-        const activity = businessType && businessType !== "Organization" ? businessType.toLowerCase() : "son activité";
         qna.push({
-            q: `Dans quelles situations faire appel à ${name} ?`,
-            a: `${name} peut accompagner une entité qui souhaite ${cleanUseCases.length > 0 ? cleanUseCases.map(uc => uc.charAt(0).toLowerCase() + uc.slice(1)).join(", ") : `améliorer sa lisibilité auprès des IA, structurer ses informations en format sémantique et renforcer sa présence dans le registre AYA`}.`.trim(),
-            category: "Offre"
+            q: en ? `When should you work with ${name}?` : `Dans quelles situations faire appel à ${name} ?`,
+            a: en
+                ? `${name} can help organizations looking to ${cleanUseCases.length > 0 ? cleanUseCases.map(uc => uc.charAt(0).toLowerCase() + uc.slice(1)).join(", ") : "improve their AI readability, structure information in semantic format and strengthen their presence in the AYA registry"}.`.trim()
+                : `${name} peut accompagner une entité qui souhaite ${cleanUseCases.length > 0 ? cleanUseCases.map(uc => uc.charAt(0).toLowerCase() + uc.slice(1)).join(", ") : `améliorer sa lisibilité auprès des IA, structurer ses informations en format sémantique et renforcer sa présence dans le registre AYA`}.`.trim(),
+            category: en ? "Offer" : "Offre"
         });
     }
 
     if (audience) {
         const segments = audience.split(',').map(s => s.trim()).filter(Boolean);
         qna.push({
-            q: `À qui s'adresse ${name} ?`,
-            a: segments.length > 1
-                ? `L'offre ${nameArticle} cible ${segments.length} segments : ${segments.join(", ")}.`
-                : `L'offre ${nameArticle} est conçue pour les ${audience.toLowerCase()}.`,
-            category: "Offre"
+            q: en ? `Who is ${name} for?` : `À qui s'adresse ${name} ?`,
+            a: en
+                ? (segments.length > 1
+                    ? `${nameArticle} offering targets ${segments.length} segments: ${segments.join(", ")}.`
+                    : `${nameArticle} offering is designed for ${audience.toLowerCase()}.`)
+                : (segments.length > 1
+                    ? `L'offre ${nameArticle} cible ${segments.length} segments : ${segments.join(", ")}.`
+                    : `L'offre ${nameArticle} est conçue pour les ${audience.toLowerCase()}.`),
+            category: en ? "Offer" : "Offre"
         });
     }
 
-    // --- PROCESSUS ---
+    // --- PROCESSUS / PROCESS ---
     if (processSteps.length > 0) {
         qna.push({
-            q: `Quelle est la méthodologie ${nameArticle} ?`,
-            a: `Le processus se déroule en ${processSteps.length} étapes : ${processSteps.join(", puis ")}.${deliveryMode ? ` Mode d'intervention : ${deliveryMode}.` : ""}${qualityAssurance ? ` Engagement qualité : ${qualityAssurance}.` : ""}`.trim(),
-            category: "Processus"
+            q: en ? `What is ${nameArticle} methodology?` : `Quelle est la méthodologie ${nameArticle} ?`,
+            a: en
+                ? `The process involves ${processSteps.length} steps: ${processSteps.join(", then ")}.${deliveryMode ? ` Delivery mode: ${deliveryMode}.` : ""}${qualityAssurance ? ` Quality commitment: ${qualityAssurance}.` : ""}`.trim()
+                : `Le processus se déroule en ${processSteps.length} étapes : ${processSteps.join(", puis ")}.${deliveryMode ? ` Mode d'intervention : ${deliveryMode}.` : ""}${qualityAssurance ? ` Engagement qualité : ${qualityAssurance}.` : ""}`.trim(),
+            category: en ? "Process" : "Processus"
         });
     }
 
     if (deliveryMode || geoServed) {
         qna.push({
-            q: `Comment ${name} délivre ses prestations ?`,
-            a: `${deliveryMode ? `Les prestations sont délivrées en mode ${deliveryMode}. ` : ""}${geoServed ? `Zone géographique couverte : ${geoServed}. ` : ""}${qualityAssurance ? `Engagement qualité : ${qualityAssurance}.` : ""}`.trim() || `Contactez ${name} pour en savoir plus sur les modalités d'intervention.`,
-            category: "Processus"
+            q: en ? `How does ${name} deliver its services?` : `Comment ${name} délivre ses prestations ?`,
+            a: en
+                ? (`${deliveryMode ? `Services are delivered via ${deliveryMode}. ` : ""}${geoServed ? `Geographic coverage: ${geoServed}. ` : ""}${qualityAssurance ? `Quality commitment: ${qualityAssurance}.` : ""}`.trim() || `Contact ${name} to learn more about service delivery.`)
+                : (`${deliveryMode ? `Les prestations sont délivrées en mode ${deliveryMode}. ` : ""}${geoServed ? `Zone géographique couverte : ${geoServed}. ` : ""}${qualityAssurance ? `Engagement qualité : ${qualityAssurance}.` : ""}`.trim() || `Contactez ${name} pour en savoir plus sur les modalités d'intervention.`),
+            category: en ? "Process" : "Processus"
         });
     }
 
-    // --- TARIFS / FINANCEMENT ---
-    qna.push({
-        q: isAssoFaq ? `Comment est financé${eAccord} ${name} ?` : `Quels sont les tarifs ${nameArticle} ?`,
-        a: pricing
-            ? (isAssoFaq
-                ? `${name} est financé${eAccord} par : ${pricing}. Pour en savoir plus, contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
-                : `Informations tarifaires : ${pricing}. Pour un devis personnalisé, contactez-nous${email ? ` à ${email}` : ` via ${url}`}.`)
-            : (isAssoFaq
-                ? `Les informations de financement ${nameArticle} sont disponibles sur demande. Contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
-                : `Les tarifs sont établis sur mesure selon votre projet. Contactez ${name} pour une proposition personnalisée${email ? ` : ${email}` : ` via ${url}`}.`),
-        category: isAssoFaq ? "Financement" : "Commercial"
-    });
+    // --- TARIFS / PRICING ---
+    if (en) {
+        qna.push({
+            q: isAssoFaq ? `How is ${name} funded?` : `What are ${nameArticle} rates?`,
+            a: pricing
+                ? (isAssoFaq
+                    ? `${name} is funded through: ${pricing}. For more information, contact the team${email ? ` at ${email}` : ` via ${url}`}.`
+                    : `Pricing information: ${pricing}. For a customized quote, contact us${email ? ` at ${email}` : ` via ${url}`}.`)
+                : (isAssoFaq
+                    ? `Funding information for ${name} is available upon request. Contact the team${email ? ` at ${email}` : ` via ${url}`}.`
+                    : `Rates are tailored to your project. Contact ${name} for a personalized proposal${email ? `: ${email}` : ` via ${url}`}.`),
+            category: isAssoFaq ? "Funding" : "Pricing"
+        });
+    } else {
+        qna.push({
+            q: isAssoFaq ? `Comment est financé${eAccord} ${name} ?` : `Quels sont les tarifs ${nameArticle} ?`,
+            a: pricing
+                ? (isAssoFaq
+                    ? `${name} est financé${eAccord} par : ${pricing}. Pour en savoir plus, contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
+                    : `Informations tarifaires : ${pricing}. Pour un devis personnalisé, contactez-nous${email ? ` à ${email}` : ` via ${url}`}.`)
+                : (isAssoFaq
+                    ? `Les informations de financement ${nameArticle} sont disponibles sur demande. Contactez l'équipe${email ? ` à ${email}` : ` via ${url}`}.`
+                    : `Les tarifs sont établis sur mesure selon votre projet. Contactez ${name} pour une proposition personnalisée${email ? ` : ${email}` : ` via ${url}`}.`),
+            category: isAssoFaq ? "Financement" : "Commercial"
+        });
+    }
 
-    // --- CONFIANCE & CONFORMITÉ ---
+    // --- CONFIANCE & CONFORMITÉ / TRUST & COMPLIANCE ---
     if (certifications.length > 0) {
         qna.push({
-            q: `Quelles certifications et labels ${name} détient-${isAssoFaq ? "elle" : "il"} ?`,
-            a: `${name} détient les certifications suivantes : ${certifications.join(", ")}.${frameworks.length > 0 ? ` Référentiels de conformité adoptés : ${frameworks.join(", ")}.` : ""} Ces engagements attestent d'une démarche qualité structurée.`,
-            category: "Conformité"
+            q: en ? `What certifications does ${name} hold?` : `Quelles certifications et labels ${name} détient-${isAssoFaq ? "elle" : "il"} ?`,
+            a: en
+                ? `${name} holds the following certifications: ${certifications.join(", ")}.${frameworks.length > 0 ? ` Compliance frameworks adopted: ${frameworks.join(", ")}.` : ""} These commitments demonstrate a structured quality approach.`
+                : `${name} détient les certifications suivantes : ${certifications.join(", ")}.${frameworks.length > 0 ? ` Référentiels de conformité adoptés : ${frameworks.join(", ")}.` : ""} Ces engagements attestent d'une démarche qualité structurée.`,
+            category: en ? "Compliance" : "Conformité"
         });
     }
 
     if (policies.length > 0 || securityMeasures.length > 0) {
         qna.push({
-            q: `Quelles garanties de conformité offre ${name} ?`,
-            a: `${policies.length > 0 ? `Politiques en vigueur : ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Mesures de sécurité déployées : ${securityMeasures.join(", ")}.` : ""}`.trim(),
-            category: "Conformité"
+            q: en ? `What compliance guarantees does ${name} offer?` : `Quelles garanties de conformité offre ${name} ?`,
+            a: en
+                ? `${policies.length > 0 ? `Active policies: ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Security measures deployed: ${securityMeasures.join(", ")}.` : ""}`.trim()
+                : `${policies.length > 0 ? `Politiques en vigueur : ${policies.join(", ")}. ` : ""}${securityMeasures.length > 0 ? `Mesures de sécurité déployées : ${securityMeasures.join(", ")}.` : ""}`.trim(),
+            category: en ? "Compliance" : "Conformité"
         });
     }
 
-    // --- INDICATEURS ---
+    // --- INDICATEURS / INDICATORS ---
     if (keyIndicators.length > 0) {
-        // Check if indicators have concrete numeric values
         const hasConcreteValuesFaq = keyIndicators.some(ind => /\d/.test(ind));
         qna.push({
-            q: `Quels sont les indicateurs d'impact ${nameArticle} ?`,
-            a: hasConcreteValuesFaq
-                ? `Les indicateurs clés ${nameArticle} incluent : ${keyIndicators.join(", ")}. Ces métriques témoignent de l'impact concret et de la qualité des interventions.`
-                : `${name} déclare suivre ${keyIndicators.length > 1 ? "les indicateurs suivants" : "l'indicateur suivant"} : ${keyIndicators.join(", ")}. La valeur publique n'est pas précisée dans les sources actuelles.`,
-            category: "Indicateurs"
+            q: en ? `What are ${nameArticle} impact indicators?` : `Quels sont les indicateurs d'impact ${nameArticle} ?`,
+            a: en
+                ? (hasConcreteValuesFaq
+                    ? `${nameArticle} key indicators include: ${keyIndicators.join(", ")}. These metrics demonstrate concrete impact and service quality.`
+                    : `${name} reports tracking ${keyIndicators.length > 1 ? "the following indicators" : "the following indicator"}: ${keyIndicators.join(", ")}. Public values are not specified in current sources.`)
+                : (hasConcreteValuesFaq
+                    ? `Les indicateurs clés ${nameArticle} incluent : ${keyIndicators.join(", ")}. Ces métriques témoignent de l'impact concret et de la qualité des interventions.`
+                    : `${name} déclare suivre ${keyIndicators.length > 1 ? "les indicateurs suivants" : "l'indicateur suivant"} : ${keyIndicators.join(", ")}. La valeur publique n'est pas précisée dans les sources actuelles.`),
+            category: en ? "Indicators" : "Indicateurs"
         });
     }
 
-    // --- RESSOURCES PÉDAGOGIQUES ---
+    // --- RESSOURCES / RESOURCES ---
     const rawHasGlossary = data.contenus_pedagogiques?.has_glossary?.value;
     const hasGlossary = (rawHasGlossary === "__SKIPPED__" || rawHasGlossary === "[SKIP] Non applicable") ? false : rawHasGlossary;
     if (hasDoc || hasFaq || hasGlossary) {
-        // When all 3 resources are available (PRO pack), use concise formulation tied to activity
         const allThreeAvailable = hasFaq && hasGlossary && hasDoc;
-        const activityRef = businessType && businessType !== "Organization"
-            ? businessType.toLowerCase()
-            : "son activité";
+        const activityRef = en
+            ? (businessType && businessType !== "Organization" ? businessType.toLowerCase() : "its activity")
+            : (businessType && businessType !== "Organization" ? businessType.toLowerCase() : "son activité");
         let resourceAnswer: string;
-        if (allThreeAvailable) {
-            resourceAnswer = `Oui. ${name} met à disposition une FAQ, un glossaire métier et une documentation liée à ${activityRef}.`;
+        if (en) {
+            if (allThreeAvailable) {
+                resourceAnswer = `Yes. ${name} provides a FAQ, a professional glossary and documentation related to ${activityRef}.`;
+            } else {
+                const resParts: string[] = [];
+                if (typeof hasDoc === 'string' && hasDoc !== "__SKIPPED__") resParts.push(`documentation (${hasDoc})`);
+                else if (hasDoc) resParts.push("comprehensive documentation");
+                if (hasFaq) resParts.push("a FAQ answering common questions");
+                if (hasGlossary) resParts.push("a professional vocabulary glossary");
+                resourceAnswer = `Yes. ${name} provides ${resParts.join(", ")}. Find these resources at ${url}.`;
+            }
         } else {
-            const resParts: string[] = [];
-            if (typeof hasDoc === 'string' && hasDoc !== "__SKIPPED__") resParts.push(`une documentation (${hasDoc})`);
-            else if (hasDoc) resParts.push("une documentation complète");
-            if (hasFaq) resParts.push("une FAQ pour répondre aux questions courantes");
-            if (hasGlossary) resParts.push("un glossaire du vocabulaire métier");
-            resourceAnswer = `Oui. ${name} met à disposition ${resParts.join(", ")}. Retrouvez ces ressources sur ${url}.`;
+            if (allThreeAvailable) {
+                resourceAnswer = `Oui. ${name} met à disposition une FAQ, un glossaire métier et une documentation liée à ${activityRef}.`;
+            } else {
+                const resParts: string[] = [];
+                if (typeof hasDoc === 'string' && hasDoc !== "__SKIPPED__") resParts.push(`une documentation (${hasDoc})`);
+                else if (hasDoc) resParts.push("une documentation complète");
+                if (hasFaq) resParts.push("une FAQ pour répondre aux questions courantes");
+                if (hasGlossary) resParts.push("un glossaire du vocabulaire métier");
+                resourceAnswer = `Oui. ${name} met à disposition ${resParts.join(", ")}. Retrouvez ces ressources sur ${url}.`;
+            }
         }
         qna.push({
-            q: `${name} propose-t-${isAssoFaq ? "elle" : "il"} des ressources pédagogiques ?`,
+            q: en ? `Does ${name} provide educational resources?` : `${name} propose-t-${isAssoFaq ? "elle" : "il"} des ressources pédagogiques ?`,
             a: resourceAnswer,
-            category: "Ressources"
+            category: en ? "Resources" : "Ressources"
         });
     }
 
     // --- CONTACT ---
     const contactParts: string[] = [];
-    if (email) contactParts.push(`par email à ${email}`);
-    if (phone) contactParts.push(`par téléphone au ${phone}`);
-    contactParts.push(`via le site web ${url}`);
+    if (en) {
+        if (email) contactParts.push(`by email at ${email}`);
+        if (phone) contactParts.push(`by phone at ${phone}`);
+        contactParts.push(`via the website ${url}`);
+    } else {
+        if (email) contactParts.push(`par email à ${email}`);
+        if (phone) contactParts.push(`par téléphone au ${phone}`);
+        contactParts.push(`via le site web ${url}`);
+    }
 
     qna.push({
-        q: `Comment contacter ${name} ?`,
-        a: `Contactez ${name} ${contactParts.join(", ")}.`,
+        q: en ? `How to contact ${name}?` : `Comment contacter ${name} ?`,
+        a: en ? `Contact ${name} ${contactParts.join(", ")}.` : `Contactez ${name} ${contactParts.join(", ")}.`,
         category: "Contact"
     });
 
-    // --- AYO / VISIBILITÉ IA ---
+    // --- AYO / AI VISIBILITY ---
     qna.push({
-        q: `${name} est-${isAssoFaq ? "elle" : "il"} certifié${eAccord} AYO ?`,
-        a: `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AI Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssoFaq ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`,
-        category: "Visibilité IA"
+        q: en ? `Is ${name} AYO certified?` : `${name} est-${isAssoFaq ? "elle" : "il"} certifié${eAccord} AYO ?`,
+        a: en
+            ? `Yes. ${name} has completed a full AYO diagnostic and has a cryptographically signed ASR (AI Singular Record) file. This file enables AI agents (ChatGPT, Gemini, Claude, Perplexity) to accurately understand its activity and reliably recommend it. ${name} is registered in the AYA Registry.`
+            : `Oui. ${name} a réalisé un diagnostic AYO complet et dispose d'un fichier ASR (AI Singular Record) signé cryptographiquement. Ce fichier permet aux agents IA (ChatGPT, Gemini, Claude, Perplexity) de comprendre précisément son activité et de ${isAssoFaq ? "la" : "le"} recommander de manière fiable. ${name} est enregistré${eAccord} dans le Registre AYA.`,
+        category: en ? "AI Visibility" : "Visibilité IA"
     });
 
     // Bug 8: Clean double punctuation in all FAQ answers
@@ -1098,14 +1210,15 @@ export function generateFaqJson(data: any, url: string): any {
         "url": url,
         "numberOfQuestions": mainEntity.length,
         "categories": [...new Set(qna.map(q => q.category))],
-        "inLanguage": "fr",
+        "inLanguage": locale,
         "mainEntity": mainEntity
     };
 }
 
 // --- GENERATOR: glossary.json ---
-export function generateGlossaryJson(data: any): any {
-    const name = cleanVal(data.identite?.name?.value) || "Entreprise";
+export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any {
+    const en = locale === 'en';
+    const name = cleanVal(data.identite?.name?.value) || (en ? "Entity" : "Entreprise");
     const rawBTgloss = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTgloss || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
@@ -1121,7 +1234,7 @@ export function generateGlossaryJson(data: any): any {
     const securityMeasures = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
         .map(s => truncateSecurity(s))));
 
-    const nameArticleG = /^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`;
+    const nameArticleG = en ? `${name}'s` : (/^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`);
 
     const terms: { term: string; def: string; category: string }[] = [];
     const seen = new Set<string>();
@@ -1144,15 +1257,26 @@ export function generateGlossaryJson(data: any): any {
         terms.push({ term: cleanTerm, def, category });
     };
 
-    addTerm(name, `${city ? `Organisation basée à ${city}` : "Organisation"}${country ? ` (${country})` : ""}${businessType !== "Organization" ? `, spécialisée dans ${businessType.toLowerCase()}` : ""}. Entité vérifiée et enregistrée dans le registre AYA avec un ASR signé cryptographiquement.`, "Identité");
+    addTerm(name, en
+        ? `${city ? `Organization based in ${city}` : "Organization"}${country ? ` (${country})` : ""}${businessType !== "Organization" ? `, specializing in ${businessType.toLowerCase()}` : ""}. Verified entity registered in the AYA registry with a cryptographically signed ASR.`
+        : `${city ? `Organisation basée à ${city}` : "Organisation"}${country ? ` (${country})` : ""}${businessType !== "Organization" ? `, spécialisée dans ${businessType.toLowerCase()}` : ""}. Entité vérifiée et enregistrée dans le registre AYA avec un ASR signé cryptographiquement.`,
+        en ? "Identity" : "Identité");
     // Ne PAS créer de DefinedTerm pour businessType si c'est la valeur par défaut "Organization"
     // (signifie que l'utilisateur a répondu "aucun" ou similaire → pas un vrai terme métier)
     if (businessType !== "Organization" && sanitizeFieldValue(businessType) !== null) {
-        addTerm(businessType, `Domaine d'activité principal ${nameArticleG}. Cette classification détermine le positionnement sectoriel et les critères de recommandation par les agents IA.`, "Identité");
+        addTerm(businessType, en
+            ? `${nameArticleG} main activity domain. This classification determines sector positioning and AI recommendation criteria.`
+            : `Domaine d'activité principal ${nameArticleG}. Cette classification détermine le positionnement sectoriel et les critères de recommandation par les agents IA.`,
+            en ? "Identity" : "Identité");
     }
 
-    // Bug 10: Each service MUST have a UNIQUE description — use the service name contextually
-    const serviceDescTemplates = [
+    const serviceDescTemplates = en ? [
+        (s: string) => `${s} is ${nameArticleG} flagship service. This service forms the core of the offering declared in the ASR and determines the entity's main positioning.`,
+        (s: string) => `${s}: complementary service offered by ${name}. This service broadens the scope of intervention and functional coverage.`,
+        (s: string) => `${s} — specialized activity of ${name}. This offering component is documented and verifiable in AYO semantic assets.`,
+        (s: string) => `${s} is part of ${nameArticleG} declared expertise. This service addresses specific needs identified during the AIO analysis.`,
+        (s: string) => `${s} service provided by ${name}. This contributes to the diversification and completeness of the entity's overall offering.`,
+    ] : [
         (s: string) => `${s} est la prestation phare ${nameArticleG}. Ce service constitue le cœur de l'offre déclarée dans l'ASR et détermine le positionnement principal de l'entité.`,
         (s: string) => `${s} : service complémentaire proposé par ${name}. Cette prestation enrichit le périmètre d'intervention et la couverture fonctionnelle de l'entité.`,
         (s: string) => `${s} — activité spécialisée ${nameArticleG}. Ce volet de l'offre est documenté et vérifiable dans les actifs sémantiques AYO.`,
@@ -1161,10 +1285,15 @@ export function generateGlossaryJson(data: any): any {
     ];
     services.forEach((s, i) => {
         if (typeof s !== 'string') return;
-        addTerm(s, serviceDescTemplates[i % serviceDescTemplates.length](s), "Services");
+        addTerm(s, serviceDescTemplates[i % serviceDescTemplates.length](s), en ? "Services" : "Services");
     });
 
-    const useCaseDescTemplates = [
+    const useCaseDescTemplates = en ? [
+        (uc: string) => `${uc} — key intervention context for ${name}. A concrete situation where an AI agent would direct a user toward this entity.`,
+        (uc: string) => `${uc} — operational scenario declared by ${name}. Relevance signal for matching user queries with available expertise.`,
+        (uc: string) => `${uc} — recurring use case addressed by ${name}. Enriches the contextual understanding of the entity by generative AIs.`,
+        (uc: string) => `${uc} — field application of ${nameArticleG} competencies. Enables AI agents to recommend the entity in the right decision-making context.`,
+    ] : [
         (uc: string) => `${uc} — contexte d'intervention clé ${nameArticleG}. Situation concrète dans laquelle un agent IA orienterait un utilisateur vers cette entité.`,
         (uc: string) => `${uc} — scénario opérationnel déclaré par ${name}. Signal de pertinence pour le matching entre requêtes utilisateurs et expertise disponible.`,
         (uc: string) => `${uc} — cas de figure récurrent adressé par ${name}. Enrichit la compréhension contextuelle de l'entité par les IA génératives.`,
@@ -1172,70 +1301,94 @@ export function generateGlossaryJson(data: any): any {
     ];
     useCases.forEach((uc, i) => {
         if (typeof uc !== 'string') return;
-        addTerm(uc, useCaseDescTemplates[i % useCaseDescTemplates.length](uc), "Cas d'usage");
+        addTerm(uc, useCaseDescTemplates[i % useCaseDescTemplates.length](uc), en ? "Use Cases" : "Cas d'usage");
     });
 
-    const processDescTemplates = [
+    const processDescTemplates = en ? [
+        (step: string, i: number) => `Phase ${i + 1} of ${nameArticleG} methodology. Structuring step in the support journey.`,
+        (step: string, i: number) => `Step ${i + 1} of the operational process. Key element of ${nameArticleG} intervention framework.`,
+    ] : [
         (step: string, i: number) => `Phase ${i + 1} de la méthodologie ${nameArticleG}. Étape structurante du parcours d'accompagnement.`,
         (step: string, i: number) => `${i + 1}${i === 0 ? "ère" : "ème"} étape du processus opérationnel. Élément clé du dispositif d'intervention ${nameArticleG}.`,
     ];
+    const asrDesc = en ? ASR_CANONICAL_DESCRIPTION_EN : ASR_CANONICAL_DESCRIPTION;
+    const processCategory = en ? "Process" : "Processus";
     processSteps.forEach((step, i) => {
         if (typeof step !== 'string') return;
-        // If the step is or contains "ASR", use the canonical ASR description
-        if (/^ASR$/i.test(step.trim()) || /^Génération du fichier ASR/i.test(step.trim())) {
-            addTerm(step, ASR_CANONICAL_DESCRIPTION, "Processus");
+        if (/^ASR$/i.test(step.trim()) || /^Génération du fichier ASR/i.test(step.trim()) || /^ASR file generation/i.test(step.trim())) {
+            addTerm(step, asrDesc, processCategory);
         } else {
-            addTerm(step, processDescTemplates[i % processDescTemplates.length](step, i), "Processus");
+            addTerm(step, processDescTemplates[i % processDescTemplates.length](step, i), processCategory);
         }
     });
 
+    const complianceCategory = en ? "Compliance" : "Conformité";
     certifications.forEach(c => {
         if (typeof c !== 'string') return;
         const cLower = c.toLowerCase();
-        // "Conformité RGPD" / "GDPR" is a declarative signal, not a certification/label
         if (cLower.includes('rgpd') || cLower.includes('gdpr') || cLower.includes('protection des données')) {
-            addTerm(c, `Signal déclaratif de conformité relatif à la protection des données personnelles. Élément pris en compte dans l'évaluation de la lisibilité et de la confiance.`, "Conformité");
+            addTerm(c, en
+                ? `Declarative compliance signal related to personal data protection. Factor considered in the readability and trust evaluation.`
+                : `Signal déclaratif de conformité relatif à la protection des données personnelles. Élément pris en compte dans l'évaluation de la lisibilité et de la confiance.`, complianceCategory);
         } else {
-            addTerm(c, `Certification ou label officiel détenu par ${name}. Signal de confiance évalué dans le scoring AIO (bloc Confiance & Conformité, pondéré à 15/100).`, "Conformité");
+            addTerm(c, en
+                ? `Official certification or label held by ${name}. Trust signal evaluated in the AIO scoring (Trust & Compliance block, weighted at 15/100).`
+                : `Certification ou label officiel détenu par ${name}. Signal de confiance évalué dans le scoring AIO (bloc Confiance & Conformité, pondéré à 15/100).`, complianceCategory);
         }
     });
 
     frameworks.forEach(f => {
         if (typeof f !== 'string') return;
-        addTerm(f, `Référentiel de conformité adopté par ${name}. Témoigne d'une maturité organisationnelle évaluée dans le scoring AIO.`, "Conformité");
+        addTerm(f, en
+            ? `Compliance framework adopted by ${name}. Demonstrates organizational maturity evaluated in the AIO scoring.`
+            : `Référentiel de conformité adopté par ${name}. Témoigne d'une maturité organisationnelle évaluée dans le scoring AIO.`, complianceCategory);
     });
     policies.forEach(p => {
         if (typeof p !== 'string') return;
         const cleanP = p.replace(/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, "").trim();
-        addTerm(cleanP, getPolicyDefinition(cleanP, name), "Conformité");
+        addTerm(cleanP, getPolicyDefinition(cleanP, name, locale), complianceCategory);
     });
 
     securityMeasures.forEach(sm => {
         if (typeof sm !== 'string') return;
         const cleanSm = sm.replace(/\bde\s+(Wix|WordPress|Squarespace|Shopify|Webflow)\b/gi, "").trim();
-        addTerm(cleanSm, getSecurityDefinition(cleanSm, name), "Sécurité");
+        addTerm(cleanSm, getSecurityDefinition(cleanSm, name, locale), en ? "Security" : "Sécurité");
     });
 
     if (audience) {
-        // Bug fix: UNE SEULE entrée "Public cible" qui liste tous les segments,
-        // au lieu d'une entrée par segment individuel
         const segments = audience.split(',').map(s => s.trim()).filter(Boolean);
-        addTerm("Public cible", `${name} s'adresse aux ${segments.join(", ")}. Ces segments déterminent les contextes de recommandation IA pertinents (recherche locale, matching expert, comparaison sectorielle).`, "Audience");
+        addTerm(en ? "Target audience" : "Public cible", en
+            ? `${name} serves ${segments.join(", ")}. These segments determine the relevant AI recommendation contexts (local search, expert matching, sector comparison).`
+            : `${name} s'adresse aux ${segments.join(", ")}. Ces segments déterminent les contextes de recommandation IA pertinents (recherche locale, matching expert, comparaison sectorielle).`,
+            "Audience");
     }
 
-    addTerm("ASR (AI Singular Record)", "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", "Écosystème AYO");
-    addTerm("AIO", "Artificial Intelligence Optimization — discipline qui consiste à optimiser la lisibilité d'une entité pour les IA génératives.", "Écosystème AYO");
-    addTerm("AIO Score", "Score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Calculé sur 7 blocs pondérés : Identité, Offre, Processus, Conformité, Indicateurs, Pédagogie, Technique.", "Écosystème AYO");
-    addTerm("AYA (AYO Authority Registry)", "Registre officiel des entités certifiées AYO. L'inscription AYA atteste qu'une entité a été analysée, scorée, et que son ASR est authentique, signé et à jour.", "Écosystème AYO");
-    addTerm("Pack AYO PRO", "Ensemble de 5 fichiers sémantiques (ASR, manifest, FAQ, glossaire, contexte externe) livrés à une entité pour optimiser sa visibilité auprès des agents IA. Inclut 3 ans d'inscription au registre AYA.", "Écosystème AYO");
+    const ayoCategory = en ? "AYO Ecosystem" : "Écosystème AYO";
+    addTerm("ASR (AI Singular Record)", en
+        ? "A structured JSON-LD file, cryptographically signed (Ed25519), constituting an entity's official semantic identity. The ASR is the reference document consulted by AI agents to reliably recommend, compare, or present an organization."
+        : "Fichier JSON-LD structuré et signé cryptographiquement (Ed25519) qui constitue l'identité sémantique officielle d'une entité. L'ASR est le document de référence consulté par les agents IA pour recommander, comparer ou présenter une organisation de manière fiable.", ayoCategory);
+    addTerm("AIO", en
+        ? "Artificial Intelligence Optimization — the discipline of optimizing an entity's readability for generative AIs."
+        : "Artificial Intelligence Optimization — discipline qui consiste à optimiser la lisibilité d'une entité pour les IA génératives.", ayoCategory);
+    addTerm("AIO Score", en
+        ? "A score from 0 to 100 measuring an entity's semantic readability by generative AIs. Calculated across 7 weighted blocks: Identity, Offer, Process, Compliance, Indicators, Education, Technical."
+        : "Score de 0 à 100 mesurant la lisibilité sémantique d'une entité par les IA génératives. Calculé sur 7 blocs pondérés : Identité, Offre, Processus, Conformité, Indicateurs, Pédagogie, Technique.", ayoCategory);
+    addTerm("AYA (AYO Authority Registry)", en
+        ? "The official registry of AYO-certified entities. AYA registration certifies that an entity has been analyzed, scored, and that its ASR is authentic, signed, and up to date."
+        : "Registre officiel des entités certifiées AYO. L'inscription AYA atteste qu'une entité a été analysée, scorée, et que son ASR est authentique, signé et à jour.", ayoCategory);
+    addTerm("Pack AYO PRO", en
+        ? "A set of 5 semantic files (ASR, manifest, FAQ, glossary, external context) delivered to an entity to optimize its visibility to AI agents. Includes 3 years of AYA registry registration."
+        : "Ensemble de 5 fichiers sémantiques (ASR, manifest, FAQ, glossaire, contexte externe) livrés à une entité pour optimiser sa visibilité auprès des agents IA. Inclut 3 ans d'inscription au registre AYA.", ayoCategory);
 
     return {
         "@context": "https://schema.org",
         "@type": "DefinedTermSet",
-        name: `Glossaire Officiel - ${name}`,
+        name: en ? `Official Glossary - ${name}` : `Glossaire Officiel - ${name}`,
         version: "AYO-GLOSSARY-2.0",
-        description: `Vocabulaire métier officiel ${nameArticleG}, utilisé comme référence par les agents IA pour interpréter les données sémantiques de cette entité.`,
-        inLanguage: "fr",
+        description: en
+            ? `Official professional vocabulary of ${name}, used as reference by AI agents to interpret this entity's semantic data.`
+            : `Vocabulaire métier officiel ${nameArticleG}, utilisé comme référence par les agents IA pour interpréter les données sémantiques de cette entité.`,
+        inLanguage: locale,
         numberOfTerms: terms.length,
         hasDefinedTerm: terms
             .filter(item => !isGarbageGlossaryTerm(item.term) && !isFormContaminatedGlossary(item.term, item.def))
@@ -1243,7 +1396,7 @@ export function generateGlossaryJson(data: any): any {
                 // Bug 8: Fix bare "ASR" term with generic description
                 let def = item.def;
                 if (/^ASR$/i.test(item.term.trim()) && !item.def.includes("JSON-LD")) {
-                    def = ASR_CANONICAL_DESCRIPTION;
+                    def = en ? ASR_CANONICAL_DESCRIPTION_EN : ASR_CANONICAL_DESCRIPTION;
                 }
                 return {
                     "@type": "DefinedTerm",
@@ -1256,8 +1409,9 @@ export function generateGlossaryJson(data: any): any {
 }
 
 // --- GENERATOR: external_context.json ---
-export function generateExternalContextJsonLocal(data: any, url?: string): any {
-    const name = cleanVal(data.identite?.name?.value) || "Entreprise";
+export function generateExternalContextJsonLocal(data: any, url?: string, locale: 'fr' | 'en' = 'en'): any {
+    const en = locale === 'en';
+    const name = cleanVal(data.identite?.name?.value) || (en ? "Entity" : "Entreprise");
     const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", "Organisation"));
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
@@ -1371,14 +1525,14 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     // Bug 13: Use real use_cases as intents instead of generic "Vendre des produits/services"
     useCases.slice(0, 10).forEach(uc => addUnique(intentKeywords, uc));
 
-    const primaryChannels: string[] = ["Site web"];
+    const primaryChannels: string[] = [en ? "Website" : "Site web"];
     const secondaryChannels: string[] = [];
     if (email) secondaryChannels.push("Email");
-    if (phone) secondaryChannels.push("Telephone");
+    if (phone) secondaryChannels.push(en ? "Phone" : "Telephone");
     if (deliveryMode) {
         const dm = deliveryMode.toLowerCase();
-        if (dm.includes("ligne") || dm.includes("remote") || dm.includes("digital") || dm.includes("visio") || dm.includes("web") || dm.includes("plateforme") || dm.includes("online")) primaryChannels.push("En ligne");
-        if (dm.includes("site") || dm.includes("presen") || dm.includes("atelier")) primaryChannels.push("Sur site");
+        if (dm.includes("ligne") || dm.includes("remote") || dm.includes("digital") || dm.includes("visio") || dm.includes("web") || dm.includes("plateforme") || dm.includes("online")) primaryChannels.push(en ? "Online" : "En ligne");
+        if (dm.includes("site") || dm.includes("presen") || dm.includes("atelier")) primaryChannels.push(en ? "On-site" : "Sur site");
     }
 
     const reputationEnabled = certifications.length > 0 || qualityAssurance.length > 0 || keyIndicators.length > 0;
@@ -1399,7 +1553,9 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
     if (isOnline) {
         const geoLower = (geographies || "").toLowerCase();
         if (!geoLower.includes("international") && !geoLower.includes("mondial") && !geoLower.includes("world")) {
-            geoContext.delivery_note = "Service disponible en ligne — portée potentiellement internationale";
+            geoContext.delivery_note = en
+                ? "Service available online — potentially international reach"
+                : "Service disponible en ligne — portée potentiellement internationale";
         }
     }
 
@@ -1421,8 +1577,8 @@ export function generateExternalContextJsonLocal(data: any, url?: string): any {
                 if (dm.includes("mobile") || dm.includes("app")) types.push("mobile");
                 if (dm.includes("saas") || dm.includes("plateforme") || dm.includes("platform")) types.push("SaaS");
                 if (dm.includes("api")) types.push("API");
-                if (dm.includes("presen") || dm.includes("site") || dm.includes("atelier") || dm.includes("physique")) types.push("sur site");
-                if (dm.includes("visio") || dm.includes("remote") || dm.includes("ligne") || dm.includes("online") || dm.includes("digital")) types.push("en ligne");
+                if (dm.includes("presen") || dm.includes("site") || dm.includes("atelier") || dm.includes("physique")) types.push(en ? "on-site" : "sur site");
+                if (dm.includes("visio") || dm.includes("remote") || dm.includes("ligne") || dm.includes("online") || dm.includes("digital")) types.push(en ? "online" : "en ligne");
                 return [...new Set(types)];
             })(),
             geographic_context: geoContext,
