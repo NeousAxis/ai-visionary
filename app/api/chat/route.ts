@@ -101,7 +101,7 @@ export async function POST(req: Request) {
 
     const correlationId = generateCorrelationId();
     const logger = createLogger(correlationId, 'chat');
-    let locale: Locale = 'fr'; // default, overridden in try block
+    let locale: Locale = 'en'; // default EN, overridden by body.locale
 
     try {
         const body = await req.json();
@@ -2430,6 +2430,7 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                         for (const [suffix, fieldPath] of FIELD_ENTRIES) {
                             QUESTION_TO_FIELD[`q_${suffix}`] = fieldPath;           // q_identite_contact_email
                             QUESTION_TO_FIELD[`validation_${suffix}`] = fieldPath;   // validation_identite_contact_email
+                            QUESTION_TO_FIELD[`evidence_${suffix}`] = fieldPath;     // V4: evidence_identite_contact_email
                             QUESTION_TO_FIELD[suffix] = fieldPath;                   // identite_contact_email (fallback)
                         }
 
@@ -2449,8 +2450,23 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                                 (existing.q === 0);
 
                             if (isEmpty) {
-                                fields[bloc][field] = { value: answer, q: 1, evidence: ["questionnaire_answer"] };
-                                console.log(`🔄 INJECT from questionnaire: ${fieldPath} = ${answer.substring(0, 60)}`);
+                                // V4: Use evaluateEvidence for evidence questions to get proper q-values
+                                let qValue = 1 as any;
+                                let evidenceUrl: string | undefined;
+                                if (V4_EVIDENCE_MODE && qId.startsWith('evidence_')) {
+                                    const matchingTemplate = EVIDENCE_TEMPLATES.find(t => `evidence_${t.block}_${t.fieldName}` === qId);
+                                    if (matchingTemplate) {
+                                        const evaluation = evaluateEvidence(matchingTemplate, answer);
+                                        qValue = evaluation.q;
+                                        evidenceUrl = evaluation.evidenceUrl;
+                                        console.log(`🎯 V4 evaluateEvidence: ${fieldPath} → q=${qValue}${evidenceUrl ? ` (URL: ${evidenceUrl})` : ''}`);
+                                    }
+                                }
+                                const evidenceTrail = evidenceUrl
+                                    ? ["questionnaire_answer", evidenceUrl]
+                                    : ["questionnaire_answer"];
+                                fields[bloc][field] = { value: answer, q: qValue, evidence: evidenceTrail };
+                                console.log(`🔄 INJECT from questionnaire: ${fieldPath} = ${answer.substring(0, 60)} (q=${qValue})`);
                                 injectedCount++;
                             }
                         }
