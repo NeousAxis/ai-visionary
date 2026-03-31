@@ -16,6 +16,7 @@ import type {
   QuestionContext,
   ClassificationResult,
   SiteType,
+  ReliabilityLevel,
 } from './evidence-types';
 import type { Quality } from './aio-score-engine';
 
@@ -47,6 +48,7 @@ function tmpl(
     evidenceType: EvidenceType;
     priority: number;
     mandatory?: boolean;
+    reliabilityLevel: ReliabilityLevel;
     siteTypes?: SiteType[];
     customLabel_fr?: string;
     customLabel_en?: string;
@@ -64,6 +66,7 @@ function tmpl(
     qIfDeclaration: 0.5 as const,
     priority: opts.priority,
     mandatory: opts.mandatory,
+    reliabilityLevel: opts.reliabilityLevel,
     siteTypes: opts.siteTypes,
     inputType: 'text' as const,
     customLabel_fr: opts.customLabel_fr,
@@ -82,6 +85,7 @@ const IDENTITE_TEMPLATES: EvidenceQuestion[] = [
     evidenceType: 'text',
     priority: 1,
     mandatory: true,
+    reliabilityLevel: 'verifiable',
     customLabel_fr: "Email professionnel...",
     customLabel_en: "Professional email...",
   }),
@@ -91,6 +95,7 @@ const IDENTITE_TEMPLATES: EvidenceQuestion[] = [
     evidenceType: 'text',
     priority: 2,
     mandatory: true,
+    reliabilityLevel: 'verifiable',
     customLabel_fr: "Nom legal...",
     customLabel_en: "Legal name...",
   }),
@@ -100,6 +105,7 @@ const IDENTITE_TEMPLATES: EvidenceQuestion[] = [
     evidenceType: 'text',
     priority: 3,
     mandatory: true,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Telephone...",
     customLabel_en: "Phone number...",
   }),
@@ -114,6 +120,7 @@ const OFFRE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "List your main services (comma-separated)",
     evidenceType: 'text',
     priority: 10,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Vos services...",
     customLabel_en: "Your services...",
   }),
@@ -122,6 +129,7 @@ const OFFRE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What are your main products?",
     evidenceType: 'text',
     priority: 11,
+    reliabilityLevel: 'self_declared',
     siteTypes: ['e-commerce'],
     customLabel_fr: "Vos produits...",
     customLabel_en: "Your products...",
@@ -131,6 +139,7 @@ const OFFRE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "Who is your target audience?",
     evidenceType: 'text',
     priority: 12,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Audience cible...",
     customLabel_en: "Target audience...",
   }),
@@ -139,6 +148,7 @@ const OFFRE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What is your pricing policy? (e.g., on request, starting from X CHF)",
     evidenceType: 'text',
     priority: 13,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Politique tarifaire...",
     customLabel_en: "Pricing policy...",
   }),
@@ -153,6 +163,7 @@ const PROCESSUS_TEMPLATES: EvidenceQuestion[] = [
     question_en: "Describe your main work process steps",
     evidenceType: 'text',
     priority: 20,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Etapes de travail...",
     customLabel_en: "Work steps...",
   }),
@@ -161,6 +172,7 @@ const PROCESSUS_TEMPLATES: EvidenceQuestion[] = [
     question_en: "How do you deliver your services? (online, on-site, hybrid)",
     evidenceType: 'text',
     priority: 21,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Mode de livraison...",
     customLabel_en: "Delivery mode...",
   }),
@@ -169,6 +181,7 @@ const PROCESSUS_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What quality measures do you apply?",
     evidenceType: 'text',
     priority: 22,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Mesures qualite...",
     customLabel_en: "Quality measures...",
   }),
@@ -185,6 +198,7 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
       "What certifications do you hold? Provide your certifications page URL if possible.",
     evidenceType: 'url',
     priority: 30,
+    reliabilityLevel: 'verifiable',
     customLabel_fr: "Certifications et URL...",
     customLabel_en: "Certifications and URL...",
   }),
@@ -193,6 +207,7 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What standards or frameworks do you follow? (ISO, GDPR, SOC2, etc.)",
     evidenceType: 'text',
     priority: 31,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Standards / frameworks...",
     customLabel_en: "Standards / frameworks...",
   }),
@@ -201,6 +216,7 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "Do you have published policies (privacy, ToS)? Provide the URL.",
     evidenceType: 'url',
     priority: 32,
+    reliabilityLevel: 'verifiable',
     customLabel_fr: "URL de vos politiques...",
     customLabel_en: "Policies URL...",
   }),
@@ -209,6 +225,7 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What security measures do you implement?",
     evidenceType: 'text',
     priority: 33,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Mesures de securite...",
     customLabel_en: "Security measures...",
   }),
@@ -225,6 +242,7 @@ const INDICATEURS_TEMPLATES: EvidenceQuestion[] = [
       "Cite your key figures with concrete values (e.g., 150 clients, 99.9% uptime, 12 employees)",
     evidenceType: 'text',
     priority: 40,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Chiffres cles...",
     customLabel_en: "Key figures...",
   }),
@@ -233,6 +251,7 @@ const INDICATEURS_TEMPLATES: EvidenceQuestion[] = [
     question_en: "When were your information last updated? (format: YYYY-MM)",
     evidenceType: 'text',
     priority: 41,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Date de mise a jour...",
     customLabel_en: "Last update date...",
   }),
@@ -247,6 +266,7 @@ const PEDAGOGIE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "Do you have an FAQ page? If yes, provide the URL.",
     evidenceType: 'url',
     priority: 50,
+    reliabilityLevel: 'verifiable',
     customLabel_fr: "URL de la FAQ...",
     customLabel_en: "FAQ URL...",
   }),
@@ -255,6 +275,7 @@ const PEDAGOGIE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "Do you have a glossary or lexicon? Provide the URL.",
     evidenceType: 'url',
     priority: 51,
+    reliabilityLevel: 'verifiable',
     customLabel_fr: "URL du glossaire...",
     customLabel_en: "Glossary URL...",
   }),
@@ -263,6 +284,7 @@ const PEDAGOGIE_TEMPLATES: EvidenceQuestion[] = [
     question_en: "Do you have technical documentation? Provide the URL.",
     evidenceType: 'url',
     priority: 52,
+    reliabilityLevel: 'verifiable',
     siteTypes: ['saas'],
     customLabel_fr: "URL de la documentation...",
     customLabel_en: "Documentation URL...",
@@ -278,6 +300,7 @@ const EXTERNAL_CONTEXT_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What keywords describe your business?",
     evidenceType: 'text',
     priority: 60,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Mots-cles...",
     customLabel_en: "Keywords...",
   }),
@@ -286,6 +309,7 @@ const EXTERNAL_CONTEXT_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What questions do your clients most frequently ask?",
     evidenceType: 'text',
     priority: 61,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Questions frequentes...",
     customLabel_en: "Frequent questions...",
   }),
@@ -296,6 +320,7 @@ const EXTERNAL_CONTEXT_TEMPLATES: EvidenceQuestion[] = [
       "What are your distribution channels? (website, marketplace, social media)",
     evidenceType: 'text',
     priority: 62,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Canaux de distribution...",
     customLabel_en: "Distribution channels...",
   }),
@@ -310,6 +335,7 @@ const OFFRE_EXTRAS_TEMPLATES: EvidenceQuestion[] = [
     question_en: "Describe 2-3 concrete use cases of your services",
     evidenceType: 'text',
     priority: 14,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Cas d'usage...",
     customLabel_en: "Use cases...",
   }),
@@ -318,6 +344,7 @@ const OFFRE_EXTRAS_TEMPLATES: EvidenceQuestion[] = [
     question_en: "What geographic areas do you serve?",
     evidenceType: 'text',
     priority: 15,
+    reliabilityLevel: 'self_declared',
     customLabel_fr: "Zones geographiques...",
     customLabel_en: "Geographic areas...",
   }),
@@ -430,49 +457,54 @@ const URL_RE = /https?:\/\/[^\s]+/i;
 
 /**
  * Evaluates a user answer against an evidence question.
- * Returns the field path, quality value, and optional evidence URL.
+ * Returns the field path, quality value, optional evidence URL, and reliability level.
  *
- * Scoring logic:
- * - Empty / refusal          -> q = 0
- * - Bare confirmation ("yes") -> q = 0.5  (declaration only)
- * - URL provided              -> q = 1    (verifiable evidence)
- * - Concrete data (numbers, long text, commas) -> q = 1
- * - Anything else             -> q = 0.5  (declaration only)
+ * Scoring logic (reliability-aware):
+ * - Empty / refusal                          -> q = 0
+ * - Bare confirmation ("yes")               -> q = 0.5  (declaration only)
+ * - Interpretive / subjective claims         -> q = 0, reliabilityLevel = 'interpretive'
+ * - Verifiable field + URL provided          -> q = 1    (proven)
+ * - Verifiable field without URL             -> q = 0.5  (declared but not proven)
+ * - Self-declared field                      -> q = 0.5  (max for unverifiable data)
  */
 export function evaluateEvidence(
   question: EvidenceQuestion,
   answer: string,
 ): EvidenceAnswer {
   const trimmed = answer.trim();
+  const reliability = question.reliabilityLevel;
 
   // Empty or refusal
   if (!trimmed || REFUSAL_RE.test(trimmed)) {
-    return { field: question.field, q: 0 as Quality, rawAnswer: trimmed };
+    return { field: question.field, q: 0 as Quality, rawAnswer: trimmed, reliabilityLevel: reliability };
   }
 
   // Bare confirmation
   if (CONFIRMATION_RE.test(trimmed)) {
-    return { field: question.field, q: 0.5 as Quality, rawAnswer: trimmed };
+    return { field: question.field, q: 0.5 as Quality, rawAnswer: trimmed, reliabilityLevel: reliability };
   }
 
-  // URL evidence
-  const urlMatch = trimmed.match(URL_RE);
-  if (urlMatch) {
-    return {
-      field: question.field,
-      q: 1 as Quality,
-      evidenceUrl: urlMatch[0],
-      rawAnswer: trimmed,
-    };
+  // INTERPRETIVE detection: subjective claims get q=0
+  const INTERPRETIVE_RE = /\b(leader|meilleur|best|top\s|innovant|innovative|world.?class|cutting.?edge|unmatched|unrivaled|number\s*one|#1|premier|superieur|superior)\b/i;
+  if (INTERPRETIVE_RE.test(trimmed)) {
+    return { field: question.field, q: 0 as Quality, rawAnswer: trimmed, reliabilityLevel: 'interpretive' };
   }
 
-  // Concrete evidence: contains digits, is substantial, or has list separators
-  const hasConcreteData =
-    /\d/.test(trimmed) || trimmed.length > 20 || trimmed.includes(',');
-  if (hasConcreteData) {
-    return { field: question.field, q: 1 as Quality, rawAnswer: trimmed };
+  // VERIFIABLE: URL evidence -> q=1
+  if (reliability === 'verifiable') {
+    const urlMatch = trimmed.match(URL_RE);
+    if (urlMatch) {
+      return { field: question.field, q: 1 as Quality, evidenceUrl: urlMatch[0], rawAnswer: trimmed, reliabilityLevel: 'verifiable' };
+    }
+    // Verifiable field without URL -> q=0.5 (declared but not proven)
+    return { field: question.field, q: 0.5 as Quality, rawAnswer: trimmed, reliabilityLevel: 'self_declared' };
   }
 
-  // Default: declaration only
-  return { field: question.field, q: 0.5 as Quality, rawAnswer: trimmed };
+  // SELF_DECLARED: max q=0.5 regardless of content quality
+  if (reliability === 'self_declared') {
+    return { field: question.field, q: 0.5 as Quality, rawAnswer: trimmed, reliabilityLevel: 'self_declared' };
+  }
+
+  // Default fallback
+  return { field: question.field, q: 0.5 as Quality, rawAnswer: trimmed, reliabilityLevel: reliability };
 }

@@ -17,6 +17,8 @@ export interface ClassificationResult {
 
 export type EvidenceType = 'url' | 'text' | 'confirmation';
 
+export type ReliabilityLevel = 'verifiable' | 'self_declared' | 'interpretive';
+
 export interface EvidenceQuestion {
   field: string;               // full path: 'engagements_conformite.certifications'
   block: string;               // block name: 'engagements_conformite'
@@ -30,6 +32,7 @@ export interface EvidenceQuestion {
   qIfDeclaration: 0.5;         // bare confirmation only
   priority: number;            // sort order (1 = first)
   mandatory?: boolean;         // always ask if missing (contact_email, legal_name, contact_phone)
+  reliabilityLevel: ReliabilityLevel; // data reliability classification
   inputType?: 'text';          // force text input
   customLabel_fr?: string;     // placeholder FR
   customLabel_en?: string;     // placeholder EN
@@ -51,6 +54,7 @@ export interface EvidenceAnswer {
   q: Quality;
   evidenceUrl?: string;
   rawAnswer: string;
+  reliabilityLevel: ReliabilityLevel;
 }
 
 // --- Site Detection Signals (added to AioScanResult) ---

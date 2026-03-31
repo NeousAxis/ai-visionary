@@ -126,6 +126,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 | `fix/otp-eclore-protection` | Testee, PAS mergee | owner_email + admin section |
 | `fix/remediation` | Archivee | Sprints 1-10 (tous termines, merges dans main) |
 | `fix/i18n-bilingual` | ARCHIVEE | Tentative i18n echouee du 28 mars, NE PAS UTILISER |
+| `feature/ayo-v4-evidence-based` | En cours, PAS mergee | V4 Evidence-Based: site-classifier, question-engine, feature flag, bug fixes PRO |
 
 **Workflow** : TOUJOURS travailler sur une branche feature/fix. Ne JAMAIS merger dans `main` sans validation de Cyril.
 
@@ -167,33 +168,47 @@ En attendant le chantier V4, deux optimisations du questionnaire :
 
 ---
 
-### Chantier AYO V4 — Architecture Evidence-Based (FUTUR MAJEUR)
+### Chantier AYO V4 — Architecture Evidence-Based + Data Reliability Layer
 
-> Complexite : CRITIQUE. Duree : 2-3 semaines. Cyril DOIT etre present.
-> Pre-requis : i18n stable (fait), lifecycle stable (fait), 10k+ entites (en cours).
-
-#### Probleme actuel
-
-AYO fonctionne sur du **declaratif** : "Avez-vous des certifications ?" -> "Oui" -> q=0.5. Aucune preuve. Les IA ne peuvent pas recouper ces declarations.
-
-#### Vision cible
-
-AYO doit fonctionner sur des **preuves verifiables** :
-
-| Actuel (declaratif) | Cible (evidence-based) |
-|---------------------|----------------------|
-| "Avez-vous une FAQ ?" -> Oui/Non | Le scan detecte la FAQ -> q=1 automatique |
-| "Quels sont vos services ?" -> texte libre | Le scan extrait les services -> lien de confirmation |
-| "Certifications ?" -> Oui/Non | "URL de votre page certifications ?" -> verifie auto |
-| q=0.5 pour tout "Oui" | q=1 si preuve fournie, q=0.5 si declaration seule |
-| 15-20 questions | 5-8 questions ciblees (preuve uniquement) |
+> Branche : `feature/ayo-v4-evidence-based` | Flag : `AYO_V4_EVIDENCE` (OFF par defaut)
+> Sprints 1-5 codes, build OK. En cours de test.
 
 #### Principe fondamental
 
-**Lisibilite = Recommandabilite**. Pour qu'une IA recommande une entreprise SANS halluciner, elle a besoin de :
-1. Des donnees structurees (ASR) — deja fait
-2. Des preuves recoupables (URLs, certifications verifiables, avis publics) — pas encore
-3. De la coherence entre la declaration et la realite observable — pas encore verifie
+**Lisibilite = Recommandabilite**. Pour qu'une IA recommande une entreprise SANS halluciner :
+1. Des donnees structurees (ASR) — fait
+2. Des preuves recoupables (URLs, certifications verifiables) — V4
+3. De la coherence entre declaration et realite observable — V4
+
+#### Data Reliability Layer (3 niveaux de verite)
+
+| Niveau | Tag | Exemples | q max | Impact |
+|--------|-----|----------|-------|--------|
+| **Verifiable** | `verified` | Certifications, Privacy Policy, FAQ, glossaire | q=1 si URL | Fort |
+| **Declaratif structure** | `self_declared` | KPIs, clients, uptime, process interne | q=0.5 max | Limite |
+| **Interpretatif** | `interpretive` | "leader", "innovant", "best" | q=0 | Ignore |
+
+> Regle : tout ce qui n'est pas verifiable est utilisable, mais ne doit jamais etre determinant.
+
+#### Ce qui est code (branche V4)
+
+| Module | Fichier | Statut |
+|--------|---------|--------|
+| Site Classifier | `lib/site-classifier.ts` | Fait — 7 types, deterministe |
+| Question Engine | `lib/question-engine.ts` | Fait — 24 templates, reliability levels |
+| Evidence Types | `lib/evidence-types.ts` | Fait — ReliabilityLevel, EvidenceAnswer |
+| Chat Integration | `app/api/chat/route.ts` | Fait — feature flag, 4 zones V4 |
+| Interpretive Detection | `lib/agents/controle-qualite.ts` | Fait — penalise claims subjectifs |
+| ASR Reliability Meta | `lib/ayo-crypto.ts` | Fait — data_reliability dans meta |
+| Bug fixes PRO files | `lib/ayo-generators.ts` | Fait — glossaire, keywords, certifs |
+
+#### Principe du scoring V4
+
+`aio-score-engine.ts` n'est PAS modifie. Le reliability layer agit en AMONT :
+- `evaluateEvidence()` cap les q-values selon le niveau de fiabilite
+- `downgradeFieldQuality()` detecte et penalise les claims interpretatifs
+- Le score engine recoit des q-values deja ajustees
+- Consequence : 100% declaratif = score max ~50/100. Pour monter, il FAUT des preuves URL.
 
 #### Architecture technique V4
 
@@ -344,15 +359,14 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 
 | # | Tache | Priorite | Statut |
 |---|-------|----------|--------|
-| 1 | Merger branches en attente dans `main` (validation Cyril) | Immediat | En attente |
-| 2 | Coherence linguistique fichiers PRO (FAQ/glossaire/ASR en langue du site) | Immediat | A faire |
-| 3 | Scraping 10k+ entites + registres du commerce | Critique | En cours |
+| 1 | ~~Merger branches en attente dans `main`~~ | ~~Immediat~~ | Fait (31 mars 2026) |
+| 2 | ~~Coherence linguistique fichiers PRO (EN par defaut)~~ | ~~Immediat~~ | Fait (31 mars 2026) |
+| 3 | Scraping 10k+ entites + registres du commerce | Critique | En cours (~4400) |
 | 4 | Campagne email entreprises indexees | Haute | A faire |
-| 5 | Chantier AYO V4 Evidence-Based | Haute (futur) | A planifier |
+| 5 | Chantier AYO V4 Evidence-Based | Haute | Sprints 1-3 faits, branche `feature/ayo-v4-evidence-based`, flag `AYO_V4_EVIDENCE` OFF par defaut |
 | 6 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
 | 7 | Soumission There's An AI For That | Moyenne | Cyril |
 | 8 | Mots-cles intelligents AYO (sous-agent post-questionnaire) | Future | Idee |
-| 9 | Dashboard client (espace personnel OTP) | Future | Idee |
 
 ---
 

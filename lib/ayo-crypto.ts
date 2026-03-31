@@ -511,6 +511,57 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             }
             return count;
         })(),
+        "data_reliability": (() => {
+            let verified = 0;
+            let selfDeclared = 0;
+            let interpretive = 0;
+            let evidenceUrls = 0;
+
+            // Verifiable fields (can be proven with URL)
+            const VERIFIABLE_FIELDS = [
+                'identite.contact_email', 'identite.legal_name',
+                'engagements_conformite.certifications', 'engagements_conformite.policies',
+                'contenus_pedagogiques.has_faq', 'contenus_pedagogiques.has_glossary',
+                'contenus_pedagogiques.has_documentation',
+            ];
+
+            const blocks = ['identite', 'offre', 'processus_methodes', 'engagements_conformite', 'indicateurs', 'contenus_pedagogiques', 'structure_technique'];
+            const fieldDetails: Record<string, { reliability: string; evidence_url: string | null }> = {};
+
+            for (const block of blocks) {
+                const blockData = data?.[block];
+                if (!blockData) continue;
+                for (const [fieldName, fieldData] of Object.entries(blockData) as [string, any][]) {
+                    const fieldPath = `${block}.${fieldName}`;
+                    if (!fieldData || typeof fieldData !== 'object' || fieldData.q === undefined) continue;
+
+                    const hasUrl = fieldData.evidence?.some((e: string) => typeof e === 'string' && /^https?:\/\//i.test(e));
+                    const isInterpretive = fieldData.evidence?.includes('interpretive_claim_detected');
+                    const isVerifiableField = VERIFIABLE_FIELDS.includes(fieldPath);
+
+                    if (isInterpretive) {
+                        interpretive++;
+                        fieldDetails[fieldPath] = { reliability: 'interpretive', evidence_url: null };
+                    } else if (hasUrl) {
+                        verified++;
+                        evidenceUrls++;
+                        const url = fieldData.evidence.find((e: string) => /^https?:\/\//i.test(e));
+                        fieldDetails[fieldPath] = { reliability: 'verified', evidence_url: url || null };
+                    } else if (isVerifiableField && fieldData.q > 0) {
+                        selfDeclared++;
+                        fieldDetails[fieldPath] = { reliability: 'self_declared', evidence_url: null };
+                    } else if (fieldData.q > 0) {
+                        selfDeclared++;
+                        fieldDetails[fieldPath] = { reliability: 'self_declared', evidence_url: null };
+                    }
+                }
+            }
+
+            return {
+                summary: { verified_fields: verified, self_declared_fields: selfDeclared, interpretive_fields: interpretive, evidence_urls: evidenceUrls },
+                policy: "Verified fields backed by URL evidence. Self-declared fields accepted but not independently verified. Interpretive claims excluded from scoring.",
+            };
+        })(),
     };
 
     // Bug 11: Always include cap transparency info

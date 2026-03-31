@@ -543,6 +543,27 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
         }
     });
 
+    // V4: Detect interpretive/subjective claims and penalize
+    const INTERPRETIVE_CLAIMS_RE = /\b(leader|meilleur|best|top\s|innovant|innovative|world.?class|cutting.?edge|unmatched|unrivaled|number\s*one|#1|premier|supérieur|superior|unique|révolutionnaire|revolutionary|disruptive|game.?changer|first.?of.?its.?kind)\b/i;
+
+    const textFieldsToCheck = [
+        'offre.services', 'offre.products', 'offre.use_cases',
+        'processus_methodes.quality_assurance',
+        'engagements_conformite.certifications',
+    ];
+
+    for (const fieldPath of textFieldsToCheck) {
+        const [block, field] = fieldPath.split('.');
+        if (!fields[block]?.[field]) continue;
+        const val = fields[block][field].value;
+        const textToCheck = Array.isArray(val) ? val.join(' ') : (typeof val === 'string' ? val : '');
+        if (INTERPRETIVE_CLAIMS_RE.test(textToCheck) && fields[block][field].q > 0) {
+            fields[block][field].q = 0;
+            fields[block][field].evidence = [...(fields[block][field].evidence || []), 'interpretive_claim_detected'];
+            console.log(`⚠️ INTERPRETIVE CLAIM detected in ${fieldPath}: "${textToCheck.substring(0, 60)}" → q=0`);
+        }
+    }
+
     return logs;
 }
 
