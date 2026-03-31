@@ -234,30 +234,32 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Block 5: indicateurs — STRUCTURAL CAPACITY + ENGAGEMENT (V4 Evidence-Based)
-// Replaces "how many clients?" with "what can you actually deliver?"
-// An AI recommends operational clarity, not vanity metrics
+// Block 5: indicateurs → FIABILITE & ENGAGEMENT OPERATIONNEL (V4)
+// Verifiable-first: URL of SLA/commitments page → q=1
+// Fallback: structured text → q=0.5 (self_declared, weight 0.4)
+// Missing: q=0
+// "Prove you're reliable, not that you're good"
 // ---------------------------------------------------------------------------
 const INDICATEURS_TEMPLATES: EvidenceQuestion[] = [
   tmpl('indicateurs', 'key_indicators', {
     question_fr:
-      "Quelles sont vos limites explicites ? (capacite de production, types de projets refuses, contraintes)",
+      "Avez-vous une page publique decrivant vos engagements, SLA ou garanties ? Fournissez l'URL. Sinon, decrivez brievement vos limites et engagements.",
     question_en:
-      "What are your explicit limitations? (production capacity, types of projects refused, constraints)",
-    evidenceType: 'text',
+      "Do you have a public page describing your commitments, SLA, or guarantees? Provide the URL. Otherwise, briefly describe your limits and commitments.",
+    evidenceType: 'url',
     priority: 40,
-    reliabilityLevel: 'self_declared',
-    customLabel_fr: "Limites et capacite...",
-    customLabel_en: "Limits and capacity...",
+    reliabilityLevel: 'verifiable',
+    customLabel_fr: "URL engagements ou description...",
+    customLabel_en: "Commitments URL or description...",
   }),
   tmpl('indicateurs', 'last_review_date', {
-    question_fr: "Quels engagements explicites prenez-vous envers vos clients ? (SLA, garanties, transparence)",
-    question_en: "What explicit commitments do you make to your clients? (SLA, guarantees, transparency)",
-    evidenceType: 'text',
+    question_fr: "Avez-vous une page conditions de service / limitations ? Fournissez l'URL. Sinon, quelles limites reconnaissez-vous ?",
+    question_en: "Do you have a terms of service / limitations page? Provide the URL. Otherwise, what limitations do you acknowledge?",
+    evidenceType: 'url',
     priority: 41,
-    reliabilityLevel: 'self_declared',
-    customLabel_fr: "Engagements explicites...",
-    customLabel_en: "Explicit commitments...",
+    reliabilityLevel: 'verifiable',
+    customLabel_fr: "URL conditions ou limites...",
+    customLabel_en: "Terms URL or limitations...",
   }),
 ];
 
