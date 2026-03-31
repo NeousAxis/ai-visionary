@@ -402,11 +402,15 @@ export function buildEvidenceQueue(
         return false;
       }
 
-      // V4 Reliability: skip self_declared non-mandatory questions
-      // Self-declared data is capped at q=0.5 — asking wastes user time
-      // Only ask: verifiable (URL proof → q=1) or mandatory (contact info)
+      // V4 Reliability: skip self_declared questions ONLY IF scan already detected the data
+      // If scan didn't detect it, we still need to ask (even if capped at q=0.5)
+      // Verifiable questions are always asked (URL proof can reach q=1)
       if (q.reliabilityLevel === 'self_declared' && !q.mandatory) {
-        return false;
+        const scanConfidence = ctx.detected[q.field] ?? 0;
+        if (scanConfidence >= 70) {
+          return false; // scan already has this data, no need to ask
+        }
+        // scan missed it → ask the question (will be capped at q=0.5)
       }
 
       // Filter by detection confidence (skip if already detected)
