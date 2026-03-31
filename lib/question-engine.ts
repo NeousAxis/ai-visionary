@@ -155,35 +155,37 @@ const OFFRE_TEMPLATES: EvidenceQuestion[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Block 3: processus_methodes (3 questions)
+// Block 3: processus_methodes — STRUCTURAL CAPACITY (V4 Evidence-Based)
+// Replaces vague "describe your process" with verifiable operational questions
+// An AI recommends capability to deliver, not marketing claims
 // ---------------------------------------------------------------------------
 const PROCESSUS_TEMPLATES: EvidenceQuestion[] = [
   tmpl('processus_methodes', 'process_steps', {
-    question_fr: "Decrivez vos etapes de travail principales",
-    question_en: "Describe your main work process steps",
-    evidenceType: 'text',
+    question_fr: "Votre processus de travail est-il documente ? Si oui, fournissez l'URL.",
+    question_en: "Is your work process documented? If yes, provide the URL.",
+    evidenceType: 'url',
     priority: 20,
-    reliabilityLevel: 'self_declared',
-    customLabel_fr: "Etapes de travail...",
-    customLabel_en: "Work steps...",
+    reliabilityLevel: 'verifiable',
+    customLabel_fr: "URL documentation processus...",
+    customLabel_en: "Process documentation URL...",
   }),
   tmpl('processus_methodes', 'delivery_mode', {
-    question_fr: "Comment livrez-vous vos services ? (en ligne, sur site, hybride)",
-    question_en: "How do you deliver your services? (online, on-site, hybrid)",
+    question_fr: "Quel est votre modele d'execution ? (solo, equipe, reseau de partenaires)",
+    question_en: "What is your execution model? (solo, team, partner network)",
     evidenceType: 'text',
     priority: 21,
     reliabilityLevel: 'self_declared',
-    customLabel_fr: "Mode de livraison...",
-    customLabel_en: "Delivery mode...",
+    customLabel_fr: "Modele d'execution...",
+    customLabel_en: "Execution model...",
   }),
   tmpl('processus_methodes', 'quality_assurance', {
-    question_fr: "Quelles mesures de qualite appliquez-vous ?",
-    question_en: "What quality measures do you apply?",
-    evidenceType: 'text',
+    question_fr: "Avez-vous des mecanismes de controle qualite documentes ? Fournissez l'URL si possible.",
+    question_en: "Do you have documented quality control mechanisms? Provide the URL if possible.",
+    evidenceType: 'url',
     priority: 22,
-    reliabilityLevel: 'self_declared',
-    customLabel_fr: "Mesures qualite...",
-    customLabel_en: "Quality measures...",
+    reliabilityLevel: 'verifiable',
+    customLabel_fr: "URL controle qualite...",
+    customLabel_en: "Quality control URL...",
   }),
 ];
 
@@ -203,13 +205,13 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     customLabel_en: "Certifications and URL...",
   }),
   tmpl('engagements_conformite', 'frameworks', {
-    question_fr: "Quels standards ou frameworks suivez-vous ? (ISO, RGPD, SOC2, etc.)",
-    question_en: "What standards or frameworks do you follow? (ISO, GDPR, SOC2, etc.)",
-    evidenceType: 'text',
+    question_fr: "Quels standards suivez-vous ? Fournissez l'URL de votre page conformite si possible.",
+    question_en: "What standards do you follow? Provide your compliance page URL if possible.",
+    evidenceType: 'url',
     priority: 31,
-    reliabilityLevel: 'self_declared',
-    customLabel_fr: "Standards / frameworks...",
-    customLabel_en: "Standards / frameworks...",
+    reliabilityLevel: 'verifiable',
+    customLabel_fr: "Standards et URL conformite...",
+    customLabel_en: "Standards and compliance URL...",
   }),
   tmpl('engagements_conformite', 'policies', {
     question_fr: "Avez-vous des politiques publiees (confidentialite, CGV) ? Indiquez l'URL.",
@@ -221,39 +223,41 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     customLabel_en: "Policies URL...",
   }),
   tmpl('engagements_conformite', 'security_measures', {
-    question_fr: "Quelles mesures de securite implementez-vous ?",
-    question_en: "What security measures do you implement?",
+    question_fr: "Reconnaissez-vous des limites dans vos services ? Lesquelles ?",
+    question_en: "Do you acknowledge limitations in your services? Which ones?",
     evidenceType: 'text',
     priority: 33,
     reliabilityLevel: 'self_declared',
-    customLabel_fr: "Mesures de securite...",
-    customLabel_en: "Security measures...",
+    customLabel_fr: "Limites reconnues...",
+    customLabel_en: "Acknowledged limitations...",
   }),
 ];
 
 // ---------------------------------------------------------------------------
-// Block 5: indicateurs (2 questions — EVIDENCE-BASED)
+// Block 5: indicateurs — STRUCTURAL CAPACITY + ENGAGEMENT (V4 Evidence-Based)
+// Replaces "how many clients?" with "what can you actually deliver?"
+// An AI recommends operational clarity, not vanity metrics
 // ---------------------------------------------------------------------------
 const INDICATEURS_TEMPLATES: EvidenceQuestion[] = [
   tmpl('indicateurs', 'key_indicators', {
     question_fr:
-      "Citez vos chiffres cles avec des valeurs concretes (ex: 150 clients, 99.9% uptime, 12 employes)",
+      "Quelles sont vos limites explicites ? (capacite de production, types de projets refuses, contraintes)",
     question_en:
-      "Cite your key figures with concrete values (e.g., 150 clients, 99.9% uptime, 12 employees)",
+      "What are your explicit limitations? (production capacity, types of projects refused, constraints)",
     evidenceType: 'text',
     priority: 40,
     reliabilityLevel: 'self_declared',
-    customLabel_fr: "Chiffres cles...",
-    customLabel_en: "Key figures...",
+    customLabel_fr: "Limites et capacite...",
+    customLabel_en: "Limits and capacity...",
   }),
   tmpl('indicateurs', 'last_review_date', {
-    question_fr: "Date de derniere mise a jour de vos informations ? (format: YYYY-MM)",
-    question_en: "When were your information last updated? (format: YYYY-MM)",
+    question_fr: "Quels engagements explicites prenez-vous envers vos clients ? (SLA, garanties, transparence)",
+    question_en: "What explicit commitments do you make to your clients? (SLA, guarantees, transparency)",
     evidenceType: 'text',
     priority: 41,
     reliabilityLevel: 'self_declared',
-    customLabel_fr: "Date de mise a jour...",
-    customLabel_en: "Last update date...",
+    customLabel_fr: "Engagements explicites...",
+    customLabel_en: "Explicit commitments...",
   }),
 ];
 
