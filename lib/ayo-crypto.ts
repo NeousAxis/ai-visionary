@@ -495,8 +495,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "tier": mode,
         "validity_period": mode === 'PRO' ? "3 years" : mode === 'PLATEFORME' ? "1 year" : "demo",
         "spec": "https://ai-visionary.com/specs/asr-v3",
-        "trust_level": "self_declared_structured",
-        "evidence_level": "declared_signals_only",
+        "trust_level": process.env.AYO_V4_EVIDENCE === 'true' ? "reliability_weighted" : "self_declared_structured",
+        "evidence_level": process.env.AYO_V4_EVIDENCE === 'true' ? "verified_and_declared" : "declared_signals_only",
         "evidence_count": (() => {
             let count = 0;
             const blocks = ['identite', 'offre', 'processus_methodes', 'engagements_conformite', 'indicateurs', 'contenus_pedagogiques', 'structure_technique'];
@@ -562,6 +562,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 policy: "Verified fields backed by URL evidence. Self-declared fields accepted but not independently verified. Interpretive claims excluded from scoring.",
             };
         })(),
+        "data_classification": {
+            "verified": { "weight": 1.0, "description": "Backed by URL evidence or scan detection" },
+            "self_declared": { "weight": 0.4, "description": "User-declared, not independently verified" },
+            "unknown": { "weight": 0.1, "description": "Not provided or uncertain" }
+        },
     };
 
     // Bug 11: Always include cap transparency info
@@ -590,12 +595,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         reason: rawIndicatorsForSignal.length > 0
             ? (hasConcreteValues ? "indicators_provided" : "indicators_declared_with_transparency")
             : "absence_declared_and_structured",
-        trust_modifier: rawIndicatorsForSignal.length > 0
-            ? (hasConcreteValues ? "positive" : "neutral")
-            : "neutral",
-        recommendation_impact: rawIndicatorsForSignal.length > 0
-            ? (hasConcreteValues ? "none" : "low")
-            : "low"
+        trust_modifier: "neutral",
+        recommendation_impact: "low"
     } : undefined;
 
     const asrContent: any = {

@@ -189,7 +189,7 @@ function buildProEmailHtml(params: {
     blocks: Record<string, number>;
     locale?: 'fr' | 'en';
 }): string {
-    const { name, url, score, ayaId, blocks, locale = 'fr' } = params;
+    const { name, url, score, ayaId, blocks, locale = 'en' } = params;
     const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
     const en = locale === 'en';
 
@@ -754,6 +754,19 @@ export async function POST(req: Request) {
             // with has_jsonld=true and has_asr_file=true so the email shows
             // the real uncapped score the client is entitled to.
             try {
+                // PRO: Override structure_technique fields to reflect delivered files
+                if (ext?.structure_technique) {
+                    if (ext.structure_technique.has_asr) {
+                        ext.structure_technique.has_asr = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
+                    } else {
+                        ext.structure_technique.has_asr = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
+                    }
+                    if (ext.structure_technique.has_jsonld) {
+                        ext.structure_technique.has_jsonld = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
+                    } else {
+                        ext.structure_technique.has_jsonld = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
+                    }
+                }
                 const proExtract = {
                     fields: ext,
                     version: "AYO-EXTRACT-3.0" as const,

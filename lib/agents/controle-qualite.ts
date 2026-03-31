@@ -564,6 +564,37 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
         }
     }
 
+    // V4: RELIABILITY-BASED Q-VALUE CAPPING
+    // Self-declared fields (not verifiable by URL) are capped at q=0.5 max
+    // This prevents inflated scores from 100% declarative data
+    const VERIFIABLE_FIELDS = new Set([
+        'identite.contact_email',
+        'identite.legal_name',
+        'engagements_conformite.certifications',
+        'engagements_conformite.policies',
+        'contenus_pedagogiques.has_faq',
+        'contenus_pedagogiques.has_glossary',
+        'contenus_pedagogiques.has_documentation',
+    ]);
+
+    const V4_EVIDENCE_MODE = process.env.AYO_V4_EVIDENCE === 'true';
+    if (V4_EVIDENCE_MODE) {
+        for (const blockName of Object.keys(fields)) {
+            const block = fields[blockName];
+            if (typeof block !== 'object' || block === null) continue;
+            for (const fieldName of Object.keys(block)) {
+                const fieldPath = `${blockName}.${fieldName}`;
+                const field = block[fieldName];
+                if (field && typeof field === 'object' && 'q' in field && !VERIFIABLE_FIELDS.has(fieldPath)) {
+                    if (field.q > 0.5) {
+                        logs.push({ field: fieldPath, reason: 'self_declared_capped_to_0.5' });
+                        field.q = 0.5;
+                    }
+                }
+            }
+        }
+    }
+
     return logs;
 }
 

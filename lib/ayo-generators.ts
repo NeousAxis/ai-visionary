@@ -1325,7 +1325,9 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     ];
     useCases.forEach((uc, i) => {
         if (typeof uc !== 'string') return;
-        addTerm(uc, useCaseDescTemplates[i % useCaseDescTemplates.length](uc), en ? "Use Cases" : "Cas d'usage");
+        const trimmedUc = uc.trim();
+        if (!trimmedUc || trimmedUc.length < 3) return;
+        addTerm(trimmedUc, useCaseDescTemplates[i % useCaseDescTemplates.length](trimmedUc), en ? "Use Cases" : "Cas d'usage");
     });
 
     const processDescTemplates = en ? [
