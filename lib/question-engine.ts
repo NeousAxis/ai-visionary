@@ -396,6 +396,13 @@ export function buildEvidenceQueue(
         return false;
       }
 
+      // V4 Reliability: skip self_declared non-mandatory questions
+      // Self-declared data is capped at q=0.5 — asking wastes user time
+      // Only ask: verifiable (URL proof → q=1) or mandatory (contact info)
+      if (q.reliabilityLevel === 'self_declared' && !q.mandatory) {
+        return false;
+      }
+
       // Filter by detection confidence (skip if already detected)
       if (!q.askOnlyIf(ctx.detected)) {
         return false;
