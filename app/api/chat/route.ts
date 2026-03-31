@@ -1395,6 +1395,11 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 console.log(`📡 Re-scanning ${urlToScan} for question context...`);
                 try {
                     contextScanResult = await scanUrlForAioSignals(urlToScan);
+                    // V4: Classify site from context scan if not already classified
+                    if (V4_EVIDENCE_MODE && !v4Classification && contextScanResult?.isReachable) {
+                        v4Classification = classifySite(contextScanResult);
+                        console.log(`🏷️ V4 Site Classification (re-scan): ${v4Classification.type} (confidence: ${v4Classification.confidence})`);
+                    }
                 } catch (e) {
                     console.warn("Context scan failed:", e);
                 }
