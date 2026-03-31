@@ -13,7 +13,7 @@ import {
 
 // Keys loaded from environment — NEVER hardcode secrets
 const SECRET_KEY_BASE64 = process.env.AYO_SIGNING_PRIVATE_KEY || process.env.AYO_SIGNING_KEY || '';
-const KEY_ID = (process.env.AYO_KEY_ID || 'AYO-KEY-2026-03').trim();
+const KEY_ID = (process.env.AYO_KEY_ID || 'AYO-KEY-2026-03').replace(/\\n/g, '').replace(/[\n\r]/g, '').trim();
 
 // Public key for verification (safe to commit — this is NOT a secret)
 const PUBLIC_KEY_BASE64 = 'Ol1YRyHMESzAIBYquUZJHyR1fDevd8oLcUmd98nUnCE=';
