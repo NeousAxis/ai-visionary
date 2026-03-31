@@ -626,3 +626,53 @@ export function applyCorrections(files: ProPackFiles, errors: QCError[]): ProPac
 
     return corrected;
 }
+
+// --- V4 Evidence Validation ---
+
+/**
+ * Validates an evidence URL by performing a HEAD request.
+ * Returns reachability status. 3-second timeout.
+ */
+export async function validateEvidenceUrl(url: string): Promise<{
+    reachable: boolean;
+    statusCode: number | null;
+}> {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const response = await fetch(url, {
+            method: 'HEAD',
+            signal: controller.signal,
+            redirect: 'follow',
+            headers: { 'User-Agent': 'AYO-Bot/1.0 (AI Visionary Evidence Check)' },
+        });
+        clearTimeout(timeoutId);
+        return { reachable: response.ok, statusCode: response.status };
+    } catch {
+        return { reachable: false, statusCode: null };
+    }
+}
+
+/**
+ * Checks if an answer contains concrete evidence (not just a vague declaration).
+ * Used to decide between q=1 (concrete) and q=0.5 (vague).
+ */
+export function isConcreteEvidence(answer: string, fieldType: string): boolean {
+    const trimmed = answer.trim();
+    if (!trimmed) return false;
+
+    // URL is always concrete evidence
+    if (/https?:\/\/[^\s]+/i.test(trimmed)) return true;
+
+    // Concrete numbers (dates, quantities, percentages)
+    if (/\d+/.test(trimmed) && trimmed.length > 5) return true;
+
+    // Named certifications (ISO, SOC, GDPR with specifics)
+    if (/\b(ISO\s*\d{4,5}|SOC\s*[12]|PCI.DSS|HIPAA|GDPR|RGPD|CE\s*mark)/i.test(trimmed)) return true;
+
+    // Substantial text (multiple items or detailed description)
+    if (trimmed.includes(',') && trimmed.length > 15) return true;
+    if (trimmed.length > 50) return true;
+
+    return false;
+}

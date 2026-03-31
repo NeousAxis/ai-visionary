@@ -1,5 +1,6 @@
 import { db } from './db';
 import { isAllowedUrl } from './validators';
+import type { SiteDetectionSignals } from './evidence-types';
 
 export interface AioScanResult {
     url: string;
@@ -15,6 +16,7 @@ export interface AioScanResult {
     h1: string[];
     text: string;
     scoreFactors: string[];
+    detectedSiteSignals?: SiteDetectionSignals;
 }
 
 export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanResult> {
@@ -92,6 +94,18 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
                 .replace(/\s+/g, " ")
                 .trim()
                 .substring(0, 15000); // Limit context size
+
+            // V4: Detect site signals for classifier
+            result.detectedSiteSignals = {
+                hasCart: /cart|panier|add.to.cart|shopping.cart|ajouter.au.panier/i.test(lowerHtml),
+                hasLogin: /login|sign.?in|sign.?up|register|log.?in|connexion|inscription/i.test(lowerHtml),
+                hasAPI: /\bapi\b|developer|sdk|webhook|documentation/i.test(lowerHtml),
+                hasPricing: /pricing|tarifs|plans|abonnement|subscription/i.test(lowerHtml),
+                hasPortfolio: /portfolio|réalisations|realisations|my.projects|mes.projets/i.test(lowerHtml),
+                hasBlog: /\bblog\b|articles?|actualités|actualites|news/i.test(lowerHtml),
+                hasTeamPage: /team|équipe|equipe|our.team|notre.équipe/i.test(lowerHtml),
+                hasContactForm: /contact.form|formulaire.de.contact|contactez|get.in.touch/i.test(lowerHtml),
+            };
 
             // --- ANALYSE JSON-LD (CONTENU) ---
             const jsonLdRegex = /<script\s+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;

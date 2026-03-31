@@ -51,6 +51,17 @@ import {
     formatRecommendationsForChat,
     getExtractionRulesForPrompt,
 } from '@/lib/agents/architecte';
+import { classifySite } from '@/lib/site-classifier';
+import {
+    buildEvidenceQueue,
+    buildEvidenceQuestionBlock,
+    evaluateEvidence,
+    EVIDENCE_TEMPLATES,
+} from '@/lib/question-engine';
+import type { QuestionContext } from '@/lib/evidence-types';
+
+// V4 Evidence-Based mode (default OFF)
+const V4_EVIDENCE_MODE = process.env.AYO_V4_EVIDENCE === 'true';
 
 // Allow streaming responses up to 120 seconds (Vercel Pro supports up to 300s)
 // Scoring + Gemini extraction can take 45-90s under load
@@ -365,6 +376,10 @@ export async function POST(req: Request) {
         }
 
         console.log(`🎯 AYO STATE: ${ayoState} | URL: ${detectedUrl} | Steps: ${stepsCompleted} | HasScan: ${hasScanInHistory}`);
+
+        // V4: Function-scoped variables for evidence-based flow
+        let v4Classification: any = null;
+        let v4EvidenceQueue: any[] = [];
 
         // 🛡️ HANDLER: EXISTING_CLIENT (Immediate Recognition)
         // Ensure we are NOT in an OTP flow (send_otp or 6 digits)
@@ -720,6 +735,12 @@ export async function POST(req: Request) {
             // 1. DEEP SCAN to get ALL possible data
             console.log(`📡 Deep scanning ${urlToScan}...`);
             const deepScanResult = await scanUrlForAioSignals(urlToScan);
+
+            // V4: Classify site type if evidence mode is enabled
+            if (V4_EVIDENCE_MODE && deepScanResult.isReachable) {
+                v4Classification = classifySite(deepScanResult);
+                console.log(`🏷️ V4 Site Classification: ${v4Classification.type} (confidence: ${v4Classification.confidence})`);
+            }
 
             // 2. ATTEMPT TO ANSWER the 25 critical questions via LLM extraction
             const EXTRACTION_ATTEMPT_PROMPT = locale === 'en' ? `
@@ -1487,15 +1508,38 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
               'indicateurs.certifications_count',
             ];
 
-            const validationQueue = allBlockNames.filter(b =>
-              lowConfidenceKeys.includes(b) && !ENRICHMENT_ONLY_FIELDS.includes(b)
-            );
-            const enrichmentQueue = allBlockNames.filter(b =>
-              (unknownKeys.includes(b) && !lowConfidenceKeys.includes(b)) ||
-              (lowConfidenceKeys.includes(b) && ENRICHMENT_ONLY_FIELDS.includes(b))
-            );
-            // Validation d'abord, enrichissement ensuite
-            const combinedQueue = [...validationQueue, ...enrichmentQueue];
+            let validationQueue: string[] = [];
+            let enrichmentQueue: string[] = [];
+            let combinedQueue: string[] = [];
+
+            if (V4_EVIDENCE_MODE && v4Classification) {
+                // V4: Build evidence queue from question engine
+                const confidenceMap: Record<string, number> = {};
+                for (const key of highConfidenceKeys) confidenceMap[key] = 90;
+                for (const key of lowConfidenceKeys) confidenceMap[key] = 70;
+                // unknownKeys stay at 0 (default)
+
+                const ctx: QuestionContext = {
+                    detected: confidenceMap,
+                    siteType: v4Classification.type,
+                    suggestedSkips: v4Classification.suggestedSkips,
+                    locale,
+                };
+                v4EvidenceQueue = buildEvidenceQueue(ctx, v4Classification);
+                // Map to field paths for compatibility with existing queue logic
+                combinedQueue = v4EvidenceQueue.map(q => q.field);
+                console.log(`🎯 V4 Evidence Queue: ${combinedQueue.length} questions (was ~${allBlockNames.length} fields)`);
+            } else {
+                // V3: Original queue building
+                validationQueue = allBlockNames.filter(b =>
+                  lowConfidenceKeys.includes(b) && !ENRICHMENT_ONLY_FIELDS.includes(b)
+                );
+                enrichmentQueue = allBlockNames.filter(b =>
+                  (unknownKeys.includes(b) && !lowConfidenceKeys.includes(b)) ||
+                  (lowConfidenceKeys.includes(b) && ENRICHMENT_ONLY_FIELDS.includes(b))
+                );
+                combinedQueue = [...validationQueue, ...enrichmentQueue];
+            }
 
             // SMART SKIP: Remove redundant questions when a related field already has data
             // Rollback: set RELATED_FIELD_SKIP_RULES = [] to disable instantly
@@ -1847,6 +1891,21 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
             // ONLY GENERATE A NEW QUESTION IF WE ARE STILL IN QUESTIONING MODE
             if (ayoState === AyoState.QUESTIONNAIRE || ayoState === AyoState.OWNERSHIP || ayoState === AyoState.TRUTH_WARNING) {
 
+                if (V4_EVIDENCE_MODE && v4EvidenceQueue.length > 0) {
+                    // V4: Use evidence question engine
+                    const evidenceQ = v4EvidenceQueue.find(q => q.field === nextBlockName);
+                    if (evidenceQ) {
+                        finalResponseText = JSON.stringify(buildEvidenceQuestionBlock(evidenceQ, locale));
+                        console.log(`🎯 V4 EVIDENCE question for ${nextBlockName} (type: ${evidenceQ.evidenceType})`);
+                    } else {
+                        // Fallback to V3 enrichment question
+                        const enFieldName = nextBlockName.split('.')[1] || nextBlockName;
+                        const enBlockName = nextBlockName.split('.')[0] || nextBlockName;
+                        finalResponseText = buildEnrichmentQuestion(enBlockName, enFieldName, locale);
+                        console.log(`⚠️ V4 fallback to V3 enrichment for ${nextBlockName}`);
+                    }
+                } else {
+                // V3: Original question generation
                 // 🆕 VALIDATION STATIQUE : Si le prochain bloc est lowConfidence, question Oui/Non sans LLM
                 if (validationQueue.includes(nextBlockName)) {
                     const fieldName = nextBlockName.split('.')[1] || nextBlockName;
@@ -1870,6 +1929,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 console.log(`✅ ENRICHISSEMENT STATIQUE pour ${nextBlockName} (pas de LLM)`);
 
                 } // fin du else (ENRICHISSEMENT STATIQUE)
+                } // fin du else (V3 original)
 
             }
         } // End of conditional questioning block (OWNERSHIP | TRUTH_WARNING | QUESTIONNAIRE | CALIBRATION)

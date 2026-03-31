@@ -479,7 +479,8 @@ export function cleanFormResiduesArray(values: string[]): string[] {
 export function sanitizeCertifications(values: string[]): string[] {
     // If the only entry is a bare "Oui" or similar confirmation, return empty
     const BARE_CONFIRMATION_RE = /^(oui|yes|ok|d'accord|exact|je confirme)[\s!.]*$/i;
-    const filtered = values.filter(v => !BARE_CONFIRMATION_RE.test(v.trim()));
+    const QUESTION_TEXT_RE = /^(poss[eé]dez|avez|do you|have you|quelles?|which|what|are there|y a[- ]t[- ]il)/i;
+    const filtered = values.filter(v => !BARE_CONFIRMATION_RE.test(v.trim()) && !QUESTION_TEXT_RE.test(v.trim()));
     return sanitizeFormContaminationArray(filtered);
 }
 
@@ -505,6 +506,10 @@ export function isFormContaminatedGlossary(term: string, description: string): b
     if (RAW_FORM_ANSWER_RE.test(combined)) return true;
     if (/:\s*(Oui|Non)\s*$/i.test(combined)) return true;
     if (DOUBT_VALUE_RE.test(combined)) return true;
+    // Phrase detection: too long to be a term
+    if (term.trim().includes(' ') && term.trim().length > 60) return true;
+    // Verb-start detection (French infinitives/imperatives commonly starting glossary contamination)
+    if (/^(faire|mettre|assurer|garantir|fournir|offrir|proposer|utiliser|appliquer|respecter|implementer|developper)/i.test(term.trim())) return true;
     return false;
 }
 
@@ -512,7 +517,12 @@ export function isFormContaminatedGlossary(term: string, description: string): b
  * FIX 5: Clean keyword/intent entries — remove escaped quotes, leading dots, trailing punctuation.
  */
 export function cleanKeywordEntry(entry: string): string {
-    return entry.replace(/^[\s."]+|[\s."]+$/g, '').replace(/\\"/g, '').trim();
+    return entry
+        .replace(/\\n/g, ' ')           // escaped newline string
+        .replace(/[\n\r]/g, ' ')         // actual newline characters
+        .replace(/^[\s."]+|[\s."]+$/g, '')
+        .replace(/\\"/g, '')
+        .trim();
 }
 
 // --- DATA QUALITY HELPERS ---
@@ -1628,6 +1638,29 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
             removable: true,
             retention: "3_years_aya_registration",
             review_cycle: "annual"
-        }
+        },
+        // V4: Evidence links from diagnostic
+        evidence_verification: {
+            "@type": "DataCatalog",
+            description: en ? "Verification links provided during AIO diagnostic" : "Liens de vérification fournis lors du diagnostic AIO",
+            urls: (() => {
+                const links: string[] = [];
+                const blocks = ['identite', 'offre', 'processus_methodes', 'engagements_conformite', 'indicateurs', 'contenus_pedagogiques', 'structure_technique'];
+                for (const block of blocks) {
+                    const blockData = data?.[block];
+                    if (!blockData) continue;
+                    for (const field of Object.values(blockData) as any[]) {
+                        if (field?.evidence && Array.isArray(field.evidence)) {
+                            for (const e of field.evidence) {
+                                if (typeof e === 'string' && /^https?:\/\//i.test(e) && !links.includes(e)) {
+                                    links.push(e);
+                                }
+                            }
+                        }
+                    }
+                }
+                return links;
+            })(),
+        },
     };
 }

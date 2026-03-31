@@ -30,6 +30,8 @@ export enum AyoState {
     ATTENTE_URL = 'ATTENTE_URL',
     /** Scan en cours */
     SCAN_EN_COURS = 'SCAN_EN_COURS',
+    /** V4: Classification du type de site */
+    CLASSIFICATION = 'CLASSIFICATION',
     /** Confirmation de propriété du site */
     OWNERSHIP = 'OWNERSHIP',
     /** Avertissement vérité / anti-bullshit */

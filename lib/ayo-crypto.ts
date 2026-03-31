@@ -13,7 +13,7 @@ import {
 
 // Keys loaded from environment — NEVER hardcode secrets
 const SECRET_KEY_BASE64 = process.env.AYO_SIGNING_PRIVATE_KEY || process.env.AYO_SIGNING_KEY || '';
-const KEY_ID = process.env.AYO_KEY_ID || 'AYO-KEY-2026-03';
+const KEY_ID = (process.env.AYO_KEY_ID || 'AYO-KEY-2026-03').trim();
 
 // Public key for verification (safe to commit — this is NOT a secret)
 const PUBLIC_KEY_BASE64 = 'Ol1YRyHMESzAIBYquUZJHyR1fDevd8oLcUmd98nUnCE=';
@@ -496,7 +496,21 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "validity_period": mode === 'PRO' ? "3 years" : mode === 'PLATEFORME' ? "1 year" : "demo",
         "spec": "https://ai-visionary.com/specs/asr-v3",
         "trust_level": "self_declared_structured",
-        "evidence_level": "declared_signals_only"
+        "evidence_level": "declared_signals_only",
+        "evidence_count": (() => {
+            let count = 0;
+            const blocks = ['identite', 'offre', 'processus_methodes', 'engagements_conformite', 'indicateurs', 'contenus_pedagogiques', 'structure_technique'];
+            for (const block of blocks) {
+                const blockData = data?.[block];
+                if (!blockData) continue;
+                for (const field of Object.values(blockData) as any[]) {
+                    if (field?.evidence && Array.isArray(field.evidence)) {
+                        count += field.evidence.filter((e: string) => typeof e === 'string' && /^https?:\/\//i.test(e)).length;
+                    }
+                }
+            }
+            return count;
+        })(),
     };
 
     // Bug 11: Always include cap transparency info
