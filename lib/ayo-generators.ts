@@ -394,7 +394,16 @@ export function sanitizeAudience(val: string): string {
  * Keywords should be short phrases, not full descriptions
  */
 export function sanitizeKeywords(items: string[], maxLen: number = 80): string[] {
-    return items.filter(k => k.length <= maxLen && !/[a-zA-Z0-9-]+\.(com|org|net|io|fr|ch)/i.test(k));
+    return items.filter(k => {
+        if (k.length > maxLen) return false;
+        // Filter URLs
+        if (/[a-zA-Z0-9-]+\.(com|org|net|io|fr|ch)/i.test(k)) return false;
+        // Filter truncated keywords: ending with a 1-2 char word (likely cut mid-word)
+        if (/\s[a-zA-Z]{1,2}$/.test(k.trim())) return false;
+        // Filter empty or whitespace-only
+        if (!k.trim()) return false;
+        return true;
+    });
 }
 
 // --- FIX 2: SANITIZER FOR RAW FORM QUESTIONS INJECTED AS DATA ---
@@ -501,15 +510,20 @@ export function cleanProcessStep(step: string): string {
  */
 export function isFormContaminatedGlossary(term: string, description: string): boolean {
     const combined = `${term} ${description}`;
+    const t = term.trim();
     if (FORM_QUESTION_RE.test(term) || FORM_QUESTION_RE.test(description)) return true;
-    if (/\?\s*$/.test(term)) return true; // Term itself is a question
+    if (/\?\s*$/.test(t)) return true; // Term itself is a question
     if (RAW_FORM_ANSWER_RE.test(combined)) return true;
     if (/:\s*(Oui|Non)\s*$/i.test(combined)) return true;
     if (DOUBT_VALUE_RE.test(combined)) return true;
-    // Phrase detection: too long to be a term
-    if (term.trim().includes(' ') && term.trim().length > 60) return true;
-    // Verb-start detection (French infinitives/imperatives commonly starting glossary contamination)
-    if (/^(faire|mettre|assurer|garantir|fournir|offrir|proposer|utiliser|appliquer|respecter|implementer|developper)/i.test(term.trim())) return true;
+    // Conjunction-start: "And ...", "Or ...", "Et ...", "Ou ..." — list fragment, not a term
+    if (/^(and|or|et|ou|also|plus|with)\s/i.test(t)) return true;
+    // Phrase detection: 4+ words with spaces = likely a sentence, not a glossary term
+    if (t.includes(' ') && t.split(/\s+/).length >= 5) return true;
+    // Sentence-ending punctuation in a term = not a glossary term
+    if (/\.\s*$/.test(t) && t.includes(' ')) return true;
+    // Verb-start detection (FR infinitives / EN verbs commonly starting sentence fragments)
+    if (/^(faire|mettre|assurer|garantir|fournir|offrir|proposer|utiliser|appliquer|respecter|implementer|developper|clients?\s+seek|companies?\s+seeking|building|creating|developing)/i.test(t)) return true;
     return false;
 }
 
