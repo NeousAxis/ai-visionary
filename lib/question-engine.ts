@@ -214,8 +214,8 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     customLabel_en: "Rules followed or link...",
   }),
   tmpl('engagements_conformite', 'policies', {
-    question_fr: "Avez-vous des politiques publiees (confidentialite, CGV) ? Indiquez l'URL.",
-    question_en: "Do you have published policies (privacy, ToS)? Provide the URL.",
+    question_fr: "Avez-vous une page confidentialite ou conditions generales sur votre site ? Si oui, collez le lien.",
+    question_en: "Do you have a privacy policy or terms page on your website? If yes, paste the link.",
     evidenceType: 'url',
     priority: 32,
     reliabilityLevel: 'verifiable',
@@ -243,23 +243,23 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
 const INDICATEURS_TEMPLATES: EvidenceQuestion[] = [
   tmpl('indicateurs', 'key_indicators', {
     question_fr:
-      "Avez-vous une page sur votre site qui explique ce que vous garantissez a vos clients ? Si oui, collez le lien. Sinon, decrivez en quelques mots.",
+      "Combien de projets pouvez-vous gerer en parallele ? Travaillez-vous seul, en equipe, ou avec des partenaires ?",
     question_en:
-      "Do you have a page on your website explaining what you guarantee to your clients? If yes, paste the link. Otherwise, describe briefly.",
-    evidenceType: 'url',
+      "How many projects can you handle at the same time? Do you work solo, with a team, or with partners?",
+    evidenceType: 'text',
     priority: 40,
-    reliabilityLevel: 'verifiable',
-    customLabel_fr: "Lien ou description...",
-    customLabel_en: "Link or description...",
+    reliabilityLevel: 'self_declared',
+    customLabel_fr: "Capacite et organisation...",
+    customLabel_en: "Capacity and organization...",
   }),
   tmpl('indicateurs', 'last_review_date', {
-    question_fr: "Avez-vous une page qui presente vos conditions ou vos limites ? Si oui, collez le lien. Sinon, quelles limites reconnaissez-vous ?",
-    question_en: "Do you have a page that explains your terms or limitations? If yes, paste the link. Otherwise, what limitations do you acknowledge?",
-    evidenceType: 'url',
+    question_fr: "Quels types de projets refusez-vous ou ne correspondent pas a votre expertise ?",
+    question_en: "What types of projects do you refuse or that don't match your expertise?",
+    evidenceType: 'text',
     priority: 41,
-    reliabilityLevel: 'verifiable',
-    customLabel_fr: "Lien ou limites...",
-    customLabel_en: "Link or limitations...",
+    reliabilityLevel: 'self_declared',
+    customLabel_fr: "Projets refuses...",
+    customLabel_en: "Refused projects...",
   }),
 ];
 
