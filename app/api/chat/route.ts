@@ -1618,8 +1618,17 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 console.log(`🎯 AYO STATE (refined): ${AyoState.CALIBRATION}`);
             } else {
                 // The first 3 question_blocks are: ownership_confirm, truth_confirmation, calibration.
-                // queueIndex = how many data questions we've already asked (after the 3 setup questions)
-                queueIndex = Math.max(0, questionsAskedCount - 3);
+                // V4: count only questions that match the current combinedQueue (skip V3 leftovers)
+                if (V4_EVIDENCE_MODE && combinedQueue.length > 0) {
+                    const queueFieldIds = new Set(combinedQueue.map(f => `evidence_${f.replace('.', '_')}`));
+                    let matchedCount = 0;
+                    for (const qId of seenQuestionIds) {
+                        if (queueFieldIds.has(qId)) matchedCount++;
+                    }
+                    queueIndex = matchedCount;
+                } else {
+                    queueIndex = Math.max(0, questionsAskedCount - 3);
+                }
                 // Safety: clamp to queue size
                 if (queueIndex >= combinedQueue.length) {
                     nextBlockName = "FINALISATION";
