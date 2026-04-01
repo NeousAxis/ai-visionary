@@ -79,6 +79,15 @@ const cleanTextAsr = cleanText;
 const cleanArrayAsr = cleanArray;
 const cleanValAsr = cleanVal;
 
+/** Neutralize marketing language in use cases (e.g. "Building premium web ecosystems" -> "web ecosystems") */
+function neutralizeUseCase(uc: string): string {
+    return uc
+        .replace(/^(building|creating|developing|delivering|providing|designing|crafting|enabling|empowering|driving|leveraging|unlocking|transforming)\s+/i, '')
+        .replace(/^(premium|cutting-edge|world-class|innovative|revolutionary|high-performance|next-generation|state-of-the-art|best-in-class|leading|advanced)\s+/i, '')
+        .replace(/^(and|or)\s+/i, '')
+        .trim();
+}
+
 /**
  * Generates Real ASR JSON based on Tier (LIGHT, PLATEFORME, PRO)
  */
@@ -111,10 +120,16 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const isAssociationType = isAssociation(businessType, entityNameRaw, entityUrlRaw);
     const schemaType = isAssociationType ? "NonProfitOrganization" : (lowerBT.includes("cabinet") || lowerBT.includes("bureau") ? "ProfessionalService" : "Organization");
 
+    const country = cleanValAsr(data.identite?.country?.value);
+    // Normalize city: "Swiss" is an adjective, not a city name
+    const cityRaw = cleanValAsr(data.identite?.city?.value) || '';
+    const countrySynonyms = [country.toLowerCase(), 'swiss', 'suisse', 'schweiz', 'svizzera', 'français', 'française', 'french', 'german', 'deutsch', 'italian', 'italiano'];
+    const city = countrySynonyms.includes(cityRaw.toLowerCase().trim()) ? '' : cityRaw;
+
     const address = {
         "@type": "PostalAddress",
-        "addressLocality": cleanValAsr(data.identite?.city?.value),
-        "addressCountry": cleanValAsr(data.identite?.country?.value)
+        "addressLocality": city,
+        "addressCountry": country
     };
 
     // areaServed: use declared geography instead of hardcoded 5km radius
@@ -248,7 +263,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const offer: any = {
         "services": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value))),
         "products": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value))),
-        "use_cases": filterGarbageEntries(mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)))),
+        "use_cases": filterGarbageEntries(mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)))).map(neutralizeUseCase).filter(Boolean),
     };
 
     if (mode !== 'LIGHT') {
@@ -580,6 +595,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const rawIndicatorsForSignal = sanitizeFieldArray(cleanArrayAsr(data.indicateurs?.key_indicators?.value));
     const hasCertifications = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value)).length > 0;
     const hasPolicies = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)).length > 0;
+    const hasGdprFramework = sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value))
+        .some((f: string) => /gdpr|rgpd/i.test(f));
 
     const commitments = mode !== 'LIGHT' ? {
         measurement_intent: true,
@@ -623,7 +640,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             let gdprStatus: string;
             if (scoreToUse > 50) {
                 gdprStatus = "compliant";
-            } else if (hasPrivacyPolicy) {
+            } else if (hasPrivacyPolicy || hasGdprFramework) {
                 gdprStatus = "declared";
             } else if (hasPolicies) {
                 // Policies exist but GDPR would be "unknown" — upgrade to "declared"
@@ -658,7 +675,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const buildContextualRelevance = (): any[] => {
         const relevanceItems: any[] = [];
         // Add use_cases as high relevance
-        const useCases = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)));
+        const useCases = filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value))).map(neutralizeUseCase).filter(Boolean);
         for (const uc of useCases.slice(0, 5)) {
             if (uc && uc.length > 2 && !AI_MODEL_RE.test(uc.trim())) {
                 relevanceItems.push({ context: uc, relevance: "high" });

@@ -2478,16 +2478,15 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     console.warn('⚠️ Questionnaire answers injection failed:', qaErr instanceof Error ? qaErr.message : qaErr);
                 }
 
-                // 4c. CLEAN OUTPUT LAYER — sanitize AFTER all injections, BEFORE scoring
-                // Injected data (scan_state + questionnaire answers) may contain:
-                // - Question text leaked as values ("Do you have published policies... [SKIP]")
-                // - Mixed text+URL ("Standards and compliance URL : https://...")
-                // - URLs used as KPI names ("https_whtg1_com_services")
-                // - Copyright text as policies ("© 2026 WHTG1...")
+                // 4c. CLEAN OUTPUT LAYER — apply reliability capping after all injections
+                // NOTE: sanitizeLlmFields already ran once on the LLM output (before injections).
+                // We do NOT re-run it here because questionnaire answers (evaluated by evaluateEvidence)
+                // and scan_state data are already clean. Re-sanitizing would wrongly zero out
+                // legitimate user answers whose text matches QUESTION_LEAK_RE patterns.
+                // Only downgradeFieldQuality runs here for reliability-level capping.
                 if (extractJson?.fields) {
-                    const cleanLogs = sanitizeLlmFields(extractJson.fields);
                     const cleanDowngradeLogs = downgradeFieldQuality(extractJson.fields);
-                    for (const log of [...cleanLogs, ...cleanDowngradeLogs]) {
+                    for (const log of cleanDowngradeLogs) {
                         logger.info('POST_INJECT_CLEAN', `${log.field}: ${log.reason}`);
                     }
                 }
