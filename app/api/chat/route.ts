@@ -1618,22 +1618,33 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                 console.log(`🎯 AYO STATE (refined): ${AyoState.CALIBRATION}`);
             } else {
                 // The first 3 question_blocks are: ownership_confirm, truth_confirmation, calibration.
-                // V4: count only questions that match the current combinedQueue (skip V3 leftovers)
                 if (V4_EVIDENCE_MODE && combinedQueue.length > 0) {
-                    const queueFieldIds = new Set(combinedQueue.map(f => `evidence_${f.replace('.', '_')}`));
-                    let matchedCount = 0;
-                    for (const qId of seenQuestionIds) {
-                        if (queueFieldIds.has(qId)) matchedCount++;
+                    // V4: find the FIRST queue item that hasn't been asked yet
+                    // Check both V4 IDs (evidence_*) and V3 IDs (q_*, validation_*)
+                    let foundNext = false;
+                    for (let i = 0; i < combinedQueue.length; i++) {
+                        const field = combinedQueue[i];
+                        const v4Id = `evidence_${field.replace('.', '_')}`;
+                        const v3Id1 = `q_${field.replace('.', '_')}`;
+                        const v3Id2 = `validation_${field.replace('.', '_')}`;
+                        if (!seenQuestionIds.has(v4Id) && !seenQuestionIds.has(v3Id1) && !seenQuestionIds.has(v3Id2)) {
+                            queueIndex = i;
+                            nextBlockName = field;
+                            foundNext = true;
+                            break;
+                        }
                     }
-                    queueIndex = matchedCount;
+                    if (!foundNext) {
+                        nextBlockName = "FINALISATION";
+                        queueIndex = combinedQueue.length;
+                    }
                 } else {
                     queueIndex = Math.max(0, questionsAskedCount - 3);
-                }
-                // Safety: clamp to queue size
-                if (queueIndex >= combinedQueue.length) {
-                    nextBlockName = "FINALISATION";
-                } else {
-                    nextBlockName = combinedQueue[queueIndex];
+                    if (queueIndex >= combinedQueue.length) {
+                        nextBlockName = "FINALISATION";
+                    } else {
+                        nextBlockName = combinedQueue[queueIndex];
+                    }
                 }
             }
             console.log(`📋 QUEUE DEBUG: questionsAsked=${questionsAskedCount}, queueIdx=${queueIndex}, queueLen=${combinedQueue.length}, next=${nextBlockName}`);
