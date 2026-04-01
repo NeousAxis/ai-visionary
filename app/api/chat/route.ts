@@ -1097,26 +1097,26 @@ GÉNÈRE CE JSON MAINTENANT :
                         contact_phone: { value: scanState.detected["identite.contact_phone"] || "", q: scanState.confidence["identite.contact_phone"] >= 70 ? 1 : scanState.confidence["identite.contact_phone"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     offre: {
-                        services: { value: [], q: scanState.confidence["offre.services"] >= 70 ? 1 : scanState.confidence["offre.services"] > 0 ? 0.5 : 0, evidence: [] },
-                        products: { value: [], q: scanState.confidence["offre.products"] >= 70 ? 1 : scanState.confidence["offre.products"] > 0 ? 0.5 : 0, evidence: [] },
-                        use_cases: { value: [], q: scanState.confidence["offre.use_cases"] >= 70 ? 1 : scanState.confidence["offre.use_cases"] > 0 ? 0.5 : 0, evidence: [] },
+                        services: { value: scanState.detected["offre.services"] || [], q: scanState.confidence["offre.services"] >= 70 ? 1 : scanState.confidence["offre.services"] > 0 ? 0.5 : 0, evidence: [] },
+                        products: { value: scanState.detected["offre.products"] || [], q: scanState.confidence["offre.products"] >= 70 ? 1 : scanState.confidence["offre.products"] > 0 ? 0.5 : 0, evidence: [] },
+                        use_cases: { value: scanState.detected["offre.use_cases"] || [], q: scanState.confidence["offre.use_cases"] >= 70 ? 1 : scanState.confidence["offre.use_cases"] > 0 ? 0.5 : 0, evidence: [] },
                         target_audience: { value: scanState.detected["offre.target_audience"] || "", q: scanState.confidence["offre.target_audience"] >= 70 ? 1 : scanState.confidence["offre.target_audience"] > 0 ? 0.5 : 0, evidence: [] },
                         pricing_indication: { value: scanState.detected["offre.pricing_indication"] || "", q: scanState.confidence["offre.pricing_indication"] >= 70 ? 1 : scanState.confidence["offre.pricing_indication"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     processus_methodes: {
-                        process_steps: { value: [], q: scanState.confidence["processus_methodes.process_steps"] >= 70 ? 1 : scanState.confidence["processus_methodes.process_steps"] > 0 ? 0.5 : 0, evidence: [] },
+                        process_steps: { value: scanState.detected["processus_methodes.process_steps"] || [], q: scanState.confidence["processus_methodes.process_steps"] >= 70 ? 1 : scanState.confidence["processus_methodes.process_steps"] > 0 ? 0.5 : 0, evidence: [] },
                         delivery_mode: { value: scanState.detected["processus_methodes.delivery_mode"] || "", q: scanState.confidence["processus_methodes.delivery_mode"] >= 70 ? 1 : scanState.confidence["processus_methodes.delivery_mode"] > 0 ? 0.5 : 0, evidence: [] },
                         geographies_served: { value: scanState.detected["processus_methodes.geographies_served"] || "", q: scanState.confidence["processus_methodes.geographies_served"] >= 70 ? 1 : scanState.confidence["processus_methodes.geographies_served"] > 0 ? 0.5 : 0, evidence: [] },
                         quality_assurance: { value: scanState.detected["processus_methodes.quality_assurance"] || "", q: scanState.confidence["processus_methodes.quality_assurance"] >= 70 ? 1 : scanState.confidence["processus_methodes.quality_assurance"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     engagements_conformite: {
-                        policies: { value: [], q: scanState.confidence["engagements_conformite.policies"] >= 70 ? 1 : scanState.confidence["engagements_conformite.policies"] > 0 ? 0.5 : 0, evidence: [] },
-                        frameworks: { value: [], q: scanState.confidence["engagements_conformite.frameworks"] >= 70 ? 1 : scanState.confidence["engagements_conformite.frameworks"] > 0 ? 0.5 : 0, evidence: [] },
-                        certifications: { value: [], q: scanState.confidence["engagements_conformite.certifications"] >= 70 ? 1 : scanState.confidence["engagements_conformite.certifications"] > 0 ? 0.5 : 0, evidence: [] },
-                        security_measures: { value: [], q: scanState.confidence["engagements_conformite.security_measures"] >= 70 ? 1 : scanState.confidence["engagements_conformite.security_measures"] > 0 ? 0.5 : 0, evidence: [] },
+                        policies: { value: scanState.detected["engagements_conformite.policies"] || [], q: scanState.confidence["engagements_conformite.policies"] >= 70 ? 1 : scanState.confidence["engagements_conformite.policies"] > 0 ? 0.5 : 0, evidence: [] },
+                        frameworks: { value: scanState.detected["engagements_conformite.frameworks"] || [], q: scanState.confidence["engagements_conformite.frameworks"] >= 70 ? 1 : scanState.confidence["engagements_conformite.frameworks"] > 0 ? 0.5 : 0, evidence: [] },
+                        certifications: { value: scanState.detected["engagements_conformite.certifications"] || [], q: scanState.confidence["engagements_conformite.certifications"] >= 70 ? 1 : scanState.confidence["engagements_conformite.certifications"] > 0 ? 0.5 : 0, evidence: [] },
+                        security_measures: { value: scanState.detected["engagements_conformite.security_measures"] || [], q: scanState.confidence["engagements_conformite.security_measures"] >= 70 ? 1 : scanState.confidence["engagements_conformite.security_measures"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     indicateurs: {
-                        key_indicators: { value: [], q: scanState.confidence["indicateurs.key_indicators"] >= 70 ? 1 : scanState.confidence["indicateurs.key_indicators"] > 0 ? 0.5 : 0, evidence: [] },
+                        key_indicators: { value: scanState.detected["indicateurs.key_indicators"] || [], q: scanState.confidence["indicateurs.key_indicators"] >= 70 ? 1 : scanState.confidence["indicateurs.key_indicators"] > 0 ? 0.5 : 0, evidence: [] },
                         last_review_date: { value: scanState.detected["indicateurs.last_review_date"] || "", q: scanState.confidence["indicateurs.last_review_date"] >= 70 ? 1 : scanState.confidence["indicateurs.last_review_date"] > 0 ? 0.5 : 0, evidence: [] },
                     },
                     contenus_pedagogiques: {
@@ -1144,13 +1144,18 @@ GÉNÈRE CE JSON MAINTENANT :
                     external_context: {
                         ecosystem_presence: { value: [], q: 0, evidence: [] },
                         reputation_signals: { value: false, q: 0, evidence: [] },
-                        keywords: { value: [], q: scanState.confidence["external_context.keywords"] >= 70 ? 1 : scanState.confidence["external_context.keywords"] > 0 ? 0.5 : 0, evidence: [] },
-                        intents: { value: [], q: scanState.confidence["external_context.intents"] >= 70 ? 1 : scanState.confidence["external_context.intents"] > 0 ? 0.5 : 0, evidence: [] },
+                        keywords: { value: scanState.detected["external_context.keywords"] || [], q: scanState.confidence["external_context.keywords"] >= 70 ? 1 : scanState.confidence["external_context.keywords"] > 0 ? 0.5 : 0, evidence: [] },
+                        intents: { value: scanState.detected["external_context.intents"] || [], q: scanState.confidence["external_context.intents"] >= 70 ? 1 : scanState.confidence["external_context.intents"] > 0 ? 0.5 : 0, evidence: [] },
                         channels: { value: [], q: 0, evidence: [] },
                         permissions: { value: [], q: 0, evidence: [] },
                     },
                 }
             } as AyoExtract;
+
+            // V4: Apply downgrades to initial extract (structured absence, reliability capping)
+            if (V4_EVIDENCE_MODE && initialExtract.fields) {
+                downgradeFieldQuality(initialExtract.fields as any);
+            }
 
             const initialScore = analyseScore(initialExtract);
             logger.info('INITIAL_SCORE', `Initial AIO score for ${urlToScan}: ${initialScore.total}/100`, {
