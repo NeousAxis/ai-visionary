@@ -440,6 +440,65 @@ export function sanitizeLlmFields(fields: Record<string, any>): SanitizeLog[] {
         }
     }
 
+    // Pass 4: Remove question text that leaked into data fields
+    // When [SKIP] or question text appears as a value, it's contamination
+    const QUESTION_LEAK_RE = /^(what|which|do you|are you|have you|how|quels?|quel(?:le)?s?|avez|possédez|décrivez|combien|cite|list)\s/i;
+    const SKIP_ANSWER_RE = /\[SKIP\]|non applicable|not applicable|n\/a/i;
+    for (const blockName of Object.keys(fields)) {
+        const block = fields[blockName];
+        if (typeof block !== 'object' || block === null) continue;
+        for (const fieldName of Object.keys(block)) {
+            const field = block[fieldName];
+            if (!field || typeof field !== 'object' || !('value' in field)) continue;
+            if (typeof field.value === 'string') {
+                if (QUESTION_LEAK_RE.test(field.value.trim()) || SKIP_ANSWER_RE.test(field.value.trim())) {
+                    logs.push({ field: `${blockName}.${fieldName}`, reason: 'question_text_leaked', originalValue: field.value });
+                    field.value = '';
+                    field.q = 0;
+                }
+            }
+            if (Array.isArray(field.value)) {
+                const cleaned = field.value.filter((item: any) => {
+                    if (typeof item !== 'string') return true;
+                    return !QUESTION_LEAK_RE.test(item.trim()) && !SKIP_ANSWER_RE.test(item.trim());
+                });
+                if (cleaned.length < field.value.length) {
+                    logs.push({ field: `${blockName}.${fieldName}`, reason: 'question_text_leaked_in_array', originalValue: field.value });
+                    field.value = cleaned;
+                    if (cleaned.length === 0) field.q = 0;
+                }
+            }
+        }
+    }
+
+    // Pass 5: Validate policies — copyright notices are NOT policies
+    if (fields.engagements_conformite?.policies) {
+        const pol = fields.engagements_conformite.policies;
+        if (Array.isArray(pol.value)) {
+            const validPolicies = pol.value.filter((item: any) => {
+                if (typeof item !== 'string') return true;
+                const lower = item.toLowerCase();
+                // Reject copyright-only text
+                if (/^©|^copyright|^all rights reserved/i.test(item.trim())) return false;
+                // Reject very short text without policy keywords
+                if (item.length < 20 && !/privacy|policy|terms|conditions|gdpr|rgpd|confidential/i.test(lower)) return false;
+                return true;
+            });
+            if (validPolicies.length < pol.value.length) {
+                logs.push({ field: 'engagements_conformite.policies', reason: 'copyright_not_policy', originalValue: pol.value });
+                pol.value = validPolicies;
+                if (validPolicies.length === 0) pol.q = 0;
+            }
+        } else if (typeof pol.value === 'string') {
+            const lower = pol.value.toLowerCase();
+            if (/^©|^copyright|^all rights reserved/i.test(pol.value.trim())) {
+                logs.push({ field: 'engagements_conformite.policies', reason: 'copyright_not_policy', originalValue: pol.value });
+                pol.value = '';
+                pol.q = 0;
+            }
+        }
+    }
+
     return logs;
 }
 
