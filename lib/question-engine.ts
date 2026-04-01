@@ -203,13 +203,14 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     customLabel_en: "Data protection page link...",
   }),
   tmpl('engagements_conformite', 'frameworks', {
-    question_fr: "Avez-vous une page mentions legales, conditions generales ou politique de confidentialite sur votre site ?",
-    question_en: "Do you have a legal notice, terms of service, or privacy policy page on your website?",
+    question_fr: "Avez-vous des mentions legales et des conditions generales (CGV/CGU) sur votre site ? Si oui, collez le lien.",
+    question_en: "Do you have a legal notice and terms of service (ToS) on your website? If yes, paste the link.",
     evidenceType: 'url',
     priority: 31,
     reliabilityLevel: 'verifiable',
-    customLabel_fr: "Lien mentions legales...",
-    customLabel_en: "Legal / privacy page link...",
+    mandatory: true,  // Legal docs are fundamental credibility signals — GDPR ≠ mentions légales
+    customLabel_fr: "Lien mentions legales / CGV...",
+    customLabel_en: "Legal notice / ToS link...",
   }),
   tmpl('engagements_conformite', 'policies', {
     question_fr: "Avez-vous une page sur votre site qui explique comment vous travaillez avec vos clients (votre methode ou vos etapes) ?",
