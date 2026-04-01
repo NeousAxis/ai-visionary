@@ -664,22 +664,16 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
     }
 
     // V4: RELIABILITY-BASED Q-VALUE CAPPING
-    // Self-declared fields (not verifiable by URL) are capped at q=0.5 max
-    // This prevents inflated scores from 100% declarative data
-    const VERIFIABLE_FIELDS = new Set([
-        'identite.contact_email',
-        'identite.legal_name',
-        'engagements_conformite.certifications',
-        'engagements_conformite.policies',
-        'contenus_pedagogiques.has_faq',
-        'contenus_pedagogiques.has_glossary',
-        'contenus_pedagogiques.has_documentation',
-        'structure_technique.has_asr',
-        'structure_technique.has_jsonld',
-        'structure_technique.has_sitemap',
-        'structure_technique.mobile_optimized',
-    ]);
-
+    // 3 categories:
+    // 1. SCAN-OBSERVED: data detected from the public website → verifiable, keep q=1
+    // 2. QUESTIONNAIRE ANSWER WITH URL: user provided proof → keep q=1
+    // 3. QUESTIONNAIRE ANSWER WITHOUT URL: user declared, no proof → cap q=0.5
+    // 4. INTERPRETIVE: marketing claims → q=0 (handled above)
+    //
+    // How to distinguish: check the evidence array.
+    // - Scan data has evidence like "scan_state", "high_confidence_scan", or no "questionnaire_answer"
+    // - Questionnaire answers have evidence "questionnaire_answer"
+    // - URL-backed answers have evidence "questionnaire_answer" + an https:// URL
     const V4_EVIDENCE_MODE = process.env.AYO_V4_EVIDENCE === 'true';
     if (V4_EVIDENCE_MODE) {
         for (const blockName of Object.keys(fields)) {
@@ -688,12 +682,21 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
             for (const fieldName of Object.keys(block)) {
                 const fieldPath = `${blockName}.${fieldName}`;
                 const field = block[fieldName];
-                if (field && typeof field === 'object' && 'q' in field && !VERIFIABLE_FIELDS.has(fieldPath)) {
-                    if (field.q > 0.5) {
-                        logs.push({ field: fieldPath, reason: 'self_declared_capped_to_0.5' });
-                        field.q = 0.5;
-                    }
-                }
+                if (!field || typeof field !== 'object' || !('q' in field) || field.q <= 0.5) continue;
+
+                const evidence = field.evidence || [];
+                const isFromQuestionnaire = evidence.includes('questionnaire_answer');
+                const hasUrlProof = evidence.some((e: string) => typeof e === 'string' && /^https?:\/\//i.test(e));
+
+                // Scan-observed data (not from questionnaire) → keep q=1, it's on the public website
+                if (!isFromQuestionnaire) continue;
+
+                // Questionnaire answer with URL proof → keep q=1
+                if (hasUrlProof) continue;
+
+                // Questionnaire answer without URL → self_declared, cap to q=0.5
+                logs.push({ field: fieldPath, reason: 'self_declared_capped_to_0.5' });
+                field.q = 0.5;
             }
         }
     }
