@@ -400,18 +400,17 @@ export function buildEvidenceQueue(
         return false;
       }
 
-      // V4 Reliability: skip self_declared questions ONLY IF scan already detected the data
-      // If scan didn't detect it, we still need to ask (even if capped at q=0.5)
-      // Verifiable questions are always asked (URL proof can reach q=1)
+      // V4: CORE questions only (5 max)
+      // - mandatory fields → always ask
+      // - verifiable fields (URL proof) → ask if not scan-detected
+      // - self_declared fields → NEVER ask (enriched via scan/LLM/backend)
+      // Self-declared data (keywords, intents, channels, capacity, etc.)
+      // stays in the ASR but is filled by scan or LLM, not by user questions.
       if (q.reliabilityLevel === 'self_declared' && !q.mandatory) {
-        const scanConfidence = ctx.detected[q.field] ?? 0;
-        if (scanConfidence >= 70) {
-          return false; // scan already has this data, no need to ask
-        }
-        // scan missed it → ask the question (will be capped at q=0.5)
+        return false;
       }
 
-      // Filter by detection confidence (skip if already detected)
+      // Skip if scan already detected with sufficient confidence
       if (!q.askOnlyIf(ctx.detected)) {
         return false;
       }
