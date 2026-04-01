@@ -205,13 +205,13 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
     customLabel_en: "Certifications and URL...",
   }),
   tmpl('engagements_conformite', 'frameworks', {
-    question_fr: "Quels standards suivez-vous ? Fournissez l'URL de votre page conformite si possible.",
-    question_en: "What standards do you follow? Provide your compliance page URL if possible.",
+    question_fr: "Suivez-vous des regles ou normes particulieres ? (ex: RGPD, ISO, etc.) Si vous avez une page dediee, collez le lien.",
+    question_en: "Do you follow any particular rules or regulations? (e.g., GDPR, ISO, etc.) If you have a dedicated page, paste the link.",
     evidenceType: 'url',
     priority: 31,
     reliabilityLevel: 'verifiable',
-    customLabel_fr: "Standards et URL conformite...",
-    customLabel_en: "Standards and compliance URL...",
+    customLabel_fr: "Regles suivies ou lien...",
+    customLabel_en: "Rules followed or link...",
   }),
   tmpl('engagements_conformite', 'policies', {
     question_fr: "Avez-vous des politiques publiees (confidentialite, CGV) ? Indiquez l'URL.",
