@@ -732,22 +732,19 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
 
         ['key_indicators', 'last_review_date'].forEach(fieldName => {
             const field = fields.indicateurs[fieldName];
-            // Case 1: field doesn't exist at all → create with structured absence
+            // Case 1: field doesn't exist → create with structured absence
             if (!field) {
                 fields.indicateurs[fieldName] = { value: '', q: 0.5, evidence: ['structured_absence'] };
                 logs.push({ field: `indicateurs.${fieldName}`, reason: 'structured_absence_created' });
                 return;
             }
-            // Case 2: field exists but empty with q=0 → upgrade to structured absence
+            // Case 2: field exists with q=0 → upgrade to q=0.5 (structured absence)
+            // No isEmpty check — even if scan detected some text with low confidence,
+            // the absence of verifiable KPIs is a neutral signal, not a punishment.
             if (field.q === 0) {
-                const isEmpty = !field.value || field.value === '' ||
-                    (Array.isArray(field.value) && field.value.length === 0);
-                if (isEmpty) {
-                    field.q = 0.5;
-                    field.value = field.value || '';
-                    field.evidence = [...(field.evidence || []), 'structured_absence'];
-                    logs.push({ field: `indicateurs.${fieldName}`, reason: 'structured_absence_neutral_score' });
-                }
+                field.q = 0.5;
+                field.evidence = [...(field.evidence || []), 'structured_absence'];
+                logs.push({ field: `indicateurs.${fieldName}`, reason: 'structured_absence_neutral_score' });
             }
         });
     }
