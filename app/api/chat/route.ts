@@ -1071,6 +1071,19 @@ GÉNÈRE CE JSON MAINTENANT :
             }
 
             // 2b. COMPUTE INITIAL SCORE (Bible 7-bloc engine)
+            // Helper: normalize detected value to array (scan returns strings, scoring expects arrays)
+            const toArray = (val: any): string[] => {
+                if (!val) return [];
+                if (Array.isArray(val)) return val;
+                if (typeof val === 'string') return val.split(/[,;]\s*/).map((s: string) => s.trim()).filter(Boolean);
+                return [String(val)];
+            };
+            const toVal = (field: string) => scanState.detected?.[field] || '';
+            const qOf = (field: string) => scanState.confidence?.[field] >= 70 ? 1 : scanState.confidence?.[field] > 0 ? 0.5 : 0;
+
+            // V4: Set products na=true for non-e-commerce sites (service companies don't have "products")
+            const isEcommerce = v4Classification?.type === 'e-commerce';
+
             // Build a partial AyoExtract from scan data + extracted answers
             const initialExtract: AyoExtract = {
                 version: "AYO-EXTRACT-3.0",
@@ -1088,36 +1101,38 @@ GÉNÈRE CE JSON MAINTENANT :
                 },
                 fields: {
                     identite: {
-                        name: { value: scanState.detected["identite.name"] || "", q: scanState.confidence["identite.name"] >= 70 ? 1 : scanState.confidence["identite.name"] > 0 ? 0.5 : 0, evidence: [] },
-                        legal_name: { value: scanState.detected["identite.legal_name"] || "", q: scanState.confidence["identite.legal_name"] >= 70 ? 1 : scanState.confidence["identite.legal_name"] > 0 ? 0.5 : 0, evidence: [] },
-                        business_type: { value: scanState.detected["identite.business_type"] || "", q: scanState.confidence["identite.business_type"] >= 70 ? 1 : scanState.confidence["identite.business_type"] > 0 ? 0.5 : 0, evidence: [] },
-                        city: { value: scanState.detected["identite.city"] || "", q: scanState.confidence["identite.city"] >= 70 ? 1 : scanState.confidence["identite.city"] > 0 ? 0.5 : 0, evidence: [] },
-                        country: { value: scanState.detected["identite.country"] || "", q: scanState.confidence["identite.country"] >= 70 ? 1 : scanState.confidence["identite.country"] > 0 ? 0.5 : 0, evidence: [] },
-                        contact_email: { value: scanState.detected["identite.contact_email"] || "", q: scanState.confidence["identite.contact_email"] >= 70 ? 1 : scanState.confidence["identite.contact_email"] > 0 ? 0.5 : 0, evidence: [] },
-                        contact_phone: { value: scanState.detected["identite.contact_phone"] || "", q: scanState.confidence["identite.contact_phone"] >= 70 ? 1 : scanState.confidence["identite.contact_phone"] > 0 ? 0.5 : 0, evidence: [] },
+                        name: { value: toVal('identite.name'), q: qOf('identite.name'), evidence: [] },
+                        legal_name: { value: toVal('identite.legal_name'), q: qOf('identite.legal_name'), evidence: [] },
+                        business_type: { value: toVal('identite.business_type'), q: qOf('identite.business_type'), evidence: [] },
+                        city: { value: toVal('identite.city'), q: qOf('identite.city'), evidence: [] },
+                        country: { value: toVal('identite.country'), q: qOf('identite.country'), evidence: [] },
+                        contact_email: { value: toVal('identite.contact_email'), q: qOf('identite.contact_email'), evidence: [] },
+                        contact_phone: { value: toVal('identite.contact_phone'), q: qOf('identite.contact_phone'), evidence: [] },
                     },
                     offre: {
-                        services: { value: scanState.detected["offre.services"] || [], q: scanState.confidence["offre.services"] >= 70 ? 1 : scanState.confidence["offre.services"] > 0 ? 0.5 : 0, evidence: [] },
-                        products: { value: scanState.detected["offre.products"] || [], q: scanState.confidence["offre.products"] >= 70 ? 1 : scanState.confidence["offre.products"] > 0 ? 0.5 : 0, evidence: [] },
-                        use_cases: { value: scanState.detected["offre.use_cases"] || [], q: scanState.confidence["offre.use_cases"] >= 70 ? 1 : scanState.confidence["offre.use_cases"] > 0 ? 0.5 : 0, evidence: [] },
-                        target_audience: { value: scanState.detected["offre.target_audience"] || "", q: scanState.confidence["offre.target_audience"] >= 70 ? 1 : scanState.confidence["offre.target_audience"] > 0 ? 0.5 : 0, evidence: [] },
-                        pricing_indication: { value: scanState.detected["offre.pricing_indication"] || "", q: scanState.confidence["offre.pricing_indication"] >= 70 ? 1 : scanState.confidence["offre.pricing_indication"] > 0 ? 0.5 : 0, evidence: [] },
+                        services: { value: toArray(scanState.detected?.["offre.services"]), q: qOf('offre.services'), evidence: [] },
+                        products: isEcommerce
+                            ? { value: toArray(scanState.detected?.["offre.products"]), q: qOf('offre.products'), evidence: [] }
+                            : { value: [], q: 0, evidence: [], na: true },  // Service company → products not applicable
+                        use_cases: { value: toArray(scanState.detected?.["offre.use_cases"]), q: qOf('offre.use_cases'), evidence: [] },
+                        target_audience: { value: toVal('offre.target_audience'), q: qOf('offre.target_audience'), evidence: [] },
+                        pricing_indication: { value: toVal('offre.pricing_indication'), q: qOf('offre.pricing_indication'), evidence: [] },
                     },
                     processus_methodes: {
-                        process_steps: { value: scanState.detected["processus_methodes.process_steps"] || [], q: scanState.confidence["processus_methodes.process_steps"] >= 70 ? 1 : scanState.confidence["processus_methodes.process_steps"] > 0 ? 0.5 : 0, evidence: [] },
-                        delivery_mode: { value: scanState.detected["processus_methodes.delivery_mode"] || "", q: scanState.confidence["processus_methodes.delivery_mode"] >= 70 ? 1 : scanState.confidence["processus_methodes.delivery_mode"] > 0 ? 0.5 : 0, evidence: [] },
-                        geographies_served: { value: scanState.detected["processus_methodes.geographies_served"] || "", q: scanState.confidence["processus_methodes.geographies_served"] >= 70 ? 1 : scanState.confidence["processus_methodes.geographies_served"] > 0 ? 0.5 : 0, evidence: [] },
-                        quality_assurance: { value: scanState.detected["processus_methodes.quality_assurance"] || "", q: scanState.confidence["processus_methodes.quality_assurance"] >= 70 ? 1 : scanState.confidence["processus_methodes.quality_assurance"] > 0 ? 0.5 : 0, evidence: [] },
+                        process_steps: { value: toArray(scanState.detected?.["processus_methodes.process_steps"]), q: qOf('processus_methodes.process_steps'), evidence: [] },
+                        delivery_mode: { value: toVal('processus_methodes.delivery_mode'), q: qOf('processus_methodes.delivery_mode'), evidence: [] },
+                        geographies_served: { value: toVal('processus_methodes.geographies_served'), q: qOf('processus_methodes.geographies_served'), evidence: [] },
+                        quality_assurance: { value: toVal('processus_methodes.quality_assurance'), q: qOf('processus_methodes.quality_assurance'), evidence: [] },
                     },
                     engagements_conformite: {
-                        policies: { value: scanState.detected["engagements_conformite.policies"] || [], q: scanState.confidence["engagements_conformite.policies"] >= 70 ? 1 : scanState.confidence["engagements_conformite.policies"] > 0 ? 0.5 : 0, evidence: [] },
-                        frameworks: { value: scanState.detected["engagements_conformite.frameworks"] || [], q: scanState.confidence["engagements_conformite.frameworks"] >= 70 ? 1 : scanState.confidence["engagements_conformite.frameworks"] > 0 ? 0.5 : 0, evidence: [] },
-                        certifications: { value: scanState.detected["engagements_conformite.certifications"] || [], q: scanState.confidence["engagements_conformite.certifications"] >= 70 ? 1 : scanState.confidence["engagements_conformite.certifications"] > 0 ? 0.5 : 0, evidence: [] },
-                        security_measures: { value: scanState.detected["engagements_conformite.security_measures"] || [], q: scanState.confidence["engagements_conformite.security_measures"] >= 70 ? 1 : scanState.confidence["engagements_conformite.security_measures"] > 0 ? 0.5 : 0, evidence: [] },
+                        policies: { value: toArray(scanState.detected?.["engagements_conformite.policies"]), q: qOf('engagements_conformite.policies'), evidence: [] },
+                        frameworks: { value: toArray(scanState.detected?.["engagements_conformite.frameworks"]), q: qOf('engagements_conformite.frameworks'), evidence: [] },
+                        certifications: { value: toArray(scanState.detected?.["engagements_conformite.certifications"]), q: qOf('engagements_conformite.certifications'), evidence: [] },
+                        security_measures: { value: toArray(scanState.detected?.["engagements_conformite.security_measures"]), q: qOf('engagements_conformite.security_measures'), evidence: [] },
                     },
                     indicateurs: {
-                        key_indicators: { value: scanState.detected["indicateurs.key_indicators"] || [], q: scanState.confidence["indicateurs.key_indicators"] >= 70 ? 1 : scanState.confidence["indicateurs.key_indicators"] > 0 ? 0.5 : 0, evidence: [] },
-                        last_review_date: { value: scanState.detected["indicateurs.last_review_date"] || "", q: scanState.confidence["indicateurs.last_review_date"] >= 70 ? 1 : scanState.confidence["indicateurs.last_review_date"] > 0 ? 0.5 : 0, evidence: [] },
+                        key_indicators: { value: toArray(scanState.detected?.["indicateurs.key_indicators"]), q: qOf('indicateurs.key_indicators'), evidence: [] },
+                        last_review_date: { value: toVal('indicateurs.last_review_date'), q: qOf('indicateurs.last_review_date'), evidence: [] },
                     },
                     contenus_pedagogiques: {
                         has_faq: { value: scanState.detected["contenus_pedagogiques.has_faq"] || deepScanResult.hasFaqContent || false, q: scanState.confidence["contenus_pedagogiques.has_faq"] >= 70 ? 1 : (deepScanResult.hasFaqContent ? 1 : (scanState.confidence["contenus_pedagogiques.has_faq"] > 0 ? 0.5 : 0)), evidence: [] },
