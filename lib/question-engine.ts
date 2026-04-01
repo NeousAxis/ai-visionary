@@ -233,32 +233,22 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Block 5: indicateurs → FIABILITE & ENGAGEMENT OPERATIONNEL (V4)
-// Verifiable-first: URL of SLA/commitments page → q=1
-// Fallback: structured text → q=0.5 (self_declared, weight 0.4)
-// Missing: q=0
-// "Prove you're reliable, not that you're good"
+// Block 5: indicateurs → SOCIAL PROOF (V4)
+// Social media presence = verifiable credibility signal
+// AIs check LinkedIn, GitHub, Twitter to cross-reference claims
 // ---------------------------------------------------------------------------
 const INDICATEURS_TEMPLATES: EvidenceQuestion[] = [
   tmpl('indicateurs', 'key_indicators', {
     question_fr:
-      "Combien de projets pouvez-vous gerer en parallele ? Travaillez-vous seul, en equipe, ou avec des partenaires ?",
+      "Sur quels reseaux sociaux etes-vous present ? Collez vos liens. (LinkedIn, Twitter/X, GitHub, etc.)",
     question_en:
-      "How many projects can you handle at the same time? Do you work solo, with a team, or with partners?",
-    evidenceType: 'text',
+      "Which social networks are you on? Paste your links. (LinkedIn, Twitter/X, GitHub, etc.)",
+    evidenceType: 'url',
     priority: 40,
-    reliabilityLevel: 'self_declared',
-    customLabel_fr: "Capacite et organisation...",
-    customLabel_en: "Capacity and organization...",
-  }),
-  tmpl('indicateurs', 'last_review_date', {
-    question_fr: "Quels types de projets refusez-vous ou ne correspondent pas a votre expertise ?",
-    question_en: "What types of projects do you refuse or that don't match your expertise?",
-    evidenceType: 'text',
-    priority: 41,
-    reliabilityLevel: 'self_declared',
-    customLabel_fr: "Projets refuses...",
-    customLabel_en: "Refused projects...",
+    reliabilityLevel: 'verifiable',
+    mandatory: true,  // Social proof is a core credibility signal
+    customLabel_fr: "Liens reseaux sociaux...",
+    customLabel_en: "Social media links...",
   }),
 ];
 
