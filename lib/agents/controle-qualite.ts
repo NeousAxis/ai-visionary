@@ -577,10 +577,16 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
         }
     }
 
-    // ENGAGEMENTS: certifications — q=1 only for named recognized certs
+    // V4: Helper — check if a field has URL evidence (URL = proof, skip downgrade)
+    const hasUrlEvidence = (field: any): boolean => {
+        if (!field?.evidence || !Array.isArray(field.evidence)) return false;
+        return field.evidence.some((e: string) => typeof e === 'string' && /^https?:\/\//i.test(e));
+    };
+
+    // ENGAGEMENTS: certifications — q=1 if URL proof OR named recognized cert
     if (fields.engagements_conformite?.certifications) {
         const cert = fields.engagements_conformite.certifications;
-        if (cert.q === 1 && Array.isArray(cert.value)) {
+        if (cert.q === 1 && !hasUrlEvidence(cert) && Array.isArray(cert.value)) {
             const knownCerts = /iso|ohsas|haccp|b.?corp|fair.?trade|leed|ce\b|nf\b|afnor|tuv|ul\b|fda|gmp|gdpr|rgpd|soc.?[12]|pci|hipaa|fedramp/i;
             const hasRealCert = cert.value.some((c: any) => knownCerts.test(String(c)));
             if (!hasRealCert) {
@@ -590,16 +596,32 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
         }
     }
 
-    // ENGAGEMENTS: policies — q=1 only if policy IS active (not "en cours")
+    // ENGAGEMENTS: policies — q=1 if URL proof OR policy IS active
     if (fields.engagements_conformite?.policies) {
         const pol = fields.engagements_conformite.policies;
-        if (pol.q === 1 && Array.isArray(pol.value)) {
+        if (pol.q === 1 && !hasUrlEvidence(pol) && Array.isArray(pol.value)) {
             const inProgress = /en cours|en phase|prochainement|bientôt|prévu|planifié/i;
             const allInProgress = pol.value.every((p: any) => inProgress.test(String(p)));
             if (allInProgress && pol.value.length > 0) {
                 pol.q = 0.5;
                 logs.push({ field: 'engagements_conformite.policies', reason: 'all_policies_in_progress' });
             }
+        }
+    }
+
+    // ENGAGEMENTS: frameworks — q=1 if URL proof (skip label check)
+    if (fields.engagements_conformite?.frameworks) {
+        const fw = fields.engagements_conformite.frameworks;
+        if (fw.q === 1 && hasUrlEvidence(fw)) {
+            // URL provided = verified, keep q=1
+        }
+    }
+
+    // ENGAGEMENTS: security_measures — q=1 if URL proof (skip label check)
+    if (fields.engagements_conformite?.security_measures) {
+        const sm = fields.engagements_conformite.security_measures;
+        if (sm.q === 1 && hasUrlEvidence(sm)) {
+            // URL provided = verified, keep q=1
         }
     }
 
@@ -699,6 +721,25 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
                 field.q = 0.5;
             }
         }
+    }
+
+    // V4: STRUCTURED ABSENCE — indicateurs empty ≠ 0, it means "no measurement system yet"
+    // 70% of businesses (agencies, consultants, early-stage SaaS) don't publish KPIs.
+    // Penalizing them for market norms is wrong. Score = 0.5 (neutral, not punitive).
+    if (V4_EVIDENCE_MODE) {
+        ['key_indicators', 'last_review_date'].forEach(fieldName => {
+            const field = fields.indicateurs?.[fieldName];
+            if (field && field.q === 0) {
+                const isEmpty = !field.value || field.value === '' ||
+                    (Array.isArray(field.value) && field.value.length === 0);
+                if (isEmpty) {
+                    field.q = 0.5;
+                    field.value = field.value || '';
+                    field.evidence = [...(field.evidence || []), 'structured_absence'];
+                    logs.push({ field: `indicateurs.${fieldName}`, reason: 'structured_absence_neutral_score' });
+                }
+            }
+        });
     }
 
     return logs;
