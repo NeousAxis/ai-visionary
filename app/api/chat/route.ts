@@ -2531,7 +2531,22 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     }
                 }
 
-                // 4d. RECOMPUTE SCORE after all injections + cleaning
+                // 4d. V4: FORCE structured absence for indicateurs RIGHT BEFORE scoring
+                // This runs AFTER all injections and cleanups — nothing can overwrite it
+                if (V4_EVIDENCE_MODE && extractJson?.fields) {
+                    if (!extractJson.fields.indicateurs) (extractJson.fields as any).indicateurs = {};
+                    const ind = (extractJson.fields as any).indicateurs;
+                    if (!ind.key_indicators || ind.key_indicators.q === 0) {
+                        ind.key_indicators = { value: ind.key_indicators?.value || '', q: 0.5, evidence: ['structured_absence'] };
+                        console.log('🏷️ STRUCTURED ABSENCE: indicateurs.key_indicators → q=0.5');
+                    }
+                    if (!ind.last_review_date || ind.last_review_date.q === 0) {
+                        ind.last_review_date = { value: ind.last_review_date?.value || '', q: 0.5, evidence: ['structured_absence'] };
+                        console.log('🏷️ STRUCTURED ABSENCE: indicateurs.last_review_date → q=0.5');
+                    }
+                }
+
+                // RECOMPUTE SCORE after all injections + cleaning + structured absence
                 // The initial scoreResult was computed before injections, so we need to recalculate
                 const enrichedScoreResult = analyseScore(extractJson);
                 logger.info('ENRICHED_SCORE_RESULT', `Enriched score after injections: ${enrichedScoreResult.total}/100 (was ${scoreResult.total}/100)`, {
