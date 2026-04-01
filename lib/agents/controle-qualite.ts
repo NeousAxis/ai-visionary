@@ -442,8 +442,10 @@ export function sanitizeLlmFields(fields: Record<string, any>): SanitizeLog[] {
 
     // Pass 4: Remove question text that leaked into data fields
     // When [SKIP] or question text appears as a value, it's contamination
-    const QUESTION_LEAK_RE = /^(what|which|do you|are you|have you|how|quels?|quel(?:le)?s?|avez|possédez|décrivez|combien|cite|list)\s/i;
+    const QUESTION_LEAK_RE = /^(what|which|do you|are you|have you|how|is your|quels?|quel(?:le)?s?|avez|possédez|décrivez|combien|cite|list)\s/i;
     const SKIP_ANSWER_RE = /\[SKIP\]|non applicable|not applicable|n\/a/i;
+    // Mixed question+answer patterns: "Question text : answer" or "Question text ... answer"
+    const MIXED_QA_RE = /^(standards|certifications?|policies|frameworks|compliance|qualit[yé]|process|do you|what|which|how|avez|quels?).*?:\s/i;
     for (const blockName of Object.keys(fields)) {
         const block = fields[blockName];
         if (typeof block !== 'object' || block === null) continue;
@@ -451,19 +453,57 @@ export function sanitizeLlmFields(fields: Record<string, any>): SanitizeLog[] {
             const field = block[fieldName];
             if (!field || typeof field !== 'object' || !('value' in field)) continue;
             if (typeof field.value === 'string') {
-                if (QUESTION_LEAK_RE.test(field.value.trim()) || SKIP_ANSWER_RE.test(field.value.trim())) {
+                const trimVal = field.value.trim();
+                if (QUESTION_LEAK_RE.test(trimVal) || SKIP_ANSWER_RE.test(trimVal)) {
                     logs.push({ field: `${blockName}.${fieldName}`, reason: 'question_text_leaked', originalValue: field.value });
+                    field.value = '';
+                    field.q = 0;
+                }
+                // Mixed question:answer → extract only the answer part after ":"
+                else if (MIXED_QA_RE.test(trimVal)) {
+                    const colonIdx = trimVal.indexOf(':');
+                    if (colonIdx > 0) {
+                        const answerPart = trimVal.substring(colonIdx + 1).trim();
+                        if (answerPart && answerPart.length > 2 && !SKIP_ANSWER_RE.test(answerPart)) {
+                            logs.push({ field: `${blockName}.${fieldName}`, reason: 'mixed_qa_cleaned', originalValue: field.value });
+                            field.value = answerPart;
+                        } else {
+                            logs.push({ field: `${blockName}.${fieldName}`, reason: 'mixed_qa_empty_answer', originalValue: field.value });
+                            field.value = '';
+                            field.q = 0;
+                        }
+                    }
+                }
+                // URL stored as KPI name (URL is not a metric)
+                else if (fieldName === 'key_indicators' && /^https?:\/\/|^https?_/i.test(trimVal)) {
+                    logs.push({ field: `${blockName}.${fieldName}`, reason: 'url_as_kpi', originalValue: field.value });
                     field.value = '';
                     field.q = 0;
                 }
             }
             if (Array.isArray(field.value)) {
-                const cleaned = field.value.filter((item: any) => {
-                    if (typeof item !== 'string') return true;
-                    return !QUESTION_LEAK_RE.test(item.trim()) && !SKIP_ANSWER_RE.test(item.trim());
-                });
-                if (cleaned.length < field.value.length) {
-                    logs.push({ field: `${blockName}.${fieldName}`, reason: 'question_text_leaked_in_array', originalValue: field.value });
+                const cleaned = field.value
+                    .map((item: any) => {
+                        if (typeof item !== 'string') return item;
+                        const t = item.trim();
+                        // Remove question leaks and skip tokens
+                        if (QUESTION_LEAK_RE.test(t) || SKIP_ANSWER_RE.test(t)) return null;
+                        // Clean mixed question:answer → keep answer only
+                        if (MIXED_QA_RE.test(t)) {
+                            const ci = t.indexOf(':');
+                            if (ci > 0) {
+                                const ans = t.substring(ci + 1).trim();
+                                return (ans && ans.length > 2 && !SKIP_ANSWER_RE.test(ans)) ? ans : null;
+                            }
+                        }
+                        // URL as KPI
+                        if (fieldName === 'key_indicators' && /^https?:\/\/|^https?_/i.test(t)) return null;
+                        return item;
+                    })
+                    .filter((item: any) => item !== null);
+                const originalLen = field.value.length;
+                if (cleaned.length < originalLen) {
+                    logs.push({ field: `${blockName}.${fieldName}`, reason: 'question_text_leaked_in_array' });
                     field.value = cleaned;
                     if (cleaned.length === 0) field.q = 0;
                 }
@@ -634,6 +674,10 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
         'contenus_pedagogiques.has_faq',
         'contenus_pedagogiques.has_glossary',
         'contenus_pedagogiques.has_documentation',
+        'structure_technique.has_asr',
+        'structure_technique.has_jsonld',
+        'structure_technique.has_sitemap',
+        'structure_technique.mobile_optimized',
     ]);
 
     const V4_EVIDENCE_MODE = process.env.AYO_V4_EVIDENCE === 'true';

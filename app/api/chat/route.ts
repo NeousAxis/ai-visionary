@@ -2478,7 +2478,21 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     console.warn('⚠️ Questionnaire answers injection failed:', qaErr instanceof Error ? qaErr.message : qaErr);
                 }
 
-                // 4c. RECOMPUTE SCORE after all injections (scan_state + questionnaire answers)
+                // 4c. CLEAN OUTPUT LAYER — sanitize AFTER all injections, BEFORE scoring
+                // Injected data (scan_state + questionnaire answers) may contain:
+                // - Question text leaked as values ("Do you have published policies... [SKIP]")
+                // - Mixed text+URL ("Standards and compliance URL : https://...")
+                // - URLs used as KPI names ("https_whtg1_com_services")
+                // - Copyright text as policies ("© 2026 WHTG1...")
+                if (extractJson?.fields) {
+                    const cleanLogs = sanitizeLlmFields(extractJson.fields);
+                    const cleanDowngradeLogs = downgradeFieldQuality(extractJson.fields);
+                    for (const log of [...cleanLogs, ...cleanDowngradeLogs]) {
+                        logger.info('POST_INJECT_CLEAN', `${log.field}: ${log.reason}`);
+                    }
+                }
+
+                // 4d. RECOMPUTE SCORE after all injections + cleaning
                 // The initial scoreResult was computed before injections, so we need to recalculate
                 const enrichedScoreResult = analyseScore(extractJson);
                 logger.info('ENRICHED_SCORE_RESULT', `Enriched score after injections: ${enrichedScoreResult.total}/100 (was ${scoreResult.total}/100)`, {
