@@ -727,9 +727,19 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
     // 70% of businesses (agencies, consultants, early-stage SaaS) don't publish KPIs.
     // Penalizing them for market norms is wrong. Score = 0.5 (neutral, not punitive).
     if (V4_EVIDENCE_MODE) {
+        // Ensure indicateurs block exists
+        if (!fields.indicateurs) fields.indicateurs = {};
+
         ['key_indicators', 'last_review_date'].forEach(fieldName => {
-            const field = fields.indicateurs?.[fieldName];
-            if (field && field.q === 0) {
+            const field = fields.indicateurs[fieldName];
+            // Case 1: field doesn't exist at all → create with structured absence
+            if (!field) {
+                fields.indicateurs[fieldName] = { value: '', q: 0.5, evidence: ['structured_absence'] };
+                logs.push({ field: `indicateurs.${fieldName}`, reason: 'structured_absence_created' });
+                return;
+            }
+            // Case 2: field exists but empty with q=0 → upgrade to structured absence
+            if (field.q === 0) {
                 const isEmpty = !field.value || field.value === '' ||
                     (Array.isArray(field.value) && field.value.length === 0);
                 if (isEmpty) {
