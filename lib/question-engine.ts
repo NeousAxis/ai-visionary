@@ -243,23 +243,23 @@ const CONFORMITE_TEMPLATES: EvidenceQuestion[] = [
 const INDICATEURS_TEMPLATES: EvidenceQuestion[] = [
   tmpl('indicateurs', 'key_indicators', {
     question_fr:
-      "Avez-vous une page publique decrivant vos engagements, SLA ou garanties ? Fournissez l'URL. Sinon, decrivez brievement vos limites et engagements.",
+      "Avez-vous une page sur votre site qui explique ce que vous garantissez a vos clients ? Si oui, collez le lien. Sinon, decrivez en quelques mots.",
     question_en:
-      "Do you have a public page describing your commitments, SLA, or guarantees? Provide the URL. Otherwise, briefly describe your limits and commitments.",
+      "Do you have a page on your website explaining what you guarantee to your clients? If yes, paste the link. Otherwise, describe briefly.",
     evidenceType: 'url',
     priority: 40,
     reliabilityLevel: 'verifiable',
-    customLabel_fr: "URL engagements ou description...",
-    customLabel_en: "Commitments URL or description...",
+    customLabel_fr: "Lien ou description...",
+    customLabel_en: "Link or description...",
   }),
   tmpl('indicateurs', 'last_review_date', {
-    question_fr: "Avez-vous une page conditions de service / limitations ? Fournissez l'URL. Sinon, quelles limites reconnaissez-vous ?",
-    question_en: "Do you have a terms of service / limitations page? Provide the URL. Otherwise, what limitations do you acknowledge?",
+    question_fr: "Avez-vous une page qui presente vos conditions ou vos limites ? Si oui, collez le lien. Sinon, quelles limites reconnaissez-vous ?",
+    question_en: "Do you have a page that explains your terms or limitations? If yes, paste the link. Otherwise, what limitations do you acknowledge?",
     evidenceType: 'url',
     priority: 41,
     reliabilityLevel: 'verifiable',
-    customLabel_fr: "URL conditions ou limites...",
-    customLabel_en: "Terms URL or limitations...",
+    customLabel_fr: "Lien ou limites...",
+    customLabel_en: "Link or limitations...",
   }),
 ];
 
