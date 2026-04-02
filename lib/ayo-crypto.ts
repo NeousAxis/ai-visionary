@@ -133,10 +133,15 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     };
 
     // areaServed: use declared geography instead of hardcoded 5km radius
-    const geoServed = normalizeCase(cleanValAsr(data.processus_methodes?.geographies_served?.value));
+    let geoServed = normalizeCase(cleanValAsr(data.processus_methodes?.geographies_served?.value));
     const deliveryModeRaw = cleanValAsr(data.processus_methodes?.delivery_mode?.value);
-    const isOnlineDelivery = deliveryModeRaw && (deliveryModeRaw.toLowerCase().includes("en ligne") || deliveryModeRaw.toLowerCase().includes("online"));
-    const appendInternational = (name: string) => isOnlineDelivery && !name.toLowerCase().includes("international") ? `${name}, International` : name;
+    const isOnlineDelivery = deliveryModeRaw && /online|remote|digital|virtual|en ligne|visio/i.test(deliveryModeRaw);
+    // If online delivery and no explicit geography (or only home country) → Global
+    const HOME_COUNTRY_ONLY_RE = /^(suisse|switzerland|swiss|france|germany|uk|deutschland|united kingdom|italia|italy|españa|spain|belgique|belgium|österreich|austria|luxembourg|nederland|netherlands)$/i;
+    if (isOnlineDelivery && (!geoServed || HOME_COUNTRY_ONLY_RE.test(geoServed.trim()))) {
+        geoServed = 'Global';
+    }
+    const appendInternational = (name: string) => isOnlineDelivery && !name.toLowerCase().includes("international") && !name.toLowerCase().includes("global") ? `${name}, International` : name;
     // Bug 7: Deduplicate areaServed name — "Monde entier, International" → "International"
     const deduplicateAreaName = (name: string): string => {
         const INTL_SYNONYMS = /\b(monde entier|mondial[e]?|worldwide|global)\b/i;
@@ -367,6 +372,25 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.policies = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)))));
         engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
             .map(s => truncateSecurity(s)))));
+        // Normalize: move GDPR/RGPD/ISO from security_measures to frameworks, keep actual security measures in place
+        const normalizedCompliance = (() => {
+            const FRAMEWORK_PATTERNS = /gdpr|rgpd|iso\s*\d|soc\s*[12]|pci|hipaa|ccpa|lgpd|loi\s*25/i;
+            const movedToFrameworks: string[] = [];
+            const cleanedSecurity = (engagements.security_measures || []).filter((s: string) => {
+                if (FRAMEWORK_PATTERNS.test(s)) {
+                    movedToFrameworks.push(s);
+                    return false;
+                }
+                return true;
+            });
+            return {
+                frameworks: [...new Set([...(engagements.frameworks || []), ...movedToFrameworks])],
+                securityMeasures: cleanedSecurity
+            };
+        })();
+        engagements.frameworks = normalizedCompliance.frameworks;
+        engagements.security_measures = normalizedCompliance.securityMeasures;
+
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
         if (engagements.certifications.length === 0 && certQ > 0) {
@@ -520,7 +544,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 if (!blockData) continue;
                 for (const field of Object.values(blockData) as any[]) {
                     if (field?.evidence && Array.isArray(field.evidence)) {
-                        count += field.evidence.filter((e: string) => typeof e === 'string' && /^https?:\/\//i.test(e)).length;
+                        // Count direct URL strings in evidence array
+                        count += field.evidence.filter((e: any) => typeof e === 'string' && /^https?:\/\//i.test(e)).length;
+                        // Count URLs inside sub-arrays like ["questionnaire_answer", "https://..."]
+                        count += field.evidence.filter((e: any) => Array.isArray(e) && e.some((item: any) => typeof item === 'string' && /^https?:\/\//i.test(item))).length;
+                    }
+                    // Count field value itself if it's a URL
+                    if (typeof field?.value === 'string' && /^https?:\/\//i.test(field.value)) {
+                        count++;
                     }
                 }
             }
@@ -550,7 +581,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                     const fieldPath = `${block}.${fieldName}`;
                     if (!fieldData || typeof fieldData !== 'object' || fieldData.q === undefined) continue;
 
-                    const hasUrl = fieldData.evidence?.some((e: string) => typeof e === 'string' && /^https?:\/\//i.test(e));
+                    // Check for URLs: direct strings, sub-arrays like ["questionnaire_answer", "https://..."], or field value itself
+                    const hasDirectUrl = fieldData.evidence?.some((e: any) => typeof e === 'string' && /^https?:\/\//i.test(e));
+                    const hasSubArrayUrl = fieldData.evidence?.some((e: any) => Array.isArray(e) && e.some((item: any) => typeof item === 'string' && /^https?:\/\//i.test(item)));
+                    const hasValueUrl = typeof fieldData.value === 'string' && /^https?:\/\//i.test(fieldData.value);
+                    const hasUrl = hasDirectUrl || hasSubArrayUrl || hasValueUrl;
                     const isInterpretive = fieldData.evidence?.includes('interpretive_claim_detected');
                     const isVerifiableField = VERIFIABLE_FIELDS.includes(fieldPath);
 
@@ -560,7 +595,16 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                     } else if (hasUrl) {
                         verified++;
                         evidenceUrls++;
-                        const url = fieldData.evidence.find((e: string) => /^https?:\/\//i.test(e));
+                        // Extract URL from any source
+                        let url: string | null = null;
+                        if (hasDirectUrl) {
+                            url = fieldData.evidence.find((e: any) => typeof e === 'string' && /^https?:\/\//i.test(e));
+                        } else if (hasSubArrayUrl) {
+                            const subArr = fieldData.evidence.find((e: any) => Array.isArray(e) && e.some((item: any) => typeof item === 'string' && /^https?:\/\//i.test(item)));
+                            url = subArr?.find((item: any) => typeof item === 'string' && /^https?:\/\//i.test(item)) || null;
+                        } else if (hasValueUrl) {
+                            url = fieldData.value;
+                        }
                         fieldDetails[fieldPath] = { reliability: 'verified', evidence_url: url || null };
                     } else if (isVerifiableField && fieldData.q > 0) {
                         selfDeclared++;
