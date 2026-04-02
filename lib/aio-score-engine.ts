@@ -149,27 +149,37 @@ export function computeAioScore(extract: AyoExtract) {
         blockScores[block] = { weight, raw: rawAvg, score };
     });
 
-    // 2) Apply per-block caps based on data quality (FIX 1: stricter scoring)
-    // a) certifications empty → conformity block max 8/15
+    // 2) Apply per-block caps based on data quality
     const certNode = extract.fields?.engagements_conformite?.certifications;
     const certArr = certNode?.value;
-    const certEmpty = !certArr || (Array.isArray(certArr) && certArr.length === 0);
+    // V4: certifications with URL evidence or na:true are NOT considered empty
+    const certHasUrlEvidence = certNode?.evidence?.some((e: any) => typeof e === 'string' && /^https?:\/\//i.test(e));
+    const certIsNa = certNode?.na === true;
+    const certEmpty = !certIsNa && !certHasUrlEvidence && (!certArr || (Array.isArray(certArr) && certArr.length === 0) || (typeof certArr === 'string' && certArr === ''));
     if (certEmpty && blockScores.engagements_conformite) {
         blockScores.engagements_conformite.score = Math.min(blockScores.engagements_conformite.score, 8);
     }
 
-    // b) key_indicators with no concrete numbers → indicateurs block max 8/20
+    // b) key_indicators — V4: structured_absence or na:true = no cap
     const indNode = extract.fields?.indicateurs?.key_indicators;
     const indArr = indNode?.value;
+    const indIsNa = indNode?.na === true;
+    const indIsStructuredAbsence = indNode?.evidence?.includes('structured_absence');
+    const indHasUrlEvidence = indNode?.evidence?.some((e: any) => typeof e === 'string' && /^https?:\/\//i.test(e));
     const hasConcreteNumbers = Array.isArray(indArr) && indArr.some((v: any) => /\d/.test(String(v)));
-    if (!hasConcreteNumbers && blockScores.indicateurs) {
+    // Skip cap if: na (user said N/A), structured absence (neutral), URL evidence, or has numbers
+    if (!hasConcreteNumbers && !indIsNa && !indIsStructuredAbsence && !indHasUrlEvidence && blockScores.indicateurs) {
         blockScores.indicateurs.score = Math.min(blockScores.indicateurs.score, 8);
     }
 
-    // c) No testimonials (review date absent or indicators empty) → indicateurs max 10/20
+    // c) No testimonials — V4: skip cap if na or structured absence
     const reviewNode = extract.fields?.indicateurs?.last_review_date;
+    const reviewIsNa = reviewNode?.na === true;
+    const reviewIsStructuredAbsence = reviewNode?.evidence?.includes('structured_absence');
     const noTestimonials = !reviewNode?.value || reviewNode.q === 0;
-    if (noTestimonials && (!indArr || (Array.isArray(indArr) && indArr.length === 0)) && blockScores.indicateurs) {
+    if (noTestimonials && !reviewIsNa && !reviewIsStructuredAbsence &&
+        (!indArr || (Array.isArray(indArr) && indArr.length === 0)) && !indIsNa && !indIsStructuredAbsence &&
+        blockScores.indicateurs) {
         blockScores.indicateurs.score = Math.min(blockScores.indicateurs.score, 10);
     }
 
@@ -192,7 +202,14 @@ export function computeAioScore(extract: AyoExtract) {
     }
 
     // c) No external proof/evidence → cap total at 78 (FIX 1)
-    const hasExternalProof = !certEmpty || hasConcreteNumbers ||
+    // V4: URL evidence counts as external proof
+    const hasAnyUrlEvidence = Object.values(extract.fields || {}).some((block: any) => {
+        if (typeof block !== 'object' || block === null) return false;
+        return Object.values(block).some((field: any) =>
+            field?.evidence?.some((e: any) => typeof e === 'string' && /^https?:\/\//i.test(e))
+        );
+    });
+    const hasExternalProof = !certEmpty || hasConcreteNumbers || hasAnyUrlEvidence ||
         (extract.source.scan.has_asr_file === true) ||
         isAyaRegistered;
     if (!hasExternalProof) {
