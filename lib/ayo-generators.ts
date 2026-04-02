@@ -1267,6 +1267,8 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     const addTerm = (term: string, def: string, category: string) => {
         // Ne jamais ajouter un terme garbage comme DefinedTerm
         if (sanitizeFieldValue(term) === null) return;
+        // Reject URLs as glossary terms
+        if (/^https?:\/\//i.test(term.trim())) return;
         // Bug 11: Skip standalone AI names as glossary terms
         if (AI_NAME_GLOSSARY_RE.test(term.trim())) return;
         // Bug 7: Skip "Etc.", "etc.", "..." garbage terms
@@ -1434,6 +1436,17 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     };
 }
 
+/** Normalize country names to English (for external_context) */
+function normalizeCountryENec(val: string): string {
+    const map: Record<string, string> = {
+        'suisse': 'Switzerland', 'swiss': 'Switzerland', 'schweiz': 'Switzerland',
+        'france': 'France', 'deutschland': 'Germany', 'allemagne': 'Germany',
+        'italie': 'Italy', 'italia': 'Italy', 'espagne': 'Spain', 'españa': 'Spain',
+        'belgique': 'Belgium', 'pays-bas': 'Netherlands', 'autriche': 'Austria',
+    };
+    return map[val.toLowerCase().trim()] || val;
+}
+
 // --- GENERATOR: external_context.json ---
 export function generateExternalContextJsonLocal(data: any, url?: string, locale: 'fr' | 'en' = 'en'): any {
     const en = locale === 'en';
@@ -1445,7 +1458,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceEC ? sanitizeAudience(rawAudienceEC) : "";
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
-    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
+    const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
     const email = data.identite?.contact_email?.value || "";
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhoneExt) ? rawPhoneExt : "";
@@ -1631,7 +1644,8 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
         },
         keywords_context: {
             discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords.map(stripNumberedPrefix).map(cleanKeywordEntry))),
-            intent_keywords: filterGarbageEntries(sanitizeKeywords(intentKeywords).map(stripNumberedPrefix).map(cleanKeywordEntry)),
+            intent_keywords: filterGarbageEntries(sanitizeKeywords(intentKeywords).map(stripNumberedPrefix).map(cleanKeywordEntry))
+                .filter((k: string) => !/^(and|or|et|ou)\s/i.test(k.trim())),
             audience_segments: filterGarbageEntries(audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
             source: "declared_plus_structured_normalization"
         },

@@ -79,6 +79,44 @@ const cleanTextAsr = cleanText;
 const cleanArrayAsr = cleanArray;
 const cleanValAsr = cleanVal;
 
+/** Extract a human-readable label from a URL evidence answer */
+function urlToLabel(url: string): string {
+    try {
+        const u = new URL(url);
+        // Try hash fragment first: https://site.com/#gdpr → "GDPR"
+        if (u.hash) return u.hash.replace('#', '').replace(/-/g, ' ').toUpperCase();
+        // Try last path segment: https://site.com/terms.html → "Terms"
+        const path = u.pathname.replace(/\.(html|htm|php|asp)$/i, '');
+        const segment = path.split('/').filter(Boolean).pop();
+        if (segment) return segment.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+        // Fallback: hostname
+        return u.hostname;
+    } catch {
+        return url;
+    }
+}
+
+/** Normalize country names to English */
+function normalizeCountryEN(val: string): string {
+    const map: Record<string, string> = {
+        'suisse': 'Switzerland', 'swiss': 'Switzerland', 'schweiz': 'Switzerland',
+        'france': 'France', 'deutschland': 'Germany', 'allemagne': 'Germany',
+        'italie': 'Italy', 'italia': 'Italy', 'espagne': 'Spain', 'españa': 'Spain',
+        'belgique': 'Belgium', 'pays-bas': 'Netherlands', 'autriche': 'Austria',
+    };
+    return map[val.toLowerCase().trim()] || val;
+}
+
+/** Normalize audience labels to English */
+function normalizeAudienceEN(val: string): string {
+    const map: Record<string, string> = {
+        'entreprises': 'Enterprises', 'particuliers': 'Individuals',
+        'professionnels': 'Professionals', 'associations': 'Associations',
+        'étudiants': 'Students', 'startups': 'Startups',
+    };
+    return map[val.toLowerCase().trim()] || val;
+}
+
 /** Neutralize marketing language in use cases (e.g. "Building premium web ecosystems" -> "web ecosystems") */
 function neutralizeUseCase(uc: string): string {
     return uc
@@ -120,10 +158,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const isAssociationType = isAssociation(businessType, entityNameRaw, entityUrlRaw);
     const schemaType = isAssociationType ? "NonProfitOrganization" : (lowerBT.includes("cabinet") || lowerBT.includes("bureau") ? "ProfessionalService" : "Organization");
 
-    const country = cleanValAsr(data.identite?.country?.value);
+    const countryRaw = cleanValAsr(data.identite?.country?.value);
+    const country = normalizeCountryEN(countryRaw);
     // Normalize city: "Swiss" is an adjective, not a city name
     const cityRaw = cleanValAsr(data.identite?.city?.value) || '';
-    const countrySynonyms = [country.toLowerCase(), 'swiss', 'suisse', 'schweiz', 'svizzera', 'français', 'française', 'french', 'german', 'deutsch', 'italian', 'italiano'];
+    const countrySynonyms = [countryRaw.toLowerCase(), country.toLowerCase(), 'swiss', 'suisse', 'schweiz', 'svizzera', 'français', 'française', 'french', 'german', 'deutsch', 'italian', 'italiano'];
     const city = countrySynonyms.includes(cityRaw.toLowerCase().trim()) ? '' : cityRaw;
 
     const address = {
@@ -234,7 +273,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     if (mode !== 'LIGHT') {
         const legalNameVal = cleanValAsr(data.identite?.legal_name?.value);
         if (legalNameVal) identity.legalName = legalNameVal;
-        const locationVal = cleanValAsr(data.identite?.country?.value);
+        const locationVal = normalizeCountryEN(cleanValAsr(data.identite?.country?.value));
         identity.location = locationVal || (en ? "Not specified" : "Non spécifié");
         identity.address = address;
         identity.areaServed = areaServed;
@@ -268,7 +307,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     const offer: any = {
         "services": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value))),
         "products": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value))),
-        "use_cases": filterGarbageEntries(mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)))).map(neutralizeUseCase).filter(Boolean),
+        "use_cases": filterGarbageEntries(mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)))).map(neutralizeUseCase).filter(Boolean)
+            .map((s: string) => s.replace(/\.\s*$/, '').trim())
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)),
     };
 
     if (mode !== 'LIGHT') {
@@ -285,6 +326,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             .filter(Boolean)
             .filter((s: string) => !HALLUCINATED_AUDIENCE_RE.test(s))
             .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
+            .map(normalizeAudienceEN)
             .slice(0, 15));
         if (offer.audience.length === 0) offer.audience = [en ? "General public" : "Grand public"];
 
@@ -341,12 +383,13 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 if (BARE_ACRONYM_RE.test(trimmed)) return null;
                 return trimmed;
             })
-            .filter((step: string | null): step is string => step !== null && step.length >= 10);
+            .filter((step: string | null): step is string => step !== null && step.length >= 10)
+            .map((s: string) => s.replace(/\.\s*$/, '').trim());
         processus.delivery_mode = sanitizeFieldValue(deliveryMode) || deliveryMode; // already cleaned above
         // geographies_served: fallback to country if empty, normalize case
         const sanitizedGeoServed = sanitizeFieldValue(geoServed);
         const sanitizedCountryFallback = sanitizeFieldValue(cleanValAsr(data.identite?.country?.value));
-        processus.geographies_served = normalizeCase(sanitizedGeoServed || sanitizedCountryFallback || "");
+        processus.geographies_served = normalizeCountryEN(normalizeCase(sanitizedGeoServed || sanitizedCountryFallback || ""));
         // quality_assurance: force array format (comma-separated string → array)
         const rawQA = cleanValAsr(data.processus_methodes?.quality_assurance?.value);
         const qaArray = rawQA ? rawQA.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
@@ -390,6 +433,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         })();
         engagements.frameworks = normalizedCompliance.frameworks;
         engagements.security_measures = normalizedCompliance.securityMeasures;
+
+        // Normalize: URLs → labels (URLs are evidence, not names)
+        engagements.certifications = (engagements.certifications || []).map((c: string) => /^https?:\/\//i.test(c) ? urlToLabel(c) : c);
+        engagements.frameworks = (engagements.frameworks || []).map((f: string) => /^https?:\/\//i.test(f) ? urlToLabel(f) : f);
 
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
