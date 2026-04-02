@@ -2424,7 +2424,68 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     console.warn('⚠️ scan_state injection failed:', scanErr instanceof Error ? scanErr.message : scanErr);
                 }
 
-                // 🔄 INJECT QUESTIONNAIRE ANSWERS: Recover answers from intermediate saves
+                // 🔄 V4: DIRECT INJECTION from conversation history (bypass DB)
+                // Read V4 evidence answers directly from messages — no DB dependency
+                if (V4_EVIDENCE_MODE && extractJson?.fields) {
+                    const fields = extractJson.fields as any;
+                    let lastEvidenceId = '';
+                    for (const msg of messages) {
+                        if (msg.role === 'assistant' && typeof msg.content === 'string') {
+                            const idMatch = msg.content.match(/"id"\s*:\s*"(evidence_[^"]+)"/);
+                            if (idMatch) lastEvidenceId = idMatch[1];
+                        } else if (msg.role === 'user' && lastEvidenceId) {
+                            const answer = (msg.content as string).trim();
+                            // Skip confirmations and setup answers
+                            if (!answer || /^(oui|yes|ok|non|no)[\s!.]*$/i.test(answer)) { lastEvidenceId = ''; continue; }
+                            // Map evidence ID to field path: evidence_block_field → block.field
+                            const parts = lastEvidenceId.replace('evidence_', '').split('_');
+                            // Find the right block.field split (block names can have underscores)
+                            let bloc = '', fieldName = '';
+                            for (let i = 1; i < parts.length; i++) {
+                                const tryBloc = parts.slice(0, i).join('_');
+                                const tryField = parts.slice(i).join('_');
+                                if (fields[tryBloc] && fields[tryBloc][tryField] !== undefined) {
+                                    bloc = tryBloc; fieldName = tryField; break;
+                                }
+                            }
+                            if (!bloc) {
+                                // Try known blocks
+                                for (const knownBloc of ['identite', 'offre', 'processus_methodes', 'engagements_conformite', 'indicateurs', 'contenus_pedagogiques', 'external_context']) {
+                                    const prefix = knownBloc + '_';
+                                    if (lastEvidenceId.replace('evidence_', '').startsWith(prefix.replace('.', '_'))) {
+                                        bloc = knownBloc;
+                                        fieldName = lastEvidenceId.replace('evidence_', '').substring(prefix.length);
+                                        break;
+                                    }
+                                }
+                            }
+                            if (bloc && fields[bloc]) {
+                                // Evaluate evidence
+                                const matchingTemplate = EVIDENCE_TEMPLATES.find(t => `evidence_${t.block}_${t.fieldName}` === lastEvidenceId);
+                                let qValue: any = 1;
+                                let evidenceUrl: string | undefined;
+                                if (matchingTemplate) {
+                                    const evaluation = evaluateEvidence(matchingTemplate, answer);
+                                    qValue = evaluation.q;
+                                    evidenceUrl = evaluation.evidenceUrl;
+                                }
+                                // Check for N/A / skip
+                                const isSkip = /\[SKIP\]|not applicable|non applicable|n\/a/i.test(answer);
+                                if (isSkip) {
+                                    fields[bloc][fieldName] = { value: '', q: 0, evidence: ['user_skipped'], na: true };
+                                    console.log(`🎯 V4 DIRECT: ${bloc}.${fieldName} → SKIPPED (na:true)`);
+                                } else {
+                                    const trail = evidenceUrl ? ['questionnaire_answer', evidenceUrl] : ['questionnaire_answer'];
+                                    fields[bloc][fieldName] = { value: answer, q: qValue, evidence: trail };
+                                    console.log(`🎯 V4 DIRECT: ${bloc}.${fieldName} → q=${qValue}${evidenceUrl ? ' URL:' + evidenceUrl : ''}`);
+                                }
+                            }
+                            lastEvidenceId = '';
+                        }
+                    }
+                }
+
+                // 🔄 INJECT QUESTIONNAIRE ANSWERS: Recover answers from intermediate saves (V3 fallback)
                 // If the LLM extraction missed user-provided data, the progressive saves have it
                 try {
                     const existingAnalysis = await db.getAnalysis(sessionAsrId);
