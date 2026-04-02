@@ -2484,16 +2484,18 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                             const [bloc, field] = fieldPath.split('.');
                             if (!bloc || !field || !fields[bloc]) continue;
 
+                            // V4: User answers ALWAYS override scan data (user > scan)
+                            // V3: Only inject if field is empty (backward compat)
                             const existing = fields[bloc][field];
                             const isEmpty = !existing || existing.value === '' || existing.value === null ||
                                 (Array.isArray(existing.value) && existing.value.length === 0) ||
                                 (existing.q === 0);
+                            const isV4Answer = V4_EVIDENCE_MODE && qId.startsWith('evidence_');
 
-                            if (isEmpty) {
-                                // V4: Use evaluateEvidence for evidence questions to get proper q-values
+                            if (isEmpty || isV4Answer) {
                                 let qValue = 1 as any;
                                 let evidenceUrl: string | undefined;
-                                if (V4_EVIDENCE_MODE && qId.startsWith('evidence_')) {
+                                if (isV4Answer) {
                                     const matchingTemplate = EVIDENCE_TEMPLATES.find(t => `evidence_${t.block}_${t.fieldName}` === qId);
                                     if (matchingTemplate) {
                                         const evaluation = evaluateEvidence(matchingTemplate, answer);
@@ -2531,18 +2533,36 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     }
                 }
 
-                // 4d. V4: FORCE structured absence for indicateurs RIGHT BEFORE scoring
-                // This runs AFTER all injections and cleanups — nothing can overwrite it
+                // 4d. V4: Handle indicateurs before scoring
+                // - If user answered with data → keep as-is (questionnaire injection handled it)
+                // - If user said "not applicable" / skip → set na:true (excluded from scoring)
+                // - If no answer and no data → structured absence (q=0.5, neutral)
                 if (V4_EVIDENCE_MODE && extractJson?.fields) {
                     if (!extractJson.fields.indicateurs) (extractJson.fields as any).indicateurs = {};
                     const ind = (extractJson.fields as any).indicateurs;
-                    if (!ind.key_indicators || ind.key_indicators.q === 0) {
-                        ind.key_indicators = { value: ind.key_indicators?.value || '', q: 0.5, evidence: ['structured_absence'] };
-                        console.log('🏷️ STRUCTURED ABSENCE: indicateurs.key_indicators → q=0.5');
-                    }
-                    if (!ind.last_review_date || ind.last_review_date.q === 0) {
-                        ind.last_review_date = { value: ind.last_review_date?.value || '', q: 0.5, evidence: ['structured_absence'] };
-                        console.log('🏷️ STRUCTURED ABSENCE: indicateurs.last_review_date → q=0.5');
+
+                    // Check if user explicitly skipped (N/A) via questionnaire answers
+                    const savedAnswers = await db.getAnalysis(sessionAsrId).then(a => a?.data?.questionnaire_answers).catch(() => null);
+                    const skippedIndicators = savedAnswers && Object.entries(savedAnswers).some(
+                        ([k, v]) => k.includes('key_indicators') && typeof v === 'string' &&
+                        /not applicable|non applicable|\[SKIP\]|n\/a/i.test(v)
+                    );
+
+                    if (skippedIndicators) {
+                        // User said N/A → exclude from scoring (na:true)
+                        ind.key_indicators = { value: '', q: 0, evidence: ['user_skipped'], na: true };
+                        ind.last_review_date = { value: '', q: 0, evidence: ['user_skipped'], na: true };
+                        console.log('🏷️ INDICATEURS: user skipped → na:true (excluded from scoring)');
+                    } else {
+                        // No skip: apply structured absence if still empty
+                        if (!ind.key_indicators || (ind.key_indicators.q === 0 && !ind.key_indicators.na)) {
+                            ind.key_indicators = { value: ind.key_indicators?.value || '', q: 0.5, evidence: ['structured_absence'] };
+                            console.log('🏷️ STRUCTURED ABSENCE: indicateurs.key_indicators → q=0.5');
+                        }
+                        if (!ind.last_review_date || (ind.last_review_date.q === 0 && !ind.last_review_date.na)) {
+                            ind.last_review_date = { value: ind.last_review_date?.value || '', q: 0.5, evidence: ['structured_absence'] };
+                            console.log('🏷️ STRUCTURED ABSENCE: indicateurs.last_review_date → q=0.5');
+                        }
                     }
                 }
 
