@@ -306,7 +306,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 6 | Campagne email entreprises indexees | Haute | A faire |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
-| 9 | Reduire dependance LLM — le scanner doit extraire 80%+ des donnees directement du HTML (balises, JSON-LD, listes, mots-cles), le LLM ne sert que pour les 20% ambigus. Objectif : resultats identiques a chaque scan. | Future | Identifie |
+| 9 | Micro-agents deterministes — remplacer le LLM par des micro-agents specialises (detect-contact, detect-services, detect-legal, detect-location, detect-security, detect-jsonld, detect-social). Chaque agent fait UNE action simple sur le HTML brut, pas de LLM. Le LLM n'intervient qu'a la fin pour classer les ambiguites. Objectif : resultats identiques a chaque scan. | Future | Identifie |
 | 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
 
 ---
