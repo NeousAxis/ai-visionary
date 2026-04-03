@@ -169,8 +169,8 @@ export default function DiagnosticV2Page() {
             Analyze how AI reads <span className="dv2-accent">your website</span>
           </h1>
           <p className="dv2-hero-sub">
-            7 deterministic micro-agents scan your site in real-time.<br />
-            Every data point is verified. Nothing is invented.
+            7 super agents scan your site in real-time.<br />
+            Every data point is structured to be optimized for AI.
           </p>
           <form className="dv2-search-form" onSubmit={e => { e.preventDefault(); startScan(); }}>
             <div className="dv2-search-box">
