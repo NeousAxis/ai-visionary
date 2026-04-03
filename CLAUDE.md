@@ -203,9 +203,11 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
    - GDPR principles filter — "Privacy by Design", "GDPR compliance" sortis de security_measures
    - `splitLongSecurityEntries()` + `truncateSecurity()`
    - `cleanOutputArray()` — "And" prefix, trailing periods, capitalisation
-5. Anti-marketing filters — "premium", "zero-latency", "ecosystem", etc. (ASR + ExternalContext)
+5. Anti-marketing filters — "premium", "zero-latency", "ecosystem", etc. (ASR + ExternalContext + FAQ)
 6. Country normalization — `normalizeCountryEN`/`normalizeCountryENec` dans TOUS les generateurs
-7. City normalization — NOT_A_CITY filter dans TOUS les generateurs (Swiss, Suisse = pas une ville)
+7. City normalization — NOT_A_CITY filter dans TOUS les generateurs (Swiss, Suisse, "Swiss based" = pas une ville)
+8. Frontend label stripping — les labels des champs V4 (`customLabel`) sont strippes des reponses avant evaluation
+9. Deterministic online detection — si services contiennent website/app/software/saas/digital/agentic/cloud/api → isOnlineDelivery=true (independant du LLM)
 
 #### Matrice de coherence des 5 generateurs (COMPLETE)
 
@@ -271,7 +273,9 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Site bilingue FR/EN : toggle header, `next-intl` + cookie `NEXT_LOCALE`, toutes pages + chatbot + emails + formulaires + API
 - Flux complet AYO V4 : URL -> scan -> classification site -> questions ciblees -> score strict -> paiement Stripe -> fichiers -> email (bilingue)
 - V4 Evidence-Based actif en prod : site-classifier, question-engine, data reliability layer, anti-marketing, GDPR reclassification
-- Sanitization complete des fichiers PRO : anti-marketing, URL→label, country normalization, "And" prefix, trailing periods, GDPR principles filter
+- Sanitization complete des fichiers PRO via `sanitizeComplianceOutput()` partagee : anti-marketing, URL→label, country normalization, "And" prefix, trailing periods, GDPR principles filter, deterministic online detection
+- Frontend label stripping : les `customLabel` des champs V4 sont automatiquement strippes des reponses utilisateur
+- Stepper/barre de progression bilingue FR/EN (triggers mis a jour)
 - Stripe Checkout live (CHF, 2 offres : AYA 19 CHF/mois, PRO 499 CHF)
 - Registre AYA public : ~4400+ entites, pagination serveur, badges certifie/indexe, recherche, tri
 - API AYA : 7 endpoints (index, llm, docs, search, entity, stats, live) + `?lang=fr|en`
@@ -297,7 +301,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 1 | ~~Merger branches en attente dans `main`~~ | ~~Immediat~~ | Fait (31 mars 2026) |
 | 2 | ~~Coherence linguistique fichiers PRO (EN par defaut)~~ | ~~Immediat~~ | Fait (31 mars 2026) |
 | 3 | ~~AYO V4 Evidence-Based~~ | ~~Haute~~ | Fait — actif en prod, flag ON (3 avril 2026) |
-| 4 | Stabiliser qualite fichiers PRO (anti-marketing, classification, normalisation) | Critique | En cours — iterations sur les sanitization layers |
+| 4 | ~~Stabiliser qualite fichiers PRO (anti-marketing, classification, normalisation)~~ | ~~Critique~~ | Fait — solidifie (3 avril 2026). sanitizeComplianceOutput() partagee, score stable 82/100 |
 | 5 | Scraping 10k+ entites + registres du commerce | Critique | En cours (~4400) |
 | 6 | Campagne email entreprises indexees | Haute | A faire |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
