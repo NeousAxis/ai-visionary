@@ -1019,8 +1019,9 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     const name = cleanVal(data.identite?.name?.value) || (en ? "Our company" : "Notre entreprise");
     const rawBTfaq = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTfaq || ""));
-    const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
-    const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
+    const MARKETING_RE = /\b(premium|zero.?latency|high.?performance|cutting.?edge|world.?class|best.?in.?class|next.?gen|revolutionary|unmatched|superior|autonomous .* workforces?|ecosystem)\b/i;
+    const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value)).filter(s => !MARKETING_RE.test(s));
+    const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value)).filter(p => !MARKETING_RE.test(p));
     const rawAudienceFaq = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceFaq ? sanitizeAudience(rawAudienceFaq) : "";
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
@@ -1544,8 +1545,9 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const name = cleanVal(data.identite?.name?.value) || (en ? "Entity" : "Entreprise");
     const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", en ? "Organization" : "Organisation"));
+    const MARKETING_RE_EC = /\b(premium|zero.?latency|high.?performance|cutting.?edge|world.?class|best.?in.?class|next.?gen|revolutionary|unmatched|superior|autonomous .* workforces?|ecosystem)\b/i;
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
-    const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
+    const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value)).filter(p => !MARKETING_RE_EC.test(p));
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceEC ? sanitizeAudience(rawAudienceEC) : "";
     const rawCity = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
@@ -1687,7 +1689,11 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
         geoContext.primary_market = `${city}${city && country ? ", " : ""}${country}`.trim();
     }
     const dmLower = deliveryMode.toLowerCase();
-    const isOnline = dmLower.includes("ligne") || dmLower.includes("online") || dmLower.includes("remote") || dmLower.includes("digital") || dmLower.includes("web");
+    const servicesJoinedEC = sanitizeFieldArray(cleanArray(data.offre?.services?.value)).join(' ').toLowerCase();
+    const btLowerEC = (sanitizeFieldValue(cleanVal(data.identite?.business_type?.value) || '') || '').toLowerCase();
+    const DIGITAL_SVC_RE = /\b(website|web\s|app|software|saas|platform|digital|cloud|api|agentic|multi.?agent|native application|développement|development|création de site|e-commerce)\b/i;
+    const isOnline = dmLower.includes("ligne") || dmLower.includes("online") || dmLower.includes("remote") || dmLower.includes("digital") || dmLower.includes("web")
+        || DIGITAL_SVC_RE.test(servicesJoinedEC) || DIGITAL_SVC_RE.test(btLowerEC);
     // served_areas: if online and geographies is just a country name → "Global"
     const SINGLE_COUNTRY_RE = /^(switzerland|suisse|schweiz|france|germany|deutschland|belgium|belgique|italy|italia|spain|españa|netherlands|austria|uk|usa|canada)$/i;
     if (isOnline && (!geographies || SINGLE_COUNTRY_RE.test(geographies.trim()))) {

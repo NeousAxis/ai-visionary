@@ -177,10 +177,16 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // areaServed: use declared geography instead of hardcoded 5km radius
     let geoServed = normalizeCase(cleanValAsr(data.processus_methodes?.geographies_served?.value));
     const deliveryModeRaw = cleanValAsr(data.processus_methodes?.delivery_mode?.value);
-    // Check for online signals: delivery_mode OR service_mode OR contextual_signals
+    // Check for online signals: delivery_mode OR service_mode OR services content (deterministic fallback)
     const serviceMode = Array.isArray(data.contextual_signals?.service_mode?.value) ? data.contextual_signals.service_mode.value.join(' ') : '';
+    const servicesJoined = (Array.isArray(data.offre?.services?.value) ? data.offre.services.value : []).join(' ').toLowerCase();
+    const btLower = (cleanValAsr(data.identite?.business_type?.value) || '').toLowerCase();
+    // Deterministic: if services or business_type mention digital/web/software → online
+    const DIGITAL_SERVICE_RE = /\b(website|web\s|app|software|saas|platform|digital|cloud|api|agentic|multi.?agent|native application|développement|development|création de site|e-commerce)\b/i;
     const isOnlineDelivery = (deliveryModeRaw && /online|remote|digital|virtual|en ligne|visio/i.test(deliveryModeRaw))
-        || /online|remote|digital/i.test(serviceMode);
+        || /online|remote|digital/i.test(serviceMode)
+        || DIGITAL_SERVICE_RE.test(servicesJoined)
+        || DIGITAL_SERVICE_RE.test(btLower);
     // If online delivery and no explicit geography (or only home country) → Global
     const HOME_COUNTRY_ONLY_RE = /^(suisse|switzerland|swiss|france|germany|uk|deutschland|united kingdom|italia|italy|españa|spain|belgique|belgium|österreich|austria|luxembourg|nederland|netherlands)$/i;
     if (isOnlineDelivery && (!geoServed || HOME_COUNTRY_ONLY_RE.test(geoServed.trim()))) {
