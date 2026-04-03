@@ -434,6 +434,34 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.frameworks = normalizedCompliance.frameworks;
         engagements.security_measures = normalizedCompliance.securityMeasures;
 
+        // Reclassify: GDPR/RGPD = regulation/framework, NOT certification
+        // ISO/SOC/B Corp = real certifications. "Legal" alone = meaningless.
+        {
+            const REGULATION_RE = /\bgdpr\b|\brgpd\b/i;
+            const MEANINGLESS_FRAMEWORK_RE = /^legal$/i;
+            const movedToFrameworks: string[] = [];
+            // Move regulations from certifications → frameworks
+            engagements.certifications = (engagements.certifications || []).filter((c: string) => {
+                if (REGULATION_RE.test(c)) {
+                    movedToFrameworks.push('GDPR'); // Normalize name
+                    return false;
+                }
+                return true;
+            });
+            if (movedToFrameworks.length > 0) {
+                engagements.frameworks = [...new Set([...(engagements.frameworks || []), ...movedToFrameworks])];
+            }
+            // Remove meaningless standalone "Legal" from frameworks
+            engagements.frameworks = (engagements.frameworks || []).filter((f: string) => !MEANINGLESS_FRAMEWORK_RE.test(f.trim()));
+            // Deduplicate: "GDPR compliance" → "GDPR" (redundant)
+            engagements.frameworks = (engagements.frameworks || []).map((f: string) => {
+                if (/^gdpr\s+compliance$/i.test(f.trim())) return 'GDPR';
+                if (/^rgpd\s+compliance$/i.test(f.trim())) return 'GDPR';
+                return f;
+            });
+            engagements.frameworks = [...new Set(engagements.frameworks)];
+        }
+
         // Normalize: URLs → labels (URLs are evidence, not names)
         engagements.certifications = (engagements.certifications || []).map((c: string) => /^https?:\/\//i.test(c) ? urlToLabel(c) : c);
         engagements.frameworks = (engagements.frameworks || []).map((f: string) => /^https?:\/\//i.test(f) ? urlToLabel(f) : f);

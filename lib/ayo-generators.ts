@@ -494,6 +494,26 @@ export function sanitizeCertifications(values: string[]): string[] {
 }
 
 /**
+ * Reclassify compliance data: GDPR/RGPD is a regulation (framework), NOT a certification.
+ * "Legal" alone is meaningless. "GDPR compliance" deduplicates to "GDPR".
+ */
+function reclassifyCompliance(certs: string[], fwks: string[]): { certifications: string[]; frameworks: string[] } {
+    const REGULATION_RE = /\bgdpr\b|\brgpd\b/i;
+    const movedToFrameworks: string[] = [];
+    const cleanedCerts = certs.filter(c => {
+        if (REGULATION_RE.test(c)) { movedToFrameworks.push('GDPR'); return false; }
+        return true;
+    });
+    let cleanedFwks = [...new Set([...fwks, ...movedToFrameworks])];
+    // Remove meaningless standalone "Legal"
+    cleanedFwks = cleanedFwks.filter(f => !/^legal$/i.test(f.trim()));
+    // Deduplicate: "GDPR compliance" → "GDPR"
+    cleanedFwks = cleanedFwks.map(f => /^(gdpr|rgpd)\s+compliance$/i.test(f.trim()) ? 'GDPR' : f);
+    cleanedFwks = [...new Set(cleanedFwks)];
+    return { certifications: cleanedCerts, frameworks: cleanedFwks };
+}
+
+/**
  * FIX 3: Strip leading numbers/dots from process steps.
  * "1. Structuration..." → "Structuration..."
  * "ASR. 2. Création..." → "Création..."
@@ -851,8 +871,11 @@ export function generateManifestJson(data: any, url: string, locale: 'fr' | 'en'
     const rawBT = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBT || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
-    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
-    const dataFrameworks = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const rawCertsM = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const rawFrameworksM = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const reclassifiedM = reclassifyCompliance(rawCertsM, rawFrameworksM);
+    const certifications = reclassifiedM.certifications;
+    const dataFrameworks = reclassifiedM.frameworks;
     const dataPolicies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
 
@@ -978,8 +1001,11 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     const qualityAssurance = sanitizeFieldValue(
         Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ') : cleanVal(rawQAfaq)
     ) || "";
-    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
-    const frameworks = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const rawCertsF = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const rawFrameworksF = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const reclassifiedF = reclassifyCompliance(rawCertsF, rawFrameworksF);
+    const certifications = reclassifiedF.certifications;
+    const frameworks = reclassifiedF.frameworks;
     const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
     const securityMeasures = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))
         .map(s => truncateSecurity(s))));
@@ -1115,12 +1141,19 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     }
 
     // --- CONFIANCE & CONFORMITÉ / TRUST & COMPLIANCE ---
-    if (certifications.length > 0) {
+    if (certifications.length > 0 || frameworks.length > 0) {
+        const certsText = certifications.length > 0
+            ? (en ? `${name} holds the following certifications: ${certifications.join(", ")}.` : `${name} détient les certifications suivantes : ${certifications.join(", ")}.`)
+            : '';
+        const fwksText = frameworks.length > 0
+            ? (en ? `${certifications.length > 0 ? ' ' : `${name} follows these `}Compliance frameworks adopted: ${frameworks.join(", ")}.` : `${certifications.length > 0 ? ' ' : `${name} suit les `}Référentiels de conformité adoptés : ${frameworks.join(", ")}.`)
+            : '';
+        const suffix = en ? ' These commitments demonstrate a structured quality approach.' : ' Ces engagements attestent d\'une démarche qualité structurée.';
         qna.push({
-            q: en ? `What certifications does ${name} hold?` : `Quelles certifications et labels ${name} détient-${isAssoFaq ? "elle" : "il"} ?`,
-            a: en
-                ? `${name} holds the following certifications: ${certifications.join(", ")}.${frameworks.length > 0 ? ` Compliance frameworks adopted: ${frameworks.join(", ")}.` : ""} These commitments demonstrate a structured quality approach.`
-                : `${name} détient les certifications suivantes : ${certifications.join(", ")}.${frameworks.length > 0 ? ` Référentiels de conformité adoptés : ${frameworks.join(", ")}.` : ""} Ces engagements attestent d'une démarche qualité structurée.`,
+            q: en
+                ? (certifications.length > 0 ? `What certifications does ${name} hold?` : `What compliance frameworks does ${name} follow?`)
+                : (certifications.length > 0 ? `Quelles certifications et labels ${name} détient-${isAssoFaq ? "elle" : "il"} ?` : `Quels référentiels de conformité ${name} suit-${isAssoFaq ? "elle" : "il"} ?`),
+            a: `${certsText}${fwksText}${suffix}`.trim(),
             category: en ? "Compliance" : "Conformité"
         });
     }
@@ -1247,14 +1280,17 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTgloss || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
-    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const rawCertsG = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const rawFrameworksG = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
+    const reclassifiedG = reclassifyCompliance(rawCertsG, rawFrameworksG);
+    const certifications = reclassifiedG.certifications;
+    const frameworks = reclassifiedG.frameworks;
     const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
     const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceGloss ? sanitizeAudience(rawAudienceGloss) : "";
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
     const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
     const policies = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
-    const frameworks = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
     const securityMeasures = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
         .map(s => truncateSecurity(s))));
 
@@ -1437,6 +1473,16 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
 }
 
 /** Normalize country names to English (for external_context) */
+function urlToLabel(url: string): string {
+    try {
+        const u = new URL(url);
+        if (u.hash) return u.hash.replace(/^#/, '').replace(/[-_]/g, ' ').trim() || u.hostname;
+        const seg = u.pathname.split('/').filter(Boolean).pop();
+        if (seg && seg !== 'index.html') return seg.replace(/\.\w+$/, '').replace(/[-_]/g, ' ').trim();
+        return u.hostname.replace(/^www\./, '');
+    } catch { return url; }
+}
+
 function normalizeCountryENec(val: string): string {
     const map: Record<string, string> = {
         'suisse': 'Switzerland', 'swiss': 'Switzerland', 'schweiz': 'Switzerland',
@@ -1457,17 +1503,24 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceEC ? sanitizeAudience(rawAudienceEC) : "";
-    const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
+    const rawCity = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
+    // "Swiss" is an adjective, not a city — clear it
+    const NOT_A_CITY = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain)$/i;
+    const city = NOT_A_CITY.test(rawCity.trim()) ? "" : rawCity;
     const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
     const email = data.identite?.contact_email?.value || "";
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhoneExt) ? rawPhoneExt : "";
-    const certifications = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
-    const frameworks = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const rawCertsEC = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
+    const rawFrameworksEC = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
+    const reclassifiedEC = reclassifyCompliance(rawCertsEC, rawFrameworksEC);
+    const certifications = reclassifiedEC.certifications.map((c: string) => /^https?:\/\//i.test(c) ? urlToLabel(c) : c);
+    const frameworks = reclassifiedEC.frameworks.map((f: string) => /^https?:\/\//i.test(f) ? urlToLabel(f) : f);
     const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
     const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
-    const geographies = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
+    const rawGeographies = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
+    const geographies = normalizeCountryENec(rawGeographies);
     const rawQAec = data.processus_methodes?.quality_assurance?.value;
     const qualityAssuranceRaw: string[] = Array.isArray(rawQAec)
         ? rawQAec.filter((s: any) => typeof s === 'string' && s.trim()).map((s: string) => s.trim())
@@ -1585,13 +1638,18 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     if (city || country) {
         geoContext.primary_market = `${city}${city && country ? ", " : ""}${country}`.trim();
     }
-    if (geographies) geoContext.served_areas = geographies;
-    // Si delivery_mode est en ligne mais geographies ne mentionne pas "International", ajouter une note
     const dmLower = deliveryMode.toLowerCase();
     const isOnline = dmLower.includes("ligne") || dmLower.includes("online") || dmLower.includes("remote") || dmLower.includes("digital") || dmLower.includes("web");
+    // served_areas: if online and geographies is just a country name → "Global"
+    const SINGLE_COUNTRY_RE = /^(switzerland|suisse|schweiz|france|germany|deutschland|belgium|belgique|italy|italia|spain|españa|netherlands|austria|uk|usa|canada)$/i;
+    if (isOnline && (!geographies || SINGLE_COUNTRY_RE.test(geographies.trim()))) {
+        geoContext.served_areas = "Global";
+    } else if (geographies) {
+        geoContext.served_areas = geographies;
+    }
     if (isOnline) {
         const geoLower = (geographies || "").toLowerCase();
-        if (!geoLower.includes("international") && !geoLower.includes("mondial") && !geoLower.includes("world")) {
+        if (!geoLower.includes("international") && !geoLower.includes("mondial") && !geoLower.includes("world") && !geoLower.includes("global")) {
             geoContext.delivery_note = en
                 ? "Service available online — potentially international reach"
                 : "Service disponible en ligne — portée potentiellement internationale";
