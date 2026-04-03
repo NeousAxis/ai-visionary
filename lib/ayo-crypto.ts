@@ -305,8 +305,17 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
 
     // Offer
     const offer: any = {
-        "services": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value))),
-        "products": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value))),
+        "services": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.services?.value)))
+            .filter((s: string) => {
+                const MARKETING_SERVICE_RE = /\b(premium|zero.?latency|high.?performance|cutting.?edge|world.?class|best.?in.?class|next.?gen|revolutionary|unmatched|superior|ecosystem)\b/i;
+                return !MARKETING_SERVICE_RE.test(s);
+            }),
+        "products": filterGarbageEntries(sanitizeFieldArray(cleanArrayAsr(data.offre?.products?.value)))
+            .filter((p: string) => {
+                // Anti-marketing: reject marketing claims posing as products
+                const MARKETING_PRODUCT_RE = /\b(premium|zero.?latency|high.?performance|cutting.?edge|world.?class|best.?in.?class|next.?gen|revolutionary|unmatched|superior|autonomous .* workforces?|ecosystem)\b/i;
+                return !MARKETING_PRODUCT_RE.test(p);
+            }),
         "use_cases": filterGarbageEntries(mergeAiNamesInUseCases(sanitizeFieldArray(cleanArrayAsr(data.offre?.use_cases?.value)))).map(neutralizeUseCase).filter(Boolean)
             .map((s: string) => s.replace(/\.\s*$/, '').trim())
             .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)),
@@ -316,11 +325,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // Sanitize audience: reject garbage values, full sentences, only keep short segments
         const rawAudience = sanitizeFieldValue(cleanValAsr(data.offre?.target_audience?.value));
         const isAudienceSentence = rawAudience && ((rawAudience.length > 100 && !rawAudience.includes(',')) || /[a-zA-Z0-9-]+\.[a-z]{2,}/i.test(rawAudience));
-        // Correction 2: audience as array instead of string
-        const defaultAudience = en ? "General public" : "Grand public";
-        const audienceString = isAudienceSentence ? defaultAudience : fixUnmatchedBrackets(rawAudience || defaultAudience);
+        // Correction 2: audience as array instead of string — NO "General public" default (scan data takes priority)
+        const audienceString = isAudienceSentence ? '' : fixUnmatchedBrackets(rawAudience || '');
         // Bug 5: Limit audience to max 15 segments, filter hallucinated/generic segments
-        const HALLUCINATED_AUDIENCE_RE = /^(secteur de (la|l'|le|les)|secteur [a-zéèêëàâä])/i;
+        const HALLUCINATED_AUDIENCE_RE = /^(secteur de (la|l'|le|les)|secteur [a-zéèêëàâä]|general public|grand public)/i;
         offer.audience = filterGarbageEntries(audienceString.split(',')
             .map((s: string) => s.trim())
             .filter(Boolean)
@@ -328,7 +336,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
             .map(normalizeAudienceEN)
             .slice(0, 15));
-        if (offer.audience.length === 0) offer.audience = [en ? "General public" : "Grand public"];
+        // Only use "B2B" or "B2C" as default if no audience detected — NEVER "General public"
+        if (offer.audience.length === 0) offer.audience = ["B2B"];
 
         // Correction 3: pricingIndication as structured object
         const rawPricing = cleanValAsr(data.offre?.pricing_indication?.value);
@@ -391,8 +400,21 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         const sanitizedCountryFallback = sanitizeFieldValue(cleanValAsr(data.identite?.country?.value));
         processus.geographies_served = normalizeCountryEN(normalizeCase(sanitizedGeoServed || sanitizedCountryFallback || ""));
         // quality_assurance: force array format (comma-separated string → array)
+        // Smart split: don't split commas inside parentheses — "encryption (TLS 1.3, AES-256)" stays intact
         const rawQA = cleanValAsr(data.processus_methodes?.quality_assurance?.value);
-        const qaArray = rawQA ? rawQA.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+        const qaArray: string[] = [];
+        if (rawQA) {
+            let depth = 0, current = '';
+            for (const ch of rawQA) {
+                if (ch === '(') depth++;
+                else if (ch === ')') depth = Math.max(0, depth - 1);
+                if (ch === ',' && depth === 0) {
+                    if (current.trim()) qaArray.push(current.trim());
+                    current = '';
+                } else { current += ch; }
+            }
+            if (current.trim()) qaArray.push(current.trim());
+        }
         processus.quality_assurance = filterGarbageEntries(sanitizeFieldArray(qaArray))
             .filter((entry: string) => {
                 // Remove marketing promises — keep only factual, verifiable signals
@@ -414,7 +436,12 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.frameworks = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value)))));
         engagements.policies = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)))));
         engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
-            .map(s => truncateSecurity(s)))));
+            .map(s => truncateSecurity(s)))))
+            .filter((s: string) => {
+                // GDPR principles are NOT security measures — filter them out
+                const GDPR_PRINCIPLE_RE = /\b(privacy by design|right to erasure|right to be forgotten|explicit consent|data minimization|purpose limitation|storage limitation|data portability|lawful basis|legitimate interest)\b/i;
+                return !GDPR_PRINCIPLE_RE.test(s);
+            });
         // Normalize: move GDPR/RGPD/ISO from security_measures to frameworks, keep actual security measures in place
         const normalizedCompliance = (() => {
             const FRAMEWORK_PATTERNS = /gdpr|rgpd|iso\s*\d|soc\s*[12]|pci|hipaa|ccpa|lgpd|loi\s*25/i;

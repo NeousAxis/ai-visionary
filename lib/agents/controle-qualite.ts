@@ -665,7 +665,7 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
     });
 
     // V4: Detect interpretive/subjective claims and penalize
-    const INTERPRETIVE_CLAIMS_RE = /\b(leader|meilleur|best|top\s|innovant|innovative|world.?class|cutting.?edge|unmatched|unrivaled|number\s*one|#1|premier|supérieur|superior|unique|révolutionnaire|revolutionary|disruptive|game.?changer|first.?of.?its.?kind)\b/i;
+    const INTERPRETIVE_CLAIMS_RE = /\b(leader|meilleur|best|top\s|innovant|innovative|world.?class|cutting.?edge|unmatched|unrivaled|number\s*one|#1|premier|supérieur|superior|unique|révolutionnaire|revolutionary|disruptive|game.?changer|first.?of.?its.?kind|premium|zero.?latency|high.?performance|next.?gen|best.?in.?class|autonomous .* workforces?|ecosystem)\b/i;
 
     const textFieldsToCheck = [
         'offre.services', 'offre.products', 'offre.use_cases',

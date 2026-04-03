@@ -1701,9 +1701,11 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
             process_transparency: (processSteps.length > 0 || deliveryMode) ? "documented" : "undisclosed"
         },
         keywords_context: {
-            discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords.map(stripNumberedPrefix).map(cleanKeywordEntry))),
+            discovery_keywords: filterGarbageEntries(sanitizeKeywords(discoveryKeywords.map(stripNumberedPrefix).map(cleanKeywordEntry)))
+                .filter((k: string) => !/\b(premium|zero.?latency|high.?performance|cutting.?edge|world.?class|ecosystem|next.?gen|autonomous .* workforces?)\b/i.test(k)),
             intent_keywords: filterGarbageEntries(sanitizeKeywords(intentKeywords).map(stripNumberedPrefix).map(cleanKeywordEntry))
-                .filter((k: string) => !/^(and|or|et|ou)\s/i.test(k.trim())),
+                .filter((k: string) => !/^(and|or|et|ou)\s/i.test(k.trim()))
+                .filter((k: string) => !/\b(premium|zero.?latency|high.?performance|cutting.?edge|world.?class|ecosystem|next.?gen|autonomous .* workforces?)\b/i.test(k)),
             audience_segments: filterGarbageEntries(audience ? audience.split(",").map((s: string) => s.trim()).filter(Boolean) : []),
             source: "declared_plus_structured_normalization"
         },
