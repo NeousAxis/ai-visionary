@@ -496,21 +496,37 @@ export function sanitizeCertifications(values: string[]): string[] {
 /**
  * Reclassify compliance data: GDPR/RGPD is a regulation (framework), NOT a certification.
  * "Legal" alone is meaningless. "GDPR compliance" deduplicates to "GDPR".
+ * URLs are converted to labels THEN filtered.
  */
 function reclassifyCompliance(certs: string[], fwks: string[]): { certifications: string[]; frameworks: string[] } {
     const REGULATION_RE = /\bgdpr\b|\brgpd\b/i;
     const movedToFrameworks: string[] = [];
-    const cleanedCerts = certs.filter(c => {
+    let cleanedCerts = certs.filter(c => {
         if (REGULATION_RE.test(c)) { movedToFrameworks.push('GDPR'); return false; }
         return true;
     });
     let cleanedFwks = [...new Set([...fwks, ...movedToFrameworks])];
-    // Remove meaningless standalone "Legal"
+    // Step 1: URLs → labels FIRST (so "Https://whtg1.com/legal.html" → "legal")
+    cleanedCerts = cleanedCerts.map(c => /^https?:\/\//i.test(c) ? urlToLabel(c) : c);
+    cleanedFwks = cleanedFwks.map(f => /^https?:\/\//i.test(f) ? urlToLabel(f) : f);
+    // Step 2: Remove meaningless "legal" (NOW catches URL-derived "legal" too)
     cleanedFwks = cleanedFwks.filter(f => !/^legal$/i.test(f.trim()));
-    // Deduplicate: "GDPR compliance" → "GDPR"
+    // Step 3: Deduplicate "GDPR compliance" → "GDPR"
     cleanedFwks = cleanedFwks.map(f => /^(gdpr|rgpd)\s+compliance$/i.test(f.trim()) ? 'GDPR' : f);
     cleanedFwks = [...new Set(cleanedFwks)];
     return { certifications: cleanedCerts, frameworks: cleanedFwks };
+}
+
+/**
+ * Universal output array cleanup — strips "And" prefix, trailing periods, capitalizes.
+ * Must run on ALL output arrays in ALL generators.
+ */
+function cleanOutputArray(arr: string[]): string[] {
+    return arr
+        .map(s => s.replace(/^(and|et)\s+/i, '').trim())  // "And retrospective" → "retrospective"
+        .map(s => s.replace(/\.\s*$/, '').trim())           // trailing period
+        .filter(Boolean)
+        .map(s => s.charAt(0).toUpperCase() + s.slice(1));  // capitalize
 }
 
 /**
@@ -877,7 +893,7 @@ export function generateManifestJson(data: any, url: string, locale: 'fr' | 'en'
     const certifications = reclassifiedM.certifications;
     const dataFrameworks = reclassifiedM.frameworks;
     const dataPolicies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
-    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
+    const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
 
     const isAssoManifest = isAssociation(businessType, name, url);
     const lowerMBT = businessType.toLowerCase();
@@ -991,12 +1007,14 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     const email = data.identite?.contact_email?.value || "";
     const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhone) ? rawPhone : "";
-    const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
-    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
+    const rawCityFaq = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
+    const city = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain)$/i.test(rawCityFaq.trim()) ? "" : rawCityFaq;
+    const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
     const legalName = sanitizeFieldValue(cleanVal(data.identite?.legal_name?.value)) || "";
-    const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
+    const processSteps = cleanOutputArray(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep));
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
-    const geoServed = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
+    const rawGeoFaq = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
+    const geoServed = normalizeCountryENec(rawGeoFaq);
     const rawQAfaq = data.processus_methodes?.quality_assurance?.value;
     const qualityAssurance = sanitizeFieldValue(
         Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ') : cleanVal(rawQAfaq)
@@ -1007,8 +1025,13 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     const certifications = reclassifiedF.certifications;
     const frameworks = reclassifiedF.frameworks;
     const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
-    const securityMeasures = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))
-        .map(s => truncateSecurity(s))));
+    const securityMeasures = cleanOutputArray(filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))
+        .map(s => truncateSecurity(s))))
+        .filter(s => {
+            // GDPR principles/compliance are NOT security measures
+            const GDPR_RE = /\b(privacy by design|right to erasure|explicit consent|data minimization|gdpr compliance|rgpd compliance)\b/i;
+            return !GDPR_RE.test(s);
+        }));
     const NO_DATA_PHRASES_FAQ = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
     const keyIndicators = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
         .filter((ind: string) => !NO_DATA_PHRASES_FAQ.test(ind.trim()))
@@ -1285,14 +1308,18 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     const reclassifiedG = reclassifyCompliance(rawCertsG, rawFrameworksG);
     const certifications = reclassifiedG.certifications;
     const frameworks = reclassifiedG.frameworks;
-    const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
+    const processSteps = cleanOutputArray(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep));
     const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceGloss ? sanitizeAudience(rawAudienceGloss) : "";
     const city = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
-    const country = sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "";
+    const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
     const policies = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
-    const securityMeasures = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
-        .map(s => truncateSecurity(s))));
+    const securityMeasures = cleanOutputArray(filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
+        .map(s => truncateSecurity(s))))
+        .filter(s => {
+            const GDPR_RE = /\b(privacy by design|right to erasure|explicit consent|data minimization|gdpr compliance|rgpd compliance)\b/i;
+            return !GDPR_RE.test(s);
+        }));
 
     const nameArticleG = en ? `${name}'s` : (/^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`);
 
@@ -1514,8 +1541,8 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const rawCertsEC = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
     const rawFrameworksEC = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
     const reclassifiedEC = reclassifyCompliance(rawCertsEC, rawFrameworksEC);
-    const certifications = reclassifiedEC.certifications.map((c: string) => /^https?:\/\//i.test(c) ? urlToLabel(c) : c);
-    const frameworks = reclassifiedEC.frameworks.map((f: string) => /^https?:\/\//i.test(f) ? urlToLabel(f) : f);
+    const certifications = reclassifiedEC.certifications;
+    const frameworks = reclassifiedEC.frameworks;
     const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
     const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
@@ -1527,7 +1554,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
         : (typeof rawQAec === 'string' && rawQAec.trim())
             ? rawQAec.split(',').map((s: string) => s.trim()).filter(Boolean)
             : [];
-    const qualityAssurance = sanitizeFieldArray(qualityAssuranceRaw);
+    const qualityAssurance = cleanOutputArray(sanitizeFieldArray(qualityAssuranceRaw));
     const NO_DATA_PHRASES_EC = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
     const keyIndicators = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
         .filter((ind: string) => !NO_DATA_PHRASES_EC.test(ind.trim()))

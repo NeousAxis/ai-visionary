@@ -393,7 +393,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
                 return trimmed;
             })
             .filter((step: string | null): step is string => step !== null && step.length >= 10)
-            .map((s: string) => s.replace(/\.\s*$/, '').trim());
+            .map((s: string) => s.replace(/^(and|et)\s+/i, '').trim())  // "And retrospective" → "Retrospective"
+            .map((s: string) => s.replace(/\.\s*$/, '').trim())
+            .filter(Boolean)
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1));
         processus.delivery_mode = sanitizeFieldValue(deliveryMode) || deliveryMode; // already cleaned above
         // geographies_served: fallback to country if empty, normalize case
         const sanitizedGeoServed = sanitizeFieldValue(geoServed);
@@ -417,16 +420,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         }
         processus.quality_assurance = filterGarbageEntries(sanitizeFieldArray(qaArray))
             .filter((entry: string) => {
-                // Remove marketing promises — keep only factual, verifiable signals
                 const lower = entry.toLowerCase();
-                const isMarketingPromise =
-                    lower.includes('recommandabilité') ||
-                    lower.includes('exhaustive') ||
-                    lower.includes('garantie') ||
-                    lower.includes('propriété intellectuelle') ||
-                    lower.includes('priorité ia');
-                return !isMarketingPromise;
-            });
+                return !(lower.includes('recommandabilité') || lower.includes('exhaustive') ||
+                    lower.includes('garantie') || lower.includes('propriété intellectuelle') || lower.includes('priorité ia'));
+            })
+            .map((s: string) => s.replace(/^(and|et)\s+/i, '').trim())  // "and quarterly..." → "Quarterly..."
+            .map((s: string) => s.replace(/\.\s*$/, '').trim())          // trailing period
+            .filter(Boolean)
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1));
     }
 
     // Engagements & Compliance
@@ -438,10 +439,14 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
             .map(s => truncateSecurity(s)))))
             .filter((s: string) => {
-                // GDPR principles are NOT security measures — filter them out
-                const GDPR_PRINCIPLE_RE = /\b(privacy by design|right to erasure|right to be forgotten|explicit consent|data minimization|purpose limitation|storage limitation|data portability|lawful basis|legitimate interest)\b/i;
-                return !GDPR_PRINCIPLE_RE.test(s);
-            });
+                // GDPR principles + "GDPR compliance" are NOT security measures
+                const GDPR_RE = /\b(privacy by design|right to erasure|right to be forgotten|explicit consent|data minimization|purpose limitation|storage limitation|data portability|lawful basis|legitimate interest|gdpr compliance|rgpd compliance)\b/i;
+                return !GDPR_RE.test(s);
+            })
+            .map((s: string) => s.replace(/^(and|et)\s+/i, '').trim())
+            .map((s: string) => s.replace(/\.\s*$/, '').trim())
+            .filter(Boolean)
+            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1));
         // Normalize: move GDPR/RGPD/ISO from security_measures to frameworks, keep actual security measures in place
         const normalizedCompliance = (() => {
             const FRAMEWORK_PATTERNS = /gdpr|rgpd|iso\s*\d|soc\s*[12]|pci|hipaa|ccpa|lgpd|loi\s*25/i;
@@ -492,6 +497,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // Normalize: URLs → labels (URLs are evidence, not names)
         engagements.certifications = (engagements.certifications || []).map((c: string) => /^https?:\/\//i.test(c) ? urlToLabel(c) : c);
         engagements.frameworks = (engagements.frameworks || []).map((f: string) => /^https?:\/\//i.test(f) ? urlToLabel(f) : f);
+        // Re-filter after URL→label: "Https://whtg1.com/legal.html" → "legal" → filter out
+        engagements.frameworks = (engagements.frameworks || []).filter((f: string) => !/^legal$/i.test(f.trim()));
+        engagements.frameworks = [...new Set(engagements.frameworks)];
 
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
