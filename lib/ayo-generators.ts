@@ -265,19 +265,8 @@ export function mergeAiNamesInUseCases(useCases: string[]): string[] {
     }
 
     if (!primaryAiUseCase && mentionedAiNames.size > 0) {
-        // All were standalone AI names — create meaningful use cases instead of listing names
-        const aiList = ALL_AI_NAMES.filter(n => mentionedAiNames.has(n));
-        for (const name of ALL_AI_NAMES) {
-            if (!aiList.includes(name)) aiList.push(name);
-        }
-        const aiListStr = aiList.join(", ");
-        // Return 3 meaningful use cases instead of just one with AI names
-        return [
-            `Être visible et recommandé par les IA génératives (${aiListStr})`,
-            "Structurer les informations d'une entité pour les agents IA",
-            "Créer une identité sémantique exploitable par les assistants IA",
-            ...nonAiUseCases
-        ];
+        // All were standalone AI names — skip them (AYO doesn't invent use cases)
+        return nonAiUseCases;
     } else if (primaryAiUseCase && mentionedAiNames.size > 0) {
         // Ensure all AI names are in the primary use case
         const allAiList = ALL_AI_NAMES.filter(n =>

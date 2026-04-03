@@ -3,7 +3,7 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 29 mars 2026
+> Derniere mise a jour : 3 avril 2026
 
 ---
 
@@ -38,13 +38,30 @@
 | 6. Pedagogie | /10 | has_faq, has_glossary, has_documentation |
 | 7. Socle Technique | /10 | has_jsonld, has_asr, has_sitemap, mobile_optimized |
 
-### Flux principal
+### Doctrine AYO (regle produit canonique)
+
+> **AYO scanne, confirme, classe, normalise, structure. AYO n'invente rien.**
+
+AYO est un moteur de structuration, un classificateur semantique, un generateur de fichiers lisibles par les IA. AYO n'est PAS un reecrivain de site, un conseiller marketing, ni un optimiseur SEO.
+
+**Pipeline correct :**
+1. **Scan** — relever ce qui existe deja (identite, offre, processus, conformite, contenus, technique)
+2. **Questionnaire** — completer UNIQUEMENT les zones ambigues/manquantes (confirmation, precision — jamais invention)
+3. **Fusion** — construire une verite structuree unique (scan_detected + questionnaire_confirmed), priorite a la coherence
+4. **Production** — 5 fichiers qui representent correctement ce qui a ete trouve et confirme
+
+**Critere qualite :** BON = structure mieux l'information existante sans changer son sens. MAUVAIS = ajoute une idee absente, transforme un slogan en fait, melange les blocs, cree une incoherence scan/questionnaire.
+
+### Flux principal (V4 — actif en prod)
 
 ```
 URL -> Scanner (aio-scanner.ts) -> Score initial (aio-score-engine.ts)
-    -> Questions STATIQUES (ENRICHMENT_TEMPLATES) -> LLM extrait JSON (q values)
+    -> Classification site (site-classifier.ts) -> SiteType
+    -> Questions ciblees V4 (question-engine.ts) -> seulement ce qui manque
+    -> LLM extrait JSON (q values) -> evaluateEvidence() -> reliability capping
+    -> downgradeFieldQuality() -> anti-marketing + GDPR principles filter
     -> Score enrichi -> Delta avant/apres -> Email capture -> Stripe Checkout
-    -> Webhook -> Genere fichiers -> Email
+    -> Webhook -> Genere fichiers (sanitization complete) -> Email
 ```
 
 ### Les 5 fichiers du Pack PRO
@@ -120,13 +137,11 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 | Branche | Statut | Contenu |
 |---------|--------|---------|
-| `main` | Production | FR only, pas encore mis a jour avec i18n |
-| `feature/i18n-en-fr` | Testee, PAS mergee | i18n complet FR/EN (Session 10) |
-| `feature/chat-bilingual` | En cours, PAS mergee | Chat bilingue + smart skip + threshold 70 |
-| `fix/otp-eclore-protection` | Testee, PAS mergee | owner_email + admin section |
+| `main` | Production | Bilingue FR/EN + V4 Evidence-Based actif (flag ON) |
 | `fix/remediation` | Archivee | Sprints 1-10 (tous termines, merges dans main) |
 | `fix/i18n-bilingual` | ARCHIVEE | Tentative i18n echouee du 28 mars, NE PAS UTILISER |
-| `feature/ayo-v4-evidence-based` | En cours, PAS mergee | V4 Evidence-Based: site-classifier, question-engine, feature flag, bug fixes PRO |
+
+**Branches mergees dans main (31 mars - 3 avril 2026) :** `feature/i18n-en-fr`, `fix/otp-eclore-protection`, `feature/chat-bilingual`, `feature/ayo-v4-evidence-based`
 
 **Workflow** : TOUJOURS travailler sur une branche feature/fix. Ne JAMAIS merger dans `main` sans validation de Cyril.
 
@@ -144,41 +159,16 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 ### Priorite IMMEDIATE
 
-1. **Merger les branches en attente** dans `main` apres validation Cyril : `feature/i18n-en-fr`, `fix/otp-eclore-protection`, `feature/chat-bilingual`
-2. **Coherence linguistique des fichiers PRO** : FAQ, glossaire, external_context, ASR doivent etre 100% dans la langue du diagnostic
-3. **Croissance registre** : objectif 10k+ entites
-
-### Coherence linguistique fichiers PRO (a corriger)
-
-Les generateurs (`ayo-generators.ts`, `ayo-crypto.ts`, `ayo-semantics.ts`) ont des templates FR hardcodes :
-- FAQ questions/reponses sont en francais meme si le diagnostic est en anglais
-- Glossaire idem
-- `external_context.json` labels en francais
-- `cap_reason`, `data_maturity` labels, `meta` fields dans l'ASR sont en francais
-- **Solution** : passer la locale aux generateurs et avoir des templates EN/FR
-
-### Fix temporaire en place (29 mars 2026)
-
-En attendant le chantier V4, deux optimisations du questionnaire :
-- **Seuil de confiance 85 -> 70** : les donnees scannees avec confidence >= 70 sont auto-validees (q=1, pas de question Yes/No)
-- **Smart skip** : `RELATED_FIELD_SKIP_RULES` dans `chat/route.ts` — si services detectes, skip question products (et inversement)
-- **Resultat** : ~7 questions redondantes en moins, questionnaire plus fluide
-- **Rollback** : remettre le seuil a 85 dans `app/api/chat/route.ts` (chercher `>= 70 ? 1 :`, remettre `>= 85 ? 1 :`)
-- **Rollback smart skip** : `RELATED_FIELD_SKIP_RULES = []` desactive instantanement
+1. **Stabiliser la qualite des fichiers PRO** — anti-marketing, classification correcte, normalisation pays/langue
+2. **Croissance registre** : objectif 10k+ entites
+3. **Campagne email entreprises indexees**
 
 ---
 
-### Chantier AYO V4 — Architecture Evidence-Based + Data Reliability Layer
+### AYO V4 Evidence-Based — ACTIF EN PRODUCTION
 
-> Branche : `feature/ayo-v4-evidence-based` | Flag : `AYO_V4_EVIDENCE` (OFF par defaut)
-> Sprints 1-5 codes, build OK. En cours de test.
-
-#### Principe fondamental
-
-**Lisibilite = Recommandabilite**. Pour qu'une IA recommande une entreprise SANS halluciner :
-1. Des donnees structurees (ASR) — fait
-2. Des preuves recoupables (URLs, certifications verifiables) — V4
-3. De la coherence entre declaration et realite observable — V4
+> Flag `AYO_V4_EVIDENCE=true` actif en prod depuis le 3 avril 2026.
+> Merge dans `main`, plus de branche separee.
 
 #### Data Reliability Layer (3 niveaux de verite)
 
@@ -186,116 +176,41 @@ En attendant le chantier V4, deux optimisations du questionnaire :
 |--------|-----|----------|-------|--------|
 | **Verifiable** | `verified` | Certifications, Privacy Policy, FAQ, glossaire | q=1 si URL | Fort |
 | **Declaratif structure** | `self_declared` | KPIs, clients, uptime, process interne | q=0.5 max | Limite |
-| **Interpretatif** | `interpretive` | "leader", "innovant", "best" | q=0 | Ignore |
+| **Interpretatif** | `interpretive` | "leader", "innovant", "best", "premium" | q=0 | Ignore |
 
-> Regle : tout ce qui n'est pas verifiable est utilisable, mais ne doit jamais etre determinant.
+#### Modules V4 en production
 
-#### Ce qui est code (branche V4)
+| Module | Fichier | Role |
+|--------|---------|------|
+| Site Classifier | `lib/site-classifier.ts` | 7 types de sites, deterministe |
+| Question Engine | `lib/question-engine.ts` | 24 templates, reliability levels, 4-5 questions max |
+| Evidence Types | `lib/evidence-types.ts` | Types partages (ReliabilityLevel, EvidenceAnswer) |
+| Anti-marketing | `lib/agents/controle-qualite.ts` | INTERPRETIVE_CLAIMS_RE + downgradeFieldQuality |
+| Compliance reclassifier | `lib/ayo-generators.ts` | reclassifyCompliance() + cleanOutputArray() |
+| ASR Reliability Meta | `lib/ayo-crypto.ts` | data_reliability dans meta + GDPR principles filter |
+| Score Engine Caps | `lib/aio-score-engine.ts` | Per-block caps respectent na:true, structured_absence, URL evidence |
 
-| Module | Fichier | Statut |
-|--------|---------|--------|
-| Site Classifier | `lib/site-classifier.ts` | Fait — 7 types, deterministe |
-| Question Engine | `lib/question-engine.ts` | Fait — 24 templates, reliability levels |
-| Evidence Types | `lib/evidence-types.ts` | Fait — ReliabilityLevel, EvidenceAnswer |
-| Chat Integration | `app/api/chat/route.ts` | Fait — feature flag, 4 zones V4 |
-| Interpretive Detection | `lib/agents/controle-qualite.ts` | Fait — penalise claims subjectifs |
-| ASR Reliability Meta | `lib/ayo-crypto.ts` | Fait — data_reliability dans meta |
-| Bug fixes PRO files | `lib/ayo-generators.ts` | Fait — glossaire, keywords, certifs |
+#### Sanitization layers (ordre d'execution)
 
-#### Principe du scoring V4
+1. `sanitizeLlmFields()` — nettoie les question texts, copyright, hallucinations LLM
+2. `downgradeFieldQuality()` — cap q-values (reliability), detecte interpretive claims, structured absence
+3. `reclassifyCompliance()` — GDPR→framework, "Legal" supprime, URL→label AVANT filtrage
+4. `cleanOutputArray()` — "And" prefix, trailing periods, capitalisation
+5. Anti-marketing filters — "premium", "zero-latency", "ecosystem", etc.
+6. GDPR principles filter — "Privacy by Design", "GDPR compliance" sortis de security_measures
+7. Country normalization — normalizeCountryEN/normalizeCountryENec dans TOUS les generateurs
 
-`aio-score-engine.ts` n'est PAS modifie. Le reliability layer agit en AMONT :
-- `evaluateEvidence()` cap les q-values selon le niveau de fiabilite
-- `downgradeFieldQuality()` detecte et penalise les claims interpretatifs
-- Le score engine recoit des q-values deja ajustees
-- Consequence : 100% declaratif = score max ~50/100. Pour monter, il FAUT des preuves URL.
+#### Classification semantique correcte
 
-#### Architecture technique V4
-
-**2 nouveaux modules a creer :**
-
-##### 1. Site Classifier (`lib/site-classifier.ts`)
-
-Analyse le scan result et classifie le type de site :
-- `e-commerce` : produits, panier, prix detectes
-- `saas` : app, login, API, pricing detectes
-- `corporate` : equipe, a-propos, bureaux
-- `freelance` : portfolio, 1 personne, services
-- `association` : non-profit, membres, mission
-- `media` : articles, blog, redaction
-- `government` : .gov, services publics
-
-Le type de site determine QUELLES questions poser et LESQUELLES sont pertinentes.
-
-##### 2. Question Engine (`lib/question-engine.ts`)
-
-Remplace les ENRICHMENT_TEMPLATES actuels par un systeme intelligent :
-
-```typescript
-// Structure
-interface QuestionSet {
-  type: SiteType;                    // e-commerce, saas, corporate, etc.
-  questions: EvidenceQuestion[];
-}
-
-interface EvidenceQuestion {
-  field: string;                     // champ AIO cible
-  askOnlyIf: (scan: ScanResult) => boolean;  // condition pour poser la question
-  question_fr: string;
-  question_en: string;
-  evidenceType: 'url' | 'text' | 'confirmation';
-  qValueIfEvidence: number;          // 1.0 si preuve fournie
-  qValueIfDeclaration: number;       // 0.5 si juste "oui"
-}
-```
-
-**Logique `askOnlyIfMissing`** : La question n'est posee QUE si le scan n'a pas deja detecte la donnee avec une confidence suffisante. Si le scan a trouve l'info -> q=1 automatique, pas de question.
-
-##### Ordre du pipeline V4
-
-```
-1. Scan (aio-scanner.ts) -> ScanResult
-2. Classification (site-classifier.ts) -> SiteType
-3. Detection automatique -> q=1 pour tout ce qui est deja detecte
-4. Questions ciblees (question-engine.ts) -> seulement ce qui manque
-5. Extraction LLM -> JSON structure avec q values
-6. Scoring (aio-score-engine.ts) -> Score final
-7. Generation ASR -> Fichiers avec preuves integrees
-```
-
-##### QUESTION_SETS_BY_TYPE (exemples)
-
-**E-commerce** : questions sur catalogues, methodes de paiement, politique retour, certifications e-commerce
-**SaaS** : questions sur API, documentation, uptime/SLA, integrations
-**Corporate** : questions sur equipe, processus, certifications ISO
-**Freelance** : questions sur portfolio, references, methodologie
-**Association** : questions sur mission, membres, transparence financiere
-
-#### Impact technique
-
-| Fichier | Modification |
-|---------|-------------|
-| `lib/site-classifier.ts` | CREER — classification du type de site |
-| `lib/question-engine.ts` | CREER — moteur de questions evidence-based |
-| `lib/agents/greffier.ts` | Reecrire les ENRICHMENT_TEMPLATES pour preuves |
-| `app/api/chat/route.ts` | Refondre la logique de queue (validation/enrichment -> evidence) |
-| `lib/aio-score-engine.ts` | Ajouter score de confiance base sur preuves |
-| `lib/aio-scanner.ts` | Enrichir le scan pour verifier URLs de preuve |
-| `lib/ayo-system-prompt.ts` | Adapter le prompt pour le mode evidence-based |
-
-#### Dependances
-
-- Les fichiers PRO (5 fichiers ASR) dependent des donnees extraites
-- Les emails dependent des scores
-- Le registre AYA depend du scoring
-- Les pages certificat affichent les donnees extraites
-
-#### Risques
-
-- Changer le questionnaire = changer le coeur du produit
-- Le scoring doit rester coherent avec les entites deja certifiees
-- Les clients existants ne doivent pas voir leur score baisser
-- La transition doit etre progressive (pas de big bang)
+| Type | Contenu | Exemples |
+|------|---------|----------|
+| **certification** | Label qualite delivre par un tiers | ISO 27001, B Corp, SOC 2 |
+| **framework** | Regulation ou cadre de conformite | GDPR, HIPAA, PCI-DSS |
+| **policy** | Document publie par l'entreprise | Terms & Conditions, Privacy Policy |
+| **security_measure** | Technique de securite deployee | TLS 1.3, AES-256, MFA |
+| **NOT security** | Principes reglementaires | Privacy by Design, Right to Erasure |
+| **NOT certification** | GDPR (c'est un framework) | |
+| **NOT framework** | "Legal" seul (meaningless) | |
 
 ---
 
@@ -336,7 +251,9 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 ## 6. CE QUI EST FAIT ET FONCTIONNE
 
 - Site bilingue FR/EN : toggle header, `next-intl` + cookie `NEXT_LOCALE`, toutes pages + chatbot + emails + formulaires + API
-- Flux complet AYO : URL -> scan -> questions statiques -> score strict -> paiement Stripe -> fichiers -> email (bilingue)
+- Flux complet AYO V4 : URL -> scan -> classification site -> questions ciblees -> score strict -> paiement Stripe -> fichiers -> email (bilingue)
+- V4 Evidence-Based actif en prod : site-classifier, question-engine, data reliability layer, anti-marketing, GDPR reclassification
+- Sanitization complete des fichiers PRO : anti-marketing, URL→label, country normalization, "And" prefix, trailing periods, GDPR principles filter
 - Stripe Checkout live (CHF, 2 offres : AYA 19 CHF/mois, PRO 499 CHF)
 - Registre AYA public : ~4400+ entites, pagination serveur, badges certifie/indexe, recherche, tri
 - API AYA : 7 endpoints (index, llm, docs, search, entity, stats, live) + `?lang=fr|en`
@@ -344,7 +261,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Generation et envoi des 5 fichiers PRO en ZIP (emails bilingues)
 - Signature Ed25519 des ASR (cle rotee, env var)
 - Supabase PostgreSQL (migration depuis Firestore terminee)
-- Questions statiques (ENRICHMENT_TEMPLATES), scoring strict (cap 78)
+- Per-block scoring caps respectent V4 signals (na:true, structured_absence, URL evidence)
 - 10 sprints de remediation securite termines
 - OTP email (owner_email only), admin dashboard, logger, rate-limit, validators
 - Lifecycle : formulaire MAJ 7 blocs + OTP gate + renouvellement + protection downgrade PRO->AYA
@@ -361,12 +278,12 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 |---|-------|----------|--------|
 | 1 | ~~Merger branches en attente dans `main`~~ | ~~Immediat~~ | Fait (31 mars 2026) |
 | 2 | ~~Coherence linguistique fichiers PRO (EN par defaut)~~ | ~~Immediat~~ | Fait (31 mars 2026) |
-| 3 | Scraping 10k+ entites + registres du commerce | Critique | En cours (~4400) |
-| 4 | Campagne email entreprises indexees | Haute | A faire |
-| 5 | Chantier AYO V4 Evidence-Based | Haute | Sprints 1-3 faits, branche `feature/ayo-v4-evidence-based`, flag `AYO_V4_EVIDENCE` OFF par defaut |
-| 6 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
-| 7 | Soumission There's An AI For That | Moyenne | Cyril |
-| 8 | Mots-cles intelligents AYO (sous-agent post-questionnaire) | Future | Idee |
+| 3 | ~~AYO V4 Evidence-Based~~ | ~~Haute~~ | Fait — actif en prod, flag ON (3 avril 2026) |
+| 4 | Stabiliser qualite fichiers PRO (anti-marketing, classification, normalisation) | Critique | En cours — iterations sur les sanitization layers |
+| 5 | Scraping 10k+ entites + registres du commerce | Critique | En cours (~4400) |
+| 6 | Campagne email entreprises indexees | Haute | A faire |
+| 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
+| 8 | Soumission There's An AI For That | Moyenne | Cyril |
 
 ---
 
@@ -409,11 +326,14 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 
 ### Fichiers critiques a lire en priorite
 
-1. `app/api/chat/route.ts` — Coeur du chatbot (~2800 lignes)
-2. `lib/aio-score-engine.ts` — Moteur de scoring
-3. `app/api/webhooks/checkout-success/route.ts` — Webhook Stripe
-4. `lib/agents/greffier.ts` — Templates de questions statiques
-5. `lib/ayo-generators.ts` — Generateurs des 5 fichiers PRO
+1. `app/api/chat/route.ts` — Coeur du chatbot + pipeline V4 (~2800 lignes)
+2. `lib/aio-score-engine.ts` — Moteur de scoring (per-block caps V4)
+3. `lib/ayo-crypto.ts` — Generateur ASR + sanitization + signature Ed25519
+4. `lib/ayo-generators.ts` — Generateurs FAQ/glossary/manifest/external_context + reclassifyCompliance + cleanOutputArray
+5. `lib/agents/controle-qualite.ts` — Anti-marketing + downgradeFieldQuality + INTERPRETIVE_CLAIMS_RE
+6. `lib/question-engine.ts` — V4 question templates + evaluateEvidence
+7. `lib/site-classifier.ts` — Classification deterministe (7 types)
+8. `app/api/webhooks/checkout-success/route.ts` — Webhook Stripe + PRO score lift
 
 ---
 
