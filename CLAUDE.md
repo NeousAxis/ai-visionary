@@ -306,6 +306,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 6 | Campagne email entreprises indexees | Haute | A faire |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
+| 9 | Reduire dependance LLM — scanner regex 80%+ des donnees, LLM pour 20% ambigus | Future | Identifie |
+| 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
 
 ---
 
