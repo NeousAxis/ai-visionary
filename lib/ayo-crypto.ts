@@ -174,7 +174,10 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // areaServed: use declared geography instead of hardcoded 5km radius
     let geoServed = normalizeCase(cleanValAsr(data.processus_methodes?.geographies_served?.value));
     const deliveryModeRaw = cleanValAsr(data.processus_methodes?.delivery_mode?.value);
-    const isOnlineDelivery = deliveryModeRaw && /online|remote|digital|virtual|en ligne|visio/i.test(deliveryModeRaw);
+    // Check for online signals: delivery_mode OR service_mode OR contextual_signals
+    const serviceMode = Array.isArray(data.contextual_signals?.service_mode?.value) ? data.contextual_signals.service_mode.value.join(' ') : '';
+    const isOnlineDelivery = (deliveryModeRaw && /online|remote|digital|virtual|en ligne|visio/i.test(deliveryModeRaw))
+        || /online|remote|digital/i.test(serviceMode);
     // If online delivery and no explicit geography (or only home country) → Global
     const HOME_COUNTRY_ONLY_RE = /^(suisse|switzerland|swiss|france|germany|uk|deutschland|united kingdom|italia|italy|españa|spain|belgique|belgium|österreich|austria|luxembourg|nederland|netherlands)$/i;
     if (isOnlineDelivery && (!geoServed || HOME_COUNTRY_ONLY_RE.test(geoServed.trim()))) {

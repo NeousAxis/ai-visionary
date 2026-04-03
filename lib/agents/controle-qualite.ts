@@ -676,11 +676,16 @@ export function downgradeFieldQuality(fields: Record<string, any>): SanitizeLog[
     for (const fieldPath of textFieldsToCheck) {
         const [block, field] = fieldPath.split('.');
         if (!fields[block]?.[field]) continue;
-        const val = fields[block][field].value;
+        const node = fields[block][field];
+        // DOCTRINE: scan-observed data is factual (the site actually says it) — don't penalize
+        // Only penalize interpretive claims from questionnaire answers (user or LLM invention)
+        const isFromScan = !node.evidence?.includes('questionnaire_answer');
+        if (isFromScan) continue; // Scan data = factual, keep as-is
+        const val = node.value;
         const textToCheck = Array.isArray(val) ? val.join(' ') : (typeof val === 'string' ? val : '');
-        if (INTERPRETIVE_CLAIMS_RE.test(textToCheck) && fields[block][field].q > 0) {
-            fields[block][field].q = 0;
-            fields[block][field].evidence = [...(fields[block][field].evidence || []), 'interpretive_claim_detected'];
+        if (INTERPRETIVE_CLAIMS_RE.test(textToCheck) && node.q > 0) {
+            node.q = 0;
+            node.evidence = [...(node.evidence || []), 'interpretive_claim_detected'];
             console.log(`⚠️ INTERPRETIVE CLAIM detected in ${fieldPath}: "${textToCheck.substring(0, 60)}" → q=0`);
         }
     }
