@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-// Types for SSE events
+// Types
 type AgentName = 'detect-contact' | 'detect-services' | 'detect-legal' | 'detect-location' | 'detect-security' | 'detect-jsonld' | 'detect-social';
 type AgentStatus = 'waiting' | 'running' | 'done' | 'error';
 type Phase = 'idle' | 'fetch' | 'agents' | 'score' | 'complete' | 'error';
@@ -12,9 +12,12 @@ type Phase = 'idle' | 'fetch' | 'agents' | 'score' | 'complete' | 'error';
 interface AgentState {
   name: AgentName;
   label: string;
+  labelFr: string;
   icon: string;
+  description: string;
   status: AgentStatus;
-  data: Record<string, unknown> | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any;
   durationMs: number;
 }
 
@@ -25,66 +28,58 @@ interface ScoreBlock {
   maxScore: number;
 }
 
-const AGENT_DEFS: Omit<AgentState, 'status' | 'data' | 'durationMs'>[] = [
-  { name: 'detect-jsonld', label: 'Structured Data', icon: '🔗' },
-  { name: 'detect-contact', label: 'Contact Info', icon: '📧' },
-  { name: 'detect-location', label: 'Location', icon: '📍' },
-  { name: 'detect-services', label: 'Services & Products', icon: '🛠️' },
-  { name: 'detect-legal', label: 'Legal & Compliance', icon: '⚖️' },
-  { name: 'detect-security', label: 'Security', icon: '🔒' },
-  { name: 'detect-social', label: 'Social Media', icon: '🌐' },
+const AGENTS: Omit<AgentState, 'status' | 'data' | 'durationMs'>[] = [
+  { name: 'detect-jsonld', label: 'Structured Data', labelFr: 'Données structurées', icon: '{ }', description: 'JSON-LD schemas' },
+  { name: 'detect-contact', label: 'Contact', labelFr: 'Contact', icon: '@', description: 'Email & phone' },
+  { name: 'detect-location', label: 'Location', labelFr: 'Localisation', icon: '◎', description: 'City & country' },
+  { name: 'detect-services', label: 'Services', labelFr: 'Services', icon: '◆', description: 'Offers & products' },
+  { name: 'detect-legal', label: 'Compliance', labelFr: 'Conformité', icon: '§', description: 'Legal & frameworks' },
+  { name: 'detect-security', label: 'Security', labelFr: 'Sécurité', icon: '⬡', description: 'Headers & encryption' },
+  { name: 'detect-social', label: 'Social', labelFr: 'Réseaux sociaux', icon: '◈', description: 'Social profiles' },
 ];
 
 export default function DiagnosticV2Page() {
   const [url, setUrl] = useState('');
   const [phase, setPhase] = useState<Phase>('idle');
   const [agents, setAgents] = useState<AgentState[]>(
-    AGENT_DEFS.map(a => ({ ...a, status: 'waiting', data: null, durationMs: 0 }))
+    AGENTS.map(a => ({ ...a, status: 'waiting' as const, data: null, durationMs: 0 }))
   );
   const [score, setScore] = useState<{ total: number; blocks: ScoreBlock[] } | null>(null);
   const [totalDuration, setTotalDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [scanUrl, setScanUrl] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToStep = useCallback((id: string) => {
+  const scrollTo = useCallback((id: string) => {
     setTimeout(() => {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 300);
+    }, 400);
   }, []);
 
   const startScan = useCallback(async () => {
     if (!url.trim()) return;
-
-    // Reset state
     setPhase('fetch');
     setError(null);
     setScore(null);
     setScanUrl(url.trim());
-    setAgents(AGENT_DEFS.map(a => ({ ...a, status: 'running', data: null, durationMs: 0 })));
-    scrollToStep('step-agents');
+    setAgents(AGENTS.map(a => ({ ...a, status: 'running', data: null, durationMs: 0 })));
+    scrollTo('step-agents');
 
     try {
-      const response = await fetch('/api/diagnostic/scan', {
+      const res = await fetch('/api/diagnostic/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim() }),
       });
 
-      if (!response.body) {
-        setError('No response from server');
-        setPhase('error');
-        return;
-      }
+      if (!res.body) { setError('No response'); setPhase('error'); return; }
 
-      const reader = response.body.getReader();
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n\n');
         buffer = lines.pop() || '';
@@ -92,372 +87,330 @@ export default function DiagnosticV2Page() {
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           try {
-            const event = JSON.parse(line.slice(6));
-
-            if (event.phase === 'agent') {
+            const ev = JSON.parse(line.slice(6));
+            if (ev.phase === 'agent') {
               setPhase('agents');
-              setAgents(prev =>
-                prev.map(a =>
-                  a.name === event.agent
-                    ? { ...a, status: event.status, data: event.data, durationMs: event.durationMs }
-                    : a
-                )
-              );
-            } else if (event.phase === 'score' && event.status === 'done' && event.data) {
-              scrollToStep('step-score');
-              const s = event.data;
-              setScore({
-                total: s.score ?? s.total ?? 0,
-                blocks: s.blocks || s.audit?.blocks || [],
-              });
-            } else if (event.phase === 'complete') {
+              setAgents(prev => prev.map(a =>
+                a.name === ev.agent ? { ...a, status: ev.status, data: ev.data, durationMs: ev.durationMs } : a
+              ));
+            } else if (ev.phase === 'score' && ev.status === 'done' && ev.data) {
+              setScore({ total: ev.data.score ?? ev.data.total ?? 0, blocks: ev.data.blocks || ev.data.audit?.blocks || [] });
+            } else if (ev.phase === 'complete') {
               setPhase('complete');
-              setTotalDuration(event.totalDurationMs || 0);
-              scrollToStep('step-score');
-
-              // Extract score from complete event if not yet set
-              if (event.score && !score) {
-                setScore({
-                  total: event.score.score ?? event.score.total ?? 0,
-                  blocks: event.score.blocks || event.score.audit?.blocks || [],
-                });
+              setTotalDuration(ev.totalDurationMs || 0);
+              scrollTo('step-score');
+              if (ev.score) {
+                setScore({ total: ev.score.score ?? ev.score.total ?? 0, blocks: ev.score.blocks || ev.score.audit?.blocks || [] });
               }
-            } else if (event.phase === 'error') {
-              setError(event.message || 'Scan failed');
+            } else if (ev.phase === 'error') {
+              setError(ev.message || 'Scan failed');
               setPhase('error');
             }
-          } catch {
-            // Skip parse errors
-          }
+          } catch { /* skip */ }
         }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Network error');
       setPhase('error');
     }
-  }, [url, scrollToStep, score]);
+  }, [url, scrollTo]);
 
   const isScanning = phase === 'fetch' || phase === 'agents';
   const isDone = phase === 'complete';
+  const agentsDone = agents.filter(a => a.status === 'done').length;
+  const agentsTotal = agents.length;
 
   return (
-    <div className="diagnostic-v2" ref={containerRef}>
-      {/* Header */}
-      <header className="diagnostic-v2-header">
-        <div className="diagnostic-v2-header-inner">
-          <Link href="/" className="diagnostic-v2-logo">
-            <Image src="/images/ayo-logo.webp" alt="AYO" width={36} height={36} />
-            <span>AYO</span>
-          </Link>
-          <span className="diagnostic-v2-badge">Micro-Agents V2</span>
+    <div className="dv2">
+      {/* ─── HEADER ─── */}
+      <header className="dv2-header">
+        <Link href="/" className="dv2-logo-link">
+          <Image src="/logo-v2.png" alt="AI Visionary" width={32} height={32} />
+          <span className="dv2-logo-text">AYO</span>
+        </Link>
+        <div className="dv2-header-right">
+          <span className="dv2-version-badge">V2 — Micro-Agents</span>
+          <Link href="/diagnostic" className="dv2-link-v1">V1 Classic →</Link>
         </div>
       </header>
 
-      {/* Step 1: URL Input */}
-      <section id="step-url" className="diagnostic-v2-section diagnostic-v2-hero">
-        <h1>Analyze your website&apos;s AI readability</h1>
-        <p className="diagnostic-v2-subtitle">
-          7 specialized agents scan your site in real-time. No AI hallucination — only verified data.
-        </p>
-        <form
-          className="diagnostic-v2-input-group"
-          onSubmit={(e) => { e.preventDefault(); startScan(); }}
-        >
-          <input
-            type="text"
-            placeholder="Enter your website URL (e.g. example.com)"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            disabled={isScanning}
-            className="diagnostic-v2-url-input"
-          />
-          <button
-            type="submit"
-            disabled={isScanning || !url.trim()}
-            className="diagnostic-v2-btn-primary"
-          >
-            {isScanning ? (
-              <><span className="diagnostic-v2-spinner" /> Scanning...</>
-            ) : (
-              '🔍 Analyze'
-            )}
-          </button>
-        </form>
+      {/* ─── HERO ─── */}
+      <section className="dv2-hero">
+        <div className="dv2-hero-glow" />
+        <div className="dv2-hero-content">
+          <div className="dv2-hero-tag">Zero AI Hallucination</div>
+          <h1>
+            See how AI reads<br />
+            <span className="dv2-gradient-text">your website</span>
+          </h1>
+          <p className="dv2-hero-sub">
+            7 deterministic agents scan your site in real-time.<br />
+            Every data point is verified — nothing is invented.
+          </p>
+          <form className="dv2-search-form" onSubmit={e => { e.preventDefault(); startScan(); }}>
+            <div className="dv2-search-box">
+              <span className="dv2-search-icon">⌕</span>
+              <input
+                type="text"
+                placeholder="yourcompany.com"
+                value={url}
+                onChange={e => setUrl(e.target.value)}
+                disabled={isScanning}
+                className="dv2-search-input"
+                autoFocus
+              />
+              <button type="submit" disabled={isScanning || !url.trim()} className="dv2-search-btn">
+                {isScanning ? <span className="dv2-spinner" /> : 'Analyze'}
+              </button>
+            </div>
+          </form>
+        </div>
       </section>
 
-      {/* Step 2: Agent Panel */}
+      {/* ─── AGENTS PANEL ─── */}
       {phase !== 'idle' && (
-        <section id="step-agents" className="diagnostic-v2-section">
-          <div className="diagnostic-v2-section-header">
-            <h2>🤖 Micro-Agents Scanning</h2>
-            {scanUrl && <span className="diagnostic-v2-url-tag">{scanUrl}</span>}
-            {totalDuration > 0 && (
-              <span className="diagnostic-v2-duration">
-                Completed in {(totalDuration / 1000).toFixed(1)}s
-              </span>
-            )}
+        <section id="step-agents" className="dv2-section">
+          <div className="dv2-section-top">
+            <h2>Live Scan</h2>
+            <div className="dv2-meta">
+              <span className="dv2-url-chip">{scanUrl}</span>
+              {isScanning && <span className="dv2-progress-text">{agentsDone}/{agentsTotal} agents</span>}
+              {totalDuration > 0 && <span className="dv2-time-chip">⚡ {(totalDuration / 1000).toFixed(1)}s</span>}
+            </div>
           </div>
-          <div className="diagnostic-v2-agents-grid">
-            {agents.map((agent) => (
-              <AgentCard key={agent.name} agent={agent} />
+
+          {/* Progress bar */}
+          {isScanning && (
+            <div className="dv2-progress-bar">
+              <div className="dv2-progress-fill" style={{ width: `${(agentsDone / agentsTotal) * 100}%` }} />
+            </div>
+          )}
+
+          <div className="dv2-agents-grid">
+            {agents.map(agent => (
+              <div key={agent.name} className={`dv2-agent dv2-agent--${agent.status}`}>
+                <div className="dv2-agent-top">
+                  <span className="dv2-agent-icon">{agent.icon}</span>
+                  <div className="dv2-agent-info">
+                    <span className="dv2-agent-label">{agent.label}</span>
+                    <span className="dv2-agent-desc">{agent.description}</span>
+                  </div>
+                  <span className="dv2-agent-badge">
+                    {agent.status === 'waiting' && '—'}
+                    {agent.status === 'running' && <span className="dv2-dot-pulse" />}
+                    {agent.status === 'done' && '✓'}
+                    {agent.status === 'error' && '✗'}
+                  </span>
+                </div>
+                {agent.status === 'done' && agent.data && (
+                  <div className="dv2-agent-data">
+                    <DataPreview name={agent.name} data={agent.data} />
+                    {agent.durationMs > 0 && <span className="dv2-agent-ms">{agent.durationMs}ms</span>}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Step 3: Score */}
+      {/* ─── SCORE ─── */}
       {score && (
-        <section id="step-score" className="diagnostic-v2-section">
-          <h2>📊 AIO Score</h2>
-          <div className="diagnostic-v2-score-container">
-            <div className="diagnostic-v2-score-circle">
-              <span className="diagnostic-v2-score-value">{Math.round(score.total)}</span>
-              <span className="diagnostic-v2-score-max">/100</span>
+        <section id="step-score" className="dv2-section">
+          <h2>AIO Score</h2>
+          <div className="dv2-score-panel">
+            <div className="dv2-score-ring">
+              <svg viewBox="0 0 120 120" className="dv2-ring-svg">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(74,145,158,0.15)" strokeWidth="8" />
+                <circle
+                  cx="60" cy="60" r="52"
+                  fill="none" stroke="url(#scoreGrad)" strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(score.total / 100) * 327} 327`}
+                  transform="rotate(-90 60 60)"
+                  className="dv2-ring-progress"
+                />
+                <defs>
+                  <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#4A919E" />
+                    <stop offset="100%" stopColor="#356D76" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="dv2-score-num">
+                <span className="dv2-score-big">{Math.round(score.total)}</span>
+                <span className="dv2-score-of">/100</span>
+              </div>
             </div>
+
             {score.blocks && score.blocks.length > 0 && (
-              <div className="diagnostic-v2-blocks">
-                {score.blocks.map((block: ScoreBlock, i: number) => (
-                  <div key={i} className="diagnostic-v2-block-row">
-                    <span className="diagnostic-v2-block-label">
-                      {block.label || block.name}
-                    </span>
-                    <div className="diagnostic-v2-block-bar-bg">
-                      <div
-                        className="diagnostic-v2-block-bar-fill"
-                        style={{
-                          width: `${block.maxScore > 0 ? (block.score / block.maxScore) * 100 : 0}%`,
-                          animationDelay: `${i * 150}ms`,
-                        }}
-                      />
+              <div className="dv2-blocks">
+                {score.blocks.map((b, i) => {
+                  const pct = b.maxScore > 0 ? (b.score / b.maxScore) * 100 : 0;
+                  return (
+                    <div key={i} className="dv2-block-row">
+                      <span className="dv2-block-name">{b.label || b.name}</span>
+                      <div className="dv2-block-track">
+                        <div
+                          className={`dv2-block-fill ${pct >= 70 ? 'dv2-fill-good' : pct >= 40 ? 'dv2-fill-mid' : 'dv2-fill-low'}`}
+                          style={{ width: `${pct}%`, animationDelay: `${i * 100}ms` }}
+                        />
+                      </div>
+                      <span className="dv2-block-val">{b.score?.toFixed?.(1) ?? 0}/{b.maxScore}</span>
                     </div>
-                    <span className="diagnostic-v2-block-score">
-                      {block.score?.toFixed?.(1) ?? '0'}/{block.maxScore}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         </section>
       )}
 
-      {/* Step 5: Plans */}
+      {/* ─── PLANS ─── */}
       {isDone && score && (
-        <section id="step-plans" className="diagnostic-v2-section">
-          <h2>🚀 Boost your AI Readability</h2>
-          <p className="diagnostic-v2-subtitle">
-            Get listed in the AYA Trust Registry and receive your ASR identity files.
-          </p>
-          <div className="diagnostic-v2-plans-grid">
-            <div className="diagnostic-v2-plan-card">
-              <div className="diagnostic-v2-plan-badge">AYA Subscription</div>
-              <div className="diagnostic-v2-plan-price">19 CHF<span>/month</span></div>
-              <ul>
-                <li>✅ AYA Trust Registry listing</li>
-                <li>✅ Hosted ASR file</li>
-                <li>✅ Monthly updates</li>
-                <li>✅ Public certificate page</li>
+        <section id="step-plans" className="dv2-section">
+          <h2>Boost your AI Readability</h2>
+          <p className="dv2-section-sub">Get your ASR identity files and join the AYA Trust Registry.</p>
+          <div className="dv2-plans">
+            <div className="dv2-plan">
+              <div className="dv2-plan-name">AYA Subscription</div>
+              <div className="dv2-plan-price">19 <span>CHF/mo</span></div>
+              <ul className="dv2-plan-list">
+                <li>AYA Trust Registry listing</li>
+                <li>Hosted ASR file</li>
+                <li>Monthly updates</li>
+                <li>Public certificate page</li>
               </ul>
-              <a
-                href={`${process.env.NEXT_PUBLIC_STRIPE_LINK_AYA_SUB || '#'}`}
-                className="diagnostic-v2-btn-secondary"
-              >
-                Subscribe
-              </a>
+              <button className="dv2-plan-btn dv2-plan-btn--outline">Subscribe</button>
             </div>
-            <div className="diagnostic-v2-plan-card diagnostic-v2-plan-featured">
-              <div className="diagnostic-v2-plan-badge-pro">PRO Pack</div>
-              <div className="diagnostic-v2-plan-price">499 CHF<span> one-time</span></div>
-              <ul>
-                <li>✅ Everything in AYA</li>
-                <li>✅ 5 ASR identity files</li>
-                <li>✅ 3 years Registry included</li>
-                <li>✅ Ed25519 digital signature</li>
-                <li>✅ Score boost</li>
+            <div className="dv2-plan dv2-plan--pro">
+              <div className="dv2-plan-tag">RECOMMENDED</div>
+              <div className="dv2-plan-name">PRO Pack</div>
+              <div className="dv2-plan-price">499 <span>CHF</span></div>
+              <ul className="dv2-plan-list">
+                <li>Everything in AYA</li>
+                <li>5 ASR identity files</li>
+                <li>3 years Registry included</li>
+                <li>Ed25519 digital signature</li>
+                <li>Score boost up to +20pts</li>
               </ul>
-              <a
-                href={`${process.env.NEXT_PUBLIC_STRIPE_LINK_PRO || '#'}`}
-                className="diagnostic-v2-btn-primary"
-              >
-                Get PRO Pack
-              </a>
+              <button className="dv2-plan-btn dv2-plan-btn--solid">Get PRO Pack</button>
             </div>
           </div>
         </section>
       )}
 
-      {/* Step 8: Compare */}
+      {/* ─── COMPARE ─── */}
       {isDone && score && (
-        <section id="step-compare" className="diagnostic-v2-section">
-          <h2>📈 How you compare</h2>
-          <p className="diagnostic-v2-subtitle">
-            Your score vs the average in the AYA Registry ({'>'}4,400 entities indexed).
-          </p>
-          <div className="diagnostic-v2-compare">
-            <div className="diagnostic-v2-compare-bar">
-              <div className="diagnostic-v2-compare-label">Your site</div>
-              <div className="diagnostic-v2-compare-bar-bg">
-                <div
-                  className="diagnostic-v2-compare-bar-fill diagnostic-v2-compare-you"
-                  style={{ width: `${Math.min(score.total, 100)}%` }}
-                />
+        <section id="step-compare" className="dv2-section">
+          <h2>Your Position</h2>
+          <div className="dv2-compare-card">
+            <div className="dv2-compare-row">
+              <span className="dv2-compare-label">Your site</span>
+              <div className="dv2-compare-track">
+                <div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} />
               </div>
-              <span className="diagnostic-v2-compare-value">{Math.round(score.total)}/100</span>
+              <span className="dv2-compare-val dv2-compare-val--you">{Math.round(score.total)}</span>
             </div>
-            <div className="diagnostic-v2-compare-bar">
-              <div className="diagnostic-v2-compare-label">Registry avg.</div>
-              <div className="diagnostic-v2-compare-bar-bg">
-                <div
-                  className="diagnostic-v2-compare-bar-fill diagnostic-v2-compare-avg"
-                  style={{ width: '32%' }}
-                />
+            <div className="dv2-compare-row">
+              <span className="dv2-compare-label">AYA avg.</span>
+              <div className="dv2-compare-track">
+                <div className="dv2-compare-fill dv2-compare-fill--avg" style={{ width: '32%' }} />
               </div>
-              <span className="diagnostic-v2-compare-value">32/100</span>
+              <span className="dv2-compare-val">32</span>
             </div>
-            <p className="diagnostic-v2-compare-message">
+            <div className="dv2-compare-row">
+              <span className="dv2-compare-label">With PRO</span>
+              <div className="dv2-compare-track">
+                <div className="dv2-compare-fill dv2-compare-fill--pro" style={{ width: `${Math.min(score.total + 20, 100)}%` }} />
+              </div>
+              <span className="dv2-compare-val dv2-compare-val--pro">{Math.min(Math.round(score.total) + 20, 100)}</span>
+            </div>
+            <p className="dv2-compare-msg">
               {score.total >= 50
-                ? `🎉 Your site is already more AI-readable than most businesses!`
-                : `With ASR files and AYA registration, you could reach 70+ and outperform most competitors.`}
+                ? '🎉 You are already more AI-readable than most businesses in the registry!'
+                : '💡 With ASR files and AYA registration, you could significantly outperform your competitors.'}
             </p>
           </div>
         </section>
       )}
 
-      {/* Error */}
+      {/* ─── ERROR ─── */}
       {error && (
-        <section className="diagnostic-v2-section diagnostic-v2-error">
+        <section className="dv2-section dv2-error-box">
           <p>❌ {error}</p>
-          <button onClick={() => { setPhase('idle'); setError(null); }} className="diagnostic-v2-btn-secondary">
+          <button onClick={() => { setPhase('idle'); setError(null); }} className="dv2-plan-btn dv2-plan-btn--outline">
             Try again
           </button>
         </section>
       )}
 
-      {/* Footer */}
-      <footer className="diagnostic-v2-footer">
-        <p>AI Visionary — Geneva, Switzerland | <Link href="/aya">AYA Registry</Link></p>
+      {/* ─── FOOTER ─── */}
+      <footer className="dv2-footer">
+        <p>AI Visionary — Geneva, Switzerland · <Link href="/aya">AYA Registry</Link> · {'>'}4,400 entities indexed</p>
       </footer>
     </div>
   );
 }
 
-// --- Agent Card Component ---
-
-function AgentCard({ agent }: { agent: AgentState }) {
-  const statusIcon = {
-    waiting: '⏳',
-    running: '🔄',
-    done: '✅',
-    error: '❌',
-  }[agent.status];
-
-  return (
-    <div className={`diagnostic-v2-agent-card diagnostic-v2-agent-${agent.status}`}>
-      <div className="diagnostic-v2-agent-header">
-        <span className="diagnostic-v2-agent-icon">{agent.icon}</span>
-        <span className="diagnostic-v2-agent-name">{agent.label}</span>
-        <span className="diagnostic-v2-agent-status">{statusIcon}</span>
-      </div>
-      {agent.status === 'running' && (
-        <div className="diagnostic-v2-agent-running">
-          <div className="diagnostic-v2-agent-pulse" />
-          Scanning...
-        </div>
-      )}
-      {agent.status === 'done' && agent.data && (
-        <div className="diagnostic-v2-agent-results">
-          <AgentDataPreview name={agent.name} data={agent.data} />
-          {agent.durationMs > 0 && (
-            <span className="diagnostic-v2-agent-time">{agent.durationMs}ms</span>
-          )}
-        </div>
-      )}
-      {agent.status === 'error' && (
-        <div className="diagnostic-v2-agent-error-msg">Failed to extract</div>
-      )}
-    </div>
-  );
-}
-
-// --- Data Preview per Agent ---
-
+// ─── DATA PREVIEW ───
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function AgentDataPreview({ name, data }: { name: AgentName; data: any }) {
+function DataPreview({ name, data }: { name: AgentName; data: any }) {
+  if (!data) return null;
+
   switch (name) {
     case 'detect-contact':
-      return (
-        <div className="diagnostic-v2-data-preview">
-          {data.email && <div>📧 {String(data.email)}</div>}
-          {data.phone && <div>📞 {String(data.phone)}</div>}
-          {!data.email && !data.phone && <div className="text-muted">No contact found</div>}
-        </div>
-      );
+      return <div className="dv2-preview">
+        {data.email && <span>📧 {data.email}</span>}
+        {data.phone && <span>📞 {data.phone}</span>}
+        {!data.email && !data.phone && <span className="dv2-muted">—</span>}
+      </div>;
+
     case 'detect-services': {
-      const services = (data.services as string[]) || [];
-      const products = (data.products as string[]) || [];
-      const all = [...services, ...products];
-      return (
-        <div className="diagnostic-v2-data-preview">
-          {all.length > 0
-            ? all.slice(0, 3).map((s, i) => <div key={i}>• {s}</div>)
-            : <div className="text-muted">No services detected</div>}
-          {all.length > 3 && <div className="text-muted">+{all.length - 3} more</div>}
-        </div>
-      );
+      const all = [...(data.services || []), ...(data.products || [])];
+      return <div className="dv2-preview">
+        {all.length > 0
+          ? all.slice(0, 3).map((s: string, i: number) => <span key={i}>• {s}</span>)
+          : <span className="dv2-muted">—</span>}
+        {all.length > 3 && <span className="dv2-muted">+{all.length - 3} more</span>}
+      </div>;
     }
+
     case 'detect-legal': {
-      const items = [
-        ...((data.policies as string[]) || []),
-        ...((data.frameworks as string[]) || []),
-        ...((data.certifications as string[]) || []),
-      ];
-      return (
-        <div className="diagnostic-v2-data-preview">
-          {items.length > 0
-            ? items.slice(0, 4).map((s, i) => <div key={i}>• {s}</div>)
-            : <div className="text-muted">No legal info found</div>}
-        </div>
-      );
+      const items = [...(data.policies || []), ...(data.frameworks || []), ...(data.certifications || [])];
+      return <div className="dv2-preview">
+        {items.length > 0 ? items.slice(0, 3).map((s: string, i: number) => <span key={i}>• {s}</span>) : <span className="dv2-muted">—</span>}
+      </div>;
     }
+
     case 'detect-location':
-      return (
-        <div className="diagnostic-v2-data-preview">
-          {(data.city || data.country)
-            ? <div>📍 {[data.city, data.country].filter(Boolean).join(', ')}</div>
-            : <div className="text-muted">No location found</div>}
-        </div>
-      );
+      return <div className="dv2-preview">
+        {(data.city || data.country)
+          ? <span>{[data.city, data.country].filter(Boolean).join(', ')}</span>
+          : <span className="dv2-muted">—</span>}
+      </div>;
+
     case 'detect-security': {
-      const measures = (data.measures as string[]) || [];
-      return (
-        <div className="diagnostic-v2-data-preview">
-          {measures.length > 0
-            ? measures.slice(0, 4).map((s, i) => <div key={i}>🔒 {s}</div>)
-            : <div className="text-muted">No security headers</div>}
-        </div>
-      );
+      const m = (data.measures || []) as string[];
+      return <div className="dv2-preview">
+        {m.length > 0 ? m.slice(0, 4).map((s: string, i: number) => <span key={i}>{s}</span>) : <span className="dv2-muted">—</span>}
+      </div>;
     }
+
     case 'detect-jsonld':
-      return (
-        <div className="diagnostic-v2-data-preview">
-          {data.hasOrganizationType
-            ? <div>✅ {String(data.type || 'Organization')} — {String(data.name || 'Found')}</div>
-            : data.schemas && (data.schemas as unknown[]).length > 0
-              ? <div>⚠️ JSON-LD found but no Organization type</div>
-              : <div className="text-muted">No JSON-LD found</div>}
-        </div>
-      );
+      return <div className="dv2-preview">
+        {data.hasOrganizationType
+          ? <span>✓ {data.type || 'Organization'}{data.name ? ` — ${data.name}` : ''}</span>
+          : (data.schemas?.length > 0 ? <span>⚠ JSON-LD found, no Org type</span> : <span className="dv2-muted">—</span>)}
+      </div>;
+
     case 'detect-social': {
-      const platforms = (data.platforms as string[]) || [];
-      return (
-        <div className="diagnostic-v2-data-preview">
-          {platforms.length > 0
-            ? <div>{platforms.join(' • ')}</div>
-            : <div className="text-muted">No social links found</div>}
-        </div>
-      );
+      const p = (data.platforms || []) as string[];
+      return <div className="dv2-preview">
+        {p.length > 0 ? <span>{p.join(' · ')}</span> : <span className="dv2-muted">—</span>}
+      </div>;
     }
-    default:
-      return null;
+
+    default: return null;
   }
 }
