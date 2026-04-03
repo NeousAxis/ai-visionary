@@ -519,6 +519,35 @@ function cleanOutputArray(arr: string[]): string[] {
 }
 
 /**
+ * SHARED: Complete compliance output sanitization.
+ * Combines reclassifyCompliance + GDPR principles filter + splitLongSecurityEntries +
+ * cleanOutputArray + anti-marketing. Used by ALL 5 generators.
+ */
+export function sanitizeComplianceOutput(raw: {
+    certifications: string[];
+    frameworks: string[];
+    policies: string[];
+    security_measures: string[];
+}): { certifications: string[]; frameworks: string[]; policies: string[]; security_measures: string[] } {
+    // 1. Reclassify (GDPR→framework, Legal removed, URL→label, dedup)
+    const reclassified = reclassifyCompliance(raw.certifications, raw.frameworks);
+
+    // 2. GDPR principles filter on security_measures
+    const GDPR_PRINCIPLE_RE = /\b(privacy by design|right to erasure|right to be forgotten|explicit consent|data minimization|purpose limitation|storage limitation|data portability|lawful basis|legitimate interest|gdpr compliance|rgpd compliance)\b/i;
+    let secMeasures = splitLongSecurityEntries(
+        raw.security_measures.map(s => truncateSecurity(s))
+    ).filter(s => !GDPR_PRINCIPLE_RE.test(s));
+
+    // 3. cleanOutputArray on all
+    return {
+        certifications: cleanOutputArray(reclassified.certifications),
+        frameworks: cleanOutputArray(reclassified.frameworks),
+        policies: cleanOutputArray(raw.policies),
+        security_measures: cleanOutputArray(secMeasures),
+    };
+}
+
+/**
  * FIX 3: Strip leading numbers/dots from process steps.
  * "1. Structuration..." → "Structuration..."
  * "ASR. 2. Création..." → "Création..."
@@ -876,12 +905,15 @@ export function generateManifestJson(data: any, url: string, locale: 'fr' | 'en'
     const rawBT = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBT || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
-    const rawCertsM = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
-    const rawFrameworksM = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
-    const reclassifiedM = reclassifyCompliance(rawCertsM, rawFrameworksM);
-    const certifications = reclassifiedM.certifications;
-    const dataFrameworks = reclassifiedM.frameworks;
-    const dataPolicies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
+    const complianceM = sanitizeComplianceOutput({
+        certifications: cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)))),
+        frameworks: cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)))),
+        policies: cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)))),
+        security_measures: cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))),
+    });
+    const certifications = complianceM.certifications;
+    const dataFrameworks = complianceM.frameworks;
+    const dataPolicies = complianceM.policies;
     const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
 
     const isAssoManifest = isAssociation(businessType, name, url);
@@ -1008,19 +1040,16 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     const qualityAssurance = sanitizeFieldValue(
         Array.isArray(rawQAfaq) ? rawQAfaq.filter(Boolean).join(', ') : cleanVal(rawQAfaq)
     ) || "";
-    const rawCertsF = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
-    const rawFrameworksF = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
-    const reclassifiedF = reclassifyCompliance(rawCertsF, rawFrameworksF);
-    const certifications = reclassifiedF.certifications;
-    const frameworks = reclassifiedF.frameworks;
-    const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
-    const securityMeasures = cleanOutputArray(filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))
-        .map(s => truncateSecurity(s))))
-        .filter(s => {
-            // GDPR principles/compliance are NOT security measures
-            const GDPR_RE = /\b(privacy by design|right to erasure|explicit consent|data minimization|gdpr compliance|rgpd compliance)\b/i;
-            return !GDPR_RE.test(s);
-        }));
+    const complianceF = sanitizeComplianceOutput({
+        certifications: cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)))),
+        frameworks: cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)))),
+        policies: cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)))),
+        security_measures: filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))))),
+    });
+    const certifications = complianceF.certifications;
+    const frameworks = complianceF.frameworks;
+    const policies = complianceF.policies;
+    const securityMeasures = complianceF.security_measures;
     const NO_DATA_PHRASES_FAQ = /^(pas encore|aucun|non applicable|pas de|n\/a|rien|néant|none|pas disponible|je n'ai pas|nous n'avons pas)/i;
     const keyIndicators = filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.indicateurs?.key_indicators?.value))
         .filter((ind: string) => !NO_DATA_PHRASES_FAQ.test(ind.trim()))
@@ -1292,11 +1321,14 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTgloss || "", "Organization"));
     const services = sanitizeFieldArray(cleanArray(data.offre?.services?.value));
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
-    const rawCertsG = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
-    const rawFrameworksG = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)));
-    const reclassifiedG = reclassifyCompliance(rawCertsG, rawFrameworksG);
-    const certifications = reclassifiedG.certifications;
-    const frameworks = reclassifiedG.frameworks;
+    const complianceG = sanitizeComplianceOutput({
+        certifications: cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)))),
+        frameworks: cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))),
+        policies: cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))),
+        security_measures: filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))),
+    });
+    const certifications = complianceG.certifications;
+    const frameworks = complianceG.frameworks;
     const processSteps = cleanOutputArray(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep));
     const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceGloss ? sanitizeAudience(rawAudienceGloss) : "";
@@ -1304,13 +1336,8 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     const NOT_A_CITY_G = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain|belgique|belgium)$/i;
     const city = NOT_A_CITY_G.test(rawCityG.trim()) ? "" : rawCityG;
     const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
-    const policies = cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)));
-    const securityMeasures = cleanOutputArray(filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value))
-        .map(s => truncateSecurity(s))))
-        .filter(s => {
-            const GDPR_RE = /\b(privacy by design|right to erasure|explicit consent|data minimization|gdpr compliance|rgpd compliance)\b/i;
-            return !GDPR_RE.test(s);
-        }));
+    const policies = complianceG.policies;
+    const securityMeasures = complianceG.security_measures;
 
     const nameArticleG = en ? `${name}'s` : (/^[aeiouhAEIOUHéÉàÀ]/.test(name) ? `d'${name}` : `de ${name}`);
 
@@ -1516,7 +1543,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const en = locale === 'en';
     const name = cleanVal(data.identite?.name?.value) || (en ? "Entity" : "Entreprise");
     const rawBTec = sanitizeFieldValue(cleanVal(data.identite?.business_type?.value));
-    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", "Organisation"));
+    const businessType = fixUnmatchedBrackets(sanitizeBusinessType(rawBTec || "", en ? "Organization" : "Organisation"));
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
     const products = sanitizeFieldArray(cleanArray(data.offre?.products?.value));
     const rawAudienceEC = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
@@ -1529,12 +1556,15 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const email = data.identite?.contact_email?.value || "";
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhoneExt) ? rawPhoneExt : "";
-    const rawCertsEC = cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value))));
-    const rawFrameworksEC = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value))));
-    const reclassifiedEC = reclassifyCompliance(rawCertsEC, rawFrameworksEC);
-    const certifications = reclassifiedEC.certifications;
-    const frameworks = reclassifiedEC.frameworks;
-    const policies = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value))));
+    const complianceEC = sanitizeComplianceOutput({
+        certifications: cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArray(data.engagements_conformite?.certifications?.value)))),
+        frameworks: cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.frameworks?.value)))),
+        policies: cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.policies?.value)))),
+        security_measures: filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArray(data.engagements_conformite?.security_measures?.value)))),
+    });
+    const certifications = complianceEC.certifications;
+    const frameworks = complianceEC.frameworks;
+    const policies = complianceEC.policies;
     const processSteps = cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep);
     const deliveryMode = sanitizeFieldValue(cleanVal(data.processus_methodes?.delivery_mode?.value)) || "";
     const rawGeographies = sanitizeFieldValue(cleanVal(data.processus_methodes?.geographies_served?.value)) || "";
@@ -1590,7 +1620,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     // Ville comme keyword géographique
     if (city && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, city);
     // Business type as keyword (skip generic fallback "Organisation")
-    if (businessType && businessType !== "Organisation" && businessType.length <= 60 && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, businessType);
+    if (businessType && businessType !== "Organisation" && businessType !== "Organization" && businessType.length <= 60 && discoveryKeywords.length < MAX_DISCOVERY_KEYWORDS) addUnique(discoveryKeywords, businessType);
     // Bug 12: Ensure minimum 8 discovery_keywords — complete with services and sector terms
     const MIN_DISCOVERY_KEYWORDS = 8;
     if (discoveryKeywords.length < MIN_DISCOVERY_KEYWORDS) {

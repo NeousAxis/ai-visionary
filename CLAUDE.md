@@ -192,13 +192,31 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 #### Sanitization layers (ordre d'execution)
 
+**En amont (chat/route.ts, controle-qualite.ts) :**
 1. `sanitizeLlmFields()` — nettoie les question texts, copyright, hallucinations LLM
-2. `downgradeFieldQuality()` — cap q-values (reliability), detecte interpretive claims, structured absence
-3. `reclassifyCompliance()` — GDPR→framework, "Legal" supprime, URL→label AVANT filtrage
-4. `cleanOutputArray()` — "And" prefix, trailing periods, capitalisation
-5. Anti-marketing filters — "premium", "zero-latency", "ecosystem", etc.
-6. GDPR principles filter — "Privacy by Design", "GDPR compliance" sortis de security_measures
-7. Country normalization — normalizeCountryEN/normalizeCountryENec dans TOUS les generateurs
+2. `downgradeFieldQuality()` — cap q-values (reliability), detecte interpretive claims (questionnaire only, PAS scan), structured absence
+3. `INTERPRETIVE_CLAIMS_RE` — ne s'applique QU'aux reponses du questionnaire (evidence includes 'questionnaire_answer'), PAS aux donnees du scan (donnees factuelles)
+
+**En aval (5 generateurs, via fonctions partagees) :**
+4. `sanitizeComplianceOutput()` — fonction PARTAGEE utilisee par les 5 generateurs. Inclut :
+   - `reclassifyCompliance()` — GDPR→framework, "Legal" supprime, URL→label AVANT filtrage
+   - GDPR principles filter — "Privacy by Design", "GDPR compliance" sortis de security_measures
+   - `splitLongSecurityEntries()` + `truncateSecurity()`
+   - `cleanOutputArray()` — "And" prefix, trailing periods, capitalisation
+5. Anti-marketing filters — "premium", "zero-latency", "ecosystem", etc. (ASR + ExternalContext)
+6. Country normalization — `normalizeCountryEN`/`normalizeCountryENec` dans TOUS les generateurs
+7. City normalization — NOT_A_CITY filter dans TOUS les generateurs (Swiss, Suisse = pas une ville)
+
+#### Matrice de coherence des 5 generateurs (COMPLETE)
+
+| Check | ASR | Manifest | FAQ | Glossary | EC |
+|-------|-----|----------|-----|----------|----|
+| sanitizeComplianceOutput | ✅ | ✅ | ✅ | ✅ | ✅ |
+| City NOT_A_CITY | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Country normalize | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Geography Global | ✅ | — | ✅ | — | ✅ |
+| cleanOutputArray | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Anti-marketing | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 #### Classification semantique correcte
 

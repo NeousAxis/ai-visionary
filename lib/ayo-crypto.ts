@@ -8,7 +8,8 @@ import {
     splitLongSecurityEntries,
     sanitizeFormContaminationArray, sanitizeCertifications, cleanProcessStep,
     cleanKeywordEntry,
-    cleanFormResiduesArray
+    cleanFormResiduesArray,
+    sanitizeComplianceOutput
 } from './ayo-generators';
 
 // Keys loaded from environment — NEVER hardcode secrets
@@ -433,76 +434,19 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1));
     }
 
-    // Engagements & Compliance
+    // Engagements & Compliance — uses shared sanitizeComplianceOutput()
     const engagements: any = {};
     if (mode !== 'LIGHT') {
-        engagements.certifications = filterGarbageEntries(cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value)))));
-        engagements.frameworks = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value)))));
-        engagements.policies = filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value)))));
-        engagements.security_measures = splitLongSecurityEntries(filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value))
-            .map(s => truncateSecurity(s)))))
-            .filter((s: string) => {
-                // GDPR principles + "GDPR compliance" are NOT security measures
-                const GDPR_RE = /\b(privacy by design|right to erasure|right to be forgotten|explicit consent|data minimization|purpose limitation|storage limitation|data portability|lawful basis|legitimate interest|gdpr compliance|rgpd compliance)\b/i;
-                return !GDPR_RE.test(s);
-            })
-            .map((s: string) => s.replace(/^(and|et)\s+/i, '').trim())
-            .map((s: string) => s.replace(/\.\s*$/, '').trim())
-            .filter(Boolean)
-            .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1));
-        // Normalize: move GDPR/RGPD/ISO from security_measures to frameworks, keep actual security measures in place
-        const normalizedCompliance = (() => {
-            const FRAMEWORK_PATTERNS = /gdpr|rgpd|iso\s*\d|soc\s*[12]|pci|hipaa|ccpa|lgpd|loi\s*25/i;
-            const movedToFrameworks: string[] = [];
-            const cleanedSecurity = (engagements.security_measures || []).filter((s: string) => {
-                if (FRAMEWORK_PATTERNS.test(s)) {
-                    movedToFrameworks.push(s);
-                    return false;
-                }
-                return true;
-            });
-            return {
-                frameworks: [...new Set([...(engagements.frameworks || []), ...movedToFrameworks])],
-                securityMeasures: cleanedSecurity
-            };
-        })();
-        engagements.frameworks = normalizedCompliance.frameworks;
-        engagements.security_measures = normalizedCompliance.securityMeasures;
-
-        // Reclassify: GDPR/RGPD = regulation/framework, NOT certification
-        // ISO/SOC/B Corp = real certifications. "Legal" alone = meaningless.
-        {
-            const REGULATION_RE = /\bgdpr\b|\brgpd\b/i;
-            const MEANINGLESS_FRAMEWORK_RE = /^legal$/i;
-            const movedToFrameworks: string[] = [];
-            // Move regulations from certifications → frameworks
-            engagements.certifications = (engagements.certifications || []).filter((c: string) => {
-                if (REGULATION_RE.test(c)) {
-                    movedToFrameworks.push('GDPR'); // Normalize name
-                    return false;
-                }
-                return true;
-            });
-            if (movedToFrameworks.length > 0) {
-                engagements.frameworks = [...new Set([...(engagements.frameworks || []), ...movedToFrameworks])];
-            }
-            // Remove meaningless standalone "Legal" from frameworks
-            engagements.frameworks = (engagements.frameworks || []).filter((f: string) => !MEANINGLESS_FRAMEWORK_RE.test(f.trim()));
-            // Deduplicate: "GDPR compliance" → "GDPR" (redundant)
-            engagements.frameworks = (engagements.frameworks || []).map((f: string) => {
-                if (/^gdpr\s+compliance$/i.test(f.trim())) return 'GDPR';
-                if (/^rgpd\s+compliance$/i.test(f.trim())) return 'GDPR';
-                return f;
-            });
-            engagements.frameworks = [...new Set(engagements.frameworks)];
-        }
-
-        // Normalize: URLs → labels (URLs are evidence, not names)
-        engagements.certifications = (engagements.certifications || []).map((c: string) => /^https?:\/\//i.test(c) ? urlToLabel(c) : c);
-        engagements.frameworks = (engagements.frameworks || []).map((f: string) => /^https?:\/\//i.test(f) ? urlToLabel(f) : f);
-        // Re-filter after URL→label: "Https://whtg1.com/legal.html" → "legal" → filter out
-        engagements.frameworks = (engagements.frameworks || []).filter((f: string) => !/^legal$/i.test(f.trim()));
-        engagements.frameworks = [...new Set(engagements.frameworks)];
+        const complianceASR = sanitizeComplianceOutput({
+            certifications: filterGarbageEntries(cleanFormResiduesArray(sanitizeCertifications(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.certifications?.value))))),
+            frameworks: filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.frameworks?.value))))),
+            policies: filterGarbageEntries(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.policies?.value))))),
+            security_measures: filterGarbageEntries(cleanFormResiduesArray(sanitizeFieldArray(cleanArrayAsr(data.engagements_conformite?.security_measures?.value)))),
+        });
+        engagements.certifications = complianceASR.certifications;
+        engagements.frameworks = complianceASR.frameworks;
+        engagements.policies = complianceASR.policies;
+        engagements.security_measures = complianceASR.security_measures;
 
         // Bug 15: If user declared having certifications (q > 0) but array is empty (no proof), flag it
         const certQ = data.engagements_conformite?.certifications?.q ?? 0;
