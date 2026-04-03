@@ -314,19 +314,20 @@ export default function AyoChat({ mode = 'widget' }: AyoChatProps) {
         const lastAiMsg = messages.filter(m => m.role === 'assistant').pop()?.content || "";
         const allContent = messages.map(m => m.content).join(" ");
 
-        // PRIORITY ORDER FOR DETECTION (Step 5 -> 1)
-        // CRITICAL: Step 4 MUST be detected before Step 3 for ambiguous messages like "Finaliser PACK PRO".
-        if (allContent.includes("Paiement confirmé") || allContent.includes("Dossier Final Envoyé") || allContent.includes("Envoi en cours")) {
-            currentStep = 5; // Livraison
+        // PRIORITY ORDER FOR DETECTION (Step 5 -> 1) — supports FR and EN
+        const has = (text: string, ...keywords: string[]) => keywords.some(k => text.includes(k));
+
+        if (has(allContent, "Paiement confirmé", "Payment confirmed", "Dossier Final Envoyé", "Envoi en cours", "Your AYA Certificate is active", "Votre certificat AYA est actif")) {
+            currentStep = 5; // Delivery
         }
-        else if (lastAiMsg.includes("Finaliser ma commande") || lastAiMsg.includes("Payer et recevoir") || lastAiMsg.includes("Entrez votre email professionnel pour finaliser") || lastAiMsg.includes("Lien sécurisé") || lastAiMsg.includes("Activer la Certification") || lastAiMsg.includes("Email enregistré")) {
-            currentStep = 4; // Finalisation (Email / Paiement)
+        else if (has(lastAiMsg, "Finaliser ma commande", "Payer et recevoir", "Entrez votre email", "Enter your email", "Lien sécurisé", "Buy my ASR", "Email enregistré", "Email registered", "Activer la Certification", "Activate Certification", "Finalize my PRO PACK")) {
+            currentStep = 4; // Finalization (Email / Payment)
         }
-        else if (lastAiMsg.includes("OPPORTUNITÉ STRATÉGIQUE") || lastAiMsg.includes("Votre décision finale") || lastAiMsg.includes("PACK PLATEFORME") || lastAiMsg.includes("PACK PRO")) {
-            currentStep = 3; // Choix ASR (Sales Pitch)
+        else if (has(lastAiMsg, "OPPORTUNITÉ STRATÉGIQUE", "STRATEGIC OPPORTUNITY", "Votre décision finale", "Your final decision", "PACK PLATEFORME", "PACK PRO", "PRO Pack", "AYA Subscription", "Abonnement AYA", "Select your Pack", "certification level")) {
+            currentStep = 3; // ASR Choice
         }
-        else if (lastAiMsg.includes("Score AIO") || lastAiMsg.includes("Analyse AIO Finale") || lastAiMsg.includes("SCAN TERMINÉ") || lastAiMsg.includes("Analyse en cours")) {
-            currentStep = 2; // Analyse
+        else if (has(lastAiMsg, "Score AIO", "AIO SCORE", "FINAL AIO", "SCORE FINAL", "Analyse AIO Finale", "SCAN TERMINÉ", "SCAN COMPLETE", "Analyse en cours", "Analysis in progress", "Calculating score", "BLOCKS TO IMPROVE", "BLOCS À AMÉLIORER")) {
+            currentStep = 2; // Analysis
         }
 
         const steps = [
