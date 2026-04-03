@@ -2434,7 +2434,20 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                             const idMatch = msg.content.match(/"id"\s*:\s*"(evidence_[^"]+)"/);
                             if (idMatch) lastEvidenceId = idMatch[1];
                         } else if (msg.role === 'user' && lastEvidenceId) {
-                            const answer = (msg.content as string).trim();
+                            let answer = (msg.content as string).trim();
+                            // Strip concatenated label suffix from frontend: "{answer}{customLabel}\u00a0:"
+                            // The frontend appends the input field label to the user's answer
+                            const matchingTpl = EVIDENCE_TEMPLATES.find(t => `evidence_${t.block}_${t.fieldName}` === lastEvidenceId);
+                            if (matchingTpl) {
+                                const labels = [matchingTpl.customLabel_en, matchingTpl.customLabel_fr].filter(Boolean);
+                                for (const label of labels) {
+                                    if (!label) continue;
+                                    // Strip label with various separators: "answerLabel :", "answerLabel:", "answerLabel\u00a0:"
+                                    const labelClean = label.replace(/\.{3}$/, '').trim(); // remove trailing "..."
+                                    const suffixRE = new RegExp(`${labelClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\u00a0]*:?\\s*$`, 'i');
+                                    answer = answer.replace(suffixRE, '').trim();
+                                }
+                            }
                             // Skip confirmations and setup answers
                             if (!answer || /^(oui|yes|ok|non|no)[\s!.]*$/i.test(answer)) { lastEvidenceId = ''; continue; }
                             // Map evidence ID to field path: evidence_block_field → block.field
@@ -2536,9 +2549,20 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                         }
 
                         let injectedCount = 0;
-                        for (const [qId, answer] of Object.entries(savedAnswers)) {
+                        for (const [qId, rawAnswer] of Object.entries(savedAnswers)) {
                             const fieldPath = QUESTION_TO_FIELD[qId];
-                            if (!fieldPath || !answer || typeof answer !== 'string') continue;
+                            if (!fieldPath || !rawAnswer || typeof rawAnswer !== 'string') continue;
+                            // Strip concatenated label suffix from frontend
+                            let answer = rawAnswer.trim();
+                            const tplForClean = EVIDENCE_TEMPLATES.find(t => `evidence_${t.block}_${t.fieldName}` === qId);
+                            if (tplForClean) {
+                                for (const lbl of [tplForClean.customLabel_en, tplForClean.customLabel_fr].filter(Boolean)) {
+                                    if (!lbl) continue;
+                                    const lblClean = lbl.replace(/\.{3}$/, '').trim();
+                                    const re = new RegExp(`${lblClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\u00a0]*:?\\s*$`, 'i');
+                                    answer = answer.replace(re, '').trim();
+                                }
+                            }
                             // Skip confirmation-only answers
                             if (answer.match(/^(oui|non|ok|exact|parfait|je confirme|c'est bon|yes|no|correct|perfect|i confirm|that's right)$/i)) continue;
 

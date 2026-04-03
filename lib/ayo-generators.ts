@@ -1029,7 +1029,7 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhone) ? rawPhone : "";
     const rawCityFaq = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
-    const city = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain)$/i.test(rawCityFaq.trim()) ? "" : rawCityFaq;
+    const city = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain|belgique|belgium)(\s|$)/i.test(rawCityFaq.trim()) ? "" : rawCityFaq;
     const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
     const legalName = sanitizeFieldValue(cleanVal(data.identite?.legal_name?.value)) || "";
     const processSteps = cleanOutputArray(cleanFormResiduesArray(sanitizeFormContaminationArray(sanitizeFieldArray(cleanArray(data.processus_methodes?.process_steps?.value)))).map(cleanProcessStep));
@@ -1333,7 +1333,7 @@ export function generateGlossaryJson(data: any, locale: 'fr' | 'en' = 'en'): any
     const rawAudienceGloss = sanitizeFieldValue(cleanVal(data.offre?.target_audience?.value));
     const audience = rawAudienceGloss ? sanitizeAudience(rawAudienceGloss) : "";
     const rawCityG = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
-    const NOT_A_CITY_G = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain|belgique|belgium)$/i;
+    const NOT_A_CITY_G = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain|belgique|belgium)(\s|$)/i;
     const city = NOT_A_CITY_G.test(rawCityG.trim()) ? "" : rawCityG;
     const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
     const policies = complianceG.policies;
@@ -1550,7 +1550,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const audience = rawAudienceEC ? sanitizeAudience(rawAudienceEC) : "";
     const rawCity = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
     // "Swiss" is an adjective, not a city — clear it
-    const NOT_A_CITY = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain)$/i;
+    const NOT_A_CITY = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain|belgique|belgium)(\s|$)/i;
     const city = NOT_A_CITY.test(rawCity.trim()) ? "" : rawCity;
     const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
     const email = data.identite?.contact_email?.value || "";

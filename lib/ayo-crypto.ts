@@ -164,7 +164,9 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     // Normalize city: "Swiss" is an adjective, not a city name
     const cityRaw = cleanValAsr(data.identite?.city?.value) || '';
     const countrySynonyms = [countryRaw.toLowerCase(), country.toLowerCase(), 'swiss', 'suisse', 'schweiz', 'svizzera', 'français', 'française', 'french', 'german', 'deutsch', 'italian', 'italiano'];
-    const city = countrySynonyms.includes(cityRaw.toLowerCase().trim()) ? '' : cityRaw;
+    const cityLower = cityRaw.toLowerCase().trim();
+    // Match exact OR "Swiss based", "Suisse romande", etc. (country word at start)
+    const city = countrySynonyms.some(s => cityLower === s || cityLower.startsWith(s + ' ')) ? '' : cityRaw;
 
     const address = {
         "@type": "PostalAddress",
