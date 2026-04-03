@@ -13,7 +13,7 @@
 
 | Terme | Definition |
 |-------|-----------|
-| **AYO** | Chatbot IA qui diagnostique la lisibilite IA d'un site web. Utilise Google Gemini. |
+| **AYO** | Agent IA qui diagnostique la lisibilite IA d'un site web. V1=chatbot Gemini (page /diagnostic). V2=micro-agents deterministes (page /diagnostic-v2, branche feature/micro-agents-diagnostic). |
 | **AIO Score** | Score 0-100, deterministe, base sur 7 blocs ponderes (la "Bible AIO"). |
 | **AYA** | Registre public d'entites indexees/certifiees (Supabase `aya_registry`). ~4400+ entites. |
 | **ASR** | AI Singular Record — fichier JSON-LD signe Ed25519, identite numerique de l'entite. |
@@ -140,6 +140,7 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 | `main` | Production | Bilingue FR/EN + V4 Evidence-Based actif (flag ON) |
 | `fix/remediation` | Archivee | Sprints 1-10 (tous termines, merges dans main) |
 | `fix/i18n-bilingual` | ARCHIVEE | Tentative i18n echouee du 28 mars, NE PAS UTILISER |
+| `feature/micro-agents-diagnostic` | Experimentale | Diagnostic V2 micro-agents + one-page live. JETABLE si echec. |
 
 **Branches mergees dans main (31 mars - 3 avril 2026) :** `feature/i18n-en-fr`, `fix/otp-eclore-protection`, `feature/chat-bilingual`, `feature/ayo-v4-evidence-based`
 
@@ -234,6 +235,87 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 ---
 
+### Diagnostic V2 — Micro-Agents Deterministes (branche `feature/micro-agents-diagnostic`)
+
+> Branche experimentale JETABLE. Si echec, on supprime. `main` reste intacte.
+> Page : `/diagnostic-v2` — coexiste avec `/diagnostic` (V1 chatbot Gemini)
+
+#### Principe
+
+Remplacer le LLM (Gemini) par 7 micro-agents deterministes. Chaque agent fait UNE action sur le HTML brut.
+Zero LLM pour l'extraction. Le score reflete ce qui est TROUVE, pas invente.
+
+#### Les 7 micro-agents
+
+| Agent | Fichier | Action | Input | Output |
+|-------|---------|--------|-------|--------|
+| detect-contact | `lib/micro-agents/detect-contact.ts` | Email + telephone | HTML | `{ email, phone, q }` |
+| detect-services | `lib/micro-agents/detect-services.ts` | Services/produits (h2/h3/ul) | HTML | `{ services[], products[], q }` |
+| detect-legal | `lib/micro-agents/detect-legal.ts` | Liens legal/privacy + certifications | HTML | `{ policies[], frameworks[], certifications[], urls[], q }` |
+| detect-location | `lib/micro-agents/detect-location.ts` | Pays + ville | HTML | `{ city, country, q }` |
+| detect-security | `lib/micro-agents/detect-security.ts` | Headers HTTP + mentions securite | HTML + headers | `{ measures[], q }` |
+| detect-jsonld | `lib/micro-agents/detect-jsonld.ts` | Parse JSON-LD | HTML | `{ schemas[], type, name, q }` |
+| detect-social | `lib/micro-agents/detect-social.ts` | Liens sociaux | HTML | `{ links[], platforms[], q }` |
+
+#### Orchestrateur
+
+`lib/micro-agents/orchestrator.ts` — lance les 7 agents en parallele, merge les resultats en `AyoExtract` via `mergeAgentResultsToExtract()`. Compatible avec le score engine et les generateurs existants.
+
+#### Mapping agents → blocs AIO
+
+| Bloc AyoExtract | Agents sources | Champs couverts |
+|-----------------|---------------|-----------------|
+| identite (10pts) | detect-contact, detect-location, detect-jsonld | name, city, country, email, phone |
+| offre (20pts) | detect-services | services, products |
+| processus_methodes (15pts) | — | Non couvert (q=0) |
+| engagements_conformite (15pts) | detect-legal, detect-security | policies, frameworks, certifications, security_measures |
+| indicateurs (20pts) | — | Non couvert (q=0) |
+| contenus_pedagogiques (10pts) | detect-jsonld (FAQ schema) | has_faq |
+| structure_technique (10pts) | detect-jsonld, detect-security | has_jsonld, has_asr |
+
+~16/30 champs couverts. Les ~14 restants = q:0 (question engine V4 optionnel).
+
+#### Page Diagnostic V2 — One-Page 8 etapes
+
+| Etape | Composant | Description |
+|-------|-----------|-------------|
+| 1 | `UrlInput.tsx` | Champ URL + bouton Analyser |
+| 2 | `AgentPanel.tsx` + `AgentCard.tsx` | 7 cartes agents live via SSE |
+| 3 | `ScoreReveal.tsx` + `ScoreBlockBar.tsx` | Score AIO anime bloc par bloc |
+| 4 | `FileGeneration.tsx` | 5 fichiers PRO generes avec checkmarks |
+| 5 | `PlanSelector.tsx` | Choix AYA (19 CHF/mois) vs PRO (499 CHF) |
+| 6 | `PaymentStep.tsx` | Redirect Stripe Checkout |
+| 7 | `ConfirmationStep.tsx` | Succes + info livraison |
+| 8 | `CompareSection.tsx` | Compare avec concurrents AYA (meme secteur/pays) |
+
+#### API Diagnostic V2
+
+| Route | Methode | Description |
+|-------|---------|-------------|
+| `/api/diagnostic/scan` | POST | SSE — lance micro-agents, stream resultats en temps reel |
+| `/api/diagnostic/score` | POST | Calcule AIO score depuis resultats merges |
+| `/api/diagnostic/generate` | POST | Genere les 5 fichiers PRO |
+
+#### Structure fichiers V2
+
+```
+lib/micro-agents/
+  types.ts, html-fetcher.ts, orchestrator.ts
+  detect-contact.ts, detect-services.ts, detect-legal.ts
+  detect-location.ts, detect-security.ts, detect-jsonld.ts, detect-social.ts
+
+app/diagnostic-v2/
+  page.tsx, layout.tsx
+
+app/components/diagnostic-v2/
+  UrlInput.tsx, AgentPanel.tsx, AgentCard.tsx
+  ScoreReveal.tsx, ScoreBlockBar.tsx, FileGeneration.tsx
+  PlanSelector.tsx, PaymentStep.tsx, ConfirmationStep.tsx
+  CompareSection.tsx, DiagnosticStepContainer.tsx
+```
+
+---
+
 ### Croissance — Objectif 10k+ entites
 
 #### Bot AYA (scraping automatise)
@@ -306,7 +388,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 6 | Campagne email entreprises indexees | Haute | A faire |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
-| 9 | Micro-agents deterministes — remplacer le LLM par des micro-agents specialises (detect-contact, detect-services, detect-legal, detect-location, detect-security, detect-jsonld, detect-social). Chaque agent fait UNE action simple sur le HTML brut, pas de LLM. Le LLM n'intervient qu'a la fin pour classer les ambiguites. Objectif : resultats identiques a chaque scan. | Future | Identifie |
+| 9 | Diagnostic V2 micro-agents — remplacer le LLM par 7 micro-agents deterministes + nouvelle page one-page live `/diagnostic-v2` avec 8 etapes visibles. Branche `feature/micro-agents-diagnostic` (jetable). | Haute | En cours — branche feature/micro-agents-diagnostic |
 | 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
 
 ---
@@ -358,6 +440,8 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 6. `lib/question-engine.ts` — V4 question templates + evaluateEvidence
 7. `lib/site-classifier.ts` — Classification deterministe (7 types)
 8. `app/api/webhooks/checkout-success/route.ts` — Webhook Stripe + PRO score lift
+9. `lib/micro-agents/orchestrator.ts` — Orchestrateur micro-agents + mergeAgentResultsToExtract (V2)
+10. `app/api/diagnostic/scan/route.ts` — SSE endpoint micro-agents (V2)
 
 ---
 
