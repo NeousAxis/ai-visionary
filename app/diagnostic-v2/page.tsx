@@ -156,8 +156,8 @@ export default function DiagnosticV2Page() {
           <span className="dv2-logo-text">AYO</span>
         </Link>
         <div className="dv2-header-right">
-          <StepIndicator current={currentStep} />
-          <span className="dv2-version-badge">V2</span>
+          <span className="dv2-version-badge">V2 — Micro-Agents</span>
+          <Link href="/diagnostic" className="dv2-link-v1">V1 Classic →</Link>
         </div>
       </header>
 
@@ -427,22 +427,6 @@ export default function DiagnosticV2Page() {
       <footer className="dv2-footer">
         <p>AI Visionary — Geneva, Switzerland · <Link href="/aya">AYA Registry</Link> · {'>'}4,400 entities indexed</p>
       </footer>
-    </div>
-  );
-}
-
-// ─── Step Indicator ───
-function StepIndicator({ current }: { current: Step }) {
-  const steps = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-  const labels = ['URL', 'Scan', 'Score', 'Files', 'Plan', 'Pay', 'Done', 'Compare'];
-  return (
-    <div className="dv2-steps-bar">
-      {steps.map((s, i) => (
-        <div key={s} className={`dv2-step-dot ${current >= s ? 'dv2-step-dot-active' : ''} ${current === s ? 'dv2-step-dot-current' : ''}`}>
-          <span className="dv2-step-dot-num">{current > s ? '✓' : s}</span>
-          <span className="dv2-step-dot-label">{labels[i]}</span>
-        </div>
-      ))}
     </div>
   );
 }
