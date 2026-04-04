@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       return entityMatchesSector(e.sector_macro || '', detectedSector);
     });
 
-    // Sort: certified first, then by score
+    // Show ALL entities in the sector — certified first, then by score
     const sorted = sectorPool
       .filter((e: any) => (e.asr_score || 0) > 0)
       .sort((a: any, b: any) => {
