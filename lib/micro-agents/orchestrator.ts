@@ -167,8 +167,20 @@ export async function mergeAgentResultsToExtract(
   const metaTitleMatch = fetchResult.html.match(/<title[^>]*>([^<]+)<\/title>/i);
   const name = jsonld.name || (metaTitleMatch ? metaTitleMatch[1].trim() : '');
 
-  // Determine business type from JSON-LD
-  const businessType = jsonld.type || '';
+  // Determine business type: JSON-LD first, then infer from services/content
+  let businessType = jsonld.type || '';
+  if (!businessType && services.services.length > 0) {
+    const svcText = services.services.join(' ').toLowerCase();
+    if (/consulting|conseil|advisory|accompagnement|stratégie/i.test(svcText)) businessType = 'ConsultingFirm';
+    else if (/website|web|app|software|développement|development|saas|platform/i.test(svcText)) businessType = 'TechnologyCompany';
+    else if (/design|graphi|créati|branding|ux|ui/i.test(svcText)) businessType = 'DesignAgency';
+    else if (/marketing|communication|pub|seo|social media/i.test(svcText)) businessType = 'MarketingAgency';
+    else if (/formation|training|coaching|education|cours/i.test(svcText)) businessType = 'EducationalOrganization';
+    else if (/legal|juridique|avocat|droit|compliance/i.test(svcText)) businessType = 'LegalService';
+    else if (/health|santé|medical|pharma|clinic/i.test(svcText)) businessType = 'MedicalBusiness';
+    else if (/finance|bank|assurance|investissement/i.test(svcText)) businessType = 'FinancialService';
+    else businessType = 'ProfessionalService';
+  }
 
   // City/country: merge JSON-LD + location agent
   const city = location.city || jsonld.address?.city || '';
