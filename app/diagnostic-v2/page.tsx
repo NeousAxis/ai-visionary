@@ -127,9 +127,27 @@ export default function DiagnosticV2Page() {
             } else if (ev.phase === 'complete') {
               setTotalDuration(ev.totalDurationMs || 0);
               if (ev.score) {
+                // Score engine returns blocks as object {identite: 3.5, offre: 8.2}
+                // Convert to array [{name, label, score, maxScore}]
+                const BLOCK_LABELS: Record<string, [string, number]> = {
+                  identite: ['Identity & Presence', 10],
+                  offre: ['Offer Clarity', 20],
+                  processus_methodes: ['Process & Methods', 15],
+                  engagements_conformite: ['Trust & Compliance', 15],
+                  indicateurs: ['Key Indicators', 20],
+                  contenus_pedagogiques: ['Educational Content', 10],
+                  structure_technique: ['Technical Foundation', 10],
+                };
+                const blocksObj = ev.score.blocks || {};
+                const blocksArr = Object.entries(blocksObj).map(([key, val]) => ({
+                  name: key,
+                  label: BLOCK_LABELS[key]?.[0] || key,
+                  score: typeof val === 'number' ? val : 0,
+                  maxScore: BLOCK_LABELS[key]?.[1] || 10,
+                }));
                 setScore({
-                  total: ev.score.score ?? ev.score.total ?? 0,
-                  blocks: ev.score.blocks || ev.score.audit?.blocks || [],
+                  total: ev.score.total ?? 0,
+                  blocks: blocksArr,
                 });
               }
               // Move to step 3 (scoring)

@@ -1,137 +1,128 @@
-// lib/micro-agents/detect-services.ts — Extract services/products from HTML headings and lists
+// lib/micro-agents/detect-services.ts — Extract services/products from HTML
 
 import type { ServicesResult, Quality } from './types';
 
-// Section heading keywords that indicate services/products
-const SERVICE_KEYWORDS = /services?|solutions?|offerings?|what we do|nos services|nos solutions|ce que nous faisons|notre offre|prestations?/i;
-const PRODUCT_KEYWORDS = /products?|produits?|our products|nos produits|catalogue|catalog/i;
-const GENERIC_OFFER = /features?|fonctionnalit[ée]s?|capabilities|comp[ée]tences/i;
-
-// Items to filter out (too generic or navigation)
-const NOISE_FILTER = /^(home|accueil|about|contact|blog|news|login|sign|menu|nav|cookie|privacy|terms|legal|search|\d+|©|all rights)/i;
+const SERVICE_KW = /services?|solutions?|offerings?|what we do|nos services|nos solutions|notre offre|prestations?|accompagnement|beratung|leistungen/i;
+const PRODUCT_KW = /products?|produits?|our products|nos produits|catalogue|catalog/i;
+const GENERIC_KW = /features?|fonctionnalit[ée]s?|capabilities|comp[ée]tences|expertise/i;
+const NOISE = /^(home|accueil|about|contact|blog|news|login|sign|menu|nav|cookie|privacy|terms|legal|search|\d+|©|all rights|en savoir|learn more|read more|voir plus|lire|details|more info)/i;
 
 export function detectServices(html: string): ServicesResult {
   const services: string[] = [];
   const products: string[] = [];
-  let q: Quality = 0;
 
-  // Strip scripts and styles
-  const cleanHtml = html
+  // Strip nav, header, footer, scripts, styles
+  const clean = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<nav[\s\S]*?<\/nav>/gi, '');
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[\s\S]*?<\/header>/gi, '');
 
-  // Strategy 1: Find headings near service/product sections, then extract sibling lists
-  const sectionRegex = /<(?:h[2-3]|div[^>]*class="[^"]*(?:title|heading)[^"]*")[^>]*>([\s\S]*?)<\/(?:h[2-3]|div)>\s*(?:<[^>]*>)*\s*(?:<ul[^>]*>([\s\S]*?)<\/ul>)?/gi;
+  // === Strategy 1: List items (ul/ol) near service headings ===
+  extractListsNearHeadings(clean, SERVICE_KW, services);
+  extractListsNearHeadings(clean, PRODUCT_KW, products);
 
-  let match;
-  while ((match = sectionRegex.exec(cleanHtml)) !== null) {
-    const headingText = stripTags(match[1]).trim();
-    const listHtml = match[2] || '';
+  // === Strategy 2: Card layouts (repeated div/article with h3/h4 inside sections) ===
+  extractCardsInSections(clean, SERVICE_KW, services);
+  extractCardsInSections(clean, PRODUCT_KW, products);
+  extractCardsInSections(clean, GENERIC_KW, services);
 
-    const isService = SERVICE_KEYWORDS.test(headingText) || GENERIC_OFFER.test(headingText);
-    const isProduct = PRODUCT_KEYWORDS.test(headingText);
+  // === Strategy 3: All h3/h4 under service-keyword sections ===
+  extractHeadingsInSections(clean, SERVICE_KW, services);
+  extractHeadingsInSections(clean, PRODUCT_KW, products);
 
-    if ((isService || isProduct) && listHtml) {
-      const items = extractListItems(listHtml);
-      if (isProduct) {
-        products.push(...items);
-      } else {
-        services.push(...items);
+  // === Strategy 4: Meta description as hint ===
+  const metaDesc = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i);
+  if (metaDesc && services.length === 0 && products.length === 0) {
+    // Extract comma-separated items from meta description
+    const parts = metaDesc[1].split(/[,|·•]/).map(s => s.trim()).filter(s => s.length > 3 && s.length < 100);
+    if (parts.length >= 2) {
+      services.push(...parts.slice(0, 5));
+    }
+  }
+
+  // === Strategy 5: Title tag parsing ===
+  if (services.length === 0 && products.length === 0) {
+    const title = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    if (title) {
+      const parts = title[1].split(/[|·\-–—]/).map(s => s.trim()).filter(s => s.length > 3);
+      if (parts.length >= 2) {
+        // Second part is often the service description
+        services.push(parts.slice(1).join(' — '));
       }
     }
   }
 
-  // Strategy 2: Extract all h2/h3 headings under service/product sections
-  const allHeadings = extractHeadingsNearKeywords(cleanHtml);
-  for (const { text, type } of allHeadings) {
-    if (type === 'product' && !products.includes(text)) {
-      products.push(text);
-    } else if (type === 'service' && !services.includes(text)) {
-      services.push(text);
-    }
-  }
-
-  // Strategy 3: If still empty, look for any ul/li in main content area
-  if (services.length === 0 && products.length === 0) {
-    const mainContent = cleanHtml.match(/<main[\s\S]*?<\/main>/i)?.[0] || cleanHtml;
-    const allLists = extractAllMeaningfulLists(mainContent);
-    services.push(...allLists.slice(0, 10)); // Cap at 10
-  }
-
-  // Deduplicate and clean
-  const cleanServices = deduplicateAndClean(services);
-  const cleanProducts = deduplicateAndClean(products);
-
-  // Quality
-  if (cleanServices.length > 0 || cleanProducts.length > 0) {
-    q = cleanServices.length >= 3 || cleanProducts.length >= 3 ? 1 : 0.5;
-  }
+  const cleanServices = dedup(services);
+  const cleanProducts = dedup(products);
+  const total = cleanServices.length + cleanProducts.length;
+  const q: Quality = total >= 3 ? 1 : total > 0 ? 0.5 : 0;
 
   return { services: cleanServices, products: cleanProducts, q };
 }
 
-function stripTags(html: string): string {
-  return html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim();
+function strip(html: string): string {
+  return html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#\d+;/g, '').trim();
 }
 
-function extractListItems(listHtml: string): string[] {
-  const items: string[] = [];
-  const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+function extractListsNearHeadings(html: string, keyword: RegExp, out: string[]) {
+  // Find sections containing keyword, then extract ul/ol items within
+  const sectionRe = /(<(?:section|div|article)[^>]*>[\s\S]*?<\/(?:section|div|article)>)/gi;
   let match;
-  while ((match = liRegex.exec(listHtml)) !== null) {
-    const text = stripTags(match[1]).trim();
-    if (text.length > 2 && text.length < 200 && !NOISE_FILTER.test(text)) {
-      items.push(text);
-    }
-  }
-  return items;
-}
+  while ((match = sectionRe.exec(html)) !== null) {
+    const section = match[1];
+    if (section.length > 20000) continue; // skip huge sections
+    const first500 = strip(section.substring(0, 500));
+    if (!keyword.test(first500)) continue;
 
-function extractHeadingsNearKeywords(html: string): { text: string; type: 'service' | 'product' }[] {
-  const results: { text: string; type: 'service' | 'product' }[] = [];
-
-  // Find sections that contain service/product keywords
-  const sections = html.split(/<(?:section|div)[^>]*>/i);
-
-  for (const section of sections) {
-    const isServiceSection = SERVICE_KEYWORDS.test(section.substring(0, 500));
-    const isProductSection = PRODUCT_KEYWORDS.test(section.substring(0, 500));
-
-    if (isServiceSection || isProductSection) {
-      const headingRegex = /<h[2-4][^>]*>([\s\S]*?)<\/h[2-4]>/gi;
-      let match;
-      while ((match = headingRegex.exec(section)) !== null) {
-        const text = stripTags(match[1]).trim();
-        if (text.length > 3 && text.length < 150 && !NOISE_FILTER.test(text) &&
-            !SERVICE_KEYWORDS.test(text) && !PRODUCT_KEYWORDS.test(text)) {
-          results.push({
-            text,
-            type: isProductSection ? 'product' : 'service',
-          });
-        }
+    const liRe = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+    let li;
+    while ((li = liRe.exec(section)) !== null) {
+      const text = strip(li[1]).replace(/\s+/g, ' ');
+      if (text.length > 3 && text.length < 200 && !NOISE.test(text)) {
+        out.push(text);
       }
     }
   }
-
-  return results;
 }
 
-function extractAllMeaningfulLists(html: string): string[] {
-  const items: string[] = [];
-  const ulRegex = /<ul[^>]*>([\s\S]*?)<\/ul>/gi;
-  let match;
-  while ((match = ulRegex.exec(html)) !== null) {
-    const listItems = extractListItems(match[1]);
-    // Only take lists with 3+ items (likely content, not navigation)
-    if (listItems.length >= 3) {
-      items.push(...listItems);
+function extractCardsInSections(html: string, keyword: RegExp, out: string[]) {
+  // Split by sections, find ones with keyword, extract h3/h4 headings from card-like divs
+  const sections = html.split(/<(?:section)[^>]*>/i);
+  for (const section of sections) {
+    if (section.length > 30000) continue;
+    const first500 = strip(section.substring(0, 500));
+    if (!keyword.test(first500)) continue;
+
+    // Look for h3/h4 headings (typical of cards)
+    const headingRe = /<h[3-4][^>]*>([\s\S]*?)<\/h[3-4]>/gi;
+    let h;
+    while ((h = headingRe.exec(section)) !== null) {
+      const text = strip(h[1]).replace(/\s+/g, ' ');
+      if (text.length > 3 && text.length < 150 && !NOISE.test(text) &&
+          !keyword.test(text) && !SERVICE_KW.test(text) && !PRODUCT_KW.test(text)) {
+        out.push(text);
+      }
     }
   }
-  return items;
 }
 
-function deduplicateAndClean(items: string[]): string[] {
+function extractHeadingsInSections(html: string, keyword: RegExp, out: string[]) {
+  const sections = html.split(/<(?:section|div)[^>]*class=["'][^"']*(?:service|product|offer|card|feature)[^"']*["']/i);
+  for (const section of sections) {
+    if (section.length > 20000 || !keyword.test(section.substring(0, 800))) continue;
+    const hRe = /<h[2-4][^>]*>([\s\S]*?)<\/h[2-4]>/gi;
+    let h;
+    while ((h = hRe.exec(section)) !== null) {
+      const text = strip(h[1]).replace(/\s+/g, ' ');
+      if (text.length > 3 && text.length < 150 && !NOISE.test(text)) {
+        out.push(text);
+      }
+    }
+  }
+}
+
+function dedup(items: string[]): string[] {
   const seen = new Set<string>();
   return items
     .map(s => s.replace(/\s+/g, ' ').trim())
@@ -139,7 +130,7 @@ function deduplicateAndClean(items: string[]): string[] {
       const key = s.toLowerCase();
       if (seen.has(key)) return false;
       seen.add(key);
-      return s.length > 2 && s.length < 200;
+      return s.length > 3 && s.length < 200;
     })
-    .slice(0, 15); // Cap at 15 items
+    .slice(0, 15);
 }

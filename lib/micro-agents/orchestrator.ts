@@ -92,9 +92,9 @@ export async function runAllAgents(
   const [jsonldRun, contactRun, servicesRun, legalRun, securityRun, socialRun] =
     await Promise.all(agentPromises);
 
-  // Location uses JSON-LD results
+  // Location uses JSON-LD results + site URL
   const locationRun = await runAgent('detect-location', () =>
-    detectLocation(html, jsonldRun.result || undefined)
+    detectLocation(html, jsonldRun.result || undefined, fetchResult.url)
   );
 
   // Emit events
