@@ -89,14 +89,19 @@ export default function DiagnosticV2Page() {
         scrollTo('step-5');
         setCompareLoading(true);
         try {
+          // Get services detected by agents for sector matching
+          const detectedServices = agents.find(a => a.name === 'detect-services')?.data?.services || [];
+          const siteDomain = scanUrl.replace(/^https?:\/\//, '').split('/')[0];
+          const jsonldName = agents.find(a => a.name === 'detect-jsonld')?.data?.name || '';
+
           const r = await fetch('/api/diagnostic/compare', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              sector: 'consulting',
               country: agents.find(a => a.name === 'detect-location')?.data?.country || '',
-              currentScore: score?.total || 0,
-              currentName: scanUrl.replace(/^https?:\/\//, '').split('/')[0],
+              services: detectedServices,
+              siteName: jsonldName || siteDomain,
+              siteUrl: scanUrl,
             }),
           });
           const data = await r.json();

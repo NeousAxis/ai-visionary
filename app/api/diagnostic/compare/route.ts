@@ -1,56 +1,114 @@
-// app/api/diagnostic/compare/route.ts — Find real competitors from AYA registry
+// app/api/diagnostic/compare/route.ts — Find REAL sector competitors from AYA registry
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+// Map detected keywords to AYA sector_macro values
+const SECTOR_KEYWORDS: Record<string, string[]> = {
+  'consulting': ['consulting', 'conseil', 'stratégie', 'strategy', 'accompagnement', 'advisory'],
+  'technology': ['tech', 'software', 'saas', 'digital', 'platform', 'app', 'développement', 'it services'],
+  'finance': ['finance', 'bank', 'insurance', 'fintech', 'investissement', 'crédit'],
+  'education': ['education', 'formation', 'training', 'école', 'university', 'learning'],
+  'healthcare': ['health', 'santé', 'medical', 'pharma', 'clinic'],
+  'retail': ['retail', 'commerce', 'e-commerce', 'shop', 'store', 'boutique'],
+  'sustainability': ['durable', 'durabilité', 'sustainability', 'rse', 'csr', 'environnement', 'écologie', 'green', 'transition'],
+  'association': ['association', 'ong', 'ngo', 'fondation', 'non-profit', 'bénévol'],
+  'media': ['media', 'presse', 'journal', 'communication', 'marketing', 'agence'],
+  'legal': ['legal', 'juridique', 'avocat', 'law', 'notaire', 'droit'],
+  'real-estate': ['immobilier', 'real estate', 'property', 'construction'],
+  'food': ['food', 'restaurant', 'alimentation', 'gastronomie', 'cuisine'],
+  'manufacturing': ['industrie', 'manufacturing', 'production', 'usine', 'fabrication'],
+};
+
+function detectSector(services: string[], title: string): string[] {
+  const allText = [...services, title].join(' ').toLowerCase();
+  const matches: string[] = [];
+  for (const [sector, keywords] of Object.entries(SECTOR_KEYWORDS)) {
+    if (keywords.some(kw => allText.includes(kw))) {
+      matches.push(sector);
+    }
+  }
+  return matches.length > 0 ? matches : ['consulting']; // fallback
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { country } = await req.json();
+    const { country, services, siteName, siteUrl } = await req.json();
 
-    const allEntities = await db.getAyaEntities(500);
+    const allEntities = await db.getAyaEntities(1000);
     if (!allEntities || allEntities.length === 0) {
       return NextResponse.json({ competitors: [], averageScore: 0, totalInSector: 0 });
     }
 
-    // Filter by country if available
-    let pool = allEntities;
-    if (country) {
-      const cl = country.toLowerCase();
-      const countryPool = pool.filter((e: any) =>
-        (e.country_legal || e.country || '').toLowerCase().includes(cl)
+    // Detect sector from services
+    const sectors = detectSector(services || [], siteName || '');
+
+    // Normalize site URL for exclusion
+    const siteUrlNorm = (siteUrl || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
+
+    // Filter: same sector + exclude the tested site itself
+    const sectorPool = allEntities.filter((e: any) => {
+      const name = (e.display_name || e.legal_name || '').toLowerCase();
+      const entitySector = (e.sector_macro || '').toLowerCase();
+      const entityUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
+
+      // Exclude the tested site
+      if (siteUrlNorm && entityUrl && entityUrl.includes(siteUrlNorm)) return false;
+      if (siteUrlNorm && siteUrlNorm.includes(entityUrl) && entityUrl.length > 3) return false;
+      if (siteName && name === siteName.toLowerCase()) return false;
+
+      // Must have a name
+      if (name.length < 2) return false;
+
+      // Match sector
+      return sectors.some(s =>
+        entitySector.includes(s) ||
+        SECTOR_KEYWORDS[s]?.some(kw => entitySector.includes(kw) || name.includes(kw))
       );
-      if (countryPool.length >= 3) pool = countryPool;
+    });
+
+    // If sector filter too restrictive, try country filter
+    let pool = sectorPool;
+    if (pool.length < 3 && country) {
+      const cl = country.toLowerCase();
+      pool = allEntities.filter((e: any) => {
+        const entityUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
+        if (siteUrlNorm && entityUrl.includes(siteUrlNorm)) return false;
+        const n = (e.display_name || e.legal_name || '');
+        return n.length > 1 && (e.country_legal || '').toLowerCase().includes(cl);
+      });
     }
 
-    // Only keep entities WITH a name (no "Unknown")
-    const named = pool.filter((e: any) => {
-      const n = e.display_name || e.legal_name || '';
-      return n.length > 1 && n !== 'Unknown';
-    });
+    // Still not enough? Use all entities minus tested site
+    if (pool.length < 3) {
+      pool = allEntities.filter((e: any) => {
+        const entityUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
+        if (siteUrlNorm && entityUrl.includes(siteUrlNorm)) return false;
+        return (e.display_name || e.legal_name || '').length > 1;
+      });
+    }
 
-    // Prefer certified entities (real scores), then entities with non-50 scores
-    const certified = named.filter((e: any) => e.payment_completed === true && (e.asr_score || 0) > 0);
-    const withRealScore = named.filter((e: any) => {
-      const s = e.asr_score || 0;
-      return s > 0 && s !== 50 && !certified.some((c: any) => c.entity_id === e.entity_id);
-    });
+    // Sort by score, prefer certified
+    const sorted = pool
+      .filter((e: any) => (e.asr_score || 0) > 0)
+      .sort((a: any, b: any) => {
+        // Certified first, then by score
+        const aCert = a.payment_completed ? 1 : 0;
+        const bCert = b.payment_completed ? 1 : 0;
+        if (aCert !== bCert) return bCert - aCert;
+        return (b.asr_score || 0) - (a.asr_score || 0);
+      });
 
-    const meaningful = [...certified, ...withRealScore];
+    const competitors = sorted.slice(0, 5).map((e: any) => ({
+      name: e.display_name || e.legal_name,
+      score: e.asr_score || 0,
+      country: e.country_legal || '',
+      certified: e.payment_completed === true,
+      sector: e.sector_macro || '',
+    }));
 
-    // Build competitors list — only named entities
-    const competitors = (meaningful.length >= 3 ? meaningful : named.filter((e: any) => (e.asr_score || 0) > 0))
-      .sort((a: any, b: any) => (b.asr_score || 0) - (a.asr_score || 0))
-      .slice(0, 5)
-      .map((e: any) => ({
-        name: e.display_name || e.legal_name || 'N/A',
-        score: e.asr_score || 0,
-        country: e.country_legal || e.country || '',
-        certified: e.payment_completed === true,
-      }))
-      .filter((c: any) => c.name !== 'N/A'); // Extra safety
-
-    // Average from pool
-    const scores = named.map((e: any) => e.asr_score || 0).filter((s: number) => s > 0);
+    // Average
+    const scores = pool.map((e: any) => e.asr_score || 0).filter((s: number) => s > 0);
     const averageScore = scores.length > 0
       ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
       : 0;
@@ -58,7 +116,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       competitors,
       averageScore,
-      totalInSector: named.length,
+      totalInSector: sectorPool.length,
+      detectedSectors: sectors,
     });
   } catch (err) {
     console.error('[compare]', err);
