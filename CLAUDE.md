@@ -13,7 +13,7 @@
 
 | Terme | Definition |
 |-------|-----------|
-| **AYO** | Agent IA qui diagnostique la lisibilite IA d'un site web. V1=chatbot Gemini (page /diagnostic). V2=micro-agents deterministes (page /diagnostic-v2, branche feature/micro-agents-diagnostic). |
+| **AYO** | Agent IA qui diagnostique la lisibilite IA d'un site web. V1=chatbot Gemini (page /diagnostic). V2=micro-agents LLM cibles Gemini 3 Flash (page /diagnostic-v2, branche feature/micro-agents-diagnostic). |
 | **AIO Score** | Score 0-100, deterministe, base sur 7 blocs ponderes (la "Bible AIO"). |
 | **AYA** | Registre public d'entites indexees/certifiees (Supabase `aya_registry`). ~4400+ entites. |
 | **ASR** | AI Singular Record — fichier JSON-LD signe Ed25519, identite numerique de l'entite. |
@@ -235,83 +235,109 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 ---
 
-### Diagnostic V2 — Micro-Agents Deterministes (branche `feature/micro-agents-diagnostic`)
+### Diagnostic V2 — Micro-Agents LLM Cibles (branche `feature/micro-agents-diagnostic`)
 
 > Branche experimentale JETABLE. Si echec, on supprime. `main` reste intacte.
 > Page : `/diagnostic-v2` — coexiste avec `/diagnostic` (V1 chatbot Gemini)
 
 #### Principe
 
-Remplacer le LLM (Gemini) par 7 micro-agents deterministes. Chaque agent fait UNE action sur le HTML brut.
-Zero LLM pour l'extraction. Le score reflete ce qui est TROUVE, pas invente.
+Chaque micro-agent = 1 appel LLM (Gemini 3 Flash) avec un prompt ultra-cible de 3-5 lignes.
+Tache trop specifique pour halluciner. Schema de sortie JSON valide par parseJson.
+Les agents tournent en SEQUENTIEL pour que le client voie chaque agent travailler en live.
 
 #### Les 7 micro-agents
 
-| Agent | Fichier | Action | Input | Output |
-|-------|---------|--------|-------|--------|
-| detect-contact | `lib/micro-agents/detect-contact.ts` | Email + telephone | HTML | `{ email, phone, q }` |
-| detect-services | `lib/micro-agents/detect-services.ts` | Services/produits (h2/h3/ul) | HTML | `{ services[], products[], q }` |
-| detect-legal | `lib/micro-agents/detect-legal.ts` | Liens legal/privacy + certifications | HTML | `{ policies[], frameworks[], certifications[], urls[], q }` |
-| detect-location | `lib/micro-agents/detect-location.ts` | Pays + ville | HTML | `{ city, country, q }` |
-| detect-security | `lib/micro-agents/detect-security.ts` | Headers HTTP + mentions securite | HTML + headers | `{ measures[], q }` |
-| detect-jsonld | `lib/micro-agents/detect-jsonld.ts` | Parse JSON-LD | HTML | `{ schemas[], type, name, q }` |
-| detect-social | `lib/micro-agents/detect-social.ts` | Liens sociaux | HTML | `{ links[], platforms[], q }` |
+| Agent | Fichier | Methode | Input | Output |
+|-------|---------|---------|-------|--------|
+| detect-contact | `lib/micro-agents/detect-contact.ts` | **LLM** | Texte site | `{ email, phone, hasContactForm, q }` |
+| detect-services | `lib/micro-agents/detect-services.ts` | **LLM** | Texte site | `{ services[], products[], target_audience, use_cases[], pricing, q }` |
+| detect-legal | `lib/micro-agents/detect-legal.ts` | **LLM** | Texte site | `{ policies[], frameworks[], certifications[], urls[], q }` |
+| detect-location | `lib/micro-agents/detect-location.ts` | **JSON-LD d'abord, puis LLM** | Texte + URL | `{ city, country, q }` |
+| detect-security | `lib/micro-agents/detect-security.ts` | **Headers deterministe + LLM** | Texte + headers | `{ measures[], q }` |
+| detect-jsonld | `lib/micro-agents/detect-jsonld.ts` | **Deterministe** (parsing JSON) | HTML brut | `{ schemas[], type, name, q }` |
+| detect-social | `lib/micro-agents/detect-social.ts` | **Deterministe** (regex URL) | HTML brut | `{ links[], platforms[], q }` |
 
-#### Orchestrateur
+#### Architecture LLM
 
-`lib/micro-agents/orchestrator.ts` — lance les 7 agents en parallele, merge les resultats en `AyoExtract` via `mergeAgentResultsToExtract()`. Compatible avec le score engine et les generateurs existants.
+| Composant | Fichier | Role |
+|-----------|---------|------|
+| llm-agent | `lib/micro-agents/llm-agent.ts` | Caller partage : Gemini 3 Flash, temp=0, maxOutputTokens=4000 |
+| html-fetcher | `lib/micro-agents/html-fetcher.ts` | Fetch HTML + SPA detection (jina.ai fallback) + Puppeteer |
+| orchestrator | `lib/micro-agents/orchestrator.ts` | Sequentiel, merge → AyoExtract, check ASR + AYA registry |
+
+**Prompts bilingues** : tous les prompts supportent FR/EN/DE.
+**parseJson robuste** : repare le JSON tronque (ferme les brackets manquants).
+**SPA handling** : detecte les shells vides (div#root), fallback vers jina.ai markdown → conversion HTML.
+**Contact forms** : un formulaire de contact = methode de contact valide (q=0.5), pas une penalite.
+
+#### Orchestrateur — champs extraits
+
+L'orchestrateur fait aussi un 8eme appel LLM pour process/indicateurs :
+- `process_steps` : etapes methodologie
+- `delivery_mode` : online / on-site / hybrid
+- `geographies_served` : zones geographiques
+- `quality_assurance` : suivi qualite
+- `key_indicators` : chiffres cles (X ans, X clients, X projets)
+
+Checks supplementaires (deterministes) :
+- HEAD `/.ayo/asr.json` → `has_asr`
+- `db.getAyaEntityByUrl()` → `is_aya_registered`
+- Viewport meta, sitemap, FAQ, glossaire, documentation → dans `contenus_pedagogiques` + `structure_technique`
 
 #### Mapping agents → blocs AIO
 
 | Bloc AyoExtract | Agents sources | Champs couverts |
 |-----------------|---------------|-----------------|
-| identite (10pts) | detect-contact, detect-location, detect-jsonld | name, city, country, email, phone |
-| offre (20pts) | detect-services | services, products |
-| processus_methodes (15pts) | — | Non couvert (q=0) |
+| identite (10pts) | detect-contact, detect-location, detect-jsonld | name, city, country, email/form, phone |
+| offre (20pts) | detect-services | services, products, target_audience, use_cases, pricing |
+| processus_methodes (15pts) | orchestrator LLM | process_steps, delivery_mode, geographies, quality_assurance |
 | engagements_conformite (15pts) | detect-legal, detect-security | policies, frameworks, certifications, security_measures |
-| indicateurs (20pts) | — | Non couvert (q=0) |
-| contenus_pedagogiques (10pts) | detect-jsonld (FAQ schema) | has_faq |
-| structure_technique (10pts) | detect-jsonld, detect-security | has_jsonld, has_asr |
+| indicateurs (20pts) | orchestrator LLM | key_indicators |
+| contenus_pedagogiques (10pts) | detect-jsonld + deterministe | has_faq, has_glossary, has_documentation |
+| structure_technique (10pts) | detect-jsonld + deterministe | has_asr, has_jsonld, has_sitemap, mobile_optimized |
 
-~16/30 champs couverts. Les ~14 restants = q:0 (question engine V4 optionnel).
+#### Score PRO projete
+
+La route `/api/diagnostic/scan` calcule aussi un `proScore` :
+- Clone l'extract et ajoute ce qu'AYO PRO genere reellement (FAQ, glossary, doc, ASR, JSON-LD)
+- Repasse `computeAioScore()` sur l'extract enrichi
+- Le delta montre la valeur ajoutee du Pack PRO (typiquement +10 a +18 points)
 
 #### Page Diagnostic V2 — One-Page 8 etapes
 
-| Etape | Composant | Description |
-|-------|-----------|-------------|
-| 1 | `UrlInput.tsx` | Champ URL + bouton Analyser |
-| 2 | `AgentPanel.tsx` + `AgentCard.tsx` | 7 cartes agents live via SSE |
-| 3 | `ScoreReveal.tsx` + `ScoreBlockBar.tsx` | Score AIO anime bloc par bloc |
-| 4 | `FileGeneration.tsx` | 5 fichiers PRO generes avec checkmarks |
-| 5 | `PlanSelector.tsx` | Choix AYA (19 CHF/mois) vs PRO (499 CHF) |
-| 6 | `PaymentStep.tsx` | Redirect Stripe Checkout |
-| 7 | `ConfirmationStep.tsx` | Succes + info livraison |
-| 8 | `CompareSection.tsx` | Compare avec concurrents AYA (meme secteur/pays) |
+| Etape | Description |
+|-------|-------------|
+| 1 | Champ URL + bouton Analyser |
+| 2 | 7 cartes agents live via SSE (spinner + texte scanning + resultats) |
+| 3 | Score AIO 7 dimensions (cartes full-width + ring total) |
+| 4 | 5 fichiers ASR generes un par un avec barre de progression |
+| 5 | Compare vs concurrents AYA (meme sector_macro, certifies d'abord) + score PRO |
+| 6 | Choix plan AYA (19 CHF/mois) vs PRO (499 CHF) |
+| 7 | Paiement Stripe |
+| 8 | Confirmation + checklist |
 
 #### API Diagnostic V2
 
 | Route | Methode | Description |
 |-------|---------|-------------|
-| `/api/diagnostic/scan` | POST | SSE — lance micro-agents, stream resultats en temps reel |
-| `/api/diagnostic/score` | POST | Calcule AIO score depuis resultats merges |
-| `/api/diagnostic/generate` | POST | Genere les 5 fichiers PRO |
+| `/api/diagnostic/scan` | POST | SSE — lance micro-agents sequentiels, stream resultats + score + proScore |
+| `/api/diagnostic/score` | POST | Calcule AIO score depuis extract |
+| `/api/diagnostic/compare` | POST | Cherche concurrents dans AYA par sector_macro |
 
 #### Structure fichiers V2
 
 ```
 lib/micro-agents/
-  types.ts, html-fetcher.ts, orchestrator.ts
+  types.ts, llm-agent.ts, html-fetcher.ts, orchestrator.ts
   detect-contact.ts, detect-services.ts, detect-legal.ts
   detect-location.ts, detect-security.ts, detect-jsonld.ts, detect-social.ts
 
 app/diagnostic-v2/
   page.tsx, layout.tsx
 
-app/components/diagnostic-v2/
-  UrlInput.tsx, AgentPanel.tsx, AgentCard.tsx
-  ScoreReveal.tsx, ScoreBlockBar.tsx, FileGeneration.tsx
-  PlanSelector.tsx, PaymentStep.tsx, ConfirmationStep.tsx
-  CompareSection.tsx, DiagnosticStepContainer.tsx
+app/api/diagnostic/
+  scan/route.ts, score/route.ts, compare/route.ts
 ```
 
 ---

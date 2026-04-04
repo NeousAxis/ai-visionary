@@ -275,7 +275,12 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`,
         business_type: field(businessType, businessType ? 1 : 0, businessType ? ['scan_micro_agent'] : []),
         city: field(city, location.q, city ? ['scan_micro_agent'] : []),
         country: field(country, location.q, country ? ['scan_micro_agent'] : []),
-        contact_email: field(email, email ? 1 : 0, email ? ['scan_micro_agent'] : []),
+        // Email OR contact form = valid contact method (anti-spam = normal)
+        contact_email: field(
+          email || ((contact as any).hasContactForm ? 'contact_form' : ''),
+          email ? 1 : (contact as any).hasContactForm ? 0.5 : 0,
+          email ? ['scan_micro_agent'] : (contact as any).hasContactForm ? ['scan_micro_agent_form'] : []
+        ),
         contact_phone: field(phone, phone ? 0.5 : 0, phone ? ['scan_micro_agent'] : []),
       },
       offre: {
