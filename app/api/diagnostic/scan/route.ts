@@ -50,6 +50,12 @@ export async function POST(req: NextRequest) {
         send({ phase: 'merge', status: 'done' });
 
         // Phase 4: Compute current score
+        // V2 scan mode: disable evidence caps (no JSON-LD cap, no external proof cap)
+        // The V2 score reflects data FOUND, not penalized for missing technical files
+        // The evidence layer comes later (V4 questionnaire)
+        extract.source.scan.has_jsonld = extract.source.scan.has_jsonld || true; // Disable cap at 50
+        extract.source.scan.is_aya_registered = true; // Disable cap for non-AYA sites
+
         send({ phase: 'score', status: 'running' });
         const score = computeAioScore(extract);
 
