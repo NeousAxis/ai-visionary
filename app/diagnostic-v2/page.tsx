@@ -55,8 +55,9 @@ export default function DiagnosticV2Page() {
   const [filesRevealed, setFilesRevealed] = useState<number>(0);
   const [scoreRevealed, setScoreRevealed] = useState(false);
   const [competitors, setCompetitors] = useState<{ name: string; score: number; country: string }[]>([]);
-  const [avgScore, setAvgScore] = useState(32);
+  const [avgScore, setAvgScore] = useState(0);
   const [totalInSector, setTotalInSector] = useState(0);
+  const [compareLoading, setCompareLoading] = useState(false);
 
   const scrollTo = useCallback((id: string) => {
     setTimeout(() => {
@@ -72,30 +73,30 @@ export default function DiagnosticV2Page() {
     }
     if (currentStep === 4 && filesRevealed === FILES.length) {
       // Auto-advance to step 5 (Compare) + fetch competitors
-      setTimeout(() => {
+      setTimeout(async () => {
         setCurrentStep(5);
         scrollTo('step-5');
-        // Fetch real competitors from AYA registry
-        fetch('/api/diagnostic/compare', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sector: 'consulting',
-            country: agents.find(a => a.name === 'detect-location')?.data?.country || '',
-            currentScore: score?.total || 0,
-            currentName: scanUrl.replace(/^https?:\/\//, '').split('/')[0],
-          }),
-        })
-          .then(r => r.json())
-          .then(data => {
-            if (data.competitors?.length) setCompetitors(data.competitors);
-            if (data.averageScore) setAvgScore(data.averageScore);
-            if (data.totalInSector) setTotalInSector(data.totalInSector);
-          })
-          .catch(() => {});
+        setCompareLoading(true);
+        try {
+          const r = await fetch('/api/diagnostic/compare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sector: 'consulting',
+              country: agents.find(a => a.name === 'detect-location')?.data?.country || '',
+              currentScore: score?.total || 0,
+              currentName: scanUrl.replace(/^https?:\/\//, '').split('/')[0],
+            }),
+          });
+          const data = await r.json();
+          if (data.competitors?.length) setCompetitors(data.competitors);
+          if (data.averageScore) setAvgScore(data.averageScore);
+          if (data.totalInSector) setTotalInSector(data.totalInSector);
+        } catch { /* ignore */ }
+        setCompareLoading(false);
+        // Auto-advance to step 6 (Plans) after compare loaded
+        setTimeout(() => { setCurrentStep(6); scrollTo('step-6'); }, 2000);
       }, 1000);
-      // Auto-advance to step 6 (Plans)
-      setTimeout(() => { setCurrentStep(6); scrollTo('step-6'); }, 4000);
     }
   }, [currentStep, filesRevealed, scrollTo]);
 
@@ -370,43 +371,46 @@ export default function DiagnosticV2Page() {
           </p>
 
           <div className="dv2-compare-card">
-            {/* Your score */}
-            <div className="dv2-compare-row">
-              <span className="dv2-compare-label dv2-compare-label--you">Your site</span>
-              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} /></div>
-              <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}</span>
-            </div>
-
-            {/* Real competitors */}
-            {competitors.length > 0 && competitors.map((c, i) => (
-              <div key={i} className="dv2-compare-row">
-                <span className="dv2-compare-label">{c.name.length > 18 ? c.name.substring(0, 18) + '...' : c.name}</span>
-                <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--competitor" style={{ width: `${Math.min(c.score, 100)}%` }} /></div>
-                <span className="dv2-compare-val">{Math.round(c.score)}</span>
+            {compareLoading ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <span className="dv2-dot-pulse" /> Loading competitors from AYA Registry...
               </div>
-            ))}
+            ) : (
+              <>
+                {/* Your score — always first */}
+                <div className="dv2-compare-row">
+                  <span className="dv2-compare-label dv2-compare-label--you">⬤ Your site</span>
+                  <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} /></div>
+                  <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}/100</span>
+                </div>
 
-            {/* Registry average */}
-            <div className="dv2-compare-row">
-              <span className="dv2-compare-label">Registry avg.</span>
-              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--avg" style={{ width: `${avgScore}%` }} /></div>
-              <span className="dv2-compare-val">{avgScore}</span>
-            </div>
+                {/* Real competitors from AYA registry */}
+                {competitors.map((c, i) => (
+                  <div key={i} className="dv2-compare-row">
+                    <span className="dv2-compare-label">{c.name.length > 20 ? c.name.substring(0, 20) + '…' : c.name}</span>
+                    <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--competitor" style={{ width: `${Math.min(c.score, 100)}%` }} /></div>
+                    <span className="dv2-compare-val">{Math.round(c.score)}/100</span>
+                  </div>
+                ))}
 
-            {/* With PRO projection */}
-            <div className="dv2-compare-row">
-              <span className="dv2-compare-label dv2-compare-label--pro">With PRO ✦</span>
-              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--pro" style={{ width: `${Math.min(score.total + 20, 100)}%` }} /></div>
-              <span className="dv2-compare-val dv2-val-pro">{Math.min(Math.round(score.total) + 20, 100)}</span>
-            </div>
+                {/* Sector average */}
+                {avgScore > 0 && (
+                  <div className="dv2-compare-row" style={{ borderTop: '1px solid var(--border-light)', paddingTop: '0.75rem', marginTop: '0.25rem' }}>
+                    <span className="dv2-compare-label">Sector average</span>
+                    <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--avg" style={{ width: `${avgScore}%` }} /></div>
+                    <span className="dv2-compare-val">{avgScore}/100</span>
+                  </div>
+                )}
 
-            <p className="dv2-compare-msg">
-              {score.total >= 50
-                ? '🎉 Your site is already more AI-readable than most businesses!'
-                : competitors.length > 0
-                  ? `💡 With ASR files, you could outperform ${competitors.filter(c => c.score < score.total + 20).length} of these ${competitors.length} competitors.`
-                  : '💡 With ASR files and AYA registration, your AI discoverability would significantly increase.'}
-            </p>
+                <p className="dv2-compare-msg">
+                  {competitors.length > 0
+                    ? score.total > avgScore
+                      ? `🎉 You are above the sector average! With ASR files, you could reach ${Math.min(Math.round(score.total) + 20, 100)}/100.`
+                      : `💡 ${competitors.filter(c => c.score > score.total).length} entities in your sector score higher. ASR files could boost you to ${Math.min(Math.round(score.total) + 20, 100)}/100.`
+                    : '💡 Join the AYA Registry to benchmark against your sector.'}
+                </p>
+              </>
+            )}
           </div>
         </section>
       )}

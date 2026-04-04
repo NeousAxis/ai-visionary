@@ -84,9 +84,9 @@ async function renderWithJina(url: string): Promise<string | null> {
   try {
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), 15000);
+    // NO X-Return-Format header — jina returns clean Markdown by default
     const res = await fetch(`https://r.jina.ai/${url}`, {
       signal: ctrl.signal,
-      headers: { 'Accept': 'text/html', 'X-Return-Format': 'html' },
     });
     clearTimeout(tid);
     if (!res.ok) return null;
