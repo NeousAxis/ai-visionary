@@ -415,7 +415,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 6 | Campagne email entreprises indexees | Haute | A faire |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
-| 9 | Diagnostic V2 micro-agents — 7 micro-agents LLM cibles (Gemini 3 Flash) + page one-page live `/diagnostic-v2` avec 8 etapes. Score scan 67/100 pour whtg1.com (vs 82 V1). Branche `feature/micro-agents-diagnostic`. | Haute | En cours — page fonctionnelle, scoring a affiner |
+| 9 | Diagnostic V2 micro-agents — 7 micro-agents LLM cibles (Gemini 3 Flash) + page one-page live `/diagnostic-v2` avec 8 etapes. Score scan **81/100** pour whtg1.com (vs 82 V1). Zero caps evidence. Branche `feature/micro-agents-diagnostic`. | Haute | En cours — scoring OK, universalite a verifier |
 | 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
 | 11 | Re-scoring batch V2 — repasser les ~4400 entites AYA au travers du scoring V2 micro-agents pour coherence. Pipeline batch a integrer dans le bot. ~35000 appels Gemini Flash. | Critique | A faire apres finalisation V2 |
 
