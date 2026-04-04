@@ -429,7 +429,7 @@ export default function DiagnosticV2Page() {
                 </div>
 
                 {/* Real competitors from AYA registry */}
-                {competitors.map((c, i) => (
+                {competitors.length > 0 ? competitors.map((c, i) => (
                   <div key={i} className="dv2-compare-row">
                     <span className="dv2-compare-label">
                       {c.name.length > 18 ? c.name.substring(0, 18) + '…' : c.name}
@@ -438,7 +438,11 @@ export default function DiagnosticV2Page() {
                     <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--competitor" style={{ width: `${Math.min(c.score, 100)}%` }} /></div>
                     <span className="dv2-compare-val">{Math.round(c.score)}/100</span>
                   </div>
-                ))}
+                )) : (
+                  <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem', padding: '0.75rem 0' }}>
+                    No direct competitors found in the AYA Registry for your sector.
+                  </p>
+                )}
 
                 {/* Sector average */}
                 {avgScore > 0 && (

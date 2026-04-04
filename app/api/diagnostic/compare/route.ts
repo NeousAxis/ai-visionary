@@ -79,14 +79,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Still not enough? Use all entities minus tested site
-    if (pool.length < 3) {
-      pool = allEntities.filter((e: any) => {
-        const entityUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
-        if (siteUrlNorm && entityUrl.includes(siteUrlNorm)) return false;
-        return (e.display_name || e.legal_name || '').length > 1;
-      });
-    }
+    // If no sector match, DON'T fall back to random companies
+    // Instead return empty competitors with a flag
 
     // Sort by score, prefer certified
     const sorted = pool
@@ -113,11 +107,15 @@ export async function POST(req: NextRequest) {
       ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
       : 0;
 
+    // If pool is too small or only has generic 50-score entities, don't show fake competitors
+    const hasRealCompetitors = competitors.length > 0 && competitors.some((c: any) => c.score !== 50);
+
     return NextResponse.json({
-      competitors,
+      competitors: hasRealCompetitors ? competitors : [],
       averageScore,
       totalInSector: sectorPool.length,
       detectedSectors: sectors,
+      noCompetitors: !hasRealCompetitors,
     });
   } catch (err) {
     console.error('[compare]', err);
