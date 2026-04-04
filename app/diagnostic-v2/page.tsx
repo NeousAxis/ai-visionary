@@ -64,7 +64,7 @@ export default function DiagnosticV2Page() {
   const [scanUrl, setScanUrl] = useState('');
   const [filesRevealed, setFilesRevealed] = useState<number>(0);
   const [scoreRevealed, setScoreRevealed] = useState(false);
-  const [competitors, setCompetitors] = useState<{ name: string; score: number; country: string }[]>([]);
+  const [competitors, setCompetitors] = useState<{ name: string; score: number; country: string; certified?: boolean }[]>([]);
   const [avgScore, setAvgScore] = useState(0);
   const [totalInSector, setTotalInSector] = useState(0);
   const [compareLoading, setCompareLoading] = useState(false);
@@ -309,24 +309,24 @@ export default function DiagnosticV2Page() {
               return (
                 <div
                   key={i}
-                  className={`dv2-score-card ${scoreRevealed ? 'dv2-score-card--revealed' : ''}`}
-                  style={{ animationDelay: `${i * 150}ms` }}
+                  className="dv2-score-card"
+                  style={{ animationDelay: `${i * 120}ms` }}
                 >
                   <div className="dv2-score-card-header">
                     <span className="dv2-score-card-icon">{icon}</span>
                     <span className="dv2-score-card-label">{b.label || b.name}</span>
+                  </div>
+                  <div className="dv2-score-card-bar">
+                    <div
+                      className={`dv2-score-card-fill ${pct >= 70 ? 'dv2-fill-good' : pct >= 40 ? 'dv2-fill-mid' : 'dv2-fill-low'}`}
+                      style={{ width: scoreRevealed ? `${pct}%` : '0%', transition: `width 0.8s ease-out ${i * 120}ms` }}
+                    />
                   </div>
                   <div className="dv2-score-card-value">
                     <span className={`dv2-score-card-num ${pct >= 70 ? 'dv2-num-good' : pct >= 40 ? 'dv2-num-mid' : 'dv2-num-low'}`}>
                       {scoreRevealed ? b.score?.toFixed?.(1) ?? '0' : '—'}
                     </span>
                     <span className="dv2-score-card-max">/{b.maxScore}</span>
-                  </div>
-                  <div className="dv2-score-card-bar">
-                    <div
-                      className={`dv2-score-card-fill ${pct >= 70 ? 'dv2-fill-good' : pct >= 40 ? 'dv2-fill-mid' : 'dv2-fill-low'}`}
-                      style={{ width: scoreRevealed ? `${pct}%` : '0%', transition: `width 0.8s ease-out ${i * 150}ms` }}
-                    />
                   </div>
                   <span className={`dv2-score-card-pct ${pct >= 70 ? 'dv2-num-good' : pct >= 40 ? 'dv2-num-mid' : 'dv2-num-low'}`}>
                     {scoreRevealed ? `${Math.round(pct)}%` : ''}
@@ -419,7 +419,10 @@ export default function DiagnosticV2Page() {
                 {/* Real competitors from AYA registry */}
                 {competitors.map((c, i) => (
                   <div key={i} className="dv2-compare-row">
-                    <span className="dv2-compare-label">{c.name.length > 20 ? c.name.substring(0, 20) + '…' : c.name}</span>
+                    <span className="dv2-compare-label">
+                      {c.name.length > 18 ? c.name.substring(0, 18) + '…' : c.name}
+                      {c.certified && <span className="dv2-compare-certified"> ✦</span>}
+                    </span>
                     <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--competitor" style={{ width: `${Math.min(c.score, 100)}%` }} /></div>
                     <span className="dv2-compare-val">{Math.round(c.score)}/100</span>
                   </div>
