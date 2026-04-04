@@ -78,23 +78,38 @@ export async function runAllAgents(
     };
   }
 
+  // Prepare clean text for LLM agents (strip HTML tags)
+  const textContent = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#\d+;/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
   // Step 2: Run all agents in parallel
+  // JSON-LD + Social = deterministic (parse HTML)
+  // Contact, Services, Legal, Security = LLM (parse text)
   const agentPromises = [
     runAgent('detect-jsonld', () => detectJsonLd(html)),
-    runAgent('detect-contact', () => detectContact(html)),
-    runAgent('detect-services', () => detectServices(html)),
-    runAgent('detect-legal', () => detectLegal(html)),
-    runAgent('detect-security', () => detectSecurity(html, headers)),
-    runAgent('detect-social', () => detectSocial(html)),
+    runAgent('detect-contact', () => detectContact(textContent)),
+    runAgent('detect-services', () => detectServices(textContent)),
+    runAgent('detect-legal', () => detectLegal(textContent)),
+    runAgent('detect-security', () => detectSecurity(textContent, headers)),
+    runAgent('detect-social', () => detectSocial(html)), // needs raw HTML for URLs
   ] as const;
 
-  // Run JSON-LD first (location depends on it), then location
   const [jsonldRun, contactRun, servicesRun, legalRun, securityRun, socialRun] =
     await Promise.all(agentPromises);
 
-  // Location uses JSON-LD results + site URL
+  // Location uses JSON-LD results + text + site URL
   const locationRun = await runAgent('detect-location', () =>
-    detectLocation(html, jsonldRun.result || undefined, fetchResult.url)
+    detectLocation(textContent, jsonldRun.result || undefined, fetchResult.url)
   );
 
   // Emit events
@@ -145,85 +160,56 @@ export async function mergeAgentResultsToExtract(
   const email = contact.email || jsonld.contactPoint?.email || '';
   const phone = contact.phone || jsonld.contactPoint?.phone || '';
 
-  const html = fetchResult.html;
-  const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  const rawHtml = fetchResult.html;
+  const plainText = rawHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
 
   // --- FAQ detection ---
-  const hasFaqLink = /href=["'][^"']*faq[^"']*["']/i.test(html);
-  const hasFaqText = /foire aux questions|frequently asked questions|FAQ/i.test(text);
+  const hasFaqLink = /href=["'][^"']*faq[^"']*["']/i.test(rawHtml);
+  const hasFaqText = /foire aux questions|frequently asked questions|FAQ/i.test(plainText);
   const hasFaqContent = hasFaqLink || hasFaqText || jsonld.hasFaqSchema;
 
-  // --- Process & Methods extraction (from text content) ---
-  const processSteps: string[] = [];
-  // Look for numbered steps or methodology sections
-  const stepPatterns = [
-    /(?:étape|step|phase)\s*[:\s]*(\d+)\s*[:\s.\-–—]+\s*([^\n.]{5,80})/gi,
-    /^0*(\d+)\s*[.\-–—:]\s*([A-ZÀ-Ü][^\n]{5,80})/gm,
-  ];
-  for (const pattern of stepPatterns) {
-    let m;
-    const re = new RegExp(pattern.source, pattern.flags);
-    while ((m = re.exec(text)) !== null) {
-      const step = (m[2] || m[1]).trim();
-      if (step.length > 3 && !processSteps.includes(step)) processSteps.push(step);
+  // --- Process & Indicators via focused LLM ---
+  let processSteps: string[] = [];
+  let deliveryMode = '';
+  let geographies = country || '';
+  let qaText = '';
+  let indicators: string[] = [];
+
+  try {
+    const { llmExtract, parseJson } = await import('./llm-agent');
+    const raw = await llmExtract(
+      `You are a business process extractor. From the website content, extract:
+- process_steps: the methodology or process steps the business follows (max 6)
+- delivery_mode: "online", "on-site", or "hybrid"
+- geographies: where they operate (countries, regions)
+- quality_assurance: any quality control or monitoring mentioned
+- indicators: key numbers/metrics mentioned (e.g. "5 years experience", "200+ clients", "17 SDGs")
+
+Return ONLY valid JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
+Extract ONLY what is explicitly mentioned. Do NOT invent. No explanation.`,
+      plainText,
+    );
+    const data = parseJson<{
+      process_steps?: string[];
+      delivery_mode?: string;
+      geographies?: string;
+      quality_assurance?: string;
+      indicators?: string[];
+    }>(raw);
+    if (data) {
+      processSteps = data.process_steps || [];
+      deliveryMode = data.delivery_mode || '';
+      if (data.geographies) geographies = data.geographies;
+      qaText = data.quality_assurance || '';
+      indicators = data.indicators || [];
     }
-  }
-  // Also extract h3 headings from methodology-like sections
-  const methSections = html.match(/(?:approche|methode|methodology|process|démarche|notre approche|how we work|comment)[\s\S]{0,3000}/gi) || [];
-  for (const section of methSections) {
-    const h3s = section.match(/<h3[^>]*>([\s\S]*?)<\/h3>/gi) || [];
-    for (const h3 of h3s) {
-      const t = h3.replace(/<[^>]+>/g, '').trim();
-      if (t.length > 3 && t.length < 100 && !processSteps.includes(t)) processSteps.push(t);
-    }
-  }
-  // Markdown: look for ### under methodology sections
-  const mdStepRe = /(?:approche|method|process|démarche|comment|du futur)[\s\S]{0,50}###\s+(.+)/gi;
-  let mdM;
-  while ((mdM = mdStepRe.exec(text)) !== null) {
-    if (!processSteps.includes(mdM[1].trim())) processSteps.push(mdM[1].trim());
-  }
-
-  // Delivery mode detection
-  const isOnline = /online|en ligne|digital|remote|à distance|platform|saas|app/i.test(text);
-  const isOnsite = /on.?site|sur.?place|présentiel|in.?person|atelier|workshop/i.test(text);
-  const deliveryMode = isOnline && isOnsite ? 'hybrid' : isOnline ? 'online' : isOnsite ? 'on-site' : '';
-
-  // Geography detection
-  const geoText = /suisses?|swiss|france|europe|worldwide|international|global/i.exec(text);
-  const geographies = geoText ? geoText[0] : country || '';
-
-  // Quality assurance detection
-  const hasQA = /certifi[ée]|quality|qualité|garanti|assurance|suivi|mesure.?d.?impact|ajustement/i.test(text);
-  const qaText = hasQA ? 'Continuous monitoring & adjustment' : '';
-
-  // --- Key Indicators extraction ---
-  const indicators: string[] = [];
-  // Look for numbers with context (years, clients, projects, etc.)
-  const numPatterns = [
-    /(\d+)\s*(?:ans?|years?)\s*(?:d['']?expérience|experience|direction|accompagnement)/gi,
-    /(\d+)\s*(?:clients?|entreprises?|companies|projects?|projets?)/gi,
-    /(\d+)\s*(?:pays|countries|villes|cities)/gi,
-    /\+?\s*(\d+)\s*(?:collaborateurs?|employees?|team|équipe)/gi,
-  ];
-  for (const pattern of numPatterns) {
-    let m;
-    const re = new RegExp(pattern.source, pattern.flags);
-    while ((m = re.exec(text)) !== null) {
-      indicators.push(m[0].trim());
-    }
-  }
-  // Also look for "X ans" or "X+" standalone patterns
-  const standaloneNums = text.match(/\b\d+\s*(?:ans|years|\+|ODD)\b/gi) || [];
-  for (const n of standaloneNums) {
-    if (!indicators.includes(n.trim())) indicators.push(n.trim());
-  }
+  } catch { /* fallback: empty */ }
 
   // --- Technical Foundation ---
-  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(html) || /responsive|mobile/i.test(text);
-  const hasSitemap = /sitemap\.xml/i.test(html);
-  const hasGlossary = /glossar|lexique|glossaire/i.test(text);
-  const hasDocumentation = /documentation|docs\b|developer|api.?reference|guide|tutoriel/i.test(text);
+  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(rawHtml) || /responsive|mobile/i.test(plainText);
+  const hasSitemap = /sitemap\.xml/i.test(rawHtml);
+  const hasGlossary = /glossar|lexique|glossaire/i.test(plainText);
+  const hasDocumentation = /documentation|docs\b|developer|api.?reference|guide|tutoriel/i.test(plainText);
 
   // ASR file check — HEAD request to /.ayo/asr.json
   let hasAsr = false;
@@ -283,7 +269,7 @@ export async function mergeAgentResultsToExtract(
         process_steps: field(processSteps, processSteps.length > 0 ? 1 : 0, processSteps.length ? ['scan_micro_agent'] : []),
         delivery_mode: field(deliveryMode, deliveryMode ? 0.5 : 0, deliveryMode ? ['scan_micro_agent'] : []),
         geographies_served: field(geographies, geographies ? 0.5 : 0, geographies ? ['scan_micro_agent'] : []),
-        quality_assurance: field(qaText, hasQA ? 0.5 : 0, hasQA ? ['scan_micro_agent'] : []),
+        quality_assurance: field(qaText, qaText ? 0.5 : 0, qaText ? ['scan_micro_agent'] : []),
       },
       engagements_conformite: {
         policies: field(legal.policies, legal.policies.length ? legal.q : 0, legal.policies.length ? ['scan_micro_agent'] : []),

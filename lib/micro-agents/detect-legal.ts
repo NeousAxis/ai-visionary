@@ -1,138 +1,36 @@
-// lib/micro-agents/detect-legal.ts — Detect legal/privacy/compliance links + certifications
+// lib/micro-agents/detect-legal.ts — Extract legal/compliance info via focused LLM
 
 import type { LegalResult, Quality } from './types';
+import { llmExtract, parseJson } from './llm-agent';
 
-// Link patterns for policies
-const POLICY_LINK_PATTERNS: [RegExp, string][] = [
-  [/privacy.?policy|politique.?de.?confidentialit[ée]|datenschutz/i, 'Privacy Policy'],
-  [/terms.?(?:of.?(?:service|use)|and.?conditions)|conditions.?g[ée]n[ée]rales|cgu|cgv|agb/i, 'Terms & Conditions'],
-  [/cookie.?policy|politique.?(?:de.?)?cookies/i, 'Cookie Policy'],
-  [/legal.?notice|mentions.?l[ée]gales|impressum/i, 'Legal Notice'],
-  [/refund.?policy|politique.?de.?remboursement/i, 'Refund Policy'],
-  [/disclaimer|avertissement/i, 'Disclaimer'],
-  [/acceptable.?use/i, 'Acceptable Use Policy'],
-  [/data.?processing|dpa|traitement.?des.?donn[ée]es/i, 'Data Processing Agreement'],
-  [/code.?of.?conduct|code.?de.?conduite/i, 'Code of Conduct'],
-];
+const PROMPT = `You are a legal/compliance extractor. From the website content below, extract:
+- policies: published documents (Privacy Policy, Terms & Conditions, Cookie Policy, Legal Notice, etc.)
+- frameworks: regulatory frameworks mentioned (GDPR, HIPAA, PCI-DSS, LPD, CCPA, etc.)
+- certifications: third-party certifications (ISO 27001, SOC 2, B Corp, etc.)
+- urls: any URLs to legal/policy pages found
 
-// Framework detection patterns
-const FRAMEWORK_PATTERNS: [RegExp, string][] = [
-  [/\bGDPR\b|r[èe]glement.?g[ée]n[ée]ral.?sur.?la.?protection.?des.?donn[ée]es|RGPD/i, 'GDPR'],
-  [/\bHIPAA\b/i, 'HIPAA'],
-  [/\bPCI[\s-]DSS\b/i, 'PCI-DSS'],
-  [/\bSOX\b|Sarbanes[\s-]Oxley/i, 'SOX'],
-  [/\bCCPA\b|California.?Consumer.?Privacy/i, 'CCPA'],
-  [/\bLPD\b|Loi.?f[ée]d[ée]rale.?sur.?la.?protection.?des.?donn[ée]es/i, 'LPD'],
-  [/\bnFADP\b|new.?Federal.?Act.?on.?Data.?Protection/i, 'nFADP'],
-  [/\bFINMA\b/i, 'FINMA'],
-  [/\bMiFID\b/i, 'MiFID II'],
-  [/\bDORA\b|Digital.?Operational.?Resilience/i, 'DORA'],
-  [/\bePrivacy\b/i, 'ePrivacy'],
-];
+Extract ONLY what is explicitly mentioned. Do NOT invent.
+Return ONLY valid JSON: {"policies": [], "frameworks": [], "certifications": [], "urls": []}
+No explanation.`;
 
-// Certification patterns
-const CERTIFICATION_PATTERNS: [RegExp, string][] = [
-  [/\bISO[\s-]?27001\b/i, 'ISO 27001'],
-  [/\bISO[\s-]?27701\b/i, 'ISO 27701'],
-  [/\bISO[\s-]?9001\b/i, 'ISO 9001'],
-  [/\bISO[\s-]?14001\b/i, 'ISO 14001'],
-  [/\bISO[\s-]?22301\b/i, 'ISO 22301'],
-  [/\bSOC[\s-]?2\b/i, 'SOC 2'],
-  [/\bSOC[\s-]?1\b/i, 'SOC 1'],
-  [/\bB[\s-]?Corp\b/i, 'B Corp'],
-  [/\bFedRAMP\b/i, 'FedRAMP'],
-  [/\bCSA[\s-]?STAR\b/i, 'CSA STAR'],
-  [/\bCyber[\s-]?Essentials\b/i, 'Cyber Essentials'],
-  [/\bTISAX\b/i, 'TISAX'],
-  [/\bHITRUST\b/i, 'HITRUST'],
-  [/\bISAE[\s-]?3402\b/i, 'ISAE 3402'],
-];
+export async function detectLegal(content: string): Promise<LegalResult> {
+  try {
+    const raw = await llmExtract(PROMPT, content);
+    const data = parseJson<{ policies?: string[]; frameworks?: string[]; certifications?: string[]; urls?: string[] }>(raw);
+    if (!data) return { policies: [], frameworks: [], certifications: [], urls: [], q: 0 };
 
-export function detectLegal(html: string): LegalResult {
-  const policies: string[] = [];
-  const frameworks: string[] = [];
-  const certifications: string[] = [];
-  const urls: string[] = [];
-  let q: Quality = 0;
+    const policies = data.policies || [];
+    const frameworks = data.frameworks || [];
+    const certifications = data.certifications || [];
+    const urls = data.urls || [];
 
-  // --- Extract all links ---
-  const linkRegex = /<a[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  let match;
+    const total = policies.length + frameworks.length + certifications.length;
+    let q: Quality = 0;
+    if (total > 0 && urls.length > 0) q = 1;
+    else if (total > 0) q = 0.5;
 
-  while ((match = linkRegex.exec(html)) !== null) {
-    const href = match[1];
-    const linkText = match[2].replace(/<[^>]+>/g, '').trim();
-    const combined = href + ' ' + linkText;
-
-    for (const [pattern, policyName] of POLICY_LINK_PATTERNS) {
-      if (pattern.test(combined) && !policies.includes(policyName)) {
-        policies.push(policyName);
-        if (href.startsWith('http') || href.startsWith('/')) {
-          urls.push(href);
-        }
-        break;
-      }
-    }
+    return { policies, frameworks, certifications, urls, q };
+  } catch {
+    return { policies: [], frameworks: [], certifications: [], urls: [], q: 0 };
   }
-
-  // --- Detect frameworks in full text ---
-  for (const [pattern, frameworkName] of FRAMEWORK_PATTERNS) {
-    if (pattern.test(html) && !frameworks.includes(frameworkName)) {
-      frameworks.push(frameworkName);
-    }
-  }
-
-  // --- Detect certifications ---
-  for (const [pattern, certName] of CERTIFICATION_PATTERNS) {
-    if (pattern.test(html) && !certifications.includes(certName)) {
-      certifications.push(certName);
-    }
-  }
-
-  // --- Text-based detection (for SPA/markdown rendered content) ---
-  const plainText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-
-  // Detect policy mentions in text (not just links)
-  const textPolicyPatterns: [RegExp, string][] = [
-    [/mentions?\s+l[ée]gales/i, 'Legal Notice'],
-    [/privacy\s+policy|politique\s+de\s+confidentialit/i, 'Privacy Policy'],
-    [/terms?\s+(?:of\s+)?(?:service|use)|conditions?\s+g[ée]n[ée]rales|CGV|CGU/i, 'Terms & Conditions'],
-    [/cookie\s+polic|politique\s+(?:de\s+)?cookies/i, 'Cookie Policy'],
-    [/RGPD|GDPR/i, 'RGPD'],
-    [/impressum/i, 'Legal Notice'],
-  ];
-  for (const [pattern, name] of textPolicyPatterns) {
-    if (pattern.test(plainText) && !policies.includes(name)) {
-      // Check if it's RGPD — that goes in frameworks
-      if (name === 'RGPD') {
-        if (!frameworks.includes('GDPR')) frameworks.push('GDPR');
-      } else {
-        policies.push(name);
-      }
-    }
-  }
-
-  // Detect certifications in text (badges, mentions)
-  const textCertPatterns: [RegExp, string][] = [
-    [/certifi[ée]\s+(?:en\s+)?strat[ée]gie/i, 'Certified Strategy & Sustainability'],
-    [/certifi[ée]\s+(?:en\s+)?(?:RSE|CSR)/i, 'CSR Certified'],
-    [/label\s+(?:B\s*Corp|ESR|Lucie)/i, 'CSR Label'],
-  ];
-  for (const [pattern, name] of textCertPatterns) {
-    if (pattern.test(plainText) && !certifications.includes(name)) {
-      certifications.push(name);
-    }
-  }
-
-  // --- Quality ---
-  const total = policies.length + frameworks.length + certifications.length;
-  if (total === 0) {
-    q = 0;
-  } else if (policies.length > 0 && urls.length > 0) {
-    q = 1; // Has links = verifiable
-  } else if (total > 0) {
-    q = 0.5; // Mentioned in text
-  }
-
-  return { policies, frameworks, certifications, urls, q };
 }
