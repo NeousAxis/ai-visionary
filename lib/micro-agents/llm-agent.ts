@@ -11,7 +11,7 @@ function getModel() {
   const key = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '').trim();
   if (!key) throw new Error('No Gemini API key found (GEMINI_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY)');
   const google = createGoogleGenerativeAI({ apiKey: key });
-  _model = google('gemini-2.5-flash');
+  _model = google('gemini-3-flash-preview');
   return _model;
 }
 
