@@ -54,6 +54,9 @@ export default function DiagnosticV2Page() {
   const [scanUrl, setScanUrl] = useState('');
   const [filesRevealed, setFilesRevealed] = useState<number>(0);
   const [scoreRevealed, setScoreRevealed] = useState(false);
+  const [competitors, setCompetitors] = useState<{ name: string; score: number; country: string }[]>([]);
+  const [avgScore, setAvgScore] = useState(32);
+  const [totalInSector, setTotalInSector] = useState(0);
 
   const scrollTo = useCallback((id: string) => {
     setTimeout(() => {
@@ -68,10 +71,31 @@ export default function DiagnosticV2Page() {
       return () => clearTimeout(timer);
     }
     if (currentStep === 4 && filesRevealed === FILES.length) {
-      // Auto-advance to step 5 (Compare) after all files shown
-      setTimeout(() => { setCurrentStep(5); scrollTo('step-5'); }, 1000);
-      // Then auto-advance to step 6 (Plans) after Compare is visible
-      setTimeout(() => { setCurrentStep(6); scrollTo('step-6'); }, 3500);
+      // Auto-advance to step 5 (Compare) + fetch competitors
+      setTimeout(() => {
+        setCurrentStep(5);
+        scrollTo('step-5');
+        // Fetch real competitors from AYA registry
+        fetch('/api/diagnostic/compare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sector: 'consulting',
+            country: agents.find(a => a.name === 'detect-location')?.data?.country || '',
+            currentScore: score?.total || 0,
+            currentName: scanUrl.replace(/^https?:\/\//, '').split('/')[0],
+          }),
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data.competitors?.length) setCompetitors(data.competitors);
+            if (data.averageScore) setAvgScore(data.averageScore);
+            if (data.totalInSector) setTotalInSector(data.totalInSector);
+          })
+          .catch(() => {});
+      }, 1000);
+      // Auto-advance to step 6 (Plans)
+      setTimeout(() => { setCurrentStep(6); scrollTo('step-6'); }, 4000);
     }
   }, [currentStep, filesRevealed, scrollTo]);
 
@@ -314,15 +338,21 @@ export default function DiagnosticV2Page() {
           <div className="dv2-files-list">
             {FILES.map((file, i) => {
               const revealed = i < filesRevealed;
+              const isGenerating = currentStep === 4 && i === filesRevealed;
               return (
-                <div key={file.name} className={`dv2-file-row ${revealed ? 'dv2-file-done' : 'dv2-file-pending'}`}>
-                  <span className="dv2-file-icon">{revealed ? '✓' : currentStep === 4 && i === filesRevealed ? '◌' : '—'}</span>
+                <div key={file.name} className={`dv2-file-row ${revealed ? 'dv2-file-done' : isGenerating ? 'dv2-file-active' : 'dv2-file-pending'}`}>
+                  <span className="dv2-file-icon">{revealed ? '✓' : isGenerating ? '◌' : '—'}</span>
                   <div className="dv2-file-info">
                     <span className="dv2-file-name">{file.name}</span>
                     <span className="dv2-file-desc">{file.desc}</span>
+                    {isGenerating && (
+                      <div className="dv2-file-progress">
+                        <div className="dv2-file-progress-bar" />
+                      </div>
+                    )}
                   </div>
-                  {revealed && <span className="dv2-file-check">Ready</span>}
-                  {currentStep === 4 && i === filesRevealed && <span className="dv2-file-generating"><span className="dv2-dot-pulse" /> Generating...</span>}
+                  {revealed && <span className="dv2-file-check">✓ Ready</span>}
+                  {isGenerating && <span className="dv2-file-generating"><span className="dv2-dot-pulse" /> Generating...</span>}
                 </div>
               );
             })}
@@ -334,29 +364,48 @@ export default function DiagnosticV2Page() {
       {currentStep >= 5 && score && (
         <section id="step-5" className={`dv2-step dv2-step-reveal ${currentStep === 5 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">05</div>
-          <h2>Your Position in the AI Ecosystem</h2>
-          <p className="dv2-step-sub">How your AI readability compares to {'>'}4,400 entities in the AYA Registry.</p>
+          <h2>Your Position vs Competitors</h2>
+          <p className="dv2-step-sub">
+            How your AI readability compares to {totalInSector > 0 ? totalInSector : '>4,400'} entities in the AYA Registry.
+          </p>
 
           <div className="dv2-compare-card">
+            {/* Your score */}
             <div className="dv2-compare-row">
-              <span className="dv2-compare-label">Your site</span>
+              <span className="dv2-compare-label dv2-compare-label--you">Your site</span>
               <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} /></div>
-              <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}/100</span>
+              <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}</span>
             </div>
+
+            {/* Real competitors */}
+            {competitors.length > 0 && competitors.map((c, i) => (
+              <div key={i} className="dv2-compare-row">
+                <span className="dv2-compare-label">{c.name.length > 18 ? c.name.substring(0, 18) + '...' : c.name}</span>
+                <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--competitor" style={{ width: `${Math.min(c.score, 100)}%` }} /></div>
+                <span className="dv2-compare-val">{Math.round(c.score)}</span>
+              </div>
+            ))}
+
+            {/* Registry average */}
             <div className="dv2-compare-row">
               <span className="dv2-compare-label">Registry avg.</span>
-              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--avg" style={{ width: '32%' }} /></div>
-              <span className="dv2-compare-val">32/100</span>
+              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--avg" style={{ width: `${avgScore}%` }} /></div>
+              <span className="dv2-compare-val">{avgScore}</span>
             </div>
+
+            {/* With PRO projection */}
             <div className="dv2-compare-row">
-              <span className="dv2-compare-label">With PRO</span>
+              <span className="dv2-compare-label dv2-compare-label--pro">With PRO ✦</span>
               <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--pro" style={{ width: `${Math.min(score.total + 20, 100)}%` }} /></div>
-              <span className="dv2-compare-val dv2-val-pro">{Math.min(Math.round(score.total) + 20, 100)}/100</span>
+              <span className="dv2-compare-val dv2-val-pro">{Math.min(Math.round(score.total) + 20, 100)}</span>
             </div>
+
             <p className="dv2-compare-msg">
               {score.total >= 50
                 ? '🎉 Your site is already more AI-readable than most businesses!'
-                : '💡 With ASR files and AYA registration, your AI discoverability would significantly increase.'}
+                : competitors.length > 0
+                  ? `💡 With ASR files, you could outperform ${competitors.filter(c => c.score < score.total + 20).length} of these ${competitors.length} competitors.`
+                  : '💡 With ASR files and AYA registration, your AI discoverability would significantly increase.'}
             </p>
           </div>
         </section>
@@ -454,7 +503,12 @@ function DataPreview({ name, data }: { name: AgentName; data: any }) {
   if (!data) return null;
   switch (name) {
     case 'detect-contact':
-      return <div className="dv2-preview">{data.email && <span>📧 {data.email}</span>}{data.phone && <span>📞 {data.phone}</span>}{!data.email && !data.phone && <span className="dv2-muted">No contact found</span>}</div>;
+      return <div className="dv2-preview">
+        {data.email && <span>📧 {data.email}</span>}
+        {data.phone && <span>📞 {data.phone}</span>}
+        {data.hasContactForm && <span>📋 Contact form detected</span>}
+        {!data.email && !data.phone && !data.hasContactForm && <span className="dv2-muted">No contact found</span>}
+      </div>;
     case 'detect-services': {
       const all = [...(data.services || []), ...(data.products || [])];
       return <div className="dv2-preview">{all.length > 0 ? all.slice(0, 3).map((s: string, i: number) => <span key={i}>• {s}</span>) : <span className="dv2-muted">None detected</span>}{all.length > 3 && <span className="dv2-muted">+{all.length - 3} more</span>}</div>;

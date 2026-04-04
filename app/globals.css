@@ -826,8 +826,12 @@ ul {
 .dv2-file-info { flex:1; }
 .dv2-file-name { display:block; font-weight:600; font-size:0.9rem; color:var(--text-main); font-family:'SF Mono',ui-monospace,monospace; }
 .dv2-file-desc { display:block; font-size:0.75rem; color:var(--text-muted); }
-.dv2-file-check { font-size:0.75rem; font-weight:600; color:#16a34a; }
-.dv2-file-generating { font-size:0.75rem; color:var(--primary-color); display:flex; align-items:center; gap:0.4rem; }
+.dv2-file-active { border-color:rgba(74,145,158,0.3); background:rgba(74,145,158,0.02); }
+.dv2-file-check { font-size:0.75rem; font-weight:600; color:#16a34a; white-space:nowrap; }
+.dv2-file-generating { font-size:0.75rem; color:var(--primary-color); display:flex; align-items:center; gap:0.4rem; white-space:nowrap; }
+.dv2-file-progress { margin-top:0.4rem; height:3px; background:var(--bg-accent); border-radius:2px; overflow:hidden; width:100%; }
+.dv2-file-progress-bar { height:100%; width:100%; background:linear-gradient(90deg, var(--primary-color), #6BC5D2); border-radius:2px; animation:dv2-file-load 0.6s ease-out forwards; transform-origin:left; }
+@keyframes dv2-file-load { from{transform:scaleX(0)} to{transform:scaleX(1)} }
 
 /* Plans */
 .dv2-plans { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
@@ -868,8 +872,11 @@ ul {
 .dv2-compare-track { flex:1; height:20px; background:var(--bg-accent); border-radius:10px; overflow:hidden; }
 .dv2-compare-fill { height:100%; border-radius:10px; animation:dv2-bar 1s ease-out forwards; transform-origin:left; }
 .dv2-compare-fill--you { background:linear-gradient(90deg, #4A919E, #6BC5D2); }
+.dv2-compare-fill--competitor { background:#94a3b8; }
 .dv2-compare-fill--avg { background:#cbd5e1; }
 .dv2-compare-fill--pro { background:linear-gradient(90deg, #4A919E, #22c55e); }
+.dv2-compare-label--you { color:var(--primary-color); font-weight:700; }
+.dv2-compare-label--pro { color:#16a34a; font-weight:700; }
 .dv2-compare-val { min-width:36px; font-weight:700; font-size:0.9rem; color:var(--text-muted); text-align:right; }
 .dv2-val-you { color:var(--primary-color); }
 .dv2-val-pro { color:#16a34a; }

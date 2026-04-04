@@ -1,96 +1,25 @@
 // lib/micro-agents/html-fetcher.ts — Fetch HTML + headers for micro-agents
-// Supports SPA detection with headless rendering fallback
+// Handles SPAs with headless rendering fallback + returns both HTML and text
 
 import { isAllowedUrl } from '../validators';
 import type { FetchResult } from './types';
 
-// Minimum text content to consider the page "real" (not an empty SPA shell)
-const MIN_TEXT_LENGTH = 500;
-
-// SPA shell indicators
-const SPA_INDICATORS = [
+const MIN_TEXT = 500;
+const SPA_SHELL = [
   /<div\s+id=["'](?:root|app|__next|__nuxt)["']\s*>\s*<\/div>/i,
-  /<div\s+id=["'](?:root|app)["']\s*><\/div>/i,
   /type=["']module["']\s+src=["']\/(?:assets|static|js)\//i,
 ];
 
-/**
- * Check if HTML is likely an empty SPA shell
- */
 function isSpaShell(html: string): boolean {
-  // Very short HTML with SPA indicators
-  const textContent = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+  const text = html.replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  if (textContent.length < MIN_TEXT_LENGTH) {
-    return SPA_INDICATORS.some(re => re.test(html));
-  }
-  return false;
-}
-
-/**
- * Fetch rendered HTML from a headless rendering service.
- * Uses Google's public web render service as fallback.
- */
-async function fetchRenderedHtml(url: string): Promise<string | null> {
-  // Strategy 1: Use a headless rendering proxy
-  // We use r.jina.ai which renders JS and returns clean content
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-    const response = await fetch(`https://r.jina.ai/${url}`, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'text/html',
-        'User-Agent': 'AYO-Bot/2.0 (AI Visionary Scanner)',
-      },
-    });
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const text = await response.text();
-      if (text.length > MIN_TEXT_LENGTH) {
-        return text;
-      }
-    }
-  } catch {
-    // Fallback below
-  }
-
-  // Strategy 2: Google cache / webcache
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    const cacheUrl = `https://webcache.googleusercontent.com/search?q=cache:${encodeURIComponent(url)}`;
-    const response = await fetch(cacheUrl, {
-      signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AYO-Bot/2.0)' },
-    });
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const text = await response.text();
-      if (text.length > MIN_TEXT_LENGTH) {
-        return text;
-      }
-    }
-  } catch {
-    // Both strategies failed
-  }
-
-  return null;
+    .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return text.length < MIN_TEXT && SPA_SHELL.some(re => re.test(html));
 }
 
 export async function fetchHtml(targetUrl: string): Promise<FetchResult> {
   let url = targetUrl.trim();
-  if (!url.startsWith('http')) {
-    url = 'https://' + url;
-  }
+  if (!url.startsWith('http')) url = 'https://' + url;
 
   const ssrfCheck = isAllowedUrl(url);
   if (!ssrfCheck.allowed) {
@@ -98,40 +27,74 @@ export async function fetchHtml(targetUrl: string): Promise<FetchResult> {
   }
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-    const response = await fetch(url, {
-      signal: controller.signal,
+    // Step 1: Normal fetch (fast)
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(url, {
+      signal: ctrl.signal,
       headers: { 'User-Agent': 'AYO-Bot/2.0 (AI Visionary Micro-Agent Scanner)' },
       redirect: 'follow',
     });
-    clearTimeout(timeoutId);
+    clearTimeout(tid);
 
-    let html = await response.text();
-
-    // Extract response headers
+    let html = await res.text();
     const headers: Record<string, string> = {};
-    response.headers.forEach((value, key) => {
-      headers[key.toLowerCase()] = value;
-    });
+    res.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
 
-    // SPA Detection: if the HTML is just an empty shell, try headless rendering
-    if (response.ok && isSpaShell(html)) {
-      const rendered = await fetchRenderedHtml(url);
-      if (rendered) {
-        html = rendered;
-      }
+    // Step 2: SPA detection — if empty shell, fetch rendered version
+    if (res.ok && isSpaShell(html)) {
+      try {
+        const ctrl2 = new AbortController();
+        const tid2 = setTimeout(() => ctrl2.abort(), 15000);
+        const rendered = await fetch(`https://r.jina.ai/${url}`, {
+          signal: ctrl2.signal,
+          headers: { 'Accept': 'text/html', 'X-Return-Format': 'html' },
+        });
+        clearTimeout(tid2);
+        if (rendered.ok) {
+          const text = await rendered.text();
+          if (text.length > MIN_TEXT) {
+            // jina returns markdown — wrap it so agents can parse it
+            // Keep the markdown but ALSO try to reconstruct basic HTML hints
+            html = convertMarkdownToBasicHtml(text, url);
+          }
+        }
+      } catch { /* keep original html */ }
     }
 
-    return {
-      url,
-      html,
-      headers,
-      statusCode: response.status,
-      isReachable: response.ok,
-    };
+    return { url, html, headers, statusCode: res.status, isReachable: res.ok };
   } catch {
     return { url, html: '', headers: {}, statusCode: 0, isReachable: false };
   }
+}
+
+/**
+ * Convert jina markdown output to basic HTML that agents can parse.
+ * This isn't perfect HTML but gives agents enough structure to work with.
+ */
+function convertMarkdownToBasicHtml(md: string, sourceUrl: string): string {
+  let html = md;
+
+  // Convert markdown links [text](url) to <a href="url">text</a>
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+  // Convert ### headings to h3, ## to h2, # to h1
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+  // Convert **bold** to <strong>
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Convert list items
+  html = html.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
+
+  // Add the source URL as a meta hint
+  html = `<html><head><title>${md.split('\n')[0] || ''}</title></head><body>${html}</body></html>`;
+
+  // Inject domain info for TLD detection
+  const domain = sourceUrl.replace(/^https?:\/\//, '').split('/')[0];
+  html += `<a href="${sourceUrl}">${domain}</a>`;
+
+  return html;
 }

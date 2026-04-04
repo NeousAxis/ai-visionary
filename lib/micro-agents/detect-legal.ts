@@ -89,14 +89,49 @@ export function detectLegal(html: string): LegalResult {
     }
   }
 
+  // --- Text-based detection (for SPA/markdown rendered content) ---
+  const plainText = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+
+  // Detect policy mentions in text (not just links)
+  const textPolicyPatterns: [RegExp, string][] = [
+    [/mentions?\s+l[ée]gales/i, 'Legal Notice'],
+    [/privacy\s+policy|politique\s+de\s+confidentialit/i, 'Privacy Policy'],
+    [/terms?\s+(?:of\s+)?(?:service|use)|conditions?\s+g[ée]n[ée]rales|CGV|CGU/i, 'Terms & Conditions'],
+    [/cookie\s+polic|politique\s+(?:de\s+)?cookies/i, 'Cookie Policy'],
+    [/RGPD|GDPR/i, 'RGPD'],
+    [/impressum/i, 'Legal Notice'],
+  ];
+  for (const [pattern, name] of textPolicyPatterns) {
+    if (pattern.test(plainText) && !policies.includes(name)) {
+      // Check if it's RGPD — that goes in frameworks
+      if (name === 'RGPD') {
+        if (!frameworks.includes('GDPR')) frameworks.push('GDPR');
+      } else {
+        policies.push(name);
+      }
+    }
+  }
+
+  // Detect certifications in text (badges, mentions)
+  const textCertPatterns: [RegExp, string][] = [
+    [/certifi[ée]\s+(?:en\s+)?strat[ée]gie/i, 'Certified Strategy & Sustainability'],
+    [/certifi[ée]\s+(?:en\s+)?(?:RSE|CSR)/i, 'CSR Certified'],
+    [/label\s+(?:B\s*Corp|ESR|Lucie)/i, 'CSR Label'],
+  ];
+  for (const [pattern, name] of textCertPatterns) {
+    if (pattern.test(plainText) && !certifications.includes(name)) {
+      certifications.push(name);
+    }
+  }
+
   // --- Quality ---
   const total = policies.length + frameworks.length + certifications.length;
   if (total === 0) {
     q = 0;
   } else if (policies.length > 0 && urls.length > 0) {
     q = 1; // Has links = verifiable
-  } else {
-    q = 0.5; // Mentioned but no proof link
+  } else if (total > 0) {
+    q = 0.5; // Mentioned in text
   }
 
   return { policies, frameworks, certifications, urls, q };

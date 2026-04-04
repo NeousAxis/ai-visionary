@@ -84,9 +84,12 @@ export function detectContact(html: string): ContactResult {
   else if (email) q = 1;  // email alone is verifiable
   else if (phone) q = 0.5;
 
-  // Detect contact form as fallback signal
+  // Detect contact form (both HTML and text/markdown)
   const hasContactForm = /<form[^>]*(?:contact|message|anfrage|kontakt)/i.test(html) ||
-    /name=["'](?:email|message|subject)["']/i.test(html);
+    /name=["'](?:email|message|subject)["']/i.test(html) ||
+    /formulaire|contact\s+form|remplissez|fill\s+(?:out|in)\s+the\s+form/i.test(html);
+
+  // If no email found but contact form exists, that's still a contact method
   if (!email && !phone && hasContactForm) {
     q = 0.5;
   }
