@@ -145,23 +145,88 @@ export function mergeAgentResultsToExtract(
   const email = contact.email || jsonld.contactPoint?.email || '';
   const phone = contact.phone || jsonld.contactPoint?.phone || '';
 
-  // FAQ detection
-  const hasFaqLink = /href=["'][^"']*faq[^"']*["']/i.test(fetchResult.html);
-  const hasFaqText = /foire aux questions|frequently asked questions/i.test(fetchResult.html);
+  const html = fetchResult.html;
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+
+  // --- FAQ detection ---
+  const hasFaqLink = /href=["'][^"']*faq[^"']*["']/i.test(html);
+  const hasFaqText = /foire aux questions|frequently asked questions|FAQ/i.test(text);
   const hasFaqContent = hasFaqLink || hasFaqText || jsonld.hasFaqSchema;
 
-  // Sitemap check (quick regex in HTML or common paths)
-  const hasSitemap = /sitemap\.xml/i.test(fetchResult.html);
+  // --- Process & Methods extraction (from text content) ---
+  const processSteps: string[] = [];
+  // Look for numbered steps or methodology sections
+  const stepPatterns = [
+    /(?:étape|step|phase)\s*[:\s]*(\d+)\s*[:\s.\-–—]+\s*([^\n.]{5,80})/gi,
+    /^0*(\d+)\s*[.\-–—:]\s*([A-ZÀ-Ü][^\n]{5,80})/gm,
+  ];
+  for (const pattern of stepPatterns) {
+    let m;
+    const re = new RegExp(pattern.source, pattern.flags);
+    while ((m = re.exec(text)) !== null) {
+      const step = (m[2] || m[1]).trim();
+      if (step.length > 3 && !processSteps.includes(step)) processSteps.push(step);
+    }
+  }
+  // Also extract h3 headings from methodology-like sections
+  const methSections = html.match(/(?:approche|methode|methodology|process|démarche|notre approche|how we work|comment)[\s\S]{0,3000}/gi) || [];
+  for (const section of methSections) {
+    const h3s = section.match(/<h3[^>]*>([\s\S]*?)<\/h3>/gi) || [];
+    for (const h3 of h3s) {
+      const t = h3.replace(/<[^>]+>/g, '').trim();
+      if (t.length > 3 && t.length < 100 && !processSteps.includes(t)) processSteps.push(t);
+    }
+  }
+  // Markdown: look for ### under methodology sections
+  const mdStepRe = /(?:approche|method|process|démarche|comment|du futur)[\s\S]{0,50}###\s+(.+)/gi;
+  let mdM;
+  while ((mdM = mdStepRe.exec(text)) !== null) {
+    if (!processSteps.includes(mdM[1].trim())) processSteps.push(mdM[1].trim());
+  }
 
-  // Mobile optimized (viewport meta)
-  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(fetchResult.html);
+  // Delivery mode detection
+  const isOnline = /online|en ligne|digital|remote|à distance|platform|saas|app/i.test(text);
+  const isOnsite = /on.?site|sur.?place|présentiel|in.?person|atelier|workshop/i.test(text);
+  const deliveryMode = isOnline && isOnsite ? 'hybrid' : isOnline ? 'online' : isOnsite ? 'on-site' : '';
 
-  // ASR file check
-  const hasAsr = false; // Would need separate HEAD request, default false
+  // Geography detection
+  const geoText = /suisses?|swiss|france|europe|worldwide|international|global/i.exec(text);
+  const geographies = geoText ? geoText[0] : country || '';
 
-  // Glossary/documentation detection
-  const hasGlossary = /glossar|lexique|glossaire/i.test(fetchResult.html);
-  const hasDocumentation = /documentation|docs\b|developer|api.?reference/i.test(fetchResult.html);
+  // Quality assurance detection
+  const hasQA = /certifi[ée]|quality|qualité|garanti|assurance|suivi|mesure.?d.?impact|ajustement/i.test(text);
+  const qaText = hasQA ? 'Continuous monitoring & adjustment' : '';
+
+  // --- Key Indicators extraction ---
+  const indicators: string[] = [];
+  // Look for numbers with context (years, clients, projects, etc.)
+  const numPatterns = [
+    /(\d+)\s*(?:ans?|years?)\s*(?:d['']?expérience|experience|direction|accompagnement)/gi,
+    /(\d+)\s*(?:clients?|entreprises?|companies|projects?|projets?)/gi,
+    /(\d+)\s*(?:pays|countries|villes|cities)/gi,
+    /\+?\s*(\d+)\s*(?:collaborateurs?|employees?|team|équipe)/gi,
+  ];
+  for (const pattern of numPatterns) {
+    let m;
+    const re = new RegExp(pattern.source, pattern.flags);
+    while ((m = re.exec(text)) !== null) {
+      indicators.push(m[0].trim());
+    }
+  }
+  // Also look for "X ans" or "X+" standalone patterns
+  const standaloneNums = text.match(/\b\d+\s*(?:ans|years|\+|ODD)\b/gi) || [];
+  for (const n of standaloneNums) {
+    if (!indicators.includes(n.trim())) indicators.push(n.trim());
+  }
+
+  // --- Technical Foundation ---
+  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(html) || /responsive|mobile/i.test(text);
+  const hasSitemap = /sitemap\.xml/i.test(html);
+  const hasGlossary = /glossar|lexique|glossaire/i.test(text);
+  const hasDocumentation = /documentation|docs\b|developer|api.?reference|guide|tutoriel/i.test(text);
+
+  // ASR file check (we can't do a HEAD request here, check if domain is in AYA)
+  const hasAsr = false;
 
   return {
     version: 'AYO-EXTRACT-3.0',
@@ -194,10 +259,10 @@ export function mergeAgentResultsToExtract(
         pricing_indication: field('', 0, []),
       },
       processus_methodes: {
-        process_steps: field([], 0, []),
-        delivery_mode: field('', 0, []),
-        geographies_served: field('', 0, []),
-        quality_assurance: field('', 0, []),
+        process_steps: field(processSteps, processSteps.length > 0 ? 1 : 0, processSteps.length ? ['scan_micro_agent'] : []),
+        delivery_mode: field(deliveryMode, deliveryMode ? 0.5 : 0, deliveryMode ? ['scan_micro_agent'] : []),
+        geographies_served: field(geographies, geographies ? 0.5 : 0, geographies ? ['scan_micro_agent'] : []),
+        quality_assurance: field(qaText, hasQA ? 0.5 : 0, hasQA ? ['scan_micro_agent'] : []),
       },
       engagements_conformite: {
         policies: field(legal.policies, legal.policies.length ? legal.q : 0, legal.policies.length ? ['scan_micro_agent'] : []),
@@ -206,13 +271,15 @@ export function mergeAgentResultsToExtract(
         security_measures: field(security.measures, security.q, security.measures.length ? ['scan_micro_agent'] : []),
       },
       indicateurs: {
-        key_indicators: field([], 0, []),
+        key_indicators: field(indicators, indicators.length > 0 ? 0.5 : 0, indicators.length ? ['scan_micro_agent'] : []),
         last_review_date: field('', 0, []),
       },
       contenus_pedagogiques: {
         has_faq: field(hasFaqContent, hasFaqContent ? 1 : 0, hasFaqContent ? ['scan_micro_agent'] : []),
-        has_glossary: field(hasGlossary, hasGlossary ? 0.5 : 0, hasGlossary ? ['scan_micro_agent'] : []),
-        has_documentation: field(hasDocumentation, hasDocumentation ? 0.5 : 0, hasDocumentation ? ['scan_micro_agent'] : []),
+        // Glossary & documentation are GENERATED by AYO in ASR files — not expected on the site
+        // Mark as na:true so they don't penalize the initial scan score
+        has_glossary: { value: hasGlossary, q: hasGlossary ? 0.5 as const : 0 as const, evidence: hasGlossary ? ['scan_micro_agent'] : [], na: !hasGlossary },
+        has_documentation: { value: hasDocumentation, q: hasDocumentation ? 0.5 as const : 0 as const, evidence: hasDocumentation ? ['scan_micro_agent'] : [], na: !hasDocumentation },
       },
       structure_technique: {
         has_asr: field(hasAsr, 0, []),
