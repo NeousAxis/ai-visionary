@@ -196,16 +196,18 @@ export async function mergeAgentResultsToExtract(
   try {
     const { llmExtract, parseJson } = await import('./llm-agent');
     const raw = await llmExtract(
-      `You are a business process extractor. From the website content, extract:
-- process_steps: the methodology or process steps the business follows (max 6)
-- delivery_mode: "online", "on-site", or "hybrid"
-- geographies: where they operate (countries, regions)
-- quality_assurance: any quality control or monitoring mentioned
-- indicators: key numbers/metrics mentioned (e.g. "5 years experience", "200+ clients", "17 SDGs")
+      `You extract business process and key metrics from websites. Content can be in ANY language (French, English, German, etc.).
 
-Return ONLY valid JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
-Extract ONLY what is explicitly mentioned. Do NOT invent. No explanation.`,
-      plainText,
+Extract:
+- process_steps: methodology steps, approach phases, how they work. Look for: "Notre approche", "Our process", "Étape 1", "Phase 1", numbered steps, "Écoute & Diagnostic", "Déploiement & Suivi", "How we work", "Comment nous travaillons" (max 6 items)
+- delivery_mode: "online", "on-site", or "hybrid". Look for: "en ligne", "présentiel", "ateliers", "workshops", "remote", "plateforme", "sur site"
+- geographies: where they operate. Look for: "suisses", "Switzerland", "Europe", "France", "international", "worldwide"
+- quality_assurance: quality monitoring mentioned. Look for: "suivi", "mesure d'impact", "ajustements", "certifié", "monitoring", "quality assurance"
+- indicators: key numbers with context. Look for: "5 ans", "2 ans", "17 ODD", "200+ clients", "X projets", any number with business meaning. Include the full phrase (e.g. "5 ans de direction association")
+
+Return ONLY JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
+Extract ONLY what is explicitly mentioned. Do NOT invent.`,
+      plainText, 10000,
     );
     const data = parseJson<{
       process_steps?: string[];

@@ -65,17 +65,8 @@ export async function POST(req: NextRequest) {
       return eSector === detectedSector;
     });
 
-    // If not enough in exact sector, try same country
-    let pool = sectorPool;
-    if (pool.length < 3 && country) {
-      const cl = country.toLowerCase();
-      pool = allEntities.filter((e: any) => {
-        const eUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
-        if (siteNorm && eUrl && (eUrl.includes(siteNorm) || siteNorm.includes(eUrl))) return false;
-        const n = e.display_name || e.legal_name || '';
-        return n.length > 1 && (e.country_legal || '').toLowerCase() === cl.substring(0, 2).toUpperCase();
-      });
-    }
+    // Use ONLY sector pool — no fallback to random companies
+    const pool = sectorPool;
 
     // Sort: certified first, then by score descending — exclude pure 50s unless certified
     const sorted = pool

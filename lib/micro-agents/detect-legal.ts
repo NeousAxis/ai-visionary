@@ -3,19 +3,20 @@
 import type { LegalResult, Quality } from './types';
 import { llmExtract, parseJson } from './llm-agent';
 
-const PROMPT = `You are a legal/compliance extractor. From the website content below, extract:
-- policies: published documents (Privacy Policy, Terms & Conditions, Cookie Policy, Legal Notice, etc.)
-- frameworks: regulatory frameworks mentioned (GDPR, HIPAA, PCI-DSS, LPD, CCPA, etc.)
-- certifications: third-party certifications (ISO 27001, SOC 2, B Corp, etc.)
-- urls: any URLs to legal/policy pages found
+const PROMPT = `You extract legal and compliance information from websites. The content can be in ANY language (French, English, German, etc.).
 
-Extract ONLY what is explicitly mentioned. Do NOT invent.
-Return ONLY valid JSON: {"policies": [], "frameworks": [], "certifications": [], "urls": []}
-No explanation.`;
+Extract:
+- policies: published legal documents. Look for: "Privacy Policy", "Mentions légales", "CGV", "CGU", "RGPD", "Terms", "Cookie Policy", "Impressum", "Datenschutz", "Politique de confidentialité", links to /legal, /privacy, /terms, /mentions-legales, /rgpd, /cgv
+- frameworks: regulatory frameworks. Look for: GDPR, RGPD, HIPAA, PCI-DSS, LPD, CCPA, ODD (Objectifs de Développement Durable / SDGs), RSE/CSR
+- certifications: third-party certifications. Look for: "Certifié", "Certified", ISO, SOC, B Corp, any certification mentioned
+- urls: URLs of legal/policy pages found
+
+Return ONLY JSON: {"policies": [], "frameworks": [], "certifications": [], "urls": []}
+Extract ONLY what is explicitly mentioned. Do NOT invent.`;
 
 export async function detectLegal(content: string): Promise<LegalResult> {
   try {
-    const raw = await llmExtract(PROMPT, content);
+    const raw = await llmExtract(PROMPT, content, 10000);
     const data = parseJson<{ policies?: string[]; frameworks?: string[]; certifications?: string[]; urls?: string[] }>(raw);
     if (!data) return { policies: [], frameworks: [], certifications: [], urls: [], q: 0 };
 

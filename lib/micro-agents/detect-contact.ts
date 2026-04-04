@@ -3,17 +3,19 @@
 import type { ContactResult, Quality } from './types';
 import { llmExtract, parseJson } from './llm-agent';
 
-const PROMPT = `You are a contact info extractor. From the website content below, extract ONLY:
-- email: the main contact/business email (not noreply, not support@wordpress)
-- phone: the main phone number (with country code if possible)
-- hasContactForm: true if a contact form exists on the page
+const PROMPT = `You extract contact information from websites. The content can be in ANY language (French, English, German, etc.).
 
-Return ONLY valid JSON: {"email": "x@y.com" or null, "phone": "+41..." or null, "hasContactForm": true/false}
-Do NOT invent data. If not found, return null. No explanation.`;
+Extract:
+- email: the business contact email. Look for mailto: links, email addresses in text, form action URLs containing emails (formsubmit.co, formspree, etc.)
+- phone: the phone number with country code if available
+- hasContactForm: true if a contact form is present (look for: "formulaire", "remplissez", "contact form", "Kontaktformular", "get in touch", "nous contacter", input fields for name/email/message)
+
+Return ONLY JSON: {"email": "x@y.com" or null, "phone": "+41..." or null, "hasContactForm": true/false}
+Do NOT invent. If not found, return null.`;
 
 export async function detectContact(content: string): Promise<ContactResult> {
   try {
-    const raw = await llmExtract(PROMPT, content);
+    const raw = await llmExtract(PROMPT, content, 10000);
     const data = parseJson<{ email?: string | null; phone?: string | null; hasContactForm?: boolean }>(raw);
     if (!data) return { email: null, phone: null, q: 0 };
 
