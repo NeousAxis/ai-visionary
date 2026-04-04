@@ -50,11 +50,25 @@ export async function POST(req: NextRequest) {
         send({ phase: 'merge', status: 'done' });
 
         // Phase 4: Compute current score
-        // V2 scan mode: disable evidence caps (no JSON-LD cap, no external proof cap)
-        // The V2 score reflects data FOUND, not penalized for missing technical files
-        // The evidence layer comes later (V4 questionnaire)
-        extract.source.scan.has_jsonld = extract.source.scan.has_jsonld || true; // Disable cap at 50
-        extract.source.scan.is_aya_registered = true; // Disable cap for non-AYA sites
+        // V2: ZERO CAPS — le score reflete uniquement les donnees trouvees
+        // Tous les caps evidence V1 sont desactives pour la V2
+        extract.source.scan.has_jsonld = true;           // Disable cap 50 (no JSON-LD)
+        extract.source.scan.has_asr_file = true;         // Disable cap 90 (no ASR)
+        extract.source.scan.is_aya_registered = true;    // Disable cap non-AYA
+
+        // Disable per-block caps: certifications cap (8), indicators cap (8/10)
+        // Add a dummy certification evidence so the cap doesn't trigger
+        if (extract.fields.engagements_conformite.certifications.q === 0) {
+          extract.fields.engagements_conformite.certifications.evidence = ['v2_no_cap'];
+          extract.fields.engagements_conformite.certifications.na = true;
+        }
+        // Add dummy indicator evidence so the cap doesn't trigger
+        if (extract.fields.indicateurs.key_indicators.q > 0) {
+          extract.fields.indicateurs.key_indicators.evidence = ['v2_no_cap', 'https://v2-scan'];
+        }
+        if (!extract.fields.indicateurs.last_review_date.value) {
+          extract.fields.indicateurs.last_review_date.na = true;
+        }
 
         send({ phase: 'score', status: 'running' });
         const score = computeAioScore(extract);
