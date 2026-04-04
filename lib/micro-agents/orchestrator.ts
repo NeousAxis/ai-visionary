@@ -179,7 +179,13 @@ export async function mergeAgentResultsToExtract(
   const phone = contact.phone || jsonld.contactPoint?.phone || '';
 
   const rawHtml = fetchResult.html;
-  const plainText = rawHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  const plainText = rawHtml
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ').trim();
 
   // --- FAQ detection ---
   const hasFaqLink = /href=["'][^"']*faq[^"']*["']/i.test(rawHtml);

@@ -3,35 +3,64 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-// Map detected service keywords to AYA sector_macro values (in French)
-const SECTOR_MAP: Record<string, string[]> = {
-  'Conseil & Services Pro': ['consulting', 'conseil', 'stratégie', 'strategy', 'accompagnement', 'advisory', 'coaching', 'formation', 'durabilité', 'sustainability', 'rse', 'csr'],
-  'Technologie & SaaS': ['tech', 'software', 'saas', 'digital', 'platform', 'app', 'développement', 'it', 'web', 'ai', 'data', 'cloud', 'api'],
-  'Finance & Assurance': ['finance', 'bank', 'insurance', 'fintech', 'investissement', 'crédit', 'assurance'],
-  'Éducation & Formation': ['education', 'formation', 'training', 'école', 'university', 'learning'],
-  'Santé & Pharma': ['health', 'santé', 'medical', 'pharma', 'clinic', 'hôpital'],
+// Standard AYA sectors
+const SECTORS = [
+  'Conseil & Services Pro',
+  'Technologie & SaaS',
+  'Finance & Assurance',
+  'Éducation & Formation',
+  'Santé & Pharma',
+  'Commerce & Retail',
+  'Média & Communication',
+  'Tourisme & Transport',
+  'Industrie & Manufacture',
+  'Immobilier & Construction',
+  'Alimentation & Restaurant',
+  'Juridique & Compliance',
+];
+
+// Keywords that map to each sector
+const SECTOR_KEYWORDS: Record<string, string[]> = {
+  'Conseil & Services Pro': ['consulting', 'conseil', 'stratégie', 'strategy', 'accompagnement', 'advisory', 'coaching', 'durabilité', 'sustainability', 'rse', 'csr', 'audit'],
+  'Technologie & SaaS': ['tech', 'software', 'saas', 'digital', 'platform', 'app', 'développement', 'development', 'web', 'ai', 'data', 'cloud', 'api', 'native', 'agentic', 'website creation', 'mobile'],
+  'Finance & Assurance': ['finance', 'bank', 'insurance', 'fintech', 'investissement', 'assurance', 'crédit', 'trading'],
+  'Éducation & Formation': ['education', 'formation', 'training', 'école', 'university', 'learning', 'cours'],
+  'Santé & Pharma': ['health', 'santé', 'medical', 'pharma', 'clinic', 'hôpital', 'biotech'],
   'Commerce & Retail': ['retail', 'commerce', 'e-commerce', 'shop', 'store', 'boutique', 'vente'],
-  'Média & Communication': ['media', 'presse', 'journal', 'communication', 'marketing', 'agence', 'pub'],
-  'Tourisme & Transport': ['tourisme', 'transport', 'voyage', 'hotel', 'airline', 'travel'],
-  'Industrie & Manufacture': ['industrie', 'manufacturing', 'production', 'usine', 'fabrication'],
-  'Immobilier & Construction': ['immobilier', 'real estate', 'property', 'construction'],
-  'Alimentation & Restaurant': ['food', 'restaurant', 'alimentation', 'gastronomie'],
-  'Juridique & Compliance': ['legal', 'juridique', 'avocat', 'law', 'notaire', 'droit'],
+  'Média & Communication': ['media', 'presse', 'communication', 'marketing', 'agence', 'publicité', 'design'],
+  'Tourisme & Transport': ['tourisme', 'transport', 'voyage', 'hotel', 'airline', 'travel', 'logistics'],
+  'Industrie & Manufacture': ['industrie', 'manufacturing', 'production', 'usine', 'fabrication', 'engineering'],
+  'Immobilier & Construction': ['immobilier', 'real estate', 'property', 'construction', 'architecture'],
+  'Alimentation & Restaurant': ['food', 'restaurant', 'alimentation', 'gastronomie', 'café', 'traiteur'],
+  'Juridique & Compliance': ['legal', 'juridique', 'avocat', 'law', 'notaire', 'compliance', 'droit'],
 };
 
-function detectSectorMacro(services: string[], title: string): string | null {
+function detectSectorFromServices(services: string[], title: string): string | null {
   const allText = [...services, title].join(' ').toLowerCase();
-  let bestMatch: string | null = null;
-  let bestCount = 0;
-
-  for (const [sectorMacro, keywords] of Object.entries(SECTOR_MAP)) {
-    const count = keywords.filter(kw => allText.includes(kw)).length;
-    if (count > bestCount) {
-      bestCount = count;
-      bestMatch = sectorMacro;
-    }
+  let best: string | null = null;
+  let bestScore = 0;
+  for (const [sector, keywords] of Object.entries(SECTOR_KEYWORDS)) {
+    const score = keywords.filter(kw => allText.includes(kw)).length;
+    if (score > bestScore) { bestScore = score; best = sector; }
   }
-  return bestMatch;
+  return best;
+}
+
+function entityMatchesSector(entitySector: string, targetSector: string): boolean {
+  if (!entitySector || !targetSector) return false;
+  const es = entitySector.toLowerCase();
+  const ts = targetSector.toLowerCase();
+
+  // Exact match
+  if (es === ts) return true;
+
+  // Entity has standard sector that matches target
+  if (SECTORS.some(s => s.toLowerCase() === es && s.toLowerCase() === ts)) return true;
+
+  // Entity has long description — check if it contains keywords of target sector
+  const keywords = SECTOR_KEYWORDS[targetSector] || [];
+  const matchCount = keywords.filter(kw => es.includes(kw)).length;
+  return matchCount >= 2; // At least 2 keyword matches
 }
 
 export async function POST(req: NextRequest) {
@@ -39,17 +68,14 @@ export async function POST(req: NextRequest) {
     const { country, services, siteName, siteUrl } = await req.json();
 
     const allEntities = await db.getAyaEntities(1000);
-    if (!allEntities || allEntities.length === 0) {
+    if (!allEntities?.length) {
       return NextResponse.json({ competitors: [], averageScore: 0, totalInSector: 0 });
     }
 
-    // Detect sector from services
-    const detectedSector = detectSectorMacro(services || [], siteName || '');
-
-    // Normalize site URL for exclusion
+    const detectedSector = detectSectorFromServices(services || [], siteName || '');
     const siteNorm = (siteUrl || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
 
-    // Filter by sector_macro + exclude tested site
+    // Filter by sector + exclude tested site
     const sectorPool = allEntities.filter((e: any) => {
       const eName = (e.display_name || e.legal_name || '');
       const eUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
@@ -59,24 +85,13 @@ export async function POST(req: NextRequest) {
       if (siteName && eName.toLowerCase() === siteName.toLowerCase()) return false;
       if (eName.length < 2) return false;
 
-      // Match sector — use includes for flexible matching
-      // sector_macro can be exact ("Technologie & SaaS") or a long description
-      if (!detectedSector) return false; // no sector = don't show random
-      const eSector = (e.sector_macro || '').toLowerCase();
-      const dSector = detectedSector.toLowerCase();
-      // Match if: exact match, or sector keywords overlap
-      const dKeywords = SECTOR_MAP[detectedSector] || [];
-      return eSector === dSector ||
-        eSector.includes(dSector.split(' ')[0]) ||
-        dKeywords.some(kw => eSector.includes(kw));
+      // Match sector
+      if (!detectedSector) return false;
+      return entityMatchesSector(e.sector_macro || '', detectedSector);
     });
 
-    // Use ONLY sector pool — no fallback to random companies
-    const pool = sectorPool;
-
-    // Show ALL entities in the sector (certified + indexed)
-    // Certified first, then by score
-    const sorted = pool
+    // Sort: certified first, then by score
+    const sorted = sectorPool
       .filter((e: any) => (e.asr_score || 0) > 0)
       .sort((a: any, b: any) => {
         const ac = a.payment_completed ? 1 : 0;
@@ -94,7 +109,7 @@ export async function POST(req: NextRequest) {
     }));
 
     // Average from sector pool
-    const scores = pool.map((e: any) => e.asr_score || 0).filter((s: number) => s > 0);
+    const scores = sectorPool.map((e: any) => e.asr_score || 0).filter((s: number) => s > 0);
     const averageScore = scores.length > 0
       ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
       : 0;
