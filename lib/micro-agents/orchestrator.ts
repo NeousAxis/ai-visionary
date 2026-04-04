@@ -255,6 +255,8 @@ Do NOT invent.`,
     console.log(`[orchestrator] AYA lookup for ${url}: ${ayaEntity ? 'FOUND (score:' + ayaEntity.asr_score + ', paid:' + ayaEntity.payment_completed + ')' : 'NOT FOUND'}`);
     if (ayaEntity && ayaEntity.payment_completed) {
       isAyaRegistered = true;
+      // AYA hosts JSON-LD + ASR for certified entities
+      hasAsr = true;
     }
   } catch (err) {
     console.error(`[orchestrator] AYA lookup FAILED for ${url}:`, err instanceof Error ? err.message : err);
@@ -335,7 +337,7 @@ Do NOT invent.`,
         // has_asr = fichier ASR physique sur le site (PRO uniquement)
         // is_aya_registered = dans le registre AYA (AYA ou PRO) — géré séparément par le score engine
         has_asr: field(hasAsr, hasAsr ? 1 : 0, hasAsr ? ['scan_micro_agent'] : []),
-        has_jsonld: field(jsonld.hasOrganizationType, jsonld.hasOrganizationType ? 1 : 0, jsonld.hasOrganizationType ? ['scan_micro_agent'] : []),
+        has_jsonld: field(jsonld.hasOrganizationType || isAyaRegistered, (jsonld.hasOrganizationType || isAyaRegistered) ? 1 : 0, isAyaRegistered ? ['aya_registry'] : jsonld.hasOrganizationType ? ['scan_micro_agent'] : []),
         has_sitemap: field(hasSitemap, hasSitemap ? 0.5 : 0, hasSitemap ? ['scan_micro_agent'] : []),
         mobile_optimized: field(hasMobileViewport, hasMobileViewport ? 1 : 0, hasMobileViewport ? ['scan_micro_agent'] : []),
       },
