@@ -64,6 +64,7 @@ export default function DiagnosticV2Page() {
   const [scanUrl, setScanUrl] = useState('');
   const [filesRevealed, setFilesRevealed] = useState<number>(0);
   const [scoreRevealed, setScoreRevealed] = useState(false);
+  const [proScore, setProScore] = useState<number | null>(null);
   const [competitors, setCompetitors] = useState<{ name: string; score: number; country: string; certified?: boolean }[]>([]);
   const [avgScore, setAvgScore] = useState(0);
   const [totalInSector, setTotalInSector] = useState(0);
@@ -186,6 +187,10 @@ export default function DiagnosticV2Page() {
                   total: ev.score.total ?? 0,
                   blocks: blocksArr,
                 });
+              }
+              // Capture PRO score (with AYO-generated files)
+              if (ev.proScore) {
+                setProScore(ev.proScore.total ?? null);
               }
               // Move to step 3 (scoring)
               setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 500);
@@ -437,12 +442,23 @@ export default function DiagnosticV2Page() {
                   </div>
                 )}
 
+                {/* With AYO PRO — real calculated projection */}
+                {proScore !== null && (
+                  <div className="dv2-compare-row" style={{ borderTop: '1px solid var(--border-light)', paddingTop: '0.75rem', marginTop: '0.25rem' }}>
+                    <span className="dv2-compare-label dv2-compare-label--pro">With AYO PRO ✦</span>
+                    <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--pro" style={{ width: `${Math.min(proScore, 100)}%` }} /></div>
+                    <span className="dv2-compare-val dv2-val-pro">{Math.round(proScore)}/100</span>
+                  </div>
+                )}
+
                 <p className="dv2-compare-msg">
-                  {competitors.length > 0
-                    ? score.total > avgScore
-                      ? `🎉 You are above the sector average! With ASR files, you could reach ${Math.min(Math.round(score.total) + 20, 100)}/100.`
-                      : `💡 ${competitors.filter(c => c.score > score.total).length} entities in your sector score higher. ASR files could boost you to ${Math.min(Math.round(score.total) + 20, 100)}/100.`
-                    : '💡 Join the AYA Registry to benchmark against your sector.'}
+                  {proScore !== null && proScore > score.total
+                    ? `🚀 With AYO PRO files (ASR, FAQ, glossary, documentation), your score would jump from ${Math.round(score.total)} to ${Math.round(proScore)}/100 — a +${Math.round(proScore - score.total)} point boost!`
+                    : competitors.length > 0
+                      ? score.total > avgScore
+                        ? '🎉 You are above the sector average!'
+                        : `💡 ${competitors.filter(c => c.score > score.total).length} entities in your sector score higher.`
+                      : '💡 Join the AYA Registry to benchmark against your sector.'}
                 </p>
               </>
             )}

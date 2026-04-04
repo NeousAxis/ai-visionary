@@ -49,9 +49,25 @@ export async function POST(req: NextRequest) {
         const extract = mergeAgentResultsToExtract(url, fetchResult, results);
         send({ phase: 'merge', status: 'done' });
 
-        // Phase 4: Compute score
+        // Phase 4: Compute current score
         send({ phase: 'score', status: 'running' });
         const score = computeAioScore(extract);
+
+        // Phase 4b: Compute PRO score (what happens when AYO adds ASR files)
+        // Deep clone extract and add what AYO PRO generates
+        const proExtract = JSON.parse(JSON.stringify(extract));
+        // AYO PRO adds: ASR file, FAQ, glossary, documentation, JSON-LD
+        proExtract.fields.contenus_pedagogiques.has_faq = { value: true, q: 1, evidence: ['ayo_pro_generated'] };
+        proExtract.fields.contenus_pedagogiques.has_glossary = { value: true, q: 1, evidence: ['ayo_pro_generated'] };
+        proExtract.fields.contenus_pedagogiques.has_documentation = { value: true, q: 1, evidence: ['ayo_pro_generated'] };
+        proExtract.fields.structure_technique.has_asr = { value: true, q: 1, evidence: ['ayo_pro_generated'] };
+        proExtract.fields.structure_technique.has_jsonld = { value: true, q: 1, evidence: ['ayo_pro_generated'] };
+        proExtract.fields.structure_technique.has_sitemap = { value: true, q: 1, evidence: ['ayo_pro_generated'] };
+        proExtract.source.scan.has_asr_file = true;
+        proExtract.source.scan.has_jsonld = true;
+        proExtract.source.scan.is_aya_registered = true;
+        const proScore = computeAioScore(proExtract);
+
         send({ phase: 'score', status: 'done', data: score });
 
         // Phase 5: Final summary
@@ -61,6 +77,7 @@ export async function POST(req: NextRequest) {
           agentResults: results,
           extract,
           score,
+          proScore, // Score WITH AYO PRO files
           url: fetchResult.url,
         });
       } catch (err) {
