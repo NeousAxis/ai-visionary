@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
         // Phase 3: Merge results into AyoExtract
         send({ phase: 'merge', status: 'running' });
-        const extract = mergeAgentResultsToExtract(url, fetchResult, results);
+        const extract = await mergeAgentResultsToExtract(url, fetchResult, results);
         send({ phase: 'merge', status: 'done' });
 
         // Phase 4: Compute current score

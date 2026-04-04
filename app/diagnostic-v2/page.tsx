@@ -65,6 +65,7 @@ export default function DiagnosticV2Page() {
   const [filesRevealed, setFilesRevealed] = useState<number>(0);
   const [scoreRevealed, setScoreRevealed] = useState(false);
   const [proScore, setProScore] = useState<number | null>(null);
+  const [detectedName, setDetectedName] = useState('');
   const [competitors, setCompetitors] = useState<{ name: string; score: number; country: string; certified?: boolean }[]>([]);
   const [avgScore, setAvgScore] = useState(0);
   const [totalInSector, setTotalInSector] = useState(0);
@@ -193,10 +194,11 @@ export default function DiagnosticV2Page() {
                   blocks: blocksArr,
                 });
               }
-              // Capture PRO score (with AYO-generated files)
-              if (ev.proScore) {
-                setProScore(ev.proScore.total ?? null);
-              }
+              // Capture PRO score + site name
+              if (ev.proScore) setProScore(ev.proScore.total ?? null);
+              // Get detected name from extract
+              const eName = ev.extract?.fields?.identite?.name?.value;
+              if (eName) setDetectedName(eName);
               // Move to step 3 (scoring)
               setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 500);
             } else if (ev.phase === 'error') {
@@ -421,7 +423,7 @@ export default function DiagnosticV2Page() {
               <>
                 {/* Your score — always first */}
                 <div className="dv2-compare-row">
-                  <span className="dv2-compare-label dv2-compare-label--you">⬤ Your site</span>
+                  <span className="dv2-compare-label dv2-compare-label--you">⬤ {detectedName || scanUrl.replace(/^https?:\/\//, '').split('/')[0]}</span>
                   <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} /></div>
                   <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}/100</span>
                 </div>

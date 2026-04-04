@@ -123,11 +123,11 @@ export async function runAllAgents(
  * Merge all agent results into AyoExtract format.
  * Compatible with computeAioScore() and all generators.
  */
-export function mergeAgentResultsToExtract(
+export async function mergeAgentResultsToExtract(
   url: string,
   fetchResult: FetchResult,
   results: AllAgentResults,
-): AyoExtract {
+): Promise<AyoExtract> {
   const { contact, services, legal, location, security, jsonld, social } = results;
 
   // Determine name: prefer JSON-LD, fallback to meta title
@@ -225,8 +225,28 @@ export function mergeAgentResultsToExtract(
   const hasGlossary = /glossar|lexique|glossaire/i.test(text);
   const hasDocumentation = /documentation|docs\b|developer|api.?reference|guide|tutoriel/i.test(text);
 
-  // ASR file check (we can't do a HEAD request here, check if domain is in AYA)
-  const hasAsr = false;
+  // ASR file check — HEAD request to /.ayo/asr.json
+  let hasAsr = false;
+  try {
+    const asrUrl = new URL(url);
+    asrUrl.pathname = '/.ayo/asr.json';
+    const asrRes = await fetch(asrUrl.toString(), {
+      method: 'HEAD',
+      headers: { 'User-Agent': 'AYO-Bot/2.0' },
+      signal: AbortSignal.timeout(3000),
+    });
+    hasAsr = asrRes.ok;
+  } catch { /* ignore */ }
+
+  // AYA Registry check — is this site already registered?
+  let isAyaRegistered = false;
+  try {
+    const { db } = await import('../db');
+    const ayaEntity = await db.getAyaEntityByUrl(url);
+    if (ayaEntity && ayaEntity.payment_completed) {
+      isAyaRegistered = true;
+    }
+  } catch { /* ignore */ }
 
   return {
     version: 'AYO-EXTRACT-3.0',
@@ -239,6 +259,7 @@ export function mergeAgentResultsToExtract(
         has_asr_file: hasAsr,
         has_faq_content: hasFaqContent,
         has_faq_schema: jsonld.hasFaqSchema,
+        is_aya_registered: isAyaRegistered,
       },
     },
     fields: {
@@ -282,7 +303,7 @@ export function mergeAgentResultsToExtract(
         has_documentation: field(hasDocumentation, hasDocumentation ? 0.5 : 0, hasDocumentation ? ['scan_micro_agent'] : []),
       },
       structure_technique: {
-        has_asr: field(hasAsr, 0, []),
+        has_asr: field(hasAsr || isAyaRegistered, (hasAsr || isAyaRegistered) ? 1 : 0, (hasAsr || isAyaRegistered) ? ['scan_micro_agent'] : []),
         has_jsonld: field(jsonld.hasOrganizationType, jsonld.hasOrganizationType ? 1 : 0, jsonld.hasOrganizationType ? ['scan_micro_agent'] : []),
         has_sitemap: field(hasSitemap, hasSitemap ? 0.5 : 0, hasSitemap ? ['scan_micro_agent'] : []),
         mobile_optimized: field(hasMobileViewport, hasMobileViewport ? 1 : 0, hasMobileViewport ? ['scan_micro_agent'] : []),
