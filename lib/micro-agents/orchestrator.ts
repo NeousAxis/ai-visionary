@@ -289,32 +289,33 @@ Do NOT invent.`,
           email ? 1 : (contact as any).hasContactForm ? 0.5 : 0,
           email ? ['scan_micro_agent'] : (contact as any).hasContactForm ? ['scan_micro_agent_form'] : []
         ),
-        contact_phone: field(phone, phone ? 0.5 : 0, phone ? ['scan_micro_agent'] : []),
+        contact_phone: field(phone, phone ? 1 : 0, phone ? ['scan_micro_agent'] : []),
       },
       offre: {
         services: field(services.services, services.q, services.services.length ? ['scan_micro_agent'] : []),
         products: field(services.products, services.products.length ? services.q : 0, services.products.length ? ['scan_micro_agent'] : []),
+        // Found on site = verifiable = q:1
         use_cases: field(
           (services as any).use_cases || [],
-          (services as any).use_cases?.length ? 0.5 : 0,
+          (services as any).use_cases?.length ? 1 : 0,
           (services as any).use_cases?.length ? ['scan_micro_agent'] : []
         ),
         target_audience: field(
           (services as any).target_audience || '',
-          (services as any).target_audience ? 0.5 : 0,
+          (services as any).target_audience ? 1 : 0,
           (services as any).target_audience ? ['scan_micro_agent'] : []
         ),
         pricing_indication: field(
           (services as any).pricing || '',
-          (services as any).pricing ? 0.5 : 0,
+          (services as any).pricing ? 1 : 0,
           (services as any).pricing ? ['scan_micro_agent'] : []
         ),
       },
       processus_methodes: {
         process_steps: field(processSteps, processSteps.length > 0 ? 1 : 0, processSteps.length ? ['scan_micro_agent'] : []),
-        delivery_mode: field(deliveryMode, deliveryMode ? 0.5 : 0, deliveryMode ? ['scan_micro_agent'] : []),
-        geographies_served: field(geographies, geographies ? 0.5 : 0, geographies ? ['scan_micro_agent'] : []),
-        quality_assurance: field(qaText, qaText ? 0.5 : 0, qaText ? ['scan_micro_agent'] : []),
+        delivery_mode: field(deliveryMode, deliveryMode ? 1 : 0, deliveryMode ? ['scan_micro_agent'] : []),
+        geographies_served: field(geographies, geographies ? 1 : 0, geographies ? ['scan_micro_agent'] : []),
+        quality_assurance: field(qaText, qaText ? 1 : 0, qaText ? ['scan_micro_agent'] : []),
       },
       engagements_conformite: {
         policies: field(legal.policies, legal.policies.length ? legal.q : 0, legal.policies.length ? ['scan_micro_agent'] : []),
@@ -323,7 +324,7 @@ Do NOT invent.`,
         security_measures: field(security.measures, security.q, security.measures.length ? ['scan_micro_agent'] : []),
       },
       indicateurs: {
-        key_indicators: field(indicators, indicators.length > 0 ? 0.5 : 0, indicators.length ? ['scan_micro_agent'] : []),
+        key_indicators: field(indicators, indicators.length > 0 ? 1 : 0, indicators.length ? ['scan_micro_agent'] : []),
         last_review_date: field('', 0, []),
       },
       contenus_pedagogiques: {
