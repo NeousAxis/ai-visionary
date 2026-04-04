@@ -9,9 +9,9 @@ let _model: ReturnType<ReturnType<typeof createGoogleGenerativeAI>> | null = nul
 function getModel() {
   if (_model) return _model;
   const key = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '').trim();
-  if (!key) throw new Error('No Gemini API key');
+  if (!key) throw new Error('No Gemini API key found (GEMINI_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY)');
   const google = createGoogleGenerativeAI({ apiKey: key });
-  _model = google('gemini-3.0-flash');
+  _model = google('gemini-2.5-flash');
   return _model;
 }
 
@@ -29,15 +29,19 @@ export async function llmExtract(
   const model = getModel();
   const truncated = content.length > maxChars ? content.substring(0, maxChars) : content;
 
-  const { text } = await generateText({
-    model,
-    temperature: 0,
-    maxOutputTokens: 1000,
-    system: systemPrompt,
-    prompt: truncated,
-  });
-
-  return text;
+  try {
+    const { text } = await generateText({
+      model,
+      temperature: 0,
+      maxOutputTokens: 1000,
+      system: systemPrompt,
+      prompt: truncated,
+    });
+    return text;
+  } catch (err) {
+    console.error('[llm-agent] Gemini call failed:', err instanceof Error ? err.message : err);
+    throw err;
+  }
 }
 
 /**
