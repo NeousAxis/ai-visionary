@@ -792,7 +792,11 @@ ul {
 .dv2-badge-done { background:rgba(34,197,94,0.1); color:#16a34a; }
 .dv2-badge-error { background:rgba(206,106,107,0.1); color:#CE6A6B; }
 .dv2-dot-pulse { width:8px; height:8px; background:var(--primary-color); border-radius:50%; animation:dv2-pulse 1.2s ease-in-out infinite; }
+.dv2-agent-spinner { width:18px; height:18px; border:2.5px solid var(--border-light); border-top-color:var(--primary-color); border-radius:50%; animation:spin .8s linear infinite; display:inline-block; }
 .dv2-agent-data { margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border-light); }
+.dv2-agent-scanning { animation:dv2-pulse-opacity 1.5s ease-in-out infinite; }
+.dv2-scanning-text { font-size:0.8rem; color:var(--primary-color); font-style:italic; }
+@keyframes dv2-pulse-opacity { 0%,100%{opacity:1} 50%{opacity:.4} }
 .dv2-preview { display:flex; flex-direction:column; gap:0.2rem; font-size:0.8rem; color:var(--text-body); }
 .dv2-preview span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .dv2-muted { color:var(--text-muted); font-style:italic; }

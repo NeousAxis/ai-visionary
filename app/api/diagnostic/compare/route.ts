@@ -59,10 +59,16 @@ export async function POST(req: NextRequest) {
       if (siteName && eName.toLowerCase() === siteName.toLowerCase()) return false;
       if (eName.length < 2) return false;
 
-      // Match sector
-      if (!detectedSector) return true; // no sector detected = show all
-      const eSector = (e.sector_macro || '');
-      return eSector === detectedSector;
+      // Match sector — use includes for flexible matching
+      // sector_macro can be exact ("Technologie & SaaS") or a long description
+      if (!detectedSector) return false; // no sector = don't show random
+      const eSector = (e.sector_macro || '').toLowerCase();
+      const dSector = detectedSector.toLowerCase();
+      // Match if: exact match, or sector keywords overlap
+      const dKeywords = SECTOR_MAP[detectedSector] || [];
+      return eSector === dSector ||
+        eSector.includes(dSector.split(' ')[0]) ||
+        dKeywords.some(kw => eSector.includes(kw));
     });
 
     // Use ONLY sector pool — no fallback to random companies

@@ -291,11 +291,16 @@ export default function DiagnosticV2Page() {
                     </span>
                   </div>
                   <span className={`dv2-agent-badge dv2-badge-${agent.status}`}>
-                    {agent.status === 'running' && <span className="dv2-dot-pulse" />}
+                    {agent.status === 'running' && <span className="dv2-agent-spinner" />}
                     {agent.status === 'done' && '✓'}
                     {agent.status === 'error' && '✗'}
                   </span>
                 </div>
+                {agent.status === 'running' && (
+                  <div className="dv2-agent-data dv2-agent-scanning">
+                    <span className="dv2-scanning-text">{agent.desc}</span>
+                  </div>
+                )}
                 {agent.status === 'done' && agent.data && (
                   <div className="dv2-agent-data">
                     <DataPreview name={agent.name} data={agent.data} />
