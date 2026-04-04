@@ -399,6 +399,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Translation agents Python : descriptions certifiees, dictionnaire 16558 termes, keywords FR 100%
 - Page `/developers` : stats dynamiques, docs GitHub/HuggingFace
 - Exports : GitHub (4435 fichiers) + HuggingFace (4436 entites)
+- Diagnostic V2 micro-agents : page `/diagnostic-v2` avec 7 agents LLM cibles (Gemini 3 Flash), 8 etapes live, scoring 7 dimensions, compare concurrents AYA, score PRO projete. Branche `feature/micro-agents-diagnostic`.
 
 ---
 
@@ -414,8 +415,9 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 6 | Campagne email entreprises indexees | Haute | A faire |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
-| 9 | Diagnostic V2 micro-agents — remplacer le LLM par 7 micro-agents deterministes + nouvelle page one-page live `/diagnostic-v2` avec 8 etapes visibles. Branche `feature/micro-agents-diagnostic` (jetable). | Haute | En cours — branche feature/micro-agents-diagnostic |
+| 9 | Diagnostic V2 micro-agents — 7 micro-agents LLM cibles (Gemini 3 Flash) + page one-page live `/diagnostic-v2` avec 8 etapes. Score scan 67/100 pour whtg1.com (vs 82 V1). Branche `feature/micro-agents-diagnostic`. | Haute | En cours — page fonctionnelle, scoring a affiner |
 | 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
+| 11 | Re-scoring batch V2 — repasser les ~4400 entites AYA au travers du scoring V2 micro-agents pour coherence. Pipeline batch a integrer dans le bot. ~35000 appels Gemini Flash. | Critique | A faire apres finalisation V2 |
 
 ---
 
