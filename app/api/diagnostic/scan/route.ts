@@ -5,7 +5,7 @@ import { runAllAgents, mergeAgentResultsToExtract } from '@/lib/micro-agents/orc
 import { computeAioScore } from '@/lib/aio-score-engine';
 import type { AgentEvent } from '@/lib/micro-agents/types';
 
-export const maxDuration = 30;
+export const maxDuration = 60; // Puppeteer SPA rendering can take up to 15s
 
 export async function POST(req: NextRequest) {
   const { url } = await req.json();
