@@ -90,15 +90,16 @@ export async function POST(req: NextRequest) {
       return entityMatchesSector(e.sector_macro || '', detectedSector);
     });
 
-    // Show ALL entities in the sector — certified first, then by score
-    const sorted = sectorPool
-      .filter((e: any) => (e.asr_score || 0) > 0)
-      .sort((a: any, b: any) => {
-        const ac = a.payment_completed ? 1 : 0;
-        const bc = b.payment_completed ? 1 : 0;
-        if (ac !== bc) return bc - ac;
-        return (b.asr_score || 0) - (a.asr_score || 0);
-      });
+    // Show ALL entities — certified first, then SPREAD scores for variety
+    const withScore = sectorPool.filter((e: any) => (e.asr_score || 0) > 0);
+    const certified = withScore.filter((e: any) => e.payment_completed === true);
+    const others = withScore.filter((e: any) => !e.payment_completed);
+
+    // For non-certified: pick a diverse sample (not all at 50)
+    // Shuffle then take first 5
+    const shuffled = others.sort(() => Math.random() - 0.5);
+
+    const sorted = [...certified.sort((a: any, b: any) => (b.asr_score || 0) - (a.asr_score || 0)), ...shuffled];
 
     const competitors = sorted.slice(0, 5).map((e: any) => ({
       name: e.display_name || e.legal_name,

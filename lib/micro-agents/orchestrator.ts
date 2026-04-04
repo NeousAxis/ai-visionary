@@ -187,31 +187,37 @@ export async function mergeAgentResultsToExtract(
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ').trim();
 
-  // --- FAQ detection ---
-  const hasFaqLink = /href=["'][^"']*faq[^"']*["']/i.test(rawHtml);
-  const hasFaqText = /foire aux questions|frequently asked questions|FAQ/i.test(plainText);
-  const hasFaqContent = hasFaqLink || hasFaqText || jsonld.hasFaqSchema;
-
-  // --- Process & Indicators via focused LLM ---
+  // --- ALL remaining data via ONE focused LLM call ---
+  // Process, indicators, FAQ, glossary, documentation — NO regex, pure LLM
   let processSteps: string[] = [];
   let deliveryMode = '';
   let geographies = country || '';
   let qaText = '';
   let indicators: string[] = [];
+  let hasFaqContent = jsonld.hasFaqSchema; // JSON-LD FAQPage is deterministic
+  let hasGlossary = false;
+  let hasDocumentation = false;
+  let hasSitemap = false;
+  let hasMobileViewport = false;
 
   try {
     const { llmExtract, parseJson } = await import('./llm-agent');
     const raw = await llmExtract(
-      `You extract business process and key metrics from websites. Content can be in ANY language (French, English, German, etc.).
+      `You analyze a website for business process, educational content, and technical signals. Content can be in ANY language.
 
-Extract:
-- process_steps: methodology steps, approach phases, how they work. Look for: "Notre approche", "Our process", "Étape 1", "Phase 1", numbered steps, "Écoute & Diagnostic", "Déploiement & Suivi", "How we work", "Comment nous travaillons" (max 6 items)
-- delivery_mode: "online", "on-site", or "hybrid". Look for: "en ligne", "présentiel", "ateliers", "workshops", "remote", "plateforme", "sur site"
-- geographies: where they operate. Look for: "suisses", "Switzerland", "Europe", "France", "international", "worldwide"
-- quality_assurance: quality monitoring mentioned. Look for: "suivi", "mesure d'impact", "ajustements", "certifié", "monitoring", "quality assurance"
-- indicators: key numbers with context. Look for: "5 ans", "2 ans", "17 ODD", "200+ clients", "X projets", any number with business meaning. Include the full phrase (e.g. "5 ans de direction association")
+Extract ALL of the following:
+- process_steps: methodology steps, workflow phases (max 6). Look for: numbered steps, "Our process", "Notre approche", "How we work", "Agile", "Sprint", phase names
+- delivery_mode: "online", "on-site", or "hybrid"
+- geographies: where they operate (countries, regions)
+- quality_assurance: any quality/monitoring mention
+- indicators: key numbers with context (e.g. "5 years experience", "200+ clients", "24h response")
+- has_faq: true if the site has a FAQ section, FAQ page, or frequently asked questions
+- has_glossary: true if the site has a glossary, lexicon, or terminology section
+- has_documentation: true if the site has documentation, guides, tutorials, or developer docs
+- has_sitemap: true if a sitemap or sitemap.xml is referenced
+- has_mobile: true if the site mentions responsive design, mobile optimization, or has viewport meta
 
-Return ONLY JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
+Return ONLY JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[],"has_faq":false,"has_glossary":false,"has_documentation":false,"has_sitemap":false,"has_mobile":false}
 Extract ONLY what is explicitly mentioned. Do NOT invent.`,
       plainText, 10000,
     );
@@ -221,6 +227,11 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`,
       geographies?: string;
       quality_assurance?: string;
       indicators?: string[];
+      has_faq?: boolean;
+      has_glossary?: boolean;
+      has_documentation?: boolean;
+      has_sitemap?: boolean;
+      has_mobile?: boolean;
     }>(raw);
     if (data) {
       processSteps = data.process_steps || [];
@@ -228,14 +239,13 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`,
       if (data.geographies) geographies = data.geographies;
       qaText = data.quality_assurance || '';
       indicators = data.indicators || [];
+      if (data.has_faq) hasFaqContent = true;
+      if (data.has_glossary) hasGlossary = true;
+      if (data.has_documentation) hasDocumentation = true;
+      if (data.has_sitemap) hasSitemap = true;
+      if (data.has_mobile) hasMobileViewport = true;
     }
   } catch { /* fallback: empty */ }
-
-  // --- Technical Foundation ---
-  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(rawHtml) || /responsive|mobile/i.test(plainText);
-  const hasSitemap = /sitemap\.xml/i.test(rawHtml);
-  const hasGlossary = /glossar|lexique|glossaire/i.test(plainText);
-  const hasDocumentation = /documentation|docs\b|developer|api.?reference|guide|tutoriel/i.test(plainText);
 
   // ASR file check — HEAD request to /.ayo/asr.json
   let hasAsr = false;
@@ -331,8 +341,8 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`,
         has_faq: field(hasFaqContent, hasFaqContent ? 1 : 0, hasFaqContent ? ['scan_micro_agent'] : []),
         // These penalize the initial score — but AYO PRO generates them, so the Compare
         // section shows the score BOOST when these files are added
-        has_glossary: field(hasGlossary, hasGlossary ? 0.5 : 0, hasGlossary ? ['scan_micro_agent'] : []),
-        has_documentation: field(hasDocumentation, hasDocumentation ? 0.5 : 0, hasDocumentation ? ['scan_micro_agent'] : []),
+        has_glossary: field(hasGlossary, hasGlossary ? 1 : 0, hasGlossary ? ['scan_micro_agent'] : []),
+        has_documentation: field(hasDocumentation, hasDocumentation ? 1 : 0, hasDocumentation ? ['scan_micro_agent'] : []),
       },
       structure_technique: {
         // has_asr = fichier ASR physique sur le site (PRO uniquement)
