@@ -68,8 +68,10 @@ export default function DiagnosticV2Page() {
       return () => clearTimeout(timer);
     }
     if (currentStep === 4 && filesRevealed === FILES.length) {
-      // Auto-advance to step 5 after all files shown
+      // Auto-advance to step 5 (Compare) after all files shown
       setTimeout(() => { setCurrentStep(5); scrollTo('step-5'); }, 1000);
+      // Then auto-advance to step 6 (Plans) after Compare is visible
+      setTimeout(() => { setCurrentStep(6); scrollTo('step-6'); }, 3500);
     }
   }, [currentStep, filesRevealed, scrollTo]);
 
@@ -328,15 +330,47 @@ export default function DiagnosticV2Page() {
         </section>
       )}
 
-      {/* ═══ STEP 5 — SUBSCRIPTION CHOICE ═══ */}
-      {currentStep >= 5 && (
+      {/* ═══ STEP 5 — COMPARE (auto-displayed after files) ═══ */}
+      {currentStep >= 5 && score && (
         <section id="step-5" className={`dv2-step dv2-step-reveal ${currentStep === 5 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">05</div>
+          <h2>Your Position in the AI Ecosystem</h2>
+          <p className="dv2-step-sub">How your AI readability compares to {'>'}4,400 entities in the AYA Registry.</p>
+
+          <div className="dv2-compare-card">
+            <div className="dv2-compare-row">
+              <span className="dv2-compare-label">Your site</span>
+              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} /></div>
+              <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}/100</span>
+            </div>
+            <div className="dv2-compare-row">
+              <span className="dv2-compare-label">Registry avg.</span>
+              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--avg" style={{ width: '32%' }} /></div>
+              <span className="dv2-compare-val">32/100</span>
+            </div>
+            <div className="dv2-compare-row">
+              <span className="dv2-compare-label">With PRO</span>
+              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--pro" style={{ width: `${Math.min(score.total + 20, 100)}%` }} /></div>
+              <span className="dv2-compare-val dv2-val-pro">{Math.min(Math.round(score.total) + 20, 100)}/100</span>
+            </div>
+            <p className="dv2-compare-msg">
+              {score.total >= 50
+                ? '🎉 Your site is already more AI-readable than most businesses!'
+                : '💡 With ASR files and AYA registration, your AI discoverability would significantly increase.'}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ═══ STEP 6 — CHOOSE PLAN ═══ */}
+      {currentStep >= 6 && (
+        <section id="step-6" className={`dv2-step dv2-step-reveal ${currentStep === 6 ? 'dv2-step-active' : ''}`}>
+          <div className="dv2-step-num">06</div>
           <h2>Choose Your Plan</h2>
           <p className="dv2-step-sub">Activate your AI identity and join the AYA Trust Registry.</p>
 
           <div className="dv2-plans">
-            <div className="dv2-plan" onClick={() => { setCurrentStep(6); scrollTo('step-6'); }}>
+            <div className="dv2-plan" onClick={() => { setCurrentStep(7); scrollTo('step-7'); }}>
               <div className="dv2-plan-name">AYA Subscription</div>
               <div className="dv2-plan-price">19 <span>CHF/mo</span></div>
               <ul className="dv2-plan-list">
@@ -347,7 +381,7 @@ export default function DiagnosticV2Page() {
               </ul>
               <button className="dv2-plan-btn dv2-plan-btn--outline">Select AYA →</button>
             </div>
-            <div className="dv2-plan dv2-plan--pro" onClick={() => { setCurrentStep(6); scrollTo('step-6'); }}>
+            <div className="dv2-plan dv2-plan--pro" onClick={() => { setCurrentStep(7); scrollTo('step-7'); }}>
               <div className="dv2-plan-tag">RECOMMENDED</div>
               <div className="dv2-plan-name">PRO Pack</div>
               <div className="dv2-plan-price">499 <span>CHF</span></div>
@@ -364,14 +398,14 @@ export default function DiagnosticV2Page() {
         </section>
       )}
 
-      {/* ═══ STEP 6 — PAYMENT ═══ */}
-      {currentStep >= 6 && (
-        <section id="step-6" className={`dv2-step dv2-step-reveal ${currentStep === 6 ? 'dv2-step-active' : ''}`}>
-          <div className="dv2-step-num">06</div>
+      {/* ═══ STEP 7 — PAYMENT ═══ */}
+      {currentStep >= 7 && (
+        <section id="step-7" className={`dv2-step dv2-step-reveal ${currentStep === 7 ? 'dv2-step-active' : ''}`}>
+          <div className="dv2-step-num">07</div>
           <h2>Payment</h2>
           <div className="dv2-payment-box">
             <p>You will be redirected to Stripe for secure payment.</p>
-            <button className="dv2-search-btn" onClick={() => { setCurrentStep(7); scrollTo('step-7'); }}>
+            <button className="dv2-search-btn" onClick={() => { setCurrentStep(8); scrollTo('step-8'); }}>
               Proceed to Payment →
             </button>
             <p className="dv2-payment-note">🔒 Secure checkout powered by Stripe</p>
@@ -379,10 +413,10 @@ export default function DiagnosticV2Page() {
         </section>
       )}
 
-      {/* ═══ STEP 7 — CONFIRMATION ═══ */}
-      {currentStep >= 7 && (
-        <section id="step-7" className={`dv2-step dv2-step-reveal ${currentStep === 7 ? 'dv2-step-active' : ''}`}>
-          <div className="dv2-step-num">07</div>
+      {/* ═══ STEP 8 — CONFIRMATION ═══ */}
+      {currentStep >= 8 && (
+        <section id="step-8" className={`dv2-step dv2-step-reveal ${currentStep === 8 ? 'dv2-step-active' : ''}`}>
+          <div className="dv2-step-num">08</div>
           <h2>Confirmation</h2>
           <div className="dv2-confirm-box">
             <div className="dv2-confirm-icon">✓</div>
@@ -394,41 +428,6 @@ export default function DiagnosticV2Page() {
               <li>🏛️ AYA Registry entry activated</li>
               <li>🔗 Public certificate page live</li>
             </ul>
-            <button className="dv2-plan-btn dv2-plan-btn--solid" onClick={() => { setCurrentStep(8); scrollTo('step-8'); }}>
-              See how you compare →
-            </button>
-          </div>
-        </section>
-      )}
-
-      {/* ═══ STEP 8 — COMPARE ═══ */}
-      {currentStep >= 8 && score && (
-        <section id="step-8" className={`dv2-step dv2-step-reveal ${currentStep === 8 ? 'dv2-step-active' : ''}`}>
-          <div className="dv2-step-num">08</div>
-          <h2>Your Position in the AI Ecosystem</h2>
-          <p className="dv2-step-sub">See how your AI readability compares to {'>'}4,400 entities in the AYA Registry.</p>
-
-          <div className="dv2-compare-card">
-            <div className="dv2-compare-row">
-              <span className="dv2-compare-label">Your site</span>
-              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} /></div>
-              <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}</span>
-            </div>
-            <div className="dv2-compare-row">
-              <span className="dv2-compare-label">Registry avg.</span>
-              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--avg" style={{ width: '32%' }} /></div>
-              <span className="dv2-compare-val">32</span>
-            </div>
-            <div className="dv2-compare-row">
-              <span className="dv2-compare-label">With PRO</span>
-              <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--pro" style={{ width: `${Math.min(score.total + 20, 100)}%` }} /></div>
-              <span className="dv2-compare-val dv2-val-pro">{Math.min(Math.round(score.total) + 20, 100)}</span>
-            </div>
-            <p className="dv2-compare-msg">
-              {score.total >= 50
-                ? '🎉 Your site is already more AI-readable than most businesses!'
-                : '💡 With ASR files and AYA registration, your AI discoverability would significantly increase.'}
-            </p>
           </div>
         </section>
       )}
