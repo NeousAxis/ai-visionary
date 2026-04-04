@@ -255,10 +255,13 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`,
   try {
     const { db } = await import('../db');
     const ayaEntity = await db.getAyaEntityByUrl(url);
+    console.log(`[orchestrator] AYA lookup for ${url}: ${ayaEntity ? 'FOUND (score:' + ayaEntity.asr_score + ', paid:' + ayaEntity.payment_completed + ')' : 'NOT FOUND'}`);
     if (ayaEntity && ayaEntity.payment_completed) {
       isAyaRegistered = true;
     }
-  } catch { /* ignore */ }
+  } catch (err) {
+    console.error(`[orchestrator] AYA lookup FAILED for ${url}:`, err instanceof Error ? err.message : err);
+  }
 
   return {
     version: 'AYO-EXTRACT-3.0',
