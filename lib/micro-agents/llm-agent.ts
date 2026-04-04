@@ -34,7 +34,7 @@ export async function llmExtract(
     const { text } = await generateText({
       model,
       temperature: 0,
-      maxOutputTokens: 1000,
+      maxOutputTokens: 4000,
       system: systemPrompt,
       prompt: truncated,
     });
@@ -51,10 +51,26 @@ export async function llmExtract(
  */
 export function parseJson<T>(text: string): T | null {
   try {
-    // Strip ```json ... ``` wrappers
     const cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
     return JSON.parse(cleaned);
   } catch {
-    return null;
+    // Try to fix truncated JSON by closing brackets
+    try {
+      let fixed = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+      // Remove trailing incomplete values
+      fixed = fixed.replace(/,\s*"[^"]*$/, '').replace(/,\s*$/, '');
+      // Count and close open brackets
+      const opens = (fixed.match(/\{/g) || []).length;
+      const closes = (fixed.match(/\}/g) || []).length;
+      const arrOpens = (fixed.match(/\[/g) || []).length;
+      const arrCloses = (fixed.match(/\]/g) || []).length;
+      for (let i = 0; i < arrOpens - arrCloses; i++) fixed += ']';
+      for (let i = 0; i < opens - closes; i++) fixed += '}';
+      console.log('[parseJson] Fixed truncated JSON, attempting parse...');
+      return JSON.parse(fixed);
+    } catch {
+      console.error('[parseJson] Failed to parse even after fix attempt:', text.substring(0, 200));
+      return null;
+    }
   }
 }
