@@ -30,6 +30,7 @@ export async function llmExtract(
   const truncated = content.length > maxChars ? content.substring(0, maxChars) : content;
 
   try {
+    console.log(`[llm-agent] Calling Gemini with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
     const { text } = await generateText({
       model,
       temperature: 0,
@@ -37,9 +38,10 @@ export async function llmExtract(
       system: systemPrompt,
       prompt: truncated,
     });
+    console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
     return text;
   } catch (err) {
-    console.error('[llm-agent] Gemini call failed:', err instanceof Error ? err.message : err);
+    console.error('[llm-agent] Gemini call FAILED:', err instanceof Error ? err.message : err);
     throw err;
   }
 }

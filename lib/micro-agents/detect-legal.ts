@@ -16,7 +16,9 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`;
 
 export async function detectLegal(content: string): Promise<LegalResult> {
   try {
+    console.log(`[detect-legal] Input length: ${content.length}`);
     const raw = await llmExtract(PROMPT, content, 10000);
+    console.log(`[detect-legal] Raw response: ${raw.substring(0, 300)}`);
     const data = parseJson<{ policies?: string[]; frameworks?: string[]; certifications?: string[]; urls?: string[] }>(raw);
     if (!data) return { policies: [], frameworks: [], certifications: [], urls: [], q: 0 };
 

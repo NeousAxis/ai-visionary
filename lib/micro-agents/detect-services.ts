@@ -23,7 +23,9 @@ interface ExtendedServicesResult extends ServicesResult {
 
 export async function detectServices(content: string): Promise<ExtendedServicesResult> {
   try {
+    console.log(`[detect-services] Input length: ${content.length}, first 200: ${content.substring(0, 200)}`);
     const raw = await llmExtract(PROMPT, content, 10000);
+    console.log(`[detect-services] Raw response: ${raw.substring(0, 300)}`);
     const data = parseJson<{
       services?: string[];
       products?: string[];
