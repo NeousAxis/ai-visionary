@@ -74,16 +74,11 @@ export async function POST(req: NextRequest) {
     // Use ONLY sector pool — no fallback to random companies
     const pool = sectorPool;
 
-    // Sort: certified first, then by score descending — exclude pure 50s unless certified
+    // ONLY show certified entities (payment_completed = true)
+    // Bot-indexed entities (score ~49-50) are NOT real competitors
     const sorted = pool
-      .filter((e: any) => (e.asr_score || 0) > 0)
-      .filter((e: any) => e.payment_completed === true || (e.asr_score || 0) !== 50)
-      .sort((a: any, b: any) => {
-        const ac = a.payment_completed ? 1 : 0;
-        const bc = b.payment_completed ? 1 : 0;
-        if (ac !== bc) return bc - ac;
-        return (b.asr_score || 0) - (a.asr_score || 0);
-      });
+      .filter((e: any) => e.payment_completed === true && (e.asr_score || 0) > 0)
+      .sort((a: any, b: any) => (b.asr_score || 0) - (a.asr_score || 0));
 
     const competitors = sorted.slice(0, 5).map((e: any) => ({
       name: e.display_name || e.legal_name,

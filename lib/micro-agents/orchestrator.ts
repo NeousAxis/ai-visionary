@@ -281,9 +281,21 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`,
       offre: {
         services: field(services.services, services.q, services.services.length ? ['scan_micro_agent'] : []),
         products: field(services.products, services.products.length ? services.q : 0, services.products.length ? ['scan_micro_agent'] : []),
-        use_cases: field([], 0, []),
-        target_audience: field('', 0, []),
-        pricing_indication: field('', 0, []),
+        use_cases: field(
+          (services as any).use_cases || [],
+          (services as any).use_cases?.length ? 0.5 : 0,
+          (services as any).use_cases?.length ? ['scan_micro_agent'] : []
+        ),
+        target_audience: field(
+          (services as any).target_audience || '',
+          (services as any).target_audience ? 0.5 : 0,
+          (services as any).target_audience ? ['scan_micro_agent'] : []
+        ),
+        pricing_indication: field(
+          (services as any).pricing || '',
+          (services as any).pricing ? 0.5 : 0,
+          (services as any).pricing ? ['scan_micro_agent'] : []
+        ),
       },
       processus_methodes: {
         process_steps: field(processSteps, processSteps.length > 0 ? 1 : 0, processSteps.length ? ['scan_micro_agent'] : []),

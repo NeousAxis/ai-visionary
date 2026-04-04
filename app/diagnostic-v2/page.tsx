@@ -447,7 +447,7 @@ export default function DiagnosticV2Page() {
                   </div>
                 )) : (
                   <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem', padding: '0.75rem 0' }}>
-                    No direct competitors found in the AYA Registry for your sector.
+                    No indexed competitors currently visible in the AYA Registry for your sector.
                   </p>
                 )}
 
