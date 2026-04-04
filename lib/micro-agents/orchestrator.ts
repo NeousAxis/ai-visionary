@@ -92,34 +92,52 @@ export async function runAllAgents(
     .replace(/\s+/g, ' ')
     .trim();
 
-  // Step 2: Run all agents in parallel
-  // JSON-LD + Social = deterministic (parse HTML)
-  // Contact, Services, Legal, Security = LLM (parse text)
-  const agentPromises = [
-    runAgent('detect-jsonld', () => detectJsonLd(html)),
-    runAgent('detect-contact', () => detectContact(textContent)),
-    runAgent('detect-services', () => detectServices(textContent)),
-    runAgent('detect-legal', () => detectLegal(textContent)),
-    runAgent('detect-security', () => detectSecurity(textContent, headers)),
-    runAgent('detect-social', () => detectSocial(html)), // needs raw HTML for URLs
-  ] as const;
+  // Step 2: Run agents SEQUENTIALLY — so the client sees each one work in real-time
+  const events: AgentEvent[] = [];
 
-  const [jsonldRun, contactRun, servicesRun, legalRun, securityRun, socialRun] =
-    await Promise.all(agentPromises);
+  // Agent 1: JSON-LD (deterministic, fast)
+  onEvent?.({ agent: 'detect-jsonld', status: 'running', data: null, durationMs: 0 });
+  const jsonldRun = await runAgent('detect-jsonld', () => detectJsonLd(html));
+  events.push(jsonldRun.event);
+  onEvent?.(jsonldRun.event);
 
-  // Location uses JSON-LD results + text + site URL
+  // Agent 2: Contact (LLM)
+  onEvent?.({ agent: 'detect-contact', status: 'running', data: null, durationMs: 0 });
+  const contactRun = await runAgent('detect-contact', () => detectContact(textContent));
+  events.push(contactRun.event);
+  onEvent?.(contactRun.event);
+
+  // Agent 3: Location (LLM)
+  onEvent?.({ agent: 'detect-location', status: 'running', data: null, durationMs: 0 });
   const locationRun = await runAgent('detect-location', () =>
     detectLocation(textContent, jsonldRun.result || undefined, fetchResult.url)
   );
+  events.push(locationRun.event);
+  onEvent?.(locationRun.event);
 
-  // Emit events
-  const allRuns = [jsonldRun, contactRun, locationRun, servicesRun, legalRun, securityRun, socialRun];
-  const events: AgentEvent[] = [];
+  // Agent 4: Services (LLM)
+  onEvent?.({ agent: 'detect-services', status: 'running', data: null, durationMs: 0 });
+  const servicesRun = await runAgent('detect-services', () => detectServices(textContent));
+  events.push(servicesRun.event);
+  onEvent?.(servicesRun.event);
 
-  for (const run of allRuns) {
-    events.push(run.event);
-    onEvent?.(run.event);
-  }
+  // Agent 5: Legal/Compliance (LLM)
+  onEvent?.({ agent: 'detect-legal', status: 'running', data: null, durationMs: 0 });
+  const legalRun = await runAgent('detect-legal', () => detectLegal(textContent));
+  events.push(legalRun.event);
+  onEvent?.(legalRun.event);
+
+  // Agent 6: Security (deterministic headers + LLM content)
+  onEvent?.({ agent: 'detect-security', status: 'running', data: null, durationMs: 0 });
+  const securityRun = await runAgent('detect-security', () => detectSecurity(textContent, headers));
+  events.push(securityRun.event);
+  onEvent?.(securityRun.event);
+
+  // Agent 7: Social (deterministic, fast)
+  onEvent?.({ agent: 'detect-social', status: 'running', data: null, durationMs: 0 });
+  const socialRun = await runAgent('detect-social', () => detectSocial(html));
+  events.push(socialRun.event);
+  onEvent?.(socialRun.event);
 
   const results: AllAgentResults = {
     contact: contactRun.result || { email: null, phone: null, q: 0 },

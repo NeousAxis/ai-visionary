@@ -196,9 +196,11 @@ export default function DiagnosticV2Page() {
               }
               // Capture PRO score + site name
               if (ev.proScore) setProScore(ev.proScore.total ?? null);
-              // Get detected name from extract
-              const eName = ev.extract?.fields?.identite?.name?.value;
-              if (eName) setDetectedName(eName);
+              // Get detected name — prefer short name, not full title
+              const eName = ev.extract?.fields?.identite?.name?.value || '';
+              // Strip " | subtitle" from title-based names
+              const shortName = eName.split(/\s*[|–—]\s*/)[0].trim();
+              if (shortName) setDetectedName(shortName);
               // Move to step 3 (scoring)
               setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 500);
             } else if (ev.phase === 'error') {

@@ -3,32 +3,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-// Map detected keywords to AYA sector_macro values
-const SECTOR_KEYWORDS: Record<string, string[]> = {
-  'consulting': ['consulting', 'conseil', 'stratégie', 'strategy', 'accompagnement', 'advisory'],
-  'technology': ['tech', 'software', 'saas', 'digital', 'platform', 'app', 'développement', 'it services'],
-  'finance': ['finance', 'bank', 'insurance', 'fintech', 'investissement', 'crédit'],
-  'education': ['education', 'formation', 'training', 'école', 'university', 'learning'],
-  'healthcare': ['health', 'santé', 'medical', 'pharma', 'clinic'],
-  'retail': ['retail', 'commerce', 'e-commerce', 'shop', 'store', 'boutique'],
-  'sustainability': ['durable', 'durabilité', 'sustainability', 'rse', 'csr', 'environnement', 'écologie', 'green', 'transition'],
-  'association': ['association', 'ong', 'ngo', 'fondation', 'non-profit', 'bénévol'],
-  'media': ['media', 'presse', 'journal', 'communication', 'marketing', 'agence'],
-  'legal': ['legal', 'juridique', 'avocat', 'law', 'notaire', 'droit'],
-  'real-estate': ['immobilier', 'real estate', 'property', 'construction'],
-  'food': ['food', 'restaurant', 'alimentation', 'gastronomie', 'cuisine'],
-  'manufacturing': ['industrie', 'manufacturing', 'production', 'usine', 'fabrication'],
+// Map detected service keywords to AYA sector_macro values (in French)
+const SECTOR_MAP: Record<string, string[]> = {
+  'Conseil & Services Pro': ['consulting', 'conseil', 'stratégie', 'strategy', 'accompagnement', 'advisory', 'coaching', 'formation', 'durabilité', 'sustainability', 'rse', 'csr'],
+  'Technologie & SaaS': ['tech', 'software', 'saas', 'digital', 'platform', 'app', 'développement', 'it', 'web', 'ai', 'data', 'cloud', 'api'],
+  'Finance & Assurance': ['finance', 'bank', 'insurance', 'fintech', 'investissement', 'crédit', 'assurance'],
+  'Éducation & Formation': ['education', 'formation', 'training', 'école', 'university', 'learning'],
+  'Santé & Pharma': ['health', 'santé', 'medical', 'pharma', 'clinic', 'hôpital'],
+  'Commerce & Retail': ['retail', 'commerce', 'e-commerce', 'shop', 'store', 'boutique', 'vente'],
+  'Média & Communication': ['media', 'presse', 'journal', 'communication', 'marketing', 'agence', 'pub'],
+  'Tourisme & Transport': ['tourisme', 'transport', 'voyage', 'hotel', 'airline', 'travel'],
+  'Industrie & Manufacture': ['industrie', 'manufacturing', 'production', 'usine', 'fabrication'],
+  'Immobilier & Construction': ['immobilier', 'real estate', 'property', 'construction'],
+  'Alimentation & Restaurant': ['food', 'restaurant', 'alimentation', 'gastronomie'],
+  'Juridique & Compliance': ['legal', 'juridique', 'avocat', 'law', 'notaire', 'droit'],
 };
 
-function detectSector(services: string[], title: string): string[] {
+function detectSectorMacro(services: string[], title: string): string | null {
   const allText = [...services, title].join(' ').toLowerCase();
-  const matches: string[] = [];
-  for (const [sector, keywords] of Object.entries(SECTOR_KEYWORDS)) {
-    if (keywords.some(kw => allText.includes(kw))) {
-      matches.push(sector);
+  let bestMatch: string | null = null;
+  let bestCount = 0;
+
+  for (const [sectorMacro, keywords] of Object.entries(SECTOR_MAP)) {
+    const count = keywords.filter(kw => allText.includes(kw)).length;
+    if (count > bestCount) {
+      bestCount = count;
+      bestMatch = sectorMacro;
     }
   }
-  return matches.length > 0 ? matches : ['consulting']; // fallback
+  return bestMatch;
 }
 
 export async function POST(req: NextRequest) {
@@ -41,55 +44,47 @@ export async function POST(req: NextRequest) {
     }
 
     // Detect sector from services
-    const sectors = detectSector(services || [], siteName || '');
+    const detectedSector = detectSectorMacro(services || [], siteName || '');
 
     // Normalize site URL for exclusion
-    const siteUrlNorm = (siteUrl || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
+    const siteNorm = (siteUrl || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
 
-    // Filter: same sector + exclude the tested site itself
+    // Filter by sector_macro + exclude tested site
     const sectorPool = allEntities.filter((e: any) => {
-      const name = (e.display_name || e.legal_name || '').toLowerCase();
-      const entitySector = (e.sector_macro || '').toLowerCase();
-      const entityUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
+      const eName = (e.display_name || e.legal_name || '');
+      const eUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
 
-      // Exclude the tested site
-      if (siteUrlNorm && entityUrl && entityUrl.includes(siteUrlNorm)) return false;
-      if (siteUrlNorm && siteUrlNorm.includes(entityUrl) && entityUrl.length > 3) return false;
-      if (siteName && name === siteName.toLowerCase()) return false;
-
-      // Must have a name
-      if (name.length < 2) return false;
+      // Exclude tested site
+      if (siteNorm && eUrl && (eUrl.includes(siteNorm) || siteNorm.includes(eUrl))) return false;
+      if (siteName && eName.toLowerCase() === siteName.toLowerCase()) return false;
+      if (eName.length < 2) return false;
 
       // Match sector
-      return sectors.some(s =>
-        entitySector.includes(s) ||
-        SECTOR_KEYWORDS[s]?.some(kw => entitySector.includes(kw) || name.includes(kw))
-      );
+      if (!detectedSector) return true; // no sector detected = show all
+      const eSector = (e.sector_macro || '');
+      return eSector === detectedSector;
     });
 
-    // If sector filter too restrictive, try country filter
+    // If not enough in exact sector, try same country
     let pool = sectorPool;
     if (pool.length < 3 && country) {
       const cl = country.toLowerCase();
       pool = allEntities.filter((e: any) => {
-        const entityUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
-        if (siteUrlNorm && entityUrl.includes(siteUrlNorm)) return false;
-        const n = (e.display_name || e.legal_name || '');
-        return n.length > 1 && (e.country_legal || '').toLowerCase().includes(cl);
+        const eUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
+        if (siteNorm && eUrl && (eUrl.includes(siteNorm) || siteNorm.includes(eUrl))) return false;
+        const n = e.display_name || e.legal_name || '';
+        return n.length > 1 && (e.country_legal || '').toLowerCase() === cl.substring(0, 2).toUpperCase();
       });
     }
 
-    // If no sector match, DON'T fall back to random companies
-    // Instead return empty competitors with a flag
-
-    // Sort by score, prefer certified
+    // Sort: certified first, then by score descending — exclude pure 50s unless certified
     const sorted = pool
       .filter((e: any) => (e.asr_score || 0) > 0)
+      .filter((e: any) => e.payment_completed === true || (e.asr_score || 0) !== 50)
       .sort((a: any, b: any) => {
-        // Certified first, then by score
-        const aCert = a.payment_completed ? 1 : 0;
-        const bCert = b.payment_completed ? 1 : 0;
-        if (aCert !== bCert) return bCert - aCert;
+        const ac = a.payment_completed ? 1 : 0;
+        const bc = b.payment_completed ? 1 : 0;
+        if (ac !== bc) return bc - ac;
         return (b.asr_score || 0) - (a.asr_score || 0);
       });
 
@@ -101,21 +96,17 @@ export async function POST(req: NextRequest) {
       sector: e.sector_macro || '',
     }));
 
-    // Average
+    // Average from sector pool
     const scores = pool.map((e: any) => e.asr_score || 0).filter((s: number) => s > 0);
     const averageScore = scores.length > 0
       ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
       : 0;
 
-    // If pool is too small or only has generic 50-score entities, don't show fake competitors
-    const hasRealCompetitors = competitors.length > 0 && competitors.some((c: any) => c.score !== 50);
-
     return NextResponse.json({
-      competitors: hasRealCompetitors ? competitors : [],
+      competitors,
       averageScore,
       totalInSector: sectorPool.length,
-      detectedSectors: sectors,
-      noCompetitors: !hasRealCompetitors,
+      detectedSector,
     });
   } catch (err) {
     console.error('[compare]', err);
