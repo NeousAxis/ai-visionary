@@ -5,85 +5,60 @@ import { db } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
   try {
-    const { country, currentScore } = await req.json();
+    const { country } = await req.json();
 
-    // Strategy: get entities from the same country with REAL scores
-    // (not just default 50 from bot indexing)
     const allEntities = await db.getAyaEntities(500);
-
     if (!allEntities || allEntities.length === 0) {
       return NextResponse.json({ competitors: [], averageScore: 0, totalInSector: 0 });
     }
 
-    // Filter: same country if available, otherwise all
+    // Filter by country if available
     let pool = allEntities;
     if (country) {
-      const countryLower = country.toLowerCase();
+      const cl = country.toLowerCase();
       const countryPool = pool.filter((e: any) =>
-        (e.country || '').toLowerCase().includes(countryLower) ||
-        countryLower.includes((e.country || '').toLowerCase())
+        (e.country_legal || e.country || '').toLowerCase().includes(cl)
       );
-      // Only use country filter if we have enough results
-      if (countryPool.length >= 5) {
-        pool = countryPool;
-      }
+      if (countryPool.length >= 3) pool = countryPool;
     }
 
-    // Separate entities with real scores (certified/PRO with payment)
-    // vs bot-indexed (all have exactly 50)
-    const withRealScore = pool.filter((e: any) => {
-      const score = e.asr_score || 0;
-      return score > 0 && score !== 50; // 50 = default bot score
+    // Only keep entities WITH a name (no "Unknown")
+    const named = pool.filter((e: any) => {
+      const n = e.display_name || e.legal_name || '';
+      return n.length > 1 && n !== 'Unknown';
     });
 
-    const certified = pool.filter((e: any) => e.payment_completed === true);
+    // Prefer certified entities (real scores), then entities with non-50 scores
+    const certified = named.filter((e: any) => e.payment_completed === true && (e.asr_score || 0) > 0);
+    const withRealScore = named.filter((e: any) => {
+      const s = e.asr_score || 0;
+      return s > 0 && s !== 50 && !certified.some((c: any) => c.entity_id === e.entity_id);
+    });
 
-    // Combine: prefer certified entities + entities with non-default scores
-    const meaningfulEntities = [
-      ...certified,
-      ...withRealScore.filter((e: any) => !certified.some((c: any) => c.aya_entity_id === e.aya_entity_id)),
-    ];
+    const meaningful = [...certified, ...withRealScore];
 
-    // If we don't have enough meaningful entities, include some bot-indexed ones
-    // but spread the scores to show variety
-    let competitors: { name: string; score: number; country: string; certified: boolean }[];
+    // Build competitors list — only named entities
+    const competitors = (meaningful.length >= 3 ? meaningful : named.filter((e: any) => (e.asr_score || 0) > 0))
+      .sort((a: any, b: any) => (b.asr_score || 0) - (a.asr_score || 0))
+      .slice(0, 5)
+      .map((e: any) => ({
+        name: e.display_name || e.legal_name || 'N/A',
+        score: e.asr_score || 0,
+        country: e.country_legal || e.country || '',
+        certified: e.payment_completed === true,
+      }))
+      .filter((c: any) => c.name !== 'N/A'); // Extra safety
 
-    if (meaningfulEntities.length >= 3) {
-      competitors = meaningfulEntities
-        .sort((a: any, b: any) => (b.asr_score || 0) - (a.asr_score || 0))
-        .slice(0, 5)
-        .map((e: any) => ({
-          name: e.name || e.entity_name || 'Unknown',
-          score: e.asr_score || 0,
-          country: e.country || '',
-          certified: e.payment_completed === true,
-        }));
-    } else {
-      // Use all pool but prefer variety in scores
-      competitors = pool
-        .filter((e: any) => (e.asr_score || 0) > 0)
-        .sort((a: any, b: any) => (b.asr_score || 0) - (a.asr_score || 0))
-        .slice(0, 5)
-        .map((e: any) => ({
-          name: e.name || e.entity_name || 'Unknown',
-          score: e.asr_score || 0,
-          country: e.country || '',
-          certified: e.payment_completed === true,
-        }));
-    }
-
-    // Calculate real average (from all entities with scores)
-    const allScores = pool
-      .map((e: any) => e.asr_score || 0)
-      .filter((s: number) => s > 0);
-    const averageScore = allScores.length > 0
-      ? Math.round(allScores.reduce((a: number, b: number) => a + b, 0) / allScores.length)
+    // Average from pool
+    const scores = named.map((e: any) => e.asr_score || 0).filter((s: number) => s > 0);
+    const averageScore = scores.length > 0
+      ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
       : 0;
 
     return NextResponse.json({
       competitors,
       averageScore,
-      totalInSector: pool.length,
+      totalInSector: named.length,
     });
   } catch (err) {
     console.error('[compare]', err);
