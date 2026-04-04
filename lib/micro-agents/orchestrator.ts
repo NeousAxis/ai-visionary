@@ -303,7 +303,9 @@ export async function mergeAgentResultsToExtract(
         has_documentation: field(hasDocumentation, hasDocumentation ? 0.5 : 0, hasDocumentation ? ['scan_micro_agent'] : []),
       },
       structure_technique: {
-        has_asr: field(hasAsr || isAyaRegistered, (hasAsr || isAyaRegistered) ? 1 : 0, (hasAsr || isAyaRegistered) ? ['scan_micro_agent'] : []),
+        // has_asr = fichier ASR physique sur le site (PRO uniquement)
+        // is_aya_registered = dans le registre AYA (AYA ou PRO) — géré séparément par le score engine
+        has_asr: field(hasAsr, hasAsr ? 1 : 0, hasAsr ? ['scan_micro_agent'] : []),
         has_jsonld: field(jsonld.hasOrganizationType, jsonld.hasOrganizationType ? 1 : 0, jsonld.hasOrganizationType ? ['scan_micro_agent'] : []),
         has_sitemap: field(hasSitemap, hasSitemap ? 0.5 : 0, hasSitemap ? ['scan_micro_agent'] : []),
         mobile_optimized: field(hasMobileViewport, hasMobileViewport ? 1 : 0, hasMobileViewport ? ['scan_micro_agent'] : []),
