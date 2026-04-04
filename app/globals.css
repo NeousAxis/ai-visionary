@@ -798,22 +798,38 @@ ul {
 .dv2-muted { color:var(--text-muted); font-style:italic; }
 .dv2-agent-ms { font-size:0.7rem; color:var(--text-muted); margin-top:0.35rem; display:block; }
 
-/* Score */
-.dv2-score-panel { display:flex; gap:3rem; align-items:center; flex-wrap:wrap; background:#fff; border:1px solid var(--border-light); border-radius:16px; padding:2.5rem; box-shadow:var(--shadow-md); }
-.dv2-score-ring { position:relative; width:150px; height:150px; flex-shrink:0; }
-.dv2-ring-svg { width:100%; height:100%; }
-.dv2-score-num { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.dv2-score-big { font-family:var(--font-heading); font-size:2.8rem; font-weight:800; color:var(--text-main); line-height:1; }
-.dv2-score-of { font-size:0.9rem; color:var(--text-muted); }
-.dv2-blocks { flex:1; min-width:280px; display:flex; flex-direction:column; gap:0.7rem; }
-.dv2-block-row { display:flex; align-items:center; gap:0.75rem; }
-.dv2-block-name { width:160px; font-size:0.82rem; color:var(--text-muted); flex-shrink:0; }
-.dv2-block-track { flex:1; height:6px; background:var(--bg-accent); border-radius:3px; overflow:hidden; }
-.dv2-block-fill { height:100%; border-radius:3px; transform-origin:left; }
+/* Score — 7 individual cards grid */
+.dv2-score-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:0.75rem; margin-bottom:1.5rem; }
+.dv2-score-card { background:#fff; border:1px solid var(--border-light); border-radius:12px; padding:1.1rem 1.25rem; box-shadow:var(--shadow-sm); opacity:0; transform:translateY(12px); animation:dv2-card-in .5s ease-out forwards; }
+@keyframes dv2-card-in { to { opacity:1; transform:translateY(0); } }
+.dv2-score-card-header { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.6rem; }
+.dv2-score-card-icon { font-size:1.1rem; }
+.dv2-score-card-label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.03em; }
+.dv2-score-card-value { display:flex; align-items:baseline; gap:0.15rem; margin-bottom:0.5rem; }
+.dv2-score-card-num { font-family:var(--font-heading); font-size:1.8rem; font-weight:800; line-height:1; }
+.dv2-score-card-max { font-size:0.85rem; color:var(--text-muted); }
+.dv2-num-good { color:#16a34a; }
+.dv2-num-mid { color:#ca8a04; }
+.dv2-num-low { color:var(--accent-color); }
+.dv2-score-card-bar { height:5px; background:var(--bg-accent); border-radius:3px; overflow:hidden; margin-bottom:0.35rem; }
+.dv2-score-card-fill { height:100%; border-radius:3px; transform-origin:left; }
 .dv2-fill-good { background:linear-gradient(90deg, #22c55e, #4ade80); }
 .dv2-fill-mid { background:linear-gradient(90deg, #eab308, #facc15); }
 .dv2-fill-low { background:linear-gradient(90deg, #CE6A6B, #ef4444); }
-.dv2-block-val { font-size:0.78rem; font-weight:600; color:var(--text-main); min-width:50px; text-align:right; }
+.dv2-score-card-pct { font-size:0.7rem; font-weight:600; }
+
+/* Global total panel */
+.dv2-total-panel { display:flex; align-items:center; justify-content:space-between; background:#fff; border:2px solid var(--primary-color); border-radius:16px; padding:1.5rem 2rem; box-shadow:0 4px 20px rgba(74,145,158,0.12); opacity:0; transform:translateY(16px); }
+.dv2-total-revealed { animation:dv2-total-in .6s ease-out 1s forwards; }
+@keyframes dv2-total-in { to { opacity:1; transform:translateY(0); } }
+.dv2-total-left { display:flex; flex-direction:column; gap:0.2rem; }
+.dv2-total-label { font-family:var(--font-heading); font-size:1.3rem; font-weight:700; color:var(--text-main); }
+.dv2-total-sub { font-size:0.78rem; color:var(--text-muted); }
+.dv2-total-ring { position:relative; width:100px; height:100px; flex-shrink:0; }
+.dv2-ring-svg { width:100%; height:100%; }
+.dv2-total-num { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.dv2-total-big { font-family:var(--font-heading); font-size:2rem; font-weight:800; color:var(--text-main); line-height:1; }
+.dv2-total-of { font-size:0.75rem; color:var(--text-muted); }
 
 /* Files */
 .dv2-files-list { display:flex; flex-direction:column; gap:0.5rem; }

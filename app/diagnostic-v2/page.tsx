@@ -31,6 +31,16 @@ const AGENTS: Omit<AgentState, 'status' | 'data' | 'durationMs'>[] = [
   { name: 'detect-social', label: 'Social', icon: '◈', desc: 'Scanning social profiles...' },
 ];
 
+const BLOCK_ICONS: Record<string, string> = {
+  identite: '🪪',
+  offre: '🎯',
+  processus_methodes: '⚙️',
+  engagements_conformite: '🛡️',
+  indicateurs: '📊',
+  contenus_pedagogiques: '📚',
+  structure_technique: '🔧',
+};
+
 const FILES = [
   { name: 'ASR-Protocol.json', desc: 'Digital identity — Ed25519 signed' },
   { name: 'manifest.json', desc: 'Structured business profile' },
@@ -284,47 +294,69 @@ export default function DiagnosticV2Page() {
         </section>
       )}
 
-      {/* ═══ STEP 3 — SCORING ═══ */}
+      {/* ═══ STEP 3 — SCORING (7 individual blocks + total) ═══ */}
       {currentStep >= 3 && score && (
         <section id="step-3" className={`dv2-step dv2-step-reveal ${currentStep === 3 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">03</div>
-          <h2>AIO Score Calculation</h2>
-          <p className="dv2-step-sub">Computing score across 7 weighted blocks...</p>
+          <h2>AIO Score — 7 Dimensions</h2>
+          <p className="dv2-step-sub">Each dimension is scored individually, then combined into your global AIO score.</p>
 
-          <div className="dv2-score-panel">
-            <div className="dv2-score-ring">
-              <svg viewBox="0 0 120 120" className="dv2-ring-svg">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="#E2EFE9" strokeWidth="8" />
-                <circle cx="60" cy="60" r="52" fill="none" stroke="url(#sg)" strokeWidth="8" strokeLinecap="round"
-                  strokeDasharray={scoreRevealed ? `${(score.total / 100) * 327} 327` : '0 327'}
-                  transform="rotate(-90 60 60)" style={{ transition: 'stroke-dasharray 1.2s ease-out' }} />
+          {/* 7 individual score cards */}
+          <div className="dv2-score-grid">
+            {(score.blocks || []).map((b, i) => {
+              const pct = b.maxScore > 0 ? (b.score / b.maxScore) * 100 : 0;
+              const icon = BLOCK_ICONS[b.name] || '◆';
+              return (
+                <div
+                  key={i}
+                  className={`dv2-score-card ${scoreRevealed ? 'dv2-score-card--revealed' : ''}`}
+                  style={{ animationDelay: `${i * 150}ms` }}
+                >
+                  <div className="dv2-score-card-header">
+                    <span className="dv2-score-card-icon">{icon}</span>
+                    <span className="dv2-score-card-label">{b.label || b.name}</span>
+                  </div>
+                  <div className="dv2-score-card-value">
+                    <span className={`dv2-score-card-num ${pct >= 70 ? 'dv2-num-good' : pct >= 40 ? 'dv2-num-mid' : 'dv2-num-low'}`}>
+                      {scoreRevealed ? b.score?.toFixed?.(1) ?? '0' : '—'}
+                    </span>
+                    <span className="dv2-score-card-max">/{b.maxScore}</span>
+                  </div>
+                  <div className="dv2-score-card-bar">
+                    <div
+                      className={`dv2-score-card-fill ${pct >= 70 ? 'dv2-fill-good' : pct >= 40 ? 'dv2-fill-mid' : 'dv2-fill-low'}`}
+                      style={{ width: scoreRevealed ? `${pct}%` : '0%', transition: `width 0.8s ease-out ${i * 150}ms` }}
+                    />
+                  </div>
+                  <span className={`dv2-score-card-pct ${pct >= 70 ? 'dv2-num-good' : pct >= 40 ? 'dv2-num-mid' : 'dv2-num-low'}`}>
+                    {scoreRevealed ? `${Math.round(pct)}%` : ''}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Global total */}
+          <div className={`dv2-total-panel ${scoreRevealed ? 'dv2-total-revealed' : ''}`}>
+            <div className="dv2-total-left">
+              <span className="dv2-total-label">Global AIO Score</span>
+              <span className="dv2-total-sub">Combined from 7 dimensions • Max 100</span>
+            </div>
+            <div className="dv2-total-ring">
+              <svg viewBox="0 0 100 100" className="dv2-ring-svg">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#E2EFE9" strokeWidth="7" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="url(#sg)" strokeWidth="7" strokeLinecap="round"
+                  strokeDasharray={scoreRevealed ? `${(score.total / 100) * 264} 264` : '0 264'}
+                  transform="rotate(-90 50 50)" style={{ transition: 'stroke-dasharray 1.5s ease-out 1s' }} />
                 <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#4A919E" /><stop offset="100%" stopColor="#356D76" />
                 </linearGradient></defs>
               </svg>
-              <div className="dv2-score-num">
-                <span className="dv2-score-big">{scoreRevealed ? Math.round(score.total) : '—'}</span>
-                <span className="dv2-score-of">/100</span>
+              <div className="dv2-total-num">
+                <span className="dv2-total-big">{scoreRevealed ? Math.round(score.total) : '—'}</span>
+                <span className="dv2-total-of">/100</span>
               </div>
             </div>
-
-            {score.blocks?.length > 0 && (
-              <div className="dv2-blocks">
-                {score.blocks.map((b, i) => {
-                  const pct = b.maxScore > 0 ? (b.score / b.maxScore) * 100 : 0;
-                  return (
-                    <div key={i} className="dv2-block-row" style={{ animationDelay: `${i * 120}ms` }}>
-                      <span className="dv2-block-name">{b.label || b.name}</span>
-                      <div className="dv2-block-track">
-                        <div className={`dv2-block-fill ${pct >= 70 ? 'dv2-fill-good' : pct >= 40 ? 'dv2-fill-mid' : 'dv2-fill-low'}`}
-                          style={{ width: scoreRevealed ? `${pct}%` : '0%', transition: `width 0.8s ease-out ${i * 120}ms` }} />
-                      </div>
-                      <span className="dv2-block-val">{scoreRevealed ? `${b.score?.toFixed?.(1) ?? 0}/${b.maxScore}` : '—'}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </section>
       )}
