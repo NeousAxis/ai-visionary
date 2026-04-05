@@ -59,8 +59,9 @@ export async function POST(req: NextRequest) {
             logger.info('OTP_VALIDATED', `OTP valid for ${email}`);
 
             if (!SESSION_SECRET) {
-                logger.error('OTP_NO_SECRET', 'SESSION_SECRET env var not set');
-                return NextResponse.json({ error: 'Erreur de configuration' }, { status: 500 });
+                // No SESSION_SECRET (e.g. Preview env) — return success without session token
+                logger.info('OTP_NO_SECRET', 'SESSION_SECRET not set — returning success without token');
+                return NextResponse.json({ success: true });
             }
 
             // 3. Generate a secure session token with expiration
