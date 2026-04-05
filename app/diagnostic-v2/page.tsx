@@ -595,7 +595,7 @@ export default function DiagnosticV2Page() {
       {currentStep >= 5 && score && (
         <section id="step-5" className={`dv2-step dv2-step-reveal ${currentStep === 5 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">05</div>
-          <h2>Your Position vs Competitors</h2>
+          <h2>Your AI Recommendability vs Competitors</h2>
           <p className="dv2-step-sub">
             How your AI readability compares to {totalInSector > 0 ? totalInSector : '>4,400'} entities in the AYA Registry.
           </p>
