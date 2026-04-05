@@ -80,6 +80,15 @@ export default function DiagnosticV2Page() {
   const [otpError, setOtpError] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpMaskedEmail, setOtpMaskedEmail] = useState('');
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  // Handle return from Stripe checkout (redirect with session_id)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('session_id')) {
+      setCurrentStep(8);
+    }
+  }, []);
 
   const scrollTo = useCallback((id: string) => {
     setTimeout(() => {
@@ -764,11 +773,41 @@ export default function DiagnosticV2Page() {
                 </div>
               </div>
               <button
-                onClick={() => { setCurrentStep(8); scrollTo('step-8'); }}
+                onClick={async () => {
+                  setPaymentLoading(true);
+                  setError(null);
+                  try {
+                    const res = await fetch('/api/create-checkout', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        email: userEmail,
+                        url: scanUrl,
+                        packType: selectedPlan === 'pro' ? 'PRO' : 'AYA_SUB',
+                        locale: 'en',
+                      }),
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                      window.location.href = data.url;
+                    } else {
+                      setError(data.error || 'Failed to create checkout session');
+                      setPaymentLoading(false);
+                    }
+                  } catch {
+                    setError('Network error — please try again');
+                    setPaymentLoading(false);
+                  }
+                }}
+                disabled={paymentLoading}
                 className="dv2-search-btn"
-                style={{ width: '100%' }}
+                style={{ width: '100%', opacity: paymentLoading ? 0.7 : 1 }}
               >
-                Proceed to Payment →
+                {paymentLoading ? (
+                  <><span className="dv2-spinner" style={{ marginRight: 8 }} /> Redirecting to Stripe...</>
+                ) : (
+                  'Proceed to Payment →'
+                )}
               </button>
               <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.75rem', textAlign: 'center' }}>
                 Secure checkout powered by Stripe

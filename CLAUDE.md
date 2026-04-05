@@ -3,7 +3,7 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 3 avril 2026
+> Derniere mise a jour : 5 avril 2026
 
 ---
 
@@ -246,7 +246,7 @@ Chaque micro-agent = 1 appel LLM (Gemini 3 Flash) avec un prompt ultra-cible de 
 Tache trop specifique pour halluciner. Schema de sortie JSON valide par parseJson.
 Les agents tournent en SEQUENTIEL pour que le client voie chaque agent travailler en live.
 
-#### Les 7 micro-agents
+#### Les 8 micro-agents
 
 | Agent | Fichier | Methode | Input | Output |
 |-------|---------|---------|-------|--------|
@@ -255,6 +255,7 @@ Les agents tournent en SEQUENTIEL pour que le client voie chaque agent travaille
 | detect-legal | `lib/micro-agents/detect-legal.ts` | **LLM** | Texte site | `{ policies[], frameworks[], certifications[], urls[], q }` |
 | detect-location | `lib/micro-agents/detect-location.ts` | **JSON-LD d'abord, puis LLM** | Texte + URL | `{ city, country, q }` |
 | detect-security | `lib/micro-agents/detect-security.ts` | **Headers deterministe + LLM** | Texte + headers | `{ measures[], q }` |
+| detect-pedagogy | `lib/micro-agents/detect-pedagogy.ts` | **LLM + Jina HTML fallback** | HTML + URL | `{ has_faq, has_glossary, has_documentation, q }` |
 | detect-jsonld | `lib/micro-agents/detect-jsonld.ts` | **Deterministe** (parsing JSON) | HTML brut | `{ schemas[], type, name, q }` |
 | detect-social | `lib/micro-agents/detect-social.ts` | **Deterministe** (regex URL) | HTML brut | `{ links[], platforms[], q }` |
 
@@ -265,6 +266,7 @@ Les agents tournent en SEQUENTIEL pour que le client voie chaque agent travaille
 | llm-agent | `lib/micro-agents/llm-agent.ts` | Caller partage : Gemini 3 Flash, temp=0, maxOutputTokens=4000 |
 | html-fetcher | `lib/micro-agents/html-fetcher.ts` | Fetch HTML + SPA detection (jina.ai fallback) + Puppeteer |
 | orchestrator | `lib/micro-agents/orchestrator.ts` | Sequentiel, merge → AyoExtract, check ASR + AYA registry |
+| detect-pedagogy | `lib/micro-agents/detect-pedagogy.ts` | LLM sur liens/headings extraits + fallback Jina HTML pour SPA |
 
 **Prompts bilingues** : tous les prompts supportent FR/EN/DE.
 **parseJson robuste** : repare le JSON tronque (ferme les brackets manquants).
@@ -279,6 +281,7 @@ L'orchestrateur fait aussi un 8eme appel LLM pour process/indicateurs :
 - `geographies_served` : zones geographiques
 - `quality_assurance` : suivi qualite
 - `key_indicators` : chiffres cles (X ans, X clients, X projets)
+- **Retry x3 + Merge** : detect-services, detect-legal et process/indicators sont appeles 3 fois en parallele. Les resultats sont fusionnes (union des arrays, keepLongest des strings). Stabilise le score a +/-1 point.
 
 Checks supplementaires (deterministes) :
 - HEAD `/.ayo/asr.json` → `has_asr`
@@ -294,7 +297,7 @@ Checks supplementaires (deterministes) :
 | processus_methodes (15pts) | orchestrator LLM | process_steps, delivery_mode, geographies, quality_assurance |
 | engagements_conformite (15pts) | detect-legal, detect-security | policies, frameworks, certifications, security_measures |
 | indicateurs (20pts) | orchestrator LLM | key_indicators |
-| contenus_pedagogiques (10pts) | detect-jsonld + deterministe | has_faq, has_glossary, has_documentation |
+| contenus_pedagogiques (10pts) | detect-pedagogy + detect-jsonld | has_faq, has_glossary, has_documentation |
 | structure_technique (10pts) | detect-jsonld + deterministe | has_asr, has_jsonld, has_sitemap, mobile_optimized |
 
 #### Score PRO projete
@@ -309,12 +312,12 @@ La route `/api/diagnostic/scan` calcule aussi un `proScore` :
 | Etape | Description |
 |-------|-------------|
 | 1 | Champ URL + bouton Analyser |
-| 2 | 7 cartes agents live via SSE (spinner + texte scanning + resultats) |
+| 2 | 8 cartes agents live via SSE (spinner + texte scanning + resultats) |
 | 3 | Score AIO 7 dimensions (cartes full-width + ring total) |
 | 4 | 5 fichiers ASR generes un par un avec barre de progression |
 | 5 | Compare vs concurrents AYA (meme sector_macro, certifies d'abord) + score PRO |
-| 6 | Choix plan AYA (19 CHF/mois) vs PRO (499 CHF) |
-| 7 | Paiement Stripe |
+| 6 | Choix plan AYA/PRO + email capture |
+| 7 | OTP pour clients existants + paiement Stripe |
 | 8 | Confirmation + checklist |
 
 #### API Diagnostic V2
@@ -331,7 +334,7 @@ La route `/api/diagnostic/scan` calcule aussi un `proScore` :
 lib/micro-agents/
   types.ts, llm-agent.ts, html-fetcher.ts, orchestrator.ts
   detect-contact.ts, detect-services.ts, detect-legal.ts
-  detect-location.ts, detect-security.ts, detect-jsonld.ts, detect-social.ts
+  detect-location.ts, detect-security.ts, detect-pedagogy.ts, detect-jsonld.ts, detect-social.ts
 
 app/diagnostic-v2/
   page.tsx, layout.tsx
@@ -400,6 +403,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Page `/developers` : stats dynamiques, docs GitHub/HuggingFace
 - Exports : GitHub (4435 fichiers) + HuggingFace (4436 entites)
 - Diagnostic V2 micro-agents : page `/diagnostic-v2` avec 7 agents LLM cibles (Gemini 3 Flash), 8 etapes live, scoring 7 dimensions, compare concurrents AYA, score PRO projete. Branche `feature/micro-agents-diagnostic`.
+- Diagnostic V2 : 8 micro-agents (dont detect-pedagogy LLM pour FAQ/glossary/docs), retry x3 pour stabilite score, OTP clients existants, email capture, Stripe TEST connecte
+- Score V2 stable : whtg1.com 81/100 (±1 point entre scans)
 
 ---
 
@@ -415,7 +420,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 6 | Campagne email entreprises indexees | Haute | A faire |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
-| 9 | Diagnostic V2 micro-agents — 7 micro-agents LLM cibles (Gemini 3 Flash) + page one-page live `/diagnostic-v2` avec 8 etapes. Score scan **81/100** pour whtg1.com (vs 82 V1). Zero caps evidence. Branche `feature/micro-agents-diagnostic`. | Haute | En cours — scoring OK, universalite a verifier |
+| 9 | Diagnostic V2 micro-agents — 8 micro-agents LLM + detect-pedagogy. Score stable 81/100. OTP + email + Stripe TEST connectes. Merge dans main. Page `/diagnostic-v2`. | Haute | Fait — merge dans main (5 avril 2026) |
 | 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
 | 11 | Re-scoring batch V2 — repasser les ~4400 entites AYA au travers du scoring V2 micro-agents pour coherence. Pipeline batch a integrer dans le bot. ~35000 appels Gemini Flash. | Critique | A faire apres finalisation V2 |
 
