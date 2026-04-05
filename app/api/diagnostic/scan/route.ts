@@ -3,6 +3,7 @@
 import { NextRequest } from 'next/server';
 import { runAllAgents, mergeAgentResultsToExtract } from '@/lib/micro-agents/orchestrator';
 import { computeAioScore } from '@/lib/aio-score-engine';
+import { db } from '@/lib/db';
 import type { AgentEvent } from '@/lib/micro-agents/types';
 
 export const maxDuration = 60; // Puppeteer SPA rendering can take up to 15s
@@ -89,6 +90,20 @@ export async function POST(req: NextRequest) {
         const proScore = computeAioScore(proExtract);
 
         send({ phase: 'score', status: 'done', data: score });
+
+        // Save V2 extract to analyses table (so webhook finds it after Stripe payment)
+        try {
+          const analysisId = crypto.randomUUID();
+          await db.saveAnalysis(analysisId, {
+            url: fetchResult.url,
+            email: null,
+            score: score.total,
+            data: { fields: extract.fields, source: extract.source, version: extract.version, blocks: score.blocks },
+          });
+          console.log(`[scan] Analysis saved: ${analysisId} score=${score.total} url=${fetchResult.url}`);
+        } catch (e) {
+          console.error('[scan] Failed to save analysis:', e instanceof Error ? e.message : e);
+        }
 
         // Phase 5: Final summary
         send({
