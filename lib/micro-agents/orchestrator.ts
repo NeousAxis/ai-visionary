@@ -369,7 +369,7 @@ Do NOT invent.`;
     fields: {
       identite: {
         name: field(name, name ? 1 : 0, name ? ['scan_micro_agent'] : []),
-        legal_name: field('', 0, []),
+        legal_name: field(name || '', name ? 1 : 0, name ? ['scan_micro_agent'] : []),
         business_type: field(businessType, businessType ? 1 : 0, businessType ? ['scan_micro_agent'] : []),
         city: field(city, location.q, city ? ['scan_micro_agent'] : []),
         country: field(country, location.q, country ? ['scan_micro_agent'] : []),
@@ -379,7 +379,9 @@ Do NOT invent.`;
           email ? 1 : contact.hasContactForm ? 0.5 : 0,
           email ? ['scan_micro_agent'] : contact.hasContactForm ? ['scan_micro_agent_form'] : []
         ),
-        contact_phone: field(phone, phone ? 1 : 0, phone ? ['scan_micro_agent'] : []),
+        contact_phone: phone
+          ? field(phone, 1, ['scan_micro_agent'])
+          : { value: '', q: 0 as Quality, evidence: [], na: true },
       },
       offre: {
         services: field(services.services, services.q, services.services.length ? ['scan_micro_agent'] : []),
