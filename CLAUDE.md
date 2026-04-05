@@ -423,6 +423,9 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 9 | Diagnostic V2 micro-agents — 8 micro-agents LLM + detect-pedagogy. Score stable 81/100. OTP + email + Stripe TEST connectes. Merge dans main. Page `/diagnostic-v2`. | Haute | Fait — merge dans main (5 avril 2026) |
 | 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
 | 11 | Re-scoring batch V2 — repasser les ~4400 entites AYA au travers du scoring V2 micro-agents pour coherence. Pipeline batch a integrer dans le bot. ~35000 appels Gemini Flash. | Critique | A faire apres finalisation V2 |
+| 12 | Dashboard Entreprise — transformer /renew/[entityId] en dashboard complet : diagnostic avec tous les scores (7 blocs), re-scan V2, admin compte, transfert email. Garder OTP gate. | Haute | A faire |
+| 13 | i18n FR/EN page diagnostic V2 — tous labels, titres, boutons via next-intl | Haute | A faire |
+| 14 | Responsive mobile page diagnostic V2 — bouton/form qui debordent sur mobile | Haute | A faire |
 
 ---
 
