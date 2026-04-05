@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { maskEmail } from '@/lib/sanitize';
@@ -66,13 +67,36 @@ export async function POST(req: NextRequest) {
         // 4. Generate 6-digit code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // 5. Save to DB (expires in 10 mins) — MUST succeed before sending email
-        const saved = await db.saveOTP(trimmedEmail, code);
-        if (!saved) {
-            console.log(`[otp-v2] FAILED to save OTP for ${maskEmail(trimmedEmail)} — aborting email send`);
-            return NextResponse.json({ error: 'Failed to save verification code. Please try again.' }, { status: 500 });
+        // 5. Save to DB DIRECTLY (bypass db.saveOTP to debug Vercel issue)
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (!supabaseUrl || !supabaseKey) {
+            console.log('[otp-v2] MISSING Supabase env vars');
+            return NextResponse.json({ error: 'Server configuration error.' }, { status: 500 });
         }
-        console.log(`[otp-v2] OTP saved for ${maskEmail(trimmedEmail)}`);
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Delete old codes for this email
+        await supabase.from('otp_codes').delete().eq('email', trimmedEmail);
+
+        // Insert new code
+        const { error: insertError } = await supabase.from('otp_codes').insert({
+            email: trimmedEmail,
+            code,
+            expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+        });
+        if (insertError) {
+            console.log(`[otp-v2] INSERT FAILED: ${insertError.message}`);
+            return NextResponse.json({ error: 'Failed to save code.' }, { status: 500 });
+        }
+
+        // Verify it's actually there
+        const { data: verify } = await supabase.from('otp_codes').select('code').eq('email', trimmedEmail).single();
+        if (!verify || verify.code !== code) {
+            console.log(`[otp-v2] VERIFY FAILED — code not in DB after insert!`);
+            return NextResponse.json({ error: 'Code save verification failed.' }, { status: 500 });
+        }
+        console.log(`[otp-v2] OTP saved AND verified for ${maskEmail(trimmedEmail)}`);
 
         // 6. Send email via Resend
         const otpSubject = en
