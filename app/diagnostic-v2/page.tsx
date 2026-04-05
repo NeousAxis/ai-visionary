@@ -334,7 +334,7 @@ export default function DiagnosticV2Page() {
                 autoFocus
               />
               <button type="submit" disabled={currentStep > 1 || !url.trim() || !emailVerified} className="dv2-search-btn">
-                {currentStep === 2 ? <span className="dv2-spinner" /> : currentStep > 2 ? '✓ Done' : !emailVerified ? 'Verify email first' : 'Analyze →'}
+                {currentStep === 2 ? <span className="dv2-spinner" /> : currentStep > 2 ? '✓ Done' : 'Analyze →'}
               </button>
             </div>
           </form>
