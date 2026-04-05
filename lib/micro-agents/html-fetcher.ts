@@ -78,13 +78,13 @@ async function renderWithBrowser(url: string): Promise<string | null> {
 }
 
 /**
- * Fallback: use jina.ai reader and convert markdown to basic HTML
+ * Fallback: use jina.ai reader — markdown for content (works best for LLM agents)
  */
 async function renderWithJina(url: string): Promise<string | null> {
   try {
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), 15000);
-    // NO X-Return-Format header — jina returns clean Markdown by default
+    // Default markdown — best for content extraction by LLM agents
     const res = await fetch(`https://r.jina.ai/${url}`, {
       signal: ctrl.signal,
     });

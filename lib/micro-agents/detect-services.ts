@@ -15,17 +15,9 @@ Extract:
 Return ONLY JSON: {"services":[],"products":[],"target_audience":"","use_cases":[],"pricing":""}
 Extract ONLY what is explicitly mentioned. Do NOT invent.`;
 
-interface ExtendedServicesResult extends ServicesResult {
-  target_audience?: string;
-  use_cases?: string[];
-  pricing?: string;
-}
-
-export async function detectServices(content: string): Promise<ExtendedServicesResult> {
+export async function detectServices(content: string): Promise<ServicesResult> {
   try {
-    console.log(`[detect-services] Input length: ${content.length}, first 200: ${content.substring(0, 200)}`);
     const raw = await llmExtract(PROMPT, content, 10000);
-    console.log(`[detect-services] Raw response: ${raw.substring(0, 300)}`);
     const data = parseJson<{
       services?: string[];
       products?: string[];

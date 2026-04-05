@@ -9,7 +9,8 @@ export type AgentName =
   | 'detect-location'
   | 'detect-security'
   | 'detect-jsonld'
-  | 'detect-social';
+  | 'detect-social'
+  | 'detect-pedagogy';
 
 export type AgentStatus = 'waiting' | 'running' | 'done' | 'error';
 
@@ -18,12 +19,16 @@ export type AgentStatus = 'waiting' | 'running' | 'done' | 'error';
 export interface ContactResult {
   email: string | null;
   phone: string | null;
+  hasContactForm?: boolean;
   q: Quality;
 }
 
 export interface ServicesResult {
   services: string[];
   products: string[];
+  target_audience?: string;
+  use_cases?: string[];
+  pricing?: string;
   q: Quality;
 }
 
@@ -64,12 +69,19 @@ export interface SocialResult {
   q: Quality;
 }
 
+export interface PedagogyResult {
+  has_faq: boolean;
+  has_glossary: boolean;
+  has_documentation: boolean;
+  q: Quality;
+}
+
 // --- SSE Event ---
 
 export interface AgentEvent {
   agent: AgentName;
   status: AgentStatus;
-  data: ContactResult | ServicesResult | LegalResult | LocationResult | SecurityResult | JsonLdResult | SocialResult | null;
+  data: ContactResult | ServicesResult | LegalResult | LocationResult | SecurityResult | JsonLdResult | SocialResult | PedagogyResult | null;
   durationMs: number;
   error?: string;
 }
@@ -92,4 +104,5 @@ export interface AllAgentResults {
   security: SecurityResult;
   jsonld: JsonLdResult;
   social: SocialResult;
+  pedagogy: PedagogyResult;
 }

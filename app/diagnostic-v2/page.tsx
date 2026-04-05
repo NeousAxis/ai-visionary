@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 // ─── Types ───
-type AgentName = 'detect-contact' | 'detect-services' | 'detect-legal' | 'detect-location' | 'detect-security' | 'detect-jsonld' | 'detect-social';
+type AgentName = 'detect-contact' | 'detect-services' | 'detect-legal' | 'detect-location' | 'detect-security' | 'detect-jsonld' | 'detect-social' | 'detect-pedagogy';
 type AgentStatus = 'waiting' | 'running' | 'done' | 'error';
 
 interface AgentState {
@@ -29,6 +29,7 @@ const AGENTS: Omit<AgentState, 'status' | 'data' | 'durationMs'>[] = [
   { name: 'detect-legal', label: 'Compliance', icon: '§', desc: 'Checking legal & frameworks...' },
   { name: 'detect-security', label: 'Security', icon: '⬡', desc: 'Analyzing headers & encryption...' },
   { name: 'detect-social', label: 'Social', icon: '◈', desc: 'Scanning social profiles...' },
+  { name: 'detect-pedagogy', label: 'Learning Content', icon: '?', desc: 'Detecting FAQ, glossary & docs...' },
 ];
 
 const BLOCK_ICONS: Record<string, string> = {
@@ -70,6 +71,15 @@ export default function DiagnosticV2Page() {
   const [avgScore, setAvgScore] = useState(0);
   const [totalInSector, setTotalInSector] = useState(0);
   const [compareLoading, setCompareLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [selectedPlan, setSelectedPlan] = useState<'aya_sub' | 'pro' | null>(null);
+  const [isExistingClient, setIsExistingClient] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpError, setOtpError] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpMaskedEmail, setOtpMaskedEmail] = useState('');
 
   const scrollTo = useCallback((id: string) => {
     setTimeout(() => {
@@ -201,6 +211,10 @@ export default function DiagnosticV2Page() {
               // Strip " | subtitle" from title-based names
               const shortName = eName.split(/\s*[|–—]\s*/)[0].trim();
               if (shortName) setDetectedName(shortName);
+              // Check if already registered in AYA
+              if (ev.is_aya_registered || ev.extract?.meta?.source?.scan?.is_aya_registered) {
+                setIsExistingClient(true);
+              }
               // Move to step 3 (scoring)
               setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 500);
             } else if (ev.phase === 'error') {
@@ -215,6 +229,58 @@ export default function DiagnosticV2Page() {
   }, [url, scrollTo]);
 
   const agentsDone = agents.filter(a => a.status === 'done').length;
+
+  // ─── OTP Handlers ───
+  const handleSendOtp = async () => {
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      const res = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: scanUrl }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setOtpSent(true);
+        if (data.maskedEmail) setOtpMaskedEmail(data.maskedEmail);
+      } else {
+        setOtpError(data.error || 'Failed to send code');
+      }
+    } catch {
+      setOtpError('Network error');
+    }
+    setOtpLoading(false);
+  };
+
+  const handleVerifyOtp = async () => {
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      const res = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: scanUrl, code: otpCode }),
+      });
+      if (res.ok) {
+        setOtpVerified(true);
+      } else {
+        setOtpError('Invalid or expired code');
+      }
+    } catch {
+      setOtpError('Network error');
+    }
+    setOtpLoading(false);
+  };
+
+  // ─── Plan selection handler ───
+  const handleSelectPlan = (plan: 'aya_sub' | 'pro') => {
+    setSelectedPlan(plan);
+    if (userEmail && userEmail.includes('@')) {
+      setCurrentStep(7);
+      scrollTo('step-7');
+    }
+  };
 
   return (
     <div className="dv2">
@@ -238,7 +304,7 @@ export default function DiagnosticV2Page() {
             Analyze how AI reads <span className="dv2-accent">your website</span>
           </h1>
           <p className="dv2-hero-sub">
-            7 super agents scan your site in real-time.<br />
+            8 super agents scan your site in real-time.<br />
             Every data point is structured to be optimized for AI.
           </p>
           <form className="dv2-search-form" onSubmit={e => { e.preventDefault(); startScan(); }}>
@@ -489,10 +555,17 @@ export default function DiagnosticV2Page() {
         <section id="step-6" className={`dv2-step dv2-step-reveal ${currentStep === 6 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">06</div>
           <h2>Choose Your Plan</h2>
-          <p className="dv2-step-sub">Activate your AI identity and join the AYA Trust Registry.</p>
+          <p className="dv2-step-sub">
+            {isExistingClient
+              ? 'Your site is already in the AYA Registry. Upgrade or manage your account below.'
+              : 'Activate your AI identity and join the AYA Trust Registry.'}
+          </p>
 
           <div className="dv2-plans">
-            <div className="dv2-plan" onClick={() => { setCurrentStep(7); scrollTo('step-7'); }}>
+            <div
+              className={`dv2-plan${selectedPlan === 'aya_sub' ? ' dv2-plan--selected' : ''}`}
+              onClick={() => handleSelectPlan('aya_sub')}
+            >
               <div className="dv2-plan-name">AYA Subscription</div>
               <div className="dv2-plan-price">19 <span>CHF/mo</span></div>
               <ul className="dv2-plan-list">
@@ -501,9 +574,14 @@ export default function DiagnosticV2Page() {
                 <li>Monthly updates</li>
                 <li>Public certificate page</li>
               </ul>
-              <button className="dv2-plan-btn dv2-plan-btn--outline">Select AYA →</button>
+              <button className="dv2-plan-btn dv2-plan-btn--outline">
+                {selectedPlan === 'aya_sub' ? '✓ Selected' : 'Select AYA →'}
+              </button>
             </div>
-            <div className="dv2-plan dv2-plan--pro" onClick={() => { setCurrentStep(7); scrollTo('step-7'); }}>
+            <div
+              className={`dv2-plan dv2-plan--pro${selectedPlan === 'pro' ? ' dv2-plan--selected' : ''}`}
+              onClick={() => handleSelectPlan('pro')}
+            >
               <div className="dv2-plan-tag">RECOMMENDED</div>
               <div className="dv2-plan-name">PRO Pack</div>
               <div className="dv2-plan-price">499 <span>CHF</span></div>
@@ -514,24 +592,189 @@ export default function DiagnosticV2Page() {
                 <li>Ed25519 digital signature</li>
                 <li>Score boost up to +20pts</li>
               </ul>
-              <button className="dv2-plan-btn dv2-plan-btn--solid">Select PRO →</button>
+              <button className="dv2-plan-btn dv2-plan-btn--solid">
+                {selectedPlan === 'pro' ? '✓ Selected' : 'Select PRO →'}
+              </button>
             </div>
+          </div>
+
+          {/* Email capture */}
+          <div style={{ marginTop: '2rem', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#212E53', fontSize: '0.95rem' }}>
+              Your email address
+            </label>
+            <input
+              type="email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder="you@company.com"
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                borderRadius: 8,
+                border: '1px solid #ccc',
+                fontSize: '1rem',
+                outline: 'none',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = '#4A919E'; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = '#ccc'; }}
+            />
+            {selectedPlan && !userEmail.includes('@') && (
+              <p style={{ color: '#CE6A6B', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                Please enter your email to continue.
+              </p>
+            )}
+            {selectedPlan && userEmail.includes('@') && (
+              <button
+                onClick={() => { setCurrentStep(7); scrollTo('step-7'); }}
+                className="dv2-search-btn"
+                style={{ marginTop: '1rem', width: '100%' }}
+              >
+                Continue →
+              </button>
+            )}
           </div>
         </section>
       )}
 
-      {/* ═══ STEP 7 — PAYMENT ═══ */}
+      {/* ═══ STEP 7 — PAYMENT / OTP ═══ */}
       {currentStep >= 7 && (
         <section id="step-7" className={`dv2-step dv2-step-reveal ${currentStep === 7 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">07</div>
-          <h2>Payment</h2>
-          <div className="dv2-payment-box">
-            <p>You will be redirected to Stripe for secure payment.</p>
-            <button className="dv2-search-btn" onClick={() => { setCurrentStep(8); scrollTo('step-8'); }}>
-              Proceed to Payment →
-            </button>
-            <p className="dv2-payment-note">🔒 Secure checkout powered by Stripe</p>
-          </div>
+
+          {/* ─── Existing client: OTP verification ─── */}
+          {isExistingClient && !otpVerified ? (
+            <div className="dv2-payment-box">
+              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔐</div>
+                <h2 style={{ color: '#212E53', marginBottom: '0.5rem' }}>Welcome back!</h2>
+                <p style={{ color: '#555', fontSize: '0.95rem', maxWidth: 420, margin: '0 auto' }}>
+                  Your site is already registered in the AYA Registry. Verify your identity to manage your account.
+                </p>
+              </div>
+
+              {!otpSent ? (
+                <div style={{ textAlign: 'center' }}>
+                  <button
+                    onClick={handleSendOtp}
+                    disabled={otpLoading}
+                    className="dv2-search-btn"
+                    style={{ minWidth: 240 }}
+                  >
+                    {otpLoading ? (
+                      <><span className="dv2-spinner" style={{ marginRight: 8 }} /> Sending...</>
+                    ) : (
+                      'Send verification code'
+                    )}
+                  </button>
+                  {otpError && (
+                    <p style={{ color: '#CE6A6B', fontSize: '0.88rem', marginTop: '0.75rem' }}>{otpError}</p>
+                  )}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ color: '#555', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                    A 6-digit code has been sent to <strong>{otpMaskedEmail || 'your registered email'}</strong>.
+                  </p>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    style={{
+                      fontSize: '1.75rem',
+                      textAlign: 'center',
+                      letterSpacing: '0.5rem',
+                      width: 220,
+                      padding: '12px 16px',
+                      borderRadius: 8,
+                      border: `2px solid ${otpError ? '#CE6A6B' : '#ccc'}`,
+                      outline: 'none',
+                      fontFamily: 'monospace',
+                      transition: 'border-color 0.2s',
+                    }}
+                    onFocus={(e) => { e.currentTarget.style.borderColor = '#4A919E'; }}
+                    onBlur={(e) => { e.currentTarget.style.borderColor = otpError ? '#CE6A6B' : '#ccc'; }}
+                    autoFocus
+                  />
+                  {otpError && (
+                    <p style={{ color: '#CE6A6B', fontSize: '0.88rem', marginTop: '0.75rem' }}>{otpError}</p>
+                  )}
+                  <div style={{ marginTop: '1.25rem' }}>
+                    <button
+                      onClick={handleVerifyOtp}
+                      disabled={otpLoading || otpCode.length !== 6}
+                      className="dv2-search-btn"
+                      style={{ minWidth: 200, opacity: otpCode.length !== 6 ? 0.5 : 1 }}
+                    >
+                      {otpLoading ? (
+                        <><span className="dv2-spinner" style={{ marginRight: 8 }} /> Verifying...</>
+                      ) : (
+                        'Verify →'
+                      )}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => { setOtpCode(''); setOtpError(''); setOtpSent(false); }}
+                    style={{
+                      marginTop: '1rem',
+                      background: 'none',
+                      border: 'none',
+                      color: '#4A919E',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    Resend code
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* ─── New client OR verified existing client: Payment ─── */
+            <div className="dv2-payment-box">
+              <h2 style={{ color: '#212E53', marginBottom: '0.5rem' }}>
+                {otpVerified ? 'Identity Verified — Proceed to Payment' : 'Payment'}
+              </h2>
+              {otpVerified && (
+                <p style={{ color: '#4A919E', fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem' }}>
+                  ✓ Your identity has been confirmed
+                </p>
+              )}
+              <div style={{
+                background: '#f8fafb',
+                borderRadius: 10,
+                padding: '1.25rem 1.5rem',
+                marginBottom: '1.5rem',
+                border: '1px solid #e2efe9',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ color: '#555', fontSize: '0.9rem' }}>Plan</span>
+                  <span style={{ fontWeight: 700, color: '#212E53' }}>
+                    {selectedPlan === 'pro' ? 'PRO Pack — 499 CHF' : 'AYA Subscription — 19 CHF/mo'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#555', fontSize: '0.9rem' }}>Email</span>
+                  <span style={{ color: '#212E53' }}>{userEmail}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => { setCurrentStep(8); scrollTo('step-8'); }}
+                className="dv2-search-btn"
+                style={{ width: '100%' }}
+              >
+                Proceed to Payment →
+              </button>
+              <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.75rem', textAlign: 'center' }}>
+                Secure checkout powered by Stripe
+              </p>
+            </div>
+          )}
         </section>
       )}
 
@@ -601,6 +844,10 @@ function DataPreview({ name, data }: { name: AgentName; data: any }) {
     case 'detect-social': {
       const p = (data.platforms || []) as string[];
       return <div className="dv2-preview">{p.length > 0 ? <span>{p.join(' · ')}</span> : <span className="dv2-muted">None found</span>}</div>;
+    }
+    case 'detect-pedagogy': {
+      const items = [data.has_faq && 'FAQ', data.has_glossary && 'Glossary', data.has_documentation && 'Documentation'].filter(Boolean);
+      return <div className="dv2-preview">{items.length > 0 ? <span>{items.join(' · ')}</span> : <span className="dv2-muted">None found</span>}</div>;
     }
     default: return null;
   }

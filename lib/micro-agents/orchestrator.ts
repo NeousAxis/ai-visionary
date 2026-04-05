@@ -1,4 +1,4 @@
-// lib/micro-agents/orchestrator.ts — Run all 7 agents, merge into AyoExtract
+// lib/micro-agents/orchestrator.ts — Run all 8 agents, merge into AyoExtract
 
 import { fetchHtml } from './html-fetcher';
 import { detectContact } from './detect-contact';
@@ -8,10 +8,94 @@ import { detectServices } from './detect-services';
 import { detectLegal } from './detect-legal';
 import { detectSecurity } from './detect-security';
 import { detectSocial } from './detect-social';
-import type { AllAgentResults, AgentEvent, AgentName, FetchResult } from './types';
+import { detectPedagogy } from './detect-pedagogy';
+import type { AllAgentResults, AgentEvent, AgentName, FetchResult, ServicesResult, LegalResult } from './types';
 import type { AyoExtract, Quality } from '../aio-score-engine';
 
-// Helper to create a FieldNode
+// --- Shared utility ---
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#\d+;/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// --- Retry+Merge helpers (stabilize LLM variance) ---
+
+function unionStrings(a: string[], b: string[]): string[] {
+  const seen = new Map<string, string>();
+  for (const s of [...a, ...b]) {
+    const key = s.toLowerCase().trim();
+    if (key && !seen.has(key)) seen.set(key, s);
+  }
+  return Array.from(seen.values());
+}
+
+function keepLongest(a: string, b: string): string {
+  if (!a) return b;
+  if (!b) return a;
+  return a.length >= b.length ? a : b;
+}
+
+/** Merge two ServicesResult (including target_audience, use_cases, pricing). */
+function mergeServices(a: ServicesResult, b: ServicesResult): ServicesResult {
+  return {
+    services: unionStrings(a.services, b.services),
+    products: unionStrings(a.products, b.products),
+    target_audience: keepLongest(a.target_audience || '', b.target_audience || ''),
+    use_cases: unionStrings(a.use_cases || [], b.use_cases || []),
+    pricing: keepLongest(a.pricing || '', b.pricing || ''),
+    q: Math.max(a.q, b.q) as Quality,
+  };
+}
+
+/** Merge two LegalResult. */
+function mergeLegal(a: LegalResult, b: LegalResult): LegalResult {
+  return {
+    policies: unionStrings(a.policies, b.policies),
+    frameworks: unionStrings(a.frameworks, b.frameworks),
+    certifications: unionStrings(a.certifications, b.certifications),
+    urls: unionStrings(a.urls, b.urls),
+    q: Math.max(a.q, b.q) as Quality,
+  };
+}
+
+/**
+ * Run an agent 2x in parallel and merge results to stabilize LLM variance.
+ */
+async function runAgentWithRetry<T>(
+  name: AgentName,
+  fn: () => Promise<T>,
+  merge: (a: T, b: T) => T,
+): Promise<{ result: T | null; event: AgentEvent }> {
+  const start = Date.now();
+  try {
+    const [r1, r2, r3] = await Promise.all([fn(), fn(), fn()]);
+    const merged = merge(merge(r1, r2), r3);
+    const ms = Date.now() - start;
+    console.log(`[retry-merge] ${name}: merged 3 results in ${ms}ms`);
+    return {
+      result: merged,
+      event: { agent: name, status: 'done', data: merged as any, durationMs: ms },
+    };
+  } catch (err) {
+    const ms = Date.now() - start;
+    return {
+      result: null,
+      event: { agent: name, status: 'error', data: null, durationMs: ms, error: err instanceof Error ? err.message : String(err) },
+    };
+  }
+}
+
 function field<T>(value: T, q: Quality, evidence: string[] = []): { value: T; q: Quality; evidence: string[] } {
   return { value, q, evidence };
 }
@@ -51,7 +135,7 @@ async function runAgent<T>(
 }
 
 /**
- * Run all 7 micro-agents in parallel.
+ * Run all 8 micro-agents sequentially.
  * Calls onEvent for each agent as it completes (for SSE streaming).
  */
 export async function runAllAgents(
@@ -79,18 +163,7 @@ export async function runAllAgents(
   }
 
   // Prepare clean text for LLM agents (strip HTML tags)
-  const textContent = html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&#\d+;/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const textContent = stripHtml(html);
 
   // Step 2: Run agents SEQUENTIALLY — so the client sees each one work in real-time
   const events: AgentEvent[] = [];
@@ -115,15 +188,15 @@ export async function runAllAgents(
   events.push(locationRun.event);
   onEvent?.(locationRun.event);
 
-  // Agent 4: Services (LLM)
+  // Agent 4: Services (LLM) — retry+merge for stability
   onEvent?.({ agent: 'detect-services', status: 'running', data: null, durationMs: 0 });
-  const servicesRun = await runAgent('detect-services', () => detectServices(textContent));
+  const servicesRun = await runAgentWithRetry('detect-services', () => detectServices(textContent), mergeServices);
   events.push(servicesRun.event);
   onEvent?.(servicesRun.event);
 
-  // Agent 5: Legal/Compliance (LLM)
+  // Agent 5: Legal/Compliance (LLM) — retry+merge for stability
   onEvent?.({ agent: 'detect-legal', status: 'running', data: null, durationMs: 0 });
-  const legalRun = await runAgent('detect-legal', () => detectLegal(textContent));
+  const legalRun = await runAgentWithRetry('detect-legal', () => detectLegal(textContent), mergeLegal);
   events.push(legalRun.event);
   onEvent?.(legalRun.event);
 
@@ -139,6 +212,12 @@ export async function runAllAgents(
   events.push(socialRun.event);
   onEvent?.(socialRun.event);
 
+  // Agent 8: Pedagogy — FAQ, Glossary, Documentation (LLM + HEAD fallback for SPA sites)
+  onEvent?.({ agent: 'detect-pedagogy', status: 'running', data: null, durationMs: 0 });
+  const pedagogyRun = await runAgent('detect-pedagogy', () => detectPedagogy(html, fetchResult.url));
+  events.push(pedagogyRun.event);
+  onEvent?.(pedagogyRun.event);
+
   const results: AllAgentResults = {
     contact: contactRun.result || { email: null, phone: null, q: 0 },
     services: servicesRun.result || { services: [], products: [], q: 0 },
@@ -147,6 +226,7 @@ export async function runAllAgents(
     security: securityRun.result || { measures: [], q: 0 },
     jsonld: jsonldRun.result || { schemas: [], type: null, name: null, description: null, address: null, contactPoint: null, hasOrganizationType: false, hasFaqSchema: false, q: 0 },
     social: socialRun.result || { links: [], platforms: [], q: 0 },
+    pedagogy: pedagogyRun.result || { has_faq: false, has_glossary: false, has_documentation: false, q: 0 },
   };
 
   return { fetchResult, results, events };
@@ -190,25 +270,16 @@ export async function mergeAgentResultsToExtract(
   const email = contact.email || jsonld.contactPoint?.email || '';
   const phone = contact.phone || jsonld.contactPoint?.phone || '';
 
-  const rawHtml = fetchResult.html;
-  const plainText = rawHtml
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ').trim();
+  const plainText = stripHtml(fetchResult.html);
 
-  // --- FAQ / Glossary / Doc / Sitemap / Mobile = DETERMINISTE (regex sur HTML) ---
-  const hasFaqContent = jsonld.hasFaqSchema ||
-    /href=["'][^"']*faq[^"']*["']/i.test(rawHtml) ||
-    /id=["']faq["']/i.test(rawHtml) ||
-    /foire aux questions|frequently asked questions/i.test(plainText);
-  const hasGlossary = /glossar|lexique|glossaire/i.test(rawHtml) ||
-    /id=["']glossary["']/i.test(rawHtml);
-  const hasDocumentation = /documentation|id=["']docs["']|developer.?guide|api.?reference|tutoriel/i.test(rawHtml);
-  const hasSitemap = /sitemap\.xml/i.test(rawHtml);
-  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(rawHtml);
+  // --- FAQ / Glossary / Doc = via detect-pedagogy LLM agent (merged with JSON-LD schema) ---
+  const { pedagogy } = results;
+  const hasFaqContent = jsonld.hasFaqSchema || pedagogy.has_faq;
+  const hasGlossary = pedagogy.has_glossary;
+  const hasDocumentation = pedagogy.has_documentation;
+  // --- Sitemap / Mobile = DETERMINISTE (regex sur HTML — detection technique pure) ---
+  const hasSitemap = /sitemap\.xml/i.test(fetchResult.html);
+  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(fetchResult.html);
 
   // --- Process & Indicators = LLM cible (1 petite mission) ---
   let processSteps: string[] = [];
@@ -219,31 +290,38 @@ export async function mergeAgentResultsToExtract(
 
   try {
     const { llmExtract, parseJson } = await import('./llm-agent');
-    const raw = await llmExtract(
-      `Extract business methodology and key metrics. Content can be in ANY language.
+    const processPrompt = `Extract business methodology and key metrics. Content can be in ANY language.
 - process_steps: methodology steps or workflow phases (max 6)
 - delivery_mode: "online", "on-site", or "hybrid"
 - geographies: operating regions
 - quality_assurance: quality monitoring mention
 - indicators: key numbers with context (e.g. "5 years", "200+ clients")
 Return ONLY JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
-Do NOT invent.`,
-      plainText, 10000,
-    );
-    const data = parseJson<{
+Do NOT invent.`;
+
+    // Retry+merge: 2 parallel LLM calls to stabilize variance
+    type ProcessData = {
       process_steps?: string[];
       delivery_mode?: string;
       geographies?: string;
       quality_assurance?: string;
       indicators?: string[];
-    }>(raw);
-    if (data) {
-      processSteps = data.process_steps || [];
-      deliveryMode = data.delivery_mode || '';
-      if (data.geographies) geographies = data.geographies;
-      qaText = data.quality_assurance || '';
-      indicators = data.indicators || [];
-    }
+    };
+    const [raw1, raw2, raw3] = await Promise.all([
+      llmExtract(processPrompt, plainText, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, plainText, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, plainText, 10000).catch(() => '{}'),
+    ]);
+    const data1 = parseJson<ProcessData>(raw1);
+    const data2 = parseJson<ProcessData>(raw2);
+    const data3 = parseJson<ProcessData>(raw3);
+    console.log('[retry-merge] process/indicators: merged 3 results');
+
+    processSteps = unionStrings(unionStrings(data1?.process_steps || [], data2?.process_steps || []), data3?.process_steps || []);
+    deliveryMode = keepLongest(keepLongest(data1?.delivery_mode || '', data2?.delivery_mode || ''), data3?.delivery_mode || '');
+    if (data1?.geographies || data2?.geographies || data3?.geographies) geographies = keepLongest(keepLongest(data1?.geographies || '', data2?.geographies || ''), data3?.geographies || '');
+    qaText = keepLongest(keepLongest(data1?.quality_assurance || '', data2?.quality_assurance || ''), data3?.quality_assurance || '');
+    indicators = unionStrings(unionStrings(data1?.indicators || [], data2?.indicators || []), data3?.indicators || []);
   } catch { /* fallback: empty */ }
 
   // ASR file check — HEAD request to /.ayo/asr.json
@@ -297,9 +375,9 @@ Do NOT invent.`,
         country: field(country, location.q, country ? ['scan_micro_agent'] : []),
         // Email OR contact form = valid contact method (anti-spam = normal)
         contact_email: field(
-          email || ((contact as any).hasContactForm ? 'contact_form' : ''),
-          email ? 1 : (contact as any).hasContactForm ? 0.5 : 0,
-          email ? ['scan_micro_agent'] : (contact as any).hasContactForm ? ['scan_micro_agent_form'] : []
+          email || (contact.hasContactForm ? 'contact_form' : ''),
+          email ? 1 : contact.hasContactForm ? 0.5 : 0,
+          email ? ['scan_micro_agent'] : contact.hasContactForm ? ['scan_micro_agent_form'] : []
         ),
         contact_phone: field(phone, phone ? 1 : 0, phone ? ['scan_micro_agent'] : []),
       },
@@ -308,19 +386,19 @@ Do NOT invent.`,
         products: field(services.products, services.products.length ? services.q : 0, services.products.length ? ['scan_micro_agent'] : []),
         // Found on site = verifiable = q:1
         use_cases: field(
-          (services as any).use_cases || [],
-          (services as any).use_cases?.length ? 1 : 0,
-          (services as any).use_cases?.length ? ['scan_micro_agent'] : []
+          services.use_cases || [],
+          services.use_cases?.length ? 1 : 0,
+          services.use_cases?.length ? ['scan_micro_agent'] : []
         ),
         target_audience: field(
-          (services as any).target_audience || '',
-          (services as any).target_audience ? 1 : 0,
-          (services as any).target_audience ? ['scan_micro_agent'] : []
+          services.target_audience || '',
+          services.target_audience ? 1 : 0,
+          services.target_audience ? ['scan_micro_agent'] : []
         ),
         pricing_indication: field(
-          (services as any).pricing || '',
-          (services as any).pricing ? 1 : 0,
-          (services as any).pricing ? ['scan_micro_agent'] : []
+          services.pricing || '',
+          services.pricing ? 1 : 0,
+          services.pricing ? ['scan_micro_agent'] : []
         ),
       },
       processus_methodes: {
@@ -378,5 +456,6 @@ function emptyResults(): AllAgentResults {
     security: { measures: [], q: 0 },
     jsonld: { schemas: [], type: null, name: null, description: null, address: null, contactPoint: null, hasOrganizationType: false, hasFaqSchema: false, q: 0 },
     social: { links: [], platforms: [], q: 0 },
+    pedagogy: { has_faq: false, has_glossary: false, has_documentation: false, q: 0 },
   };
 }

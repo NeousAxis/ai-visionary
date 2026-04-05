@@ -29,7 +29,7 @@ export async function detectContact(content: string): Promise<ContactResult> {
     else if (phone) q = 0.5;
     else if (hasContactForm) q = 0.5;
 
-    return { email, phone, q } as ContactResult;
+    return { email, phone, hasContactForm, q };
   } catch {
     return { email: null, phone: null, q: 0 };
   }
