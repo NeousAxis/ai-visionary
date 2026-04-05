@@ -81,6 +81,7 @@ export default function DiagnosticV2Page() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpMaskedEmail, setOtpMaskedEmail] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   // Handle return from Stripe checkout (redirect with session_id)
   useEffect(() => {
@@ -151,6 +152,7 @@ export default function DiagnosticV2Page() {
   // ─── Start Scan ───
   const startScan = useCallback(async () => {
     if (!url.trim()) return;
+    if (!emailVerified) return;
     setCurrentStep(2);
     setError(null);
     setScore(null);
@@ -235,7 +237,7 @@ export default function DiagnosticV2Page() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Network error');
     }
-  }, [url, scrollTo]);
+  }, [url, emailVerified, scrollTo]);
 
   const agentsDone = agents.filter(a => a.status === 'done').length;
 
@@ -244,10 +246,10 @@ export default function DiagnosticV2Page() {
     setOtpLoading(true);
     setOtpError('');
     try {
-      const res = await fetch('/api/auth/send-otp', {
+      const res = await fetch('/api/auth/send-otp-v2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: scanUrl }),
+        body: JSON.stringify({ url: url.trim(), email: userEmail }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -269,10 +271,11 @@ export default function DiagnosticV2Page() {
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: scanUrl, code: otpCode }),
+        body: JSON.stringify({ url: url.trim(), code: otpCode }),
       });
       if (res.ok) {
         setOtpVerified(true);
+        setEmailVerified(true);
       } else {
         setOtpError('Invalid or expired code');
       }
@@ -285,11 +288,14 @@ export default function DiagnosticV2Page() {
   // ─── Plan selection handler ───
   const handleSelectPlan = (plan: 'aya_sub' | 'pro') => {
     setSelectedPlan(plan);
-    if (userEmail && userEmail.includes('@')) {
-      setCurrentStep(7);
-      scrollTo('step-7');
-    }
+    setCurrentStep(7);
+    scrollTo('step-7');
   };
+
+  // ─── Domain match for email verification ───
+  const urlDomain = url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
+  const emailDomain = userEmail.split('@')[1]?.toLowerCase() || '';
+  const domainMatch = emailDomain === urlDomain && urlDomain.length > 0;
 
   return (
     <div className="dv2">
@@ -327,11 +333,106 @@ export default function DiagnosticV2Page() {
                 className="dv2-search-input"
                 autoFocus
               />
-              <button type="submit" disabled={currentStep > 1 || !url.trim()} className="dv2-search-btn">
-                {currentStep === 2 ? <span className="dv2-spinner" /> : currentStep > 2 ? '✓ Done' : 'Analyze →'}
+              <button type="submit" disabled={currentStep > 1 || !url.trim() || !emailVerified} className="dv2-search-btn">
+                {currentStep === 2 ? <span className="dv2-spinner" /> : currentStep > 2 ? '✓ Done' : !emailVerified ? 'Verify email first' : 'Analyze →'}
               </button>
             </div>
           </form>
+
+          {/* ─── Email Verification (appears after URL is entered) ─── */}
+          {url && !emailVerified && currentStep === 1 && (
+            <div style={{ maxWidth: 520, margin: '2rem auto 0', textAlign: 'center' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#212E53', marginBottom: '0.75rem' }}>
+                Verify your identity
+              </div>
+              <p style={{ color: '#555', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                Enter your <strong>@{url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]}</strong> email to start the analysis.
+              </p>
+
+              {/* Email input */}
+              <input
+                type="email"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                placeholder={`you@${url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]}`}
+                style={{
+                  width: '100%', padding: '12px 16px', borderRadius: 8,
+                  border: `1px solid ${userEmail && !domainMatch ? '#CE6A6B' : '#ccc'}`,
+                  fontSize: '1rem', outline: 'none',
+                }}
+              />
+
+              {/* Domain validation badge */}
+              {userEmail.includes('@') && (
+                <p style={{
+                  color: domainMatch ? '#4A919E' : '#CE6A6B',
+                  fontSize: '0.85rem', marginTop: '0.5rem'
+                }}>
+                  {domainMatch ? '✓ Domain matches' : `✗ Email must be @${urlDomain}`}
+                </p>
+              )}
+
+              {/* Send OTP button (only if domain matches) */}
+              {domainMatch && !otpSent && (
+                <button
+                  onClick={handleSendOtp}
+                  disabled={otpLoading}
+                  className="dv2-search-btn"
+                  style={{ marginTop: '1rem', minWidth: 240 }}
+                >
+                  {otpLoading ? 'Sending...' : 'Send verification code'}
+                </button>
+              )}
+
+              {/* OTP code input (after send) */}
+              {otpSent && !otpVerified && (
+                <div style={{ marginTop: '1rem' }}>
+                  <p style={{ color: '#555', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+                    Code sent to <strong>{otpMaskedEmail || userEmail}</strong>
+                  </p>
+                  <input
+                    type="text" inputMode="numeric" maxLength={6}
+                    value={otpCode}
+                    onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    style={{
+                      fontSize: '1.75rem', textAlign: 'center', letterSpacing: '0.5rem',
+                      width: 220, padding: '12px 16px', borderRadius: 8,
+                      border: `2px solid ${otpError ? '#CE6A6B' : '#ccc'}`,
+                      fontFamily: 'monospace',
+                    }}
+                    autoFocus
+                  />
+                  {otpError && <p style={{ color: '#CE6A6B', fontSize: '0.85rem', marginTop: '0.5rem' }}>{otpError}</p>}
+                  <div style={{ marginTop: '1rem' }}>
+                    <button
+                      onClick={handleVerifyOtp}
+                      disabled={otpLoading || otpCode.length !== 6}
+                      className="dv2-search-btn"
+                      style={{ minWidth: 200, opacity: otpCode.length !== 6 ? 0.5 : 1 }}
+                    >
+                      {otpLoading ? 'Verifying...' : 'Verify →'}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => { setOtpCode(''); setOtpError(''); setOtpSent(false); }}
+                    style={{ marginTop: '0.75rem', background: 'none', border: 'none', color: '#4A919E', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}
+                  >
+                    Resend code
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Verified badge + Analyze becomes active */}
+          {emailVerified && currentStep === 1 && (
+            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+              <span style={{ color: '#4A919E', fontWeight: 600, fontSize: '0.95rem' }}>
+                ✓ Verified as {userEmail}
+              </span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -607,153 +708,19 @@ export default function DiagnosticV2Page() {
             </div>
           </div>
 
-          {/* Email capture */}
-          <div style={{ marginTop: '2rem', maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#212E53', fontSize: '0.95rem' }}>
-              Your email address
-            </label>
-            <input
-              type="email"
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-              placeholder="you@company.com"
-              style={{
-                width: '100%',
-                padding: '12px 16px',
-                borderRadius: 8,
-                border: '1px solid #ccc',
-                fontSize: '1rem',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = '#4A919E'; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = '#ccc'; }}
-            />
-            {selectedPlan && !userEmail.includes('@') && (
-              <p style={{ color: '#CE6A6B', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                Please enter your email to continue.
-              </p>
-            )}
-            {selectedPlan && userEmail.includes('@') && (
-              <button
-                onClick={() => { setCurrentStep(7); scrollTo('step-7'); }}
-                className="dv2-search-btn"
-                style={{ marginTop: '1rem', width: '100%' }}
-              >
-                Continue →
-              </button>
-            )}
-          </div>
         </section>
       )}
 
-      {/* ═══ STEP 7 — PAYMENT / OTP ═══ */}
+      {/* ═══ STEP 7 — PAYMENT ═══ */}
       {currentStep >= 7 && (
         <section id="step-7" className={`dv2-step dv2-step-reveal ${currentStep === 7 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">07</div>
 
-          {/* ─── Existing client: OTP verification ─── */}
-          {isExistingClient && !otpVerified ? (
-            <div className="dv2-payment-box">
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔐</div>
-                <h2 style={{ color: '#212E53', marginBottom: '0.5rem' }}>Welcome back!</h2>
-                <p style={{ color: '#555', fontSize: '0.95rem', maxWidth: 420, margin: '0 auto' }}>
-                  Your site is already registered in the AYA Registry. Verify your identity to manage your account.
-                </p>
-              </div>
-
-              {!otpSent ? (
-                <div style={{ textAlign: 'center' }}>
-                  <button
-                    onClick={handleSendOtp}
-                    disabled={otpLoading}
-                    className="dv2-search-btn"
-                    style={{ minWidth: 240 }}
-                  >
-                    {otpLoading ? (
-                      <><span className="dv2-spinner" style={{ marginRight: 8 }} /> Sending...</>
-                    ) : (
-                      'Send verification code'
-                    )}
-                  </button>
-                  {otpError && (
-                    <p style={{ color: '#CE6A6B', fontSize: '0.88rem', marginTop: '0.75rem' }}>{otpError}</p>
-                  )}
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ color: '#555', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                    A 6-digit code has been sent to <strong>{otpMaskedEmail || 'your registered email'}</strong>.
-                  </p>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={otpCode}
-                    onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                    placeholder="000000"
-                    style={{
-                      fontSize: '1.75rem',
-                      textAlign: 'center',
-                      letterSpacing: '0.5rem',
-                      width: 220,
-                      padding: '12px 16px',
-                      borderRadius: 8,
-                      border: `2px solid ${otpError ? '#CE6A6B' : '#ccc'}`,
-                      outline: 'none',
-                      fontFamily: 'monospace',
-                      transition: 'border-color 0.2s',
-                    }}
-                    onFocus={(e) => { e.currentTarget.style.borderColor = '#4A919E'; }}
-                    onBlur={(e) => { e.currentTarget.style.borderColor = otpError ? '#CE6A6B' : '#ccc'; }}
-                    autoFocus
-                  />
-                  {otpError && (
-                    <p style={{ color: '#CE6A6B', fontSize: '0.88rem', marginTop: '0.75rem' }}>{otpError}</p>
-                  )}
-                  <div style={{ marginTop: '1.25rem' }}>
-                    <button
-                      onClick={handleVerifyOtp}
-                      disabled={otpLoading || otpCode.length !== 6}
-                      className="dv2-search-btn"
-                      style={{ minWidth: 200, opacity: otpCode.length !== 6 ? 0.5 : 1 }}
-                    >
-                      {otpLoading ? (
-                        <><span className="dv2-spinner" style={{ marginRight: 8 }} /> Verifying...</>
-                      ) : (
-                        'Verify →'
-                      )}
-                    </button>
-                  </div>
-                  <button
-                    onClick={() => { setOtpCode(''); setOtpError(''); setOtpSent(false); }}
-                    style={{
-                      marginTop: '1rem',
-                      background: 'none',
-                      border: 'none',
-                      color: '#4A919E',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      textDecoration: 'underline',
-                    }}
-                  >
-                    Resend code
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* ─── New client OR verified existing client: Payment ─── */
-            <div className="dv2-payment-box">
-              <h2 style={{ color: '#212E53', marginBottom: '0.5rem' }}>
-                {otpVerified ? 'Identity Verified — Proceed to Payment' : 'Payment'}
-              </h2>
-              {otpVerified && (
-                <p style={{ color: '#4A919E', fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem' }}>
-                  ✓ Your identity has been confirmed
-                </p>
-              )}
+          <div className="dv2-payment-box">
+            <h2 style={{ color: '#212E53', marginBottom: '0.5rem' }}>Payment</h2>
+            <p style={{ color: '#4A919E', fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem' }}>
+              ✓ Verified as {userEmail}
+            </p>
               <div style={{
                 background: '#f8fafb',
                 borderRadius: 10,
@@ -812,8 +779,7 @@ export default function DiagnosticV2Page() {
               <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.75rem', textAlign: 'center' }}>
                 Secure checkout powered by Stripe
               </p>
-            </div>
-          )}
+          </div>
         </section>
       )}
 
