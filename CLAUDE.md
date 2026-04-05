@@ -426,6 +426,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 12 | Dashboard Entreprise — transformer /renew/[entityId] en dashboard complet : diagnostic avec tous les scores (7 blocs), re-scan V2, admin compte, transfert email. Garder OTP gate. | Haute | A faire |
 | 13 | i18n FR/EN page diagnostic V2 — tous labels, titres, boutons via next-intl | Haute | A faire |
 | 14 | Responsive mobile page diagnostic V2 — bouton/form qui debordent sur mobile | Haute | A faire |
+| 15 | Footer visibility — les agents LLM doivent voir le contenu des footers (legal_name, pays, contact). Actuellement le textContent supprime les `<nav>` tags (orchestrator.ts ligne 155). Fix : ne plus stripper `<nav>`. Impact : tous les agents (contact, location, services, legal). | Critique | A faire |
+| 16 | Score alignment V2→email→AYA — le proScore V2 est maintenant sauve dans analyses et utilise par le webhook. Mais le score de base (sans PRO lift) doit aussi etre identique partout. Variance Gemini residuelle sur Offer Clarity (16 vs 20). | Haute | A surveiller |
 
 ---
 
