@@ -66,8 +66,12 @@ export async function POST(req: NextRequest) {
         // 4. Generate 6-digit code
         const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // 5. Save to DB (expires in 10 mins)
-        await db.saveOTP(trimmedEmail, code);
+        // 5. Save to DB (expires in 10 mins) — MUST succeed before sending email
+        const saved = await db.saveOTP(trimmedEmail, code);
+        if (!saved) {
+            console.log(`[otp-v2] FAILED to save OTP for ${maskEmail(trimmedEmail)} — aborting email send`);
+            return NextResponse.json({ error: 'Failed to save verification code. Please try again.' }, { status: 500 });
+        }
         console.log(`[otp-v2] OTP saved for ${maskEmail(trimmedEmail)}`);
 
         // 6. Send email via Resend

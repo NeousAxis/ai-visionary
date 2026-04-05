@@ -504,10 +504,10 @@ export const database = {
     /**
      * OTP MANAGEMENT (One Time Password)
      */
-    saveOTP: async (email: string, code: string): Promise<void> => {
-        if (!isSupabaseConfigured()) return;
+    saveOTP: async (email: string, code: string): Promise<boolean> => {
+        if (!isSupabaseConfigured()) { console.error('❌ [Supabase] OTP save: Supabase not configured'); return false; }
         const client = getSupabase();
-        if (!client) return;
+        if (!client) { console.error('❌ [Supabase] OTP save: no client'); return false; }
 
         try {
             // Delete any existing OTP for this email first (one active per email)
@@ -526,11 +526,13 @@ export const database = {
 
             if (error) {
                 console.error('❌ [Supabase] OTP Save Error:', error);
-                return;
+                return false;
             }
             console.log(`🔐 [Supabase] OTP saved for ${email}`);
+            return true;
         } catch (e) {
-            console.error('Error saving OTP:', e);
+            console.error('❌ [Supabase] Error saving OTP:', e);
+            return false;
         }
     },
 
