@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
             url: fetchResult.url,
             email: null,
             score: score.total,
-            data: { fields: extract.fields, source: extract.source, version: extract.version, blocks: score.blocks },
+            data: { fields: extract.fields, source: extract.source, version: extract.version, blocks: score.blocks, proScore: proScore.total, proBlocks: proScore.blocks },
           });
           console.log(`[scan] Analysis saved: ${analysisId} score=${score.total} url=${fetchResult.url}`);
         } catch (e) {

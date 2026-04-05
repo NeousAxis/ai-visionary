@@ -783,26 +783,34 @@ export async function POST(req: Request) {
                         },
                     },
                 };
-                const liftedScore = computeAioScore(proExtract as any);
+                // Use pre-calculated proScore from V2 scan if available (exact match with diagnostic)
+                const savedProScore = dbAnalysis?.data?.proScore;
+                const savedProBlocks = dbAnalysis?.data?.proBlocks;
                 const previousScore = analysisData.score;
-                // PRO lift must only RAISE the score, never lower it
-                if (liftedScore.total >= previousScore) {
+
+                if (savedProScore && savedProBlocks) {
+                    // V2 scan already computed the exact PRO score — use it directly (no recalculation variance)
+                    analysisData.score = savedProScore;
+                    analysisData.blocks = {};
+                    for (const [k, v] of Object.entries(savedProBlocks)) {
+                        analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
+                    }
+                    logger.info('WEBHOOK_PRO_SCORE_V2', `Using V2 pre-calculated proScore: ${savedProScore} (was ${previousScore})`);
+                } else {
+                    // Fallback: recalculate (V1 flow or missing proScore)
+                    const liftedScore = computeAioScore(proExtract as any);
                     analysisData.score = liftedScore.total;
                     analysisData.blocks = {};
                     for (const [k, v] of Object.entries(liftedScore.blocks)) {
                         analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
                     }
-                } else {
-                    logger.info('WEBHOOK_PRO_SCORE_KEPT', `Keeping original score ${previousScore} (lift gave lower ${liftedScore.total})`);
+                    logger.info('WEBHOOK_PRO_SCORE_LIFT', `Score recalculated for PRO: ${previousScore} -> ${liftedScore.total} (V1 fallback)`);
                 }
-                logger.info('WEBHOOK_PRO_SCORE_LIFT', `Score recalculated for PRO: ${previousScore} -> ${liftedScore.total} (cap lifted)`, {
-                    previousScore, newScore: liftedScore.total, url: analysisData.url
-                });
-                // Also update AYA registry with the lifted score (it was set earlier with the capped score)
+                // Update AYA registry with the final PRO score
                 if (ayaId && ayaId !== 'pending') {
                     try {
-                        await db.updateEntityData(ayaId, { asr_score: Math.round(liftedScore.total) });
-                        logger.info('WEBHOOK_PRO_AYA_SCORE_UPDATE', `AYA entity ${ayaId} score updated to ${liftedScore.total}`);
+                        await db.updateEntityData(ayaId, { asr_score: Math.round(analysisData.score) });
+                        logger.info('WEBHOOK_PRO_AYA_SCORE_UPDATE', `AYA entity ${ayaId} score updated to ${analysisData.score}`);
                     } catch (updateErr) {
                         logger.warn('WEBHOOK_PRO_AYA_SCORE_UPDATE_FAIL', `Failed to update AYA score: ${updateErr}`);
                     }
