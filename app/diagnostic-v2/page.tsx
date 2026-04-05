@@ -271,7 +271,7 @@ export default function DiagnosticV2Page() {
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim(), code: otpCode }),
+        body: JSON.stringify({ email: userEmail, code: otpCode }),
       });
       if (res.ok) {
         setOtpVerified(true);
@@ -343,10 +343,13 @@ export default function DiagnosticV2Page() {
           {url && !emailVerified && currentStep === 1 && (
             <div style={{ maxWidth: 520, margin: '2rem auto 0', textAlign: 'center' }}>
               <div style={{ fontSize: '1.1rem', fontWeight: 600, color: '#212E53', marginBottom: '0.75rem' }}>
-                Verify your identity
+                🔐 Verify your identity
               </div>
+              <p style={{ color: '#555', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                To protect your data from competitors, we verify that you belong to the company before running the analysis.
+              </p>
               <p style={{ color: '#555', fontSize: '0.9rem', marginBottom: '1rem' }}>
-                Enter your <strong>@{url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]}</strong> email to start the analysis.
+                Enter your <strong>@{url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]}</strong> professional email below.
               </p>
 
               {/* Email input */}
