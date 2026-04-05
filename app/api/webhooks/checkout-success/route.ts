@@ -785,10 +785,15 @@ export async function POST(req: Request) {
                 };
                 const liftedScore = computeAioScore(proExtract as any);
                 const previousScore = analysisData.score;
-                analysisData.score = liftedScore.total;
-                analysisData.blocks = {};
-                for (const [k, v] of Object.entries(liftedScore.blocks)) {
-                    analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
+                // PRO lift must only RAISE the score, never lower it
+                if (liftedScore.total >= previousScore) {
+                    analysisData.score = liftedScore.total;
+                    analysisData.blocks = {};
+                    for (const [k, v] of Object.entries(liftedScore.blocks)) {
+                        analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
+                    }
+                } else {
+                    logger.info('WEBHOOK_PRO_SCORE_KEPT', `Keeping original score ${previousScore} (lift gave lower ${liftedScore.total})`);
                 }
                 logger.info('WEBHOOK_PRO_SCORE_LIFT', `Score recalculated for PRO: ${previousScore} -> ${liftedScore.total} (cap lifted)`, {
                     previousScore, newScore: liftedScore.total, url: analysisData.url
