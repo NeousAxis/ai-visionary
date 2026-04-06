@@ -302,7 +302,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                     {t('publicKey')}
                                 </p>
                                 <p style={{ fontFamily: 'monospace', fontSize: '0.85rem', wordBreak: 'break-all', color: 'var(--text-main)' }}>
-                                    {entity.aya_entity_id}
+                                    {entity.aya_entity_id || entity.entity_id || id}
                                 </p>
                             </div>
 
