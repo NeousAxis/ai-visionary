@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
 interface OtpGateProps {
@@ -13,7 +13,16 @@ interface OtpGateProps {
 
 export default function OtpGate({ entityId, entityEmail, entityName, children }: OtpGateProps) {
   const t = useTranslations('otp');
-  const [step, setStep] = useState<'email' | 'code' | 'verified'>('email');
+  const [step, setStep] = useState<'email' | 'code' | 'verified'>(() => {
+    // Skip OTP if already verified in dashboard (same session)
+    try {
+      const verified = typeof window !== 'undefined' && sessionStorage.getItem('ayo_verified_email');
+      if (verified && entityEmail && verified === entityEmail.trim().toLowerCase()) {
+        return 'verified';
+      }
+    } catch {}
+    return 'email';
+  });
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');

@@ -322,38 +322,21 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                                     {t('lastModifiedOn')} {new Date(entity.last_update).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' })}
                                 </p>
                                 {isCertified && (
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <Link
-                                            href={`/update/${entity.entity_id}`}
-                                            style={{
-                                                fontSize: '0.75rem',
-                                                fontWeight: '600',
-                                                color: 'var(--primary-color)',
-                                                textDecoration: 'none',
-                                                padding: '4px 12px',
-                                                borderRadius: '6px',
-                                                border: '1px solid var(--primary-color)',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                        >
-                                            {t('updateButton')}
-                                        </Link>
-                                        <Link
-                                            href={`/renew/${entity.entity_id}`}
-                                            style={{
-                                                fontSize: '0.75rem',
-                                                fontWeight: '600',
-                                                color: '#CE6A6B',
-                                                textDecoration: 'none',
-                                                padding: '4px 12px',
-                                                borderRadius: '6px',
-                                                border: '1px solid #CE6A6B',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                        >
-                                            {t('renewButton')}
-                                        </Link>
-                                    </div>
+                                    <Link
+                                        href={`/dashboard/${entity.entity_id}`}
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: '600',
+                                            color: '#fff',
+                                            background: 'var(--primary-color)',
+                                            textDecoration: 'none',
+                                            padding: '6px 16px',
+                                            borderRadius: '6px',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        Dashboard →
+                                    </Link>
                                 )}
                             </div>
                         </div>

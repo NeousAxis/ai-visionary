@@ -190,14 +190,23 @@ export const database = {
                 return null;
             }
 
-            // Pick the best result: highest score WITH actual data
+            // Pick the best result: prefer entries WITH block scores, then highest score
             let bestResult: AnalysisRecord | null = null;
+            let bestHasBlocks = false;
             for (const row of data) {
                 const hasData = row.data?.fields && Object.keys(row.data.fields).some((k: string) => row.data.fields[k] && Object.keys(row.data.fields[k]).length > 0);
+                const hasBlocks = row.data?.blocks && Object.keys(row.data.blocks).length > 0;
                 const score = row.score || 0;
 
-                if (hasData && score > (bestResult?.score || 0)) {
+                if (!hasData) continue;
+                // Prefer analysis with blocks over one without, regardless of score
+                if (hasBlocks && !bestHasBlocks) {
                     bestResult = row as AnalysisRecord;
+                    bestHasBlocks = true;
+                    console.log(`🔍 [Supabase] Analysis with blocks found: score=${score}, id=${row.id}`);
+                } else if (hasBlocks === bestHasBlocks && score > (bestResult?.score || 0)) {
+                    bestResult = row as AnalysisRecord;
+                    bestHasBlocks = hasBlocks;
                     console.log(`🔍 [Supabase] Better analysis found: score=${score}, id=${row.id}`);
                 }
             }
@@ -212,6 +221,31 @@ export const database = {
         } catch (error) {
             console.error('❌ [Supabase] Query By URL Error:', error);
             return null;
+        }
+    },
+
+    getAnalysesHistoryByUrl: async (url: string, limit = 5): Promise<any[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+
+        try {
+            const normalizedUrl = database.normalizeUrl(url);
+            const { data, error } = await client
+                .from('analyses')
+                .select('id, url, score, data, created_at')
+                .eq('url_normalized', normalizedUrl)
+                .order('created_at', { ascending: false })
+                .limit(limit);
+
+            if (error) {
+                console.error('❌ [Supabase] Analyses history error:', error);
+                return [];
+            }
+            return data || [];
+        } catch (err) {
+            console.error('❌ [Supabase] Analyses history exception:', err);
+            return [];
         }
     },
 

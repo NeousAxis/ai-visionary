@@ -1,20 +1,17 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 export default function BackButton() {
-    const router = useRouter();
     const t = useTranslations('nav');
 
     return (
         <button
             onClick={() => {
-                // If there's history, go back; otherwise navigate to /aya
                 if (window.history.length > 1) {
-                    router.back();
+                    window.history.back();
                 } else {
-                    router.push('/aya');
+                    window.location.href = '/aya';
                 }
             }}
             style={{
@@ -24,7 +21,7 @@ export default function BackButton() {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: 0,
+                padding: '8px 12px',
             }}
         >
             &#x2715; {t('close')}

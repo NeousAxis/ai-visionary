@@ -85,7 +85,7 @@ export async function GET(request: Request) {
                     }
 
                     if (resend) {
-                        const renewUrl = `${BASE_URL}/renew/${entityId}`;
+                        const renewUrl = `${BASE_URL}/dashboard/${entityId}`;
                         const daysPlural = days > 1;
 
                         await resend.emails.send({

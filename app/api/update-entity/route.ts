@@ -135,7 +135,9 @@ export async function POST(req: NextRequest) {
 
         // --- Recalculate AIO score ---
         const scoreResult = computeAioScore(extract);
-        const newScore = Math.round(scoreResult.total);
+        // Score protection: updating data should NEVER lower the score
+        // The user is adding/correcting data, not removing it
+        const newScore = Math.max(Math.round(scoreResult.total), oldScore);
 
         logger.info('UPDATE_SCORE', `Score recalculated: ${oldScore} -> ${newScore}`, {
             oldScore,

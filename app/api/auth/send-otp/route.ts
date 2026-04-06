@@ -52,19 +52,24 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Entite introuvable." }, { status: 404 });
         }
 
-        // SECURITY: Only the owner_email (Stripe payer) can authenticate
-        const adminEmail = entity.owner_email;
+        // SECURITY: Only registered emails (owner_email or contact_email) can authenticate
+        const ownerEmail = entity.owner_email?.trim().toLowerCase() || '';
+        const contactEmail = (entity.contact_email || entity.email || '').trim().toLowerCase();
+        const adminEmail = ownerEmail || contactEmail;
+
         if (!adminEmail) {
-            logger.warn('OTP_NO_OWNER', `No owner_email set for ${lookupLabel}`);
-            return NextResponse.json({ error: "Aucun email proprietaire enregistre pour cette entite. Contactez support@ai-visionary.com." }, { status: 403 });
+            logger.warn('OTP_NO_OWNER', `No owner_email or contact_email set for ${lookupLabel}`);
+            return NextResponse.json({ error: en ? "No registered email for this entity. Contact support@ai-visionary.com." : "Aucun email enregistre pour cette entite. Contactez support@ai-visionary.com." }, { status: 403 });
         }
 
-        // MODE 2: verify the provided email matches the owner
+        // MODE 2: verify the provided email matches owner_email OR contact_email
         if (email && entityId) {
             const inputEmail = email.trim().toLowerCase();
-            if (inputEmail !== adminEmail.toLowerCase()) {
-                logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match owner for ${lookupLabel}`);
-                return NextResponse.json({ error: "Cet email ne correspond pas a celui enregistre pour cette entite." }, { status: 403 });
+            const matchesOwner = ownerEmail && inputEmail === ownerEmail;
+            const matchesContact = contactEmail && inputEmail === contactEmail;
+            if (!matchesOwner && !matchesContact) {
+                logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match owner/contact for ${lookupLabel}`);
+                return NextResponse.json({ error: en ? "This email does not match the registered email for this entity." : "Cet email ne correspond pas a celui enregistre pour cette entite." }, { status: 403 });
             }
         }
 
