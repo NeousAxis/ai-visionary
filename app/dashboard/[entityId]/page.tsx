@@ -67,7 +67,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ enti
     const isExpired = hasValidDate ? validUntilRaw > now === false : false;
     const isActive = hasValidDate ? validUntilRaw > now : false;
     const expiresInDays = hasValidDate ? Math.ceil((validUntilRaw.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-    const expiresSoon = isActive && expiresInDays <= 30;
+    const expiresSoon = isActive && expiresInDays <= (isPro ? 30 : 7);
     const currentPackType = isPro ? 'PRO' : 'AYA_SUB';
     const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
     const expiryDisplay = hasValidDate
