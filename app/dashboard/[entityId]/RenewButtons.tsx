@@ -87,10 +87,7 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
         t('ayaFeature4'),
     ];
 
-    // Pack active and not expiring soon: hide all buttons
-    if (isActive && !expiresSoon) {
-        return null;
-    }
+    // Always show offers — allows upgrade anytime
 
     // PRO active (expiring soon or not): hide AYA option (no downgrade)
     const hideAya = currentPackType === 'PRO' && isActive;
