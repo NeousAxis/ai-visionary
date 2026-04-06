@@ -726,7 +726,29 @@ export async function POST(req: Request) {
             }
         }
 
-        // 5. DELIVERY
+        // 5. SCORE LIFT for both packs — AYA_SUB and PRO both deliver ASR + AYA registration
+        // Use pre-calculated proScore from V2 scan if available
+        const savedProScore = dbAnalysis?.data?.proScore;
+        const savedProBlocks = dbAnalysis?.data?.proBlocks;
+        if (savedProScore && savedProScore > analysisData.score) {
+            const previousScore = analysisData.score;
+            analysisData.score = savedProScore;
+            if (savedProBlocks) {
+                analysisData.blocks = {};
+                for (const [k, v] of Object.entries(savedProBlocks)) {
+                    analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
+                }
+            }
+            logger.info('WEBHOOK_SCORE_LIFT', `Score lifted from ${previousScore} to ${savedProScore} (proScore from V2 scan)`);
+            // Update AYA registry with lifted score
+            if (ayaId && ayaId !== 'pending') {
+                try {
+                    await db.updateEntityData(ayaId, { asr_score: Math.round(analysisData.score) });
+                } catch { /* non-blocking */ }
+            }
+        }
+
+        // 5b. DELIVERY
         if (packType === 'AYA_SUB') {
             const ayaSubject = locale === 'en'
                 ? `✅ AYA subscription activated — ${entityName}`
@@ -747,78 +769,7 @@ export async function POST(req: Request) {
             logger.info('WEBHOOK_EMAIL_SUB', `Sub email sent to ${customerEmail}`);
 
         } else if (packType === 'PRO') {
-            // --- PRO SCORE LIFT: recalculate score without the hard cap ---
-            // When a client pays for PRO, they receive ASR files + JSON-LD.
-            // The original scan detected no JSON-LD (cap 50) and no ASR (cap 90),
-            // but after purchase these are provided. We recalculate the score
-            // with has_jsonld=true and has_asr_file=true so the email shows
-            // the real uncapped score the client is entitled to.
-            try {
-                // PRO: Override structure_technique fields to reflect delivered files
-                if (ext?.structure_technique) {
-                    if (ext.structure_technique.has_asr) {
-                        ext.structure_technique.has_asr = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
-                    } else {
-                        ext.structure_technique.has_asr = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
-                    }
-                    if (ext.structure_technique.has_jsonld) {
-                        ext.structure_technique.has_jsonld = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
-                    } else {
-                        ext.structure_technique.has_jsonld = { value: true, q: 1, evidence: ["pro_pack_delivered"] };
-                    }
-                }
-                const proExtract = {
-                    fields: ext,
-                    version: "AYO-EXTRACT-3.0" as const,
-                    source: {
-                        url: analysisData.url,
-                        scan: {
-                            is_reachable: true,
-                            has_jsonld: true,       // PRO pack includes JSON-LD via ASR
-                            jsonld_count: 1,
-                            has_asr_file: true,     // PRO pack delivers ASR files
-                            has_faq_content: ext?.contenus_pedagogiques?.has_faq?.value ?? false,
-                            has_faq_schema: false,
-                            is_aya_registered: true, // PRO clients are registered in AYA
-                        },
-                    },
-                };
-                // Use pre-calculated proScore from V2 scan if available (exact match with diagnostic)
-                const savedProScore = dbAnalysis?.data?.proScore;
-                const savedProBlocks = dbAnalysis?.data?.proBlocks;
-                const previousScore = analysisData.score;
-
-                if (savedProScore && savedProBlocks) {
-                    // V2 scan already computed the exact PRO score — use it directly (no recalculation variance)
-                    analysisData.score = savedProScore;
-                    analysisData.blocks = {};
-                    for (const [k, v] of Object.entries(savedProBlocks)) {
-                        analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
-                    }
-                    logger.info('WEBHOOK_PRO_SCORE_V2', `Using V2 pre-calculated proScore: ${savedProScore} (was ${previousScore})`);
-                } else {
-                    // Fallback: recalculate (V1 flow or missing proScore)
-                    const liftedScore = computeAioScore(proExtract as any);
-                    analysisData.score = liftedScore.total;
-                    analysisData.blocks = {};
-                    for (const [k, v] of Object.entries(liftedScore.blocks)) {
-                        analysisData.blocks[k] = typeof v === 'number' ? v : (v as any).score ?? 0;
-                    }
-                    logger.info('WEBHOOK_PRO_SCORE_LIFT', `Score recalculated for PRO: ${previousScore} -> ${liftedScore.total} (V1 fallback)`);
-                }
-                // Update AYA registry with the final PRO score
-                if (ayaId && ayaId !== 'pending') {
-                    try {
-                        await db.updateEntityData(ayaId, { asr_score: Math.round(analysisData.score) });
-                        logger.info('WEBHOOK_PRO_AYA_SCORE_UPDATE', `AYA entity ${ayaId} score updated to ${analysisData.score}`);
-                    } catch (updateErr) {
-                        logger.warn('WEBHOOK_PRO_AYA_SCORE_UPDATE_FAIL', `Failed to update AYA score: ${updateErr}`);
-                    }
-                }
-            } catch (liftErr) {
-                logger.warn('WEBHOOK_PRO_SCORE_LIFT_ERROR', `Failed to lift score for PRO, using original: ${liftErr}`);
-                // Non-blocking: keep original score if recalculation fails
-            }
+            // Score lift already applied above (section 5) for both packs
 
             // SANITIZE DATA BEFORE GENERATION — uses shared sanitizer from @/lib/ayo-generators
             if (ext) {
