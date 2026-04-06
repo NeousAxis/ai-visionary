@@ -13,35 +13,13 @@ export default function PaymentSuccessPage() {
   const pack = params.get('pack') || 'aya';
   const t = useTranslations('paymentSuccess');
 
-  // Poll for entity, redirect to dashboard or AYA
+  // Auto-redirect to AYA registry after 4 seconds
   useEffect(() => {
-    if (!email) { router.push('/aya'); return; }
-
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    const interval = setInterval(async () => {
-      attempts++;
-      try {
-        const res = await fetch(`/api/aya/entity-by-email?email=${encodeURIComponent(email)}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.entity_id) {
-            clearInterval(interval);
-            router.push(`/dashboard/${data.entity_id}`);
-            return;
-          }
-        }
-      } catch { /* retry */ }
-
-      if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        router.push('/aya');
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [email, router]);
+    const timer = setTimeout(() => {
+      router.push('/aya');
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [router]);
 
   return (
     <div className="dv2" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
