@@ -548,7 +548,7 @@ export default function DiagnosticV2Page() {
       )}
 
       {/* ═══ TRANSITION — Computing score spinner ═══ */}
-      {currentStep === 2 && agentsDone === AGENTS.length && (
+      {currentStep === 2 && (
         <div id="transition-score" className="dv2-transition-panel">
           <div className="dv2-transition-spinner" />
           <h3>{t('transitionTitle')}</h3>
