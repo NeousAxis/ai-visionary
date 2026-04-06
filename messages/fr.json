@@ -335,6 +335,14 @@
     "errorBody": "Votre paiement a \u00e9t\u00e9 re\u00e7u mais nous rencontrons un probl\u00e8me technique. Nos \u00e9quipes sont notifi\u00e9es.",
     "contactSupport": "Contacter le support"
   },
+  "paymentSuccess": {
+    "title": "Paiement valid\u00e9 !",
+    "packActivated": "Votre Pack {pack} est d\u00e9sormais actif",
+    "preparing": "Pr\u00e9paration de votre dashboard...",
+    "viewRegistry": "Voir le Registre AYA",
+    "backHome": "Retour \u00e0 l'accueil",
+    "spamReminder": "Un email de confirmation a \u00e9t\u00e9 envoy\u00e9. V\u00e9rifiez vos spams si n\u00e9cessaire."
+  },
   "renew": {
     "metaTitle": "Renouveler \u2014 {name} | AYA",
     "metaDescription": "Renouvelez votre certification AYA pour {name}.",

@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
         const session = await stripe.checkout.sessions.create({
             mode,
             line_items: [{ price: priceId, quantity: 1 }],
-            success_url: `https://ai-visionary.com/diagnostic?session_id={CHECKOUT_SESSION_ID}&pack=${packType === 'PRO' ? 'pro' : 'plateforme'}`,
+            success_url: `https://ai-visionary.com/payment-success?email=${encodeURIComponent(email)}&pack=${packType === 'PRO' ? 'pro' : 'aya'}`,
             cancel_url: 'https://ai-visionary.com',
             client_reference_id: clientReferenceId,
             customer_email: email,
@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
                     quantity: 1,
                 },
             ],
-            success_url: `https://ai-visionary.com/diagnostic?session_id={CHECKOUT_SESSION_ID}&pack=${packType === 'PRO' ? 'pro' : 'plateforme'}`,
+            success_url: `https://ai-visionary.com/payment-success?email=${encodeURIComponent(email)}&pack=${packType === 'PRO' ? 'pro' : 'aya'}`,
             cancel_url: 'https://ai-visionary.com',
             client_reference_id: clientReferenceId,
             customer_email: email,

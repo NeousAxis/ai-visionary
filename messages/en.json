@@ -335,6 +335,14 @@
     "errorBody": "Your payment was received but we are experiencing a technical issue. Our team has been notified.",
     "contactSupport": "Contact support"
   },
+  "paymentSuccess": {
+    "title": "Payment confirmed!",
+    "packActivated": "Your {pack} Pack is now active",
+    "preparing": "Setting up your dashboard...",
+    "viewRegistry": "View AYA Registry",
+    "backHome": "Back to Home",
+    "spamReminder": "A confirmation email has been sent. Check your spam folder if needed."
+  },
   "renew": {
     "metaTitle": "Renew \u2014 {name} | AYA",
     "metaDescription": "Renew your AYA certification for {name}.",
