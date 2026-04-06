@@ -405,6 +405,12 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Diagnostic V2 micro-agents : page `/diagnostic-v2` avec 7 agents LLM cibles (Gemini 3 Flash), 8 etapes live, scoring 7 dimensions, compare concurrents AYA, score PRO projete. Branche `feature/micro-agents-diagnostic`.
 - Diagnostic V2 : 8 micro-agents (dont detect-pedagogy LLM pour FAQ/glossary/docs), retry x3 pour stabilite score, OTP clients existants, email capture, Stripe TEST connecte
 - Score V2 stable : whtg1.com 81/100 (±1 point entre scans)
+- Public Key ID visible dans cartes AYA registry (label i18n FR/EN) + champ `public_key_id` dans LlmSummary API + GitHub export
+- Admin enrichment API : `/api/admin/enrich` — re-enrichir une entite ou batch (certifiees sans description Gemini)
+- Webhook Stripe : retry x2 pour enrichissement Gemini si premier appel echoue
+- `ayo-semantics.ts` : modele Gemini corrige → `gemini-3-flash-preview` (1.5-flash etait deprecie)
+- Admin rescore API : `/api/admin/rescore` — status, single entity, batch (3 modes) + resume via marqueur `rescore_v2`
+- Script batch : `scripts/rescore-batch.sh` — boucle offset avec dry-run, resume, logging
 
 ---
 
@@ -422,12 +428,14 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
 | 9 | Diagnostic V2 micro-agents — 8 micro-agents LLM + detect-pedagogy. Score stable 81/100. OTP + email + Stripe TEST connectes. Merge dans main. Page `/diagnostic-v2`. | Haute | Fait — merge dans main (5 avril 2026) |
 | 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
-| 11 | Re-scoring batch V2 — repasser les ~4400 entites AYA au travers du scoring V2 micro-agents pour coherence. Pipeline batch a integrer dans le bot. ~35000 appels Gemini Flash. | Critique | A faire apres finalisation V2 |
-| 12 | Dashboard Entreprise — transformer /renew/[entityId] en dashboard complet : diagnostic avec tous les scores (7 blocs), re-scan V2, admin compte, transfert email. Garder OTP gate. | Haute | A faire |
-| 13 | i18n FR/EN page diagnostic V2 — tous labels, titres, boutons via next-intl | Haute | A faire |
-| 14 | Responsive mobile page diagnostic V2 — bouton/form qui debordent sur mobile | Haute | A faire |
-| 15 | Footer visibility — les agents LLM doivent voir le contenu des footers (legal_name, pays, contact). Actuellement le textContent supprime les `<nav>` tags (orchestrator.ts ligne 155). Fix : ne plus stripper `<nav>`. Impact : tous les agents (contact, location, services, legal). | Critique | A faire |
-| 16 | Score alignment V2→email→AYA — le proScore V2 est maintenant sauve dans analyses et utilise par le webhook. Mais le score de base (sans PRO lift) doit aussi etre identique partout. Variance Gemini residuelle sur Offer Clarity (16 vs 20). | Haute | A surveiller |
+| 11 | Re-scoring batch V2 — `/api/admin/rescore` + `scripts/rescore-batch.sh`. 4432 entites eligibles, ~35k appels Gemini, ~31h. Resume via marqueur `rescore_v2.scored_at`. | Critique | Pret a lancer (6 avril 2026) |
+| 12 | ~~Dashboard Entreprise — /dashboard/[entityId] complet : 7 blocs AIO, re-scan V2, admin compte, OTP gate~~ | ~~Haute~~ | Fait — verifie (6 avril 2026) |
+| 13 | ~~i18n FR/EN page diagnostic V2 — 96+ cles, useTranslations('diagnostic'), 137 cles EN+FR~~ | ~~Haute~~ | Fait — verifie (6 avril 2026) |
+| 14 | ~~Responsive mobile page diagnostic V2 — 2 breakpoints (768px, 640px), grids single col, no overflow~~ | ~~Haute~~ | Fait — verifie (6 avril 2026) |
+| 15 | ~~Footer visibility — nav tags plus strippes dans orchestrator.ts, footers visibles par tous les agents (contact, location, services, legal)~~ | ~~Critique~~ | Fait — verifie (6 avril 2026, commit f91f98cd) |
+| 16 | ~~Score alignment V2→email→AYA — proScore sauve dans analyses, webhook l'utilise, computeAioScore() unique partout, deterministe~~ | ~~Haute~~ | Fait — verifie (6 avril 2026). Variance Offer Clarity etait pre-V2. |
+| 17 | ~~Public Key ID visible dans cartes AYA + LLM API + GitHub export~~ | ~~Haute~~ | Fait (6 avril 2026) |
+| 18 | ~~Admin enrichment API + fix modele Gemini ayo-semantics~~ | ~~Critique~~ | Fait (6 avril 2026). `/api/admin/enrich` + retry webhook + gemini-3-flash-preview |
 
 ---
 
@@ -450,6 +458,16 @@ python push_to_aya.py --dry-run          # Preview push
 python push_to_aya.py --min-score 20     # Push reel
 python export_github_dataset.py          # Export GitHub dataset
 
+# Admin — re-enrichir entites certifiees
+curl -X POST "https://ai-visionary.com/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"entity_id": "<UUID>"}'      # une entite
+curl -X POST "https://ai-visionary.com/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"all": true}'                  # batch
+curl -X POST "https://ai-visionary.com/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"all": true, "force": true}'   # force re-enrichir tout
+
+# Re-scoring batch V2
+ADMIN_SECRET=$ADMIN_SECRET ./scripts/rescore-batch.sh --dry-run          # Test sans ecriture
+ADMIN_SECRET=$ADMIN_SECRET ./scripts/rescore-batch.sh                    # Lancement reel (~31h)
+ADMIN_SECRET=$ADMIN_SECRET ./scripts/rescore-batch.sh --start-offset 500 # Reprendre a l'offset 500
+
 # API AYA locale (dev/test)
 cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 ```
@@ -461,7 +479,7 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 | Route | Description |
 |-------|-------------|
 | `/api/aya` | Index JSON des endpoints |
-| `/api/aya/llm/{domain}` | LLM-optimise — 5 champs (cache CDN 1h) |
+| `/api/aya/llm/{domain}` | LLM-optimise — 6 champs incl. public_key_id (cache CDN 1h) |
 | `/api/aya/search?q={query}` | Recherche (max 200 resultats) |
 | `/api/aya/entity/{domain}` | Detail entite + ASR_DERIVED |
 | `/api/aya/stats` | Statistiques globales |
@@ -480,6 +498,8 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 8. `app/api/webhooks/checkout-success/route.ts` — Webhook Stripe + PRO score lift
 9. `lib/micro-agents/orchestrator.ts` — Orchestrateur micro-agents + mergeAgentResultsToExtract (V2)
 10. `app/api/diagnostic/scan/route.ts` — SSE endpoint micro-agents (V2)
+11. `lib/ayo-semantics.ts` — Enrichissement Gemini bilingue (descriptions + keywords) — modele `gemini-3-flash-preview`
+12. `app/api/admin/enrich/route.ts` — Admin API re-enrichissement entites (single + batch)
 
 ---
 

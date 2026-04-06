@@ -397,6 +397,53 @@ export const database = {
     },
 
     /**
+     * Get bot-indexed entities eligible for V2 re-scoring.
+     * Filters: payment_completed != true, website not null, ordered by entity_id ASC.
+     */
+    getEntitiesForRescore: async (limit: number = 10, offset: number = 0): Promise<any[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+        try {
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('entity_id, display_name, legal_name, website, asr_score, payment_completed, asr_payload, created_at')
+                .or('payment_completed.is.null,payment_completed.eq.false')
+                .not('website', 'is', null)
+                .order('entity_id', { ascending: true })
+                .range(offset, offset + limit - 1);
+            if (error) { console.error('❌ [Supabase] getEntitiesForRescore Error:', error); return []; }
+            return data || [];
+        } catch (error) { console.error('❌ [Supabase] getEntitiesForRescore Error:', error); return []; }
+    },
+
+    /**
+     * Count bot-indexed entities eligible for V2 re-scoring.
+     */
+    countEntitiesForRescore: async (): Promise<{ total: number; rescored: number }> => {
+        if (!isSupabaseConfigured()) return { total: 0, rescored: 0 };
+        const client = getSupabase();
+        if (!client) return { total: 0, rescored: 0 };
+        try {
+            const { count: total, error } = await client
+                .from('aya_registry')
+                .select('entity_id', { count: 'exact', head: true })
+                .or('payment_completed.is.null,payment_completed.eq.false')
+                .not('website', 'is', null);
+            if (error) { console.error('❌ [Supabase] countEntitiesForRescore Error:', error); return { total: 0, rescored: 0 }; }
+            // Count rescored by checking for rescore_v2 marker — Supabase JSONB filter
+            const { count: rescored, error: e2 } = await client
+                .from('aya_registry')
+                .select('entity_id', { count: 'exact', head: true })
+                .or('payment_completed.is.null,payment_completed.eq.false')
+                .not('website', 'is', null)
+                .not('asr_payload->rescore_v2->scored_at', 'is', null);
+            if (e2) { return { total: total || 0, rescored: 0 }; }
+            return { total: total || 0, rescored: rescored || 0 };
+        } catch (error) { console.error('❌ [Supabase] countEntitiesForRescore Error:', error); return { total: 0, rescored: 0 }; }
+    },
+
+    /**
      * Retrieve an AYA Entity by its ID
      */
     /**
