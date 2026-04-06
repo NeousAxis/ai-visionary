@@ -255,6 +255,10 @@ export default function DiagnosticV2Page() {
               setAgents(prev => prev.map(a =>
                 a.name === ev.agent ? { ...a, status: ev.status, data: ev.data, durationMs: ev.durationMs } : a
               ));
+              // Keep spinner visible as cards grow
+              setTimeout(() => {
+                document.getElementById('transition-score')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+              }, 200);
             } else if (ev.phase === 'complete') {
               setTotalDuration(ev.totalDurationMs || 0);
               if (ev.score) {
