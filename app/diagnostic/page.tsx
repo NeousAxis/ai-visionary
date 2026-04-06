@@ -291,9 +291,11 @@ export default function DiagnosticV2Page() {
               if (ev.is_aya_registered || ev.extract?.meta?.source?.scan?.is_aya_registered) {
                 setIsExistingClient(true);
               }
-              // Scroll to transition spinner, then move to step 3
-              scrollTo('transition-score');
-              setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 2000);
+              // Scroll to transition spinner (center it in viewport), then move to step 3
+              setTimeout(() => {
+                document.getElementById('transition-score')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 300);
+              setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 2500);
             } else if (ev.phase === 'error') {
               setError(ev.message || t('scanFailed'));
             }
