@@ -9,7 +9,7 @@ import type { AgentEvent } from '@/lib/micro-agents/types';
 export const maxDuration = 60; // Puppeteer SPA rendering can take up to 15s
 
 export async function POST(req: NextRequest) {
-  const { url } = await req.json();
+  const { url, email } = await req.json();
 
   if (!url || typeof url !== 'string') {
     return new Response(JSON.stringify({ error: 'URL required' }), {
@@ -92,15 +92,16 @@ export async function POST(req: NextRequest) {
         send({ phase: 'score', status: 'done', data: score });
 
         // Save V2 extract to analyses table (so webhook finds it after Stripe payment)
+        let savedAnalysisId = '';
         try {
-          const analysisId = crypto.randomUUID();
-          await db.saveAnalysis(analysisId, {
+          savedAnalysisId = crypto.randomUUID();
+          await db.saveAnalysis(savedAnalysisId, {
             url: fetchResult.url,
-            email: null,
+            email: email || null,
             score: score.total,
             data: { fields: extract.fields, source: extract.source, version: extract.version, blocks: score.blocks, proScore: proScore.total, proBlocks: proScore.blocks },
           });
-          console.log(`[scan] Analysis saved: ${analysisId} score=${score.total} url=${fetchResult.url}`);
+          console.log(`[scan] Analysis saved: ${savedAnalysisId} score=${score.total} url=${fetchResult.url}`);
         } catch (e) {
           console.error('[scan] Failed to save analysis:', e instanceof Error ? e.message : e);
         }
@@ -114,6 +115,7 @@ export async function POST(req: NextRequest) {
           score,
           proScore, // Score WITH AYO PRO files
           url: fetchResult.url,
+          analysisId: savedAnalysisId, // Pass to client so checkout can reference it
         });
       } catch (err) {
         send({ phase: 'error', message: err instanceof Error ? err.message : 'Unknown error' });

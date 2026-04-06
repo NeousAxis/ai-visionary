@@ -94,6 +94,7 @@ export default function DiagnosticV2Page() {
   const [otpMaskedEmail, setOtpMaskedEmail] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [analysisId, setAnalysisId] = useState('');
 
   const t = useTranslations('diagnostic');
   const locale = useLocale();
@@ -231,7 +232,7 @@ export default function DiagnosticV2Page() {
       const res = await fetch('/api/diagnostic/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: url.trim(), email: userEmail }),
       });
       if (!res.body) { setError(t('noResponse')); return; }
 
@@ -280,8 +281,9 @@ export default function DiagnosticV2Page() {
                   blocks: blocksArr,
                 });
               }
-              // Capture PRO score + site name
+              // Capture PRO score + site name + analysis ID
               if (ev.proScore) setProScore(ev.proScore.total ?? null);
+              if (ev.analysisId) setAnalysisId(ev.analysisId);
               // Get detected name — prefer short name, not full title
               const eName = ev.extract?.fields?.identite?.name?.value || '';
               // Strip " | subtitle" from title-based names
@@ -812,6 +814,7 @@ export default function DiagnosticV2Page() {
                         url: scanUrl,
                         packType: selectedPlan === 'pro' ? 'PRO' : 'AYA_SUB',
                         locale,
+                        analysisId,
                       }),
                     });
                     const data = await res.json();
