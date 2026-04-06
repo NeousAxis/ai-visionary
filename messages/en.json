@@ -226,6 +226,7 @@
     "orgFallback": "Organisation",
     "certifiedDesc": "Semantic Identity optimized for AIs.",
     "indexedDesc": "Company indexed by AYA.",
+    "publicKeyId": "Public Key ID",
     "entityTypes": {
       "company": "Company",
       "association": "Association",
@@ -1147,6 +1148,7 @@
       "services_particuliers": "Consumer Services",
       "securite": "Security & Protection",
       "numerique": "Digital & Information",
+      "it_digital": "IT & Digital Services",
       "administration": "Administration & Public Services",
       "organisations": "Collective Organizations",
       "plateformes": "Economic Platforms",

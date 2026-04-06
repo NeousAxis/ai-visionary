@@ -6,6 +6,7 @@
 // ─── Types ───────────────────────────────────────────────────
 export interface LlmSummary {
     name: string;
+    public_key_id: string;
     what_it_does: string;
     for_who: string;
     category: string;
@@ -240,7 +241,8 @@ export function buildLlmSummary(entity: any, locale: 'fr' | 'en' = 'en'): LlmSum
         forWho = SECTOR_AUDIENCE_FALLBACK[f.category] || 'Businesses and professionals.';
     }
 
-    return { name: f.name, what_it_does: whatItDoes, for_who: forWho, category: f.category, location: f.location };
+    const publicKeyId = entity.aya_entity_id || entity.entity_id || '';
+    return { name: f.name, public_key_id: publicKeyId, what_it_does: whatItDoes, for_who: forWho, category: f.category, location: f.location };
 }
 
 // French country names for certificate page descriptions

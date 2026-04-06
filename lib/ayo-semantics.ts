@@ -20,7 +20,7 @@ const GEMINI_TIMEOUT_MS = 30_000; // 30 seconds
 const getModel = () => {
     if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY env var");
     const google = createGoogleGenerativeAI({ apiKey: GEMINI_API_KEY });
-    return google('gemini-1.5-flash');
+    return google('gemini-3-flash-preview');
 };
 
 export interface SemanticAssets {

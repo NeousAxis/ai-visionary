@@ -329,9 +329,12 @@ export default function AyaRegistryClient({
 
                                         {/* FOOTER: ID + SCORE */}
                                         <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+                                                    {t('publicKeyId')}
+                                                </span>
                                                 <span style={{ fontFamily: 'monospace', fontSize: '0.7rem', color: '#94a3b8', letterSpacing: '-0.5px' }}>
-                                                    ID: aya:{(entity.country_legal || 'xx').toLowerCase()}:{(getEntityId(entity) || '').slice(0, 8)}...
+                                                    aya:{(entity.country_legal || 'xx').toLowerCase()}:{(getEntityId(entity) || '').slice(0, 8)}
                                                 </span>
                                             </div>
                                             <div style={{ textAlign: 'right' }}>

@@ -210,8 +210,10 @@ def build_llm_record(entity: dict) -> dict:
     else:
         for_who = SECTOR_AUDIENCE_FALLBACK.get(category, "Businesses and professionals.")
 
+    public_key_id = entity.get("aya_entity_id") or entity.get("entity_id", "")
     return {
         "entity_id": entity.get("entity_id", ""),
+        "public_key_id": public_key_id,
         "name": name,
         "what_it_does": what_it_does,
         "for_who": for_who,
@@ -245,6 +247,7 @@ The same data is available via:
 | Field | Type | Description |
 |-------|------|-------------|
 | `entity_id` | string | Unique UUID identifier |
+| `public_key_id` | string | AYA public key ID |
 | `name` | string | Entity display name |
 | `what_it_does` | string | One sentence — what the entity does |
 | `for_who` | string | Target audience |

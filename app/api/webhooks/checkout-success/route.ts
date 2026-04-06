@@ -670,19 +670,26 @@ export async function POST(req: Request) {
             }, packType === 'AYA_SUB' ? 'subscription' : 'purchase');
             logger.info('WEBHOOK_AYA_OK', `AYA registered: ${ayaId} (${entityName})`, { ayaId, entityName, existingAyaEntityId });
 
-            // Generate faithful bilingual descriptions for certified entity
+            // Generate faithful bilingual descriptions for certified entity (retry x2)
             try {
                 const { generateCertifiedTranslations } = await import('@/lib/ayo-semantics');
                 const extract = analysisData.extract || {};
                 const fields = (extract.fields || extract) as Record<string, any>;
-                const translations = await generateCertifiedTranslations(
+                const enrichArgs = [
                     entityName,
                     fields.identite?.business_type?.value || '',
                     Array.isArray(fields.offre?.services?.value) ? fields.offre.services.value : [],
                     typeof fields.offre?.target_audience?.value === 'string' ? fields.offre.target_audience.value : '',
                     resolvedCountryLegal || 'CH',
                     locale as 'fr' | 'en',
-                );
+                ] as const;
+                let translations = await generateCertifiedTranslations(...enrichArgs);
+                // Retry once if Gemini returned empty
+                if (!translations.gemini_description) {
+                    logger.warn('WEBHOOK_TRANSLATIONS_RETRY', `First enrichment attempt empty for ${entityName}, retrying...`);
+                    await new Promise(r => setTimeout(r, 1500));
+                    translations = await generateCertifiedTranslations(...enrichArgs);
+                }
                 if (translations.gemini_description && ayaId) {
                     const existingEntity = await db.getAyaEntityById(ayaId);
                     if (existingEntity) {
@@ -696,9 +703,11 @@ export async function POST(req: Request) {
                         await db.updateEntityData(ayaId, { asr_payload: payload });
                         logger.info('WEBHOOK_TRANSLATIONS_OK', `Bilingual descriptions generated for ${entityName}`);
                     }
+                } else {
+                    logger.warn('WEBHOOK_TRANSLATIONS_EMPTY', `Enrichment returned empty after retry for ${entityName} — use /api/admin/enrich to fix`);
                 }
             } catch (translationErr) {
-                // Non-blocking — entity is registered, translations can be generated later
+                // Non-blocking — entity is registered, use /api/admin/enrich to fix later
                 logger.warn('WEBHOOK_TRANSLATIONS_FAIL', `Translation generation failed for ${entityName}: ${translationErr instanceof Error ? translationErr.message : 'unknown'}`);
             }
 
