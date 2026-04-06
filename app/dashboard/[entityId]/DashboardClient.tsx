@@ -499,33 +499,38 @@ export default function DashboardClient(props: DashboardProps) {
             <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>{t('rescanDesc')}</span>
           </button>
 
-          {/* Regenerate files */}
-          {props.isCertified && (
-            <button
-              onClick={async () => {
-                try {
-                  const res = await fetch('/api/regenerate-files', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ entityId: props.entityId, token: props.updateToken }),
-                  });
-                  if (res.ok) alert('Files regenerated and sent to your email!');
-                  else alert('Error regenerating files. Please try again.');
-                } catch { alert('Network error. Please try again.'); }
-              }}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4,
-                padding: '1rem', borderRadius: 8, border: '1px solid #e5e7eb',
-                background: '#fff', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.2s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#4A919E'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e5e7eb'; }}
-            >
-              <span style={{ fontSize: '1.2rem' }}>📄</span>
-              <span style={{ fontWeight: 600, color: '#212E53', fontSize: '0.9rem' }}>{t('regenFiles')}</span>
-              <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>{t('regenDesc')}</span>
-            </button>
-          )}
+          {/* Regenerate files — only active for PRO pack */}
+          <button
+            onClick={async () => {
+              if (props.currentPackType !== 'PRO') return;
+              try {
+                const res = await fetch('/api/regenerate-files', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ entityId: props.entityId, token: props.updateToken }),
+                });
+                if (res.ok) alert('Files regenerated and sent to your email!');
+                else alert('Error regenerating files. Please try again.');
+              } catch { alert('Network error. Please try again.'); }
+            }}
+            disabled={props.currentPackType !== 'PRO'}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4,
+              padding: '1rem', borderRadius: 8, border: '1px solid #e5e7eb',
+              background: props.currentPackType !== 'PRO' ? '#f3f4f6' : '#fff',
+              cursor: props.currentPackType !== 'PRO' ? 'not-allowed' : 'pointer',
+              textAlign: 'left', transition: 'border-color 0.2s',
+              opacity: props.currentPackType !== 'PRO' ? 0.5 : 1,
+            }}
+            onMouseEnter={e => { if (props.currentPackType === 'PRO') (e.currentTarget as HTMLButtonElement).style.borderColor = '#4A919E'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#e5e7eb'; }}
+          >
+            <span style={{ fontSize: '1.2rem' }}>📄</span>
+            <span style={{ fontWeight: 600, color: props.currentPackType !== 'PRO' ? '#9ca3af' : '#212E53', fontSize: '0.9rem' }}>{t('regenFiles')}</span>
+            <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>
+              {props.currentPackType !== 'PRO' ? t('regenProOnly') : t('regenDesc')}
+            </span>
+          </button>
 
           {/* Update data */}
           <Link

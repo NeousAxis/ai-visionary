@@ -553,6 +553,7 @@
     "rescanRunning": "Scanning...",
     "regenFiles": "Regenerate files",
     "regenDesc": "Regenerate your 5 ASR identity files.",
+    "regenProOnly": "Upgrade to PRO Pack to access this feature.",
     "updateData": "Update my data",
     "updateDesc": "Complete or correct your 7 AIO blocks.",
     "accountTitle": "Account",
