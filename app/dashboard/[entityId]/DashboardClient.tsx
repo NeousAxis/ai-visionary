@@ -640,25 +640,23 @@ export default function DashboardClient(props: DashboardProps) {
         </div>
       )}
 
-      {/* ─── RENEWAL OFFERS — only show when buttons are visible ─── */}
-      {(!props.isActive || props.expiresSoon) && (
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ color: '#212E53', fontSize: '1.1rem', marginBottom: '1rem', textAlign: 'center' }}>
-            💳 {t('offersTitle')}
-          </h3>
-          <RenewButtons
-            email={props.contactEmail}
-            url={props.url}
-            entityId={props.entityId}
-            hasRequiredInfo={props.hasRequiredInfo}
-            proUrl={props.proUrl}
-            ayaUrl={props.ayaUrl}
-            isActive={props.isActive}
-            expiresSoon={props.expiresSoon}
-            currentPackType={props.currentPackType}
-          />
-        </div>
-      )}
+      {/* ─── OFFERS — always visible for upgrade/renew ─── */}
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 style={{ color: '#212E53', fontSize: '1.1rem', marginBottom: '1rem', textAlign: 'center' }}>
+          💳 {t('offersTitle')}
+        </h3>
+        <RenewButtons
+          email={props.contactEmail}
+          url={props.url}
+          entityId={props.entityId}
+          hasRequiredInfo={props.hasRequiredInfo}
+          proUrl={props.proUrl}
+          ayaUrl={props.ayaUrl}
+          isActive={props.isActive}
+          expiresSoon={props.expiresSoon}
+          currentPackType={props.currentPackType}
+        />
+      </div>
 
       {/* Footer */}
       <div style={{ textAlign: 'center', marginTop: '2rem' }}>
