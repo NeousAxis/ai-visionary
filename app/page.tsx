@@ -322,9 +322,8 @@ export default function Home() {
             <div className="card pricing-card">
               <h3>{t('pricing.plan2Title')} <br /><span className="card-subtitle">{t('pricing.plan2Sub')}</span></h3>
 
-              <div className="price">{t('pricing.plan2Price')} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>{t('pricing.plan2Period')}</span>
-                <br /><span style={{ fontSize: '0.75rem', color: '#4A919E', fontWeight: 600 }}>{t('pricing.plan2f5')}</span>
-              </div>
+              <div className="price" style={{ marginBottom: 0 }}>{t('pricing.plan2Price')} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>{t('pricing.plan2Period')}</span></div>
+              <div style={{ fontSize: '0.8rem', color: '#4A919E', fontWeight: 600, marginTop: '-4px', marginBottom: '8px' }}>{t('pricing.plan2f5')}</div>
               <p className="price-details">{t('pricing.plan2Desc')}</p>
               <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                 <li>&#x2705; <strong>{t('pricing.plan2f1')}</strong></li>
