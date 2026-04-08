@@ -199,7 +199,7 @@ ${JSON.stringify(asrJson, null, 2)}
                     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 
                     <p style="font-size: 14px; color: #666;">
-                        <a href="https://ai-visionary.com" style="color: #000; text-decoration: underline;">${en ? 'Return to AI Visionary' : 'Retourner sur AI Visionary'}</a>
+                        <a href="https://ai-visionary.xyz" style="color: #000; text-decoration: underline;">${en ? 'Return to AI Visionary' : 'Retourner sur AI Visionary'}</a>
                     </p>
                 </div>
             `,

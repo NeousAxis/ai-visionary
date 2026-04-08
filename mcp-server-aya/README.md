@@ -62,7 +62,7 @@ Exemple : `get_registry_stats()`
 
 ## API AYA
 
-Base URL : `https://ai-visionary.com/api/aya`
+Base URL : `https://ai-visionary.xyz/api/aya`
 
 Le MCP server appelle l'API publique AYA hebergee sur Vercel. Aucune cle API requise. Rate limit : 30 req/min par IP.
 

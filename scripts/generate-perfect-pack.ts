@@ -81,7 +81,7 @@ const data = {
     }
 };
 
-const URL = "https://ai-visionary.com";
+const URL = "https://ai-visionary.xyz";
 const OUTPUT_DIR = "/Users/cyrilleger/Desktop/AYO_Pack_PRO_Test";
 
 async function main() {

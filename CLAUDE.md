@@ -3,7 +3,7 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 5 avril 2026
+> Derniere mise a jour : 8 avril 2026
 
 ---
 
@@ -15,7 +15,7 @@
 |-------|-----------|
 | **AYO** | Agent IA qui diagnostique la lisibilite IA d'un site web. V1=chatbot Gemini (page /diagnostic). V2=micro-agents LLM cibles Gemini 3 Flash (page /diagnostic-v2, branche feature/micro-agents-diagnostic). |
 | **AIO Score** | Score 0-100, deterministe, base sur 7 blocs ponderes (la "Bible AIO"). |
-| **AYA** | Registre public d'entites indexees/certifiees (Supabase `aya_registry`). ~4400+ entites. |
+| **AYA** | Registre public d'entites indexees/certifiees (Supabase `aya_registry`). ~4400+ entites, objectif 100k. |
 | **ASR** | AI Singular Record — fichier JSON-LD signe Ed25519, identite numerique de l'entite. |
 | **Hard cap** | Pas de JSON-LD + pas d'AYA = score max 50. Pas d'ASR = max 90. Score max 78 sans preuves externes. |
 | **q values** | Qualite de chaque donnee extraite : 0 (absent), 0.5 (vague), 1 (concret/verifie). |
@@ -98,9 +98,9 @@ URL -> Scanner (aio-scanner.ts) -> Score initial (aio-score-engine.ts)
 
 - **Frontend + API** : Vercel (serverless, maxDuration=120s)
 - **Base de donnees** : Supabase PostgreSQL
-- **Emails** : Resend (hello@ai-visionary.com)
+- **Emails** : Resend (hello@ai-visionary.xyz)
 - **Paiements** : Stripe (mode test — ne jamais passer en prod sans accord Cyril)
-- **Domaine** : ai-visionary.com
+- **Domaine** : ai-visionary.xyz (primaire, depuis 8 avril 2026). ai-visionary.com redirige vers .xyz (301).
 
 ### Variables d'environnement requises
 
@@ -117,7 +117,7 @@ RESEND_API_KEY
 ADMIN_SECRET
 SESSION_SECRET
 AYO_SIGNING_KEY
-NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
+NEXT_PUBLIC_BASE_URL=https://ai-visionary.xyz
 ```
 
 ### Base de donnees Supabase
@@ -160,9 +160,9 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.com
 
 ### Priorite IMMEDIATE
 
-1. **Stabiliser la qualite des fichiers PRO** — anti-marketing, classification correcte, normalisation pays/langue
-2. **Croissance registre** : objectif 10k+ entites
-3. **Campagne email entreprises indexees**
+1. **Croissance registre** : objectif 100k entites (scores bot 20-50 = corrects, plafond 50 = moteur conversion AYO PRO)
+2. **Campagne email entreprises indexees**
+3. **Stabiliser la qualite des fichiers PRO** — anti-marketing, classification correcte, normalisation pays/langue
 
 ---
 
@@ -345,7 +345,11 @@ app/api/diagnostic/
 
 ---
 
-### Croissance — Objectif 10k+ entites
+### Croissance — Objectif 100k entites
+
+#### Strategie scoring bot
+
+Les entites indexees par le bot ont un score entre 20 et 50 (variable selon les donnees trouvees, PAS 50 pour tout le monde). Ce score reflete la realite : quasiment aucune entreprise n'a ses donnees correctement structurees. Le plafond naturel a 50 est le moteur de conversion : pour monter au-dessus de 50 → passer par AYO PRO. Le rescoring V2 des entites bot est NON PERTINENT — les scores bot sont corrects et intentionnels.
 
 #### Bot AYA (scraping automatise)
 
@@ -355,7 +359,7 @@ domains.txt -> scraper.py -> parser.py -> generator.py -> push_to_aya.py -> Supa
 
 | Tache | Priorite |
 |-------|----------|
-| Enrichir `domains.txt` — annuaires CH, FR, DE, UK, US, Asie | Critique |
+| Enrichir `domains.txt` — annuaires CH, FR, DE, UK, US, Asie (objectif 100k) | Critique |
 | Scraper par lots — `run_pipeline_fast.py` | Critique |
 | Push vers Supabase — `push_to_aya.py --min-score 20` | Critique |
 | Enrichissement registres du commerce (Zefix CH, Sirene FR, Companies House UK) — meme chantier que le bot | Critique |
@@ -365,7 +369,7 @@ domains.txt -> scraper.py -> parser.py -> generator.py -> push_to_aya.py -> Supa
 #### Distribution — Strategie ATTRACTION SYSTEMIQUE
 
 AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
-- **API LLM-friendly** `ai-visionary.com/api/aya/llm/{domain}` (cache CDN 1h)
+- **API LLM-friendly** `ai-visionary.xyz/api/aya/llm/{domain}` (cache CDN 1h)
 - **Pages HTML** sur chaque certificat `/aya/e/[id]` (crawlable)
 - **GitHub dataset** — `github.com/NeousAxis/aya-business-dataset` (JSON individuels)
 - **HuggingFace dataset** — CSV + JSONL, CC-BY-4.0
@@ -401,7 +405,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - SEO metadata toutes pages + sitemap dynamique Supabase + confidentialite LPD/RGPD + mentions legales
 - Translation agents Python : descriptions certifiees, dictionnaire 16558 termes, keywords FR 100%
 - Page `/developers` : stats dynamiques, docs GitHub/HuggingFace
-- Exports : GitHub (4435 fichiers) + HuggingFace (4436 entites)
+- Exports : GitHub (4372 fichiers) + HuggingFace (4437 entites) — re-exportes 7 avril 2026
 - Diagnostic V2 micro-agents : page `/diagnostic-v2` avec 7 agents LLM cibles (Gemini 3 Flash), 8 etapes live, scoring 7 dimensions, compare concurrents AYA, score PRO projete. Branche `feature/micro-agents-diagnostic`.
 - Diagnostic V2 : 8 micro-agents (dont detect-pedagogy LLM pour FAQ/glossary/docs), retry x3 pour stabilite score, OTP clients existants, email capture, Stripe TEST connecte
 - Score V2 stable : whtg1.com 81/100 (±1 point entre scans)
@@ -409,8 +413,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Admin enrichment API : `/api/admin/enrich` — re-enrichir une entite ou batch (certifiees sans description Gemini)
 - Webhook Stripe : retry x2 pour enrichissement Gemini si premier appel echoue
 - `ayo-semantics.ts` : modele Gemini corrige → `gemini-3-flash-preview` (1.5-flash etait deprecie)
-- Admin rescore API : `/api/admin/rescore` — status, single entity, batch (3 modes) + resume via marqueur `rescore_v2`
-- Script batch : `scripts/rescore-batch.sh` — boucle offset avec dry-run, resume, logging
+- API Monitoring : `lib/aya/api-tracker.ts` — buffer memoire + flush Supabase toutes les 5min. Classifie les callers (llm_agent, developer, crawler, browser). 7 routes AYA instrumentees. Endpoint admin `/api/aya/analytics?days=7`.
+- Migration domaine : `ai-visionary.xyz` = domaine primaire (8 avril 2026). `.com` redirige 301 vers `.xyz`. 42+ fichiers source + i18n + docs + public migres. DNS Infomaniak, Vercel, Resend, Stripe a configurer.
 
 ---
 
@@ -422,13 +426,13 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 2 | ~~Coherence linguistique fichiers PRO (EN par defaut)~~ | ~~Immediat~~ | Fait (31 mars 2026) |
 | 3 | ~~AYO V4 Evidence-Based~~ | ~~Haute~~ | Fait — actif en prod, flag ON (3 avril 2026) |
 | 4 | ~~Stabiliser qualite fichiers PRO (anti-marketing, classification, normalisation)~~ | ~~Critique~~ | Fait — solidifie (3 avril 2026). sanitizeComplianceOutput() partagee, score stable 82/100 |
-| 5 | Scraping 10k+ entites + registres du commerce | Critique | En cours (~4400) |
+| 5 | Scraping 100k entites + registres du commerce | Critique | En cours (~4400) |
 | 6 | Campagne email entreprises indexees | Haute | A faire |
-| 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Automatise |
+| 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Fait (7 avril 2026). GitHub 4372 entites + HuggingFace 4437 entites |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
 | 9 | Diagnostic V2 micro-agents — 8 micro-agents LLM + detect-pedagogy. Score stable 81/100. OTP + email + Stripe TEST connectes. Merge dans main. Page `/diagnostic-v2`. | Haute | Fait — merge dans main (5 avril 2026) |
-| 10 | Monitoring API — tracker appels AYA par source | Moyenne | A faire |
-| 11 | Re-scoring batch V2 — `/api/admin/rescore` + `scripts/rescore-batch.sh`. 4432 entites eligibles, ~35k appels Gemini, ~31h. Resume via marqueur `rescore_v2.scored_at`. | Critique | Pret a lancer (6 avril 2026) |
+| 10 | ~~Monitoring API — tracker appels AYA par source~~ | ~~Moyenne~~ | Fait (7 avril 2026). `api-tracker.ts` + 7 routes instrumentees + `/api/aya/analytics` admin endpoint |
+| 11 | ~~Re-scoring batch V2~~ | ~~Critique~~ | ABANDONNE (7 avril 2026) — scores bot 20-50 sont corrects et intentionnels, plafond 50 = moteur conversion AYO PRO |
 | 12 | ~~Dashboard Entreprise — /dashboard/[entityId] complet : 7 blocs AIO, re-scan V2, admin compte, OTP gate~~ | ~~Haute~~ | Fait — verifie (6 avril 2026) |
 | 13 | ~~i18n FR/EN page diagnostic V2 — 96+ cles, useTranslations('diagnostic'), 137 cles EN+FR~~ | ~~Haute~~ | Fait — verifie (6 avril 2026) |
 | 14 | ~~Responsive mobile page diagnostic V2 — 2 breakpoints (768px, 640px), grids single col, no overflow~~ | ~~Haute~~ | Fait — verifie (6 avril 2026) |
@@ -439,7 +443,46 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 
 ---
 
-## 8. COMMANDES UTILES
+## 8. ANALYSE DES COUTS
+
+> **REGLE ABSOLUE : avant TOUT batch ou operation en volume, TOUJOURS estimer le cout et obtenir l'accord de Cyril.**
+
+### Budget mensuel
+
+| Service | Plan | Budget/mois | Limites |
+|---------|------|-------------|---------|
+| **Google Cloud (Gemini API)** | Pay-as-you-go | CHF 20.00 | Budget alert a 100% |
+| **Supabase** | Free/Pro (org NeousAxis) | Quota plan | Depasse = bloque ou surcharge |
+| **Vercel** | Pro | Inclus | maxDuration=120s par fonction |
+| **Resend** | Free tier | 0 | 100 emails/jour, 3000/mois |
+| **Stripe** | Mode TEST | 0 | Pas de frais en test |
+
+### Cout par operation Gemini
+
+| Operation | Appels Gemini | Cout estime |
+|-----------|---------------|-------------|
+| 1 diagnostic V2 (micro-agents) | ~13 appels | ~$0.005 |
+| 1 enrichissement Gemini (descriptions+keywords) | 1 appel | ~$0.001 |
+| Bot AYA scraping (1000 entites) | 1000 appels | ~$0.50 |
+
+### Historique des incidents couts
+
+| Date | Incident | Cause | Impact |
+|------|----------|-------|--------|
+| 6-7 avril 2026 | Budget Google 100% atteint (CHF 20) | Rescoring batch V2 : ~500 entites × 13 appels = ~6500 appels Gemini inutiles | 100% du budget mensuel consomme en 7 jours |
+| 7 avril 2026 | Quota Supabase depasse | Rescoring batch V2 : milliers de lectures/ecritures + 4 sessions paralleles | Supabase accorde une exception one-time |
+
+### Regles anti-depassement
+
+1. **JAMAIS de batch > 100 entites** sans estimation de cout prealable ET accord de Cyril
+2. **JAMAIS de sessions paralleles** sur Supabase sans verifier le quota
+3. **Budget Google = CHF 20/mois** — chaque appel Gemini compte
+4. **Le bot AYA (scraping)** utilise aussi Gemini → compter dans le budget mensuel
+5. **Rescoring batch V2 = INTERDIT** — les scores bot 20-50 sont corrects
+
+---
+
+## 9. COMMANDES UTILES
 
 ```bash
 # Developpement
@@ -459,14 +502,9 @@ python push_to_aya.py --min-score 20     # Push reel
 python export_github_dataset.py          # Export GitHub dataset
 
 # Admin — re-enrichir entites certifiees
-curl -X POST "https://ai-visionary.com/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"entity_id": "<UUID>"}'      # une entite
-curl -X POST "https://ai-visionary.com/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"all": true}'                  # batch
-curl -X POST "https://ai-visionary.com/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"all": true, "force": true}'   # force re-enrichir tout
-
-# Re-scoring batch V2
-ADMIN_SECRET=$ADMIN_SECRET ./scripts/rescore-batch.sh --dry-run          # Test sans ecriture
-ADMIN_SECRET=$ADMIN_SECRET ./scripts/rescore-batch.sh                    # Lancement reel (~31h)
-ADMIN_SECRET=$ADMIN_SECRET ./scripts/rescore-batch.sh --start-offset 500 # Reprendre a l'offset 500
+curl -X POST "https://ai-visionary.xyz/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"entity_id": "<UUID>"}'      # une entite
+curl -X POST "https://ai-visionary.xyz/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"all": true}'                  # batch
+curl -X POST "https://ai-visionary.xyz/api/admin/enrich?secret=$ADMIN_SECRET" -H "Content-Type: application/json" -d '{"all": true, "force": true}'   # force re-enrichir tout
 
 # API AYA locale (dev/test)
 cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
@@ -474,7 +512,7 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 
 ### API AYA Publique
 
-**Base URL** : `https://ai-visionary.com/api/aya`
+**Base URL** : `https://ai-visionary.xyz/api/aya`
 
 | Route | Description |
 |-------|-------------|
@@ -485,6 +523,7 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 | `/api/aya/stats` | Statistiques globales |
 | `/api/aya/live` | Toutes les entites |
 | `/api/aya/docs` | Documentation HTML |
+| `/api/aya/analytics?days=7` | **Admin** — analytics appels API (necessite ADMIN_SECRET) |
 
 ### Fichiers critiques a lire en priorite
 
@@ -500,10 +539,12 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 10. `app/api/diagnostic/scan/route.ts` — SSE endpoint micro-agents (V2)
 11. `lib/ayo-semantics.ts` — Enrichissement Gemini bilingue (descriptions + keywords) — modele `gemini-3-flash-preview`
 12. `app/api/admin/enrich/route.ts` — Admin API re-enrichissement entites (single + batch)
+13. `lib/aya/api-tracker.ts` — Monitoring API : buffer memoire, classification User-Agent, flush Supabase
+14. `app/api/aya/analytics/route.ts` — Admin endpoint analytics (aggregation par jour/endpoint/caller)
 
 ---
 
-## 9. REFERENCE
+## 10. REFERENCE
 
 - **Historique complet** des sessions, changelogs, bugs corriges : voir `MEMORY.md`
 - **Plan de remediation original** (10 sprints) : voir `PLAN-ACTION-AYO-COMPLET.md`

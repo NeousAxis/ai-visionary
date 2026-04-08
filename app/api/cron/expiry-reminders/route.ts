@@ -11,7 +11,7 @@ const resend = process.env.RESEND_API_KEY
     ? new Resend(process.env.RESEND_API_KEY)
     : null;
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://ai-visionary.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://ai-visionary.xyz';
 
 // Reminder thresholds in days before expiration
 const REMINDER_THRESHOLDS = [90, 30, 7] as const;

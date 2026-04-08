@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { trackAyaCall } from '@/lib/aya/api-tracker';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    trackAyaCall(req, 'index');
     return NextResponse.json({
         name: "AYA Index API",
         version: "1.0",
         description: "Public API for the AYA Registry — an index of 889+ organizations rated for AI readability (AIO score 0-100). No authentication required.",
-        base_url: "https://ai-visionary.com/api/aya",
-        documentation: "https://ai-visionary.com/api/aya/docs",
-        plugin_manifest: "https://ai-visionary.com/.well-known/ai-plugin.json",
+        base_url: "https://ai-visionary.xyz/api/aya",
+        documentation: "https://ai-visionary.xyz/api/aya/docs",
+        plugin_manifest: "https://ai-visionary.xyz/.well-known/ai-plugin.json",
         endpoints: {
             llm: {
                 url: "/api/aya/llm/{domain}",
@@ -16,7 +18,7 @@ export async function GET() {
                 params: {
                     domain: "Canonical domain without www (e.g. stripe.com)",
                 },
-                example: "https://ai-visionary.com/api/aya/llm/stripe.com",
+                example: "https://ai-visionary.xyz/api/aya/llm/stripe.com",
             },
             search: {
                 url: "/api/aya/search?q={query}&limit={limit}",
@@ -26,7 +28,7 @@ export async function GET() {
                     q: "Search term (required, min 1 char)",
                     limit: "Max results 1-200 (default 50)",
                 },
-                example: "https://ai-visionary.com/api/aya/search?q=stripe",
+                example: "https://ai-visionary.xyz/api/aya/search?q=stripe",
             },
             entity: {
                 url: "/api/aya/entity/{domain}",
@@ -35,19 +37,19 @@ export async function GET() {
                 params: {
                     domain: "Canonical domain without www (e.g. stripe.com)",
                 },
-                example: "https://ai-visionary.com/api/aya/entity/stripe.com",
+                example: "https://ai-visionary.xyz/api/aya/entity/stripe.com",
             },
             stats: {
                 url: "/api/aya/stats",
                 method: "GET",
                 description: "Aggregate statistics: total entities, scores, sector/country breakdown.",
-                example: "https://ai-visionary.com/api/aya/stats",
+                example: "https://ai-visionary.xyz/api/aya/stats",
             },
             live: {
                 url: "/api/aya/live",
                 method: "GET",
                 description: "Get all entities (used by the registry page). Large payload.",
-                example: "https://ai-visionary.com/api/aya/live",
+                example: "https://ai-visionary.xyz/api/aya/live",
             },
         },
         aio_score: {

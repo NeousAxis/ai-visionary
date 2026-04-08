@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { buildLlmSummary } from '@/lib/aya/llm-format';
+import { trackAyaCall } from '@/lib/aya/api-tracker';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ doma
     if (rateLimited) return rateLimited;
 
     const { domain } = await params;
+    trackAyaCall(req, 'llm', domain);
     if (!domain || domain.length < 3) {
         return NextResponse.json({ error: 'Missing or invalid domain parameter' }, { status: 400 });
     }

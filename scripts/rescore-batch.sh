@@ -21,7 +21,7 @@
 
 set -euo pipefail
 
-API_BASE="${API_BASE:-http://localhost:3002}"
+API_BASE="${API_BASE:-http://localhost:3000}"
 BATCH_SIZE=3
 START_OFFSET=0
 MAX_ENTITIES=0  # 0 = unlimited

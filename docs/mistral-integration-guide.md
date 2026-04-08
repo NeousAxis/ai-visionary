@@ -8,7 +8,7 @@ AYA is a public index of 889+ organizations rated for **AI readability** using t
 
 - **No authentication required** -- the API is fully public
 - **Rate limit**: 30 requests/minute per IP
-- **Base URL**: `https://ai-visionary.com/api/aya`
+- **Base URL**: `https://ai-visionary.xyz/api/aya`
 
 ## API Endpoints
 
@@ -92,7 +92,7 @@ import json
 import httpx
 from mistralai import Mistral
 
-AYA_BASE = "https://ai-visionary.com/api/aya"
+AYA_BASE = "https://ai-visionary.xyz/api/aya"
 
 # --- AYA API helpers ---
 
@@ -325,13 +325,13 @@ Errors return `{"error": "..."}`. In the tool handler, catch HTTP errors and ret
 The full OpenAPI 3.0 specification is available at:
 
 ```
-https://ai-visionary.com/.well-known/openapi.json
+https://ai-visionary.xyz/.well-known/openapi.json
 ```
 
 ## Links
 
-- **AYA Index**: https://ai-visionary.com/aya
-- **API Documentation**: https://ai-visionary.com/developers
-- **AI Plugin Manifest**: https://ai-visionary.com/.well-known/ai-plugin.json
+- **AYA Index**: https://ai-visionary.xyz/aya
+- **API Documentation**: https://ai-visionary.xyz/developers
+- **AI Plugin Manifest**: https://ai-visionary.xyz/.well-known/ai-plugin.json
 - **GitHub**: https://github.com/NeousAxis/ai-visionary
-- **Contact**: hello@ai-visionary.com
+- **Contact**: hello@ai-visionary.xyz

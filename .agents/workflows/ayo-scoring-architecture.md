@@ -139,7 +139,7 @@ Le déterminisme repose sur : `nextBlockName = combinedQueue[queueIndex] || "FIN
 ### BUG 8 : Lien certificat FAUX dans l'email (CORRIGÉ)
 **Symptôme** : Le bouton "Voir mon Certificat" dans l'email pointe vers `/certificate/{id}` (qui n'existe pas correctement).
 **Cause** : URL hardcodée incorrecte dans le template HTML de l'email.
-**Fix** : Changé en `https://www.ai-visionary.com/aya/e/{id}`.
+**Fix** : Changé en `https://www.ai-visionary.xyz/aya/e/{id}`.
 **Fichier** : `app/api/webhooks/checkout-success/route.ts`, ~ligne 571
 
 ### BUG 9 : entity_type non transmis → défaut "company" (CORRIGÉ)

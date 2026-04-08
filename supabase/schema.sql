@@ -241,6 +241,58 @@ ALTER TABLE otp_codes     DISABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions      DISABLE ROW LEVEL SECURITY;
 
 -- =============================================================
+-- 7. TABLE : aya_api_analytics
+-- =============================================================
+-- Aggregated API call tracking for AYA endpoints.
+-- One row per (hour, endpoint, caller_type) — lightweight.
+CREATE TABLE IF NOT EXISTS aya_api_analytics (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    hour_bucket     TIMESTAMPTZ NOT NULL,
+    endpoint        TEXT NOT NULL,
+    caller_type     TEXT NOT NULL DEFAULT 'unknown',
+    call_count      INTEGER NOT NULL DEFAULT 0,
+    sample_uas      TEXT[] DEFAULT '{}',
+    sample_ips      TEXT[] DEFAULT '{}',
+    top_domains     JSONB DEFAULT '{}',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_aya_analytics_bucket
+    ON aya_api_analytics (hour_bucket, endpoint, caller_type);
+CREATE INDEX IF NOT EXISTS idx_aya_analytics_hour
+    ON aya_api_analytics (hour_bucket DESC);
+
+CREATE TRIGGER set_aya_analytics_updated_at
+    BEFORE UPDATE ON aya_api_analytics
+    FOR EACH ROW
+    EXECUTE FUNCTION trigger_set_updated_at();
+
+ALTER TABLE aya_api_analytics DISABLE ROW LEVEL SECURITY;
+
+-- Upsert function: atomically increment counts per bucket
+CREATE OR REPLACE FUNCTION upsert_aya_analytics(
+    p_hour TIMESTAMPTZ,
+    p_endpoint TEXT,
+    p_caller_type TEXT,
+    p_count INTEGER,
+    p_uas TEXT[],
+    p_ips TEXT[],
+    p_domains JSONB
+) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO aya_api_analytics (hour_bucket, endpoint, caller_type, call_count, sample_uas, sample_ips, top_domains)
+    VALUES (p_hour, p_endpoint, p_caller_type, p_count, p_uas, p_ips, p_domains)
+    ON CONFLICT (hour_bucket, endpoint, caller_type) DO UPDATE SET
+        call_count = aya_api_analytics.call_count + p_count,
+        sample_uas = (SELECT ARRAY(SELECT DISTINCT u FROM unnest(aya_api_analytics.sample_uas || p_uas) AS u LIMIT 5)),
+        sample_ips = (SELECT ARRAY(SELECT DISTINCT i FROM unnest(aya_api_analytics.sample_ips || p_ips) AS i LIMIT 3)),
+        top_domains = aya_api_analytics.top_domains || p_domains,
+        updated_at = NOW();
+END;
+$$ LANGUAGE plpgsql;
+
+-- =============================================================
 -- COMMENTS (documentation in-schema)
 -- =============================================================
 COMMENT ON TABLE analyses IS 'AIO scan analyses — one per chat session/URL. data JSONB holds fields, blocks, scan, analysis_blocks.';

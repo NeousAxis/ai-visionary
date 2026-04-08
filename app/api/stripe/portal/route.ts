@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
         // This generates a short-lived URL where the customer can manage billing
         const session = await getStripe().billingPortal.sessions.create({
             customer: customerId,
-            return_url: `https://www.ai-visionary.com`, // Where to go after "Done"
+            return_url: `https://www.ai-visionary.xyz`, // Where to go after "Done"
         });
 
         logger.info('PORTAL_CREATED', `Portal session created for ${detectedUrl}`);

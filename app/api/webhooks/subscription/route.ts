@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
             // Bug 11 fix: use entity email only (no Stripe customer cast)
             const customerEmail = entity.contact_email || entity.email || invoice.customer_email;
             if (customerEmail && resend) {
-                const portalUrl = 'https://ai-visionary.com/diagnostic';
+                const portalUrl = 'https://ai-visionary.xyz/diagnostic';
                 // Locale: from entity metadata or default 'en'
                 const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
                 const en = locale === 'en';
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
             // Bug 11 fix: use entity email only (no Stripe customer cast)
             const customerEmail = entity.contact_email || entity.email;
             if (customerEmail && resend) {
-                const diagnosticUrl = 'https://ai-visionary.com/diagnostic';
+                const diagnosticUrl = 'https://ai-visionary.xyz/diagnostic';
                 // Locale: from entity metadata or default 'en'
                 const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
                 const en = locale === 'en';

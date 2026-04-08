@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
  * 🧪 TEST MANUEL DU WEBHOOK STRIPE
  * 
  * Usage: 
- * https://ai-visionary.com/api/webhooks/test-webhook?email=test@example.com
+ * https://ai-visionary.xyz/api/webhooks/test-webhook?email=test@example.com
  * 
  * Simule le comportement du webhook pour diagnostiquer où ça bloque.
  */

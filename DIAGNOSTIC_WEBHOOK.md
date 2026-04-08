@@ -9,7 +9,7 @@
 1. Aller sur [Stripe Dashboard > Webhooks](https://dashboard.stripe.com/test/webhooks)
 2. Vérifier qu'il existe un endpoint pointant vers :
    ```
-   https://ai-visionary.com/api/webhooks/checkout-success
+   https://ai-visionary.xyz/api/webhooks/checkout-success
    ```
 3. Événement écouté : `checkout.session.completed`
 
@@ -32,7 +32,7 @@ brew install stripe/stripe-cli/stripe
 stripe login
 
 # Écouter les événements et les rediriger vers localhost
-stripe listen --forward-to https://ai-visionary.com/api/webhooks/checkout-success
+stripe listen --forward-to https://ai-visionary.xyz/api/webhooks/checkout-success
 
 # Dans un autre terminal, déclencher un événement test
 stripe trigger checkout.session.completed
@@ -98,8 +98,8 @@ if (!dbAnalysis) {
 **Solution** : L'URL reconstruite depuis l'email doit EXACTEMENT matcher celle stockée.
 
 Exemple de problème :
-- Stocké : `ai-visionary.com`
-- Recherché : `https://ai-visionary.com`
+- Stocké : `ai-visionary.xyz`
+- Recherché : `https://ai-visionary.xyz`
 → PAS DE MATCH !
 
 #### C. Resend Quotas / Blacklist

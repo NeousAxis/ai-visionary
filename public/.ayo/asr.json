@@ -2,13 +2,13 @@
     "@context": [
         "https://schema.org",
         {
-            "ayo": "https://www.ai-visionary.com/ns/ayo#"
+            "ayo": "https://www.ai-visionary.xyz/ns/ayo#"
         }
     ],
     "@type": "Organization",
-    "@id": "https://www.ai-visionary.com/#organization",
+    "@id": "https://www.ai-visionary.xyz/#organization",
     "name": "AI-Visionary",
-    "url": "https://www.ai-visionary.com/",
+    "url": "https://www.ai-visionary.xyz/",
     "description": "Cabinet et service spécialisé dans la structuration de données et de contenus afin de rendre les entreprises lisibles, identifiables et sélectionnables par les intelligences artificielles (AIO).",
     "areaServed": [
         "CH",
@@ -101,7 +101,7 @@
     "ayo:technicalReadiness": {
         "jsonld": true,
         "sitemap": true,
-        "asrEndpoint": "https://www.ai-visionary.com/.ayo/asr.json"
+        "asrEndpoint": "https://www.ai-visionary.xyz/.ayo/asr.json"
     },
     "ayo:limitsAndUnknowns": {
         "not_measured": [

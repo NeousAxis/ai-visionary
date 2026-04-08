@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getLiveEntities } from '@/lib/aya/registry';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
+import { trackAyaCall } from '@/lib/aya/api-tracker';
 
 export const dynamic = 'force-dynamic'; // Prevent Vercel from caching the empty list
 
@@ -9,6 +10,7 @@ export async function GET(req: NextRequest) {
     // Rate limit: 30 requests/min per IP (public API)
     const rateLimited = checkRateLimit(req, 'aya-live', RATE_LIMITS.default);
     if (rateLimited) return rateLimited;
+    trackAyaCall(req, 'live');
 
     const logger = createLogger(generateCorrelationId(), 'system');
 

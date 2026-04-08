@@ -14,7 +14,7 @@ const FOOTER_FR = `
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e5e7eb;">
         <p style="font-size: 12px; color: #999; margin: 0;">
             AI Visionary &mdash; Gen&egrave;ve, Suisse<br>
-            <a href="https://ai-visionary.com" style="color: #4A919E;">ai-visionary.com</a> &bull;
+            <a href="https://ai-visionary.xyz" style="color: #4A919E;">ai-visionary.xyz</a> &bull;
             <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>
         </p>
     </div>
@@ -24,7 +24,7 @@ const FOOTER_EN = `
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border-top: 1px solid #e5e7eb;">
         <p style="font-size: 12px; color: #999; margin: 0;">
             AI Visionary &mdash; Geneva, Switzerland<br>
-            <a href="https://ai-visionary.com" style="color: #4A919E;">ai-visionary.com</a> &bull;
+            <a href="https://ai-visionary.xyz" style="color: #4A919E;">ai-visionary.xyz</a> &bull;
             <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>
         </p>
     </div>

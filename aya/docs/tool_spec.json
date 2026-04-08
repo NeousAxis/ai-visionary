@@ -6,7 +6,7 @@
   "description_for_human": "Search the AYA index of companies rated for AI readability (AIO score 0-100).",
   "api": {
     "type": "openapi",
-    "url": "https://ai-visionary.com/api/aya"
+    "url": "https://ai-visionary.xyz/api/aya"
   },
   "auth": {
     "type": "none"

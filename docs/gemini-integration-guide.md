@@ -6,7 +6,7 @@
 
 **AYA** is a public index of organizations rated for AI readability. Each entity has an **AIO score** (0-100) measuring how well its website's structured data can be understood by AI systems. Higher scores mean AI agents can more reliably recommend and describe the entity.
 
-- **Base URL**: `https://ai-visionary.com/api/aya`
+- **Base URL**: `https://ai-visionary.xyz/api/aya`
 - **Authentication**: None required (public API)
 - **Rate limit**: 30 requests/minute per IP
 
@@ -86,7 +86,7 @@ import json
 genai.configure(api_key="YOUR_GEMINI_API_KEY")
 
 # ── AYA API helper ──────────────────────────────────────────────
-AYA_BASE = "https://ai-visionary.com/api/aya"
+AYA_BASE = "https://ai-visionary.xyz/api/aya"
 
 def call_aya_api(function_name: str, args: dict) -> dict:
     """Route a Gemini function call to the correct AYA endpoint."""
@@ -311,7 +311,7 @@ chat = model.start_chat()
       "asr_status": "ASR_DERIVED",
       "entity_type": "company",
       "entity_id": "aya-nestle-com",
-      "certificate_url": "https://ai-visionary.com/aya/e/aya-nestle-com"
+      "certificate_url": "https://ai-visionary.xyz/aya/e/aya-nestle-com"
     }
   ]
 }
@@ -330,7 +330,7 @@ chat = model.start_chat()
     "entity_type": "company",
     "contact_email": "info@nestle.com",
     "entity_id": "aya-nestle-com",
-    "certificate_url": "https://ai-visionary.com/aya/e/aya-nestle-com"
+    "certificate_url": "https://ai-visionary.xyz/aya/e/aya-nestle-com"
   },
   "scoring": {
     "aio_score": 48,
@@ -384,9 +384,9 @@ chat = model.start_chat()
 
 ## Links
 
-- **API Index**: https://ai-visionary.com/api/aya
-- **OpenAPI Spec**: https://ai-visionary.com/.well-known/openapi.json
-- **AI Plugin Manifest**: https://ai-visionary.com/.well-known/ai-plugin.json
-- **AYA Registry (web)**: https://ai-visionary.com/aya
-- **Developer Docs**: https://ai-visionary.com/developers
+- **API Index**: https://ai-visionary.xyz/api/aya
+- **OpenAPI Spec**: https://ai-visionary.xyz/.well-known/openapi.json
+- **AI Plugin Manifest**: https://ai-visionary.xyz/.well-known/ai-plugin.json
+- **AYA Registry (web)**: https://ai-visionary.xyz/aya
+- **Developer Docs**: https://ai-visionary.xyz/developers
 - **GitHub**: https://github.com/NeousAxis/ai-visionary

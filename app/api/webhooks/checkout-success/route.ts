@@ -58,7 +58,7 @@ function buildAyaSubEmailHtml(params: {
     locale?: 'fr' | 'en';
 }): string {
     const { name, url, score, ayaId, blocks, locale = 'en' } = params;
-    const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
+    const ayaLink = `https://www.ai-visionary.xyz/aya/e/${ayaId}`;
     const en = locale === 'en';
 
     const blockLabelsI18n: Record<string, { fr: string; en: string; max: number }> = {
@@ -107,12 +107,12 @@ function buildAyaSubEmailHtml(params: {
         includesTitle: en ? '&#10003; Your subscription includes' : '&#10003; Ce que comprend votre abonnement',
         includes: en ? [
             '&#9989; Registration in the AYA Registry (visible to ChatGPT, Claude, Gemini...)',
-            '&#9989; ASR hosted on ai-visionary.com',
+            '&#9989; ASR hosted on ai-visionary.xyz',
             '&#9989; Updates included',
             '&#9989; Priority in AI recommendations',
         ] : [
             '&#9989; Inscription dans le Registre AYA (visible par ChatGPT, Claude, Gemini...)',
-            '&#9989; ASR h&eacute;berg&eacute; sur ai-visionary.com',
+            '&#9989; ASR h&eacute;berg&eacute; sur ai-visionary.xyz',
             '&#9989; Mises &agrave; jour incluses',
             '&#9989; Priorit&eacute; dans les recommandations IA',
         ],
@@ -171,7 +171,7 @@ function buildAyaSubEmailHtml(params: {
 
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">${t.footer}</a>
+            <a href="https://ai-visionary.xyz" style="color: #4A919E; text-decoration: none;">${t.footer}</a>
         </p>
     </div>
 </div>`;
@@ -190,7 +190,7 @@ function buildProEmailHtml(params: {
     locale?: 'fr' | 'en';
 }): string {
     const { name, url, score, ayaId, blocks, locale = 'en' } = params;
-    const ayaLink = `https://www.ai-visionary.com/aya/e/${ayaId}`;
+    const ayaLink = `https://www.ai-visionary.xyz/aya/e/${ayaId}`;
     const en = locale === 'en';
 
     const blockLabelsI18n: Record<string, { fr: string; en: string; max: number }> = {
@@ -342,7 +342,7 @@ function buildProEmailHtml(params: {
 
     <div style="background: #f9fafb; padding: 20px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">${t.footer}</a>
+            <a href="https://ai-visionary.xyz" style="color: #4A919E; text-decoration: none;">${t.footer}</a>
         </p>
     </div>
 </div>`;

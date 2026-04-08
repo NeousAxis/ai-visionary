@@ -1089,6 +1089,39 @@ export const database = {
             return [];
         }
     },
+
+    // ── API Analytics ───────────────────────────────────────
+
+    insertAyaAnalytics: async (rows: { recorded_at: string; endpoint: string; caller_type: string; call_count: number; sample_ua: string | null; domain: string | null }[]): Promise<void> => {
+        if (!isSupabaseConfigured() || rows.length === 0) return;
+        const client = getSupabase();
+        if (!client) return;
+        try {
+            const { error } = await client.from('aya_api_analytics').insert(rows);
+            if (error) console.error('❌ [Supabase] insertAyaAnalytics Error:', error.message);
+        } catch (error) {
+            console.error('❌ [Supabase] insertAyaAnalytics Error:', error);
+        }
+    },
+
+    getAyaAnalytics: async (days: number = 7): Promise<any[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+        try {
+            const since = new Date(Date.now() - days * 86400000).toISOString();
+            const { data, error } = await client
+                .from('aya_api_analytics')
+                .select('*')
+                .gte('recorded_at', since)
+                .order('recorded_at', { ascending: false });
+            if (error) { console.error('❌ [Supabase] getAyaAnalytics Error:', error); return []; }
+            return data || [];
+        } catch (error) {
+            console.error('❌ [Supabase] getAyaAnalytics Error:', error);
+            return [];
+        }
+    },
 };
 
 // Export as 'db' for backward compatibility

@@ -411,7 +411,7 @@ export async function POST(req: Request) {
                         : `🎉 **BRAVO ! VOUS ÊTES DÉJÀ CLIENT AYA.**\n\nL'entité **${client.display_name || client.legal_name}** est bien enregistrée et certifiée dans le Registre AYA.\n\nSouhaitez-vous :`,
                     buttons: [
                         { label: locale === 'en' ? "Update my profile 🔄" : "Mettre à jour ma fiche 🔄", action: `update_profile|${ec_url}` },
-                        { label: locale === 'en' ? "View my certificate 📜" : "Voir mon certificat 📜", action: "view_certificate", url: client.aya_entity_id ? `https://www.ai-visionary.com/aya/e/${client.aya_entity_id}` : undefined },
+                        { label: locale === 'en' ? "View my certificate 📜" : "Voir mon certificat 📜", action: "view_certificate", url: client.aya_entity_id ? `https://www.ai-visionary.xyz/aya/e/${client.aya_entity_id}` : undefined },
                         { label: locale === 'en' ? "Manage my subscription ⚙️" : "Gérer mon abonnement ⚙️", action: "manage_subscription" }
                     ]
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -595,7 +595,7 @@ export async function POST(req: Request) {
                     if (process.env.STRIPE_SECRET_KEY && stripeId) {
                         const session = await getStripe().billingPortal.sessions.create({
                             customer: stripeId,
-                            return_url: `https://www.ai-visionary.com`,
+                            return_url: `https://www.ai-visionary.xyz`,
                         });
                         successUrl = session.url;
                     }
@@ -641,8 +641,8 @@ export async function POST(req: Request) {
         if (lowText.includes("view_certificate") || lowText.includes("voir mon certificat") || lowText.includes("mon certificat") || lowText.includes("my certificate") || lowText.includes("view certificate")) {
             return new Response(JSON.stringify({
                 text: locale === 'en'
-                    ? `📜 **Your AIO Compliance Certificate**\n\nYour certificate is publicly accessible at the following address:\n👉 **[View my Official Certificate](https://ai-visionary.com/aya)**\n\nIt certifies your AI-compatible data structure.`
-                    : `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.com/aya)**\n\nIl atteste de votre structure de donnée compatible IA.`,
+                    ? `📜 **Your AIO Compliance Certificate**\n\nYour certificate is publicly accessible at the following address:\n👉 **[View my Official Certificate](https://ai-visionary.xyz/aya)**\n\nIt certifies your AI-compatible data structure.`
+                    : `📜 **Votre Certificat AIO Compliance**\n\nVotre certificat est accessible publiquement à l'adresse suivante :\n👉 **[Voir mon Certificat Officiel](https://ai-visionary.xyz/aya)**\n\nIl atteste de votre structure de donnée compatible IA.`,
                 buttons: [{ label: locale === 'en' ? "Back" : "Retour", action: "back" }]
             }), { status: 200 });
         }

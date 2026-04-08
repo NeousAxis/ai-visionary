@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 import { db } from '@/lib/db';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://ai-visionary.com';
+    const baseUrl = 'https://ai-visionary.xyz';
 
     const now = new Date();
 

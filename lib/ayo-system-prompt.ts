@@ -6,7 +6,7 @@
  * - 7 blocs (Bible) instead of 4
  * - LLM NEVER calculates scores (moteur déterministe only)
  * - 3 phases instead of 8 ÉTATS
- * - ai-visionary.com exception handled in code, not prompt
+ * - ai-visionary.xyz exception handled in code, not prompt
  */
 
 export type Locale = 'fr' | 'en';

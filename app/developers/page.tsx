@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: t('metaOgTitle'),
             description: t('metaOgDesc'),
-            url: 'https://ai-visionary.com/developers',
+            url: 'https://ai-visionary.xyz/developers',
             siteName: 'AI Visionary',
             type: 'website',
         },
@@ -52,7 +52,7 @@ export default async function DevelopersPage() {
     "sector": "Restauration & Alimentation",
     "aio_score": 72,
     "asr_status": "ASR_DERIVED",
-    "certificate_url": "https://ai-visionary.com/aya/e/..."
+    "certificate_url": "https://ai-visionary.xyz/aya/e/..."
   }]
 }`,
         },
@@ -70,7 +70,7 @@ export default async function DevelopersPage() {
     "website": "https://www.nestle.com",
     "country": "CH",
     "sector": "Restauration & Alimentation",
-    "certificate_url": "https://ai-visionary.com/aya/e/..."
+    "certificate_url": "https://ai-visionary.xyz/aya/e/..."
   },
   "scoring": {
     "aio_score": 72,
@@ -112,7 +112,7 @@ export default async function DevelopersPage() {
             title: t('dataSource1Title'),
             desc: t('dataSource1Desc'),
             color: '#4A919E',
-            url: 'https://ai-visionary.com/api/aya/llm/{domain}',
+            url: 'https://ai-visionary.xyz/api/aya/llm/{domain}',
             linkHref: '/api/aya/llm/stripe.com',
             external: false,
         },
@@ -120,7 +120,7 @@ export default async function DevelopersPage() {
             title: t('dataSource2Title'),
             desc: t('dataSource2Desc'),
             color: '#22c55e',
-            url: 'ai-visionary.com/aya',
+            url: 'ai-visionary.xyz/aya',
             linkHref: '/aya',
             external: false,
         },
@@ -290,7 +290,7 @@ export default async function DevelopersPage() {
                 {/* BASE URL */}
                 <section style={{ padding: '30px 0' }}>
                     <h2 style={{ fontSize: '1.4rem', color: '#212E53', borderBottom: '2px solid #4A919E', paddingBottom: '8px', marginBottom: '15px' }}>{t('baseUrlTitle')}</h2>
-                    <pre style={{ background: '#1e293b', color: '#e2e8f0', padding: '16px', borderRadius: '8px', fontSize: '0.95rem' }}>https://ai-visionary.com/api/aya</pre>
+                    <pre style={{ background: '#1e293b', color: '#e2e8f0', padding: '16px', borderRadius: '8px', fontSize: '0.95rem' }}>https://ai-visionary.xyz/api/aya</pre>
                     <div style={{ marginTop: '15px', display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                         <a href="/api/aya" style={{ color: '#4A919E', fontSize: '0.9rem' }}>{t('indexJson')}</a>
                         <a href="/.well-known/ai-plugin.json" style={{ color: '#4A919E', fontSize: '0.9rem' }}>{t('aiPluginManifest')}</a>

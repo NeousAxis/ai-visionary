@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { trackAyaCall } from '@/lib/aya/api-tracker';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
     const rateLimited = checkRateLimit(req, 'aya-search', RATE_LIMITS.default);
     if (rateLimited) return rateLimited;
+    trackAyaCall(req, 'search');
 
     const q = req.nextUrl.searchParams.get('q')?.trim();
     const limitParam = parseInt(req.nextUrl.searchParams.get('limit') || '50');
@@ -58,7 +60,7 @@ export async function GET(req: NextRequest) {
             sector: e.sector_macro || '',
             score: e.asr_score ?? 0,
             certified: e.payment_completed === true,
-            url: `https://ai-visionary.com/aya/e/${e.entity_id || ''}`,
+            url: `https://ai-visionary.xyz/aya/e/${e.entity_id || ''}`,
         }));
 
         return NextResponse.json({

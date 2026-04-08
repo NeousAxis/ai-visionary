@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: t('metaOgTitle'),
             description: t('metaOgDescription'),
-            url: 'https://ai-visionary.com/diagnostic',
+            url: 'https://ai-visionary.xyz/diagnostic',
             siteName: 'AI Visionary',
             type: 'website',
         },

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/admin/', '/api/', '/debug/', '/certificate/'],
         },
-        sitemap: 'https://ai-visionary.com/sitemap.xml',
+        sitemap: 'https://ai-visionary.xyz/sitemap.xml',
     };
 }

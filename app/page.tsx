@@ -20,8 +20,8 @@ export default function Home() {
             "@type": "Organization",
             "name": "AI Visionary",
             "alternateName": "AYA Registry",
-            "url": "https://ai-visionary.com",
-            "logo": "https://ai-visionary.com/logo-v2.png",
+            "url": "https://ai-visionary.xyz",
+            "logo": "https://ai-visionary.xyz/logo-v2.png",
             "description": "AYA is a public registry of 3000+ organizations rated for AI readability. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
             "address": {
               "@type": "PostalAddress",
@@ -33,7 +33,7 @@ export default function Home() {
             ],
             "potentialAction": {
               "@type": "SearchAction",
-              "target": "https://ai-visionary.com/api/aya/search?q={query}",
+              "target": "https://ai-visionary.xyz/api/aya/search?q={query}",
               "query-input": "required name=query"
             }
           })
@@ -323,13 +323,13 @@ export default function Home() {
               <h3>{t('pricing.plan2Title')} <br /><span className="card-subtitle">{t('pricing.plan2Sub')}</span></h3>
 
               <div className="price">{t('pricing.plan2Price')} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>{t('pricing.plan2Period')}</span></div>
+              <p style={{ fontSize: '0.85rem', color: '#4A919E', fontWeight: 600, marginTop: '4px' }}>{t('pricing.plan2f5')}</p>
               <p className="price-details">{t('pricing.plan2Desc')}</p>
               <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
                 <li>&#x2705; <strong>{t('pricing.plan2f1')}</strong></li>
                 <li>&#x2705; {t('pricing.plan2f2')}</li>
                 <li>&#x2705; {t('pricing.plan2f3')}</li>
                 <li>&#x2705; {t('pricing.plan2f4')}</li>
-                <li>&#x2705; {t('pricing.plan2f5')}</li>
               </ul>
               <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
                 <Link href="/diagnostic?pack=pro" className="btn btn-secondary w-full" style={{ width: '100%' }}>

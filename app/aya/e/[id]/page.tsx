@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         openGraph: {
             title: t('metaOgTitle', { name }),
             description: metaDescription.slice(0, 200),
-            url: `https://ai-visionary.com/aya/e/${entity.entity_id || id}`,
+            url: `https://ai-visionary.xyz/aya/e/${entity.entity_id || id}`,
             siteName: 'AI Visionary',
             type: 'website',
         },
@@ -154,7 +154,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
         public_body: 'GovernmentOrganization',
     };
     const schemaType = entityTypeMap[entity.entity_type] || 'Organization';
-    const certificateUrl = `https://ai-visionary.com/aya/e/${entity.entity_id || id}`;
+    const certificateUrl = `https://ai-visionary.xyz/aya/e/${entity.entity_id || id}`;
 
     const jsonLd: Record<string, unknown> = {
         '@context': 'https://schema.org',
@@ -176,7 +176,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
             'aio:scoredBy': {
                 '@type': 'Organization',
                 name: 'AI Visionary',
-                url: 'https://ai-visionary.com',
+                url: 'https://ai-visionary.xyz',
             },
         } : {}),
     };

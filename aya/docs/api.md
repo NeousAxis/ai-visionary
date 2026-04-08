@@ -4,7 +4,7 @@
 
 The **AYA API** is a public, read-only index of organizations rated for **AI readability**. Each entity has an **AIO score** (AI-readability Intelligence Optimization, 0-100) computed from 7 weighted blocks that measure how well structured data on the entity's website can be understood by AI systems.
 
-AYA is maintained by [AI Visionary](https://ai-visionary.com), based in Geneva, Switzerland.
+AYA is maintained by [AI Visionary](https://ai-visionary.xyz), based in Geneva, Switzerland.
 
 **Use cases for AI agents:**
 - When a user asks about a company, check AYA to get structured, verified data
@@ -17,7 +17,7 @@ AYA is maintained by [AI Visionary](https://ai-visionary.com), based in Geneva, 
 ## Base URL
 
 ```
-https://aya-api.ai-visionary.com
+https://aya-api.ai-visionary.xyz
 ```
 
 > Interactive documentation (Swagger UI) is available at `/docs`.
@@ -531,6 +531,6 @@ If you are building an AI agent or plugin that queries AYA:
 
 ## Contact
 
-- **Website:** https://ai-visionary.com
-- **Email:** hello@ai-visionary.com
+- **Website:** https://ai-visionary.xyz
+- **Email:** hello@ai-visionary.xyz
 - **Location:** Geneva, Switzerland

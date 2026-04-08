@@ -2,7 +2,7 @@
  * E2E Test — Questionnaire AYO complet pour AI Visionary
  *
  * Ce script:
- * 1. Envoie l'URL https://www.ai-visionary.com/ au chat AYO
+ * 1. Envoie l'URL https://www.ai-visionary.xyz/ au chat AYO
  * 2. Repond a toutes les questions du questionnaire
  * 3. Appelle /api/debug/test-ayo pour generer les 5 fichiers Pack PRO
  * 4. Sauvegarde les fichiers sur le bureau
@@ -20,7 +20,7 @@ const OUTPUT_DIR = '/Users/cyrilleger/Desktop/AYO_Pack_PRO_Test';
 // Reponses pour AI Visionary
 const ANSWERS = [
     // 1. URL
-    "https://www.ai-visionary.com/",
+    "https://www.ai-visionary.xyz/",
     // 2. Confirmation proprietaire
     "✅ Oui, c'est mon site",
     // 3. Confirmation donnees exactes (truth warning)
@@ -28,7 +28,7 @@ const ANSWERS = [
     // 4. Calibration activite
     "Rendre les entreprises visibles par les IA grâce à la création de fichiers structurés ASR (AI Singular Record). Nous analysons la présence digitale des entreprises et générons des fichiers de données structurées pour que les IA comme ChatGPT, Gemini et Claude puissent les identifier, les comprendre et les recommander.",
     // 5+ Reponses generiques adaptees selon la question
-    "hello@ai-visionary.com",
+    "hello@ai-visionary.xyz",
     "Genève, Suisse",
     "Audit de visibilité IA (score AIO), Génération de fichiers ASR, Certification AYA, Accompagnement à l'optimisation AIO",
     "Pack PRO ASR (fichiers structurés), Pack Plateforme (abonnement mensuel), Certificat AYA de conformité IA",
@@ -36,7 +36,7 @@ const ANSWERS = [
     "B2B principalement : PME, startups, consultants, agences digitales, grandes entreprises en transformation digitale",
     "Pack PRO : 499 CHF achat unique, Abonnement AYA : 19 CHF/mois, Audit gratuit via le chatbot AYO",
     "1. Scan automatique du site web. 2. Questionnaire intelligent avec AYO. 3. Génération des fichiers ASR structurés. 4. Déploiement et certification AYA.",
-    "100% en ligne via la plateforme ai-visionary.com et le chatbot AYO",
+    "100% en ligne via la plateforme ai-visionary.xyz et le chatbot AYO",
     "International - service accessible mondialement. Focus marché francophone (Suisse, France, Belgique, Canada)",
     "Aucune certification formelle pour le moment",
     "Aucun framework ou fédération spécifique",
@@ -178,8 +178,8 @@ async function generatePackFiles() {
     console.log('  GENERATION DES FICHIERS PACK PRO');
     console.log('='.repeat(60));
 
-    const url = `${DEBUG_URL}?url=ai-visionary.com&email=hello@ai-visionary.com&secret=${ADMIN_SECRET}`;
-    console.log(`\nAppel: ${DEBUG_URL}?url=ai-visionary.com&email=...&secret=***`);
+    const url = `${DEBUG_URL}?url=ai-visionary.xyz&email=hello@ai-visionary.xyz&secret=${ADMIN_SECRET}`;
+    console.log(`\nAppel: ${DEBUG_URL}?url=ai-visionary.xyz&email=...&secret=***`);
 
     try {
         const resp = await fetch(url);
@@ -188,16 +188,16 @@ async function generatePackFiles() {
             console.error(`Erreur ${resp.status}: ${txt.substring(0, 500)}`);
 
             // Essayer avec www
-            console.log('\nRetry avec www.ai-visionary.com...');
-            const url2 = `${DEBUG_URL}?url=www.ai-visionary.com&email=hello@ai-visionary.com&secret=${ADMIN_SECRET}`;
+            console.log('\nRetry avec www.ai-visionary.xyz...');
+            const url2 = `${DEBUG_URL}?url=www.ai-visionary.xyz&email=hello@ai-visionary.xyz&secret=${ADMIN_SECRET}`;
             const resp2 = await fetch(url2);
             if (!resp2.ok) {
                 const txt2 = await resp2.text();
                 console.error(`Erreur ${resp2.status}: ${txt2.substring(0, 500)}`);
 
                 // Essayer avec https://
-                console.log('\nRetry avec https://www.ai-visionary.com/...');
-                const url3 = `${DEBUG_URL}?url=https://www.ai-visionary.com/&email=hello@ai-visionary.com&secret=${ADMIN_SECRET}`;
+                console.log('\nRetry avec https://www.ai-visionary.xyz/...');
+                const url3 = `${DEBUG_URL}?url=https://www.ai-visionary.xyz/&email=hello@ai-visionary.xyz&secret=${ADMIN_SECRET}`;
                 const resp3 = await fetch(url3);
                 if (!resp3.ok) {
                     const txt3 = await resp3.text();

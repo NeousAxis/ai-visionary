@@ -2,7 +2,7 @@
     "entity": {
         "name": "AI-VISIONARY",
         "type": "organization",
-        "canonicalUrl": "https://www.ai-visionary.com/"
+        "canonicalUrl": "https://www.ai-visionary.xyz/"
     },
     "authority": {
         "role": "conceptual-authority",
@@ -14,16 +14,16 @@
     },
     "sources": {
         "asr": {
-            "url": "https://www.ai-visionary.com/.ayo/asr.json",
+            "url": "https://www.ai-visionary.xyz/.ayo/asr.json",
             "level": "ESSENTIAL_PRO",
             "priority": 1
         },
         "glossary": {
-            "url": "https://www.ai-visionary.com/.ayo/glossary.json",
+            "url": "https://www.ai-visionary.xyz/.ayo/glossary.json",
             "priority": 2
         },
         "faq": {
-            "url": "https://www.ai-visionary.com/.ayo/faq.json",
+            "url": "https://www.ai-visionary.xyz/.ayo/faq.json",
             "priority": 3
         }
     },
@@ -37,7 +37,7 @@
         "faq": "versioned"
     },
     "discovery": {
-        "sitemap": "https://www.ai-visionary.com/sitemap.xml",
-        "asrEndpoint": "https://www.ai-visionary.com/.ayo/"
+        "sitemap": "https://www.ai-visionary.xyz/sitemap.xml",
+        "asrEndpoint": "https://www.ai-visionary.xyz/.ayo/"
     }
 }

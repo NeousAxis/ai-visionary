@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { trackAyaCall } from '@/lib/aya/api-tracker';
 
 const HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -43,7 +44,7 @@ const HTML = `<!DOCTYPE html>
     <div class="container">
         <section>
             <h2>Base URL</h2>
-            <pre>https://ai-visionary.com/api/aya</pre>
+            <pre>https://ai-visionary.xyz/api/aya</pre>
             <p>All endpoints return JSON. No API key needed. Rate limited to 30 requests/minute per IP.</p>
             <p>AI Plugin manifest: <a href="/.well-known/ai-plugin.json">/.well-known/ai-plugin.json</a></p>
         </section>
@@ -75,7 +76,7 @@ const HTML = `<!DOCTYPE html>
       "sector": "Technologie & SaaS",
       "aio_score": 74,
       "asr_status": "ASR_DERIVED",
-      "certificate_url": "https://ai-visionary.com/aya/e/..."
+      "certificate_url": "https://ai-visionary.xyz/aya/e/..."
     }
   ]
 }</pre>
@@ -99,7 +100,7 @@ const HTML = `<!DOCTYPE html>
     "website": "https://stripe.com",
     "country": "XX",
     "sector": "Technologie & SaaS",
-    "certificate_url": "https://ai-visionary.com/aya/e/..."
+    "certificate_url": "https://ai-visionary.xyz/aya/e/..."
   },
   "scoring": {
     "aio_score": 74,
@@ -181,7 +182,8 @@ const HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+    trackAyaCall(req, 'docs');
     return new NextResponse(HTML, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });

@@ -20,8 +20,7 @@ export async function POST(req: NextRequest) {
     const auth = requireAdmin(req);
     if (!auth.authorized) return auth.response!;
 
-    const rateLimited = checkRateLimit(req, 'admin-rescore', RATE_LIMITS.debug);
-    if (rateLimited) return rateLimited;
+    // No rate limit for rescore — already protected by ADMIN_SECRET + each batch takes 60-90s
 
     const logger = createLogger(generateCorrelationId(), 'admin');
     const body = await req.json();

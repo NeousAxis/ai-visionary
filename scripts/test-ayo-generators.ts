@@ -126,7 +126,7 @@ function generateManifestJson(data: any, url: string): any {
         recommendationPolicy: { scope: "contextual", noSubjectiveClaims: true, signalsOnly: true, comparisonAllowed: true, rankingBasis: "declared_signals_and_score" },
         compliance: complianceSignals.length > 0 ? { frameworks: complianceSignals } : undefined,
         updatePolicy: { asr: "versioned-and-sealed", glossary: "versioned", faq: "versioned", review_cycle: "annual", last_generated: new Date().toISOString().split('T')[0] },
-        discovery: { sitemap: `${url}/sitemap.xml`, asrEndpoint: `${url}/.ayo/`, registryUrl: "https://www.ai-visionary.com/aya" },
+        discovery: { sitemap: `${url}/sitemap.xml`, asrEndpoint: `${url}/.ayo/`, registryUrl: "https://www.ai-visionary.xyz/aya" },
         api_access: { status: "open", endpoint: "/.ayo/asr.json", format: "JSON", cors: "public" }
     };
 }
@@ -609,7 +609,7 @@ function generateTestAsrJson(data: any, score: number, url: string): any {
         }));
 
     return {
-        "@context": "https://ai-visionary.com/contexts/aio-v3.jsonld",
+        "@context": "https://ai-visionary.xyz/contexts/aio-v3.jsonld",
         "type": "AI_Singular_Record",
         "meta": { "aio_score": Math.round(score), "version": "3.0-PRO", "tier": "PRO" },
         "identity": identity,

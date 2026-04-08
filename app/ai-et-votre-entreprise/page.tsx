@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: t('metaOgTitle'),
             description: t('metaOgDesc'),
-            url: 'https://ai-visionary.com/ai-et-votre-entreprise',
+            url: 'https://ai-visionary.xyz/ai-et-votre-entreprise',
             siteName: 'AI Visionary',
             type: 'website',
         },

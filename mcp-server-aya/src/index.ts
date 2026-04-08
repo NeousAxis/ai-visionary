@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-const AYA_API_BASE = "https://ai-visionary.com/api/aya";
+const AYA_API_BASE = "https://ai-visionary.xyz/api/aya";
 
 const server = new Server(
   {

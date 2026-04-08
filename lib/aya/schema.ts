@@ -43,6 +43,6 @@ export interface AyaEntity {
         status: AyaEntityStatus; // Calculé selon (now - last_update)
         freshness_score: number; // 0.0 à 1.0
         priority_level: 'normal' | 'reduced' | 'boosted';
-        source_url: string; // ex: https://aya.ai-visionary.com/e/UUID
+        source_url: string; // ex: https://aya.ai-visionary.xyz/e/UUID
     };
 }

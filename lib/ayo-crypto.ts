@@ -598,7 +598,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         "protocol": "AYO-ASR",
         "tier": mode,
         "validity_period": mode === 'PRO' ? "3 years" : mode === 'PLATEFORME' ? "1 year" : "demo",
-        "spec": "https://ai-visionary.com/specs/asr-v3",
+        "spec": "https://ai-visionary.xyz/specs/asr-v3",
         "trust_level": process.env.AYO_V4_EVIDENCE === 'true' ? "reliability_weighted" : "self_declared_structured",
         "evidence_level": process.env.AYO_V4_EVIDENCE === 'true' ? "verified_and_declared" : "declared_signals_only",
         "evidence_count": (() => {
@@ -726,7 +726,7 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
     } : undefined;
 
     const asrContent: any = {
-        "@context": "https://ai-visionary.com/contexts/aio-v3.jsonld",
+        "@context": "https://ai-visionary.xyz/contexts/aio-v3.jsonld",
         "type": "AI_Singular_Record",
         "meta": meta,
         "identity": identity,
@@ -842,8 +842,8 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
             },
             "trust_chain": {
                 "issuer": "AYO Trusted Authority",
-                "registry": "https://ai-visionary.com/aya/registry",
-                "verification_endpoint": "https://ai-visionary.com/api/verify-asr"
+                "registry": "https://ai-visionary.xyz/aya/registry",
+                "verification_endpoint": "https://ai-visionary.xyz/api/verify-asr"
             },
             "source_priority": ["asr_protocol", "manifest", "external_context", "faq", "glossary"]
         };

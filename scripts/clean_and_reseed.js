@@ -112,7 +112,7 @@ function generate1973FakeEntities() {
                 status: 'fresh',
                 freshness_score: 1.0,
                 priority_level: 'normal',
-                source_url: `https://www.ai-visionary.com/aya/e/${entityId}`
+                source_url: `https://www.ai-visionary.xyz/aya/e/${entityId}`
             }
         });
     }

@@ -151,7 +151,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const ayaLink = `https://www.ai-visionary.com/aya/e/${entityId}`;
+        const ayaLink = `https://www.ai-visionary.xyz/aya/e/${entityId}`;
 
         const emailHtml = `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
 
     <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
         <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-            <a href="https://ai-visionary.com" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — ${en ? 'Make your business visible to AI' : 'Rendez votre entreprise visible par les IA'}
+            <a href="https://ai-visionary.xyz" style="color: #4A919E; text-decoration: none;">AI Visionary</a> — ${en ? 'Make your business visible to AI' : 'Rendez votre entreprise visible par les IA'}
         </p>
     </div>
 </div>`;

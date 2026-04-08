@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: t('metaOgTitle', { count: rounded }),
             description: t('metaOgDescription', { count: rounded }),
-            url: 'https://ai-visionary.com/aya',
+            url: 'https://ai-visionary.xyz/aya',
             siteName: 'AI Visionary',
             type: 'website',
         },
@@ -57,7 +57,7 @@ export default async function AyaPage({
         "@type": "ItemList",
         "name": "AYA Registry \u2014 AI Readability Index",
         "description": `Public registry of ${totalAll}+ organizations rated for AI readability (AIO score 0-100)`,
-        "url": "https://ai-visionary.com/aya",
+        "url": "https://ai-visionary.xyz/aya",
         "numberOfItems": totalAll,
         "itemListElement": entities.slice(0, 10).map((e: any, i: number) => ({
             "@type": "ListItem",
