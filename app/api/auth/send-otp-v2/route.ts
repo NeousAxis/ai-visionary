@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
             : `Votre code de verification : ${code}`;
 
         const { error } = await sendEmail({
-            from: 'AI Visionary Security <hello@ai-visionary.xyz>',
+            from: 'AI Visionary Security <security@ai-visionary.xyz>',
             to: [trimmedEmail],
             subject: otpSubject,
             html: `

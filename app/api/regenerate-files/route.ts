@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
 </div>`;
 
         const emailResult = await sendEmail({
-            from: 'AYO Delivery <hello@ai-visionary.xyz>',
+            from: 'AYO Delivery <delivery@ai-visionary.xyz>',
             to: [customerEmail],
             subject: en ? `Your AYO files have been updated — ${entityName}` : `Vos fichiers AYO mis a jour — ${entityName}`,
             attachments: [{ filename: 'AYO_Pack_PRO_Updated.zip', content: zipBuffer }],
