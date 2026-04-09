@@ -36,9 +36,11 @@ export async function registerOrUpdateEntity(
         try {
             console.log(`🔍 AYA REGISTRY: Checking for existing entity with URL: ${targetUrl}`);
             const existing = await db.getAyaEntityByUrl(targetUrl);
-            if (existing && existing.aya_entity_id) {
-                console.log(`♻️ AYA REGISTRY: DUPLICATE FOUND. Updating existing Entity ID: ${existing.aya_entity_id}`);
-                entityId = existing.aya_entity_id;
+            // Supabase returns column as `entity_id` (not `aya_entity_id`)
+            const existingId = existing?.entity_id || existing?.aya_entity_id;
+            if (existing && existingId) {
+                console.log(`♻️ AYA REGISTRY: DUPLICATE FOUND. Updating existing Entity ID: ${existingId}`);
+                entityId = existingId;
                 existingData = existing; // Keep existing data
             } else {
                 console.log(`✨ AYA REGISTRY: No duplicate found. Creating new Entity.`);
@@ -96,7 +98,7 @@ export async function registerOrUpdateEntity(
             status: 'fresh',
             freshness_score: 1.0,
             priority_level: 'normal',
-            source_url: `https://www.ai-visionary.xyz/aya/e/${entityId}`
+            source_url: `https://ai-visionary.xyz/aya/e/${entityId}`
         }
     };
 

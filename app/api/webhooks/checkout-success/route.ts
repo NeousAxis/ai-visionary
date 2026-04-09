@@ -55,7 +55,7 @@ function buildAyaSubEmailHtml(params: {
     locale?: 'fr' | 'en';
 }): string {
     const { name, url, score, ayaId, blocks, locale = 'en' } = params;
-    const ayaLink = `https://www.ai-visionary.xyz/aya/e/${ayaId}`;
+    const ayaLink = `https://ai-visionary.xyz/aya/e/${ayaId}`;
     const en = locale === 'en';
 
     const blockLabelsI18n: Record<string, { fr: string; en: string; max: number }> = {
@@ -187,7 +187,7 @@ function buildProEmailHtml(params: {
     locale?: 'fr' | 'en';
 }): string {
     const { name, url, score, ayaId, blocks, locale = 'en' } = params;
-    const ayaLink = `https://www.ai-visionary.xyz/aya/e/${ayaId}`;
+    const ayaLink = `https://ai-visionary.xyz/aya/e/${ayaId}`;
     const en = locale === 'en';
 
     const blockLabelsI18n: Record<string, { fr: string; en: string; max: number }> = {

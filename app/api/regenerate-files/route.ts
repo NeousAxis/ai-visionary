@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const ayaLink = `https://www.ai-visionary.xyz/aya/e/${entityId}`;
+        const ayaLink = `https://ai-visionary.xyz/aya/e/${entityId}`;
 
         const emailHtml = `<div style="font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; max-width: 640px; margin: 0 auto;">
     <div style="background: linear-gradient(135deg, #212E53 0%, #4A919E 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">

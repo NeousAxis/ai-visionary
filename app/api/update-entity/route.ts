@@ -272,7 +272,7 @@ export async function POST(req: NextRequest) {
                 zip.file('external_context.json', JSON.stringify(architecteResult.files.externalContext, null, 2));
                 const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
 
-                const ayaLink = `https://www.ai-visionary.xyz/aya/e/${entityId}`;
+                const ayaLink = `https://ai-visionary.xyz/aya/e/${entityId}`;
                 const scoreColor = newScore >= 60 ? '#166534' : newScore >= 40 ? '#854d0e' : '#991b1b';
                 const delta = newScore - oldScore;
                 const deltaStr = delta > 0 ? `+${delta}` : `${delta}`;
@@ -330,7 +330,7 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
             // AYA subscription clients: send simple confirmation email (no files)
             try {
                 const entityNameForEmail = (displayName as string) || 'Entreprise';
-                const ayaLink = `https://www.ai-visionary.xyz/aya/e/${entityId}`;
+                const ayaLink = `https://ai-visionary.xyz/aya/e/${entityId}`;
                 const delta = newScore - oldScore;
                 const deltaStr = delta > 0 ? `+${delta}` : `${delta}`;
                 const scoreColor = newScore >= 60 ? '#166534' : newScore >= 40 ? '#854d0e' : '#991b1b';

@@ -8,11 +8,7 @@ export default function BackButton() {
     return (
         <button
             onClick={() => {
-                if (window.history.length > 1) {
-                    window.history.back();
-                } else {
-                    window.location.href = '/aya';
-                }
+                window.location.href = '/aya';
             }}
             style={{
                 fontSize: '0.9rem',

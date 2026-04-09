@@ -1002,7 +1002,7 @@ export function generateManifestJson(data: any, url: string, locale: 'fr' | 'en'
         discovery: {
             sitemap: joinUrl(url, 'sitemap.xml'),
             asrEndpoint: joinUrl(url, '.ayo/'),
-            registryUrl: "https://www.ai-visionary.xyz/aya"
+            registryUrl: "https://ai-visionary.xyz/aya"
         },
         api_access: {
             status: "open",

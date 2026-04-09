@@ -228,6 +228,8 @@ export default function DiagnosticV2Page() {
   const startScan = useCallback(async (skipEmailCheck = false) => {
     if (!url.trim()) return;
     if (!emailVerified && !skipEmailCheck) return;
+
+    setExistingEntity(null);
     setCurrentStep(2);
     setError(null);
     setScore(null);
@@ -410,7 +412,26 @@ export default function DiagnosticV2Page() {
             {t('heroSub1')}<br />
             {t('heroSub2')}
           </p>
-          <form className="dv2-search-form" onSubmit={e => { e.preventDefault(); startScan(); }}>
+          <form className="dv2-search-form" onSubmit={async e => {
+            e.preventDefault();
+            if (!url.trim()) return;
+            // Check AYA registry first — redirect to dashboard if entity exists
+            try {
+              const domain = url.trim().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+              if (domain.includes('.') && domain.length >= 4) {
+                const res = await fetch(`/api/aya/entity/${encodeURIComponent(domain)}`);
+                if (res.ok) {
+                  const data = await res.json();
+                  const eid = data?.entity?.entity_id;
+                  if (eid && data?.scoring?.asr_status === 'ASR_CERTIFIED') {
+                    window.location.href = `/dashboard/${eid}`;
+                    return;
+                  }
+                }
+              }
+            } catch { /* ignore, proceed normally */ }
+            startScan();
+          }}>
             <div className="dv2-search-box">
               <input
                 type="text"
@@ -421,7 +442,7 @@ export default function DiagnosticV2Page() {
                 className="dv2-search-input"
                 autoFocus
               />
-              <button type="submit" disabled={currentStep > 1 || !url.trim() || !emailVerified} className="dv2-search-btn">
+              <button type="submit" disabled={currentStep > 1 || !url.trim()} className="dv2-search-btn">
                 {currentStep === 2 ? <span className="dv2-spinner" /> : currentStep > 2 ? t('analyzDone') : t('analyzBtn')}
               </button>
             </div>

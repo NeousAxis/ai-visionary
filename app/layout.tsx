@@ -61,13 +61,13 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": ["https://schema.org", { "ayo": "https://www.ai-visionary.xyz/ns/ayo#" }],
+              "@context": ["https://schema.org", { "ayo": "https://ai-visionary.xyz/ns/ayo#" }],
               "@type": "Organization",
-              "@id": "https://www.ai-visionary.xyz/#organization",
+              "@id": "https://ai-visionary.xyz/#organization",
               "name": "AI-Visionary",
-              "url": "https://www.ai-visionary.xyz/",
+              "url": "https://ai-visionary.xyz/",
               "description": "Cabinet et service spécialisé dans la structuration de données et de contenus afin de rendre les entreprises lisibles, identifiables et sélectionnables par les intelligences artificielles (AIO).",
-              "logo": "https://www.ai-visionary.xyz/icon-v2.png",
+              "logo": "https://ai-visionary.xyz/icon-v2.png",
               "areaServed": ["CH", "FR", "BE"],
               "ayo:sector": {
                 "primary": "Artificial Intelligence Services",
