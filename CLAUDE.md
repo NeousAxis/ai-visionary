@@ -98,7 +98,7 @@ URL -> Scanner (aio-scanner.ts) -> Score initial (aio-score-engine.ts)
 
 - **Frontend + API** : Vercel (serverless, maxDuration=120s)
 - **Base de donnees** : Supabase PostgreSQL
-- **Emails** : Resend (hello@ai-visionary.xyz)
+- **Emails** : Infomaniak SMTP (nodemailer). Adresses : hello@ + security@ (alias). TODO: ajouter alias delivery@ et registry@ quand Infomaniak partenariat actif.
 - **Paiements** : Stripe (mode test — ne jamais passer en prod sans accord Cyril)
 - **Domaine** : ai-visionary.xyz (primaire, depuis 8 avril 2026). ai-visionary.com redirige vers .xyz (301).
 
@@ -113,7 +113,9 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 STRIPE_PRICE_AYA=price_1SzazaPkCQYUm8hQJfrKc9EJ
 STRIPE_PRICE_PRO=price_1SlM9iPkCQYUm8hQKqOV8eqU
 GOOGLE_GENERATIVE_AI_API_KEY
-RESEND_API_KEY
+SMTP_HOST=mail.infomaniak.com
+SMTP_USER=hello@ai-visionary.xyz
+SMTP_PASSWORD
 ADMIN_SECRET
 SESSION_SECRET
 AYO_SIGNING_KEY
@@ -414,7 +416,10 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Webhook Stripe : retry x2 pour enrichissement Gemini si premier appel echoue
 - `ayo-semantics.ts` : modele Gemini corrige → `gemini-3-flash-preview` (1.5-flash etait deprecie)
 - API Monitoring : `lib/aya/api-tracker.ts` — buffer memoire + flush Supabase toutes les 5min. Classifie les callers (llm_agent, developer, crawler, browser). 7 routes AYA instrumentees. Endpoint admin `/api/aya/analytics?days=7`.
-- Migration domaine : `ai-visionary.xyz` = domaine primaire (8 avril 2026). `.com` redirige 301 vers `.xyz`. 42+ fichiers source + i18n + docs + public migres. DNS Infomaniak, Vercel, Resend, Stripe a configurer.
+- Migration domaine : `ai-visionary.xyz` = domaine primaire (8 avril 2026). `.com` redirige 301 vers `.xyz`. 42+ fichiers source + i18n + docs + public migres. DNS Infomaniak, Vercel, Stripe configures.
+- Emails : migration Resend → Infomaniak SMTP (nodemailer). `lib/mailer.ts` + 11 routes API migrees. Adresses : `hello@` (boite) + `security@` (alias). TODO partenariat Infomaniak : ajouter alias `delivery@` + `registry@`.
+- Pages FAQ (/faq), Glossaire (/glossaire), CGV (/cgv) — bilingues FR/EN, liens dans le footer.
+- Mentions legales + confidentialite : hebergement = Infomaniak Network SA (Geneve, Suisse).
 
 ---
 
