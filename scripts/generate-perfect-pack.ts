@@ -25,7 +25,7 @@ const data = {
         business_type: { value: "Rendre les entreprises visibles et recommandables par les IA grace a la creation de fichiers ASR certifies", q: 1 },
         city: { value: "Geneve", q: 1 },
         country: { value: "Suisse", q: 1 },
-        contact_email: { value: "hello@ai-visionary.com", q: 1 },
+        contact_email: { value: "hello@ai-visionary.xyz", q: 1 },
         contact_phone: { value: "+41 22 700 00 00", q: 1 },
     },
     offre: {

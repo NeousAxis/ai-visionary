@@ -52,7 +52,7 @@ export default async function ConfidentialitePage() {
                             <strong>{t('s1Body')}</strong><br />
                             {t('s1FoundedBy')}<br />
                             {t('s1Location')}<br />
-                            {t('s1Email')} <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a><br />
+                            {t('s1Email')} <a href="mailto:hello@ai-visionary.xyz" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.xyz</a><br />
                             {t('s1Site')} <a href="https://ai-visionary.xyz" style={{ color: 'var(--primary-color)' }}>ai-visionary.xyz</a>
                         </p>
                         <p style={{ marginTop: '10px' }}>
@@ -258,7 +258,7 @@ export default async function ConfidentialitePage() {
                             <strong>{t('s13Name')}</strong><br />
                             Cyril Leger<br />
                             {t('s1Location')}<br />
-                            {t('s1Email')} <a href="mailto:hello@ai-visionary.com" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.com</a>
+                            {t('s1Email')} <a href="mailto:hello@ai-visionary.xyz" style={{ color: 'var(--primary-color)' }}>hello@ai-visionary.xyz</a>
                         </p>
 
                         <p style={{ marginTop: '30px', fontSize: '0.85rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>

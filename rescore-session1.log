@@ -1,0 +1,10 @@
+08:02:28 === V2 Batch Re-scoring ===
+08:02:28 API: http://localhost:3000
+08:02:28 Batch size: 3 | Max entities: 987 | Start offset: 485
+08:02:28 Delay: 5s | Dry run: false
+08:02:28 Log: rescore-20260407-0802.log
+08:02:28 
+08:02:28 Status: 488 rescored, 3944 remaining
+08:02:28 
+08:03:53 Batch #1 offset=485 | +2 ok +1 fail +0 skip | Total: 3 done | Remaining: 3939
+08:06:02 Batch #2 offset=488 | +3 ok +0 fail +0 skip | Total: 6 done | Remaining: 3927

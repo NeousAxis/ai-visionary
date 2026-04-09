@@ -17,7 +17,7 @@ export default function Footer() {
                     <Link href="/aya">{t('ayaRegistry')}</Link>
                     <Link href="/ai-et-votre-entreprise">{t('aiAndBusiness')}</Link>
                     <Link href="/developers">{t('apiDevelopers')}</Link>
-                    <a href="mailto:hello@ai-visionary.com">{t('contact')}</a>
+                    <a href="mailto:hello@ai-visionary.xyz">{t('contact')}</a>
                     <Link href="/faq">{t('faq')}</Link>
                     <Link href="/glossaire">{t('glossary')}</Link>
                     <Link href="/cgv">{t('cgv')}</Link>

@@ -176,7 +176,7 @@ const HTML = `<!DOCTYPE html>
 
     <footer>
         <div class="container">
-            AYA API v1.0 &bull; Powered by AI Visionary &bull; Geneva, Switzerland &bull; hello@ai-visionary.com
+            AYA API v1.0 &bull; Powered by AI Visionary &bull; Geneva, Switzerland &bull; hello@ai-visionary.xyz
         </div>
     </footer>
 </body>

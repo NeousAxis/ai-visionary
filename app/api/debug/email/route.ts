@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         const en = locale === 'en';
 
         const { success, error } = await sendEmail({
-            from: 'AI Visionary Debug <hello@ai-visionary.com>',
+            from: 'AI Visionary Debug <hello@ai-visionary.xyz>',
             to: [targetEmail],
             subject: en ? 'AYO Email Configuration Test' : 'Test de Configuration Email AYO',
             html: en

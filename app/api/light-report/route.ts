@@ -125,8 +125,8 @@ export async function GET(req: NextRequest) {
 
         // 3. Send Email
         const { success: emailSuccess, error: emailError } = await sendEmail({
-            from: 'AI Visionary System <hello@ai-visionary.com>',
-            replyTo: 'hello@ai-visionary.com',
+            from: 'AI Visionary System <hello@ai-visionary.xyz>',
+            replyTo: 'hello@ai-visionary.xyz',
             to: [email],
             subject: en
                 ? 'Your AIO Light Pack (Free) - AI Visionary'
@@ -188,7 +188,7 @@ ${JSON.stringify(asrJson, null, 2)}
                             ? 'If you encounter technical difficulties installing these files, our team is here to help.'
                             : 'Si vous rencontrez des difficultés techniques pour installer ces fichiers, notre équipe est là pour vous aider.'
                         }</p>
-                        <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">${en ? 'Contact us:' : 'Contactez-nous :'} <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a></p>
+                        <p style="font-size: 13px; font-weight: bold; margin-top: 5px;">${en ? 'Contact us:' : 'Contactez-nous :'} <a href="mailto:hello@ai-visionary.xyz" style="color: #e65100;">hello@ai-visionary.xyz</a></p>
                     </div>
 
                     <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
@@ -234,7 +234,7 @@ ${JSON.stringify(asrJson, null, 2)}
                     ? 'Unable to send the email. Please try again or contact support.'
                     : 'Impossible d\'envoyer l\'email. Veuillez réessayer ou contacter le support.'
                 }</p>
-                <p style="margin-top: 20px;"><a href="mailto:hello@ai-visionary.com" style="color: #dc2626;">hello@ai-visionary.com</a></p>
+                <p style="margin-top: 20px;"><a href="mailto:hello@ai-visionary.xyz" style="color: #dc2626;">hello@ai-visionary.xyz</a></p>
             </div>
         `, {
             headers: { 'Content-Type': 'text/html; charset=utf-8' },

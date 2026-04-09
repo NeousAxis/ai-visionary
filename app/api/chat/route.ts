@@ -507,7 +507,7 @@ export async function POST(req: Request) {
                     return new Response(JSON.stringify({ error: 'Email service not configured' }), { status: 500 });
                 }
                 const { error } = await sendEmail({
-                    from: 'AI Visionary Security <security@ai-visionary.com>',
+                    from: 'AI Visionary Security <security@ai-visionary.xyz>',
                     to: [targetEmail],
                     subject: locale === 'en'
                         ? `🔒 Your security code: ${code}`
@@ -550,7 +550,7 @@ export async function POST(req: Request) {
                     text: locale === 'en'
                         ? `❌ **Error:** No administrator email found for this site.\n\nWe cannot verify your identity automatically.`
                         : `❌ **Erreur :** Aucun email administrateur trouvé pour ce site.\n\nNous ne pouvons pas vérifier votre identité automatiquement.`,
-                    buttons: [{ label: locale === 'en' ? "Contact Support 📧" : "Contacter le Support 📧", url: locale === 'en' ? "mailto:hello@ai-visionary.com?subject=OTP Authentication Issue" : "mailto:hello@ai-visionary.com?subject=Problème Authentification OTP" }]
+                    buttons: [{ label: locale === 'en' ? "Contact Support 📧" : "Contacter le Support 📧", url: locale === 'en' ? "mailto:hello@ai-visionary.xyz?subject=OTP Authentication Issue" : "mailto:hello@ai-visionary.xyz?subject=Problème Authentification OTP" }]
                 }), { status: 200, headers: { 'Content-Type': 'application/json' } });
             }
         }
@@ -1882,7 +1882,7 @@ Techniquement, si vous mentez, AYO génèrera votre fichier ASR avec les informa
                     qTextLower.includes('explain'));
 
                 // Pour les champs texte libre, TOUJOURS forcer inputType text
-                // (même si le LLM a généré des options comme "contact@ai-visionary.com")
+                // (même si le LLM a généré des options comme "contact@ai-visionary.xyz")
                 if (isTextInputField) {
                     q.options = [];
                     q.allowCustom = true;
@@ -2789,8 +2789,8 @@ ${(() => {
                 const errMsg = err instanceof Error ? err.message : 'Unknown error';
                 logger.critical('FINAL_ANALYSIS_ERROR', errMsg, { stack: err instanceof Error ? err.stack : undefined });
                 finalResponseText = locale === 'en'
-                    ? `⚠️ An error occurred during the analysis finalization.\n\nPlease try again or contact hello@ai-visionary.com.`
-                    : `⚠️ Une erreur est survenue lors de la finalisation de l'analyse.\n\nVeuillez réessayer ou contacter hello@ai-visionary.com.`;
+                    ? `⚠️ An error occurred during the analysis finalization.\n\nPlease try again or contact hello@ai-visionary.xyz.`
+                    : `⚠️ Une erreur est survenue lors de la finalisation de l'analyse.\n\nVeuillez réessayer ou contacter hello@ai-visionary.xyz.`;
             }
         } else if (!finalResponseText) {
             // 🎯 PACK SELECTION & SALES FUNNEL LOGIC

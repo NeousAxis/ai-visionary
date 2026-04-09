@@ -59,7 +59,7 @@ export async function GET(request: Request) {
                 if (process.env.SMTP_USER) {
                     const updateUrl = `${BASE_URL}/update/${entityId}`;
                     await sendEmail({
-                        from: 'AI Visionary <hello@ai-visionary.com>',
+                        from: 'AI Visionary <hello@ai-visionary.xyz>',
                         to: email,
                         subject: en
                             ? `${name} — Your AYA data is over a year old`

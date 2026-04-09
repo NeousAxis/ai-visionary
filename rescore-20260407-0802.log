@@ -1,0 +1,48 @@
+08:02:28 === V2 Batch Re-scoring ===
+08:02:28 === V2 Batch Re-scoring ===
+08:02:28 === V2 Batch Re-scoring ===
+08:02:28 API: http://localhost:3000
+08:02:28 === V2 Batch Re-scoring ===
+08:02:28 API: http://localhost:3000
+08:02:28 API: http://localhost:3000
+08:02:28 Batch size: 3 | Max entities: 987 | Start offset: 485
+08:02:28 API: http://localhost:3000
+08:02:28 Batch size: 3 | Max entities: 987 | Start offset: 1472
+08:02:28 Batch size: 3 | Max entities: 987 | Start offset: 2459
+08:02:28 Delay: 5s | Dry run: false
+08:02:28 Batch size: 3 | Max entities: 986 | Start offset: 3446
+08:02:28 Delay: 5s | Dry run: false
+08:02:28 Delay: 5s | Dry run: false
+08:02:28 Log: rescore-20260407-0802.log
+08:02:28 Delay: 5s | Dry run: false
+08:02:28 Log: rescore-20260407-0802.log
+08:02:28 
+08:02:28 Log: rescore-20260407-0802.log
+08:02:28 Log: rescore-20260407-0802.log
+08:02:28 
+08:02:28 
+08:02:28 
+08:02:28 Status: 488 rescored, 3944 remaining
+08:02:28 Status: 488 rescored, 3944 remaining
+08:02:28 Status: 488 rescored, 3944 remaining
+08:02:28 
+08:02:28 
+08:02:28 
+08:02:28 Status: 488 rescored, 3944 remaining
+08:02:28 
+{"batch_offset":485,"batch_size":3,"success":2,"skipped":0,"failed":1,"remaining":3939,"next_offset":488,"dry_run":false,"results":[{"entity_id":"1ce93560-48bf-5c2a-b720-95e5e6eb1f2c","name":"the Lott","website":"https://www.thelott.com:443/","success":true,"skipped":false,"old_score":50,"new_score":75,"duration_ms":30892,"dry_run":false},{"entity_id":"1d0135d2-31c8-5b43-8341-b19498a45f4d","name":"Milupa","website":"https://www.milupa.de/","success":false,"skipped":false,"old_score":50,"new_score":null,"duration_ms":110,"dry_run":false,"error":"site_unreachable"},{"entity_id":"1d07e1fc-4c9a-5094-839e-2fb8aa997b6c","name":"dormakaba Sverige","website":"https://www.dormakaba.com/se-sv","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":48601,"dry_run":false}]}
+08:03:53 Batch #1 offset=485 | +2 ok +1 fail +0 skip | Total: 3 done | Remaining: 3939
+{"batch_offset":3446,"batch_size":3,"success":3,"skipped":0,"failed":0,"remaining":3934,"next_offset":3449,"dry_run":false,"results":[{"entity_id":"c90546ff-c828-5682-a9f4-62e17e634243","name":"Built In","website":"https://builtin.com/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":49138,"dry_run":false},{"entity_id":"c90951c0-2618-558a-93c8-ce7a207d608a","name":"Explore the Uber Platform","website":"https://www.uber.com/ch/en/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":40465,"dry_run":false},{"entity_id":"c9145788-cc4e-5f3b-9ddb-887506796ae4","name":"SUNU GROUP","website":"https://www.sunu-group.com/","success":true,"skipped":false,"old_score":27,"new_score":50,"duration_ms":51480,"dry_run":false}]}
+08:04:54 Batch #1 offset=3446 | +3 ok +0 fail +0 skip | Total: 3 done | Remaining: 3934
+{"batch_offset":2459,"batch_size":3,"success":3,"skipped":0,"failed":0,"remaining":3933,"next_offset":2462,"dry_run":false,"results":[{"entity_id":"8eb9de49-7df6-5a84-9974-a67e7a21579b","name":"Shangri-La Hotels and Resorts","website":"https://www.shangri-la.com/en/","success":true,"skipped":false,"old_score":45,"new_score":50,"duration_ms":43385,"dry_run":false},{"entity_id":"8ebd09c2-6385-5ed3-b591-347b437ca769","name":"Domino's Pizza","website":"https://www.dominos.ch/","success":true,"skipped":false,"old_score":24,"new_score":48,"duration_ms":51461,"dry_run":false},{"entity_id":"8ebe9e42-3178-593a-844c-925603b4a63c","name":"UMIDIGI Smartphones, Smart Wearables","website":"https://www.umidigi.com/","success":true,"skipped":false,"old_score":39,"new_score":50,"duration_ms":50830,"dry_run":false}]}
+08:04:59 Batch #1 offset=2459 | +3 ok +0 fail +0 skip | Total: 3 done | Remaining: 3933
+{"batch_offset":1472,"batch_size":3,"success":3,"skipped":0,"failed":0,"remaining":3932,"next_offset":1475,"dry_run":false,"results":[{"entity_id":"55c57dd5-be1e-5390-ad45-69cb5b05c08c","name":"Givaudan","website":"https://www.givaudan.com/","success":true,"skipped":false,"old_score":50,"new_score":59,"duration_ms":64467,"dry_run":false},{"entity_id":"55eba01d-aca7-572c-9d2e-7bcbf22f840f","name":"WorldQuant","website":"https://www.worldquant.com/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":39384,"dry_run":false},{"entity_id":"55f5a967-297e-5446-9ecd-0c559e75fa13","name":"GQ","website":"https://www.gq.com/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":53353,"dry_run":false}]}
+08:05:10 Batch #1 offset=1472 | +3 ok +0 fail +0 skip | Total: 3 done | Remaining: 3932
+{"batch_offset":488,"batch_size":3,"success":3,"skipped":0,"failed":0,"remaining":3927,"next_offset":491,"dry_run":false,"results":[{"entity_id":"1d0b4697-0301-58d3-8c64-94c59b31f906","name":"Northwestern University","website":"https://www.northwestern.edu/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":42930,"dry_run":false},{"entity_id":"1d2b066e-df69-57ae-85d6-879ffc358759","name":"HWH Celebrating 125 Years","website":"https://www.webuild.com/","success":true,"skipped":false,"old_score":22,"new_score":19,"duration_ms":29027,"dry_run":false},{"entity_id":"1d3b60b6-14ed-50f7-a791-ff9d51f277b3","name":"WIPO","website":"https://www.wipo.int/portal/en/index.html","success":true,"skipped":false,"old_score":50,"new_score":71,"duration_ms":44975,"dry_run":false}]}
+08:06:02 Batch #2 offset=488 | +3 ok +0 fail +0 skip | Total: 6 done | Remaining: 3927
+{"batch_offset":1475,"batch_size":3,"success":3,"skipped":0,"failed":0,"remaining":3922,"next_offset":1478,"dry_run":false,"results":[{"entity_id":"5613830e-138e-543e-9323-3bb753e3f58d","name":"Ahrefs","website":"https://ahrefs.com/","success":true,"skipped":false,"old_score":50,"new_score":72,"duration_ms":31984,"dry_run":false},{"entity_id":"56189199-2301-588e-b962-a6fe121afd96","name":"Otter Meeting Agent","website":"https://otter.ai/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":54245,"dry_run":false},{"entity_id":"56287d97-91cf-5eba-8dc4-19829b29fb52","name":"Jebel Ali Free Zone (Jafza)","website":"https://www.jafza.ae/","success":true,"skipped":false,"old_score":50,"new_score":70,"duration_ms":39474,"dry_run":false}]}
+08:07:26 Batch #2 offset=1475 | +3 ok +0 fail +0 skip | Total: 6 done | Remaining: 3922
+{"batch_offset":3449,"batch_size":3,"success":3,"skipped":0,"failed":0,"remaining":3921,"next_offset":3452,"dry_run":false,"results":[{"entity_id":"c91828da-9907-5235-a7df-69a8504d0272","name":"DePoly","website":"https://www.depoly.co/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":35217,"dry_run":false},{"entity_id":"c92221cc-ef7f-5480-ba7b-a477a680bfbf","name":"MOTU.com","website":"https://motu.com/en-us/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":55463,"dry_run":false},{"entity_id":"c9227adb-ad5e-5da8-8722-b5408e519ca2","name":"Contentstack","website":"https://www.contentstack.com/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":57980,"dry_run":false}]}
+08:07:33 Batch #2 offset=3449 | +3 ok +0 fail +0 skip | Total: 6 done | Remaining: 3921
+{"batch_offset":2462,"batch_size":3,"success":3,"skipped":0,"failed":0,"remaining":3920,"next_offset":2465,"dry_run":false,"results":[{"entity_id":"8eccc671-1f6d-528e-b019-186721290bc9","name":"EL PAÍS: el periódico global","website":"https://elpais.com/","success":true,"skipped":false,"old_score":45,"new_score":50,"duration_ms":44761,"dry_run":false},{"entity_id":"8ee4c967-4824-50e7-98fe-095e92cc576c","name":"Polyhedra Network","website":"https://www.polyhedra.network/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":50049,"dry_run":false},{"entity_id":"8ee70ca2-735a-50e0-ae82-c66aa867e464","name":"THORChain","website":"https://www.thorchain.org/","success":true,"skipped":false,"old_score":50,"new_score":50,"duration_ms":56628,"dry_run":false}]}
+08:07:40 Batch #2 offset=2462 | +3 ok +0 fail +0 skip | Total: 6 done | Remaining: 3920

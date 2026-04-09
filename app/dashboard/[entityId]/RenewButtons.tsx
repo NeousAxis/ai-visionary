@@ -107,7 +107,7 @@ export default function RenewButtons({ email, url, entityId, hasRequiredInfo, pr
                 }}>
                     {error}
                     <br />
-                    <a href="mailto:hello@ai-visionary.com" style={{ color: '#991B1B', fontWeight: 'bold' }}>
+                    <a href="mailto:hello@ai-visionary.xyz" style={{ color: '#991B1B', fontWeight: 'bold' }}>
                         {t('contactError')}
                     </a>
                 </div>

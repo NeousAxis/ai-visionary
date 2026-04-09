@@ -1,0 +1,54 @@
+06:28:43 === V2 Batch Re-scoring ===
+06:28:43 === V2 Batch Re-scoring ===
+06:28:43 === V2 Batch Re-scoring ===
+06:28:43 === V2 Batch Re-scoring ===
+06:28:43 API: http://localhost:3002
+06:28:43 API: http://localhost:3002
+06:28:43 API: http://localhost:3002
+06:28:43 API: http://localhost:3002
+06:28:43 Batch size: 3 | Max entities: 1132 | Start offset: 3300
+06:28:43 Batch size: 3 | Max entities: 1100 | Start offset: 0
+06:28:43 Batch size: 3 | Max entities: 1100 | Start offset: 1100
+06:28:43 Batch size: 3 | Max entities: 1100 | Start offset: 2200
+06:28:43 Delay: 5s | Dry run: false
+06:28:43 Delay: 5s | Dry run: false
+06:28:43 Delay: 5s | Dry run: false
+06:28:43 Delay: 5s | Dry run: false
+06:28:43 Log: rescore-20260407-0628.log
+06:28:43 Log: rescore-20260407-0628.log
+06:28:43 Log: rescore-20260407-0628.log
+06:28:43 Log: rescore-20260407-0628.log
+06:28:43 
+06:28:43 
+06:28:43 
+06:28:43 
+06:28:44 Status: 485 rescored, 3947 remaining
+06:28:44 Status: 485 rescored, 3947 remaining
+06:28:44 Status: 485 rescored, 3947 remaining
+06:28:44 
+06:28:44 
+06:28:44 
+06:28:44 Status: 485 rescored, 3947 remaining
+06:28:44 
+{"batch_offset":2200,"batch_size":3,"success":0,"skipped":3,"failed":0,"remaining":3947,"next_offset":2203,"dry_run":false,"results":[{"entity_id":"800d2050-4232-50b2-b19e-862a2dda8829","name":"BBC Home","website":"https://www.bbc.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"802daa28-3dea-549f-ad69-086a73d7e0e6","name":"Dynatrace","website":"https://www.dynatrace.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"802e5e29-dab4-581f-8bba-dde4f348d7d4","name":"Ecopetrol","website":"https://www.ecopetrol.com.co/wps/portal/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false}]}
+{"batch_offset":3300,"batch_size":3,"success":0,"skipped":3,"failed":0,"remaining":3947,"next_offset":3303,"dry_run":false,"results":[{"entity_id":"c0002b4e-100f-508a-b547-dbc3cdcf95e9","name":"Taiwan Semiconductor Manufacturing Company Limited","website":"https://www.tsmc.com/english","success":false,"skipped":true,"old_score":71,"new_score":71,"duration_ms":0,"dry_run":false},{"entity_id":"c014746c-2877-5092-b2f8-d8f70b1b7070","name":"L&T Corporate","website":"https://www.larsentoubro.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"c014e390-5d67-54df-8ec7-358cd30535d1","name":"roots.io","website":"https://roots.io/","success":false,"skipped":true,"old_score":60,"new_score":60,"duration_ms":0,"dry_run":false}]}
+{"batch_offset":1100,"batch_size":3,"success":0,"skipped":3,"failed":0,"remaining":3947,"next_offset":1103,"dry_run":false,"results":[{"entity_id":"401033db-1f46-5f0a-a32e-7a3eb7e0ec13","name":"Uganda National Bureau Of Standards","website":"https://www.unbs.go.ug/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"40206395-4e36-5cd4-92bc-83f8d3f84c48","name":"Squid","website":"https://www.squidrouter.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"4023fba2-c675-58e6-bf6f-8ab16e1a5f64","name":"Ripple","website":"https://ripple.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false}]}
+{"batch_offset":0,"batch_size":3,"success":0,"skipped":3,"failed":0,"remaining":3947,"next_offset":3,"dry_run":false,"results":[{"entity_id":"000c92c3-0541-5d5c-b43b-eb2cf4cd1299","name":"FreshBooks","website":"https://www.freshbooks.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"001339ea-c404-5661-8924-348c063cb078","name":"Brown University","website":"https://www.brown.edu/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"00209e51-cf0d-51ee-aa62-32c17faf3fef","name":"Sacyr","website":"https://sacyr.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false}]}
+06:28:49 Batch #1 offset=2200 | +0 ok +0 fail +3 skip | Total: 3 done | Remaining: 3947
+06:28:49 Batch #1 offset=3300 | +0 ok +0 fail +3 skip | Total: 3 done | Remaining: 3947
+06:28:49 Batch #1 offset=1100 | +0 ok +0 fail +3 skip | Total: 3 done | Remaining: 3947
+06:28:49 Batch #1 offset=0 | +0 ok +0 fail +3 skip | Total: 3 done | Remaining: 3947
+{"error":"Trop de requetes. Reessayez dans quelques instants."}
+{"error":"Trop de requetes. Reessayez dans quelques instants."}
+{"error":"Trop de requetes. Reessayez dans quelques instants."}
+06:28:54   ERROR batch #2 (attempt 1): {"error":"Trop de requetes. Reessayez dans quelques instants."}
+06:28:54   Retrying in 30s...
+06:28:54   ERROR batch #2 (attempt 1): {"error":"Trop de requetes. Reessayez dans quelques instants."}
+06:28:54   ERROR batch #2 (attempt 1): {"error":"Trop de requetes. Reessayez dans quelques instants."}
+06:28:54   Retrying in 30s...
+06:28:54   Retrying in 30s...
+{"batch_offset":2203,"batch_size":3,"success":0,"skipped":3,"failed":0,"remaining":3947,"next_offset":2206,"dry_run":false,"results":[{"entity_id":"8045c3f9-c87a-52b2-b6f8-0c03221774ef","name":"Compass Group France","website":"https://www.compass-group.fr/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false},{"entity_id":"8064016b-ce56-5862-9e71-c45fc07599ab","name":"LastPass","website":"https://www.lastpass.com/","success":false,"skipped":true,"old_score":65,"new_score":65,"duration_ms":0,"dry_run":false},{"entity_id":"8076e33a-dce4-5974-be83-31362d2ff1ae","name":"Troy-Bilt","website":"https://www.troybilt.com/","success":false,"skipped":true,"old_score":50,"new_score":50,"duration_ms":0,"dry_run":false}]}
+06:28:59 Batch #2 offset=2203 | +0 ok +0 fail +3 skip | Total: 6 done | Remaining: 3947
+{"error":"Trop de requetes. Reessayez dans quelques instants."}
+06:29:04   ERROR batch #3 (attempt 1): {"error":"Trop de requetes. Reessayez dans quelques instants."}
+06:29:04   Retrying in 30s...

@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
             ASR_DERIVED: "Entity indexed by AYA bot via automated web scraping (no human verification)",
         },
         rate_limit: "30 requests/minute per IP",
-        contact: "hello@ai-visionary.com",
+        contact: "hello@ai-visionary.xyz",
         powered_by: "AI Visionary — Geneva, Switzerland",
     });
 }

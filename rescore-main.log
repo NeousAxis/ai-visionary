@@ -1,0 +1,40 @@
+07:46:28 === V2 Batch Re-scoring ===
+07:46:28 API: http://localhost:3000
+07:46:28 Batch size: 3 | Max entities: 0 | Start offset: 0
+07:46:28 Delay: 5s | Dry run: false
+07:46:28 Log: rescore-20260407-0746.log
+07:46:28 
+07:46:29 Status: 485 rescored, 3947 remaining
+07:46:29 
+07:46:34 Batch #1 offset=0 | +0 ok +0 fail +3 skip | Total: 3 done | Remaining: 3947
+07:46:44 Batch #2 offset=3 | +0 ok +1 fail +2 skip | Total: 6 done | Remaining: 3947
+07:46:54 Batch #3 offset=6 | +0 ok +0 fail +3 skip | Total: 9 done | Remaining: 3947
+07:47:04 Batch #4 offset=9 | +0 ok +0 fail +3 skip | Total: 12 done | Remaining: 3947
+07:47:14 Batch #5 offset=12 | +0 ok +1 fail +2 skip | Total: 15 done | Remaining: 3947
+07:47:24 Batch #6 offset=15 | +0 ok +0 fail +3 skip | Total: 18 done | Remaining: 3947
+07:47:33 Batch #7 offset=18 | +0 ok +0 fail +3 skip | Total: 21 done | Remaining: 3947
+07:47:43 Batch #8 offset=21 | +0 ok +0 fail +3 skip | Total: 24 done | Remaining: 3947
+07:47:53 Batch #9 offset=24 | +0 ok +0 fail +3 skip | Total: 27 done | Remaining: 3947
+07:48:02 Batch #10 offset=27 | +0 ok +0 fail +3 skip | Total: 30 done | Remaining: 3947
+07:48:12 Batch #11 offset=30 | +0 ok +0 fail +3 skip | Total: 33 done | Remaining: 3947
+07:48:22 Batch #12 offset=33 | +0 ok +0 fail +3 skip | Total: 36 done | Remaining: 3947
+07:48:32 Batch #13 offset=36 | +0 ok +0 fail +3 skip | Total: 39 done | Remaining: 3947
+07:48:41 Batch #14 offset=39 | +0 ok +0 fail +3 skip | Total: 42 done | Remaining: 3947
+07:48:51 Batch #15 offset=42 | +0 ok +0 fail +3 skip | Total: 45 done | Remaining: 3947
+07:49:01 Batch #16 offset=45 | +0 ok +0 fail +3 skip | Total: 48 done | Remaining: 3947
+07:49:11 Batch #17 offset=48 | +0 ok +0 fail +3 skip | Total: 51 done | Remaining: 3947
+07:49:20 Batch #18 offset=51 | +0 ok +0 fail +3 skip | Total: 54 done | Remaining: 3947
+07:49:30 Batch #19 offset=54 | +0 ok +0 fail +3 skip | Total: 57 done | Remaining: 3947
+07:49:40 Batch #20 offset=57 | +0 ok +0 fail +3 skip | Total: 60 done | Remaining: 3947
+07:49:50 Batch #21 offset=60 | +0 ok +0 fail +3 skip | Total: 63 done | Remaining: 3947
+07:49:59 Batch #22 offset=63 | +0 ok +1 fail +2 skip | Total: 66 done | Remaining: 3947
+07:50:09 Batch #23 offset=66 | +0 ok +0 fail +3 skip | Total: 69 done | Remaining: 3947
+07:50:19 Batch #24 offset=69 | +0 ok +0 fail +3 skip | Total: 72 done | Remaining: 3947
+07:50:29 Batch #25 offset=72 | +0 ok +0 fail +3 skip | Total: 75 done | Remaining: 3947
+07:50:38 Batch #26 offset=75 | +0 ok +0 fail +3 skip | Total: 78 done | Remaining: 3947
+07:50:48 Batch #27 offset=78 | +0 ok +1 fail +2 skip | Total: 81 done | Remaining: 3947
+07:51:05 Batch #28 offset=81 | +0 ok +1 fail +2 skip | Total: 84 done | Remaining: 3947
+07:51:17 Batch #29 offset=84 | +0 ok +0 fail +3 skip | Total: 87 done | Remaining: 3947
+07:51:27 Batch #30 offset=87 | +0 ok +0 fail +3 skip | Total: 90 done | Remaining: 3947
+07:51:36 Batch #31 offset=90 | +0 ok +0 fail +3 skip | Total: 93 done | Remaining: 3947
+07:51:46 Batch #32 offset=93 | +0 ok +0 fail +3 skip | Total: 96 done | Remaining: 3947

@@ -823,14 +823,14 @@
     "s8l6": "Droit \u00e0 la limitation du traitement (art. 18 RGPD) : demander la restriction du traitement dans certaines circonstances.",
     "s8l7": "Droit au retrait du consentement : retirer votre consentement \u00e0 tout moment, sans affecter la lic\u00e9it\u00e9 du traitement ant\u00e9rieur.",
     "s8ExerciseTitle": "Comment exercer vos droits",
-    "s8Exercise": "Adressez votre demande par email \u00e0 hello@ai-visionary.com en pr\u00e9cisant votre identit\u00e9 et la nature de votre demande. Nous r\u00e9pondrons dans un d\u00e9lai de 30 jours (extensible \u00e0 60 jours en cas de demande complexe, avec notification pr\u00e9alable).",
+    "s8Exercise": "Adressez votre demande par email \u00e0 hello@ai-visionary.xyz en pr\u00e9cisant votre identit\u00e9 et la nature de votre demande. Nous r\u00e9pondrons dans un d\u00e9lai de 30 jours (extensible \u00e0 60 jours en cas de demande complexe, avec notification pr\u00e9alable).",
     "s8ComplaintTitle": "R\u00e9clamation aupr\u00e8s d'une autorit\u00e9 de surveillance",
     "s8ComplaintIntro": "Si vous estimez que vos droits ne sont pas respect\u00e9s, vous pouvez introduire une r\u00e9clamation aupr\u00e8s de :",
     "s8ComplaintCH": "Suisse : Pr\u00e9pos\u00e9 f\u00e9d\u00e9ral \u00e0 la protection des donn\u00e9es et \u00e0 la transparence (PFPDT) \u2014",
     "s8ComplaintEU": "Union europ\u00e9enne / EEE : l'autorit\u00e9 de contr\u00f4le comp\u00e9tente de votre pays de r\u00e9sidence.",
     "s9Title": "9. Indexation automatique (Bot AYA)",
     "s9p1": "Le registre AYA peut indexer automatiquement des entreprises \u00e0 partir de donn\u00e9es publiquement accessibles sur internet (contenu de sites web, donn\u00e9es JSON-LD, sitemaps). Ce traitement est fond\u00e9 sur notre int\u00e9r\u00eat l\u00e9gitime \u00e0 constituer un registre de r\u00e9f\u00e9rence pour les agents IA (art. 6.1.f RGPD).",
-    "s9p2": "Si votre entreprise est index\u00e9e dans le registre AYA et que vous souhaitez la retirer, envoyez un email \u00e0 hello@ai-visionary.com en indiquant l'URL concern\u00e9e. La suppression sera effectu\u00e9e sous 72 heures.",
+    "s9p2": "Si votre entreprise est index\u00e9e dans le registre AYA et que vous souhaitez la retirer, envoyez un email \u00e0 hello@ai-visionary.xyz en indiquant l'URL concern\u00e9e. La suppression sera effectu\u00e9e sous 72 heures.",
     "s10Title": "10. Protection des mineurs",
     "s10p1": "Nos services s'adressent exclusivement aux professionnels et entreprises. Nous ne collectons pas sciemment de donn\u00e9es concernant des personnes de moins de 16 ans. Si vous constatez qu'un mineur a fourni des donn\u00e9es personnelles, contactez-nous pour leur suppression imm\u00e9diate.",
     "s11Title": "11. Modifications de cette politique",
@@ -1038,7 +1038,7 @@
     "integrationTitle": "Fichiers d'int\u00e9gration",
     "integrationResource": "RESSOURCE",
     "integrationUrl": "URL",
-    "footer": "API AYA v1.0 \u2022 Powered by AI Visionary \u2022 Gen\u00e8ve, Suisse \u2022 hello@ai-visionary.com"
+    "footer": "API AYA v1.0 \u2022 Powered by AI Visionary \u2022 Gen\u00e8ve, Suisse \u2022 hello@ai-visionary.xyz"
   },
   "form": {
     "blocks": {

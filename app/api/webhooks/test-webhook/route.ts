@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     const url = new URL(req.url);
-    const testEmail = url.searchParams.get('email') || 'test@ai-visionary.com';
+    const testEmail = url.searchParams.get('email') || 'test@ai-visionary.xyz';
 
     console.log(`🧪 TEST WEBHOOK SIMULATION for email: ${testEmail}`);
 

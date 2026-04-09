@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
         if (!adminEmail) {
             logger.warn('OTP_NO_OWNER', `No owner_email or contact_email set for ${lookupLabel}`);
-            return NextResponse.json({ error: en ? "No registered email for this entity. Contact support@ai-visionary.com." : "Aucun email enregistre pour cette entite. Contactez support@ai-visionary.com." }, { status: 403 });
+            return NextResponse.json({ error: en ? "No registered email for this entity. Contact support@ai-visionary.xyz." : "Aucun email enregistre pour cette entite. Contactez support@ai-visionary.xyz." }, { status: 403 });
         }
 
         // MODE 2: verify the provided email matches owner_email OR contact_email
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
             : `🔒 Votre code de sécurité : ${code}`;
         const entityLabel = entityName || (en ? 'your entity' : 'votre entité');
         const { error } = await sendEmail({
-            from: 'AI Visionary Security <security@ai-visionary.com>',
+            from: 'AI Visionary Security <security@ai-visionary.xyz>',
             to: [adminEmail],
             subject: otpSubject,
             html: `

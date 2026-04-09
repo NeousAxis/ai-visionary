@@ -15,7 +15,7 @@ const FOOTER_FR = `
         <p style="font-size: 12px; color: #999; margin: 0;">
             AI Visionary &mdash; Gen&egrave;ve, Suisse<br>
             <a href="https://ai-visionary.xyz" style="color: #4A919E;">ai-visionary.xyz</a> &bull;
-            <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>
+            <a href="mailto:hello@ai-visionary.xyz" style="color: #4A919E;">hello@ai-visionary.xyz</a>
         </p>
     </div>
 </div>`;
@@ -25,7 +25,7 @@ const FOOTER_EN = `
         <p style="font-size: 12px; color: #999; margin: 0;">
             AI Visionary &mdash; Geneva, Switzerland<br>
             <a href="https://ai-visionary.xyz" style="color: #4A919E;">ai-visionary.xyz</a> &bull;
-            <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>
+            <a href="mailto:hello@ai-visionary.xyz" style="color: #4A919E;">hello@ai-visionary.xyz</a>
         </p>
     </div>
 </div>`;
@@ -191,8 +191,8 @@ export function buildCancellationEmail(entityName: string, resubscribeUrl: strin
         ${ctaButton(en ? 'Reactivate my certification' : 'R&eacute;activer ma certification', resubscribeUrl)}
 
         <p style="font-size: 13px; color: #666;">${en
-            ? 'If you cancelled by mistake or have questions, contact us at <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>.'
-            : 'Si vous avez annul&eacute; par erreur ou si vous avez des questions, contactez-nous &agrave; <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>.'
+            ? 'If you cancelled by mistake or have questions, contact us at <a href="mailto:hello@ai-visionary.xyz" style="color: #4A919E;">hello@ai-visionary.xyz</a>.'
+            : 'Si vous avez annul&eacute; par erreur ou si vous avez des questions, contactez-nous &agrave; <a href="mailto:hello@ai-visionary.xyz" style="color: #4A919E;">hello@ai-visionary.xyz</a>.'
         }</p>
         `,
         locale
@@ -234,8 +234,8 @@ export function buildPaymentFailedEmail(entityName: string, retryUrl: string, lo
         ${ctaButton(en ? 'Update my payment' : 'Mettre &agrave; jour mon paiement', retryUrl, '#D97706')}
 
         <p style="font-size: 13px; color: #666;">${en
-            ? 'If you believe this is an error, contact us at <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>.'
-            : 'Si vous pensez qu&rsquo;il s&rsquo;agit d&rsquo;une erreur, contactez-nous &agrave; <a href="mailto:hello@ai-visionary.com" style="color: #4A919E;">hello@ai-visionary.com</a>.'
+            ? 'If you believe this is an error, contact us at <a href="mailto:hello@ai-visionary.xyz" style="color: #4A919E;">hello@ai-visionary.xyz</a>.'
+            : 'Si vous pensez qu&rsquo;il s&rsquo;agit d&rsquo;une erreur, contactez-nous &agrave; <a href="mailto:hello@ai-visionary.xyz" style="color: #4A919E;">hello@ai-visionary.xyz</a>.'
         }</p>
         `,
         locale

@@ -85,7 +85,7 @@ export async function GET(request: Request) {
                         const daysPlural = days > 1;
 
                         await sendEmail({
-                            from: 'AI Visionary <hello@ai-visionary.com>',
+                            from: 'AI Visionary <hello@ai-visionary.xyz>',
                             to: email,
                             subject: en
                                 ? `${name} — Your AYA certificate expires ${days <= 7 ? 'in ' + days + ' day' + (daysPlural ? 's' : '') : 'soon'}`

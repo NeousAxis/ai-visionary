@@ -667,8 +667,8 @@ export default function DashboardClient(props: DashboardProps) {
       <div style={{ textAlign: 'center', marginTop: '2rem' }}>
         <p style={{ fontSize: '0.85rem', color: '#9ca3af' }}>
           Questions?{' '}
-          <a href="mailto:hello@ai-visionary.com" style={{ color: '#4A919E', fontWeight: 600 }}>
-            hello@ai-visionary.com
+          <a href="mailto:hello@ai-visionary.xyz" style={{ color: '#4A919E', fontWeight: 600 }}>
+            hello@ai-visionary.xyz
           </a>
         </p>
       </div>

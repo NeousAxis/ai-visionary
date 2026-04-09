@@ -231,7 +231,7 @@ export default function PaymentSuccessModal() {
                                     {t('errorBody')}
                                 </p>
                                 <a
-                                    href="mailto:hello@ai-visionary.com"
+                                    href="mailto:hello@ai-visionary.xyz"
                                     style={{
                                         display: 'inline-block', padding: '12px 28px',
                                         background: '#F5F9F8', border: '1px solid #D4E0DC',

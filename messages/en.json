@@ -823,14 +823,14 @@
     "s8l6": "Right to restriction of processing (Art. 18 GDPR): request restriction of processing in certain circumstances.",
     "s8l7": "Right to withdraw consent: withdraw your consent at any time, without affecting the lawfulness of prior processing.",
     "s8ExerciseTitle": "How to Exercise Your Rights",
-    "s8Exercise": "Send your request by email to hello@ai-visionary.com specifying your identity and the nature of your request. We will respond within 30 days (extendable to 60 days for complex requests, with prior notification).",
+    "s8Exercise": "Send your request by email to hello@ai-visionary.xyz specifying your identity and the nature of your request. We will respond within 30 days (extendable to 60 days for complex requests, with prior notification).",
     "s8ComplaintTitle": "Complaint to a Supervisory Authority",
     "s8ComplaintIntro": "If you believe your rights are not being respected, you may file a complaint with:",
     "s8ComplaintCH": "Switzerland: Federal Data Protection and Information Commissioner (FDPIC) \u2014",
     "s8ComplaintEU": "European Union / EEA: the competent supervisory authority in your country of residence.",
     "s9Title": "9. Automatic Indexing (AYA Bot)",
     "s9p1": "The AYA registry may automatically index companies from publicly accessible data on the internet (website content, JSON-LD data, sitemaps). This processing is based on our legitimate interest in building a reference registry for AI agents (Art. 6.1.f GDPR).",
-    "s9p2": "If your company is indexed in the AYA registry and you wish to have it removed, send an email to hello@ai-visionary.com indicating the URL concerned. Removal will be completed within 72 hours.",
+    "s9p2": "If your company is indexed in the AYA registry and you wish to have it removed, send an email to hello@ai-visionary.xyz indicating the URL concerned. Removal will be completed within 72 hours.",
     "s10Title": "10. Protection of Minors",
     "s10p1": "Our services are intended exclusively for professionals and businesses. We do not knowingly collect data about individuals under 16 years of age. If you discover that a minor has provided personal data, please contact us for immediate deletion.",
     "s11Title": "11. Changes to This Policy",
@@ -1038,7 +1038,7 @@
     "integrationTitle": "Integration Files",
     "integrationResource": "RESOURCE",
     "integrationUrl": "URL",
-    "footer": "AYA API v1.0 \u2022 Powered by AI Visionary \u2022 Geneva, Switzerland \u2022 hello@ai-visionary.com"
+    "footer": "AYA API v1.0 \u2022 Powered by AI Visionary \u2022 Geneva, Switzerland \u2022 hello@ai-visionary.xyz"
   },
   "form": {
     "blocks": {

@@ -115,8 +115,8 @@ function buildAyaSubEmailHtml(params: {
         ],
         questionTitle: en ? '&#128172; Any questions?' : '&#128172; Une question ?',
         contactUs: en
-            ? 'Contact us: <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>'
-            : 'Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>',
+            ? 'Contact us: <a href="mailto:hello@ai-visionary.xyz" style="color: #e65100;">hello@ai-visionary.xyz</a>'
+            : 'Contactez-nous : <a href="mailto:hello@ai-visionary.xyz" style="color: #e65100;">hello@ai-visionary.xyz</a>',
         footer: en
             ? 'AI Visionary &mdash; Make your business visible to AI'
             : 'AI Visionary &mdash; Rendez votre entreprise visible par les IA',
@@ -265,8 +265,8 @@ function buildProEmailHtml(params: {
             ? 'Our team is available to assist you with the installation.'
             : 'Notre &eacute;quipe est disponible pour vous accompagner dans l&rsquo;installation.',
         contactUs: en
-            ? 'Contact us: <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>'
-            : 'Contactez-nous : <a href="mailto:hello@ai-visionary.com" style="color: #e65100;">hello@ai-visionary.com</a>',
+            ? 'Contact us: <a href="mailto:hello@ai-visionary.xyz" style="color: #e65100;">hello@ai-visionary.xyz</a>'
+            : 'Contactez-nous : <a href="mailto:hello@ai-visionary.xyz" style="color: #e65100;">hello@ai-visionary.xyz</a>',
         footer: en
             ? 'AI Visionary &mdash; Make your business visible to AI'
             : 'AI Visionary &mdash; Rendez votre entreprise visible par les IA',
@@ -583,7 +583,7 @@ export async function POST(req: Request) {
                             <p>Our systems are finalizing the generation of your files. You will receive them by email within the next few minutes.</p>
                             <p>If you don't receive anything within an hour, please contact us:</p>
                             <p style="text-align: center; margin: 20px 0;">
-                                <a href="mailto:hello@ai-visionary.com" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contact support</a>
+                                <a href="mailto:hello@ai-visionary.xyz" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contact support</a>
                             </p>
                         </div>
                         <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
@@ -600,7 +600,7 @@ export async function POST(req: Request) {
                             <p>Nos systèmes sont en train de finaliser la génération de vos fichiers. Vous les recevrez par email dans les prochaines minutes.</p>
                             <p>Si vous ne recevez rien dans l'heure, contactez-nous :</p>
                             <p style="text-align: center; margin: 20px 0;">
-                                <a href="mailto:hello@ai-visionary.com" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contacter le support</a>
+                                <a href="mailto:hello@ai-visionary.xyz" style="background: #4A919E; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Contacter le support</a>
                             </p>
                         </div>
                         <div style="background: #f9fafb; padding: 15px; border-radius: 0 0 12px 12px; text-align: center; border: 1px solid #e5e7eb; border-top: 0;">
@@ -608,7 +608,7 @@ export async function POST(req: Request) {
                         </div>
                     </div>`;
                 await sendEmail({
-                    from: 'AYO Support <hello@ai-visionary.com>',
+                    from: 'AYO Support <hello@ai-visionary.xyz>',
                     to: [customerEmail],
                     subject: apologySubject,
                     html: apologyHtml
@@ -760,7 +760,7 @@ export async function POST(req: Request) {
                 ? `✅ AYA subscription activated — ${entityName}`
                 : `✅ Abonnement AYA activé — ${entityName}`;
             await sendEmail({
-                from: 'AYO Registry <registry@ai-visionary.com>',
+                from: 'AYO Registry <registry@ai-visionary.xyz>',
                 to: [customerEmail],
                 subject: ayaSubject,
                 html: buildAyaSubEmailHtml({
@@ -850,7 +850,7 @@ export async function POST(req: Request) {
                     ? `📥 Your AYO PRO Pack — ${entityName}`
                     : `📥 Votre Pack AYO PRO — ${entityName}`;
                 const emailResult = await sendEmail({
-                    from: 'AYO Delivery <delivery@ai-visionary.com>',
+                    from: 'AYO Delivery <delivery@ai-visionary.xyz>',
                     to: [customerEmail],
                     subject: proSubject,
                     attachments: [{ filename: 'AYO_Pack_PRO.zip', content: zipBuffer }],
