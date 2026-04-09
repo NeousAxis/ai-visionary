@@ -229,7 +229,6 @@ export default function DiagnosticV2Page() {
     if (!url.trim()) return;
     if (!emailVerified && !skipEmailCheck) return;
 
-    setExistingEntity(null);
     setCurrentStep(2);
     setError(null);
     setScore(null);
