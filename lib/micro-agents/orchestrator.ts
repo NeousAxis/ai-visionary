@@ -213,7 +213,36 @@ export async function runAllAgents(
 
   // Extract structured links + footer from raw HTML (preserves URLs that stripHtml destroys)
   // Prepended to content for agents that need footer data (legal, contact, location)
-  const siteLinks = extractSiteLinks(html);
+  let siteLinks = extractSiteLinks(html);
+
+  // SPA fallback: if few links found (SPA shell → Jina markdown loses footer),
+  // fetch rendered HTML via Jina with footer wait to recover footer links
+  const hasFooterLinks = /FOOTER-LINK:|FOOTER-TEXT:/.test(siteLinks);
+  if (!hasFooterLinks) {
+    try {
+      console.log(`[orchestrator] No footer links found, trying Jina HTML fallback for ${url}`);
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 15000);
+      const jinaRes = await fetch(`https://r.jina.ai/${url}`, {
+        signal: ctrl.signal,
+        headers: { 'X-Return-Format': 'html', 'X-Wait-For-Selector': 'footer' },
+      });
+      clearTimeout(tid);
+      if (jinaRes.ok) {
+        const jinaHtml = await jinaRes.text();
+        if (jinaHtml.length > 500) {
+          const jinaLinks = extractSiteLinks(jinaHtml);
+          if (jinaLinks.length > siteLinks.length) {
+            siteLinks = jinaLinks;
+            console.log(`[orchestrator] Jina HTML fallback recovered ${jinaLinks.split('\n').length} link entries`);
+          }
+        }
+      }
+    } catch (err) {
+      console.log(`[orchestrator] Jina HTML fallback failed: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+
   const enrichedContent = siteLinks
     ? `=== SITE LINKS & FOOTER ===\n${siteLinks}\n\n=== PAGE CONTENT ===\n${textContent}`
     : textContent;
