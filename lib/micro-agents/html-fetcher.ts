@@ -78,41 +78,32 @@ async function renderWithBrowser(url: string): Promise<string | null> {
 }
 
 /**
- * Fallback: use jina.ai reader — markdown for content (works best for LLM agents)
+ * Fallback: use jina.ai reader — rendered HTML with footer wait.
+ * Returns real HTML (with <footer>, <nav>, <a href>) not markdown.
  */
 async function renderWithJina(url: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
   try {
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 15000);
-    // Default markdown — best for content extraction by LLM agents
     const res = await fetch(`https://r.jina.ai/${url}`, {
-      signal: ctrl.signal,
+      headers: {
+        'X-Return-Format': 'html',
+        'X-Wait-For-Selector': 'footer',
+      },
+      signal: controller.signal,
     });
-    clearTimeout(tid);
+
     if (!res.ok) return null;
-    const md = await res.text();
-    if (md.length < MIN_TEXT) return null;
 
-    // Convert markdown to basic HTML
-    let html = md;
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/^[-*] (.+)$/gm, '<li>$1</li>');
-
-    // Wrap in HTML structure
-    const title = md.match(/^Title:\s*(.+)$/m)?.[1] || '';
-    html = `<html><head><title>${title}</title></head><body>${html}</body></html>`;
-
-    // Add source domain link for TLD detection
-    const domain = url.replace(/^https?:\/\//, '').split('/')[0];
-    html += `<a href="${url}">${domain}</a>`;
+    const html = await res.text();
+    if (!html || html.length < 500) return null;
 
     return html;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
