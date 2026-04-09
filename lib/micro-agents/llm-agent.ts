@@ -27,7 +27,16 @@ export async function llmExtract(
   maxChars = 8000,
 ): Promise<string> {
   const model = getModel();
-  const truncated = content.length > maxChars ? content.substring(0, maxChars) : content;
+  // Smart truncation: keep start (70%) + end (30%) to preserve footer content
+  // Footer often contains critical data: legal pages, contact, address, copyright
+  let truncated: string;
+  if (content.length > maxChars) {
+    const headSize = Math.floor(maxChars * 0.7);
+    const tailSize = maxChars - headSize - 20;
+    truncated = content.substring(0, headSize) + '\n\n[...truncated...]\n\n' + content.substring(content.length - tailSize);
+  } else {
+    truncated = content;
+  }
 
   try {
     console.log(`[llm-agent] Calling Gemini with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);

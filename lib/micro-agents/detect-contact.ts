@@ -5,6 +5,8 @@ import { llmExtract, parseJson } from './llm-agent';
 
 const PROMPT = `You extract contact information from websites. The content can be in ANY language (French, English, German, etc.).
 
+The input starts with a SITE LINKS & FOOTER section listing all navigation links and footer content. PAY CLOSE ATTENTION to this section — contact info (email, phone, mailto links) is almost always in the footer.
+
 Extract:
 - email: the business contact email. Look for mailto: links, email addresses in text, form action URLs containing emails (formsubmit.co, formspree, etc.)
 - phone: the phone number with country code if available

@@ -7,6 +7,8 @@ const PROMPT = `You are a location extractor. From the website content below, ex
 - city: the city where the business is located (e.g. "Geneva", "Paris", "New York")
 - country: the country (e.g. "Switzerland", "France", "United States")
 
+The input starts with a SITE LINKS & FOOTER section. PAY CLOSE ATTENTION — addresses and location info are almost always in the footer.
+
 Look for addresses, footer info, "Based in", "Located in", contact sections, domain TLD (.ch=Switzerland, .fr=France, .de=Germany).
 Return ONLY valid JSON: {"city": "Geneva" or null, "country": "Switzerland" or null}
 Do NOT invent. If not found, return null. No explanation.`;

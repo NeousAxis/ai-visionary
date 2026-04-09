@@ -30,6 +30,51 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+/**
+ * Extract all links (href + anchor text) and footer/nav sections from raw HTML.
+ * This preserves URL information that stripHtml() destroys.
+ * Used to enrich content for agents that need footer data (legal, contact, location).
+ */
+function extractSiteLinks(html: string): string {
+  const parts: string[] = [];
+  let m: RegExpExecArray | null;
+
+  // Extract ALL <a href> links with their text (preserves URLs that stripHtml loses)
+  const linkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([^<]*)</gi;
+  const seenHrefs = new Set<string>();
+  while ((m = linkRe.exec(html)) !== null) {
+    const href = m[1].trim();
+    const text = m[2].trim();
+    if (href && !href.startsWith('javascript:') && !seenHrefs.has(href.toLowerCase())) {
+      seenHrefs.add(href.toLowerCase());
+      if (text) parts.push(`LINK: ${text} → ${href}`);
+      else parts.push(`LINK: ${href}`);
+    }
+  }
+
+  // Extract footer and nav text content (often contains legal name, address, copyright)
+  const navFooterRe = /<(?:footer|nav)[^>]*>([\s\S]*?)<\/(?:footer|nav)>/gi;
+  while ((m = navFooterRe.exec(html)) !== null) {
+    const innerHtml = m[1];
+    // Also extract links from within footer/nav specifically
+    const innerLinkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([^<]*)</gi;
+    let innerM;
+    while ((innerM = innerLinkRe.exec(innerHtml)) !== null) {
+      const href = innerM[1].trim();
+      const text = innerM[2].trim();
+      if (href && !href.startsWith('javascript:') && !seenHrefs.has(href.toLowerCase())) {
+        seenHrefs.add(href.toLowerCase());
+        parts.push(`FOOTER-LINK: ${text} → ${href}`);
+      }
+    }
+    // Plain text from footer/nav
+    const text = innerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (text.length > 10) parts.push(`FOOTER-TEXT: ${text.substring(0, 800)}`);
+  }
+
+  return parts.join('\n');
+}
+
 // --- Retry+Merge helpers (stabilize LLM variance) ---
 
 function unionStrings(a: string[], b: string[]): string[] {
@@ -166,6 +211,13 @@ export async function runAllAgents(
   // Prepare clean text for LLM agents (strip HTML tags)
   const textContent = stripHtml(html);
 
+  // Extract structured links + footer from raw HTML (preserves URLs that stripHtml destroys)
+  // Prepended to content for agents that need footer data (legal, contact, location)
+  const siteLinks = extractSiteLinks(html);
+  const enrichedContent = siteLinks
+    ? `=== SITE LINKS & FOOTER ===\n${siteLinks}\n\n=== PAGE CONTENT ===\n${textContent}`
+    : textContent;
+
   // Step 2: Run agents SEQUENTIALLY — so the client sees each one work in real-time
   const events: AgentEvent[] = [];
 
@@ -175,16 +227,16 @@ export async function runAllAgents(
   events.push(jsonldRun.event);
   onEvent?.(jsonldRun.event);
 
-  // Agent 2: Contact (LLM)
+  // Agent 2: Contact (LLM) — uses enrichedContent to catch footer emails/phones
   onEvent?.({ agent: 'detect-contact', status: 'running', data: null, durationMs: 0 });
-  const contactRun = await runAgent('detect-contact', () => detectContact(textContent));
+  const contactRun = await runAgent('detect-contact', () => detectContact(enrichedContent));
   events.push(contactRun.event);
   onEvent?.(contactRun.event);
 
-  // Agent 3: Location (LLM)
+  // Agent 3: Location (LLM) — uses enrichedContent to catch footer addresses
   onEvent?.({ agent: 'detect-location', status: 'running', data: null, durationMs: 0 });
   const locationRun = await runAgent('detect-location', () =>
-    detectLocation(textContent, jsonldRun.result || undefined, fetchResult.url)
+    detectLocation(enrichedContent, jsonldRun.result || undefined, fetchResult.url)
   );
   events.push(locationRun.event);
   onEvent?.(locationRun.event);
@@ -195,9 +247,9 @@ export async function runAllAgents(
   events.push(servicesRun.event);
   onEvent?.(servicesRun.event);
 
-  // Agent 5: Legal/Compliance (LLM) — retry+merge for stability
+  // Agent 5: Legal/Compliance (LLM) — uses enrichedContent to catch footer legal links (CGV, RGPD, Mentions)
   onEvent?.({ agent: 'detect-legal', status: 'running', data: null, durationMs: 0 });
-  const legalRun = await runAgentWithRetry('detect-legal', () => detectLegal(textContent), mergeLegal);
+  const legalRun = await runAgentWithRetry('detect-legal', () => detectLegal(enrichedContent), mergeLegal);
   events.push(legalRun.event);
   onEvent?.(legalRun.event);
 
@@ -272,6 +324,11 @@ export async function mergeAgentResultsToExtract(
   const phone = contact.phone || jsonld.contactPoint?.phone || '';
 
   const plainText = stripHtml(fetchResult.html);
+  // Enriched text for process/indicators LLM — includes footer links for geographies detection
+  const processLinks = extractSiteLinks(fetchResult.html);
+  const enrichedPlainText = processLinks
+    ? `=== SITE LINKS & FOOTER ===\n${processLinks}\n\n=== PAGE CONTENT ===\n${plainText}`
+    : plainText;
 
   // --- FAQ / Glossary / Doc = via detect-pedagogy LLM agent (merged with JSON-LD schema) ---
   const { pedagogy } = results;
@@ -309,9 +366,9 @@ Do NOT invent.`;
       indicators?: string[];
     };
     const [raw1, raw2, raw3] = await Promise.all([
-      llmExtract(processPrompt, plainText, 10000).catch(() => '{}'),
-      llmExtract(processPrompt, plainText, 10000).catch(() => '{}'),
-      llmExtract(processPrompt, plainText, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, enrichedPlainText, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, enrichedPlainText, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, enrichedPlainText, 10000).catch(() => '{}'),
     ]);
     const data1 = parseJson<ProcessData>(raw1);
     const data2 = parseJson<ProcessData>(raw2);
