@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
                 const en = locale === 'en';
                 try {
                     await sendEmail({
-                        from: 'registry@ai-visionary.xyz',
+                        from: 'hello@ai-visionary.xyz',
                         to: customerEmail,
                         subject: en
                             ? `Payment failed — ${entity.display_name || 'your AYA subscription'}`
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
                 const en = locale === 'en';
                 try {
                     await sendEmail({
-                        from: 'registry@ai-visionary.xyz',
+                        from: 'hello@ai-visionary.xyz',
                         to: customerEmail,
                         subject: en
                             ? `AYA subscription cancelled — ${entity.display_name || 'your business'}`

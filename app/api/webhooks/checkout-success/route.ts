@@ -760,7 +760,7 @@ export async function POST(req: Request) {
                 ? `✅ AYA subscription activated — ${entityName}`
                 : `✅ Abonnement AYA activé — ${entityName}`;
             await sendEmail({
-                from: 'AYO Registry <registry@ai-visionary.xyz>',
+                from: 'AYO Registry <hello@ai-visionary.xyz>',
                 to: [customerEmail],
                 subject: ayaSubject,
                 html: buildAyaSubEmailHtml({
@@ -850,7 +850,7 @@ export async function POST(req: Request) {
                     ? `📥 Your AYO PRO Pack — ${entityName}`
                     : `📥 Votre Pack AYO PRO — ${entityName}`;
                 const emailResult = await sendEmail({
-                    from: 'AYO Delivery <delivery@ai-visionary.xyz>',
+                    from: 'AYO Delivery <hello@ai-visionary.xyz>',
                     to: [customerEmail],
                     subject: proSubject,
                     attachments: [{ filename: 'AYO_Pack_PRO.zip', content: zipBuffer }],

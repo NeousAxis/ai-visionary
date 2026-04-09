@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
             : `🔒 Votre code de sécurité : ${code}`;
         const entityLabel = entityName || (en ? 'your entity' : 'votre entité');
         const { error } = await sendEmail({
-            from: 'AI Visionary Security <security@ai-visionary.xyz>',
+            from: 'AI Visionary Security <hello@ai-visionary.xyz>',
             to: [adminEmail],
             subject: otpSubject,
             html: `

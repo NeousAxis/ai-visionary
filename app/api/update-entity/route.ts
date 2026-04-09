@@ -313,7 +313,7 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
 </div>`;
 
                 await sendEmail({
-                    from: 'AYO Delivery <delivery@ai-visionary.xyz>',
+                    from: 'AYO Delivery <hello@ai-visionary.xyz>',
                     to: [emailTarget],
                     subject: en ? `Your AYO files have been updated — ${entityNameForEmail}` : `Vos fichiers AYO mis a jour — ${entityNameForEmail}`,
                     attachments: [{ filename: 'AYO_Pack_PRO_Updated.zip', content: zipBuffer }],
@@ -362,7 +362,7 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
 </div>`;
 
                 await sendEmail({
-                    from: 'AYO Delivery <delivery@ai-visionary.xyz>',
+                    from: 'AYO Delivery <hello@ai-visionary.xyz>',
                     to: [emailTarget],
                     subject: en ? `Update confirmed — ${entityNameForEmail}` : `Mise a jour confirmee — ${entityNameForEmail}`,
                     html: confirmationHtml,

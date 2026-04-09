@@ -507,7 +507,7 @@ export async function POST(req: Request) {
                     return new Response(JSON.stringify({ error: 'Email service not configured' }), { status: 500 });
                 }
                 const { error } = await sendEmail({
-                    from: 'AI Visionary Security <security@ai-visionary.xyz>',
+                    from: 'AI Visionary Security <hello@ai-visionary.xyz>',
                     to: [targetEmail],
                     subject: locale === 'en'
                         ? `🔒 Your security code: ${code}`
