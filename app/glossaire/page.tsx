@@ -22,7 +22,7 @@ const defStyle: React.CSSProperties = { marginBottom: '12px', color: 'var(--text
 
 export default async function GlossairePage() {
     const t = await getTranslations('glossaryPage');
-    const terms = ['aio', 'asr', 'aya', 'ayo', 'jsonld', 'llm', 'semanticFile', 'aioScore', 'registry', 'indexedEntity', 'certifiedEntity', 'packPro', 'ayaSub', 'ed25519', 'sitemap'] as const;
+    const terms = ['aio', 'asr', 'aya', 'ayo', 'jsonld', 'llm', 'semanticFile', 'aioScore', 'registry', 'indexedEntity', 'certifiedEntity', 'ed25519', 'sitemap'] as const;
     return (
         <>
             <main className="legal-page" style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 20px 40px' }}>
