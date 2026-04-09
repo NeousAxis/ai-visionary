@@ -260,6 +260,7 @@ export async function runAllAgents(
   onEvent?.(socialRun.event);
 
   // Agent 8: Pedagogy — consumes renderedHtml (no additional Jina calls)
+  console.log(`[orchestrator] Passing renderedHtml to pedagogy: ${renderedHtml.length} chars, sourceType=${sourceType}, has <footer>: ${/<footer/i.test(renderedHtml)}`);
   onEvent?.({ agent: 'detect-pedagogy', status: 'running', data: null, durationMs: 0 });
   const pedagogyRun = await runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml));
   events.push(pedagogyRun.event);

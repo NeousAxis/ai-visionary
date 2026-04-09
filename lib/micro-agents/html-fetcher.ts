@@ -29,6 +29,21 @@ function getTextContent(html: string): string {
     .trim();
 }
 
+/**
+ * Check if HTML contains useful rendered content (not an empty SPA shell).
+ * A valid rendered page should have headings, paragraphs, links with text, or meaningful text.
+ */
+function hasUsefulContent(html: string): boolean {
+  const text = getTextContent(html);
+  if (text.length < MIN_TEXT) return false;
+  // Must have at least some real DOM structure (headings, paragraphs, links with text)
+  const hasStructure =
+    /<h[1-6][^>]*>[^<]{3,}/i.test(html) ||
+    /<p[^>]*>[^<]{20,}/i.test(html) ||
+    /<a\s[^>]*href=[^>]*>[^<]{2,}/i.test(html);
+  return hasStructure;
+}
+
 function isSpaShell(html: string): boolean {
   const text = getTextContent(html);
   return text.length < MIN_TEXT && SPA_INDICATORS.some(re => re.test(html));
@@ -78,7 +93,7 @@ async function renderWithBrowser(url: string): Promise<string | null> {
  */
 async function fetchJinaHtml(url: string): Promise<string | null> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const timeout = setTimeout(() => controller.abort(), 20000);
 
   try {
     const res = await fetch(`https://r.jina.ai/${url}`, {
@@ -89,10 +104,19 @@ async function fetchJinaHtml(url: string): Promise<string | null> {
       signal: controller.signal,
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn(`[html-fetcher] Jina HTML failed: status=${res.status} for ${url}`);
+      return null;
+    }
     const html = await res.text();
-    return (html && html.length >= 500) ? html : null;
-  } catch {
+    if (!html || !hasUsefulContent(html)) {
+      console.warn(`[html-fetcher] Jina HTML: empty or SPA shell (${html?.length || 0} chars) for ${url}`);
+      return null;
+    }
+    console.log(`[html-fetcher] Jina HTML OK: ${html.length} chars for ${url}`);
+    return html;
+  } catch (err) {
+    console.warn(`[html-fetcher] Jina HTML error: ${err instanceof Error ? err.message : err} for ${url}`);
     return null;
   } finally {
     clearTimeout(timeout);
@@ -105,17 +129,26 @@ async function fetchJinaHtml(url: string): Promise<string | null> {
  */
 async function fetchJinaMarkdown(url: string): Promise<string | null> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const timeout = setTimeout(() => controller.abort(), 20000);
 
   try {
     const res = await fetch(`https://r.jina.ai/${url}`, {
       signal: controller.signal,
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn(`[html-fetcher] Jina MD failed: status=${res.status} for ${url}`);
+      return null;
+    }
     const md = await res.text();
-    return (md && md.length >= MIN_TEXT) ? md : null;
-  } catch {
+    if (!md || md.length < MIN_TEXT) {
+      console.warn(`[html-fetcher] Jina MD: too short (${md?.length || 0} chars) for ${url}`);
+      return null;
+    }
+    console.log(`[html-fetcher] Jina MD OK: ${md.length} chars for ${url}`);
+    return md;
+  } catch (err) {
+    console.warn(`[html-fetcher] Jina MD error: ${err instanceof Error ? err.message : err} for ${url}`);
     return null;
   } finally {
     clearTimeout(timeout);
@@ -188,10 +221,18 @@ export async function fetchHtml(targetUrl: string): Promise<FetchResult> {
       fetchJinaMarkdown(url),
     ]);
 
+    console.log(`[html-fetcher] Jina results for ${url}: html=${jinaHtml ? `OK(${jinaHtml.length})` : 'FAILED'}, md=${jinaMarkdown ? `OK(${jinaMarkdown.length})` : 'FAILED'}`);
+
+    // renderedHtml: prefer Jina HTML (has DOM with footer/links), fallback to raw
     const renderedHtml = jinaHtml || rawHtml;
+    // textContent: prefer Jina markdown (clean structured), fallback to stripping HTML
     const textContent = jinaMarkdown || getTextContent(renderedHtml);
 
-    console.log(`[html-fetcher] Jina: html=${jinaHtml ? jinaHtml.length : 0} chars, md=${jinaMarkdown ? jinaMarkdown.length : 0} chars for ${url}`);
+    if (!jinaHtml && !jinaMarkdown) {
+      console.warn(`[html-fetcher] BOTH Jina calls failed for SPA ${url} — using raw SPA shell (degraded)`);
+    } else if (!jinaHtml) {
+      console.warn(`[html-fetcher] Jina HTML failed for ${url} — renderedHtml=rawSpaShell, pedagogy/legal will be degraded`);
+    }
 
     return { url, rawHtml, renderedHtml, textContent, sourceType: 'spa_jina', headers, statusCode: res.status, isReachable: true };
   } catch {

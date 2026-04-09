@@ -53,7 +53,14 @@ function extractLinksAndHeadings(html: string): string {
  */
 export async function detectPedagogy(renderedHtml: string): Promise<PedagogyResult> {
   try {
+    console.log(`[detect-pedagogy] Input: ${renderedHtml.length} chars, has <footer>: ${/<footer/i.test(renderedHtml)}, has <a href>: ${/<a\s/i.test(renderedHtml)}`);
     const extracted = extractLinksAndHeadings(renderedHtml);
+    console.log(`[detect-pedagogy] Extracted ${extracted.split('\n').length} lines (${extracted.length} chars). Has FAQ: ${/faq/i.test(extracted)}, Glossaire: ${/glossai/i.test(extracted)}`);
+
+    if (!extracted || extracted.length < 20) {
+      console.warn(`[detect-pedagogy] No links/headings extracted — input is likely empty SPA shell`);
+      return { has_faq: false, has_glossary: false, has_documentation: false, q: 0 };
+    }
 
     const raw = await llmExtract(PROMPT, extracted, 8000);
     const data = parseJson<{ has_faq?: boolean; has_glossary?: boolean; has_documentation?: boolean }>(raw);
