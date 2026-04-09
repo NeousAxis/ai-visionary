@@ -19,15 +19,16 @@ const SECTORS = [
   'Juridique & Compliance',
 ];
 
-// Keywords that map to each sector
+// Keywords that map to each sector — use WORD BOUNDARIES to avoid false positives
+// Each keyword is a regex pattern matched as a whole word
 const SECTOR_KEYWORDS: Record<string, string[]> = {
-  'Conseil & Services Pro': ['consulting', 'conseil', 'stratégie', 'strategy', 'accompagnement', 'advisory', 'coaching', 'durabilité', 'sustainability', 'rse', 'csr', 'audit'],
-  'Technologie & SaaS': ['tech', 'software', 'saas', 'digital', 'platform', 'app', 'développement', 'development', 'web', 'ai', 'data', 'cloud', 'api', 'native', 'agentic', 'website creation', 'mobile'],
-  'Finance & Assurance': ['finance', 'bank', 'insurance', 'fintech', 'investissement', 'assurance', 'crédit', 'trading'],
-  'Éducation & Formation': ['education', 'formation', 'training', 'école', 'university', 'learning', 'cours'],
-  'Santé & Pharma': ['health', 'santé', 'medical', 'pharma', 'clinic', 'hôpital', 'biotech'],
-  'Commerce & Retail': ['retail', 'commerce', 'e-commerce', 'shop', 'store', 'boutique', 'vente'],
-  'Média & Communication': ['media', 'presse', 'communication', 'marketing', 'agence', 'publicité', 'design'],
+  'Conseil & Services Pro': ['consulting', 'conseil', 'stratégie', 'strategie', 'strategy', 'accompagnement', 'advisory', 'coaching', 'durabilité', 'durable', 'sustainability', 'sustainable', '\\brse\\b', '\\bcsr\\b', 'audit', 'transition'],
+  'Technologie & SaaS': ['software', '\\bsaas\\b', 'digital', 'platform', 'développement web', 'development', '\\bcloud\\b', '\\bapi\\b', 'agentic', 'website creation', 'cybersecurity', 'machine learning', 'deep learning'],
+  'Finance & Assurance': ['finance', 'bank', 'insurance', 'fintech', 'investissement', 'assurance', 'crédit', 'trading', 'asset management'],
+  'Éducation & Formation': ['education', 'formation', 'training', 'école', 'university', 'learning', 'cours', 'pédagogie'],
+  'Santé & Pharma': ['health', 'santé', 'medical', 'pharma', 'clinic', 'hôpital', 'biotech', 'thérapie'],
+  'Commerce & Retail': ['retail', 'e-commerce', 'shop', 'store', 'boutique', 'vente en ligne', 'marketplace'],
+  'Média & Communication': ['media', 'presse', 'communication', 'marketing', 'publicité', 'branding', 'journalisme'],
   'Tourisme & Transport': ['tourisme', 'transport', 'voyage', 'hotel', 'airline', 'travel', 'logistics'],
   'Industrie & Manufacture': ['industrie', 'manufacturing', 'production', 'usine', 'fabrication', 'engineering'],
   'Immobilier & Construction': ['immobilier', 'real estate', 'property', 'construction', 'architecture'],
@@ -35,32 +36,62 @@ const SECTOR_KEYWORDS: Record<string, string[]> = {
   'Juridique & Compliance': ['legal', 'juridique', 'avocat', 'law', 'notaire', 'compliance', 'droit'],
 };
 
+/**
+ * Detect sector from services using word-boundary matching.
+ * Counts keyword matches; highest score wins.
+ */
 function detectSectorFromServices(services: string[], title: string): string | null {
   const allText = [...services, title].join(' ').toLowerCase();
   let best: string | null = null;
   let bestScore = 0;
-  for (const [sector, keywords] of Object.entries(SECTOR_KEYWORDS)) {
-    const score = keywords.filter(kw => allText.includes(kw)).length;
+  for (const [sector, patterns] of Object.entries(SECTOR_KEYWORDS)) {
+    let score = 0;
+    for (const pat of patterns) {
+      try {
+        // Use word boundary regex to avoid false positives ("ai" in "souverains")
+        const re = pat.startsWith('\\b') ? new RegExp(pat, 'i') : new RegExp(`\\b${pat}\\b`, 'i');
+        if (re.test(allText)) score++;
+      } catch {
+        // Fallback to simple includes if regex fails
+        if (allText.includes(pat)) score++;
+      }
+    }
     if (score > bestScore) { bestScore = score; best = sector; }
   }
+  console.log(`[compare] Detected sector: ${best} (score=${bestScore}) from ${services.length} services`);
   return best;
 }
 
+/**
+ * Check if an entity belongs to the target sector.
+ * STRICT: only exact match with standard sector names.
+ * For non-standard sector_macro (long descriptions), require 3+ keyword matches.
+ */
 function entityMatchesSector(entitySector: string, targetSector: string): boolean {
   if (!entitySector || !targetSector) return false;
-  const es = entitySector.toLowerCase();
-  const ts = targetSector.toLowerCase();
+  const es = entitySector.toLowerCase().trim();
+  const ts = targetSector.toLowerCase().trim();
 
-  // Exact match
+  // Exact match with target
   if (es === ts) return true;
 
-  // Entity has standard sector that matches target
-  if (SECTORS.some(s => s.toLowerCase() === es && s.toLowerCase() === ts)) return true;
+  // Entity has a standard sector name — only match if identical
+  if (SECTORS.some(s => s.toLowerCase() === es)) {
+    return es === ts;
+  }
 
-  // Entity has long description — check if it contains keywords of target sector
-  const keywords = SECTOR_KEYWORDS[targetSector] || [];
-  const matchCount = keywords.filter(kw => es.includes(kw)).length;
-  return matchCount >= 2; // At least 2 keyword matches
+  // Non-standard sector (long description) — require 3+ keyword matches (strict)
+  const patterns = SECTOR_KEYWORDS[targetSector] || [];
+  let matchCount = 0;
+  for (const pat of patterns) {
+    try {
+      const re = pat.startsWith('\\b') ? new RegExp(pat, 'i') : new RegExp(`\\b${pat}\\b`, 'i');
+      if (re.test(es)) matchCount++;
+    } catch {
+      if (es.includes(pat)) matchCount++;
+    }
+  }
+  return matchCount >= 3;
 }
 
 export async function POST(req: NextRequest) {
@@ -68,7 +99,6 @@ export async function POST(req: NextRequest) {
     const { country, services, siteName, siteUrl } = await req.json();
 
     // Fetch ALL entities — must include older certified entities like Eclore
-    // (getAyaEntities paginates through Supabase in 1000-row chunks)
     const allEntities = await db.getAyaEntities(10000);
     if (!allEntities?.length) {
       return NextResponse.json({ competitors: [], averageScore: 0, totalInSector: 0 });
@@ -77,7 +107,7 @@ export async function POST(req: NextRequest) {
     const detectedSector = detectSectorFromServices(services || [], siteName || '');
     const siteNorm = (siteUrl || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
 
-    // Filter by sector + exclude tested site
+    // Filter by STRICT sector match + exclude tested site
     const sectorPool = allEntities.filter((e: any) => {
       const eName = (e.display_name || e.legal_name || '');
       const eUrl = (e.website || '').replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/$/, '').toLowerCase();
@@ -87,12 +117,12 @@ export async function POST(req: NextRequest) {
       if (siteName && eName.toLowerCase() === siteName.toLowerCase()) return false;
       if (eName.length < 2) return false;
 
-      // Match sector
+      // STRICT sector match
       if (!detectedSector) return false;
       return entityMatchesSector(e.sector_macro || '', detectedSector);
     });
 
-    // ONLY certified entities — bot-indexed at 50 are NOT comparable (pending V2 re-scoring batch)
+    // Certified competitors — STRICT sector match required
     const sorted = sectorPool
       .filter((e: any) => e.payment_completed === true && (e.asr_score || 0) > 0)
       .sort((a: any, b: any) => (b.asr_score || 0) - (a.asr_score || 0));
@@ -105,11 +135,13 @@ export async function POST(req: NextRequest) {
       sector: e.sector_macro || '',
     }));
 
-    // Average from sector pool
+    // Average from sector pool (bot + certified)
     const scores = sectorPool.map((e: any) => e.asr_score || 0).filter((s: number) => s > 0);
     const averageScore = scores.length > 0
       ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
       : 0;
+
+    console.log(`[compare] sector=${detectedSector}, pool=${sectorPool.length}, certified=${sorted.length}, avg=${averageScore}`);
 
     return NextResponse.json({
       competitors,
