@@ -588,8 +588,7 @@ export default function DiagnosticV2Page() {
               value={legalName}
               onChange={(e) => setLegalName(e.target.value)}
               placeholder={locale === 'fr' ? 'Ex: Régénère Plus Sàrl' : 'Ex: Regenere Plus Ltd'}
-              className="dv2-search-input"
-              style={{ flex: 1 }}
+              style={{ flex: 1, padding: '0.75rem 1rem', fontSize: '1.05rem', border: '2px solid #4A919E', borderRadius: '10px', outline: 'none', fontFamily: 'var(--font-body)', color: 'var(--text-main)', background: '#fff' }}
             />
             <button
               onClick={() => { if (legalName.trim()) setLegalNameConfirmed(true); }}
