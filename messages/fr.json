@@ -414,7 +414,7 @@
     "resendCode": "Renvoyer le code",
     "otpError": "Code invalide ou expiré",
     "verifiedAs": "✓ Vérifié en tant que {email}",
-    "liveScan": "Scan en direct — Micro-Agents",
+    "liveScan": "Scan en direct — Multi-Agents",
     "agents": "agents",
     "complete": "Terminé",
     "failed": "Échoué",
