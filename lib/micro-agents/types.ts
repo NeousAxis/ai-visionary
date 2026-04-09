@@ -88,9 +88,18 @@ export interface AgentEvent {
 
 // --- Orchestrator merged output ---
 
+export type SourceType = 'ssr' | 'spa_puppeteer' | 'spa_jina';
+
 export interface FetchResult {
   url: string;
-  html: string;
+  /** Raw HTML from initial fetch (may be SPA shell) */
+  rawHtml: string;
+  /** Fully rendered HTML with DOM structure (footer, nav, links) — from Puppeteer or Jina HTML */
+  renderedHtml: string;
+  /** Clean text content stripped of all HTML tags */
+  textContent: string;
+  /** How the page was rendered */
+  sourceType: SourceType;
   headers: Record<string, string>;
   statusCode: number;
   isReachable: boolean;

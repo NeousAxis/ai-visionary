@@ -12,34 +12,17 @@ import { detectPedagogy } from './detect-pedagogy';
 import type { AllAgentResults, AgentEvent, AgentName, FetchResult, ServicesResult, LegalResult } from './types';
 import type { AyoExtract, Quality } from '../aio-score-engine';
 
-// --- Shared utility ---
-
-function stripHtml(html: string): string {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    // NOTE: Do NOT strip <nav> tags — footers contain critical info
-    // (legal_name, country, contact, copyright) that agents need to see
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&#\d+;/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+// --- Source preparation ---
 
 /**
- * Extract all links (href + anchor text) and footer/nav sections from raw HTML.
- * This preserves URL information that stripHtml() destroys.
- * Used to enrich content for agents that need footer data (legal, contact, location).
+ * Extract all links (href + anchor text) and footer/nav sections from rendered HTML.
+ * Produces a structured block that preserves URL info for agents needing DOM context.
  */
 function extractSiteLinks(html: string): string {
   const parts: string[] = [];
   let m: RegExpExecArray | null;
 
-  // Extract ALL <a href> links with their text (preserves URLs that stripHtml loses)
+  // Extract ALL <a href> links with their text
   const linkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([^<]*)</gi;
   const seenHrefs = new Set<string>();
   while ((m = linkRe.exec(html)) !== null) {
@@ -52,11 +35,11 @@ function extractSiteLinks(html: string): string {
     }
   }
 
-  // Extract footer and nav text content (often contains legal name, address, copyright)
+  // Extract footer and nav text content
   const navFooterRe = /<(?:footer|nav)[^>]*>([\s\S]*?)<\/(?:footer|nav)>/gi;
   while ((m = navFooterRe.exec(html)) !== null) {
     const innerHtml = m[1];
-    // Also extract links from within footer/nav specifically
+    // Extract links from within footer/nav specifically
     const innerLinkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([^<]*)</gi;
     let innerM;
     while ((innerM = innerLinkRe.exec(innerHtml)) !== null) {
@@ -73,6 +56,16 @@ function extractSiteLinks(html: string): string {
   }
 
   return parts.join('\n');
+}
+
+/**
+ * Build enriched content for agents that need DOM context (links + footer + text).
+ * Used by: detect-legal, detect-contact, detect-location
+ */
+function buildEnrichedContent(renderedHtml: string, textContent: string): string {
+  const siteLinks = extractSiteLinks(renderedHtml);
+  if (!siteLinks) return textContent;
+  return `=== SITE LINKS & FOOTER ===\n${siteLinks}\n\n=== PAGE CONTENT ===\n${textContent}`;
 }
 
 // --- Retry+Merge helpers (stabilize LLM variance) ---
@@ -116,7 +109,7 @@ function mergeLegal(a: LegalResult, b: LegalResult): LegalResult {
 }
 
 /**
- * Run an agent 2x in parallel and merge results to stabilize LLM variance.
+ * Run an agent 3x in parallel and merge results to stabilize LLM variance.
  */
 async function runAgentWithRetry<T>(
   name: AgentName,
@@ -183,14 +176,22 @@ async function runAgent<T>(
 /**
  * Run all 8 micro-agents sequentially.
  * Calls onEvent for each agent as it completes (for SSE streaming).
+ *
+ * Source routing:
+ * - renderedHtml → detect-jsonld, detect-social (need DOM structure)
+ * - enrichedContent (links + footer + text) → detect-legal, detect-contact, detect-location
+ * - textContent → detect-services, detect-security (text is enough)
+ * - renderedHtml + url → detect-pedagogy (has its own Jina fallback)
  */
 export async function runAllAgents(
   url: string,
   onEvent?: (event: AgentEvent) => void,
 ): Promise<{ fetchResult: FetchResult; results: AllAgentResults; events: AgentEvent[] }> {
-  // Step 1: Fetch HTML
+  // Step 1: Fetch HTML — returns distinct sources
   const fetchResult = await fetchHtml(url);
-  const { html, headers } = fetchResult;
+  const { renderedHtml, textContent, headers, sourceType } = fetchResult;
+
+  console.log(`[orchestrator] Fetched ${url}: sourceType=${sourceType}, renderedHtml=${renderedHtml.length} chars, textContent=${textContent.length} chars`);
 
   if (!fetchResult.isReachable) {
     const errorEvent: AgentEvent = {
@@ -208,33 +209,25 @@ export async function runAllAgents(
     };
   }
 
-  // Prepare clean text for LLM agents (strip HTML tags)
-  const textContent = stripHtml(html);
-
-  // Extract structured links + footer from raw HTML (preserves URLs that stripHtml destroys)
-  // Prepended to content for agents that need footer data (legal, contact, location)
-  const siteLinks = extractSiteLinks(html);
-
-  const enrichedContent = siteLinks
-    ? `=== SITE LINKS & FOOTER ===\n${siteLinks}\n\n=== PAGE CONTENT ===\n${textContent}`
-    : textContent;
+  // Build enriched content for agents that need DOM context (links + footer + text)
+  const enrichedContent = buildEnrichedContent(renderedHtml, textContent);
 
   // Step 2: Run agents SEQUENTIALLY — so the client sees each one work in real-time
   const events: AgentEvent[] = [];
 
-  // Agent 1: JSON-LD (deterministic, fast)
+  // Agent 1: JSON-LD (deterministic) — needs renderedHtml (DOM with <script type="application/ld+json">)
   onEvent?.({ agent: 'detect-jsonld', status: 'running', data: null, durationMs: 0 });
-  const jsonldRun = await runAgent('detect-jsonld', () => detectJsonLd(html));
+  const jsonldRun = await runAgent('detect-jsonld', () => detectJsonLd(renderedHtml));
   events.push(jsonldRun.event);
   onEvent?.(jsonldRun.event);
 
-  // Agent 2: Contact (LLM) — uses enrichedContent to catch footer emails/phones
+  // Agent 2: Contact (LLM) — needs enrichedContent (footer has email, phone, mailto links)
   onEvent?.({ agent: 'detect-contact', status: 'running', data: null, durationMs: 0 });
   const contactRun = await runAgent('detect-contact', () => detectContact(enrichedContent));
   events.push(contactRun.event);
   onEvent?.(contactRun.event);
 
-  // Agent 3: Location (LLM) — uses enrichedContent to catch footer addresses
+  // Agent 3: Location (LLM) — needs enrichedContent (footer has address, city, country)
   onEvent?.({ agent: 'detect-location', status: 'running', data: null, durationMs: 0 });
   const locationRun = await runAgent('detect-location', () =>
     detectLocation(enrichedContent, jsonldRun.result || undefined, fetchResult.url)
@@ -242,33 +235,33 @@ export async function runAllAgents(
   events.push(locationRun.event);
   onEvent?.(locationRun.event);
 
-  // Agent 4: Services (LLM) — retry+merge for stability
+  // Agent 4: Services (LLM) — textContent is enough (services are in page body)
   onEvent?.({ agent: 'detect-services', status: 'running', data: null, durationMs: 0 });
   const servicesRun = await runAgentWithRetry('detect-services', () => detectServices(textContent), mergeServices);
   events.push(servicesRun.event);
   onEvent?.(servicesRun.event);
 
-  // Agent 5: Legal/Compliance (LLM) — uses enrichedContent to catch footer legal links (CGV, RGPD, Mentions)
+  // Agent 5: Legal/Compliance (LLM) — needs enrichedContent (footer has CGV, RGPD, Mentions légales links)
   onEvent?.({ agent: 'detect-legal', status: 'running', data: null, durationMs: 0 });
   const legalRun = await runAgentWithRetry('detect-legal', () => detectLegal(enrichedContent), mergeLegal);
   events.push(legalRun.event);
   onEvent?.(legalRun.event);
 
-  // Agent 6: Security (deterministic headers + LLM content)
+  // Agent 6: Security (deterministic headers + LLM text) — textContent is enough
   onEvent?.({ agent: 'detect-security', status: 'running', data: null, durationMs: 0 });
   const securityRun = await runAgent('detect-security', () => detectSecurity(textContent, headers));
   events.push(securityRun.event);
   onEvent?.(securityRun.event);
 
-  // Agent 7: Social (deterministic, fast)
+  // Agent 7: Social (deterministic) — needs renderedHtml (parses <a href> for social URLs)
   onEvent?.({ agent: 'detect-social', status: 'running', data: null, durationMs: 0 });
-  const socialRun = await runAgent('detect-social', () => detectSocial(html));
+  const socialRun = await runAgent('detect-social', () => detectSocial(renderedHtml));
   events.push(socialRun.event);
   onEvent?.(socialRun.event);
 
-  // Agent 8: Pedagogy — FAQ, Glossary, Documentation (LLM + HEAD fallback for SPA sites)
+  // Agent 8: Pedagogy — needs renderedHtml + url (has its own Jina HTML fallback for SPA)
   onEvent?.({ agent: 'detect-pedagogy', status: 'running', data: null, durationMs: 0 });
-  const pedagogyRun = await runAgent('detect-pedagogy', () => detectPedagogy(html, fetchResult.url));
+  const pedagogyRun = await runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml, fetchResult.url));
   events.push(pedagogyRun.event);
   onEvent?.(pedagogyRun.event);
 
@@ -298,7 +291,7 @@ export async function mergeAgentResultsToExtract(
   const { contact, services, legal, location, security, jsonld, social } = results;
 
   // Determine name: prefer JSON-LD, fallback to meta title
-  const metaTitleMatch = fetchResult.html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const metaTitleMatch = fetchResult.renderedHtml.match(/<title[^>]*>([^<]+)<\/title>/i);
   const name = jsonld.name || (metaTitleMatch ? metaTitleMatch[1].trim() : '');
 
   // Determine business type: JSON-LD first, then infer from services/content
@@ -324,12 +317,8 @@ export async function mergeAgentResultsToExtract(
   const email = contact.email || jsonld.contactPoint?.email || '';
   const phone = contact.phone || jsonld.contactPoint?.phone || '';
 
-  const plainText = stripHtml(fetchResult.html);
-  // Enriched text for process/indicators LLM — includes footer links for geographies detection
-  const processLinks = extractSiteLinks(fetchResult.html);
-  const enrichedPlainText = processLinks
-    ? `=== SITE LINKS & FOOTER ===\n${processLinks}\n\n=== PAGE CONTENT ===\n${plainText}`
-    : plainText;
+  // Build enriched content for process/indicators LLM
+  const enrichedContent = buildEnrichedContent(fetchResult.renderedHtml, fetchResult.textContent);
 
   // --- FAQ / Glossary / Doc = via detect-pedagogy LLM agent (merged with JSON-LD schema) ---
   const { pedagogy } = results;
@@ -337,8 +326,8 @@ export async function mergeAgentResultsToExtract(
   const hasGlossary = pedagogy.has_glossary;
   const hasDocumentation = pedagogy.has_documentation;
   // --- Sitemap / Mobile = DETERMINISTE (regex sur HTML — detection technique pure) ---
-  const hasSitemap = /sitemap\.xml/i.test(fetchResult.html);
-  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(fetchResult.html);
+  const hasSitemap = /sitemap\.xml/i.test(fetchResult.renderedHtml);
+  const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(fetchResult.rawHtml);
 
   // --- Process & Indicators = LLM cible (1 petite mission) ---
   let processSteps: string[] = [];
@@ -358,7 +347,7 @@ export async function mergeAgentResultsToExtract(
 Return ONLY JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
 Do NOT invent.`;
 
-    // Retry+merge: 2 parallel LLM calls to stabilize variance
+    // Retry+merge: 3 parallel LLM calls to stabilize variance
     type ProcessData = {
       process_steps?: string[];
       delivery_mode?: string;
@@ -367,9 +356,9 @@ Do NOT invent.`;
       indicators?: string[];
     };
     const [raw1, raw2, raw3] = await Promise.all([
-      llmExtract(processPrompt, enrichedPlainText, 10000).catch(() => '{}'),
-      llmExtract(processPrompt, enrichedPlainText, 10000).catch(() => '{}'),
-      llmExtract(processPrompt, enrichedPlainText, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}'),
+      llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}'),
     ]);
     const data1 = parseJson<ProcessData>(raw1);
     const data2 = parseJson<ProcessData>(raw2);
@@ -404,7 +393,6 @@ Do NOT invent.`;
     console.log(`[orchestrator] AYA lookup for ${url}: ${ayaEntity ? 'FOUND (score:' + ayaEntity.asr_score + ', paid:' + ayaEntity.payment_completed + ')' : 'NOT FOUND'}`);
     if (ayaEntity && ayaEntity.payment_completed) {
       isAyaRegistered = true;
-      // AYA hosts JSON-LD + ASR for certified entities
       hasAsr = true;
     }
   } catch (err) {
@@ -432,7 +420,6 @@ Do NOT invent.`;
         business_type: field(businessType, businessType ? 1 : 0, businessType ? ['scan_micro_agent'] : []),
         city: field(city, location.q, city ? ['scan_micro_agent'] : []),
         country: field(country, location.q, country ? ['scan_micro_agent'] : []),
-        // Email OR contact form = valid contact method (anti-spam = normal)
         contact_email: field(
           email || (contact.hasContactForm ? 'contact_form' : ''),
           email ? 1 : contact.hasContactForm ? 0.5 : 0,
@@ -445,7 +432,6 @@ Do NOT invent.`;
       offre: {
         services: field(services.services, services.q, services.services.length ? ['scan_micro_agent'] : []),
         products: field(services.products, services.products.length ? services.q : 0, services.products.length ? ['scan_micro_agent'] : []),
-        // Found on site = verifiable = q:1
         use_cases: field(
           services.use_cases || [],
           services.use_cases?.length ? 1 : 0,
@@ -480,14 +466,10 @@ Do NOT invent.`;
       },
       contenus_pedagogiques: {
         has_faq: field(hasFaqContent, hasFaqContent ? 1 : 0, hasFaqContent ? ['scan_micro_agent'] : []),
-        // These penalize the initial score — but AYO PRO generates them, so the Compare
-        // section shows the score BOOST when these files are added
         has_glossary: field(hasGlossary, hasGlossary ? 1 : 0, hasGlossary ? ['scan_micro_agent'] : []),
         has_documentation: field(hasDocumentation, hasDocumentation ? 1 : 0, hasDocumentation ? ['scan_micro_agent'] : []),
       },
       structure_technique: {
-        // has_asr = fichier ASR physique sur le site (PRO uniquement)
-        // is_aya_registered = dans le registre AYA (AYA ou PRO) — géré séparément par le score engine
         has_asr: field(hasAsr, hasAsr ? 1 : 0, hasAsr ? ['scan_micro_agent'] : []),
         has_jsonld: field(jsonld.hasOrganizationType || isAyaRegistered, (jsonld.hasOrganizationType || isAyaRegistered) ? 1 : 0, isAyaRegistered ? ['aya_registry'] : jsonld.hasOrganizationType ? ['scan_micro_agent'] : []),
         has_sitemap: field(hasSitemap, hasSitemap ? 0.5 : 0, hasSitemap ? ['scan_micro_agent'] : []),

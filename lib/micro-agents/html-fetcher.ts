@@ -1,9 +1,11 @@
 // lib/micro-agents/html-fetcher.ts — Universal HTML fetcher
+// Returns distinct sources: rawHtml, renderedHtml, textContent, sourceType
 // 1. Try simple fetch (fast, works for SSR sites)
-// 2. If SPA detected → Puppeteer headless Chromium (renders JS, universal)
+// 2. If SPA detected → Puppeteer headless Chromium
+// 3. Fallback → Jina HTML with footer wait
 
 import { isAllowedUrl } from '../validators';
-import type { FetchResult } from './types';
+import type { FetchResult, SourceType } from './types';
 
 const MIN_TEXT = 300;
 
@@ -19,6 +21,11 @@ function getTextContent(html: string): string {
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#\d+;/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -34,7 +41,6 @@ function isSpaShell(html: string): boolean {
  */
 async function renderWithBrowser(url: string): Promise<string | null> {
   try {
-    // Dynamic imports to avoid bundling issues
     const chromium = await import('@sparticuz/chromium');
     const puppeteer = await import('puppeteer-core');
 
@@ -50,24 +56,20 @@ async function renderWithBrowser(url: string): Promise<string | null> {
       const page = await browser.newPage();
       await page.setUserAgent('AYO-Bot/2.0 (AI Visionary Scanner)');
 
-      // Navigate and wait for content to render
       await page.goto(url, {
         waitUntil: 'networkidle2',
         timeout: 12000,
       });
 
-      // Wait a bit more for lazy-loaded content
+      // Scroll to bottom to trigger lazy loading (footer)
       await page.evaluate(() => {
         return new Promise<void>((resolve) => {
-          // Scroll to bottom to trigger lazy loading
           window.scrollTo(0, document.body.scrollHeight);
           setTimeout(resolve, 1000);
         });
       });
 
-      // Get the fully rendered HTML
-      const html = await page.content();
-      return html;
+      return await page.content();
     } finally {
       await browser.close();
     }
@@ -107,52 +109,78 @@ async function renderWithJina(url: string): Promise<string | null> {
   }
 }
 
+const EMPTY_RESULT: FetchResult = {
+  url: '',
+  rawHtml: '',
+  renderedHtml: '',
+  textContent: '',
+  sourceType: 'ssr',
+  headers: {},
+  statusCode: 0,
+  isReachable: false,
+};
+
 export async function fetchHtml(targetUrl: string): Promise<FetchResult> {
   let url = targetUrl.trim();
   if (!url.startsWith('http')) url = 'https://' + url;
 
   const ssrfCheck = isAllowedUrl(url);
   if (!ssrfCheck.allowed) {
-    return { url, html: '', headers: {}, statusCode: 0, isReachable: false };
+    return { ...EMPTY_RESULT, url };
   }
 
   try {
-    // Step 1: Fast fetch
+    // Step 1: Fast fetch (raw HTML)
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), 8000);
     const res = await fetch(url, {
       signal: ctrl.signal,
-      headers: { 'User-Agent': 'AYO-Bot/2.0 (AI Visionary Micro-Agent Scanner)' },
+      headers: { 'User-Agent': 'AYO-Bot/2.0 (AI Visionary Scanner)' },
       redirect: 'follow',
     });
     clearTimeout(tid);
 
-    let html = await res.text();
+    const rawHtml = await res.text();
     const headers: Record<string, string> = {};
     res.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
 
-    // Step 2: SPA detection → headless render
-    if (res.ok && isSpaShell(html)) {
-      console.log(`[html-fetcher] SPA detected for ${url}, launching headless browser...`);
-
-      // Try Puppeteer first (best quality)
-      const rendered = await renderWithBrowser(url);
-      if (rendered && getTextContent(rendered).length > MIN_TEXT) {
-        html = rendered;
-        console.log(`[html-fetcher] Puppeteer rendered ${html.length} chars for ${url}`);
-      } else {
-        // Fallback to jina.ai
-        console.log(`[html-fetcher] Puppeteer failed, falling back to jina.ai for ${url}`);
-        const jinaHtml = await renderWithJina(url);
-        if (jinaHtml) {
-          html = jinaHtml;
-          console.log(`[html-fetcher] Jina rendered ${html.length} chars for ${url}`);
-        }
-      }
+    if (!res.ok) {
+      return { url, rawHtml, renderedHtml: rawHtml, textContent: '', sourceType: 'ssr', headers, statusCode: res.status, isReachable: false };
     }
 
-    return { url, html, headers, statusCode: res.status, isReachable: res.ok };
+    // Step 2: SSR site — rawHtml IS the rendered HTML
+    if (!isSpaShell(rawHtml)) {
+      const textContent = getTextContent(rawHtml);
+      console.log(`[html-fetcher] SSR site: ${url} (${rawHtml.length} chars, ${textContent.length} text chars)`);
+      return { url, rawHtml, renderedHtml: rawHtml, textContent, sourceType: 'ssr', headers, statusCode: res.status, isReachable: true };
+    }
+
+    // Step 3: SPA detected — need rendering
+    console.log(`[html-fetcher] SPA detected for ${url}, launching headless browser...`);
+    let sourceType: SourceType = 'spa_jina';
+
+    // Try Puppeteer first (best quality — full DOM)
+    const puppeteerHtml = await renderWithBrowser(url);
+    if (puppeteerHtml && getTextContent(puppeteerHtml).length > MIN_TEXT) {
+      const textContent = getTextContent(puppeteerHtml);
+      console.log(`[html-fetcher] Puppeteer rendered ${puppeteerHtml.length} chars for ${url}`);
+      return { url, rawHtml, renderedHtml: puppeteerHtml, textContent, sourceType: 'spa_puppeteer', headers, statusCode: res.status, isReachable: true };
+    }
+
+    // Fallback: Jina HTML with footer wait
+    console.log(`[html-fetcher] Puppeteer failed, falling back to Jina HTML for ${url}`);
+    const jinaHtml = await renderWithJina(url);
+    if (jinaHtml) {
+      const textContent = getTextContent(jinaHtml);
+      console.log(`[html-fetcher] Jina HTML rendered ${jinaHtml.length} chars (${textContent.length} text) for ${url}`);
+      sourceType = 'spa_jina';
+      return { url, rawHtml, renderedHtml: jinaHtml, textContent, sourceType, headers, statusCode: res.status, isReachable: true };
+    }
+
+    // Last resort: use raw SPA shell (very limited)
+    console.log(`[html-fetcher] All renderers failed for ${url}, using raw SPA shell`);
+    return { url, rawHtml, renderedHtml: rawHtml, textContent: getTextContent(rawHtml), sourceType: 'ssr', headers, statusCode: res.status, isReachable: true };
   } catch {
-    return { url, html: '', headers: {}, statusCode: 0, isReachable: false };
+    return { ...EMPTY_RESULT, url };
   }
 }
