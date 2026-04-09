@@ -58,7 +58,7 @@ export default async function MentionsPage() {
                         <p style={{ marginTop: '10px' }}>
                             <strong>{t('s2Vercel')}</strong><br />
                             {t('s2VercelAddr')}<br />
-                            <a href="https://vercel.com" style={{ color: 'var(--primary-color)' }} target="_blank" rel="noopener noreferrer">vercel.com</a>
+                            <a href="https://www.infomaniak.com" style={{ color: 'var(--primary-color)' }} target="_blank" rel="noopener noreferrer">infomaniak.com</a>
                         </p>
                         <p style={{ marginTop: '10px' }}>{t('s2Supabase')}</p>
 
