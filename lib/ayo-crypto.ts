@@ -294,8 +294,11 @@ export async function generateRealAsrJson(extractedData: any, scoreToUse: number
         // Bug 9: Also look for email in data.email or data.identite.email as fallback
         const contactChannels: any[] = [];
         const contactEmail = data.identite?.contact_email?.value || data.identite?.email?.value || data.email || "";
-        if (contactEmail) {
+        // "contact_form" is a sentinel — not a real email. Use URL-based contact point instead.
+        if (contactEmail && contactEmail !== 'contact_form') {
             contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "email": contactEmail });
+        } else if (contactEmail === 'contact_form') {
+            contactChannels.push({ "@type": "ContactPoint", "contactType": "customer service", "url": resolvedEntityUrl ? `${resolvedEntityUrl}` : undefined, "description": "Contact form available on website" });
         }
         const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
         const validPhone = PHONE_REGEX.test(rawPhone) ? rawPhone : "";

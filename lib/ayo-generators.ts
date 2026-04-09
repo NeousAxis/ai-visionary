@@ -1026,7 +1026,10 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     const audience = rawAudienceFaq ? sanitizeAudience(rawAudienceFaq) : "";
     const useCases = mergeAiNamesInUseCases(sanitizeFieldArray(cleanArray(data.offre?.use_cases?.value)));
     const pricing = sanitizeFieldValue(cleanVal(data.offre?.pricing_indication?.value)) || "";
-    const email = data.identite?.contact_email?.value || "";
+    const rawEmail = data.identite?.contact_email?.value || "";
+    // "contact_form" is a sentinel, not a real email — treat as empty for output
+    const email = rawEmail === 'contact_form' ? '' : rawEmail;
+    const hasContactForm = rawEmail === 'contact_form';
     const rawPhone = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhone) ? rawPhone : "";
     const rawCityFaq = sanitizeFieldValue(cleanVal(data.identite?.city?.value)) || "";
@@ -1270,11 +1273,13 @@ export function generateFaqJson(data: any, url: string, locale: 'fr' | 'en' = 'e
     if (en) {
         if (email) contactParts.push(`by email at ${email}`);
         if (phone) contactParts.push(`by phone at ${phone}`);
-        contactParts.push(`via the website ${url}`);
+        if (hasContactForm) contactParts.push(`via the contact form on ${url}`);
+        else contactParts.push(`via the website ${url}`);
     } else {
         if (email) contactParts.push(`par email à ${email}`);
         if (phone) contactParts.push(`par téléphone au ${phone}`);
-        contactParts.push(`via le site web ${url}`);
+        if (hasContactForm) contactParts.push(`via le formulaire de contact sur ${url}`);
+        else contactParts.push(`via le site web ${url}`);
     }
 
     qna.push({
@@ -1555,7 +1560,9 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const NOT_A_CITY = /^(swiss|suisse|schweiz|france|germany|deutschland|italy|spain|belgique|belgium)(\s|$)/i;
     const city = NOT_A_CITY.test(rawCity.trim()) ? "" : rawCity;
     const country = normalizeCountryENec(sanitizeFieldValue(cleanVal(data.identite?.country?.value)) || "");
-    const email = data.identite?.contact_email?.value || "";
+    const rawEmailEC = data.identite?.contact_email?.value || "";
+    // "contact_form" is a sentinel, not a real email — treat as empty for output
+    const email = rawEmailEC === 'contact_form' ? '' : rawEmailEC;
     const rawPhoneExt = (data.identite?.contact_phone?.value || "").toString().trim();
     const phone = PHONE_REGEX.test(rawPhoneExt) ? rawPhoneExt : "";
     const complianceEC = sanitizeComplianceOutput({
@@ -1670,6 +1677,7 @@ export function generateExternalContextJsonLocal(data: any, url?: string, locale
     const primaryChannels: string[] = [en ? "Website" : "Site web"];
     const secondaryChannels: string[] = [];
     if (email) secondaryChannels.push("Email");
+    else if (rawEmailEC === 'contact_form') secondaryChannels.push(en ? "Contact form" : "Formulaire de contact");
     if (phone) secondaryChannels.push(en ? "Phone" : "Telephone");
     if (deliveryMode) {
         const dm = deliveryMode.toLowerCase();
