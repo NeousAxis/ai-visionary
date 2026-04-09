@@ -259,9 +259,9 @@ export async function runAllAgents(
   events.push(socialRun.event);
   onEvent?.(socialRun.event);
 
-  // Agent 8: Pedagogy — needs renderedHtml + url (has its own Jina HTML fallback for SPA)
+  // Agent 8: Pedagogy — consumes renderedHtml (no additional Jina calls)
   onEvent?.({ agent: 'detect-pedagogy', status: 'running', data: null, durationMs: 0 });
-  const pedagogyRun = await runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml, fetchResult.url));
+  const pedagogyRun = await runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml));
   events.push(pedagogyRun.event);
   onEvent?.(pedagogyRun.event);
 

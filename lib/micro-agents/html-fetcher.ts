@@ -1,8 +1,7 @@
 // lib/micro-agents/html-fetcher.ts — Universal HTML fetcher
 // Returns distinct sources: rawHtml, renderedHtml, textContent, sourceType
-// 1. Try simple fetch (fast, works for SSR sites)
-// 2. If SPA detected → Puppeteer headless Chromium
-// 3. Fallback → Jina HTML with footer wait
+// SSR: rawHtml = renderedHtml, textContent derived from it
+// SPA: two parallel Jina calls — markdown (textContent) + HTML with footer (renderedHtml)
 
 import { isAllowedUrl } from '../validators';
 import type { FetchResult, SourceType } from './types';
@@ -37,7 +36,6 @@ function isSpaShell(html: string): boolean {
 
 /**
  * Render a page with headless Chromium (Puppeteer).
- * Uses @sparticuz/chromium for Vercel/AWS Lambda compatibility.
  */
 async function renderWithBrowser(url: string): Promise<string | null> {
   try {
@@ -55,13 +53,8 @@ async function renderWithBrowser(url: string): Promise<string | null> {
     try {
       const page = await browser.newPage();
       await page.setUserAgent('AYO-Bot/2.0 (AI Visionary Scanner)');
+      await page.goto(url, { waitUntil: 'networkidle2', timeout: 12000 });
 
-      await page.goto(url, {
-        waitUntil: 'networkidle2',
-        timeout: 12000,
-      });
-
-      // Scroll to bottom to trigger lazy loading (footer)
       await page.evaluate(() => {
         return new Promise<void>((resolve) => {
           window.scrollTo(0, document.body.scrollHeight);
@@ -80,10 +73,10 @@ async function renderWithBrowser(url: string): Promise<string | null> {
 }
 
 /**
- * Fallback: use jina.ai reader — rendered HTML with footer wait.
- * Returns real HTML (with <footer>, <nav>, <a href>) not markdown.
+ * Jina HTML: returns real rendered HTML with footer.
+ * Used for: renderedHtml (DOM structure, links, footer/nav).
  */
-async function renderWithJina(url: string): Promise<string | null> {
+async function fetchJinaHtml(url: string): Promise<string | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
 
@@ -97,11 +90,31 @@ async function renderWithJina(url: string): Promise<string | null> {
     });
 
     if (!res.ok) return null;
-
     const html = await res.text();
-    if (!html || html.length < 500) return null;
+    return (html && html.length >= 500) ? html : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
-    return html;
+/**
+ * Jina Markdown: returns clean structured text (headings, lists, links).
+ * Used for: textContent (LLM agents need clean text, not raw HTML).
+ */
+async function fetchJinaMarkdown(url: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const res = await fetch(`https://r.jina.ai/${url}`, {
+      signal: controller.signal,
+    });
+
+    if (!res.ok) return null;
+    const md = await res.text();
+    return (md && md.length >= MIN_TEXT) ? md : null;
   } catch {
     return null;
   } finally {
@@ -156,30 +169,31 @@ export async function fetchHtml(targetUrl: string): Promise<FetchResult> {
     }
 
     // Step 3: SPA detected — need rendering
-    console.log(`[html-fetcher] SPA detected for ${url}, launching headless browser...`);
-    let sourceType: SourceType = 'spa_jina';
+    console.log(`[html-fetcher] SPA detected for ${url}`);
 
-    // Try Puppeteer first (best quality — full DOM)
+    // Try Puppeteer first (best quality — full real DOM)
     const puppeteerHtml = await renderWithBrowser(url);
     if (puppeteerHtml && getTextContent(puppeteerHtml).length > MIN_TEXT) {
       const textContent = getTextContent(puppeteerHtml);
-      console.log(`[html-fetcher] Puppeteer rendered ${puppeteerHtml.length} chars for ${url}`);
+      console.log(`[html-fetcher] Puppeteer: ${puppeteerHtml.length} chars, ${textContent.length} text for ${url}`);
       return { url, rawHtml, renderedHtml: puppeteerHtml, textContent, sourceType: 'spa_puppeteer', headers, statusCode: res.status, isReachable: true };
     }
 
-    // Fallback: Jina HTML with footer wait
-    console.log(`[html-fetcher] Puppeteer failed, falling back to Jina HTML for ${url}`);
-    const jinaHtml = await renderWithJina(url);
-    if (jinaHtml) {
-      const textContent = getTextContent(jinaHtml);
-      console.log(`[html-fetcher] Jina HTML rendered ${jinaHtml.length} chars (${textContent.length} text) for ${url}`);
-      sourceType = 'spa_jina';
-      return { url, rawHtml, renderedHtml: jinaHtml, textContent, sourceType, headers, statusCode: res.status, isReachable: true };
-    }
+    // Fallback: TWO parallel Jina calls
+    // - HTML with footer → renderedHtml (DOM structure for link/footer extraction)
+    // - Markdown → textContent (clean structured text for LLM agents)
+    console.log(`[html-fetcher] Puppeteer failed, launching parallel Jina calls for ${url}`);
+    const [jinaHtml, jinaMarkdown] = await Promise.all([
+      fetchJinaHtml(url),
+      fetchJinaMarkdown(url),
+    ]);
 
-    // Last resort: use raw SPA shell (very limited)
-    console.log(`[html-fetcher] All renderers failed for ${url}, using raw SPA shell`);
-    return { url, rawHtml, renderedHtml: rawHtml, textContent: getTextContent(rawHtml), sourceType: 'ssr', headers, statusCode: res.status, isReachable: true };
+    const renderedHtml = jinaHtml || rawHtml;
+    const textContent = jinaMarkdown || getTextContent(renderedHtml);
+
+    console.log(`[html-fetcher] Jina: html=${jinaHtml ? jinaHtml.length : 0} chars, md=${jinaMarkdown ? jinaMarkdown.length : 0} chars for ${url}`);
+
+    return { url, rawHtml, renderedHtml, textContent, sourceType: 'spa_jina', headers, statusCode: res.status, isReachable: true };
   } catch {
     return { ...EMPTY_RESULT, url };
   }

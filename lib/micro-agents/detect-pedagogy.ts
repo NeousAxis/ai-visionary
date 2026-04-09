@@ -1,5 +1,5 @@
 // lib/micro-agents/detect-pedagogy.ts — Detect FAQ, glossary & documentation via focused LLM
-// Extracts all links + headings from HTML. For SPAs, fetches full rendered HTML via Jina.
+// Consumes renderedHtml from html-fetcher — NO additional Jina calls.
 
 import type { PedagogyResult, Quality } from './types';
 import { llmExtract, parseJson } from './llm-agent';
@@ -15,15 +15,15 @@ Return ONLY JSON: {"has_faq": true/false, "has_glossary": true/false, "has_docum
 Do NOT invent. Only return true if clearly present.`;
 
 /**
- * Extract all links (href + text) and headings from HTML.
- * Ensures footer/nav links are included regardless of HTML size.
+ * Extract all links (href + text) and headings from rendered HTML.
+ * Works on real DOM (SSR or Jina HTML) — footer/nav links are included.
  */
 function extractLinksAndHeadings(html: string): string {
   const parts: string[] = [];
+  let m;
 
   // Extract all <a href="...">text</a> links
   const linkRe = /<a\s[^>]*href=["']([^"']+)["'][^>]*>([^<]*)</gi;
-  let m;
   while ((m = linkRe.exec(html)) !== null) {
     const href = m[1].trim();
     const text = m[2].trim();
@@ -48,42 +48,12 @@ function extractLinksAndHeadings(html: string): string {
 }
 
 /**
- * For SPAs: fetch full rendered HTML via Jina (HTML format) to get footer/nav links.
- * This is a separate request from the main html-fetcher (which uses markdown for content).
+ * Detect FAQ, glossary, documentation from renderedHtml.
+ * No Jina calls — html-fetcher already provides complete renderedHtml.
  */
-async function fetchRenderedLinks(url: string): Promise<string> {
+export async function detectPedagogy(renderedHtml: string): Promise<PedagogyResult> {
   try {
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 15000);
-    const res = await fetch(`https://r.jina.ai/${url}`, {
-      signal: ctrl.signal,
-      headers: {
-        'X-Return-Format': 'html',
-        'X-Wait-For-Selector': 'footer',
-      },
-    });
-    clearTimeout(tid);
-    if (!res.ok) return '';
-    const html = await res.text();
-    return extractLinksAndHeadings(html);
-  } catch {
-    return '';
-  }
-}
-
-export async function detectPedagogy(html: string, url: string): Promise<PedagogyResult> {
-  try {
-    // 1. Extract links from available HTML
-    let extracted = extractLinksAndHeadings(html);
-
-    // 2. Fetch Jina HTML only if extracted links don't mention FAQ/glossary/docs (SPA fallback)
-    const hasPedagogyHints = /faq|glossar|lexique|documentation|docs|guide|tutoriel/i.test(extracted);
-    if (!hasPedagogyHints) {
-      const jinaLinks = await fetchRenderedLinks(url);
-      if (jinaLinks) {
-        extracted = extracted + '\n' + jinaLinks;
-      }
-    }
+    const extracted = extractLinksAndHeadings(renderedHtml);
 
     const raw = await llmExtract(PROMPT, extracted, 8000);
     const data = parseJson<{ has_faq?: boolean; has_glossary?: boolean; has_documentation?: boolean }>(raw);
