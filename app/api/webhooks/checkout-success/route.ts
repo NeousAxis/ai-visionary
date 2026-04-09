@@ -623,10 +623,19 @@ export async function POST(req: Request) {
         }
 
         // Resolve entity name (multiple fallbacks to avoid "Entity" or "Entreprise Inconnue")
+        // Priority: user-confirmed legal name (from Stripe metadata) > scan-detected name
         const ext = analysisData.extract as Record<string, any>;
-        const entityName = ext.identite?.name?.value
+        const userLegalName = session.metadata?.legal_name || '';
+        const entityName = userLegalName
+            || ext.identite?.name?.value
             || ext.identite?.legal_name?.value
             || (locale === 'fr' ? "Entreprise" : "Entity");
+        // If user provided a legal name, also inject it into the extract for file generation
+        if (userLegalName && ext.identite) {
+            ext.identite.legal_name = { value: userLegalName, q: 1, evidence: ['user_confirmed'] };
+            // Keep display name (from scan) separate from legal name
+            if (!ext.identite.name?.value) ext.identite.name = { value: userLegalName, q: 1, evidence: ['user_confirmed'] };
+        }
 
         // 4. REGISTRY AYA
         // Extract entity metadata from analysis data (instead of defaulting to CH/company/General)

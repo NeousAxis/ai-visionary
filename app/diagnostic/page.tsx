@@ -95,6 +95,8 @@ export default function DiagnosticV2Page() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [analysisId, setAnalysisId] = useState('');
+  const [legalName, setLegalName] = useState('');
+  const [legalNameConfirmed, setLegalNameConfirmed] = useState(false);
 
   const t = useTranslations('diagnostic');
   const locale = useLocale();
@@ -203,6 +205,13 @@ export default function DiagnosticV2Page() {
     }
   }, [currentStep, filesRevealed, scrollTo]);
 
+  // Legal name confirmed → advance to step 3
+  useEffect(() => {
+    if (legalNameConfirmed && currentStep === 2 && score) {
+      setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 500);
+    }
+  }, [legalNameConfirmed, currentStep, score, scrollTo]);
+
   // Step 3: Animate score reveal
   useEffect(() => {
     if (currentStep === 3 && score && !scoreRevealed) {
@@ -297,11 +306,13 @@ export default function DiagnosticV2Page() {
               if (ev.is_aya_registered || ev.extract?.meta?.source?.scan?.is_aya_registered) {
                 setIsExistingClient(true);
               }
-              // Scroll to transition spinner (center it in viewport), then move to step 3
+              // Pre-fill legal name with detected name
+              if (shortName) setLegalName(shortName);
+              setLegalNameConfirmed(false);
+              // Scroll to legal name input (between step 2 and step 3)
               setTimeout(() => {
-                document.getElementById('transition-score')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 300);
-              setTimeout(() => { setCurrentStep(3); scrollTo('step-3'); }, 2500);
+                document.getElementById('legal-name-prompt')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 800);
             } else if (ev.phase === 'error') {
               setError(ev.message || t('scanFailed'));
             }
@@ -553,12 +564,42 @@ export default function DiagnosticV2Page() {
         </section>
       )}
 
-      {/* ═══ TRANSITION — Computing score spinner ═══ */}
-      {currentStep === 2 && (
+      {/* ═══ TRANSITION — Computing score spinner (only while agents still running) ═══ */}
+      {currentStep === 2 && !score && (
         <div id="transition-score" className="dv2-transition-panel">
           <div className="dv2-transition-spinner" />
           <h3>{t('transitionTitle')}</h3>
           <p>{t('transitionSub')}</p>
+        </div>
+      )}
+
+      {/* ═══ LEGAL NAME PROMPT — after scan, before score ═══ */}
+      {currentStep === 2 && score && !legalNameConfirmed && (
+        <div id="legal-name-prompt" className="dv2-legal-name-panel">
+          <h3>{locale === 'fr' ? 'Dernière étape avant votre score' : 'One last step before your score'}</h3>
+          <p style={{ color: '#666', marginBottom: '1rem' }}>
+            {locale === 'fr'
+              ? 'Merci d\'indiquer le nom légal de votre entreprise (tel qu\'enregistré au registre du commerce) :'
+              : 'Please enter your company\'s legal name (as registered) :'}
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', maxWidth: '500px', margin: '0 auto' }}>
+            <input
+              type="text"
+              value={legalName}
+              onChange={(e) => setLegalName(e.target.value)}
+              placeholder={locale === 'fr' ? 'Ex: Régénère Plus Sàrl' : 'Ex: Regenere Plus Ltd'}
+              className="dv2-search-input"
+              style={{ flex: 1 }}
+            />
+            <button
+              onClick={() => { if (legalName.trim()) setLegalNameConfirmed(true); }}
+              disabled={!legalName.trim()}
+              className="dv2-search-btn"
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {locale === 'fr' ? 'Confirmer' : 'Confirm'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -819,6 +860,7 @@ export default function DiagnosticV2Page() {
                         packType: selectedPlan === 'pro' ? 'PRO' : 'AYA_SUB',
                         locale,
                         analysisId,
+                        legalName: legalName.trim() || undefined,
                       }),
                     });
                     const data = await res.json();

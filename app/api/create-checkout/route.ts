@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     const logger = createLogger(generateCorrelationId(), 'checkout');
 
     try {
-        const { email, url, packType, analysisId: aid, locale: reqLocale } = await req.json();
+        const { email, url, packType, analysisId: aid, locale: reqLocale, legalName } = await req.json();
         const locale = reqLocale === 'fr' ? 'fr' : 'en';
 
         if (!email || !url) {
@@ -167,7 +167,8 @@ export async function POST(req: NextRequest) {
                 pack_type: packType, // 'AYA_SUB' | 'PRO'
                 analyzed_url: url,
                 analysis_id: aid || '',
-                mode: mode // 'subscription' | 'payment'
+                mode: mode, // 'subscription' | 'payment'
+                ...(legalName ? { legal_name: legalName } : {}),
             }
         });
 
