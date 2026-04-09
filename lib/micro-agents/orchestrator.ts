@@ -12,6 +12,40 @@ import { detectPedagogy } from './detect-pedagogy';
 import type { AllAgentResults, AgentEvent, AgentName, FetchResult, ServicesResult, LegalResult } from './types';
 import type { AyoExtract, Quality } from '../aio-score-engine';
 
+// --- Name cleaning ---
+
+/**
+ * Decode HTML entities and strip tagline/slogan from title-derived names.
+ * "Regenere+ | Consulting Stratégie &amp; Durabilité" → "Regenere+"
+ * "My Corp — The best in town" → "My Corp"
+ * "AI Visionary" → "AI Visionary" (unchanged)
+ */
+function cleanEntityName(raw: string): string {
+  if (!raw) return '';
+  // 1. Decode HTML entities (&amp; &lt; &gt; &quot; &#39; &#x27; &#NNN;)
+  let name = raw
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;|&#x27;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+
+  // 2. Strip tagline after separators: " | ", " - ", " — ", " : "
+  // Only if the part before the separator is long enough to be a real name (>= 3 chars)
+  const separators = [' | ', ' — ', ' – ', ' - ', ' : '];
+  for (const sep of separators) {
+    const idx = name.indexOf(sep);
+    if (idx >= 3) {
+      name = name.substring(0, idx).trim();
+      break;
+    }
+  }
+
+  return name.trim();
+}
+
 // --- Source preparation ---
 
 /**
@@ -293,7 +327,9 @@ export async function mergeAgentResultsToExtract(
 
   // Determine name: prefer JSON-LD, fallback to meta title
   const metaTitleMatch = fetchResult.renderedHtml.match(/<title[^>]*>([^<]+)<\/title>/i);
-  const name = jsonld.name || (metaTitleMatch ? metaTitleMatch[1].trim() : '');
+  const rawName = jsonld.name || (metaTitleMatch ? metaTitleMatch[1].trim() : '');
+  // Clean name: decode HTML entities + strip tagline/slogan after separators (|, -, —, :)
+  const name = cleanEntityName(rawName);
 
   // Determine business type: JSON-LD first, then infer from services/content
   let businessType = jsonld.type || '';
