@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import JSZip from 'jszip';
 import crypto from 'crypto';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
@@ -11,9 +11,6 @@ import { verifyUpdateToken } from '@/lib/update-token';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
-
-// Conditional Resend init
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 /**
  * POST /api/regenerate-files
@@ -143,8 +140,8 @@ export async function POST(req: NextRequest) {
         logger.info('REGEN_ZIP', `ZIP built (${zipBuffer.length} bytes) for ${entityName}`);
 
         // --- Send email ---
-        if (!resend) {
-            logger.error('REGEN_NO_RESEND', 'Resend not configured (RESEND_API_KEY missing)');
+        if (!process.env.SMTP_USER) {
+            logger.error('REGEN_NO_SMTP', 'SMTP not configured (SMTP_USER missing)');
             return NextResponse.json(
                 { error: 'Service email non configure' },
                 { status: 500 }
@@ -195,7 +192,7 @@ export async function POST(req: NextRequest) {
     </div>
 </div>`;
 
-        const emailResult = await resend.emails.send({
+        const emailResult = await sendEmail({
             from: 'AYO Delivery <delivery@ai-visionary.com>',
             to: [customerEmail],
             subject: en ? `Your AYO files have been updated — ${entityName}` : `Vos fichiers AYO mis a jour — ${entityName}`,
@@ -203,9 +200,12 @@ export async function POST(req: NextRequest) {
             html: emailHtml,
         });
 
-        logger.info('REGEN_EMAIL_SENT', `Email sent to ${customerEmail}`, {
-            resendId: (emailResult as any)?.data?.id,
-        });
+        if (!emailResult.success) {
+            logger.error('REGEN_EMAIL_FAIL', `Email send failed: ${emailResult.error}`);
+            throw new Error(emailResult.error || 'Email sending failed');
+        }
+
+        logger.info('REGEN_EMAIL_SENT', `Email sent to ${customerEmail}`);
 
         return NextResponse.json({
             success: true,

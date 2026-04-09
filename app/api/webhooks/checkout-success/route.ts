@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import Stripe from 'stripe';
 import JSZip from 'jszip';
 import crypto from 'crypto';
 
 // Vercel function config — 60s max (native Next.js method, more reliable than vercel.json)
 export const maxDuration = 60;
-
-// Initialize Services
-const resend = new Resend(process.env.RESEND_API_KEY || 're_build_placeholder');
 
 import { db } from '@/lib/db';
 // generateRealAsrJson available from '@/lib/ayo-crypto' if needed
@@ -610,7 +607,7 @@ export async function POST(req: Request) {
                             <p style="font-size: 12px; color: #9ca3af; margin: 0;">AI Visionary — Ref: ${session_id.substring(0, 20)}</p>
                         </div>
                     </div>`;
-                await resend.emails.send({
+                await sendEmail({
                     from: 'AYO Support <hello@ai-visionary.com>',
                     to: [customerEmail],
                     subject: apologySubject,
@@ -762,7 +759,7 @@ export async function POST(req: Request) {
             const ayaSubject = locale === 'en'
                 ? `✅ AYA subscription activated — ${entityName}`
                 : `✅ Abonnement AYA activé — ${entityName}`;
-            await resend.emails.send({
+            await sendEmail({
                 from: 'AYO Registry <registry@ai-visionary.com>',
                 to: [customerEmail],
                 subject: ayaSubject,
@@ -831,7 +828,7 @@ export async function POST(req: Request) {
             const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
             logger.info('WEBHOOK_ZIP_BUILT', `ZIP built with 5 files for ${entityName} (QC: ${architecteResult.delivered ? 'PASS' : 'WARN'})`, { files: 5 });
 
-            // Build email HTML first (to catch errors before Resend call)
+            // Build email HTML first (to catch errors before SMTP call)
             let emailHtml: string;
             try {
                 emailHtml = buildProEmailHtml({
@@ -852,16 +849,19 @@ export async function POST(req: Request) {
                 const proSubject = locale === 'en'
                     ? `📥 Your AYO PRO Pack — ${entityName}`
                     : `📥 Votre Pack AYO PRO — ${entityName}`;
-                const emailResult = await resend.emails.send({
+                const emailResult = await sendEmail({
                     from: 'AYO Delivery <delivery@ai-visionary.com>',
                     to: [customerEmail],
                     subject: proSubject,
                     attachments: [{ filename: 'AYO_Pack_PRO.zip', content: zipBuffer }],
                     html: emailHtml
                 });
-                logger.info('WEBHOOK_EMAIL_PRO', `PRO email sent to ${customerEmail} with 5 files`, { resendId: (emailResult as any)?.data?.id });
+                if (!emailResult.success) {
+                    throw new Error(emailResult.error || 'Email sending failed');
+                }
+                logger.info('WEBHOOK_EMAIL_PRO', `PRO email sent to ${customerEmail} with 5 files`);
             } catch (emailErr: any) {
-                logger.critical('WEBHOOK_EMAIL_CRASH', `Resend API failed: ${emailErr.message}`, { stack: emailErr.stack?.substring(0, 500), statusCode: emailErr.statusCode });
+                logger.critical('WEBHOOK_EMAIL_CRASH', `SMTP send failed: ${emailErr.message}`, { stack: emailErr.stack?.substring(0, 500) });
                 throw emailErr;
             }
         } else {

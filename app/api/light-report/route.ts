@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import { db } from '@/lib/db';
 import { generateRealAsrJson } from '@/lib/ayo-crypto';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
@@ -40,11 +40,6 @@ export async function GET(req: NextRequest) {
             headers: { 'Content-Type': 'text/html; charset=utf-8' },
         });
     }
-
-    // Initialize Resend
-    const resendKey = process.env.RESEND_API_KEY;
-    if (!resendKey) return NextResponse.json({ error: 'Resend Key Missing' }, { status: 500 });
-    const resend = new Resend(resendKey);
 
     try {
         logger.info('LIGHT_REPORT_START', `Sending LIGHT report to ${email}${url ? ` for ${url}` : ''}`);
@@ -129,7 +124,7 @@ export async function GET(req: NextRequest) {
         const finalAuditHtml = (analysisData as any).audit_report || computedAuditReport || fallbackAudit;
 
         // 3. Send Email
-        const emailResponse = await resend.emails.send({
+        const { success: emailSuccess, error: emailError } = await sendEmail({
             from: 'AI Visionary System <hello@ai-visionary.com>',
             replyTo: 'hello@ai-visionary.com',
             to: [email],
@@ -211,21 +206,17 @@ ${JSON.stringify(asrJson, null, 2)}
             ],
         });
 
-        // Check for specific Resend error even in success flow if any
-        if (emailResponse.error) {
-            throw new Error(emailResponse.error.message);
+        if (!emailSuccess) {
+            throw new Error(emailError || 'Email sending failed');
         }
 
         return new Response(`
             <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
                 <h1 style="color: #10b981;">${en ? '✅ Report sent!' : '✅ Dossier envoyé !'}</h1>
                 <p>${en ? 'Email sent to' : 'Email envoyé à'} <strong>${email}</strong>.</p>
-                <div style="background: #f0fdf4; padding: 10px; display: inline-block; margin: 15px 0; border-radius: 5px; color: #15803d; font-family: monospace;">
-                    ${en ? 'Tracking ID:' : 'ID Suivi :'} ${emailResponse.data?.id}
-                </div>
                 <p style="font-size: 0.9rem; color: #666;">${en
-                    ? 'If you don\'t receive anything, check your spam folder or contact support with the ID above.'
-                    : 'Si vous ne recevez rien, vérifiez vos spams ou contactez le support avec l\'ID ci-dessus.'
+                    ? 'If you don\'t receive anything, check your spam folder or contact support.'
+                    : 'Si vous ne recevez rien, vérifiez vos spams ou contactez le support.'
                 }</p>
                 <br>
                 <a href="/" style="color: #6366f1; text-decoration: none;">${en ? '&larr; Back to home' : '&larr; Retour à l\'accueil'}</a>

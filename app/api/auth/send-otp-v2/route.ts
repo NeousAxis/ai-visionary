@@ -4,13 +4,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { maskEmail } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 /** Extract bare domain from a URL (strips protocol, www, path) */
 function extractDomain(input: string): string {
@@ -98,12 +96,12 @@ export async function POST(req: NextRequest) {
         }
         console.log(`[otp-v2] OTP saved AND verified for ${maskEmail(trimmedEmail)}`);
 
-        // 6. Send email via Resend
+        // 6. Send email via SMTP
         const otpSubject = en
             ? `Your verification code: ${code}`
             : `Votre code de verification : ${code}`;
 
-        const { error } = await resend.emails.send({
+        const { error } = await sendEmail({
             from: 'AI Visionary Security <security@ai-visionary.com>',
             to: [trimmedEmail],
             subject: otpSubject,
@@ -126,7 +124,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (error) {
-            console.log(`[otp-v2] Email send failed: ${error.message}`);
+            console.log(`[otp-v2] Email send failed: ${error}`);
             return NextResponse.json({ error: 'Failed to send email.' }, { status: 500 });
         }
 

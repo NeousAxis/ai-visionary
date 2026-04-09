@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import { db } from '@/lib/db';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { buildExpiryReminderEmail } from '@/lib/email-templates';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
-
-const resend = process.env.RESEND_API_KEY
-    ? new Resend(process.env.RESEND_API_KEY)
-    : null;
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://ai-visionary.xyz';
 
@@ -84,11 +80,11 @@ export async function GET(request: Request) {
                         await db.updateEntityLifecycle(entityId, { expiry_reminder_7d_sent: true, expiry_reminder_7d_sent_at: now });
                     }
 
-                    if (resend) {
+                    if (process.env.SMTP_USER) {
                         const renewUrl = `${BASE_URL}/dashboard/${entityId}`;
                         const daysPlural = days > 1;
 
-                        await resend.emails.send({
+                        await sendEmail({
                             from: 'AI Visionary <hello@ai-visionary.com>',
                             to: email,
                             subject: en

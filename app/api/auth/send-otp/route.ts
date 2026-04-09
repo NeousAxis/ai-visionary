@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { urlSchema } from '@/lib/validators';
 import { maskEmail } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
     // Rate limit: 5 requests/min per IP
@@ -81,12 +79,12 @@ export async function POST(req: NextRequest) {
         // 3. Save to DB (expires in 10 mins)
         await db.saveOTP(adminEmail, code);
 
-        // 4. Send Email via Resend
+        // 4. Send Email via SMTP
         const otpSubject = en
             ? `🔒 Your security code: ${code}`
             : `🔒 Votre code de sécurité : ${code}`;
         const entityLabel = entityName || (en ? 'your entity' : 'votre entité');
-        const { error } = await resend.emails.send({
+        const { error } = await sendEmail({
             from: 'AI Visionary Security <security@ai-visionary.com>',
             to: [adminEmail],
             subject: otpSubject,
@@ -109,7 +107,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (error) {
-            logger.error('OTP_EMAIL_FAIL', `Failed to send OTP email`, { error: error.message });
+            logger.error('OTP_EMAIL_FAIL', `Failed to send OTP email`, { error });
             return NextResponse.json({ error: "Failed to send email." }, { status: 500 });
         }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import JSZip from 'jszip';
 import crypto from 'crypto';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
@@ -13,8 +13,6 @@ import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
-
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Block names matching the AyoExtract.fields keys
 const VALID_BLOCKS = [
@@ -241,7 +239,7 @@ export async function POST(req: NextRequest) {
         const emailTarget = (contactEmail && typeof contactEmail === 'string' ? contactEmail : entity.contact_email) || '';
         let filesEmailSent = false;
 
-        if (isPro && emailTarget && resend) {
+        if (isPro && emailTarget && process.env.SMTP_USER) {
             try {
                 const entityNameForEmail = (displayName as string) || 'Entreprise';
                 const extractDataForGen = extract;
@@ -314,7 +312,7 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
 </div>
 </div>`;
 
-                await resend.emails.send({
+                await sendEmail({
                     from: 'AYO Delivery <delivery@ai-visionary.com>',
                     to: [emailTarget],
                     subject: en ? `Your AYO files have been updated — ${entityNameForEmail}` : `Vos fichiers AYO mis a jour — ${entityNameForEmail}`,
@@ -328,7 +326,7 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
                 const msg = regenErr instanceof Error ? regenErr.message : 'Unknown';
                 logger.warn('UPDATE_REGEN_FAILED', `File regeneration failed (update still saved): ${msg}`);
             }
-        } else if (!isPro && emailTarget && resend) {
+        } else if (!isPro && emailTarget && process.env.SMTP_USER) {
             // AYA subscription clients: send simple confirmation email (no files)
             try {
                 const entityNameForEmail = (displayName as string) || 'Entreprise';
@@ -363,7 +361,7 @@ ${delta !== 0 ? `<p style="margin:0;font-size:14px;color:${delta > 0 ? '#166534'
 </div>
 </div>`;
 
-                await resend.emails.send({
+                await sendEmail({
                     from: 'AYO Delivery <delivery@ai-visionary.com>',
                     to: [emailTarget],
                     subject: en ? `Update confirmed — ${entityNameForEmail}` : `Mise a jour confirmee — ${entityNameForEmail}`,

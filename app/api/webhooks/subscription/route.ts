@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import { db } from '@/lib/db';
 import { createLogger } from '@/lib/logger';
 import { buildPaymentFailedEmail, buildCancellationEmail } from '@/lib/email-templates';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
-
-// Bug 3 fix: conditional Resend init (no placeholder fallback)
-const resend = process.env.RESEND_API_KEY
-    ? new Resend(process.env.RESEND_API_KEY)
-    : null;
 
 const HANDLED_EVENTS = new Set([
     'customer.subscription.updated',
@@ -116,13 +111,13 @@ export async function POST(req: NextRequest) {
             // Send payment failed email
             // Bug 11 fix: use entity email only (no Stripe customer cast)
             const customerEmail = entity.contact_email || entity.email || invoice.customer_email;
-            if (customerEmail && resend) {
+            if (customerEmail && process.env.SMTP_USER) {
                 const portalUrl = 'https://ai-visionary.xyz/diagnostic';
                 // Locale: from entity metadata or default 'en'
                 const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
                 const en = locale === 'en';
                 try {
-                    await resend.emails.send({
+                    await sendEmail({
                         from: 'registry@ai-visionary.com',
                         to: customerEmail,
                         subject: en
@@ -141,8 +136,8 @@ export async function POST(req: NextRequest) {
                 }
             } else if (!customerEmail) {
                 logger.warn('PAYMENT_FAILED_NO_EMAIL', `No email for entity ${entity.entity_id}, cannot send payment failed notification`, { entityId: entity.entity_id });
-            } else if (!resend) {
-                logger.warn('PAYMENT_FAILED_NO_RESEND', 'Resend not configured, skipping payment failed email', { entityId: entity.entity_id });
+            } else if (!process.env.SMTP_USER) {
+                logger.warn('PAYMENT_FAILED_NO_SMTP', 'SMTP not configured, skipping payment failed email', { entityId: entity.entity_id });
             }
 
             return NextResponse.json({ received: true, action: 'payment_failed_processed' });
@@ -169,13 +164,13 @@ export async function POST(req: NextRequest) {
             // Send cancellation email
             // Bug 11 fix: use entity email only (no Stripe customer cast)
             const customerEmail = entity.contact_email || entity.email;
-            if (customerEmail && resend) {
+            if (customerEmail && process.env.SMTP_USER) {
                 const diagnosticUrl = 'https://ai-visionary.xyz/diagnostic';
                 // Locale: from entity metadata or default 'en'
                 const locale: 'fr' | 'en' = (entity as any).locale === 'fr' ? 'fr' : 'en';
                 const en = locale === 'en';
                 try {
-                    await resend.emails.send({
+                    await sendEmail({
                         from: 'registry@ai-visionary.com',
                         to: customerEmail,
                         subject: en
@@ -194,8 +189,8 @@ export async function POST(req: NextRequest) {
                 }
             } else if (!customerEmail) {
                 logger.warn('SUB_CANCELLED_NO_EMAIL', `No email for entity ${entity.entity_id}, cannot send cancellation notification`, { entityId: entity.entity_id });
-            } else if (!resend) {
-                logger.warn('SUB_CANCELLED_NO_RESEND', 'Resend not configured, skipping cancellation email', { entityId: entity.entity_id });
+            } else if (!process.env.SMTP_USER) {
+                logger.warn('SUB_CANCELLED_NO_SMTP', 'SMTP not configured, skipping cancellation email', { entityId: entity.entity_id });
             }
 
             logger.info('SUB_DELETED_OK', `Entity ${entity.entity_id} marked as canceled, payment_completed=false`);

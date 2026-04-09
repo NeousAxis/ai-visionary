@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
-import { Resend } from 'resend';
+import { sendEmail } from '@/lib/mailer';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
 // registerOrUpdateEntity imported on-demand from '@/lib/aya/registry'
@@ -67,12 +67,7 @@ const V4_EVIDENCE_MODE = process.env.AYO_V4_EVIDENCE === 'true';
 // Scoring + Gemini extraction can take 45-90s under load
 export const maxDuration = 120;
 
-// Initialize Resend
-const resendApiKey = process.env.RESEND_API_KEY;
-if (!resendApiKey) {
-    console.warn('RESEND_API_KEY is not set — email features will be disabled');
-}
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+// SMTP email availability check (mailer handles credentials internally)
 
 // Initialize Stripe lazily to avoid build-time crash when env var is missing
 let _stripe: Stripe | null = null;
@@ -484,7 +479,7 @@ export async function POST(req: Request) {
             // Call our internal API (Internal fetch)
             // We can't easily fetch internal localhost in Vercel Edge/Serverless sometimes without full URL.
             // Better to import logic? No, modularity. Let's try direct DB call or fetch absolute URL.
-            // SAFEST: Direct DB/Resend call here or assume user will type code.
+            // SAFEST: Direct DB/SMTP call here or assume user will type code.
 
             // Simplest: Just simulate the API call here to ensure reliability
             // 1. Get Email (Robust Strategy: Registry -> Analysis)
@@ -508,10 +503,10 @@ export async function POST(req: Request) {
                 const code = Math.floor(100000 + Math.random() * 900000).toString();
                 await db.saveOTP(targetEmail, code);
 
-                if (!resend) {
+                if (!process.env.SMTP_USER) {
                     return new Response(JSON.stringify({ error: 'Email service not configured' }), { status: 500 });
                 }
-                const { error } = await resend.emails.send({
+                const { error } = await sendEmail({
                     from: 'AI Visionary Security <security@ai-visionary.com>',
                     to: [targetEmail],
                     subject: locale === 'en'
@@ -540,7 +535,7 @@ export async function POST(req: Request) {
                     `
                 });
 
-                if (error) console.error("Resend Error", error);
+                if (error) console.error("Email send error", error);
 
                 return new Response(JSON.stringify({
                     text: locale === 'en'
