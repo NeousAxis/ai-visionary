@@ -189,7 +189,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ enti
                 <DashboardClient
                     entityId={entityId}
                     name={name}
-                    analysisEmail={analysisEmail || contactEmail}
+                    analysisEmail={analysisEmail || ownerEmail || contactEmail}
                     contactEmail={contactEmail}
                     url={url}
                     score={totalScore}
