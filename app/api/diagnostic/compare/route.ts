@@ -67,7 +67,9 @@ export async function POST(req: NextRequest) {
   try {
     const { country, services, siteName, siteUrl } = await req.json();
 
-    const allEntities = await db.getAyaEntities(1000);
+    // Fetch ALL entities — must include older certified entities like Eclore
+    // (getAyaEntities paginates through Supabase in 1000-row chunks)
+    const allEntities = await db.getAyaEntities(10000);
     if (!allEntities?.length) {
       return NextResponse.json({ competitors: [], averageScore: 0, totalInSector: 0 });
     }
