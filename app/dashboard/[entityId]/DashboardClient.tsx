@@ -572,7 +572,7 @@ export default function DashboardClient(props: DashboardProps) {
           </div>
           <div>
             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', letterSpacing: '0.05em' }}>{t('emailLabel')}</span>
-            <p style={{ fontWeight: 600, color: '#212E53', fontSize: '0.9rem', marginTop: 2, wordBreak: 'break-all' }}>{props.contactEmail || '—'}</p>
+            <p style={{ fontWeight: 600, color: '#212E53', fontSize: '0.9rem', marginTop: 2, wordBreak: 'break-all' }}>{props.analysisEmail || props.contactEmail || '—'}</p>
           </div>
           <div>
             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', letterSpacing: '0.05em' }}>{t('urlLabel')}</span>
