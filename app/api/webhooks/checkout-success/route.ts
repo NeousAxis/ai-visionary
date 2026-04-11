@@ -21,7 +21,7 @@ import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
 
 // Pack detection by Stripe price_id (env vars) — replaces fragile price threshold
 function detectPackType(session: Stripe.Checkout.Session): string {
-    const ayaSubPriceId = process.env.STRIPE_PRICE_AYA_SUB;
+    const ayaSubPriceId = process.env.STRIPE_PRICE_AYA || process.env.STRIPE_PRICE_AYA_SUB;
     const proPriceId = process.env.STRIPE_PRICE_PRO;
 
     // Method 1: Match by price_id from line_items metadata
