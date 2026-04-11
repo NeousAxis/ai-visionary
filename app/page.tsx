@@ -226,8 +226,8 @@ export default function Home() {
           </div>
 
           {/* GEO vs ASR */}
-          <div style={{ maxWidth: '900px', margin: '60px auto 0', padding: '40px', background: '#1E293B', borderRadius: '20px' }}>
-            <h3 style={{ fontSize: '1.6rem', color: 'white', marginBottom: '32px', textAlign: 'center' }}>
+          <div style={{ maxWidth: '900px', margin: '60px auto 0', padding: '40px', background: '#F1F5F9', borderRadius: '20px' }}>
+            <h3 style={{ fontSize: '1.6rem', color: 'var(--text-main)', marginBottom: '32px', textAlign: 'center' }}>
               {t('solution.geoTitle')}
             </h3>
 
@@ -269,8 +269,8 @@ export default function Home() {
             </div>
 
             <div style={{ textAlign: 'center', padding: '28px', background: 'white', borderRadius: '16px', marginBottom: '20px' }}>
-              <h4 style={{ color: '#1E293B', marginBottom: '12px', fontSize: '1.15rem' }}>{t('solution.whyTitle')}</h4>
-              <p style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#1E293B', marginBottom: '16px' }}>{t('solution.whyBody')}</p>
+              <h4 style={{ color: 'var(--text-main)', marginBottom: '12px', fontSize: '1.15rem' }}>{t('solution.whyTitle')}</h4>
+              <p style={{ fontSize: '1.05rem', fontWeight: 'bold', color: 'var(--text-main)', marginBottom: '16px' }}>{t('solution.whyBody')}</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <p style={{ fontSize: '1rem', color: '#9A3412', padding: '14px', background: '#FFF7ED', borderRadius: '8px', borderLeft: '3px solid #F97316' }}>{t('solution.whyNoAsr')}</p>
                 <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#0F766E', padding: '14px', background: '#F0FDFA', borderRadius: '8px', borderLeft: '3px solid #0D9488' }}>{t('solution.whyWithAsr')}</p>
