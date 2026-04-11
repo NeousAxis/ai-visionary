@@ -6,6 +6,41 @@ import { db } from '@/lib/db';
 // ── Always exclude these domains (our own platform) ──
 const EXCLUDED_DOMAINS = ['ai-visionary.xyz', 'ai-visionary.com'];
 
+// ── Entity type compatibility matrix ──
+// Prevents comparing a design agency with a nonprofit, etc.
+const INCOMPATIBLE_TYPES: Record<string, Set<string>> = {
+  // Agencies/corporates should NOT be compared with associations/nonprofits
+  'DesignAgency': new Set(['association', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+  'MarketingAgency': new Set(['association', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+  'ConsultingFirm': new Set(['association', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+  'TechnologyCompany': new Set(['association', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+  'FinancialService': new Set(['association', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+  'LegalService': new Set(['association', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+  'MedicalBusiness': new Set(['association', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+  // Associations/NGOs should NOT be compared with commercial entities
+  'NonprofitOrganization': new Set(['agency', 'sarl', 'gmbh', 'sas', 'sa', 'inc', 'ltd', 'consulting', 'marketing', 'design', 'finance', 'recruitment', 'recrutement', 'security', 'sécurité', 'retail', 'e-commerce']),
+  // E-commerce should not be compared with services
+  'Store': new Set(['consulting', 'conseil', 'advisory', 'agency', 'agence', 'nonprofit', 'ngo', 'fondation', 'foundation']),
+};
+
+function isEntityTypeCompatible(siteType: string, entity: any): boolean {
+  if (!siteType) return true; // no info = allow all
+  const incompatible = INCOMPATIBLE_TYPES[siteType];
+  if (!incompatible) return true; // no rule for this siteType
+
+  // Check entity's sector_macro, entity_type, and display_name for incompatible markers
+  const entitySector = norm(entity.sector_macro || '');
+  const entityType = norm(entity.entity_type || '');
+  const entityName = norm(entity.display_name || entity.legal_name || '');
+
+  for (const marker of incompatible) {
+    if (entitySector.includes(marker) || entityType.includes(marker) || entityName.includes(marker)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // ── Business stopwords: words too generic to be discriminative ──
 // These appear in almost every company description and carry zero signal.
 const STOPWORDS = new Set([
@@ -33,6 +68,17 @@ const STOPWORDS = new Set([
   'paris', 'london', 'zurich', 'bern',
   // Entity types
   'association', 'sarl', 'gmbh', 'sas', 'inc', 'ltd', 'corp',
+  // Generic creative/project
+  'creative', 'creatif', 'creation', 'projet', 'projets', 'project', 'projects',
+  'communication', 'strategie', 'strategy', 'branding', 'brand',
+  'marketing', 'agence', 'agency', 'studio', 'freelance',
+  'identite', 'identity', 'visuelle', 'visual', 'graphique', 'graphic',
+  'atelier', 'workshop', 'formation', 'training',
+  // Generic institutional/academic words (too broad to discriminate)
+  'research', 'recherche', 'policy', 'politique', 'program', 'programme',
+  'protection', 'assistance', 'advocacy', 'awareness',
+  'mission', 'impact', 'action', 'governance', 'gouvernance',
+  'report', 'reporting', 'analysis', 'analyse', 'study', 'etude',
   // Filler
   'based', 'base', 'pour', 'avec', 'dans', 'from', 'with',
   'that', 'this', 'also', 'more', 'plus', 'best', 'across',
@@ -99,12 +145,9 @@ function extractEntityKeywords(entity: any): string[] {
   const okd = payload.data?.aio_blocks?.offre?.fields?.keywords_detected;
   if (Array.isArray(okd)) kw.push(...okd);
 
-  // gemini_description — extract significant COMPOUND terms only (5+ chars)
-  const desc = payload.enrichment?.gemini_description;
-  if (desc && typeof desc === 'string') {
-    const words = desc.split(/\s+/).filter((w: string) => w.length >= 5);
-    kw.push(...words);
-  }
+  // gemini_description — REMOVED: extracting individual words from free-text descriptions
+  // produces too many false positive matches (generic words like "projet", "creativite", "communication"
+  // match across completely unrelated entities like design agencies vs nonprofits)
 
   return Array.from(new Set(kw.map(norm).filter(isMeaningful)));
 }
@@ -160,14 +203,17 @@ function computeWeightedOverlap(
       continue;
     }
 
-    // Containment match (one keyword contains the other)
-    if (sk.length >= 4) {
+    // Containment match — strict: min 6 chars + contained word must be >= 40% of container
+    // Prevents "research" matching "humanitarian policy research" across unrelated sectors
+    if (sk.length >= 6) {
       for (const ek of entityKeywords) {
-        if (ek.length < 4) continue;
-        if (ek.includes(sk) || sk.includes(ek)) {
+        if (ek.length < 6) continue;
+        const shorter = sk.length <= ek.length ? sk : ek;
+        const longer = sk.length <= ek.length ? ek : sk;
+        if (longer.includes(shorter) && shorter.length / longer.length >= 0.4) {
           const matchWeight = idf.get(ek) ?? 1;
           if (matchWeight > 0) {
-            score += Math.min(weight, matchWeight);
+            score += Math.min(weight, matchWeight) * 0.5; // half weight for partial match
             break;
           }
         }
@@ -180,10 +226,45 @@ function computeWeightedOverlap(
 
 export async function POST(req: NextRequest) {
   try {
-    const { services, siteName, siteUrl } = await req.json();
+    const { services, siteName, siteUrl, siteType, industryKeywords } = await req.json();
 
-    // Build site keywords from services
+    // ── Sector affinity: map businessType → sector_macro patterns for boosting ──
+    const SECTOR_AFFINITY: Record<string, string[]> = {
+      'TechnologyCompany': ['technology', 'tech', 'software', 'saas', 'hardware', 'electronics', 'computer', 'peripheral', 'gaming', 'informatique', 'numerique', 'digital'],
+      'DesignAgency': ['design', 'creative', 'graphi', 'branding', 'ux', 'ui', 'agence', 'studio'],
+      'MarketingAgency': ['marketing', 'communication', 'publicite', 'advertising', 'media', 'seo', 'agence'],
+      'ConsultingFirm': ['consulting', 'conseil', 'advisory', 'strateg', 'management'],
+      'EducationalOrganization': ['education', 'formation', 'training', 'school', 'university', 'ecole'],
+      'LegalService': ['legal', 'juridique', 'avocat', 'law', 'droit', 'notaire'],
+      'MedicalBusiness': ['health', 'sante', 'medical', 'pharma', 'clinic', 'hospital'],
+      'FinancialService': ['finance', 'bank', 'assurance', 'insurance', 'investissement', 'comptab', 'audit'],
+      'ProfessionalService': ['professional', 'service'],
+      'NonprofitOrganization': ['nonprofit', 'ngo', 'ong', 'humanitarian', 'humanitaire', 'charity', 'fondation', 'foundation', 'association', 'croix-rouge', 'red cross'],
+      'Store': ['retail', 'e-commerce', 'ecommerce', 'shop', 'boutique', 'magasin', 'store', 'marketplace', 'vente'],
+    };
+
+    function getSectorBoost(entity: any): number {
+      if (!siteType) return 1;
+      const patterns = SECTOR_AFFINITY[siteType];
+      if (!patterns) return 1;
+      const entitySector = norm(entity.sector_macro || '');
+      const entityServices = (entity.asr_payload?.data?.offre?.services?.value || []).map((s: string) => norm(s)).join(' ');
+      const combined = `${entitySector} ${entityServices}`;
+      let matches = 0;
+      for (const p of patterns) {
+        if (combined.includes(p)) matches++;
+      }
+      if (matches >= 2) return 5;   // strong sector match
+      if (matches === 1) return 2.5; // partial sector match
+      return 0.3;                     // different sector = heavy penalty
+    }
+
+    // Build site keywords — PRIORITIZE industry keywords from LLM (high quality, specific)
+    // Fall back to raw services if no industry keywords available
     const rawSiteKeywords: string[] = [];
+    if (Array.isArray(industryKeywords) && industryKeywords.length > 0) {
+      rawSiteKeywords.push(...industryKeywords);
+    }
     if (Array.isArray(services)) rawSiteKeywords.push(...services);
     // Do NOT include siteName — it pollutes matching with company name words
     const siteKeywords = Array.from(new Set(rawSiteKeywords.map(norm).filter(isMeaningful)));
@@ -216,6 +297,9 @@ export async function POST(req: NextRequest) {
       const eName = (e.display_name || e.legal_name || '');
       if (eName.length < 2) continue;
 
+      // Filter out incompatible entity types (e.g. don't compare agency vs nonprofit)
+      if (!isEntityTypeCompatible(siteType, e)) continue;
+
       const kw = extractEntityKeywords(e);
       entityData.push({ entity: e, keywords: kw });
       allKeywordSets.push(kw);
@@ -228,15 +312,24 @@ export async function POST(req: NextRequest) {
     const scored: { entity: any; overlap: number; matchedKw: string[] }[] = [];
 
     for (const { entity, keywords } of entityData) {
-      const overlap = computeWeightedOverlap(siteKeywords, keywords, idf);
+      const rawOverlap = computeWeightedOverlap(siteKeywords, keywords, idf);
 
-      if (overlap > 0) {
-        // Track which site keywords actually matched
+      if (rawOverlap > 0) {
+        // Apply sector affinity boost/penalty
+        const sectorMultiplier = getSectorBoost(entity);
+        const overlap = rawOverlap * sectorMultiplier;
+
+        // Track which site keywords actually matched (same strict rules as scoring)
         const entitySet = new Set(keywords);
         const matched = siteKeywords.filter(sk => {
           if (entitySet.has(sk)) return true;
-          if (sk.length >= 4) {
-            return keywords.some(ek => ek.length >= 4 && (ek.includes(sk) || sk.includes(ek)));
+          if (sk.length >= 6) {
+            return keywords.some(ek => {
+              if (ek.length < 6) return false;
+              const shorter = sk.length <= ek.length ? sk : ek;
+              const longer = sk.length <= ek.length ? ek : sk;
+              return longer.includes(shorter) && shorter.length / longer.length >= 0.4;
+            });
           }
           return false;
         });
@@ -253,9 +346,9 @@ export async function POST(req: NextRequest) {
       return (b.entity.asr_score || 0) - (a.entity.asr_score || 0);
     });
 
-    // Top 5 competitors
+    // Top 5 competitors — require at least 2 matched keywords to avoid false positives
     const top = scored
-      .filter(s => (s.entity.asr_score || 0) > 0)
+      .filter(s => (s.entity.asr_score || 0) > 0 && s.matchedKw.length >= 2)
       .slice(0, 5);
 
     const competitors = top.map(s => ({

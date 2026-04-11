@@ -1,5 +1,6 @@
 import { db } from './db';
 import { isAllowedUrl } from './validators';
+import { AYOBOT_UA } from './micro-agents/constants';
 import type { SiteDetectionSignals } from './evidence-types';
 
 export interface AioScanResult {
@@ -65,7 +66,7 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout (Strict)
 
-        const response = await fetch(url, { signal: controller.signal, headers: { 'User-Agent': 'AYO-Bot/1.0 (AI Visionary Scanner)' } });
+        const response = await fetch(url, { signal: controller.signal, headers: { 'User-Agent': AYOBOT_UA } });
         clearTimeout(timeoutId);
 
         if (response.ok) {
@@ -182,7 +183,7 @@ export async function scanUrlForAioSignals(targetUrl: string): Promise<AioScanRe
         try {
             const asrUrl = new URL(url);
             asrUrl.pathname = '/.ayo/asr.json';
-            const asrResponse = await fetch(asrUrl.toString(), { method: 'HEAD', headers: { 'User-Agent': 'AYO-Bot/1.0' } });
+            const asrResponse = await fetch(asrUrl.toString(), { method: 'HEAD', headers: { 'User-Agent': AYOBOT_UA } });
 
             if (asrResponse.ok) {
                 result.hasAsrFile = true;

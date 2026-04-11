@@ -16,6 +16,7 @@ export type AyoExtract = {
             has_faq_content: boolean | null;
             has_faq_schema: boolean | null;
             is_aya_registered?: boolean;
+            industry_keywords?: string[];
         };
     };
     fields: {

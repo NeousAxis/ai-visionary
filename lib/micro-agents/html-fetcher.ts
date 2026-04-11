@@ -1,3 +1,5 @@
+import { AYOBOT_UA } from './constants';
+
 // lib/micro-agents/html-fetcher.ts — Universal HTML fetcher
 // Returns distinct sources: rawHtml, renderedHtml, textContent, sourceType
 // SSR: rawHtml = renderedHtml, textContent derived from it
@@ -15,7 +17,7 @@ const SPA_INDICATORS = [
   /<script[^>]*src=["'][^"']*(?:chunk|bundle|main|app)\.[a-f0-9]+\.js/i,
 ];
 
-function getTextContent(html: string): string {
+export function getTextContent(html: string): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -67,7 +69,7 @@ async function renderWithBrowser(url: string): Promise<string | null> {
 
     try {
       const page = await browser.newPage();
-      await page.setUserAgent('AYO-Bot/2.0 (AI Visionary Scanner)');
+      await page.setUserAgent(AYOBOT_UA);
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 12000 });
 
       await page.evaluate(() => {
@@ -181,7 +183,7 @@ export async function fetchHtml(targetUrl: string): Promise<FetchResult> {
     const tid = setTimeout(() => ctrl.abort(), 8000);
     const res = await fetch(url, {
       signal: ctrl.signal,
-      headers: { 'User-Agent': 'AYO-Bot/2.0 (AI Visionary Scanner)' },
+      headers: { 'User-Agent': AYOBOT_UA },
       redirect: 'follow',
     });
     clearTimeout(tid);
@@ -191,6 +193,19 @@ export async function fetchHtml(targetUrl: string): Promise<FetchResult> {
     res.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
 
     if (!res.ok) {
+      // Anti-bot / Cloudflare wall — try Jina before giving up
+      console.warn(`[html-fetcher] Direct fetch blocked: status=${res.status} for ${url} — attempting Jina fallback`);
+      const [jinaHtml, jinaMarkdown] = await Promise.all([
+        fetchJinaHtml(url),
+        fetchJinaMarkdown(url),
+      ]);
+      if (jinaHtml || jinaMarkdown) {
+        const renderedHtml = jinaHtml || '';
+        const textContent = jinaMarkdown || getTextContent(renderedHtml);
+        console.log(`[html-fetcher] Jina fallback succeeded for blocked site ${url}`);
+        return { url, rawHtml, renderedHtml, textContent, sourceType: 'spa_jina' as const, headers, statusCode: res.status, isReachable: true };
+      }
+      // Both direct and Jina failed
       return { url, rawHtml, renderedHtml: rawHtml, textContent: '', sourceType: 'ssr', headers, statusCode: res.status, isReachable: false };
     }
 

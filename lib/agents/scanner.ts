@@ -15,6 +15,7 @@
 
 import { scanUrlForAioSignals, type AioScanResult } from '../aio-scanner';
 import { db } from '../db';
+import { AYOBOT_UA } from '../micro-agents/constants';
 
 // --- URL NORMALIZATION ---
 
@@ -77,7 +78,7 @@ export async function performScan(targetUrl: string): Promise<ScannerResult> {
             try {
                 const resp = await fetch(sitemapUrl, {
                     method: 'HEAD',
-                    headers: { 'User-Agent': 'AYO-Bot/1.0' },
+                    headers: { 'User-Agent': AYOBOT_UA },
                     signal: AbortSignal.timeout(3000),
                 });
                 if (resp.ok) {
@@ -92,7 +93,7 @@ export async function performScan(targetUrl: string): Promise<ScannerResult> {
         try {
             const robotsResp = await fetch(`${urlObj.origin}/robots.txt`, {
                 method: 'HEAD',
-                headers: { 'User-Agent': 'AYO-Bot/1.0' },
+                headers: { 'User-Agent': AYOBOT_UA },
                 signal: AbortSignal.timeout(3000),
             });
             if (robotsResp.ok) {

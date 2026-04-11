@@ -530,7 +530,16 @@
     "pedagoDoc": "Documentation",
     "ayaRegistryLink": "Registre AYA",
     "scanFailed": "Échec du scan",
-    "checkoutFailed": "Échec de la création de la session de paiement"
+    "checkoutFailed": "Échec de la création de la session de paiement",
+    "fallbackTitle": "Site bloqué ou inaccessible",
+    "fallbackDesc": "AYOBot n'a pas pu accéder à ce site (protection Cloudflare, erreur 403 ou timeout). Vous pouvez coller ou téléverser le code source HTML de votre page pour lancer le diagnostic manuellement.",
+    "fallbackPaste": "Coller votre HTML",
+    "fallbackPastePlaceholder": "Collez ici le code source HTML de votre page d'accueil...",
+    "fallbackUpload": "Ou téléverser un fichier HTML",
+    "fallbackUploadBtn": "Choisir un fichier .html",
+    "fallbackFileLoaded": "Fichier chargé : {name} ({size} Ko)",
+    "fallbackSubmit": "Lancer le diagnostic avec ce HTML",
+    "fallbackWarning": "Le diagnostic utilisera le HTML que vous fournissez. Assurez-vous qu'il s'agit du code source complet de votre page d'accueil."
   },
   "dashboard": {
     "metaTitle": "Dashboard — {name} | AYO",

@@ -3,15 +3,17 @@
 import type { SocialResult, Quality } from './types';
 
 // Social links are URL patterns — deterministic is perfect here
+// Support full URLs (https://), protocol-relative (//), bare domain (no path), and JS template literals
+// Backtick (`) added as terminator for JS template strings like `https://instagram.com`,target:`_blank`
 const SOCIAL_PATTERNS: [RegExp, string][] = [
-  [/https?:\/\/(?:www\.)?linkedin\.com\/(?:company|in)\/[^\s"'<>)]+/gi, 'LinkedIn'],
-  [/https?:\/\/(?:www\.)?(?:twitter|x)\.com\/[^\s"'<>)]+/gi, 'Twitter/X'],
-  [/https?:\/\/(?:www\.)?facebook\.com\/[^\s"'<>)]+/gi, 'Facebook'],
-  [/https?:\/\/(?:www\.)?instagram\.com\/[^\s"'<>)]+/gi, 'Instagram'],
-  [/https?:\/\/(?:www\.)?youtube\.com\/(?:c\/|channel\/|@)[^\s"'<>)]+/gi, 'YouTube'],
-  [/https?:\/\/(?:www\.)?github\.com\/[^\s"'<>)]+/gi, 'GitHub'],
-  [/https?:\/\/(?:www\.)?tiktok\.com\/@[^\s"'<>)]+/gi, 'TikTok'],
-  [/https?:\/\/(?:www\.)?bsky\.app\/profile\/[^\s"'<>)]+/gi, 'Bluesky'],
+  [/(?:https?:)?\/\/(?:www\.)?linkedin\.com(?:\/(?:company|in)\/[^\s"'<>)`]+)?/gi, 'LinkedIn'],
+  [/(?:https?:)?\/\/(?:www\.)?(?:twitter|x)\.com(?:\/[^\s"'<>)`]+)?/gi, 'Twitter/X'],
+  [/(?:https?:)?\/\/(?:www\.)?facebook\.com(?:\/[^\s"'<>)`]+)?/gi, 'Facebook'],
+  [/(?:https?:)?\/\/(?:www\.)?instagram\.com(?:\/[^\s"'<>)`]+)?/gi, 'Instagram'],
+  [/(?:https?:)?\/\/(?:www\.)?youtube\.com\/(?:c\/|channel\/|@)[^\s"'<>)`]+/gi, 'YouTube'],
+  [/(?:https?:)?\/\/(?:www\.)?github\.com(?:\/[^\s"'<>)`]+)?/gi, 'GitHub'],
+  [/(?:https?:)?\/\/(?:www\.)?tiktok\.com\/@[^\s"'<>)`]+/gi, 'TikTok'],
+  [/(?:https?:)?\/\/(?:www\.)?bsky\.app\/profile\/[^\s"'<>)`]+/gi, 'Bluesky'],
 ];
 
 const IGNORE = /\/sharer|\/share|\/intent\/|\/plugins\/|\/widgets\/|\/embed|\.js|\.css|\/hashtag\//i;
@@ -25,10 +27,10 @@ export function detectSocial(html: string): SocialResult {
     const re = new RegExp(pattern.source, pattern.flags);
     let match;
     while ((match = re.exec(html)) !== null) {
-      const url = match[0].replace(/["'<>)]+$/, '').replace(/\/$/, '');
+      const url = match[0].replace(/["'<>)`]+$/, '').replace(/\/$/, '');
       if (IGNORE.test(url)) continue;
-      // Skip placeholder links (href="#")
-      if (url.endsWith('#') || url.length < 15) continue;
+      // Skip placeholder links (href="#") — min length covers //x.com = 6 chars
+      if (url.endsWith('#') || url.length < 10) continue;
 
       const key = platform.toLowerCase();
       if (!seen.has(key)) {

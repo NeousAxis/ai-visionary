@@ -7,6 +7,8 @@
  * Si un fichier échoue, retourne la liste d'erreurs pour correction par l'ARCHITECTE.
  */
 
+import { AYOBOT_UA } from '../micro-agents/constants';
+
 export interface QCError {
     file: string;
     field: string;
@@ -855,7 +857,7 @@ export async function validateEvidenceUrl(url: string): Promise<{
             method: 'HEAD',
             signal: controller.signal,
             redirect: 'follow',
-            headers: { 'User-Agent': 'AYO-Bot/1.0 (AI Visionary Evidence Check)' },
+            headers: { 'User-Agent': AYOBOT_UA },
         });
         clearTimeout(timeoutId);
         return { reachable: response.ok, statusCode: response.status };

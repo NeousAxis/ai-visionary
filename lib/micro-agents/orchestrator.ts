@@ -1,6 +1,7 @@
 // lib/micro-agents/orchestrator.ts — Run all 8 agents, merge into AyoExtract
 
-import { fetchHtml } from './html-fetcher';
+import { fetchHtml, getTextContent } from './html-fetcher';
+import { AYOBOT_UA } from './constants';
 import { detectContact } from './detect-contact';
 import { detectJsonLd } from './detect-jsonld';
 import { detectLocation } from './detect-location';
@@ -46,6 +47,41 @@ function cleanEntityName(raw: string): string {
   return name.trim();
 }
 
+// --- Deterministic legal link detection (regex, like social) ---
+
+/** Legal link patterns: detect policy/framework/certification URLs in raw HTML (incl. JS bundles) */
+const LEGAL_LINK_PATTERNS: { re: RegExp; label: string; type: 'policy' | 'framework' }[] = [
+  { re: /(?:href|to)[=:"']+\s*["']?\/?mentions?[_-]?l[eé]gales?/gi, label: 'Mentions légales', type: 'policy' },
+  { re: /(?:href|to)[=:"']+\s*["']?\/?(?:privacy|confidentialit[eé]|datenschutz)/gi, label: 'Privacy Policy', type: 'policy' },
+  { re: /(?:href|to)[=:"']+\s*["']?\/?(?:cgv|conditions?[_-]?g[eé]n[eé]rales?[_-]?(?:de[_-])?vente)/gi, label: 'CGV', type: 'policy' },
+  { re: /(?:href|to)[=:"']+\s*["']?\/?(?:cgu|conditions?[_-]?(?:g[eé]n[eé]rales?[_-]?)?(?:d[_-]?)?utilisation|terms(?:[_-]of[_-](?:use|service))?)/gi, label: 'Terms of Use', type: 'policy' },
+  { re: /(?:href|to)[=:"']+\s*["']?\/?(?:impressum|imprint)/gi, label: 'Impressum', type: 'policy' },
+  { re: /(?:href|to)[=:"']+\s*["']?\/?(?:cookie[_-]?polic|cookies)/gi, label: 'Cookie Policy', type: 'policy' },
+  { re: /(?:href|to)[=:"']+\s*["']?\/?(?:legal[_-]?notice|legal)/gi, label: 'Legal Notice', type: 'policy' },
+  { re: /(?:href|to)[=:"']+\s*["']?\/?(?:rgpd|gdpr)/gi, label: 'GDPR', type: 'framework' },
+];
+
+/**
+ * Deterministic scan for legal links in HTML (raw + rendered).
+ * Works on SPA bundles, SSR pages, Jina HTML — any format.
+ */
+function detectLegalLinksDeterministic(htmlSources: string[]): { policies: string[]; frameworks: string[] } {
+  const combined = htmlSources.join('\n');
+  const policies: string[] = [];
+  const frameworks: string[] = [];
+
+  for (const { re, label, type } of LEGAL_LINK_PATTERNS) {
+    // Reset regex lastIndex
+    re.lastIndex = 0;
+    if (re.test(combined)) {
+      if (type === 'policy' && !policies.includes(label)) policies.push(label);
+      if (type === 'framework' && !frameworks.includes(label)) frameworks.push(label);
+    }
+  }
+
+  return { policies, frameworks };
+}
+
 // --- Source preparation ---
 
 /**
@@ -56,12 +92,12 @@ function extractSiteLinks(html: string): string {
   const parts: string[] = [];
   let m: RegExpExecArray | null;
 
-  // Extract ALL <a href> links with their text
-  const linkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([^<]*)</gi;
+  // Extract ALL <a href> links with their text (supports nested elements like <span>)
+  const linkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
   const seenHrefs = new Set<string>();
   while ((m = linkRe.exec(html)) !== null) {
     const href = m[1].trim();
-    const text = m[2].trim();
+    const text = m[2].replace(/<[^>]+>/g, '').trim();
     if (href && !href.startsWith('javascript:') && !seenHrefs.has(href.toLowerCase())) {
       seenHrefs.add(href.toLowerCase());
       if (text) parts.push(`LINK: ${text} → ${href}`);
@@ -73,20 +109,20 @@ function extractSiteLinks(html: string): string {
   const navFooterRe = /<(?:footer|nav)[^>]*>([\s\S]*?)<\/(?:footer|nav)>/gi;
   while ((m = navFooterRe.exec(html)) !== null) {
     const innerHtml = m[1];
-    // Extract links from within footer/nav specifically
-    const innerLinkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([^<]*)</gi;
+    // Extract links from within footer/nav specifically (supports nested elements)
+    const innerLinkRe = /<a\s[^>]*href=["']([^"'#][^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
     let innerM;
     while ((innerM = innerLinkRe.exec(innerHtml)) !== null) {
       const href = innerM[1].trim();
-      const text = innerM[2].trim();
+      const text = innerM[2].replace(/<[^>]+>/g, '').trim();
       if (href && !href.startsWith('javascript:') && !seenHrefs.has(href.toLowerCase())) {
         seenHrefs.add(href.toLowerCase());
         parts.push(`FOOTER-LINK: ${text} → ${href}`);
       }
     }
-    // Plain text from footer/nav
+    // Plain text from footer/nav — increased limit for long footers with legal links at the end
     const text = innerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-    if (text.length > 10) parts.push(`FOOTER-TEXT: ${text.substring(0, 800)}`);
+    if (text.length > 10) parts.push(`FOOTER-TEXT: ${text.substring(0, 1500)}`);
   }
 
   return parts.join('\n');
@@ -220,9 +256,26 @@ async function runAgent<T>(
 export async function runAllAgents(
   url: string,
   onEvent?: (event: AgentEvent) => void,
+  providedHtmlContent?: string,
 ): Promise<{ fetchResult: FetchResult; results: AllAgentResults; events: AgentEvent[] }> {
-  // Step 1: Fetch HTML — returns distinct sources
-  const fetchResult = await fetchHtml(url);
+  // Step 1: Fetch HTML — or use provided content (upload fallback)
+  let fetchResult: FetchResult;
+  if (providedHtmlContent && providedHtmlContent.trim().length > 100) {
+    const textContent = getTextContent(providedHtmlContent);
+    fetchResult = {
+      url,
+      rawHtml: providedHtmlContent,
+      renderedHtml: providedHtmlContent,
+      textContent,
+      sourceType: 'ssr',
+      headers: {},
+      statusCode: 200,
+      isReachable: true,
+    };
+    console.log(`[orchestrator] Using provided HTML: ${providedHtmlContent.length} chars, ${textContent.length} text chars`);
+  } else {
+    fetchResult = await fetchHtml(url);
+  }
   const { renderedHtml, textContent, headers, sourceType } = fetchResult;
 
   console.log(`[orchestrator] Fetched ${url}: sourceType=${sourceType}, renderedHtml=${renderedHtml.length} chars, textContent=${textContent.length} chars`);
@@ -275,9 +328,27 @@ export async function runAllAgents(
   events.push(servicesRun.event);
   onEvent?.(servicesRun.event);
 
-  // Agent 5: Legal/Compliance (LLM) — needs enrichedContent (footer has CGV, RGPD, Mentions légales links)
+  // Agent 5: Legal/Compliance (LLM + deterministic merge)
+  // Step A: Deterministic regex scan on BOTH rawHtml + renderedHtml (catches SPA JS bundles)
+  const deterministicLegal = detectLegalLinksDeterministic([fetchResult.rawHtml, renderedHtml]);
+  console.log(`[orchestrator] Deterministic legal: policies=[${deterministicLegal.policies.join(', ')}], frameworks=[${deterministicLegal.frameworks.join(', ')}]`);
+
+  // Step B: LLM extraction on enrichedContent (retry x3 for stability)
   onEvent?.({ agent: 'detect-legal', status: 'running', data: null, durationMs: 0 });
   const legalRun = await runAgentWithRetry('detect-legal', () => detectLegal(enrichedContent), mergeLegal);
+
+  // Step C: Merge deterministic findings into LLM results (union, no duplicates)
+  if (legalRun.result) {
+    legalRun.result.policies = unionStrings(legalRun.result.policies, deterministicLegal.policies);
+    legalRun.result.frameworks = unionStrings(legalRun.result.frameworks, deterministicLegal.frameworks);
+    // If we found policies/frameworks deterministically, ensure q >= 0.5
+    if ((deterministicLegal.policies.length + deterministicLegal.frameworks.length) > 0 && legalRun.result.q === 0) {
+      legalRun.result.q = 0.5;
+    }
+    // Update the event data to reflect merged results
+    legalRun.event.data = legalRun.result;
+  }
+
   events.push(legalRun.event);
   onEvent?.(legalRun.event);
 
@@ -287,9 +358,13 @@ export async function runAllAgents(
   events.push(securityRun.event);
   onEvent?.(securityRun.event);
 
-  // Agent 7: Social (deterministic) — needs renderedHtml (parses <a href> for social URLs)
+  // Agent 7: Social (deterministic) — search both rawHtml AND renderedHtml for social URLs
+  // SPA sites may have social links in rawHtml shell that Jina/markdown doesn't preserve
   onEvent?.({ agent: 'detect-social', status: 'running', data: null, durationMs: 0 });
-  const socialRun = await runAgent('detect-social', () => detectSocial(renderedHtml));
+  const combinedHtmlForSocial = fetchResult.rawHtml !== renderedHtml
+    ? `${fetchResult.rawHtml}\n${renderedHtml}`
+    : renderedHtml;
+  const socialRun = await runAgent('detect-social', () => detectSocial(combinedHtmlForSocial));
   events.push(socialRun.event);
   onEvent?.(socialRun.event);
 
@@ -332,10 +407,14 @@ export async function mergeAgentResultsToExtract(
   const name = cleanEntityName(rawName);
 
   // Determine business type: JSON-LD first, then infer from services/content
+  // Order matters: NGO/nonprofit BEFORE commercial types (avoid "advisory" → ConsultingFirm for ICRC)
   let businessType = jsonld.type || '';
   if (!businessType && services.services.length > 0) {
     const svcText = services.services.join(' ').toLowerCase();
-    if (/consulting|conseil|advisory|accompagnement|stratégie/i.test(svcText)) businessType = 'ConsultingFirm';
+    const allText = `${svcText} ${fetchResult.textContent.substring(0, 2000).toLowerCase()}`;
+    // NGO/nonprofit detection FIRST — priority over commercial types
+    if (/humanitari|humanitarian|ngo|ong|croix-?rouge|red cross|unicef|unhcr|fondation|foundation|charity|charit[eé]|nonprofit|non-?profit|aide humanitaire|r[eé]fugi[eé]|refugee|droits? de l'homme|human rights|développement durable|sustainable development|action sociale/i.test(allText)) businessType = 'NonprofitOrganization';
+    else if (/consulting|conseil|advisory|accompagnement|stratégie/i.test(svcText)) businessType = 'ConsultingFirm';
     else if (/website|web|app|software|développement|development|saas|platform/i.test(svcText)) businessType = 'TechnologyCompany';
     else if (/design|graphi|créati|branding|ux|ui/i.test(svcText)) businessType = 'DesignAgency';
     else if (/marketing|communication|pub|seo|social media/i.test(svcText)) businessType = 'MarketingAgency';
@@ -343,6 +422,7 @@ export async function mergeAgentResultsToExtract(
     else if (/legal|juridique|avocat|droit|compliance/i.test(svcText)) businessType = 'LegalService';
     else if (/health|santé|medical|pharma|clinic/i.test(svcText)) businessType = 'MedicalBusiness';
     else if (/finance|bank|assurance|investissement/i.test(svcText)) businessType = 'FinancialService';
+    else if (/e-?commerce|shop|boutique|magasin|store|retail|vente en ligne|marketplace/i.test(svcText)) businessType = 'Store';
     else businessType = 'ProfessionalService';
   }
 
@@ -409,6 +489,27 @@ Do NOT invent.`;
     indicators = unionStrings(unionStrings(data1?.indicators || [], data2?.indicators || []), data3?.indicators || []);
   } catch { /* fallback: empty */ }
 
+  // --- Industry Keywords = LLM cible (for competitor matching against AYA gemini_keywords) ---
+  let industryKeywords: string[] = [];
+  try {
+    const { llmExtract, parseJson } = await import('./llm-agent');
+    const keywordsPrompt = `You are a business classifier. Based on the company's products and services, generate 5-10 specific INDUSTRY KEYWORDS that describe what this company actually sells or does.
+Rules:
+- Keywords must be SPECIFIC product/service categories, not generic words
+- Think: what would you search for to find this company's competitors?
+- Use the SAME language as the site content
+- Examples: "couteaux de cuisine", "peripheriques informatiques", "logiciel comptable", "assurance auto"
+- Do NOT include: company name, locations, generic words like "innovation", "quality", "leader"
+Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
+
+    const kwRaw = await llmExtract(keywordsPrompt, enrichedContent, 8000).catch(() => '[]');
+    const parsed = parseJson<string[]>(kwRaw);
+    if (Array.isArray(parsed)) {
+      industryKeywords = parsed.filter((k): k is string => typeof k === 'string' && k.length > 2).slice(0, 10);
+    }
+    console.log(`[orchestrator] Industry keywords: [${industryKeywords.join(', ')}]`);
+  } catch { /* fallback: empty */ }
+
   // ASR file check — HEAD request to /.ayo/asr.json
   let hasAsr = false;
   try {
@@ -416,7 +517,7 @@ Do NOT invent.`;
     asrUrl.pathname = '/.ayo/asr.json';
     const asrRes = await fetch(asrUrl.toString(), {
       method: 'HEAD',
-      headers: { 'User-Agent': 'AYO-Bot/2.0' },
+      headers: { 'User-Agent': AYOBOT_UA },
       signal: AbortSignal.timeout(3000),
     });
     hasAsr = asrRes.ok;
@@ -448,6 +549,7 @@ Do NOT invent.`;
         has_faq_content: hasFaqContent,
         has_faq_schema: jsonld.hasFaqSchema,
         is_aya_registered: isAyaRegistered,
+        industry_keywords: industryKeywords,
       },
     },
     fields: {

@@ -9,7 +9,7 @@ import type { AgentEvent } from '@/lib/micro-agents/types';
 export const maxDuration = 60; // Puppeteer SPA rendering can take up to 15s
 
 export async function POST(req: NextRequest) {
-  const { url, email } = await req.json();
+  const { url, email, htmlContent } = await req.json();
 
   if (!url || typeof url !== 'string') {
     return new Response(JSON.stringify({ error: 'URL required' }), {
@@ -17,6 +17,10 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+
+  // Validate optional HTML content (upload fallback) — cap at 2 MB
+  const safeHtml = (htmlContent && typeof htmlContent === 'string' && htmlContent.length <= 2_000_000)
+    ? htmlContent : undefined;
 
   const encoder = new TextEncoder();
 
@@ -33,14 +37,17 @@ export async function POST(req: NextRequest) {
         const startTime = Date.now();
 
         // Phase 2: Run all agents with live events
+        if (safeHtml) {
+          send({ phase: 'fetch', status: 'running', source: 'user_provided' });
+        }
+
         const { fetchResult, results, events } = await runAllAgents(url, (event: AgentEvent) => {
           send({ phase: 'agent', ...event });
-        });
+        }, safeHtml);
 
         if (!fetchResult.isReachable) {
           send({ phase: 'error', message: 'Site unreachable', statusCode: fetchResult.statusCode });
-          controller.close();
-          return;
+          return; // finally block will close controller
         }
 
         send({ phase: 'fetch', status: 'done', durationMs: Date.now() - startTime });

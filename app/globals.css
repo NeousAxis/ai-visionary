@@ -799,6 +799,11 @@ ul {
 @keyframes dv2-pulse-opacity { 0%,100%{opacity:1} 50%{opacity:.4} }
 .dv2-preview { display:flex; flex-direction:column; gap:0.2rem; font-size:0.8rem; color:var(--text-body); }
 .dv2-preview span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dv2-preview-detail { gap:0.3rem; margin-top:0.4rem; }
+.dv2-field-ok { color:#2AA198; font-weight:500; }
+.dv2-field-ok::before { content:'✅ '; }
+.dv2-field-miss { color:#8B8D98; font-style:italic; }
+.dv2-field-miss::before { content:'❌ '; }
 .dv2-muted { color:var(--text-muted); font-style:italic; }
 .dv2-agent-ms { font-size:0.7rem; color:var(--text-muted); margin-top:0.35rem; display:block; }
 
@@ -939,6 +944,16 @@ ul {
 /* Error */
 .dv2-error-box { text-align:center; background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:2rem; }
 .dv2-error-box p { color:var(--accent-color); font-weight:600; margin-bottom:1rem; }
+
+
+/* Fallback HTML upload */
+.dv2-fallback-box { border:1px solid #CE6A6B; border-radius:12px; padding:2rem; margin-top:1.5rem; background:#fff8f8; max-width:700px; margin-left:auto; margin-right:auto; }
+.dv2-fallback-box h3 { font-size:1.2rem; font-weight:700; color:var(--accent-color); margin-bottom:0.5rem; }
+.dv2-fallback-option { margin-bottom:1.5rem; }
+.dv2-fallback-label { display:block; font-weight:600; margin-bottom:0.5rem; color:var(--text-main); }
+.dv2-fallback-textarea { width:100%; font-family:monospace; font-size:0.8rem; padding:0.75rem; border:1px solid #ccc; border-radius:8px; resize:vertical; color:var(--text-main); background:#f9f9f9; }
+.dv2-fallback-file-info { font-size:0.85rem; color:#4A919E; margin-top:0.5rem; }
+.dv2-fallback-upload-btn { display:inline-block; cursor:pointer; }
 
 /* OTP section */
 .dv2-otp-section { max-width:520px; margin:2rem auto 0; text-align:center; }

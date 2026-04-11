@@ -7,9 +7,9 @@ import { llmExtract, parseJson } from './llm-agent';
 const PROMPT = `You detect educational/pedagogical content on websites. The content can be in ANY language (French, English, German, etc.).
 
 Below is a list of ALL links and section headings from the website. Detect:
-- has_faq: true if there is a FAQ page/section (look for: "FAQ", "Foire aux questions", "Frequently Asked Questions", "Häufige Fragen", /faq)
+- has_faq: true if there is a FAQ page/section (look for: "FAQ", "Foire aux questions", "Frequently Asked Questions", "Häufige Fragen", "Aide", "Help", "Support", /faq, /help)
 - has_glossary: true if there is a glossary/lexicon (look for: "Glossaire", "Glossary", "Lexique", "Lexikon", /glossar, /lexique)
-- has_documentation: true if there is documentation/guides/tutorials (look for: "Documentation", "Docs", "Guide", "Tutoriel", "Tutorial", "API Reference")
+- has_documentation: true if there is ANY educational/knowledge content: blog, insights, articles, reports, whitepapers, case studies, guides, tutorials, documentation, knowledge base, resources, academy, learning center (look for: "Blog", "Insights", "Articles", "Reports", "Resources", "Case Studies", "Études de cas", "Actualités", "News", "Guide", "Documentation", "Academy", "Learn", "Ressources", "Rapports", "Whitepapers", "Knowledge", /blog, /insights, /resources, /reports, /news, /articles, /academy, /case-studies, /our-work)
 
 Return ONLY JSON: {"has_faq": true/false, "has_glossary": true/false, "has_documentation": true/false}
 Do NOT invent. Only return true if clearly present.`;

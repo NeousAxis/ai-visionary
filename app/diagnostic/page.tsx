@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
@@ -21,6 +21,7 @@ interface AgentState {
 }
 
 interface ScoreBlock { name: string; label: string; score: number; maxScore: number; }
+
 
 const AGENT_ICONS: Record<AgentName, string> = {
   'detect-jsonld': '{ }',
@@ -68,6 +69,10 @@ const FILE_DESC_KEYS = [
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export default function DiagnosticV2Page() {
+  // Refs for values needed in compare useEffect closure (state may be stale)
+  const industryKeywordsRef = useRef<string[]>([]);
+  const detectedSiteTypeRef = useRef('');
+
   const [url, setUrl] = useState('');
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [agents, setAgents] = useState<AgentState[]>([]);
@@ -97,6 +102,11 @@ export default function DiagnosticV2Page() {
   const [analysisId, setAnalysisId] = useState('');
   const [legalName, setLegalName] = useState('');
   const [legalNameConfirmed, setLegalNameConfirmed] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
+  const [pastedHtml, setPastedHtml] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState('');
+  const [detectedSiteType, setDetectedSiteType] = useState('');
+  const [industryKeywords, setIndustryKeywords] = useState<string[]>([]);
 
   const t = useTranslations('diagnostic');
   const locale = useLocale();
@@ -189,8 +199,10 @@ export default function DiagnosticV2Page() {
             body: JSON.stringify({
               country: agents.find(a => a.name === 'detect-location')?.data?.country || '',
               services: detectedServices,
+              industryKeywords: industryKeywordsRef.current,
               siteName: jsonldName || siteDomain,
               siteUrl: scanUrl,
+              siteType: detectedSiteTypeRef.current,
             }),
           });
           const data = await r.json();
@@ -224,6 +236,87 @@ export default function DiagnosticV2Page() {
     }
   }, [currentStep, score, scoreRevealed, scrollTo]);
 
+  // ─── SSE Stream Reader (shared by startScan + startScanWithHtml) ───
+  const processSseStream = useCallback(async (res: Response) => {
+    if (!res.body) { setError(t('noResponse')); return; }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const ev = JSON.parse(line.slice(6));
+          if (ev.phase === 'agent') {
+            setAgents(prev => prev.map(a =>
+              a.name === ev.agent ? { ...a, status: ev.status, data: ev.data, durationMs: ev.durationMs } : a
+            ));
+            setTimeout(() => {
+              document.getElementById('transition-score')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 200);
+          } else if (ev.phase === 'complete') {
+            setTotalDuration(ev.totalDurationMs || 0);
+            if (ev.score) {
+              const BLOCK_LABEL_KEYS: Record<string, [string, number]> = {
+                identite: ['blockIdentite', 10],
+                offre: ['blockOffre', 20],
+                processus_methodes: ['blockProcessus', 15],
+                engagements_conformite: ['blockEngagements', 15],
+                indicateurs: ['blockIndicateurs', 20],
+                contenus_pedagogiques: ['blockPedagogie', 10],
+                structure_technique: ['blockTechnique', 10],
+              };
+              const blocksObj = ev.score.blocks || {};
+              const blocksArr = Object.entries(blocksObj).map(([key, val]) => ({
+                name: key,
+                label: BLOCK_LABEL_KEYS[key] ? t(BLOCK_LABEL_KEYS[key][0] as Parameters<typeof t>[0]) : key,
+                score: typeof val === 'number' ? val : 0,
+                maxScore: BLOCK_LABEL_KEYS[key]?.[1] || 10,
+              }));
+              setScore({
+                total: ev.score.total ?? 0,
+                blocks: blocksArr,
+              });
+            }
+            if (ev.proScore) setProScore(ev.proScore.total ?? null);
+            if (ev.analysisId) setAnalysisId(ev.analysisId);
+            const eName = ev.extract?.fields?.identite?.name?.value || '';
+            const shortName = eName.split(/\s*[|–—]\s*/)[0].trim();
+            if (shortName) setDetectedName(shortName);
+            if (ev.is_aya_registered || ev.extract?.meta?.source?.scan?.is_aya_registered) {
+              setIsExistingClient(true);
+            }
+            // Capture business_type + industry keywords for compare endpoint
+            const bType = ev.extract?.fields?.identite?.business_type?.value || '';
+            if (bType) { setDetectedSiteType(bType); detectedSiteTypeRef.current = bType; }
+            const iKw = ev.extract?.source?.scan?.industry_keywords || [];
+            if (iKw.length) { setIndustryKeywords(iKw); industryKeywordsRef.current = iKw; }
+            if (shortName) setLegalName(shortName);
+            setLegalNameConfirmed(false);
+            setTimeout(() => {
+              document.getElementById('legal-name-prompt')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 800);
+          } else if (ev.phase === 'error') {
+            setError(ev.message || t('scanFailed'));
+            // Show fallback UI if site was blocked/unreachable
+            if (ev.statusCode === 403 || ev.statusCode === 429 || ev.statusCode === 503 || ev.message === 'Site unreachable') {
+              setShowFallback(true);
+              setCurrentStep(1);
+            }
+          }
+        } catch { /* skip */ }
+      }
+    }
+  }, [t]);
+
   // ─── Start Scan ───
   const startScan = useCallback(async (skipEmailCheck = false) => {
     if (!url.trim()) return;
@@ -231,6 +324,7 @@ export default function DiagnosticV2Page() {
 
     setCurrentStep(2);
     setError(null);
+    setShowFallback(false);
     setScore(null);
     setScoreRevealed(false);
     setFilesRevealed(0);
@@ -244,86 +338,37 @@ export default function DiagnosticV2Page() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: url.trim(), email: userEmail }),
       });
-      if (!res.body) { setError(t('noResponse')); return; }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const ev = JSON.parse(line.slice(6));
-            if (ev.phase === 'agent') {
-              setAgents(prev => prev.map(a =>
-                a.name === ev.agent ? { ...a, status: ev.status, data: ev.data, durationMs: ev.durationMs } : a
-              ));
-              // Keep spinner visible as cards grow
-              setTimeout(() => {
-                document.getElementById('transition-score')?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-              }, 200);
-            } else if (ev.phase === 'complete') {
-              setTotalDuration(ev.totalDurationMs || 0);
-              if (ev.score) {
-                // Score engine returns blocks as object {identite: 3.5, offre: 8.2}
-                // Convert to array [{name, label, score, maxScore}]
-                const BLOCK_LABEL_KEYS: Record<string, [string, number]> = {
-                  identite: ['blockIdentite', 10],
-                  offre: ['blockOffre', 20],
-                  processus_methodes: ['blockProcessus', 15],
-                  engagements_conformite: ['blockEngagements', 15],
-                  indicateurs: ['blockIndicateurs', 20],
-                  contenus_pedagogiques: ['blockPedagogie', 10],
-                  structure_technique: ['blockTechnique', 10],
-                };
-                const blocksObj = ev.score.blocks || {};
-                const blocksArr = Object.entries(blocksObj).map(([key, val]) => ({
-                  name: key,
-                  label: BLOCK_LABEL_KEYS[key] ? t(BLOCK_LABEL_KEYS[key][0] as Parameters<typeof t>[0]) : key,
-                  score: typeof val === 'number' ? val : 0,
-                  maxScore: BLOCK_LABEL_KEYS[key]?.[1] || 10,
-                }));
-                setScore({
-                  total: ev.score.total ?? 0,
-                  blocks: blocksArr,
-                });
-              }
-              // Capture PRO score + site name + analysis ID
-              if (ev.proScore) setProScore(ev.proScore.total ?? null);
-              if (ev.analysisId) setAnalysisId(ev.analysisId);
-              // Get detected name — prefer short name, not full title
-              const eName = ev.extract?.fields?.identite?.name?.value || '';
-              // Strip " | subtitle" from title-based names
-              const shortName = eName.split(/\s*[|–—]\s*/)[0].trim();
-              if (shortName) setDetectedName(shortName);
-              // Check if already registered in AYA
-              if (ev.is_aya_registered || ev.extract?.meta?.source?.scan?.is_aya_registered) {
-                setIsExistingClient(true);
-              }
-              // Pre-fill legal name with detected name
-              if (shortName) setLegalName(shortName);
-              setLegalNameConfirmed(false);
-              // Scroll to legal name input (between step 2 and step 3)
-              setTimeout(() => {
-                document.getElementById('legal-name-prompt')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 800);
-            } else if (ev.phase === 'error') {
-              setError(ev.message || t('scanFailed'));
-            }
-          } catch { /* skip */ }
-        }
-      }
+      await processSseStream(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('networkError'));
     }
-  }, [url, emailVerified, scrollTo]);
+  }, [url, emailVerified, scrollTo, userEmail, processSseStream, t]);
+
+  // ─── Start Scan with provided HTML (upload fallback) ───
+  const startScanWithHtml = useCallback(async (htmlContent: string) => {
+    if (!htmlContent.trim() || htmlContent.length < 500) return;
+
+    setCurrentStep(2);
+    setError(null);
+    setShowFallback(false);
+    setScore(null);
+    setScoreRevealed(false);
+    setFilesRevealed(0);
+    setScanUrl(url.trim());
+    setAgents(AGENTS.map(a => ({ ...a, status: 'running', data: null, durationMs: 0 })));
+    scrollTo('step-2');
+
+    try {
+      const res = await fetch('/api/diagnostic/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url.trim(), email: userEmail, htmlContent }),
+      });
+      await processSseStream(res);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('networkError'));
+    }
+  }, [url, userEmail, scrollTo, processSseStream, t]);
 
   const agentsDone = agents.filter(a => a.status === 'done').length;
 
@@ -574,7 +619,7 @@ export default function DiagnosticV2Page() {
                 )}
                 {agent.status === 'done' && agent.data && (
                   <div className="dv2-agent-data">
-                    <DataPreview name={agent.name} data={agent.data} t={t} />
+                    <DataPreview name={agent.name} data={agent.data} t={t} locale={locale} />
                     {agent.durationMs > 0 && <span className="dv2-agent-ms">{agent.durationMs}ms</span>}
                   </div>
                 )}
@@ -739,7 +784,7 @@ export default function DiagnosticV2Page() {
               <>
                 {/* Your score — always first */}
                 <div className="dv2-compare-row">
-                  <span className="dv2-compare-label dv2-compare-label--you">⬤ {detectedName || scanUrl.replace(/^https?:\/\//, '').split('/')[0]}</span>
+                  <span className="dv2-compare-label dv2-compare-label--you">⬤ {legalName || detectedName || scanUrl.replace(/^https?:\/\//, '').split('/')[0]}</span>
                   <div className="dv2-compare-track"><div className="dv2-compare-fill dv2-compare-fill--you" style={{ width: `${Math.min(score.total, 100)}%` }} /></div>
                   <span className="dv2-compare-val dv2-val-you">{Math.round(score.total)}/100</span>
                 </div>
@@ -961,10 +1006,68 @@ export default function DiagnosticV2Page() {
       )}
 
       {/* ─── ERROR ─── */}
-      {error && (
+      {error && !showFallback && (
         <section className="dv2-step dv2-error-box">
-          <p>❌ {error}</p>
+          <p>&#x274C; {error}</p>
           <button onClick={() => { setCurrentStep(1); setError(null); }} className="dv2-plan-btn dv2-plan-btn--outline">{t('tryAgain')}</button>
+        </section>
+      )}
+
+      {/* ─── FALLBACK: HTML Upload (site blocked / unreachable) ─── */}
+      {showFallback && !score && (
+        <section className="dv2-step dv2-fallback-box" id="fallback-upload">
+          <h3>{t('fallbackTitle')}</h3>
+          <p className="dv2-step-sub">{t('fallbackDesc')}</p>
+
+          <div className="dv2-fallback-option">
+            <label className="dv2-fallback-label">{t('fallbackPaste')}</label>
+            <textarea
+              className="dv2-fallback-textarea"
+              placeholder={t('fallbackPastePlaceholder')}
+              value={pastedHtml}
+              onChange={e => { setPastedHtml(e.target.value); setUploadedFileName(''); }}
+              rows={8}
+            />
+          </div>
+
+          <div className="dv2-fallback-option">
+            <label className="dv2-fallback-label">{t('fallbackUpload')}</label>
+            <label className="dv2-search-btn dv2-fallback-upload-btn">
+              {t('fallbackUploadBtn')}
+              <input
+                type="file"
+                accept=".html,.htm"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    const content = ev.target?.result as string;
+                    setPastedHtml(content);
+                    setUploadedFileName(file.name);
+                  };
+                  reader.readAsText(file);
+                }}
+              />
+            </label>
+            {uploadedFileName && (
+              <p className="dv2-fallback-file-info">
+                {t('fallbackFileLoaded', { name: uploadedFileName, size: String(Math.round(pastedHtml.length / 1024)) })}
+              </p>
+            )}
+          </div>
+
+          <p className="dv2-otp-hint">{t('fallbackWarning')}</p>
+
+          <button
+            className="dv2-search-btn"
+            disabled={pastedHtml.trim().length < 500}
+            onClick={() => startScanWithHtml(pastedHtml)}
+            style={{ marginTop: '1rem' }}
+          >
+            {t('fallbackSubmit')}
+          </button>
         </section>
       )}
 
@@ -978,40 +1081,83 @@ export default function DiagnosticV2Page() {
 
 // ─── Data Preview ───
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function DataPreview({ name, data, t }: { name: AgentName; data: any; t: (key: string, values?: Record<string, string>) => string }) {
+function DataPreview({ name, data, t, locale }: { name: AgentName; data: any; t: (key: string, values?: Record<string, string>) => string; locale: string }) {
   if (!data) return null;
+  const fr = locale === 'fr';
+  const ok = (k: string, v: string) => <span key={k} className="dv2-field-ok">{v}</span>;
+  const miss = (k: string, v: string) => <span key={k} className="dv2-field-miss">{v}</span>;
+
   switch (name) {
     case 'detect-contact':
-      return <div className="dv2-preview">
-        {data.email && <span>📧 {data.email}</span>}
-        {data.phone && <span>📞 {data.phone}</span>}
-        {data.hasContactForm && <span>📋 {t('contactFormDetected')}</span>}
-        {!data.email && !data.phone && !data.hasContactForm && <span className="dv2-muted">{t('noContactFound')}</span>}
+      return <div className="dv2-preview dv2-preview-detail">
+        {data.email ? ok('email', data.email) : miss('email', 'Email')}
+        {data.phone ? ok('phone', data.phone) : miss('phone', fr ? 'Téléphone' : 'Phone')}
+        {data.hasContactForm ? ok('form', fr ? 'Formulaire de contact' : 'Contact form') : miss('form', fr ? 'Formulaire de contact' : 'Contact form')}
       </div>;
     case 'detect-services': {
-      const all = [...(data.services || []), ...(data.products || [])];
-      return <div className="dv2-preview">{all.length > 0 ? all.slice(0, 3).map((s: string, i: number) => <span key={i}>• {s}</span>) : <span className="dv2-muted">{t('noneDetected')}</span>}{all.length > 3 && <span className="dv2-muted">{t('more', { count: String(all.length - 3) })}</span>}</div>;
+      const svcs = (data.services || []) as string[];
+      const prods = (data.products || []) as string[];
+      const audience = data.target_audience as string | undefined;
+      const useCases = (data.use_cases || []) as string[];
+      const pricing = data.pricing as string | undefined;
+      return <div className="dv2-preview dv2-preview-detail">
+        {svcs.length > 0 ? svcs.slice(0, 3).map((s: string, i: number) => ok(`svc-${i}`, s)) : miss('svcs', 'Services')}
+        {svcs.length > 3 && <span key="svc-more" className="dv2-muted">+{svcs.length - 3}</span>}
+        {prods.length > 0 ? prods.slice(0, 2).map((s: string, i: number) => ok(`prod-${i}`, s)) : miss('prods', fr ? 'Produits' : 'Products')}
+        {audience ? ok('audience', audience.length > 40 ? audience.substring(0, 40) + '...' : audience) : miss('audience', fr ? 'Public cible' : 'Target audience')}
+        {useCases.length > 0 ? ok('usecases', useCases.slice(0, 2).join(', ')) : miss('usecases', fr ? 'Cas d\'usage' : 'Use cases')}
+        {pricing ? ok('pricing', pricing.length > 30 ? pricing.substring(0, 30) + '...' : pricing) : miss('pricing', fr ? 'Tarification' : 'Pricing')}
+      </div>;
     }
     case 'detect-legal': {
-      const items = [...(data.policies || []), ...(data.frameworks || []), ...(data.certifications || [])];
-      return <div className="dv2-preview">{items.length > 0 ? items.slice(0, 3).map((s: string, i: number) => <span key={i}>• {s}</span>) : <span className="dv2-muted">{t('noneDetected')}</span>}</div>;
+      const policies = (data.policies || []) as string[];
+      const frameworks = (data.frameworks || []) as string[];
+      const certs = (data.certifications || []) as string[];
+      return <div className="dv2-preview dv2-preview-detail">
+        {policies.length > 0
+          ? ok('pol', `${fr ? 'Politiques' : 'Policies'} (${policies.length}) — ${policies.slice(0, 3).join(', ')}${policies.length > 3 ? '...' : ''}`)
+          : miss('pol', fr ? 'Politiques (CGV, mentions légales)' : 'Policies (Terms, Legal)')}
+        {frameworks.length > 0
+          ? ok('fw', `${fr ? 'Conformité' : 'Compliance'} — ${frameworks.join(', ')}`)
+          : miss('fw', fr ? 'Conformité (RGPD, HIPAA...)' : 'Compliance (GDPR, HIPAA...)')}
+        {certs.length > 0
+          ? ok('cert', `${fr ? 'Certifications' : 'Certifications'} — ${certs.join(', ')}`)
+          : miss('cert', fr ? 'Certifications (ISO, SOC2...)' : 'Certifications (ISO, SOC2...)')}
+      </div>;
     }
     case 'detect-location':
-      return <div className="dv2-preview">{(data.city || data.country) ? <span>{[data.city, data.country].filter(Boolean).join(', ')}</span> : <span className="dv2-muted">{t('notFound')}</span>}</div>;
+      return <div className="dv2-preview dv2-preview-detail">
+        {data.city ? ok('city', data.city) : miss('city', fr ? 'Ville' : 'City')}
+        {data.country ? ok('country', data.country) : miss('country', fr ? 'Pays' : 'Country')}
+      </div>;
     case 'detect-security': {
       const m = (data.measures || []) as string[];
-      return <div className="dv2-preview">{m.length > 0 ? m.slice(0, 4).map((s: string, i: number) => <span key={i}>{s}</span>) : <span className="dv2-muted">{t('noHeaders')}</span>}</div>;
+      return <div className="dv2-preview dv2-preview-detail">
+        {m.length > 0
+          ? ok('sec', `${fr ? 'Mesures de sécurité' : 'Security measures'} (${m.length}) — ${m.slice(0, 3).join(', ')}${m.length > 3 ? '...' : ''}`)
+          : miss('sec', fr ? 'Aucune mesure détectée' : 'No security measures detected')}
+      </div>;
     }
     case 'detect-jsonld':
-      return <div className="dv2-preview">{data.hasOrganizationType ? <span>✓ {data.type}{data.name ? ` — ${data.name}` : ''}</span> : data.schemas?.length > 0 ? <span>⚠ {t('jsonldNoOrg')}</span> : <span className="dv2-muted">{t('notFound')}</span>}</div>;
+      return <div className="dv2-preview dv2-preview-detail">
+        {data.hasOrganizationType ? ok('org', `${data.type}${data.name ? ` — ${data.name}` : ''}`) : miss('org', fr ? 'Schema Organization' : 'Organization Schema')}
+        {data.hasFaqSchema ? ok('faq-schema', 'FAQ Schema') : miss('faq-schema', 'FAQ Schema')}
+      </div>;
     case 'detect-social': {
       const p = (data.platforms || []) as string[];
-      return <div className="dv2-preview">{p.length > 0 ? <span>{p.join(' · ')}</span> : <span className="dv2-muted">{t('noneFound')}</span>}</div>;
+      const expectedPlatforms = ['LinkedIn', 'Facebook', 'Instagram'];
+      const missingPlatforms = expectedPlatforms.filter(ep => !p.some((dp: string) => dp.toLowerCase() === ep.toLowerCase()));
+      return <div className="dv2-preview dv2-preview-detail">
+        {p.map((platform: string, i: number) => ok(`social-${i}`, platform))}
+        {missingPlatforms.map((mp, i) => miss(`miss-social-${i}`, mp))}
+      </div>;
     }
-    case 'detect-pedagogy': {
-      const items = [data.has_faq && t('pedagoFaq'), data.has_glossary && t('pedagoGlossary'), data.has_documentation && t('pedagoDoc')].filter(Boolean);
-      return <div className="dv2-preview">{items.length > 0 ? <span>{items.join(' · ')}</span> : <span className="dv2-muted">{t('noneFound')}</span>}</div>;
-    }
+    case 'detect-pedagogy':
+      return <div className="dv2-preview dv2-preview-detail">
+        {data.has_faq ? ok('faq', 'FAQ') : miss('faq', 'FAQ')}
+        {data.has_glossary ? ok('glossary', fr ? 'Glossaire' : 'Glossary') : miss('glossary', fr ? 'Glossaire' : 'Glossary')}
+        {data.has_documentation ? ok('doc', 'Documentation') : miss('doc', 'Documentation')}
+      </div>;
     default: return null;
   }
 }
