@@ -99,7 +99,7 @@ URL -> Scanner (aio-scanner.ts) -> Score initial (aio-score-engine.ts)
 - **Frontend + API** : Vercel (serverless, maxDuration=120s)
 - **Base de donnees** : Supabase PostgreSQL
 - **Emails** : Infomaniak SMTP (nodemailer). Adresses : hello@ + security@ (alias). TODO: ajouter alias delivery@ et registry@ quand Infomaniak partenariat actif.
-- **Paiements** : Stripe (mode test — ne jamais passer en prod sans accord Cyril)
+- **Paiements** : Stripe (mode LIVE depuis 11 avril 2026)
 - **Domaine** : ai-visionary.xyz (primaire, depuis 8 avril 2026). ai-visionary.com redirige vers .xyz (301).
 
 ### Variables d'environnement requises
@@ -110,8 +110,8 @@ SUPABASE_SERVICE_ROLE_KEY
 STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-STRIPE_PRICE_AYA=price_1SzazaPkCQYUm8hQJfrKc9EJ
-STRIPE_PRICE_PRO=price_1SlM9iPkCQYUm8hQKqOV8eqU
+STRIPE_PRICE_AYA=price_1TBDj5BaWEIL7y9ztiytROFa
+STRIPE_PRICE_PRO=price_1TBDj3BaWEIL7y9zfQvGqVJi
 GOOGLE_GENERATIVE_AI_API_KEY
 SMTP_HOST=mail.infomaniak.com
 SMTP_USER=hello@ai-visionary.xyz
@@ -393,7 +393,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Sanitization complete des fichiers PRO via `sanitizeComplianceOutput()` partagee : anti-marketing, URL→label, country normalization, "And" prefix, trailing periods, GDPR principles filter, deterministic online detection
 - Frontend label stripping : les `customLabel` des champs V4 sont automatiquement strippes des reponses utilisateur
 - Stepper/barre de progression bilingue FR/EN (triggers mis a jour)
-- Stripe Checkout live (CHF, 2 offres : AYA 19 CHF/mois, PRO 499 CHF)
+- Stripe Checkout LIVE en production (CHF, 2 offres : AYA 19 CHF/mois, PRO 499 CHF). Basculé mode live le 11 avril 2026. Webhook configuré sur ai-visionary.xyz.
+- Section GEO vs ASR sur la homepage — explication bilingue FR/EN de la différence entre GEO et ASR, colonnes distinctes (orange GEO / teal ASR) sur fond gris clair
 - Registre AYA public : ~4400+ entites, pagination serveur, badges certifie/indexe, recherche, tri
 - API AYA : 7 endpoints (index, llm, docs, search, entity, stats, live) + `?lang=fr|en`
 - Bot AYA : 6766 domaines pipeline, enrichissement Gemini 100% (descriptions EN+FR, keywords EN+FR)
@@ -460,7 +461,7 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | **Supabase** | Free/Pro (org NeousAxis) | Quota plan | Depasse = bloque ou surcharge |
 | **Vercel** | Pro | Inclus | maxDuration=120s par fonction |
 | **Resend** | Free tier | 0 | 100 emails/jour, 3000/mois |
-| **Stripe** | Mode TEST | 0 | Pas de frais en test |
+| **Stripe** | Mode LIVE | Commission standard (~2.9% + 0.30 CHF) | Production depuis 11 avril 2026 |
 
 ### Cout par operation Gemini
 
