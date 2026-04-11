@@ -232,38 +232,38 @@ export default function Home() {
             </h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
-              {/* GEO column — warm/orange */}
-              <div style={{ padding: '28px', background: '#FFF7ED', borderRadius: '16px', border: '2px solid #F97316', position: 'relative' }}>
-                <div style={{ display: 'inline-block', padding: '4px 14px', background: '#F97316', color: 'white', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '16px' }}>GEO</div>
-                <p style={{ fontSize: '1.05rem', color: '#92400E', lineHeight: '1.7', marginBottom: '16px' }}>
+              {/* GEO column — orange saturé */}
+              <div style={{ padding: '28px', background: '#FFEDD5', borderRadius: '16px', border: '2px solid #EA580C' }}>
+                <div style={{ display: 'inline-block', padding: '6px 16px', background: '#EA580C', color: 'white', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '16px' }}>GEO</div>
+                <p style={{ fontSize: '1.05rem', color: '#7C2D12', lineHeight: '1.7', marginBottom: '16px' }}>
                   {t('solution.geoIntro')}
                 </p>
-                <p style={{ fontSize: '1rem', color: '#B45309', lineHeight: '1.7', marginBottom: '20px' }}>
+                <p style={{ fontSize: '1rem', color: '#9A3412', lineHeight: '1.7', marginBottom: '20px' }}>
                   {t('solution.geoPoint')}
                 </p>
-                <div style={{ padding: '16px', background: 'rgba(249,115,22,0.08)', borderRadius: '10px', marginBottom: '12px' }}>
-                  <p style={{ fontSize: '0.95rem', color: '#9A3412', fontWeight: '600' }}>{t('solution.diffGeo')}</p>
+                <div style={{ padding: '16px', background: 'rgba(234,88,12,0.15)', borderRadius: '10px', marginBottom: '12px' }}>
+                  <p style={{ fontSize: '0.95rem', color: '#7C2D12', fontWeight: '600' }}>{t('solution.diffGeo')}</p>
                 </div>
-                <div style={{ padding: '16px', background: 'rgba(249,115,22,0.08)', borderRadius: '10px' }}>
-                  <p style={{ fontSize: '0.95rem', color: '#9A3412' }}>{t('solution.concreteGeo')}</p>
+                <div style={{ padding: '16px', background: 'rgba(234,88,12,0.15)', borderRadius: '10px' }}>
+                  <p style={{ fontSize: '0.95rem', color: '#7C2D12' }}>{t('solution.concreteGeo')}</p>
                 </div>
               </div>
 
-              {/* ASR column — teal/primary */}
-              <div style={{ padding: '28px', background: 'rgba(74,145,158,0.06)', borderRadius: '16px', border: '2px solid var(--primary-color)', position: 'relative' }}>
-                <div style={{ display: 'inline-block', padding: '4px 14px', background: 'var(--primary-color)', color: 'white', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '16px' }}>ASR</div>
-                <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--primary-color)', lineHeight: '1.7', marginBottom: '16px' }}>
+              {/* ASR column — teal saturé */}
+              <div style={{ padding: '28px', background: '#E0F2F1', borderRadius: '16px', border: '2px solid #0D9488' }}>
+                <div style={{ display: 'inline-block', padding: '6px 16px', background: '#0D9488', color: 'white', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '16px' }}>ASR</div>
+                <p style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#0F766E', lineHeight: '1.7', marginBottom: '16px' }}>
                   {t('solution.asrIntro')}
                 </p>
-                <p style={{ fontSize: '1rem', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '20px' }}>
+                <p style={{ fontSize: '1rem', color: '#115E59', lineHeight: '1.7', marginBottom: '20px' }}>
                   {t('solution.asrPoint1')}<br />
                   {t('solution.asrPoint2')}
                 </p>
-                <div style={{ padding: '16px', background: 'rgba(74,145,158,0.12)', borderRadius: '10px', marginBottom: '12px' }}>
-                  <p style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--primary-color)' }}>{t('solution.diffAsr')}</p>
+                <div style={{ padding: '16px', background: 'rgba(13,148,136,0.15)', borderRadius: '10px', marginBottom: '12px' }}>
+                  <p style={{ fontSize: '0.95rem', fontWeight: '600', color: '#0F766E' }}>{t('solution.diffAsr')}</p>
                 </div>
-                <div style={{ padding: '16px', background: 'rgba(74,145,158,0.12)', borderRadius: '10px' }}>
-                  <p style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--primary-color)' }}>{t('solution.concreteAsr')}</p>
+                <div style={{ padding: '16px', background: 'rgba(13,148,136,0.15)', borderRadius: '10px' }}>
+                  <p style={{ fontSize: '0.95rem', fontWeight: '600', color: '#0F766E' }}>{t('solution.concreteAsr')}</p>
                 </div>
               </div>
             </div>
@@ -272,16 +272,16 @@ export default function Home() {
               <h4 style={{ color: 'var(--text-main)', marginBottom: '12px', fontSize: '1.15rem' }}>{t('solution.whyTitle')}</h4>
               <p style={{ fontSize: '1.05rem', fontWeight: 'bold', color: 'var(--text-main)', marginBottom: '16px' }}>{t('solution.whyBody')}</p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <p style={{ fontSize: '1rem', color: '#B45309', padding: '12px', background: '#FFF7ED', borderRadius: '8px', border: '1px solid #FDBA74' }}>{t('solution.whyNoAsr')}</p>
-                <p style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary-color)', padding: '12px', background: 'rgba(74,145,158,0.08)', borderRadius: '8px', border: '1px solid rgba(74,145,158,0.3)' }}>{t('solution.whyWithAsr')}</p>
+                <p style={{ fontSize: '1rem', color: '#9A3412', padding: '14px', background: '#FFEDD5', borderRadius: '8px', border: '1px solid #FB923C' }}>{t('solution.whyNoAsr')}</p>
+                <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#0F766E', padding: '14px', background: '#E0F2F1', borderRadius: '8px', border: '1px solid #5EEAD4' }}>{t('solution.whyWithAsr')}</p>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', textAlign: 'center' }}>
-              <p style={{ fontSize: '1rem', color: '#B45309', padding: '14px', background: '#FFF7ED', borderRadius: '10px', border: '1px solid #FDBA74' }}>
+              <p style={{ fontSize: '1rem', color: '#9A3412', padding: '14px', background: '#FFEDD5', borderRadius: '10px', border: '1px solid #FB923C' }}>
                 {t('solution.summaryGeo')}
               </p>
-              <p style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--primary-color)', padding: '14px', background: 'rgba(74,145,158,0.08)', borderRadius: '10px', border: '1px solid rgba(74,145,158,0.3)' }}>
+              <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#0F766E', padding: '14px', background: '#E0F2F1', borderRadius: '10px', border: '1px solid #5EEAD4' }}>
                 {t('solution.summaryAsr')}
               </p>
             </div>
