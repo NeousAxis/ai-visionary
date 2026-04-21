@@ -58,11 +58,10 @@ export async function POST(req: NextRequest) {
         send({ phase: 'merge', status: 'done' });
 
         // Phase 4: Compute current score
-        // V2: ZERO CAPS — le score reflete uniquement les donnees trouvees
-        // Tous les caps evidence V1 sont desactives pour la V2
+        // V2: caps V1 désactivés SAUF le cap ASR doctrinal (50 sans ASR)
         extract.source.scan.has_jsonld = true;           // Disable cap 50 (no JSON-LD)
-        extract.source.scan.has_asr_file = true;         // Disable cap 90 (no ASR)
-        extract.source.scan.is_aya_registered = true;    // Disable cap non-AYA
+        // NE PAS désactiver has_asr_file ni is_aya_registered — le cap 50 sans ASR
+        // doit s'appliquer aux sites qui ne sont ni dans AYA ni porteurs d'un ASR (règle doctrinale AYO)
 
         // Disable per-block caps: certifications cap (8), indicators cap (8/10)
         // Add a dummy certification evidence so the cap doesn't trigger

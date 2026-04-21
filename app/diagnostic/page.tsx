@@ -767,18 +767,34 @@ export default function DiagnosticV2Page() {
       )}
 
       {/* ═══ STEP 5 — COMPARE (auto-displayed after files) ═══ */}
-      {currentStep >= 5 && score && (
+      {currentStep >= 5 && score && (() => {
+        // Detect if the scanned site is AI Visionary itself — no competitors to compare against
+        const scannedHost = scanUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0].toLowerCase();
+        const isOwnPlatform = scannedHost === 'ai-visionary.xyz' || scannedHost === 'ai-visionary.com' || scannedHost === 'beta.ai-visionary.xyz';
+
+        return (
         <section id="step-5" className={`dv2-step dv2-step-reveal ${currentStep === 5 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">05</div>
           <h2>{t('compareTitle')}</h2>
           <p className="dv2-step-sub">
-            {t('compareSub', { count: totalInSector > 0 ? String(totalInSector) : '>4,400' })}
+            {isOwnPlatform
+              ? t('compareSubSelf', { defaultValue: 'AI Visionary est le fournisseur du registre AYA — aucun concurrent à comparer.' })
+              : t('compareSub', { count: totalInSector > 0 ? String(totalInSector) : '>4,400' })}
           </p>
 
           <div className="dv2-compare-card">
             {compareLoading ? (
               <div style={{ textAlign: 'center', padding: '2rem' }}>
                 <span className="dv2-dot-pulse" /> {t('compareLoading')}
+              </div>
+            ) : isOwnPlatform ? (
+              <div style={{ textAlign: 'center', padding: '1.5rem' }}>
+                <p style={{ fontSize: '1rem', color: 'var(--text-main)', fontWeight: 600, marginBottom: '0.75rem' }}>
+                  🏛️ {t('compareSelfTitle', { defaultValue: 'Vous êtes la référence du registre AYA' })}
+                </p>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  {t('compareSelfDesc', { defaultValue: 'AI Visionary maintient le registre AYA. La section comparative ne s\'applique donc pas — vous êtes à l\'origine du standard.' })}
+                </p>
               </div>
             ) : (
               <>
@@ -836,7 +852,8 @@ export default function DiagnosticV2Page() {
             )}
           </div>
         </section>
-      )}
+        );
+      })()}
 
       {/* ═══ STEP 6 — CHOOSE PLAN ═══ */}
       {currentStep >= 6 && (

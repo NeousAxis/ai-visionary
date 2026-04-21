@@ -196,10 +196,13 @@ export function computeAioScore(extract: AyoExtract) {
         total = Math.min(total, 50);
     }
 
-    // b) Si ASR absent : jamais 100 (max 90)
+    // b) Si ASR absent : score PLAFONNÉ à 50 (règle doctrinale AYO)
+    // Raison : sans fichiers ASR signés, les IA ne peuvent pas recommander
+    // l'entreprise avec certitude, peu importe la qualité du site.
+    // Le seul moyen de franchir 50 est d'obtenir un ASR via AYO PRO.
     const hasAsr = extract.source.scan.has_asr_file === true || extract.fields?.structure_technique?.has_asr?.value === true || isAyaRegistered;
     if (!hasAsr) {
-        total = Math.min(total, 90);
+        total = Math.min(total, 50);
     }
 
     // c) No external proof/evidence → cap total at 78 (FIX 1)
