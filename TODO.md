@@ -27,7 +27,6 @@
 
 | ID | Faille | Risque | Statut |
 |----|--------|--------|--------|
-| H7 | Stripe Portal SANS authentification HMAC valide | Haute | **À FIX** — `verifyUpdateToken` à brancher dans `app/api/stripe/portal/route.ts` |
 | H8 | Markdown non-sanitise dans AyoChat (XSS) | Haute | À fix — DOMPurify |
 | M3 | `dangerouslySetInnerHTML` dans layout | Moyenne | À évaluer (risque faible : JSON.stringify) |
 | B5 | Types `any[]` dans AyoChat | Basse | À typer strictement |
@@ -60,6 +59,9 @@
 | 33 | Cap 50 sans ASR (regle doctrinale stricte) | 21 avril 2026 (commit f31d1d65) |
 | 34 | Masquage concurrents pour ai-visionary.xyz | 21 avril 2026 (commit f31d1d65) |
 | 35 | API DNS Infomaniak | 25 avril 2026 |
+| H7 | Stripe Portal authentification HMAC + auto-migration TEST→LIVE | 1er mai 2026 (commit `2ea71c6a`) |
+| — | Désengorgement CLAUDE.md → STATE/MIGRATION/TODO/COSTS.md | 1er mai 2026 (commit `2ea71c6a`) |
+| — | Alignement hardcodes "4400+/887" → "30000+/30298" | 1er mai 2026 (commit `35806291`) |
 
 ---
 

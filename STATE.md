@@ -83,6 +83,18 @@
 
 ---
 
+## Session 1er mai 2026 — Securite Stripe Portal + desengorgement docs
+
+- **Fix faille H7 — Stripe Portal authentification** : `app/api/stripe/portal/route.ts` reecrit. Avant : check `sessionToken` truthy uniquement (n'importe quelle string passait). Apres : `verifyUpdateToken(token, entityId)` HMAC stateless (pattern aligne sur `/api/update-entity`, `/api/regenerate-files`, `/api/update-owner-email`). Stateless donc survit aux migrations Firestore→Supabase→Infomaniak. Code-reviewer subagent : 0 issue HIGH/CRITICAL. Aucun call site frontend (route etait dead code, donc 0 risque de regression).
+- **Robustesse Stripe TEST→LIVE** : meme route. Wrapper `billingPortal.sessions.create()` dans try/catch. Si stored `stripe_customer_id` est `cus_test_*` (legacy avant 11 avril) → fallback `customers.list({email})` en mode LIVE → auto-update `stripe_customer_id` Supabase (1 row, ownership prouve par HMAC) → retry. Si toujours rien → 404 `is_legacy:true`.
+- **Desengorgement CLAUDE.md 779 → 405 lignes** : sections 6 (CE QUI EST FAIT), 6.5 (MIGRATION), 7 (TODO), 8 (COSTS) externalisees vers fichiers dedies. CLAUDE.md devient un index avec stubs pointant vers `STATE.md` / `MIGRATION.md` / `TODO.md` / `COSTS.md`.
+- **Alignement hardcodes vs realite 30 298** : `app/page.tsx:25` (JSON-LD homepage) "4400+" → "30000+". `app/api/aya/docs/route.ts:124` exemple stats `indexed_count` 887 → 30292.
+- **Activation agregation cote VPS** : ajout `AYA_VPS_API_URL=http://localhost:3000/api/aya-local` au `.env.local` du VPS (non committe). Avant : VPS retournait Supabase only (4438). Apres : VPS retourne agregation (30 298) via self-call HTTP localhost. Solution temporaire en attendant MV.3 (refactor pour lecture Postgres locale directe sans HTTP).
+- **Incident rsync individuel** : `rsync ./app/page.tsx ubuntu@vps:/home/ubuntu/app/` copie le fichier a la **racine** de la destination (pas dans `app/`). Toujours utiliser `rsync -R` (relative) pour preserver la structure quand on transfere des fichiers individuels.
+- Commits : `2ea71c6a` (Stripe Portal H7 + desengorgement) + `35806291` (hardcodes alignes). Pushes sur `main`. VPS et Vercel alignes sur `35806291`.
+
+---
+
 ## Référence rapide
 
 | Métrique | Valeur (28 avril 2026) |
