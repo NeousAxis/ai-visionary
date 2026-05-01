@@ -174,11 +174,16 @@ export async function localPgGetEntities(options: {
 /**
  * Find one entity by domain.
  * Accepts bare domain (e.g. "stripe.com") or full URL.
+ *
+ * Bug 3 fix: uses regexp_replace to normalise the stored website column before
+ * comparing, so that rows with trailing slashes, www prefix, http vs https all
+ * match.  Input is also normalised the same way.
  */
 export async function localPgGetEntityByDomain(domain: string): Promise<Entity | null> {
     const pool = getPool();
     if (!pool) return null;
 
+    // Normalise input: strip scheme, www, and trailing slash
     const bare = domain
         .replace(/^https?:\/\/(www\.)?/, '')
         .replace(/\/$/, '')
@@ -188,9 +193,10 @@ export async function localPgGetEntityByDomain(domain: string): Promise<Entity |
         const res: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
              FROM aya_registry
-             WHERE website ILIKE $1 OR website ILIKE $2
+             WHERE regexp_replace(lower(website), '^https?://(www\\.)?|/$', '', 'g') = $1
+             ORDER BY asr_score DESC NULLS LAST
              LIMIT 1`,
-            [`https://${bare}`, `https://www.${bare}`]
+            [bare]
         );
         return res.rows[0] ?? null;
     } catch (err) {

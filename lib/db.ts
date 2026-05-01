@@ -1276,14 +1276,22 @@ export async function getAyaEntitiesAggregated(options: {
     const cached = _vpsCache.get(cacheKey);
     let vpsEntities: any[] = [];
 
+    // We track the VPS total count separately from the page data.
+    let vpsTotalFromApi = 0;
+
     if (cached && Date.now() < cached.exp) {
-        vpsEntities = cached.data;
+        vpsEntities    = cached.data;
+        // The total is stored as the first element when not in search mode
+        vpsTotalFromApi = (cached as any).total ?? vpsEntities.length;
     } else {
         try {
-            // Fetch up to 5000 entities from VPS (single call — VPS has no grace period concerns)
+            // Bug 2 fix: fetch only one page worth of rows from VPS (pageSize) to avoid
+            // returning thousands of rows in the HTML payload (26 MB issue).
+            // The VPS total is read from json.total (not array length) — Bug 1 fix.
+            // Full cross-source pagination is deferred to MV.3 (Vercel→VPS migration).
             const searchParam = options.search ? `&search=${encodeURIComponent(options.search)}` : '';
             const sortParam   = options.sort   ? `&sort=${encodeURIComponent(options.sort)}`     : '';
-            const vpsUrl = `${vpsBaseUrl}/live?limit=5000${searchParam}${sortParam}`;
+            const vpsUrl = `${vpsBaseUrl}/live?limit=${options.pageSize}${searchParam}${sortParam}`;
 
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 5_000);
@@ -1294,40 +1302,45 @@ export async function getAyaEntitiesAggregated(options: {
             if (!res.ok) {
                 console.warn(`[getAyaEntitiesAggregated] VPS returned ${res.status} — falling back to Supabase only`);
             } else {
-                const json = await res.json() as { data?: any[] };
-                vpsEntities = Array.isArray(json.data) ? json.data : [];
-                _vpsCache.set(cacheKey, { data: vpsEntities, exp: Date.now() + VPS_CACHE_TTL_MS });
+                // Bug 1 fix: use json.total (the VPS full row count) for arithmetic,
+                // NOT the length of json.data (which is capped to one page size).
+                const json = await res.json() as { data?: any[]; total?: number };
+                vpsEntities    = Array.isArray(json.data) ? json.data : [];
+                vpsTotalFromApi = typeof json.total === 'number' ? json.total : vpsEntities.length;
+                const entry = Object.assign(
+                    { data: vpsEntities, exp: Date.now() + VPS_CACHE_TTL_MS },
+                    { total: vpsTotalFromApi }
+                );
+                _vpsCache.set(cacheKey, entry);
             }
         } catch (err) {
             console.warn('[getAyaEntitiesAggregated] VPS fetch failed — falling back to Supabase only:', err);
         }
     }
 
-    if (vpsEntities.length === 0) {
+    if (vpsEntities.length === 0 && vpsTotalFromApi === 0) {
         return supabaseResult;
     }
 
-    // Build a Set of entity_ids already in Supabase result (all pages, not just current)
-    // We need the full Supabase set for dedup — fetch all IDs via a lightweight query.
-    // For simplicity, we deduplicate against the full VPS list and recalculate totals.
-
-    // Collect Supabase entity_ids from the current page result
+    // Collect Supabase entity_ids from the current page result for dedup
     const supabaseIds = new Set<string>(supabaseResult.data.map((e: any) => e.entity_id as string));
 
-    // Filter VPS rows: exclude any entity_id already in Supabase
+    // Filter VPS page rows: exclude any entity_id already in Supabase
     const vpsUnique = vpsEntities.filter((e: any) => !supabaseIds.has(e.entity_id));
 
-    // Merge: Supabase rows first (certified, authoritative), then VPS-unique rows
+    // Merge: Supabase rows first (certified, authoritative), then VPS-unique rows.
+    // Bug 2 fix: vpsUnique is already one page (pageSize rows from VPS) — no 26 MB payload.
     const merged = [...supabaseResult.data, ...vpsUnique];
 
-    // Adjust total: Supabase total + VPS unique count
-    const adjustedTotal = supabaseResult.total + vpsUnique.length;
+    // Bug 1 fix: use vpsTotalFromApi (full VPS count) instead of vpsUnique.length (page slice)
+    // so that numberOfItems in JSON-LD reflects the real registry size.
+    const adjustedTotal = supabaseResult.total + vpsTotalFromApi;
 
     return {
         data:           merged,
         total:          adjustedTotal,
         certifiedCount: supabaseResult.certifiedCount,  // Only Supabase has paying customers
-        indexedCount:   supabaseResult.indexedCount + vpsUnique.length,
+        indexedCount:   supabaseResult.indexedCount + vpsTotalFromApi,
     };
 }
 
