@@ -183,17 +183,27 @@ export async function localPgGetEntityByDomain(domain: string): Promise<Entity |
     const pool = getPool();
     if (!pool) return null;
 
-    // Normalise input: strip scheme, www, and trailing slash
+    // Normalise input: strip scheme, www, path, query, fragment — keep only the host
     const bare = domain
-        .replace(/^https?:\/\/(www\.)?/, '')
-        .replace(/\/$/, '')
-        .toLowerCase();
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0];
 
     try {
+        // Normalise stored website the same way: strip scheme/www, then strip path
+        // (everything after first `/`). This catches rows like
+        // https://stripe.com/de-ch, https://www.example.com/, etc.
         const res: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
              FROM aya_registry
-             WHERE regexp_replace(lower(website), '^https?://(www\\.)?|/$', '', 'g') = $1
+             WHERE
+               regexp_replace(
+                 regexp_replace(lower(website), '^https?://(www\\.)?', '', 'g'),
+                 '/.*$', '', 'g'
+               ) = $1
              ORDER BY asr_score DESC NULLS LAST
              LIMIT 1`,
             [bare]
