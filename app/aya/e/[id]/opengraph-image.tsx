@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { db } from '@/lib/db';
+import { getAyaEntityByIdAggregated } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const alt = 'AYA Registry — AI Visionary';
@@ -32,7 +32,7 @@ function scoreColor(score: number | null): string {
 }
 
 export default async function OpengraphImage({ params }: { params: { id: string } }) {
-    const entity = await db.getAyaEntityById(params.id).catch(() => null);
+    const entity = await getAyaEntityByIdAggregated(params.id).catch(() => null);
 
     if (!entity) {
         return new ImageResponse(

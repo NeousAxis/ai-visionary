@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getAyaEntityByUrlAggregated } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { buildLlmSummary } from '@/lib/aya/llm-format';
 import { trackAyaCall } from '@/lib/aya/api-tracker';
@@ -17,11 +17,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ doma
     }
 
     try {
-        // Efficient O(1) lookup via website_normalized column
-        let entity = await db.getAyaEntityByUrl(`https://${domain}`);
-        if (!entity) {
-            entity = await db.getAyaEntityByUrl(`https://www.${domain}`);
-        }
+        // Aggregated lookup: Supabase first, then VPS. Tries both www/non-www internally.
+        const entity = await getAyaEntityByUrlAggregated(`https://${domain}`);
 
         if (!entity) {
             return NextResponse.json({ error: 'Entity not found', domain }, { status: 404 });

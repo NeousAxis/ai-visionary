@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { localPgGetEntityById as _localPgGetEntityById } from '@/lib/db-local-pg';
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -1641,4 +1642,121 @@ export async function getAyaLiveAggregated(
     const slice  = merged.slice(offset, offset + limit);
 
     return { success: true, data: slice };
+}
+
+// ── getAyaEntityByIdAggregated ────────────────────────────────────────────────
+
+/**
+ * Look up a single AYA entity by its UUID across Supabase (authoritative) and,
+ * when AYA_VPS_API_URL is set, the VPS /api/aya-local/entity-by-id/{id} endpoint.
+ *
+ * Strategy:
+ *  1. Try Supabase first — if found, return immediately (no VPS call needed).
+ *  2. On Supabase miss, try VPS (with 5 s timeout). Cache the result (60 s) to
+ *     avoid hammering the VPS on repeated requests for the same id (including 404s).
+ *  3. NEVER throws — any error returns null.
+ */
+export async function getAyaEntityByIdAggregated(id: string): Promise<any | null> {
+    // 1. Supabase first (authoritative, paying customers)
+    try {
+        const sbEntity = await database.getAyaEntityById(id);
+        if (sbEntity) return sbEntity;
+    } catch (err) {
+        console.warn('[getAyaEntityByIdAggregated] Supabase lookup failed:', err);
+    }
+
+    // 2. VPS fallback
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return null;
+
+    const cacheKey = `entity_id:${id}`;
+    const cached = _vpsCache.get(cacheKey);
+    if (cached && Date.now() < cached.exp) {
+        // Cached null is stored as empty array
+        return cached.data.length > 0 ? cached.data[0] : null;
+    }
+
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5_000);
+        const res = await fetch(`${vpsBaseUrl}/entity-by-id/${encodeURIComponent(id)}`, { signal: controller.signal });
+        clearTimeout(timeout);
+
+        if (!res.ok) {
+            // Cache the miss so we don't hammer the VPS on repeated 404s
+            _vpsCache.set(cacheKey, { data: [], exp: Date.now() + VPS_CACHE_TTL_MS });
+            console.warn(`[getAyaEntityByIdAggregated] VPS returned ${res.status} for id=${id}`);
+            return null;
+        }
+
+        const json = await res.json() as { entity?: any };
+        const entity = json.entity ?? null;
+        _vpsCache.set(cacheKey, { data: entity ? [entity] : [], exp: Date.now() + VPS_CACHE_TTL_MS });
+        return entity;
+    } catch (err) {
+        console.warn('[getAyaEntityByIdAggregated] VPS fetch failed:', err);
+        return null;
+    }
+}
+
+// ── getAyaEntityByUrlAggregated ───────────────────────────────────────────────
+
+/**
+ * Look up a single AYA entity by URL/domain across Supabase + optional VPS.
+ *
+ * Internally tries both https://<domain> and https://www.<domain> before giving up,
+ * so call sites only need one call (no double-try pattern in the caller).
+ *
+ * Caching: 60 s in-memory keyed by `entity_url:<normalized-domain>`.
+ * NEVER throws.
+ */
+export async function getAyaEntityByUrlAggregated(url: string): Promise<any | null> {
+    // Normalise to bare domain for cache key and VPS call
+    const bare = url
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0];
+
+    // 1. Supabase first — try without www, then with www
+    try {
+        let sbEntity = await database.getAyaEntityByUrl(`https://${bare}`);
+        if (!sbEntity) sbEntity = await database.getAyaEntityByUrl(`https://www.${bare}`);
+        if (sbEntity) return sbEntity;
+    } catch (err) {
+        console.warn('[getAyaEntityByUrlAggregated] Supabase lookup failed:', err);
+    }
+
+    // 2. VPS fallback
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return null;
+
+    const cacheKey = `entity_url:${bare}`;
+    const cached = _vpsCache.get(cacheKey);
+    if (cached && Date.now() < cached.exp) {
+        return cached.data.length > 0 ? cached.data[0] : null;
+    }
+
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5_000);
+        const res = await fetch(`${vpsBaseUrl}/entity/${encodeURIComponent(bare)}`, { signal: controller.signal });
+        clearTimeout(timeout);
+
+        if (!res.ok) {
+            _vpsCache.set(cacheKey, { data: [], exp: Date.now() + VPS_CACHE_TTL_MS });
+            console.warn(`[getAyaEntityByUrlAggregated] VPS returned ${res.status} for domain=${bare}`);
+            return null;
+        }
+
+        const json = await res.json() as { entity?: any };
+        const entity = json.entity ?? null;
+        _vpsCache.set(cacheKey, { data: entity ? [entity] : [], exp: Date.now() + VPS_CACHE_TTL_MS });
+        return entity;
+    } catch (err) {
+        console.warn('[getAyaEntityByUrlAggregated] VPS fetch failed:', err);
+        return null;
+    }
 }

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { db } from '@/lib/db';
+import { db, getAyaEntityByIdAggregated } from '@/lib/db';
 import { buildPlainTextDescription, COUNTRY_LABELS, COUNTRY_LABELS_FR, SECTOR_LABELS } from '@/lib/aya/llm-format';
 import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const t = await getTranslations('certificate');
     const locale = await getLocale();
     const { id } = await params;
-    const entity = await db.getAyaEntityById(id);
+    const entity = await getAyaEntityByIdAggregated(id);
 
     if (!entity) {
         return {
@@ -58,7 +58,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     const t = await getTranslations('certificate');
     const locale = (await getLocale()) as 'fr' | 'en';
     const { id } = await params;
-    const entity = await db.getAyaEntityById(id);
+    const entity = await getAyaEntityByIdAggregated(id);
 
     if (!entity) {
         return (

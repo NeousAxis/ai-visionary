@@ -335,6 +335,24 @@ export async function localPgGetStats(): Promise<LocalPgStats> {
 }
 
 /**
+ * Find one entity by its UUID primary key.
+ */
+export async function localPgGetEntityById(id: string): Promise<Entity | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS} FROM aya_registry WHERE entity_id = $1::uuid LIMIT 1`,
+            [id]
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetEntityById error:', err);
+        return null;
+    }
+}
+
+/**
  * Multi-word ILIKE search — mirrors the logic in /api/aya/search.
  */
 export async function localPgSearch(q: string, limit: number): Promise<Entity[]> {
