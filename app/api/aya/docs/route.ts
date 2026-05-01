@@ -119,10 +119,10 @@ const HTML = `<!DOCTYPE html>
                 <pre>GET /api/aya/stats
 
 {
-  "total_entities": 889,
-  "certified_count": 2,
-  "indexed_count": 887,
-  "scores": { "average": 57, "min": 20, "max": 85, "median": 57 },
+  "total_entities": 30298,
+  "certified_count": 6,
+  "indexed_count": 30292,
+  "scores": { "average": 45, "min": 3, "max": 93, "median": 50 },
   "sectors": [
     { "sector": "Technologie & SaaS", "count": 372 },
     { "sector": "Média & Communication", "count": 207 },
