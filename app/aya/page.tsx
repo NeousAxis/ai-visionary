@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { db } from '@/lib/db';
+import { db, getAyaEntitiesAggregated } from '@/lib/db';
 import AyaRegistryClient from '@/app/components/AyaRegistryClient';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
@@ -42,8 +42,8 @@ export default async function AyaPage({
     const search = (params.q || '').trim();
     const sort: SortMode = VALID_SORTS.includes(params.sort as SortMode) ? (params.sort as SortMode) : 'default';
 
-    // Server-side data fetch — only 20 entities per page
-    const { data: entities, total, certifiedCount, indexedCount } = await db.getAyaEntitiesPaginated({
+    // Server-side data fetch — only 20 entities per page (aggregated: Supabase + VPS)
+    const { data: entities, total, certifiedCount, indexedCount } = await getAyaEntitiesAggregated({
         page,
         pageSize: PAGE_SIZE,
         search: search || undefined,
@@ -59,7 +59,7 @@ export default async function AyaPage({
         "description": `Public registry of ${totalAll}+ organizations rated for AI readability (AIO score 0-100)`,
         "url": "https://ai-visionary.xyz/aya",
         "numberOfItems": totalAll,
-        "itemListElement": entities.slice(0, 10).map((e: any, i: number) => ({
+        "itemListElement": entities.slice(0, 100).map((e: any, i: number) => ({
             "@type": "ListItem",
             "position": i + 1,
             "item": {

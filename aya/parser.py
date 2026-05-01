@@ -34,30 +34,59 @@ def get_domain(url: str) -> str:
     return parsed.netloc.lower().replace("www.", "")
 
 
+def _safe_attr(tag, attr: str) -> str:
+    """
+    Safely extract an HTML attribute as a clean string.
+    BeautifulSoup can return str, list (duplicate attrs) or dict (edge cases).
+    Always returns a stripped string.
+    """
+    if not tag:
+        return ""
+    val = tag.get(attr)
+    if val is None:
+        return ""
+    if isinstance(val, list):
+        # Pick the first non-empty string-like element
+        for v in val:
+            if isinstance(v, str) and v.strip():
+                return v.strip()
+        return ""
+    if isinstance(val, dict):
+        # Unlikely but defensive: use first str value
+        for v in val.values():
+            if isinstance(v, str) and v.strip():
+                return v.strip()
+        return ""
+    if isinstance(val, str):
+        return val.strip()
+    # Any other type (int, bytes...) -> coerce then strip
+    try:
+        return str(val).strip()
+    except Exception:
+        return ""
+
+
 def extract_title_and_meta(html: str) -> dict:
     soup = BeautifulSoup(html, "lxml")
 
-    title = soup.title.string.strip() if soup.title and soup.title.string else ""
+    title = ""
+    if soup.title and soup.title.string:
+        try:
+            title = soup.title.string.strip()
+        except AttributeError:
+            title = str(soup.title.string).strip()
 
-    meta_description = ""
     meta_desc_tag = soup.find("meta", attrs={"name": "description"})
-    if meta_desc_tag and meta_desc_tag.get("content"):
-        meta_description = meta_desc_tag["content"].strip()
+    meta_description = _safe_attr(meta_desc_tag, "content")
 
-    og_title = ""
     og_title_tag = soup.find("meta", attrs={"property": "og:title"})
-    if og_title_tag and og_title_tag.get("content"):
-        og_title = og_title_tag["content"].strip()
+    og_title = _safe_attr(og_title_tag, "content")
 
-    og_description = ""
     og_desc_tag = soup.find("meta", attrs={"property": "og:description"})
-    if og_desc_tag and og_desc_tag.get("content"):
-        og_description = og_desc_tag["content"].strip()
+    og_description = _safe_attr(og_desc_tag, "content")
 
-    canonical = ""
     canonical_tag = soup.find("link", attrs={"rel": "canonical"})
-    if canonical_tag and canonical_tag.get("href"):
-        canonical = canonical_tag["href"].strip()
+    canonical = _safe_attr(canonical_tag, "href")
 
     hreflang_tags = soup.find_all("link", attrs={"hreflang": True})
     hreflang_present = len(hreflang_tags) > 0
@@ -369,11 +398,43 @@ COUNTRY_NAME_TO_ISO = {
 }
 
 
-def normalize_country(raw: str) -> str:
-    """Normalize a country name or code to ISO 3166-1 alpha-2."""
-    if not raw:
+def _coerce_to_str(raw) -> str:
+    """
+    Coerce any value (str, dict, list, None, int...) to a clean string.
+    Handles JSON-LD edge cases where a field can be structured (e.g.
+    country = {"@type": "Country", "name": "Poland"} instead of "Poland").
+    """
+    if raw is None:
         return ""
-    cleaned = raw.strip()
+    if isinstance(raw, str):
+        return raw.strip()
+    if isinstance(raw, dict):
+        # JSON-LD structured value: try common keys
+        for key in ("name", "@value", "value", "text", "addressCountry", "addressLocality"):
+            v = raw.get(key)
+            if isinstance(v, str) and v.strip():
+                return v.strip()
+            if isinstance(v, dict):
+                # One level nested (e.g. { "name": { "@value": "FR" } })
+                return _coerce_to_str(v)
+        return ""
+    if isinstance(raw, list):
+        for item in raw:
+            s = _coerce_to_str(item)
+            if s:
+                return s
+        return ""
+    try:
+        return str(raw).strip()
+    except Exception:
+        return ""
+
+
+def normalize_country(raw) -> str:
+    """Normalize a country name or code to ISO 3166-1 alpha-2."""
+    cleaned = _coerce_to_str(raw)
+    if not cleaned:
+        return ""
     # Already a 2-letter ISO code
     if len(cleaned) == 2 and cleaned.isalpha():
         return cleaned.upper()

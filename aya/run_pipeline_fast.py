@@ -18,15 +18,35 @@ scraper.TIMEOUT = 8
 MAX_WORKERS = 10
 DOMAINS_FILE = "domains.txt"
 
+# Allow override via --file <path>
+for _i, _arg in enumerate(sys.argv):
+    if _arg == "--file" and _i + 1 < len(sys.argv):
+        DOMAINS_FILE = sys.argv[_i + 1]
+    if _arg == "--workers" and _i + 1 < len(sys.argv):
+        MAX_WORKERS = int(sys.argv[_i + 1])
+
 
 def load_domains(path: str) -> list[str]:
+    # Blocklist filter — exclude porn/weapons domains
+    try:
+        from blocklist import is_blocked
+    except ImportError:
+        is_blocked = lambda d: (False, '')
+
     domains = []
+    blocked_count = 0
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
+            blocked, reason = is_blocked(line)
+            if blocked:
+                blocked_count += 1
+                continue
             domains.append(line)
+    if blocked_count > 0:
+        print(f"[blocklist] {blocked_count} domains filtered out (porn/weapons)")
     return domains
 
 

@@ -70,5 +70,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn('[sitemap] Could not fetch entities from Supabase:', _err);
     }
 
-    return [...staticPages, ...entityPages];
+    // 3. Sector landing pages
+    let sectorPages: MetadataRoute.Sitemap = [];
+    try {
+        const sectors = await db.getAyaSectors();
+        sectorPages = sectors.map(({ sector }) => ({
+            url: `${baseUrl}/aya/sector/${encodeURIComponent(sector)}`,
+            lastModified: now,
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+        }));
+    } catch (_err) {
+        console.warn('[sitemap] Could not fetch sectors from Supabase:', _err);
+    }
+
+    // 4. Country landing pages
+    let countryPages: MetadataRoute.Sitemap = [];
+    try {
+        const countries = await db.getAyaCountries();
+        countryPages = countries.map(({ country }) => ({
+            url: `${baseUrl}/aya/country/${country}`,
+            lastModified: now,
+            changeFrequency: 'weekly' as const,
+            priority: 0.6,
+        }));
+    } catch (_err) {
+        console.warn('[sitemap] Could not fetch countries from Supabase:', _err);
+    }
+
+    return [...staticPages, ...entityPages, ...sectorPages, ...countryPages];
 }

@@ -287,6 +287,22 @@
       "General": "General"
     }
   },
+  "sectorPage": {
+    "back": "← All sectors",
+    "heading": "Sector: {sector}",
+    "subheading": "{count} entities indexed in this sector",
+    "notFound": "Sector not found",
+    "metaTitle": "AYA Registry — Sector: {sector} ({count} companies)",
+    "metaDescription": "Browse {count} companies in the {sector} sector indexed in the AYA registry for AI readability."
+  },
+  "countryPage": {
+    "back": "← All countries",
+    "heading": "Country: {country}",
+    "subheading": "{count} entities indexed in this country",
+    "notFound": "Country not found",
+    "metaTitle": "AYA Registry — {country} ({count} companies)",
+    "metaDescription": "Browse {count} companies from {country} indexed in the AYA registry for AI readability."
+  },
   "certificate": {
     "notFound": "Certificate not found",
     "notFoundDesc": "This AYA certificate does not exist or has been deleted.",
@@ -342,7 +358,11 @@
     "metaFallback": "{name}{score}. {status} in the AYA registry \u2014 AI readability verified by AI Visionary.",
     "registryLabel": "Official AYA Registry",
     "lastModifiedOn": "Last modified:",
-    "scoreAio": "AIO Score"
+    "scoreAio": "AIO Score",
+    "relatedTitle": "Related entities",
+    "relatedIntro": "Other entities in the same sector or country",
+    "relatedCertified": "Certified",
+    "relatedIndexed": "Indexed"
   },
   "payment": {
     "processingTitle": "Preparing...",

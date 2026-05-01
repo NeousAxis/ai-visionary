@@ -3,7 +3,7 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 8 avril 2026
+> Derniere mise a jour : 28 avril 2026 (pivot 100% suisse + sprint Postgres VPS)
 
 ---
 
@@ -15,9 +15,9 @@
 |-------|-----------|
 | **AYO** | Agent IA qui diagnostique la lisibilite IA d'un site web. V1=chatbot Gemini (page /diagnostic). V2=micro-agents LLM cibles Gemini 3 Flash (page /diagnostic-v2, branche feature/micro-agents-diagnostic). |
 | **AIO Score** | Score 0-100, deterministe, base sur 7 blocs ponderes (la "Bible AIO"). |
-| **AYA** | Registre public d'entites indexees/certifiees (Supabase `aya_registry`). ~4400+ entites, objectif 100k. |
+| **AYA** | Registre public d'entites indexees/certifiees. **Deux sources**: Supabase `aya_registry` (~4 438 entites legacy/certifiees, intouchable) + Postgres VPS Infomaniak `aya_local.aya_registry` (~25 860 entites scrapees Tranco EU, push 28 avril 2026). Objectif 100k. Total live au 28 avril : ~30 298. |
 | **ASR** | AI Singular Record — fichier JSON-LD signe Ed25519, identite numerique de l'entite. |
-| **Hard cap** | Pas de JSON-LD + pas d'AYA = score max 50. Pas d'ASR = max 90. Score max 78 sans preuves externes. |
+| **Hard cap** | Pas de JSON-LD + pas d'AYA = score max 50. **Pas d'ASR = max 50** (doctrine stricte depuis 21 avril 2026). Score max 78 sans preuves externes. |
 | **q values** | Qualite de chaque donnee extraite : 0 (absent), 0.5 (vague), 1 (concret/verifie). |
 
 ### Business model
@@ -96,11 +96,20 @@ URL -> Scanner (aio-scanner.ts) -> Score initial (aio-score-engine.ts)
 
 ### Hebergement
 
-- **Frontend + API** : Vercel (serverless, maxDuration=120s)
-- **Base de donnees** : Supabase PostgreSQL
-- **Emails** : Infomaniak SMTP (nodemailer). Adresses : hello@ + security@ (alias). TODO: ajouter alias delivery@ et registry@ quand Infomaniak partenariat actif.
-- **Paiements** : Stripe (mode LIVE depuis 11 avril 2026)
-- **Domaine** : ai-visionary.xyz (primaire, depuis 8 avril 2026). ai-visionary.com redirige vers .xyz (301).
+**Stratégie 100 % suisse (decidee 28 avril 2026)** : aucun service US ni hors-CH pour les composants critiques. Migration Vercel → VPS Infomaniak en cours. Cloudflare/AWS/Vercel/Mailchimp/Resend interdits. Que Infomaniak + self-hosted, ou rien.
+
+- **Frontend + API** : Vercel (en sortie — pivot vers VPS Infomaniak en cours, etapes detaillees dans la section "Migration Vercel -> VPS")
+- **VPS Infomaniak `aya-bot`** : Public Cloud 4C/8G/160GB NVMe (partenariat gratuit 2 ans, 17 avril 2026). Hostname `aya-bot`, IP `83.228.229.212`, accessible aussi via `beta.ai-visionary.xyz` (DNS staging temporaire — sera supprime apres bascule). SSH `ubuntu@beta.ai-visionary.xyz`, path `/home/ubuntu/app/`, PM2 app `ai-visionary` sur `:3000`, nginx `:443`. Cible : devient la prod 100 % suisse.
+- **Base de donnees** :
+  - **Supabase PostgreSQL** — sanctuaire intouchable (~4 438 entites + analyses + scan_states + otp_codes + sessions + system_logs). Lecture seule depuis l'app, JAMAIS de migration ni d'ecriture batch sans accord explicite Cyril.
+  - **Postgres 16 self-hosted sur VPS aya-bot** (active 28 avril 2026) — DB `aya_local`, role `aya_app`, table `aya_registry` reproduite a l'identique. Contient ~25 860 entites scrapees Tranco EU (push fait le 28 avril). localhost-only, pg_hba scram-sha-256, pg_dump quotidien dans `/home/ubuntu/backups/`.
+- **CDN / DDoS / WAF** : aucun service externe. Anti-DDoS niveau reseau **inclus** avec Public Cloud Infomaniak. Hardening local : nginx (rate limiting + cache + gzip/brotli) + fail2ban + ufw.
+- **Emails** : Infomaniak SMTP (nodemailer). Adresses : hello@ + security@ (alias). TODO: ajouter alias delivery@ et registry@.
+- **Newsletter** : Infomaniak Newsletter (domain ID 62227, 50k credits/mois). Strict opt-in, pas de cold marketing (CGU). Compte bloque depuis 25 avril, ticket support en attente.
+- **Paiements** : Stripe (mode LIVE depuis 11 avril 2026). Webhook URL `https://ai-visionary.xyz/api/webhooks/checkout-success` — suit le DNS, transparente lors de la bascule VPS.
+- **Domaine** : ai-visionary.xyz (primaire, depuis 8 avril 2026). ai-visionary.com redirige vers .xyz (301). Registrar Infomaniak. Domain ID `2128919` pour API DNS.
+- **Backup** : Swiss Backup Infomaniak 200 Go (a configurer apres bascule VPS).
+- **kSuite Business** : 3 users @ai-visionary.com (a configurer).
 
 ### Variables d'environnement requises
 
@@ -120,7 +129,17 @@ ADMIN_SECRET
 SESSION_SECRET
 AYO_SIGNING_KEY
 NEXT_PUBLIC_BASE_URL=https://ai-visionary.xyz
+VPS_PG_HOST=localhost                        # VPS Postgres self-hosted
+VPS_PG_PORT=5432
+VPS_PG_DB=aya_local
+VPS_PG_USER=aya_app
+VPS_PG_PASSWORD                              # Sur VPS uniquement, never in Vercel
+HF_TOKEN                                     # HuggingFace dataset export
+INFOMANIAK_NEWSLETTER_TOKEN
+INFOMANIAK_NEWSLETTER_DOMAIN_ID=62227
 ```
+
+> Note : `AYA_VPS_API_URL` (var Vercel pour fetch HTTP vers le VPS) est obsolete depuis le pivot 100% suisse — l'app sera sur le VPS et lira directement Postgres en local.
 
 ### Base de donnees Supabase
 
@@ -162,8 +181,8 @@ NEXT_PUBLIC_BASE_URL=https://ai-visionary.xyz
 
 ### Priorite IMMEDIATE
 
-1. **Croissance registre** : objectif 100k entites (scores bot 20-50 = corrects, plafond 50 = moteur conversion AYO PRO)
-2. **Campagne email entreprises indexees**
+1. **Croissance registre** : objectif 100k entites — **Vague 1 Tranco EU en cours** (156k domaines extraits, batch 1 de 10k scrape = +9595 JSONs locaux au 14 avril). Push Supabase bloque jusqu'a fin grace period (7 mai 2026).
+2. ~~**Campagne email entreprises indexees via Newsletter**~~ — ABANDONNEE (28 avril 2026). Cold marketing aux ~1583 entites AYA-BOT incompatible avec les CGU Infomaniak Newsletter (opt-in explicite obligatoire). Endpoint `app/api/admin/campaign-aya-indexed/` + template `buildAyaIndexedAnnouncementEmail` supprimes. Newsletter Infomaniak reservee a usage opt-in futur (clients AYA Sub / Pack PRO une fois lancement commercial effectif). Les colonnes `missing_contact_email` + `email_research_status` du schema restent (utiles pour gestion interne / canal SMTP individuel hors Newsletter).
 3. **Stabiliser la qualite des fichiers PRO** — anti-marketing, classification correcte, normalisation pays/langue
 
 ---
@@ -422,6 +441,73 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 - Emails : migration Resend → Infomaniak SMTP (nodemailer). `lib/mailer.ts` + 11 routes API migrees. Adresses : `hello@` (boite) + `security@` (alias). TODO partenariat Infomaniak : ajouter alias `delivery@` + `registry@`.
 - Pages FAQ (/faq), Glossaire (/glossaire), CGV (/cgv) — bilingues FR/EN, liens dans le footer.
 - Mentions legales + confidentialite : hebergement = Infomaniak Network SA (Geneve, Suisse).
+- **Vague 1 Tranco EU (14 avril 2026)** : `aya/fetch_tranco_eu.py` telecharge Tranco Top 1M, filtre 38 TLDs europeens, dedup vs `domains.txt` → **156 616 nouveaux domaines EU** dans `aya/domains_growth_tranco.txt` (apres blocklist). Batch 1 de 10 000 domaines (`domains_batch1_10k.txt`) scrape avec succes (96% success rate, +9595 JSONs dans `aya/data/`). Push Supabase BLOQUE jusqu'au 8 mai (grace period).
+- **Blocklist porn/armement (14 avril 2026)** : `aya/blocklist.py` — patterns `PORN_RE` + `WEAPON_RE` + whitelist explicite (gun.io, gundam-store, riflessi, essex/sussex, emilfrey, etc.). Airsoft autorise (sport). 118 domaines bannis supprimes (104 porn + 14 armement). Filtre integre dans `run_pipeline_fast.py` (via `load_domains`) et `fetch_tranco_eu.py`. Aucune future vague ne peut ramener ces domaines.
+- ~~**Email template campagne bot-indexed (14 avril 2026)**~~ : SUPPRIME le 28 avril 2026 suite a abandon de la campagne (cold marketing incompatible CGU Infomaniak Newsletter). Pour reference historique uniquement : la fonction etait `buildAyaIndexedAnnouncementEmail(entityName, score, publicAyaUrl, diagnosticUrl, locale)` dans `lib/email-templates.ts`, bilingue FR/EN.
+- **Schema aya_registry (14 avril 2026)** : ajout colonnes `missing_contact_email` (BOOLEAN) + `email_research_status` (TEXT: pending | researched_ok | researched_failed | do_not_contact) + index partiel `idx_aya_missing_email`. Backfill manuel via SQL Editor — identifie les entites AYA-BOT sans email pour enrichissement manuel/tiers futur.
+- **Supabase grace period** : 7 avril → 7 mai 2026. Declenchee par l'incident rescoring V2 (depassement egress). Regle absolue : **pas de gros batch Supabase** pendant le grace period. Apres le 7 mai, retour normal Free Plan si aucun nouveau depassement. Push des 9595 JSONs locaux reporte au 8 mai.
+- **scripts/rescore-batch.sh supprime** (14 avril 2026) : ancien lanceur du rescoring V2 abandonne (utilisait nohup/caffeinate pour batch non supervise). Suppression demandee par Cyril.
+- **Batches 2 & 3 Tranco (17-18 avril 2026)** : batch 2 scrape en 1h04 (9998/10000), batch 3 en 2h40 (9979/10000 + retry 21/21 apres fix parser). Total au 18 avril : 36 245 JSONs dans `aya/data/` (6682 initial + 29 562 nouveaux). 1583 avec contact_email candidats pour campagne email.
+- **Fix `parser.py::normalize_country` (18 avril 2026)** : la fonction crashait sur `.strip()` si `raw_country` etait un dict (JSON-LD structure `{"@type":"Country","name":"Poland"}`). Ajout de `_coerce_to_str()` qui gere str/dict/list/None/int de maniere defensive. 21 sites e-commerce (gymbeam, vente-unique, benuta, mein-gartenshop24...) recuperes avec score 50 et country correctement detecte.
+- **Cap 50 sans ASR + masquage concurrents ai-visionary.xyz (21 avril 2026)** : commit `f31d1d65`. (1) `lib/aio-score-engine.ts` : cap passe de 90 a 50 sans ASR (regle doctrinale AYO). (2) `app/api/diagnostic/scan/route.ts` : retire les 2 overrides V2 (`has_asr_file = true` + `is_aya_registered = true`) qui neutralisaient le cap — GARDE seulement `has_jsonld = true`. (3) `app/diagnostic/page.tsx` : section concurrents affiche une carte dediee "Vous etes la reference du registre AYA" au lieu de competitors quand domaine = ai-visionary.xyz. (4) `messages/fr.json` + `messages/en.json` : 3 cles i18n ajoutees (`compareSelfTitle`, `compareSelfDesc`, `compareSubSelf`). **Tests end-to-end sur beta VPS valides** : plombier-geneve.ch → 50/100 (cap applique), stripe.com → 50/100 (cap applique), ai-visionary.xyz → 98.8/100 (ASR reel, cap ignore). UI testee en EN via Claude-in-Chrome. Deploy prod Vercel applique.
+- **Batch 4 Tranco (25 avril 2026)** : 6748/6767 succes (99.7%), 19 erreurs `not enough values to unpack` sur sites avec challenge Cloudflare/CDN. Retry n'a recupere que 3/19. Reste 16 abandonnes (negligeable).
+- **Batch 5 Tranco (25 avril 2026)** : 9987/10000 succes (99.87%), 13 erreurs. 2h27 de scrape. `aya/domains_batch5_10k.txt` = lignes 30001-40000 du Tranco EU. Total cumule `aya/data/` apres batch 5 : ~46 000 JSONs.
+- **Code campagne newsletter (25 avril 2026, partiellement REVERTE 28 avril)** : `lib/infomaniak-newsletter.ts` (wrapper API : createSubscriber, createCampaign, testCampaign, scheduleCampaign…) **conserve** pour usage opt-in futur. `app/api/admin/campaign-aya-indexed/route.ts` **SUPPRIME le 28 avril 2026** car il importait des contacts non opt-in dans Newsletter Infomaniak (incompatible avec les CGU). Variables env `INFOMANIAK_NEWSLETTER_TOKEN` + `INFOMANIAK_NEWSLETTER_DOMAIN_ID=62227` toujours dans `.env.local` (utilisables des qu'une vraie base opt-in sera constituee).
+- **API DNS Infomaniak debloquee (25 avril 2026)** : decouverte critique — l'endpoint `/1/domain/{domainId}/dns/record` accepte le token Newsletter et permet la gestion DNS programmatique. Domain ID `ai-visionary.xyz` = **2128919**. Format des records DKIM : il faut envoyer `type:"DKIM", dkim_type:"CNAME"` (pas `type:"CNAME"`). Permet de recreer les 4 records (SPF + 3 DKIM amazonses) sans l'interface UI Infomaniak qui se verrouillait.
+- **Newsletter Infomaniak BLOQUEE puis pivot strategique (25-28 avril 2026)** : compte temporairement bloque par le filtre qualite auto apres tests minimalistes (`campaign_is_spam`). Reponse Infomaniak (28 avril) : 4 questions sur opt-in + preuves d'inscription. Decision Cyril : reponse 100% honnete a Infomaniak — phase pre-lancement, pas de base opt-in, tests sur ses propres adresses. **Pivot strategique** : Newsletter Infomaniak ne servira QUE pour des destinataires opt-in explicites (clients AYA Sub / Pack PRO / inscriptions newsletter avec double opt-in) une fois le lancement commercial effectif. Cold marketing aux entites AYA-BOT abandonne. Code aligne avec la promesse : endpoint et template supprimes le 28 avril. Lecon double : **ne jamais tester newsletter avec un dummy minimal** + **ne jamais utiliser Newsletter pour du cold marketing — le service est strictement opt-in**.
+- **Sprint Postgres VPS + 8 fixes SEO (28 avril 2026)** : (1) Setup Postgres 16 self-hosted sur VPS Infomaniak `aya-bot` (= `beta.ai-visionary.xyz`, IP 83.228.229.212) via sous-agent Sonnet : DB `aya_local`, role `aya_app`, table `aya_registry` repliquee schema Supabase, 5 indexes, pg_hba localhost-only, `listen_addresses=localhost`, cron pg_dump quotidien dans `/home/ubuntu/backups/`. Doc dans `docs/vps-postgres-setup.md`. (2) Push 25 860 entites scrapees (filter score >= 20) sur Postgres VPS via `aya/push_to_local_pg.py` (fork de `push_to_aya.py`, batches 50 + delai 200ms, INSERT/DELETE par entity_id, transactions). 0 erreur. (3) **8 fixes SEO** : `public/.well-known/ai-plugin.json` + `openapi.json` (decouverte IA), JSON-LD ItemList registre 10 → 100 entites, "3000+" → "4400+" homepage, twitter card `summary_large_image`, `/api/aya/search` retourne `entity_id` + `domain`, OG image dynamique 1200x630 (`app/aya/e/[id]/opengraph-image.tsx`), pages `/aya/sector/[macro]` + `/aya/country/[code]` + sitemap maj (4 499 URLs), Related entities sur fiche, badge SVG endpoint `/api/aya/badge/[domain]`. (4) Architecture mixte preparee : `lib/db-local-pg.ts` (client `pg` localhost), routes `/api/aya-local/{search,entity,live,stats}`, helper `getAyaEntitiesAggregated` dans `lib/db.ts`. tsc + `npm run build` sans erreur. Supabase intacte (4 438 entites verifie). 3 nouvelles methodes lecture seule dans `lib/db.ts` : `getAyaEntitiesByFilter`, `getAyaSectors`, `getAyaCountries`.
+
+---
+
+## 6.5 MIGRATION VERCEL → VPS INFOMANIAK (en cours)
+
+> **Strategie 100 % suisse decidee 28 avril 2026.** AI Visionary doit etre 100% suisse. Aucun service US (Cloudflare interdit, AWS interdit, Vercel a sortir). Migration en cours.
+
+### Etat infra cible
+
+```
+INTERNET
+   |
+   v
+DNS Infomaniak
+   |
+   v
+[Anti-DDoS Infomaniak — inclus avec Public Cloud]
+   |
+   v
+VPS aya-bot (83.228.229.212, 4C/8G)
+   |
+   |--- ufw (22/80/443 only)
+   |--- fail2ban (ban abus auto)
+   |--- nginx (TLS Let's Encrypt + rate limit + cache + gzip/brotli)
+   |--- PM2 -> Next.js prod
+   |       |--- lit Postgres VPS local (25 860 entites)
+   |       |--- lit Supabase via SDK (4 438 entites legacy, READ ONLY)
+   |--- Postgres 16 self-hosted (localhost:5432)
+   |--- crontab : pg_dump + cron jobs Next.js
+```
+
+### Ce qui reste pour basculer (~6-7h de travail)
+
+| # | Etape | Duree |
+|---|-------|-------|
+| MV.1 | Code a jour sur le VPS : rsync + npm install (`pg` + `@types/pg`) + `npm run build` + `pm2 restart` | 30-45 min |
+| MV.2 | Verifier `.env.local` du VPS contient TOUTES les vars (Supabase URL/KEY, Stripe, Gemini, SMTP, Admin/Session/AYO keys, HF_TOKEN, Newsletter) | 30 min |
+| MV.3 | Refactorer `getAyaEntitiesAggregated` pour lire Postgres VPS en local (sans HTTP fetch) + brancher dans `/api/aya/{search,live,entity,stats}` | 1 h |
+| MV.4 | TLS Let's Encrypt sur `ai-visionary.xyz` + `www.ai-visionary.xyz` (certbot) | 30 min |
+| MV.5 | nginx config server block + reverse proxy `:3000` + `gzip`/`brotli` + `proxy_cache` + `limit_req_zone` | 1 h |
+| MV.6 | ufw firewall (22/80/443 only) + fail2ban (regles nginx + ssh) | 30 min |
+| MV.7 | Cron jobs Linux : `expire-entities` (1h), `expiry-reminders` (9h), `review-reminders` (9h) via `curl localhost:3000/api/cron/...` | 30 min |
+| MV.8 | Tests E2E sur `beta.ai-visionary.xyz` : pages publiques + diagnostic V2 + Stripe checkout + webhook + email Pack PRO + OTP + API AYA fusionnee + sitemap 30k+ URLs | 2 h |
+| MV.9 | Reduire TTL DNS `ai-visionary.xyz` a 300s (preparation switch) | 5 min |
+| MV.10 | Switch DNS : `A ai-visionary.xyz 83.228.229.212` + `CNAME www → @`, garder Vercel actif 48h | 5 min + propagation |
+| MV.11 | Surveillance 48h (logs, monitoring uptime suisse) | continu |
+| MV.12 | Desactiver Vercel + retirer auto-deploy GitHub | 5 min |
+| MV.13 | Supprimer record DNS `beta.ai-visionary.xyz` | 5 min |
+
+**Stripe webhook** : URL ne change pas (`ai-visionary.xyz/api/webhooks/checkout-success` suit le DNS). Aucune action cote dashboard Stripe.
+
+**Post-bascule** : `/api/aya-local/*` deviennent redondantes (l'app sur le VPS lit Postgres en local) — a fusionner dans `/api/aya/*` ou supprimer.
 
 ---
 
@@ -433,8 +519,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 2 | ~~Coherence linguistique fichiers PRO (EN par defaut)~~ | ~~Immediat~~ | Fait (31 mars 2026) |
 | 3 | ~~AYO V4 Evidence-Based~~ | ~~Haute~~ | Fait — actif en prod, flag ON (3 avril 2026) |
 | 4 | ~~Stabiliser qualite fichiers PRO (anti-marketing, classification, normalisation)~~ | ~~Critique~~ | Fait — solidifie (3 avril 2026). sanitizeComplianceOutput() partagee, score stable 82/100 |
-| 5 | Scraping 100k entites + registres du commerce | Critique | En cours (~4400) |
-| 6 | Campagne email entreprises indexees | Haute | A faire |
+| 5 | Scraping 100k entites + registres du commerce | Critique | En cours — Vague 1 Tranco EU : batches 1-5 scrape (+39 478 JSONs cumules au 25 avril, total data/ ~46 000 incl. 6682 initial), ~11 batches de 10k restants dans `domains_growth_tranco.txt` |
+| 6 | ~~Campagne email entreprises indexees via Newsletter~~ | ~~Haute~~ | ABANDONNE (28 avril 2026). Cold marketing aux ~1583 entites AYA-BOT incompatible avec CGU Infomaniak Newsletter (opt-in obligatoire). Endpoint `app/api/admin/campaign-aya-indexed/route.ts` et template `buildAyaIndexedAnnouncementEmail` supprimes. Si un canal d'annonce vers entites indexees est un jour necessaire, faire SMTP individuel via `hello@` (hors Newsletter Infomaniak), avec opt-out conforme LPD/RGPD. |
 | 7 | Re-exporter GitHub/HuggingFace apres chaque batch | Continue | Fait (7 avril 2026). GitHub 4372 entites + HuggingFace 4437 entites |
 | 8 | Soumission There's An AI For That | Moyenne | Cyril |
 | 9 | Diagnostic V2 micro-agents — 8 micro-agents LLM + detect-pedagogy. Score stable 81/100. OTP + email + Stripe TEST connectes. Merge dans main. Page `/diagnostic-v2`. | Haute | Fait — merge dans main (5 avril 2026) |
@@ -447,6 +533,25 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | 16 | ~~Score alignment V2→email→AYA — proScore sauve dans analyses, webhook l'utilise, computeAioScore() unique partout, deterministe~~ | ~~Haute~~ | Fait — verifie (6 avril 2026). Variance Offer Clarity etait pre-V2. |
 | 17 | ~~Public Key ID visible dans cartes AYA + LLM API + GitHub export~~ | ~~Haute~~ | Fait (6 avril 2026) |
 | 18 | ~~Admin enrichment API + fix modele Gemini ayo-semantics~~ | ~~Critique~~ | Fait (6 avril 2026). `/api/admin/enrich` + retry webhook + gemini-3-flash-preview |
+| 19 | ~~Vague 1 Tranco — extraction 156k domaines EU + batch 1 scrape 10k~~ | ~~Critique~~ | Fait (14 avril 2026). `aya/fetch_tranco_eu.py` + `aya/domains_growth_tranco.txt` + `aya/domains_batch1_10k.txt` + +9595 JSONs |
+| 20 | ~~Blocklist porn/armement + filtre permanent~~ | ~~Critique~~ | Fait (14 avril 2026). `aya/blocklist.py` + integration `run_pipeline_fast.py` + `fetch_tranco_eu.py`. 118 domaines bannis supprimes |
+| 21 | ~~Email template `buildAyaIndexedAnnouncementEmail`~~ | ~~Haute~~ | Fait (14 avril 2026), puis SUPPRIME (28 avril 2026) — abandon cold marketing via Newsletter Infomaniak. |
+| 22 | ~~Schema Supabase `missing_contact_email` + `email_research_status`~~ | ~~Haute~~ | Fait (14 avril 2026). Ajoute manuellement par Cyril via SQL Editor |
+| 23 | ~~Push Supabase Vague 1 batch 1~~ | ~~Critique~~ | ABANDONNE (28 avril 2026). Supabase intouchable (sanctuaire). Toutes les nouvelles entites scrapees vont sur Postgres VPS. Au 28 avril : 25 860 entites pushees sur Postgres VPS (filter score >= 20, 0 erreur). |
+| 24 | Vague 1 batches 6→16 (~110 000 domaines Tranco restants) | Critique | Batches 1-5 faits (55 676 JSONs scrapes au 25 avril, 25 860 pushes Postgres VPS au 28 avril). ~11 batches de 10k restants. Cible push : Postgres VPS uniquement. |
+| 32 | ~~Fix parser.py — normalize_country crash sur JSON-LD dict~~ | ~~Haute~~ | Fait (18 avril 2026). Nouvelle fonction `_coerce_to_str()` dans parser.py gere str/dict/list/None/int pour JSON-LD structures (ex: `{"@type":"Country","name":"Poland"}`). Permet de recuperer 21 sites e-commerce qui crashaient (gymbeam, vente-unique, benuta, etc.). Pays detecte correctement (PL/FR/DE) depuis le JSON-LD |
+| 25 | Patcher `aya/fetch_sirene.py` rate limit (HTTP 429) | Moyenne | REQUEST_DELAY 0.4s → 1.5s + retry exponentiel + MAX_PAGES_PER_CODE 8 → 4 |
+| 26 | Trouver alternative Zefix CH (401 auth sur `/search`) | Moyenne | Candidate : opendata.swiss, Swiss Startup Map, OpenCorporates. Tranco a deja 3277 .ch, pas urgent |
+| 27 | ~~API endpoint `/api/admin/campaign-aya-indexed`~~ | ~~Haute~~ | ABANDONNE (28 avril 2026). Endpoint supprime car incompatible avec CGU Infomaniak (importait des contacts non opt-in). `lib/infomaniak-newsletter.ts` conserve pour usage opt-in futur. |
+| 28 | thepiratebay.se + politique warez | Moyenne | EN ATTENTE — Cyril a reporte la decision (14 avril). Pas dans blocklist pour l'instant |
+| 29 | ~~Setup VPS Infomaniak `aya-bot` (Public Cloud 4C/8G/160GB)~~ | ~~Critique~~ | Fait (28 avril 2026). VPS actif (= `beta.ai-visionary.xyz`, IP 83.228.229.212). Postgres 16 + 25 860 entites pushees. Reste a installer scripts aya/ scraping pour batches 24/7 (tache 24). |
+| MV | **Migration Vercel → VPS Infomaniak (100% suisse)** | Critique | En cours. 13 etapes documentees en section 6.5. ~6-7h de travail. Cyril decide du planning. |
+| 30 | Configurer Newsletter Infomaniak (50k credits/mois) | Haute | En attente des codes. Adapter template email ou utiliser API Newsletter Infomaniak |
+| 31 | Setup kSuite Business 3 users @ai-visionary.com | Moyenne | En attente des codes. 3 boites email pro |
+| 33 | ~~Cap 50 sans ASR (regle doctrinale stricte)~~ | ~~Haute~~ | Fait (21 avril 2026). `lib/aio-score-engine.ts` passe de 90 a 50. Retire aussi les overrides V2 dans `app/api/diagnostic/scan/route.ts` (`has_asr_file = true` + `is_aya_registered = true`) qui neutralisaient le cap. Teste end-to-end : plombier-geneve.ch → 50, stripe.com → 50, ai-visionary.xyz → 98.8 (ASR reel). Commit f31d1d65 |
+| 34 | ~~Masquage concurrents pour ai-visionary.xyz~~ | ~~Haute~~ | Fait (21 avril 2026). `/api/diagnostic/compare` retourne `competitors:[]` quand domaine = ai-visionary. Carte dediee "Vous etes la reference du registre AYA" dans `app/diagnostic/page.tsx`. Cles i18n `compareSelfTitle/compareSelfDesc/compareSubSelf` ajoutees dans FR+EN. Commit f31d1d65 |
+| 35 | API DNS Infomaniak — gestion programmatique des records | Decouverte | Fait (25 avril). Endpoint `/1/domain/{domainId}/dns/record` accepte le token Newsletter. Domain ID ai-visionary.xyz = 2128919. Format DKIM specifique : `type:"DKIM", dkim_type:"CNAME"`. Permet de gerer DNS sans UI (tres utile pour eviter les erreurs de saisie). |
+| 36 | Deblocage compte Newsletter Infomaniak | Critique | Reponse Infomaniak recue (28 avril) avec 4 questions (sujets/destinataires, sources fichier, branding, preuves opt-in). Reponse honnete envoyee : phase pre-lancement, pas de base opt-in, tests sur adresses internes. Decision : Newsletter ne sera utilisee qu'avec une vraie base opt-in (clients AYA Sub / Pack PRO / inscriptions newsletter avec double opt-in) une fois lancement commercial. Cold marketing aux entites AYA-BOT abandonne. Code aligne (endpoint et template supprimes). En attente confirmation Infomaniak sur procedure de reactivation. |
 
 ---
 
@@ -461,7 +566,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | **Google Cloud (Gemini API)** | Pay-as-you-go | CHF 20.00 | Budget alert a 100% |
 | **Supabase** | Free/Pro (org NeousAxis) | Quota plan | Depasse = bloque ou surcharge |
 | **Vercel** | Pro | Inclus | maxDuration=120s par fonction |
-| **Resend** | Free tier | 0 | 100 emails/jour, 3000/mois |
+| **Resend** | Free tier | 0 | 100 emails/jour, 3000/mois (deja remplace par SMTP Infomaniak via nodemailer pour transactionnel) |
+| **Infomaniak Public Cloud** | Partenariat gratuit 2 ans | 0 | VPS 4C/8G/160GB + Swiss Backup 200GB + kSuite 3 users + Newsletter 50k/mois |
 | **Stripe** | Mode LIVE | Commission standard (~2.9% + 0.30 CHF) | Production depuis 11 avril 2026 |
 
 ### Cout par operation Gemini
@@ -477,7 +583,8 @@ AYA n'est PAS une destination. Les donnees sont sur 4 sources convergentes :
 | Date | Incident | Cause | Impact |
 |------|----------|-------|--------|
 | 6-7 avril 2026 | Budget Google 100% atteint (CHF 20) | Rescoring batch V2 : ~500 entites × 13 appels = ~6500 appels Gemini inutiles | 100% du budget mensuel consomme en 7 jours |
-| 7 avril 2026 | Quota Supabase depasse | Rescoring batch V2 : milliers de lectures/ecritures + 4 sessions paralleles | Supabase accorde une exception one-time |
+| 7 avril 2026 | Quota Supabase depasse | Rescoring batch V2 : milliers de lectures/ecritures + 4 sessions paralleles | Supabase accorde une exception one-time, grace period jusqu'au **7 mai 2026** (apres : HTTP 402 sur requetes si toujours depasse) |
+| 14 avril 2026 | (pas un incident) Correction estimation couts Gemini | Estimations initiales du batch Tranco 156k trop elevees (CHF 140 annonces, reel ~CHF 2.20 avec batching BATCH_SIZE=20 dans `enrich_with_gemini.py`) | Facteur 60x d'erreur — couts scraping negligeables en realite, seul le temps de scraping est contraignant |
 
 ### Regles anti-depassement
 

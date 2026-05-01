@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [{ url: "/icon-v2.png", width: 512, height: 512, alt: "AI Visionary Logo" }],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: t('twitterTitle'),
       description: t('twitterDescription'),
       images: ["/icon-v2.png"],

@@ -893,6 +893,116 @@ export const database = {
         }
     },
 
+    /**
+     * Get entities filtered by sector_macro or country_legal (server-side filter, paginated).
+     * Used for /aya/sector/[macro] and /aya/country/[code] landing pages.
+     */
+    getAyaEntitiesByFilter: async (options: {
+        sector?: string;
+        country?: string;
+        limit?: number;
+        offset?: number;
+    }): Promise<{ data: any[]; total: number }> => {
+        if (!isSupabaseConfigured()) return { data: [], total: 0 };
+        const client = getSupabase();
+        if (!client) return { data: [], total: 0 };
+
+        const { sector, country, limit = 100, offset = 0 } = options;
+
+        try {
+            let countQuery = client.from('aya_registry').select('*', { count: 'exact', head: true });
+            if (sector) countQuery = countQuery.eq('sector_macro', sector);
+            if (country) countQuery = countQuery.eq('country_legal', country.toUpperCase());
+            const { count: total } = await countQuery;
+
+            let query = client
+                .from('aya_registry')
+                .select('entity_id, display_name, legal_name, website, sector_macro, country_legal, entity_type, asr_score, payment_completed, asr_payload')
+                .not('display_name', 'ilike', '%porn%')
+                .not('display_name', 'ilike', '%xxx%')
+                .not('display_name', 'ilike', '%escort%')
+                .not('display_name', 'ilike', '%onlyfans%')
+                .not('display_name', 'ilike', "['%")
+                .not('display_name', 'ilike', '{{%');
+
+            if (sector) query = query.eq('sector_macro', sector);
+            if (country) query = query.eq('country_legal', country.toUpperCase());
+
+            query = query.order('asr_score', { ascending: false, nullsFirst: false }).range(offset, offset + limit - 1);
+
+            const { data, error } = await query;
+            if (error) {
+                console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
+                return { data: [], total: 0 };
+            }
+
+            return { data: data || [], total: total || 0 };
+        } catch (error) {
+            console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
+            return { data: [], total: 0 };
+        }
+    },
+
+    /**
+     * List distinct sector_macro values with their entity count. Used for sitemap + index pages.
+     */
+    getAyaSectors: async (): Promise<{ sector: string; count: number }[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+
+        try {
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('sector_macro')
+                .not('sector_macro', 'is', null);
+            if (error) return [];
+            const counts: Record<string, number> = {};
+            for (const row of data || []) {
+                const s = (row as any).sector_macro;
+                if (!s) continue;
+                counts[s] = (counts[s] || 0) + 1;
+            }
+            return Object.entries(counts)
+                .filter(([, c]) => c >= 2)
+                .sort((a, b) => b[1] - a[1])
+                .map(([sector, count]) => ({ sector, count }));
+        } catch {
+            return [];
+        }
+    },
+
+    /**
+     * List distinct country_legal values with their entity count. Used for sitemap + index pages.
+     */
+    getAyaCountries: async (): Promise<{ country: string; count: number }[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+
+        try {
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('country_legal')
+                .not('country_legal', 'is', null)
+                .neq('country_legal', '')
+                .neq('country_legal', 'XX');
+            if (error) return [];
+            const counts: Record<string, number> = {};
+            for (const row of data || []) {
+                const c = ((row as any).country_legal || '').toUpperCase();
+                if (!c || c === 'XX') continue;
+                counts[c] = (counts[c] || 0) + 1;
+            }
+            return Object.entries(counts)
+                .filter(([, c]) => c >= 2)
+                .sort((a, b) => b[1] - a[1])
+                .map(([country, count]) => ({ country, count }));
+        } catch {
+            return [];
+        }
+    },
+
     // ========================================================================
     // LIFECYCLE MANAGEMENT — Expiry, reviews, subscriptions
     // ========================================================================
@@ -1126,3 +1236,396 @@ export const database = {
 
 // Export as 'db' for backward compatibility
 export const db = database;
+
+// ── Aggregated helper (Supabase + optional VPS Postgres) ─────────────────────
+
+/**
+ * In-memory cache for VPS fetch results.
+ * Key: cache key string → { data: any[], exp: timestamp }
+ */
+const _vpsCache = new Map<string, { data: any[]; exp: number }>();
+const VPS_CACHE_TTL_MS = 60_000; // 60 seconds
+
+/**
+ * getAyaEntitiesAggregated
+ *
+ * Fetches entities from Supabase (authoritative, paying customers) and,
+ * when AYA_VPS_API_URL is set, also from the VPS /api/aya-local/live endpoint.
+ * Results are merged and deduplicated by entity_id — Supabase wins on conflicts.
+ *
+ * Falls back gracefully to Supabase-only on VPS network errors or timeouts.
+ * NEVER throws.
+ */
+export async function getAyaEntitiesAggregated(options: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    sort?: 'default' | 'alpha' | 'score' | 'country' | 'certified';
+}): Promise<{ data: any[]; total: number; certifiedCount: number; indexedCount: number }> {
+    // Always start with Supabase (authoritative source)
+    const supabaseResult = await database.getAyaEntitiesPaginated(options);
+
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) {
+        // VPS aggregation not configured — return Supabase-only result
+        return supabaseResult;
+    }
+
+    // Build VPS cache key
+    const cacheKey = `${vpsBaseUrl}|${options.search ?? ''}|${options.sort ?? 'default'}`;
+    const cached = _vpsCache.get(cacheKey);
+    let vpsEntities: any[] = [];
+
+    if (cached && Date.now() < cached.exp) {
+        vpsEntities = cached.data;
+    } else {
+        try {
+            // Fetch up to 5000 entities from VPS (single call — VPS has no grace period concerns)
+            const searchParam = options.search ? `&search=${encodeURIComponent(options.search)}` : '';
+            const sortParam   = options.sort   ? `&sort=${encodeURIComponent(options.sort)}`     : '';
+            const vpsUrl = `${vpsBaseUrl}/live?limit=5000${searchParam}${sortParam}`;
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+
+            const res = await fetch(vpsUrl, { signal: controller.signal });
+            clearTimeout(timeout);
+
+            if (!res.ok) {
+                console.warn(`[getAyaEntitiesAggregated] VPS returned ${res.status} — falling back to Supabase only`);
+            } else {
+                const json = await res.json() as { data?: any[] };
+                vpsEntities = Array.isArray(json.data) ? json.data : [];
+                _vpsCache.set(cacheKey, { data: vpsEntities, exp: Date.now() + VPS_CACHE_TTL_MS });
+            }
+        } catch (err) {
+            console.warn('[getAyaEntitiesAggregated] VPS fetch failed — falling back to Supabase only:', err);
+        }
+    }
+
+    if (vpsEntities.length === 0) {
+        return supabaseResult;
+    }
+
+    // Build a Set of entity_ids already in Supabase result (all pages, not just current)
+    // We need the full Supabase set for dedup — fetch all IDs via a lightweight query.
+    // For simplicity, we deduplicate against the full VPS list and recalculate totals.
+
+    // Collect Supabase entity_ids from the current page result
+    const supabaseIds = new Set<string>(supabaseResult.data.map((e: any) => e.entity_id as string));
+
+    // Filter VPS rows: exclude any entity_id already in Supabase
+    const vpsUnique = vpsEntities.filter((e: any) => !supabaseIds.has(e.entity_id));
+
+    // Merge: Supabase rows first (certified, authoritative), then VPS-unique rows
+    const merged = [...supabaseResult.data, ...vpsUnique];
+
+    // Adjust total: Supabase total + VPS unique count
+    const adjustedTotal = supabaseResult.total + vpsUnique.length;
+
+    return {
+        data:           merged,
+        total:          adjustedTotal,
+        certifiedCount: supabaseResult.certifiedCount,  // Only Supabase has paying customers
+        indexedCount:   supabaseResult.indexedCount + vpsUnique.length,
+    };
+}
+
+// ── Shared result types ───────────────────────────────────────────────────────
+
+export interface AyaSearchResult {
+    name: string;
+    domain: string;
+    country: string;
+    sector: string;
+    score: number;
+    certified: boolean;
+    entity_id: string;
+    url: string;
+}
+
+export interface AyaStatsShape {
+    total_entities: number;
+    certified_count: number;
+    indexed_count: number;
+    scores: {
+        average: number;
+        min: number;
+        max: number;
+        median: number;
+    };
+    sectors: { sector: string; count: number }[];
+    countries: { country: string; count: number }[];
+    last_updated: string;
+}
+
+// ── getAyaSearchAggregated ────────────────────────────────────────────────────
+
+/**
+ * Search entities across Supabase (authoritative) + optional VPS Postgres.
+ * Dedupes by entity_id — Supabase wins on conflicts.
+ * NEVER throws.
+ */
+export async function getAyaSearchAggregated(
+    q: string,
+    limit: number,
+): Promise<AyaSearchResult[]> {
+    // ── Supabase search ──────────────────────────────────────────────────────
+    const stopWords = new Set(['le','la','les','de','du','des','un','une','et','en','à','a','au','aux','dans','pour','sur','par','avec','the','of','in','and','for','on','at','to','is','an']);
+    const qLower = q.toLowerCase();
+    const words = qLower.split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w));
+
+    const mapToResult = (e: any): AyaSearchResult => ({
+        name:      e.display_name || e.legal_name || '',
+        domain:    e.website ? e.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : '',
+        country:   e.country_legal || '',
+        sector:    e.sector_macro || '',
+        score:     e.asr_score ?? 0,
+        certified: e.payment_completed === true,
+        entity_id: e.entity_id || '',
+        url:       `https://ai-visionary.xyz/aya/e/${e.entity_id || ''}`,
+    });
+
+    let supabaseResults: AyaSearchResult[] = [];
+    try {
+        const allEntities = await database.getAyaEntities();
+        const scored = allEntities
+            .map((e: any) => {
+                const basicText = [
+                    e.display_name, e.legal_name, e.website,
+                    e.sector_macro, e.country_legal, e.contact_email,
+                ].filter(Boolean).join(' ').toLowerCase();
+                const payloadText = e.asr_payload
+                    ? (typeof e.asr_payload === 'string'
+                        ? e.asr_payload.toLowerCase()
+                        : JSON.stringify(e.asr_payload).toLowerCase())
+                    : '';
+                const fullText = basicText + ' ' + payloadText;
+                const matchCount = words.filter(word => fullText.includes(word)).length;
+                const certBonus = e.payment_completed ? 0.5 : 0;
+                return { entity: e, matchCount, score: matchCount + certBonus };
+            })
+            .filter(item => item.matchCount > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit)
+            .map(item => mapToResult(item.entity));
+        supabaseResults = scored;
+    } catch (err) {
+        console.warn('[getAyaSearchAggregated] Supabase search failed:', err);
+    }
+
+    // ── VPS search ───────────────────────────────────────────────────────────
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return supabaseResults;
+
+    const cacheKey = `_search_${q}_${limit}`;
+    const cached = _vpsCache.get(cacheKey);
+    let vpsResults: AyaSearchResult[] = [];
+
+    if (cached && Date.now() < cached.exp) {
+        vpsResults = cached.data as AyaSearchResult[];
+    } else {
+        try {
+            const vpsUrl = `${vpsBaseUrl}/search?q=${encodeURIComponent(q)}&limit=${limit}`;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+            const res = await fetch(vpsUrl, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (!res.ok) {
+                console.warn(`[getAyaSearchAggregated] VPS returned ${res.status} — Supabase only`);
+            } else {
+                const json = await res.json() as { results?: AyaSearchResult[] };
+                vpsResults = Array.isArray(json.results) ? json.results : [];
+                _vpsCache.set(cacheKey, { data: vpsResults, exp: Date.now() + VPS_CACHE_TTL_MS });
+            }
+        } catch (err) {
+            console.warn('[getAyaSearchAggregated] VPS fetch failed — Supabase only:', err);
+        }
+    }
+
+    if (vpsResults.length === 0) return supabaseResults;
+
+    const supabaseIds = new Set<string>(supabaseResults.map(r => r.entity_id));
+    const vpsUnique = vpsResults.filter(r => !supabaseIds.has(r.entity_id));
+    return [...supabaseResults, ...vpsUnique].slice(0, limit);
+}
+
+// ── getAyaStatsAggregated ─────────────────────────────────────────────────────
+
+/**
+ * Compute stats across Supabase + optional VPS Postgres.
+ * Merges totals, sectors, countries with correct weighting.
+ * NEVER throws.
+ */
+export async function getAyaStatsAggregated(): Promise<AyaStatsShape> {
+    // ── Supabase stats ───────────────────────────────────────────────────────
+    let supabaseStats: AyaStatsShape = {
+        total_entities: 0,
+        certified_count: 0,
+        indexed_count: 0,
+        scores: { average: 0, min: 0, max: 0, median: 0 },
+        sectors: [],
+        countries: [],
+        last_updated: new Date().toISOString(),
+    };
+
+    try {
+        const allEntities = await database.getAyaEntities();
+        const scores = allEntities.map((e: any) => e.asr_score ?? 0);
+        const certified = allEntities.filter((e: any) => e.payment_completed);
+
+        const sectors: Record<string, number> = {};
+        for (const e of allEntities) { const s = e.sector_macro || 'Unknown'; sectors[s] = (sectors[s] || 0) + 1; }
+
+        const countries: Record<string, number> = {};
+        for (const e of allEntities) { const c = e.country_legal || 'XX'; countries[c] = (countries[c] || 0) + 1; }
+
+        const sortedScores = [...scores].sort((a: number, b: number) => a - b);
+
+        supabaseStats = {
+            total_entities: allEntities.length,
+            certified_count: certified.length,
+            indexed_count: allEntities.length - certified.length,
+            scores: {
+                average: scores.length ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0,
+                min:     scores.length ? Math.min(...scores) : 0,
+                max:     scores.length ? Math.max(...scores) : 0,
+                median:  scores.length ? sortedScores[Math.floor(sortedScores.length / 2)] : 0,
+            },
+            sectors:  Object.entries(sectors).sort((a, b) => b[1] - a[1]).map(([sector, count]) => ({ sector, count })),
+            countries: Object.entries(countries).sort((a, b) => b[1] - a[1]).map(([country, count]) => ({ country, count })),
+            last_updated: new Date().toISOString(),
+        };
+    } catch (err) {
+        console.warn('[getAyaStatsAggregated] Supabase stats failed:', err);
+    }
+
+    // ── VPS stats ────────────────────────────────────────────────────────────
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return supabaseStats;
+
+    const cacheKey = '_stats';
+    const cached = _vpsCache.get(cacheKey);
+    let vpsStats: AyaStatsShape | null = null;
+
+    if (cached && Date.now() < cached.exp) {
+        vpsStats = cached.data[0] as AyaStatsShape;
+    } else {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+            const res = await fetch(`${vpsBaseUrl}/stats`, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (!res.ok) {
+                console.warn(`[getAyaStatsAggregated] VPS returned ${res.status} — Supabase only`);
+            } else {
+                vpsStats = await res.json() as AyaStatsShape;
+                _vpsCache.set(cacheKey, { data: [vpsStats], exp: Date.now() + VPS_CACHE_TTL_MS });
+            }
+        } catch (err) {
+            console.warn('[getAyaStatsAggregated] VPS fetch failed — Supabase only:', err);
+        }
+    }
+
+    if (!vpsStats) return supabaseStats;
+
+    // ── Merge ────────────────────────────────────────────────────────────────
+    const sbCount  = supabaseStats.total_entities;
+    const vpsCount = vpsStats.total_entities;
+    const totalCount = sbCount + vpsCount;
+
+    const weightedAvg = totalCount > 0
+        ? Math.round((supabaseStats.scores.average * sbCount + vpsStats.scores.average * vpsCount) / totalCount)
+        : 0;
+
+    // Merge sectors
+    const sectorsMap: Record<string, number> = {};
+    for (const { sector, count } of supabaseStats.sectors)  sectorsMap[sector]  = (sectorsMap[sector]  || 0) + count;
+    for (const { sector, count } of vpsStats.sectors)        sectorsMap[sector]  = (sectorsMap[sector]  || 0) + count;
+    const mergedSectors = Object.entries(sectorsMap).sort((a, b) => b[1] - a[1]).map(([sector, count]) => ({ sector, count }));
+
+    // Merge countries
+    const countriesMap: Record<string, number> = {};
+    for (const { country, count } of supabaseStats.countries) countriesMap[country] = (countriesMap[country] || 0) + count;
+    for (const { country, count } of vpsStats.countries)       countriesMap[country] = (countriesMap[country] || 0) + count;
+    const mergedCountries = Object.entries(countriesMap).sort((a, b) => b[1] - a[1]).map(([country, count]) => ({ country, count }));
+
+    // last_updated: take the more recent of the two
+    const lastUpdated = supabaseStats.last_updated > (vpsStats.last_updated ?? '') ? supabaseStats.last_updated : (vpsStats.last_updated ?? supabaseStats.last_updated);
+
+    return {
+        total_entities: totalCount,
+        certified_count: supabaseStats.certified_count, // only Supabase has paying customers
+        indexed_count:   supabaseStats.indexed_count + vpsCount,
+        scores: {
+            average: weightedAvg,
+            min:     Math.min(supabaseStats.scores.min, vpsStats.scores.min ?? supabaseStats.scores.min),
+            max:     Math.max(supabaseStats.scores.max, vpsStats.scores.max ?? supabaseStats.scores.max),
+            median:  supabaseStats.scores.median, // can't correctly merge medians without raw data
+        },
+        sectors:   mergedSectors,
+        countries: mergedCountries,
+        last_updated: lastUpdated,
+    };
+}
+
+// ── getAyaLiveAggregated ──────────────────────────────────────────────────────
+
+/**
+ * Fetch all live entities across Supabase + optional VPS Postgres.
+ * Supports limit/offset for pagination across the combined dataset.
+ * NEVER throws.
+ */
+export async function getAyaLiveAggregated(
+    limit: number = 5000,
+    offset: number = 0,
+): Promise<{ success: boolean; data: any[] }> {
+    // ── Supabase live ────────────────────────────────────────────────────────
+    let supabaseEntities: any[] = [];
+    try {
+        supabaseEntities = await database.getAyaEntities();
+    } catch (err) {
+        console.warn('[getAyaLiveAggregated] Supabase fetch failed:', err);
+    }
+
+    // ── VPS live ─────────────────────────────────────────────────────────────
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) {
+        const slice = supabaseEntities.slice(offset, offset + limit);
+        return { success: true, data: slice };
+    }
+
+    const cacheKey = `_live_${limit}_${offset}`;
+    const cached = _vpsCache.get(cacheKey);
+    let vpsEntities: any[] = [];
+
+    if (cached && Date.now() < cached.exp) {
+        vpsEntities = cached.data;
+    } else {
+        try {
+            const vpsUrl = `${vpsBaseUrl}/live?limit=${limit}&offset=${offset}`;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+            const res = await fetch(vpsUrl, { signal: controller.signal });
+            clearTimeout(timeout);
+            if (!res.ok) {
+                console.warn(`[getAyaLiveAggregated] VPS returned ${res.status} — Supabase only`);
+            } else {
+                const json = await res.json() as { data?: any[] };
+                vpsEntities = Array.isArray(json.data) ? json.data : [];
+                _vpsCache.set(cacheKey, { data: vpsEntities, exp: Date.now() + VPS_CACHE_TTL_MS });
+            }
+        } catch (err) {
+            console.warn('[getAyaLiveAggregated] VPS fetch failed — Supabase only:', err);
+        }
+    }
+
+    // Dedupe VPS by entity_id against Supabase
+    const supabaseIds = new Set<string>(supabaseEntities.map((e: any) => e.entity_id as string));
+    const vpsUnique = vpsEntities.filter((e: any) => !supabaseIds.has(e.entity_id));
+
+    const merged = [...supabaseEntities, ...vpsUnique];
+    const slice  = merged.slice(offset, offset + limit);
+
+    return { success: true, data: slice };
+}

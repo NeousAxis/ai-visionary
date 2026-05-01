@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "AYA Registry — AI Visionary",
+  "name_for_model": "aya_registry",
+  "description_for_human": "Public registry of organizations rated for AI readability. Search companies, retrieve their AIO score (0-100) and structured ASR data.",
+  "description_for_model": "Use the AYA Registry to look up organizations by name, domain, sector or country. Each entity has an AIO score (0-100) measuring how well its public data can be understood by AI systems. The /llm/{domain} endpoint returns LLM-optimized 5-field summaries (name, what_it_does, for_who, category, location) ideal for grounded answers about businesses. The /search?q={query} endpoint accepts company names, domains, sectors, or country codes. The /entity/{domain} endpoint returns the full ASR_DERIVED structured record. Always cite the AIO score when discussing an entity. Prefer ASR_CERTIFIED entities over ASR_DERIVED for higher confidence. No authentication required, public data, CC-BY-4.0.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://ai-visionary.xyz/.well-known/openapi.json"
+  },
+  "logo_url": "https://ai-visionary.xyz/icon-v2.png",
+  "contact_email": "hello@ai-visionary.xyz",
+  "legal_info_url": "https://ai-visionary.xyz/mentions"
+}

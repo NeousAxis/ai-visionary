@@ -287,6 +287,22 @@
       "General": "G\u00e9n\u00e9ral"
     }
   },
+  "sectorPage": {
+    "back": "\u2190 Tous les secteurs",
+    "heading": "Secteur\u00a0: {sector}",
+    "subheading": "{count} entit\u00e9s index\u00e9es dans ce secteur",
+    "notFound": "Secteur introuvable",
+    "metaTitle": "Registre AYA \u2014 Secteur\u00a0: {sector} ({count} entreprises)",
+    "metaDescription": "Explorez les {count} entreprises du secteur {sector} index\u00e9es dans le registre AYA pour leur lisibilit\u00e9 IA."
+  },
+  "countryPage": {
+    "back": "\u2190 Tous les pays",
+    "heading": "Pays\u00a0: {country}",
+    "subheading": "{count} entit\u00e9s index\u00e9es dans ce pays",
+    "notFound": "Pays introuvable",
+    "metaTitle": "Registre AYA \u2014 {country} ({count} entreprises)",
+    "metaDescription": "Explorez les {count} entreprises de {country} index\u00e9es dans le registre AYA pour leur lisibilit\u00e9 IA."
+  },
   "certificate": {
     "notFound": "Certificat non trouv\u00e9",
     "notFoundDesc": "Ce certificat AYA n\u2019existe pas ou a \u00e9t\u00e9 supprim\u00e9.",
@@ -342,7 +358,11 @@
     "metaFallback": "{name}{score}. {status} dans le registre AYA \u2014 lisibilite IA verifiee par AI Visionary.",
     "registryLabel": "Registre Officiel AYA",
     "lastModifiedOn": "Derni\u00e8re modification le :",
-    "scoreAio": "Score AIO"
+    "scoreAio": "Score AIO",
+    "relatedTitle": "Entit\u00e9s associ\u00e9es",
+    "relatedIntro": "Autres entit\u00e9s dans le m\u00eame secteur ou pays",
+    "relatedCertified": "Certifi\u00e9",
+    "relatedIndexed": "Index\u00e9"
   },
   "payment": {
     "processingTitle": "Pr\u00e9paration en cours...",

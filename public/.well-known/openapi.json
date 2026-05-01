@@ -1,0 +1,171 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AYA Registry API",
+    "description": "Public API for the AYA Registry — an index of organizations rated for AI readability (AIO score 0-100). No authentication required. Rate limit: 30 requests/minute per IP.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "AI Visionary",
+      "email": "hello@ai-visionary.xyz",
+      "url": "https://ai-visionary.xyz"
+    },
+    "license": {
+      "name": "CC-BY-4.0",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://ai-visionary.xyz/api/aya",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/llm/{domain}": {
+      "get": {
+        "operationId": "getLlmSummary",
+        "summary": "LLM-optimized entity summary",
+        "description": "Returns a compact 5-field summary (name, what_it_does, for_who, category, location) optimized for AI agents. Best endpoint for grounded answers about a specific company.",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "description": "Canonical domain without www (e.g. stripe.com)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "description": "Language for narrative fields: 'en' (default) or 'fr'",
+            "schema": { "type": "string", "enum": ["en", "fr"], "default": "en" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "LLM summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "what_it_does": { "type": "string" },
+                    "for_who": { "type": "string" },
+                    "category": { "type": "string" },
+                    "location": { "type": "string" },
+                    "public_key_id": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "description": "Entity not found" },
+          "429": { "description": "Rate limit exceeded" }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "searchEntities",
+        "summary": "Search entities",
+        "description": "Search by name, domain, sector or country. Sorted by relevance + certified bonus. Multi-word matching with stop-word filtering.",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search term (company name, domain, sector, country code)",
+            "schema": { "type": "string", "minLength": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max results (1-200, default 50)",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 200, "default": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "q": { "type": "string" },
+                    "n": { "type": "integer" },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "country": { "type": "string" },
+                          "sector": { "type": "string" },
+                          "score": { "type": "integer" },
+                          "certified": { "type": "boolean" },
+                          "url": { "type": "string" },
+                          "entity_id": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entity/{domain}": {
+      "get": {
+        "operationId": "getEntity",
+        "summary": "Full entity record",
+        "description": "Get full entity details + ASR_DERIVED structured record by canonical domain.",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Entity record" },
+          "404": { "description": "Entity not found" }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "operationId": "getStats",
+        "summary": "Aggregate statistics",
+        "description": "Total entities, score distribution, sector and country breakdowns.",
+        "responses": {
+          "200": { "description": "Stats" }
+        }
+      }
+    },
+    "/live": {
+      "get": {
+        "operationId": "getLiveRegistry",
+        "summary": "All entities (large payload)",
+        "responses": {
+          "200": { "description": "Full registry" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AsrStatus": {
+        "type": "string",
+        "enum": ["ASR_CERTIFIED", "ASR_DERIVED"],
+        "description": "ASR_CERTIFIED = entity diagnosed by AYO with payment completed. ASR_DERIVED = entity indexed by AYA bot via web scraping."
+      }
+    }
+  }
+}

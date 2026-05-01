@@ -181,7 +181,28 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
         } : {}),
     };
 
-    // Country label — locale-aware, with translation fallback
+    // Related entities: prefer same sector, fall back to same country
+    let relatedEntities: any[] = [];
+    if (entity.sector_macro) {
+        const sectorResult = await db.getAyaEntitiesByFilter({ sector: entity.sector_macro, limit: 12 });
+        relatedEntities = sectorResult.data
+            .filter((r: any) => r.entity_id !== id)
+            .sort((a: any, b: any) => (b.asr_score ?? 0) - (a.asr_score ?? 0))
+            .slice(0, 8);
+    }
+    if (relatedEntities.length < 4 && entity.country_legal) {
+        const countryResult = await db.getAyaEntitiesByFilter({ country: entity.country_legal, limit: 12 });
+        const countryEntities = countryResult.data.filter((r: any) => r.entity_id !== id);
+        const existingIds = new Set(relatedEntities.map((r: any) => r.entity_id));
+        for (const r of countryEntities) {
+            if (!existingIds.has(r.entity_id)) {
+                relatedEntities.push(r);
+                existingIds.add(r.entity_id);
+            }
+            if (relatedEntities.length >= 8) break;
+        }
+    }
+
     const countryMap = locale === 'fr' ? COUNTRY_LABELS_FR : COUNTRY_LABELS;
     const countryLabel = countryMap[entity.country_legal] || (t.has(`countries.${entity.country_legal}`) ? t(`countries.${entity.country_legal}`) : entity.country_legal);
     // Entity type label from translation
@@ -391,6 +412,74 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
                         </div>
 
                     </div>
+
+                    {/* RELATED ENTITIES */}
+                    {relatedEntities.length > 0 && (
+                        <div style={{ marginTop: '3rem' }}>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginBottom: '0.35rem' }}>
+                                {t('relatedTitle')}
+                            </h3>
+                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                                {t('relatedIntro')}
+                            </p>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                                gap: '1rem',
+                            }}>
+                                {relatedEntities.map((r: any) => {
+                                    const rRawName = r.display_name || r.legal_name;
+                                    const rName = (rRawName && !genericNames.includes(rRawName))
+                                        ? rRawName
+                                        : (r.website ? r.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : r.entity_id);
+                                    const rScore = (r.asr_score !== undefined && r.asr_score !== null) ? r.asr_score : null;
+                                    const rCertified = r.payment_completed === true;
+                                    const rSector = locale === 'en' ? (SECTOR_LABELS[r.sector_macro] || r.sector_macro) : r.sector_macro;
+                                    return (
+                                        <Link
+                                            key={r.entity_id}
+                                            href={`/aya/e/${r.entity_id}`}
+                                            style={{ textDecoration: 'none' }}
+                                        >
+                                            <div className="card" style={{ padding: '1rem', cursor: 'pointer', transition: 'box-shadow 0.15s' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                                                    <p style={{
+                                                        fontWeight: '700',
+                                                        fontSize: '0.9rem',
+                                                        color: 'var(--text-main)',
+                                                        margin: 0,
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        maxWidth: '65%',
+                                                    }}>
+                                                        {rName}
+                                                    </p>
+                                                    <span style={{
+                                                        padding: '2px 8px',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: '600',
+                                                        background: rCertified ? 'var(--bg-accent)' : '#F1F5F9',
+                                                        color: rCertified ? 'var(--primary-color)' : '#64748B',
+                                                        whiteSpace: 'nowrap',
+                                                    }}>
+                                                        {rCertified ? t('relatedCertified') : t('relatedIndexed')}
+                                                    </span>
+                                                </div>
+                                                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0 0 0.5rem' }}>
+                                                    {r.country_legal}{rSector ? ` · ${rSector}` : ''}
+                                                </p>
+                                                <p style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--text-main)', margin: 0 }}>
+                                                    {rScore !== null ? rScore : '—'}<span style={{ fontSize: '0.75rem', fontWeight: '400', color: 'var(--text-muted)' }}>/100</span>
+                                                </p>
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     {/* FOOTER BADGE */}
                     <div style={{ marginTop: '3rem', textAlign: 'center', opacity: 0.6 }}>

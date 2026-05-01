@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getLiveEntities } from '@/lib/aya/registry';
+import { getAyaLiveAggregated } from '@/lib/db';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { trackAyaCall } from '@/lib/aya/api-tracker';
@@ -15,12 +15,14 @@ export async function GET(req: NextRequest) {
     const logger = createLogger(generateCorrelationId(), 'system');
 
     try {
-        const entities = await getLiveEntities();
+        const limitParam = parseInt(req.nextUrl.searchParams.get('limit') || '5000');
+        const offsetParam = parseInt(req.nextUrl.searchParams.get('offset') || '0');
+        const limit = Math.min(Math.max(limitParam, 1), 10000);
+        const offset = Math.max(offsetParam, 0);
 
-        return NextResponse.json({
-            success: true,
-            data: entities
-        }, {
+        const result = await getAyaLiveAggregated(limit, offset);
+
+        return NextResponse.json(result, {
             headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60' }
         });
     } catch (err) {
