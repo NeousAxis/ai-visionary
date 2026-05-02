@@ -41,14 +41,23 @@ export default function LinkedinDraftsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Try to load secret from URL query (?secret=...) on first mount
+  // Try to load secret on mount : (1) URL query (?secret=...), (2) localStorage
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const s = params.get('secret');
-    if (s) {
-      setSecret(s);
+    const fromUrl = params.get('secret');
+    if (fromUrl) {
+      setSecret(fromUrl);
       setAuthenticated(true);
+      try { localStorage.setItem('linkedin_admin_secret', fromUrl); } catch {}
+      return;
     }
+    try {
+      const stored = localStorage.getItem('linkedin_admin_secret');
+      if (stored) {
+        setSecret(stored);
+        setAuthenticated(true);
+      }
+    } catch {}
   }, []);
 
   const fetchDrafts = useCallback(async () => {
@@ -65,7 +74,11 @@ export default function LinkedinDraftsPage() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || 'Erreur de chargement');
-        if (res.status === 401) setAuthenticated(false);
+        if (res.status === 401) {
+          // Secret invalide : le retirer de localStorage et forcer re-login
+          try { localStorage.removeItem('linkedin_admin_secret'); } catch {}
+          setAuthenticated(false);
+        }
         return;
       }
       setDrafts(data.drafts || []);
@@ -128,7 +141,10 @@ export default function LinkedinDraftsPage() {
           autoFocus
         />
         <button
-          onClick={() => setAuthenticated(true)}
+          onClick={() => {
+            try { localStorage.setItem('linkedin_admin_secret', secret); } catch {}
+            setAuthenticated(true);
+          }}
           disabled={!secret}
           style={{
             width: '100%', padding: '12px', borderRadius: 8, border: 'none',
