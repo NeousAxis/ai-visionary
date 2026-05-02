@@ -413,6 +413,10 @@ export interface LinkedinPostInput {
     status: 'draft' | 'published' | 'failed' | 'skipped';
     linkedin_post_url?: string | null;
     error_message?: string | null;
+    /** 'passed' = Gemini check OK (entite non citee, safe a publier),
+     *  'skipped_visible' = entite citee par Gemini (skip auto),
+     *  null/undefined = pas teste (drafts pre-filtre). */
+    visibility_check?: string | null;
 }
 
 /**
@@ -430,8 +434,9 @@ export async function linkedinInsertPost(input: LinkedinPostInput): Promise<stri
                 current_score, projected_score,
                 post_text, post_locale, status,
                 linkedin_post_url, error_message,
-                scheduled_at, published_at
-             ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
+                scheduled_at, published_at,
+                visibility_check
+             ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11, $12)
              RETURNING id`,
             [
                 input.entity_id,
@@ -445,6 +450,7 @@ export async function linkedinInsertPost(input: LinkedinPostInput): Promise<stri
                 input.linkedin_post_url ?? null,
                 input.error_message ?? null,
                 publishedAt,
+                input.visibility_check ?? null,
             ]
         );
         return res.rows[0]?.id ?? null;
@@ -472,6 +478,7 @@ export interface LinkedinPostRow {
     scheduled_at: string;
     published_at: string | null;
     created_at: string;
+    visibility_check: string | null;
 }
 
 export async function linkedinListPosts(opts: {
@@ -496,7 +503,8 @@ export async function linkedinListPosts(opts: {
             SELECT id::text, entity_id::text, entity_domain, entity_name,
                    current_score, projected_score, post_text, post_locale,
                    status, linkedin_post_url, error_message,
-                   scheduled_at::text, published_at::text, created_at::text
+                   scheduled_at::text, published_at::text, created_at::text,
+                   visibility_check
             FROM linkedin_posts
             ${whereClause}
             ORDER BY scheduled_at DESC

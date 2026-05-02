@@ -104,6 +104,7 @@ export async function POST(req: NextRequest) {
           post_locale: 'en',
           status: 'skipped',
           error_message: vis.error || `cited: ${vis.cited_companies.slice(0, 5).join(', ')}`,
+          visibility_check: 'skipped_visible',
         });
         invisibleAttempts.push({ name: candidate.display_name, cited: vis.cited_companies });
         logger.info('CRON_SKIP_VISIBLE', `${candidate.display_name} cite par Gemini (pos ${vis.position}) — skip`);
@@ -179,6 +180,7 @@ export async function POST(req: NextRequest) {
       status,
       linkedin_post_url: postUrl || null,
       error_message: errorMessage || null,
+      visibility_check: 'passed', // a passe la verification Gemini = OK pour publier
     });
 
     if (!postId) {

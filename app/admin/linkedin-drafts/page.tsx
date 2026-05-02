@@ -22,6 +22,7 @@ interface DraftRow {
   error_message: string | null;
   scheduled_at: string;
   published_at: string | null;
+  visibility_check: string | null;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -222,11 +223,29 @@ export default function LinkedinDraftsPage() {
                   Score : <strong>{d.current_score}/100</strong> → projete <strong>{d.projected_score}/100</strong> · Locale : {d.post_locale.toUpperCase()} · {new Date(d.scheduled_at).toLocaleString('fr-CH')}
                 </p>
               </div>
-              <span style={{
-                fontSize: '0.75rem', fontWeight: 600, padding: '4px 12px', borderRadius: 9999,
-              }} className={STATUS_COLORS[d.status] || 'bg-gray-100 text-gray-700'}>
-                {d.status}
-              </span>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: '0.75rem', fontWeight: 600, padding: '4px 12px', borderRadius: 9999,
+                }} className={STATUS_COLORS[d.status] || 'bg-gray-100 text-gray-700'}>
+                  {d.status}
+                </span>
+                {d.visibility_check === 'passed' && (
+                  <span title="Verifie via Gemini : entite NON citee par les LLM, publication recommandee" style={{
+                    fontSize: '0.7rem', fontWeight: 600, padding: '4px 10px', borderRadius: 9999,
+                    background: '#D1FAE5', color: '#065F46', border: '1px solid #6EE7B7',
+                  }}>
+                    ✓ testé
+                  </span>
+                )}
+                {d.visibility_check === 'skipped_visible' && (
+                  <span title="Cite par Gemini — pas pour publication" style={{
+                    fontSize: '0.7rem', fontWeight: 600, padding: '4px 10px', borderRadius: 9999,
+                    background: '#FEE2E2', color: '#991B1B', border: '1px solid #FECACA',
+                  }}>
+                    déjà cité
+                  </span>
+                )}
+              </div>
             </div>
 
             <pre style={{
