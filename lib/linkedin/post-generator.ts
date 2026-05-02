@@ -14,10 +14,16 @@ export interface PostContext {
   entityId: string;
   currentScore: number;     // ex: 47 (cappe a 50 sans ASR)
   projectedScore: number;   // ex: 78 (avec ASR + structures)
-  sectorMacro?: string;
+  /** Phrase decrivant le secteur, deja formee dans la locale du post.
+   *  Exemple FR : "plateforme e-commerce" ; EN : "e-commerce platform". */
+  sectorPhrase?: string;
   city?: string;
   country?: string;
   locale: 'fr' | 'en';
+  /** Handle LinkedIn — utilise pour generer un @mention dans le texte.
+   *  Le tag reel cliquable est cree par Playwright autocomplete au moment de
+   *  la publication ; ici on insert "@EntityName" en texte plain. */
+  linkedinSlug?: string;
 }
 
 export interface GeneratedPost {
@@ -28,26 +34,29 @@ export interface GeneratedPost {
 const CERTIFICATE_BASE_URL = 'https://ai-visionary.xyz/aya/e';
 
 function buildSectorQueryFr(sector: string | undefined, city: string | undefined): string {
-  if (sector && city) return `meilleur ${sector.toLowerCase()} a ${city}`;
-  if (sector) return `meilleur ${sector.toLowerCase()}`;
+  if (sector && city) return `meilleure ${sector} a ${city}`;
+  if (sector) return `meilleure ${sector}`;
   if (city) return `meilleure entreprise a ${city}`;
   return 'meilleure entreprise dans son secteur';
 }
 
 function buildSectorQueryEn(sector: string | undefined, city: string | undefined): string {
-  if (sector && city) return `best ${sector.toLowerCase()} in ${city}`;
-  if (sector) return `best ${sector.toLowerCase()}`;
+  if (sector && city) return `best ${sector} in ${city}`;
+  if (sector) return `best ${sector}`;
   if (city) return `top company in ${city}`;
   return 'top company in its sector';
 }
 
 export function generatePostFr(ctx: PostContext): string {
-  const query = buildSectorQueryFr(ctx.sectorMacro, ctx.city);
+  const query = buildSectorQueryFr(ctx.sectorPhrase, ctx.city);
   const certUrl = `${CERTIFICATE_BASE_URL}/${ctx.entityId}`;
+  // Mention "@Nom" si on a un slug LinkedIn (le tag reel cliquable est fait
+  // par Playwright autocomplete en mode auto-publish)
+  const mention = ctx.linkedinSlug ? `@${ctx.entityName}` : ctx.entityName;
 
   return `Demandez a ChatGPT, Claude ou Gemini : "${query}".
 
-${ctx.entityName} ne sera pas cite. Pourtant l'entreprise existe, opere et est legitime.
+${mention} ne sera pas cite. Pourtant l'entreprise existe, opere et est legitime.
 
 Pourquoi ? Score AI-readability : ${ctx.currentScore}/100. Pas d'ASR. Donnees non structurees pour les IA.
 
@@ -61,12 +70,13 @@ Verifiable : ${certUrl}
 }
 
 export function generatePostEn(ctx: PostContext): string {
-  const query = buildSectorQueryEn(ctx.sectorMacro, ctx.city);
+  const query = buildSectorQueryEn(ctx.sectorPhrase, ctx.city);
   const certUrl = `${CERTIFICATE_BASE_URL}/${ctx.entityId}`;
+  const mention = ctx.linkedinSlug ? `@${ctx.entityName}` : ctx.entityName;
 
   return `Ask ChatGPT, Claude or Gemini: "${query}".
 
-${ctx.entityName} won't be mentioned. Yet the company exists, operates and is legitimate.
+${mention} won't be mentioned. Yet the company exists, operates and is legitimate.
 
 Why? AI-readability score: ${ctx.currentScore}/100. No ASR. Unstructured data.
 

@@ -397,3 +397,127 @@ export async function localPgSearch(q: string, limit: number): Promise<Entity[]>
         return [];
     }
 }
+
+// ── LinkedIn poster helpers (1er mai 2026) ────────────────────────────────────
+// Ces helpers ecrivent dans la table linkedin_posts (Postgres VPS uniquement,
+// pas Supabase, pour respecter la grace period jusqu'au 7 mai).
+
+export interface LinkedinPostInput {
+    entity_id: string;
+    entity_domain: string;
+    entity_name: string;
+    current_score: number;
+    projected_score: number;
+    post_text: string;
+    post_locale: string;
+    status: 'draft' | 'published' | 'failed' | 'skipped';
+    linkedin_post_url?: string | null;
+    error_message?: string | null;
+}
+
+/**
+ * Insert dans linkedin_posts. Retourne l'id genere ou null si echec.
+ * Sur Vercel (sans Postgres VPS configure), retourne null silencieusement.
+ */
+export async function linkedinInsertPost(input: LinkedinPostInput): Promise<string | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const publishedAt = input.status === 'published' ? new Date() : null;
+        const res: QueryResult<{ id: string }> = await pool.query(
+            `INSERT INTO linkedin_posts (
+                entity_id, entity_domain, entity_name,
+                current_score, projected_score,
+                post_text, post_locale, status,
+                linkedin_post_url, error_message,
+                scheduled_at, published_at
+             ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
+             RETURNING id`,
+            [
+                input.entity_id,
+                input.entity_domain,
+                input.entity_name,
+                input.current_score,
+                input.projected_score,
+                input.post_text,
+                input.post_locale,
+                input.status,
+                input.linkedin_post_url ?? null,
+                input.error_message ?? null,
+                publishedAt,
+            ]
+        );
+        return res.rows[0]?.id ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinInsertPost error:', err);
+        return null;
+    }
+}
+
+/**
+ * Liste des entity_id deja postes dans les N derniers jours.
+ * Utilise pour eviter les doublons.
+ */
+export async function linkedinGetRecentEntityIds(daysSinceCutoff: number): Promise<Set<string>> {
+    const pool = getPool();
+    if (!pool) return new Set();
+    try {
+        const res: QueryResult<{ entity_id: string }> = await pool.query(
+            `SELECT DISTINCT entity_id::text
+             FROM linkedin_posts
+             WHERE scheduled_at > NOW() - ($1 || ' days')::interval`,
+            [String(daysSinceCutoff)]
+        );
+        return new Set(res.rows.map((r) => r.entity_id));
+    } catch (err) {
+        console.error('[db-local-pg] linkedinGetRecentEntityIds error:', err);
+        return new Set();
+    }
+}
+
+/**
+ * Selection des entites candidates pour un post LinkedIn.
+ * Filtres : score <= 50, payment_completed = false, contact_email present,
+ *           website dans la liste de domaines connus passee en argument,
+ *           asr_payload.enrichment.gemini_description present.
+ */
+export async function linkedinSelectCandidates(opts: {
+    knownDomains: string[];
+    excludeEntityIds: string[];
+    limit: number;
+}): Promise<Entity[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    if (opts.knownDomains.length === 0) return [];
+
+    try {
+        // On utilise un ANY array pour matcher les domaines (insensible a la casse via lower)
+        const params: unknown[] = [opts.knownDomains, opts.limit];
+        const excludeClause = opts.excludeEntityIds.length > 0
+            ? `AND entity_id::text != ALL($${params.length + 1})`
+            : '';
+        if (opts.excludeEntityIds.length > 0) params.push(opts.excludeEntityIds);
+
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS}
+             FROM aya_registry
+             WHERE asr_score <= 50
+               AND COALESCE(payment_completed, false) = false
+               AND contact_email IS NOT NULL
+               AND lower(
+                     regexp_replace(
+                       regexp_replace(COALESCE(website, ''), '^https?://(www\\.)?', ''),
+                       '/.*$', ''
+                     )
+                   ) = ANY($1)
+               ${excludeClause}
+             ORDER BY RANDOM()
+             LIMIT $2`,
+            params
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinSelectCandidates error:', err);
+        return [];
+    }
+}

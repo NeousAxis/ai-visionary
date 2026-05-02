@@ -14,10 +14,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
-import { supabase } from '@/lib/db';
 import { selectNextEntity } from '@/lib/linkedin/post-selector';
 import { generatePost, pickLocale } from '@/lib/linkedin/post-generator';
 import { publishToLinkedIn, teardown } from '@/lib/linkedin/playwright-poster';
+import { linkedinInsertPost, isLocalPgConfigured } from '@/lib/db-local-pg';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -47,6 +47,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // --- VPS-only : Postgres VPS doit etre accessible (sinon on est sur Vercel) ---
+  if (!isLocalPgConfigured()) {
+    logger.warn('CRON_NOT_VPS', 'VPS_PG_PASSWORD missing, this route only runs on VPS');
+    return NextResponse.json(
+      { error: 'This endpoint requires VPS Postgres (run on VPS only)' },
+      { status: 503 }
+    );
+  }
+
   try {
     // --- 1. Selection entite ---
     const entity = await selectNextEntity();
@@ -57,17 +66,22 @@ export async function POST(req: NextRequest) {
     logger.info('CRON_ENTITY_PICKED', `${entity.display_name} (${entity.domain}) score=${entity.current_score}->${entity.projected_score}`);
 
     // --- 2. Generation post ---
-    const locale = pickLocale(entity.country);
+    // Locale : override KNOWN_DOMAINS_META d'abord, sinon heuristique pays
+    const locale = entity.override_locale || pickLocale(entity.country);
+    // Sector : phrase deja formee dans la bonne locale (override KNOWN_DOMAINS_META),
+    // car le sector_macro de la DB est une heuristique foireuse pour les Tranco
+    const sectorPhrase = locale === 'fr' ? entity.override_sector_fr : entity.override_sector_en;
     const post = generatePost({
       entityName: entity.display_name,
       entityDomain: entity.domain,
       entityId: entity.entity_id,
       currentScore: entity.current_score,
       projectedScore: entity.projected_score,
-      sectorMacro: entity.sector_macro,
+      sectorPhrase,
       city: entity.city,
       country: entity.country,
       locale,
+      linkedinSlug: entity.linkedin_slug,
     });
 
     // --- 3. Decision publish vs draft ---
@@ -94,13 +108,8 @@ export async function POST(req: NextRequest) {
       logger.info('CRON_DRAFT_MODE', 'LINKEDIN_AUTO_PUBLISH != true, save as draft');
     }
 
-    // --- 4. Log dans linkedin_posts (Supabase) — HARD requirement pour anti-doublon ---
-    if (!supabase) {
-      logger.error('CRON_NO_SUPABASE', 'Supabase non configure, abandon (sinon doublon possible)');
-      return NextResponse.json({ error: 'Database not available' }, { status: 503 });
-    }
-
-    const { error: insertError } = await supabase.from('linkedin_posts').insert({
+    // --- 4. Log dans linkedin_posts (Postgres VPS) — HARD requirement anti-doublon ---
+    const postId = await linkedinInsertPost({
       entity_id: entity.entity_id,
       entity_domain: entity.domain,
       entity_name: entity.display_name,
@@ -110,16 +119,12 @@ export async function POST(req: NextRequest) {
       post_locale: post.locale,
       status,
       linkedin_post_url: postUrl || null,
-      scheduled_at: new Date().toISOString(),
-      published_at: status === 'published' ? new Date().toISOString() : null,
       error_message: errorMessage || null,
     });
 
-    if (insertError) {
-      logger.error('CRON_DB_INSERT_FAIL', `Supabase insert failed : ${insertError.message}`);
-      // Hard fail : si on ne peut pas tracer en DB, on ne sait pas si l'entite a deja
-      // ete postee dans le futur -> risque de doublon. On retourne une erreur pour
-      // que le cron retry / alerte plutot que de silencieusement reussir.
+    if (!postId) {
+      logger.error('CRON_DB_INSERT_FAIL', `linkedin_posts insert failed (returned null)`);
+      // Hard fail : sans trace DB, risque de doublon au prochain cron.
       return NextResponse.json(
         { error: 'Failed to log post to DB', status },
         { status: 500 }

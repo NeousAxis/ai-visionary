@@ -1,22 +1,25 @@
 /**
  * Selection d'une entite eligible pour un post LinkedIn.
  *
+ * Source de verite : Postgres VPS (lib/db-local-pg.ts) UNIQUEMENT.
+ * Aucune lecture Supabase pendant la grace period (jusqu'au 7 mai 2026).
+ *
  * Criteres MVP :
  * - Domaine dans KNOWN_DOMAINS (entreprises connues uniquement)
  * - asr_score <= 50 (cap doctrinal sans ASR)
  * - payment_completed = false (pas un client AYA Sub / PRO)
  * - contact_email present (entite scrapee correctement)
  * - asr_payload.enrichment.gemini_description present (enrichissement OK)
- * - Pas postee dans les 30 derniers jours
- *
- * Source de verite : Supabase (table aya_registry contient les entites
- * legacy + certifiees, mais on ne pose que sur les non-payantes).
- * Les ~25 860 entites Postgres VPS Tranco sont aussi candidates a terme.
+ * - Pas postee dans les 30 derniers jours (table linkedin_posts)
  */
 
-import { db, supabase } from '@/lib/db';
 import { computeAioScore } from '@/lib/aio-score-engine';
-import { isKnownDomain, KNOWN_DOMAINS } from './known-entities';
+import {
+  linkedinGetRecentEntityIds,
+  linkedinSelectCandidates,
+  type Entity,
+} from '@/lib/db-local-pg';
+import { KNOWN_DOMAINS, getKnownEntityMeta } from './known-entities';
 
 export interface SelectableEntity {
   entity_id: string;
@@ -28,6 +31,13 @@ export interface SelectableEntity {
   city?: string;
   country?: string;
   contact_email?: string;
+  /** Locale forcee (override pickLocale par country quand override present dans KNOWN_DOMAINS_META) */
+  override_locale?: 'fr' | 'en';
+  /** Sector formule explicitement, override le sector_macro de la DB */
+  override_sector_fr?: string;
+  override_sector_en?: string;
+  /** Handle LinkedIn @company depuis KNOWN_DOMAINS_META */
+  linkedin_slug?: string;
 }
 
 const POST_FREQUENCY_DAYS = 30;
@@ -47,7 +57,6 @@ function computeProjectedScore(asrPayloadData: any, currentScore: number): numbe
 
     const proExtract = JSON.parse(JSON.stringify(asrPayloadData));
 
-    // Simule ce qu'AYO PRO fournit : ASR + FAQ + glossary + docs + JSON-LD + sitemap
     if (proExtract.fields.contenus_pedagogiques) {
       proExtract.fields.contenus_pedagogiques.has_faq = { value: true, q: 1, evidence: ['ayo_pro_simulated'] };
       proExtract.fields.contenus_pedagogiques.has_glossary = { value: true, q: 1, evidence: ['ayo_pro_simulated'] };
@@ -66,8 +75,7 @@ function computeProjectedScore(asrPayloadData: any, currentScore: number): numbe
 
     const proScore = computeAioScore(proExtract);
     return Math.round(proScore.total);
-  } catch (e) {
-    // Fallback heuristique
+  } catch {
     return Math.min(85, currentScore + 30);
   }
 }
@@ -91,67 +99,44 @@ function extractDomain(website: string | null | undefined): string {
  * Retourne null si rien d'eligible.
  */
 export async function selectNextEntity(): Promise<SelectableEntity | null> {
-  if (!supabase) {
-    console.warn('[linkedin-selector] Supabase not configured');
-    return null;
-  }
+  // 1. Charger les entity_id recemment postees (anti-doublon 30j)
+  const excludedIds = await linkedinGetRecentEntityIds(POST_FREQUENCY_DAYS);
 
-  // 1. Charger les entites recemment postees (anti-doublon 30j)
-  const cutoff = new Date(Date.now() - POST_FREQUENCY_DAYS * 24 * 3600 * 1000).toISOString();
-  const { data: recentPosts } = await supabase
-    .from('linkedin_posts')
-    .select('entity_id')
-    .gte('scheduled_at', cutoff);
-
-  const excludedIds = new Set((recentPosts || []).map((p: any) => p.entity_id));
-
-  // 2. Charger les candidates : entites non-payantes avec score <= 50
-  //    et description Gemini enrichie
-  const { data: candidates, error } = await supabase
-    .from('aya_registry')
-    .select('entity_id, display_name, website, asr_score, sector_macro, country_legal, contact_email, asr_payload')
-    .lte('asr_score', 50)
-    .eq('payment_completed', false)
-    .not('contact_email', 'is', null)
-    .limit(500);
-
-  if (error || !candidates || candidates.length === 0) {
-    console.warn('[linkedin-selector] No candidates found', error?.message);
-    return null;
-  }
-
-  // 3. Filtrer : domaine connu + pas exclu + enrichi
-  const eligibles = candidates.filter((c: any) => {
-    if (excludedIds.has(c.entity_id)) return false;
-    const domain = extractDomain(c.website);
-    if (!isKnownDomain(domain)) return false;
-    const enrichment = c.asr_payload?.enrichment;
-    if (!enrichment?.gemini_description) return false;
-    return true;
+  // 2. Charger les candidates depuis Postgres VPS
+  const candidates: Entity[] = await linkedinSelectCandidates({
+    knownDomains: Array.from(KNOWN_DOMAINS),
+    excludeEntityIds: Array.from(excludedIds),
+    limit: 50,
   });
 
-  if (eligibles.length === 0) {
-    console.warn(`[linkedin-selector] No eligible entity (${candidates.length} candidates, ${excludedIds.size} excluded recent, KNOWN_DOMAINS=${KNOWN_DOMAINS.size})`);
+  if (candidates.length === 0) {
+    console.warn(
+      `[linkedin-selector] No eligible entity (KNOWN_DOMAINS=${KNOWN_DOMAINS.size}, excluded=${excludedIds.size})`
+    );
     return null;
   }
 
-  // 4. Random pick
-  const picked = eligibles[Math.floor(Math.random() * eligibles.length)];
+  // 3. Random pick parmi les candidats (deja randomises par RANDOM() en SQL)
+  const picked = candidates[0];
   const domain = extractDomain(picked.website);
-  const projectedScore = computeProjectedScore(picked.asr_payload?.data, picked.asr_score);
+  const projectedScore = computeProjectedScore(picked.asr_payload?.data, picked.asr_score ?? 0);
 
-  // Extract city from asr_payload if present
-  const city = picked.asr_payload?.data?.fields?.identite?.city?.value || undefined;
+  // Override metadata depuis KNOWN_DOMAINS_META (DB sector/country foireuse pour Tranco)
+  const meta = getKnownEntityMeta(domain);
 
   return {
     entity_id: picked.entity_id,
     domain,
     display_name: picked.display_name || domain,
-    current_score: picked.asr_score,
+    current_score: picked.asr_score ?? 0,
     projected_score: projectedScore,
-    sector_macro: picked.sector_macro,
-    city,
-    country: picked.country_legal,
-    contact_email: picked.contact_email,
+    sector_macro: picked.sector_macro || undefined, // garde la valeur DB pour compat (non utilisee si override)
+    city: meta?.city,
+    country: meta?.country || picked.country_legal || undefined,
+    contact_email: picked.contact_email || undefined,
+    override_locale: meta?.locale,
+    override_sector_fr: meta?.sector_fr,
+    override_sector_en: meta?.sector_en,
+    linkedin_slug: meta?.linkedin_slug,
   };
 }
