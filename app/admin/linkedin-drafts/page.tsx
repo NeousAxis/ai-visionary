@@ -182,11 +182,11 @@ export default function LinkedinDraftsPage() {
   // ── DASHBOARD ──
   return (
     <div style={{ maxWidth: 1200, margin: '2rem auto', padding: '0 1rem 4rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#212E53' }}>
           📰 LinkedIn Drafts ({total})
         </h1>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
@@ -194,9 +194,10 @@ export default function LinkedinDraftsPage() {
           >
             <option value="">Tous statuts</option>
             <option value="draft">Drafts</option>
+            <option value="approved">Approuves (queue)</option>
             <option value="published">Publies</option>
             <option value="failed">Failed</option>
-            <option value="skipped">Rejetes</option>
+            <option value="skipped">Rejetes / Skipped</option>
           </select>
           <button
             onClick={fetchDrafts}
@@ -207,6 +208,26 @@ export default function LinkedinDraftsPage() {
             }}
           >
             {loading ? '...' : '🔄 Refresh'}
+          </button>
+          <button
+            onClick={() => {
+              if (!confirm('Se deconnecter ? Le secret sera efface du navigateur.')) return;
+              try { localStorage.removeItem('linkedin_admin_secret'); } catch {}
+              setSecret('');
+              setDrafts([]);
+              setTotal(0);
+              setVisibilityResults({});
+              setAuthenticated(false);
+              // Strip ?secret=... de l'URL pour eviter qu'il reste visible
+              try { window.history.replaceState({}, '', window.location.pathname); } catch {}
+            }}
+            title="Efface le secret du navigateur et retourne a l'ecran de login"
+            style={{
+              padding: '8px 16px', borderRadius: 8, border: '1px solid #FECACA',
+              background: '#FEF2F2', color: '#991B1B', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600,
+            }}
+          >
+            🔒 Deconnexion
           </button>
         </div>
       </div>
