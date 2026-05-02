@@ -32,6 +32,7 @@ export interface GeneratedPost {
 }
 
 const CERTIFICATE_BASE_URL = 'https://ai-visionary.xyz/aya/e';
+const DIAGNOSTIC_URL = 'https://ai-visionary.xyz/diagnostic';
 
 function buildSectorQueryFr(sector: string | undefined, city: string | undefined): string {
   if (sector && city) return `meilleure ${sector} a ${city}`;
@@ -49,44 +50,54 @@ function buildSectorQueryEn(sector: string | undefined, city: string | undefined
 
 export function generatePostFr(ctx: PostContext): string {
   const query = buildSectorQueryFr(ctx.sectorPhrase, ctx.city);
-  const certUrl = `${CERTIFICATE_BASE_URL}/${ctx.entityId}`;
   // Mention "@Nom" si on a un slug LinkedIn (le tag reel cliquable est fait
   // par Playwright autocomplete en mode auto-publish)
   const mention = ctx.linkedinSlug ? `@${ctx.entityName}` : ctx.entityName;
 
-  return `Demandez a ChatGPT, Claude ou Gemini : "${query}".
+  return `🔍 Test : demandez a ChatGPT « ${query} ».
 
-${mention} ne sera pas cite. Pourtant l'entreprise existe, opere et est legitime.
+${mention} n'apparaitra pas dans la reponse.
 
-Pourquoi ? Score AI-readability : ${ctx.currentScore}/100. Pas d'ASR. Donnees non structurees pour les IA.
+Pourtant ${ctx.entityName} est legitime, opere, a des clients. Mais aux yeux des IA : score AI-readability ${ctx.currentScore}/100. Pas d'ASR. Donnees invisibles.
 
-Lisibilite -> recommandabilite -> visibilite. La chaine est rompue des la premiere etape.
+C'est mecanique :
+Lisibilite → Recommandabilite → Visibilite.
+Pas de structure, pas de citation. Pas de citation, pas de leads.
 
-Avec un ASR (AI Singular Record signe cryptographiquement) : projection ${ctx.projectedScore}/100. Lisible par toutes les IA. Et independant de Google, OpenAI, Anthropic.
+Avec un ASR (AI Singular Record signe cryptographiquement) :
+projection ${ctx.projectedScore}/100. Lisible par TOUTES les IA.
+Independant de Google, OpenAI, Anthropic.
+🇨🇭 Souverainete suisse, infrastructure suisse.
 
-Verifiable : ${certUrl}
+👉 Et VOTRE entreprise ? Testez en 30 secondes :
+${DIAGNOSTIC_URL}
 
-#AIvisibility #AISearch #StructuredData #AYA #AIO`;
+#AIvisibility #AISearch #ASR #SwissTech #StructuredData`;
 }
 
 export function generatePostEn(ctx: PostContext): string {
   const query = buildSectorQueryEn(ctx.sectorPhrase, ctx.city);
-  const certUrl = `${CERTIFICATE_BASE_URL}/${ctx.entityId}`;
   const mention = ctx.linkedinSlug ? `@${ctx.entityName}` : ctx.entityName;
 
-  return `Ask ChatGPT, Claude or Gemini: "${query}".
+  return `🔍 Test: ask ChatGPT "${query}".
 
-${mention} won't be mentioned. Yet the company exists, operates and is legitimate.
+${mention} won't show up in the answer.
 
-Why? AI-readability score: ${ctx.currentScore}/100. No ASR. Unstructured data.
+Yet ${ctx.entityName} is legitimate, operates, has customers. But to AI systems: AI-readability score ${ctx.currentScore}/100. No ASR. Invisible data.
 
-Readability -> recommendability -> visibility. The chain breaks at step one.
+It's mechanical:
+Readability → Recommendability → Visibility.
+No structure, no citation. No citation, no leads.
 
-With an ASR (cryptographically-signed AI Singular Record): projected ${ctx.projectedScore}/100. Readable by every AI. Independent of Google, OpenAI, Anthropic.
+With an ASR (cryptographically-signed AI Singular Record):
+projected ${ctx.projectedScore}/100. Readable by EVERY AI.
+Independent of Google, OpenAI, Anthropic.
+🇨🇭 Swiss sovereignty, Swiss infrastructure.
 
-Verifiable: ${certUrl}
+👉 And YOUR company? Test in 30 seconds:
+${DIAGNOSTIC_URL}
 
-#AIvisibility #AISearch #StructuredData #AYA #AIO`;
+#AIvisibility #AISearch #ASR #SwissTech #StructuredData`;
 }
 
 export function generatePost(ctx: PostContext): GeneratedPost {
