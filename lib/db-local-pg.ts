@@ -455,6 +455,90 @@ export async function linkedinInsertPost(input: LinkedinPostInput): Promise<stri
 }
 
 /**
+ * Liste paginee des linkedin_posts (admin UI).
+ */
+export interface LinkedinPostRow {
+    id: string;
+    entity_id: string;
+    entity_domain: string;
+    entity_name: string;
+    current_score: number;
+    projected_score: number;
+    post_text: string;
+    post_locale: string;
+    status: string;
+    linkedin_post_url: string | null;
+    error_message: string | null;
+    scheduled_at: string;
+    published_at: string | null;
+    created_at: string;
+}
+
+export async function linkedinListPosts(opts: {
+    limit?: number;
+    offset?: number;
+    statusFilter?: string;
+}): Promise<{ rows: LinkedinPostRow[]; total: number }> {
+    const pool = getPool();
+    if (!pool) return { rows: [], total: 0 };
+    const { limit = 50, offset = 0, statusFilter } = opts;
+
+    try {
+        const params: unknown[] = [];
+        const whereClause = statusFilter ? `WHERE status = $${params.push(statusFilter)}` : '';
+        const countQuery = `SELECT COUNT(*)::text AS cnt FROM linkedin_posts ${whereClause}`;
+        const countRes = await pool.query<{ cnt: string }>(countQuery, params);
+        const total = parseInt(countRes.rows[0]?.cnt ?? '0', 10);
+
+        const limitIdx = params.push(limit);
+        const offsetIdx = params.push(offset);
+        const dataQuery = `
+            SELECT id::text, entity_id::text, entity_domain, entity_name,
+                   current_score, projected_score, post_text, post_locale,
+                   status, linkedin_post_url, error_message,
+                   scheduled_at::text, published_at::text, created_at::text
+            FROM linkedin_posts
+            ${whereClause}
+            ORDER BY scheduled_at DESC
+            LIMIT $${limitIdx} OFFSET $${offsetIdx}
+        `;
+        const dataRes = await pool.query<LinkedinPostRow>(dataQuery, params);
+        return { rows: dataRes.rows, total };
+    } catch (err) {
+        console.error('[db-local-pg] linkedinListPosts error:', err);
+        return { rows: [], total: 0 };
+    }
+}
+
+/**
+ * Met a jour le status d'un post linkedin_posts.
+ */
+export async function linkedinUpdatePostStatus(
+    id: string,
+    status: 'draft' | 'published' | 'failed' | 'skipped',
+    extra?: { linkedin_post_url?: string; error_message?: string }
+): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const publishedAt = status === 'published' ? new Date() : null;
+        await pool.query(
+            `UPDATE linkedin_posts
+             SET status = $1,
+                 linkedin_post_url = COALESCE($2, linkedin_post_url),
+                 error_message = COALESCE($3, error_message),
+                 published_at = COALESCE($4, published_at)
+             WHERE id = $5::uuid`,
+            [status, extra?.linkedin_post_url ?? null, extra?.error_message ?? null, publishedAt, id]
+        );
+        return true;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinUpdatePostStatus error:', err);
+        return false;
+    }
+}
+
+/**
  * Liste des entity_id deja postes dans les N derniers jours.
  * Utilise pour eviter les doublons.
  */
