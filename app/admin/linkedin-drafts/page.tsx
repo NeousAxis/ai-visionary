@@ -41,6 +41,8 @@ export default function LinkedinDraftsPage() {
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [visibilityResults, setVisibilityResults] = useState<Record<string, { provider: string; visible: boolean; position?: number; cited_companies: string[]; query: string; error?: string }>>({});
+  const [visibilityLoading, setVisibilityLoading] = useState<string | null>(null);
 
   // Try to load secret on mount : (1) URL query (?secret=...), (2) localStorage
   useEffect(() => {
@@ -94,6 +96,22 @@ export default function LinkedinDraftsPage() {
   useEffect(() => {
     if (authenticated) fetchDrafts();
   }, [authenticated, fetchDrafts]);
+
+  const handleVisibilityCheck = async (id: string, provider: 'gemini' | 'chatgpt') => {
+    setVisibilityLoading(`${id}-${provider}`);
+    try {
+      const url = new URL(`/api/admin/linkedin-drafts/${id}/visibility`, window.location.origin);
+      url.searchParams.set('secret', secret);
+      url.searchParams.set('provider', provider);
+      const res = await fetch(url.toString());
+      const data = await res.json();
+      setVisibilityResults(prev => ({ ...prev, [`${id}-${provider}`]: data }));
+    } catch (e: any) {
+      setVisibilityResults(prev => ({ ...prev, [`${id}-${provider}`]: { provider, visible: true, cited_companies: [], query: '', error: e?.message || 'network error' } }));
+    } finally {
+      setVisibilityLoading(null);
+    }
+  };
 
   const handleAction = async (id: string, action: 'approve' | 'reject' | 'publish_now') => {
     if (action === 'publish_now' && !confirm('Publier ce post sur LinkedIn maintenant ?')) return;
@@ -270,30 +288,70 @@ export default function LinkedinDraftsPage() {
             )}
 
             {d.status === 'draft' && (
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => handleAction(d.id, 'publish_now')}
-                  disabled={actionLoading === d.id}
-                  style={{
-                    padding: '6px 14px', borderRadius: 6, border: 'none',
-                    background: '#4A919E', color: '#fff', fontWeight: 600, fontSize: '0.85rem',
-                    cursor: actionLoading === d.id ? 'wait' : 'pointer',
-                  }}
-                >
-                  {actionLoading === d.id ? '...' : '🚀 Publier maintenant'}
-                </button>
-                <button
-                  onClick={() => handleAction(d.id, 'reject')}
-                  disabled={actionLoading === d.id}
-                  style={{
-                    padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
-                    background: '#fff', color: '#991B1B', fontWeight: 600, fontSize: '0.85rem',
-                    cursor: actionLoading === d.id ? 'wait' : 'pointer',
-                  }}
-                >
-                  ✗ Rejeter
-                </button>
-              </div>
+              <>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => handleAction(d.id, 'publish_now')}
+                    disabled={actionLoading === d.id}
+                    style={{
+                      padding: '6px 14px', borderRadius: 6, border: 'none',
+                      background: '#4A919E', color: '#fff', fontWeight: 600, fontSize: '0.85rem',
+                      cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                    }}
+                  >
+                    {actionLoading === d.id ? '...' : '🚀 Publier maintenant'}
+                  </button>
+                  <button
+                    onClick={() => handleAction(d.id, 'reject')}
+                    disabled={actionLoading === d.id}
+                    style={{
+                      padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
+                      background: '#fff', color: '#991B1B', fontWeight: 600, fontSize: '0.85rem',
+                      cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                    }}
+                  >
+                    ✗ Rejeter
+                  </button>
+                  <button
+                    onClick={() => handleVisibilityCheck(d.id, 'gemini')}
+                    disabled={visibilityLoading === `${d.id}-gemini`}
+                    style={{
+                      padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
+                      background: '#EEF2FF', color: '#3730A3', fontWeight: 600, fontSize: '0.85rem',
+                      cursor: visibilityLoading === `${d.id}-gemini` ? 'wait' : 'pointer',
+                    }}
+                  >
+                    {visibilityLoading === `${d.id}-gemini` ? '...' : '🔬 Tester Gemini'}
+                  </button>
+                  <button
+                    onClick={() => handleVisibilityCheck(d.id, 'chatgpt')}
+                    disabled={visibilityLoading === `${d.id}-chatgpt`}
+                    style={{
+                      padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
+                      background: '#F0FDF4', color: '#166534', fontWeight: 600, fontSize: '0.85rem',
+                      cursor: visibilityLoading === `${d.id}-chatgpt` ? 'wait' : 'pointer',
+                    }}
+                  >
+                    {visibilityLoading === `${d.id}-chatgpt` ? '...' : '🔬 Tester ChatGPT'}
+                  </button>
+                </div>
+                {(['gemini', 'chatgpt'] as const).map(prov => {
+                  const r = visibilityResults[`${d.id}-${prov}`];
+                  if (!r) return null;
+                  const bg = r.error ? '#FEF3C7' : (r.visible ? '#FEE2E2' : '#D1FAE5');
+                  const color = r.error ? '#92400E' : (r.visible ? '#991B1B' : '#065F46');
+                  return (
+                    <div key={prov} style={{ background: bg, color, padding: '8px 12px', borderRadius: 6, fontSize: '0.78rem', marginTop: 8, lineHeight: 1.5 }}>
+                      <strong>{prov === 'gemini' ? 'Gemini' : 'ChatGPT'}</strong> · query: « {r.query} »<br />
+                      {r.error
+                        ? `⚠️ ${r.error}`
+                        : r.visible
+                          ? `❌ Cité en position ${r.position} dans : ${r.cited_companies.join(', ')}`
+                          : `✓ NON cité. Top 5 : ${r.cited_companies.join(', ')}`}
+                    </div>
+                  );
+                })}
+              </>
             )}
           </div>
         ))}

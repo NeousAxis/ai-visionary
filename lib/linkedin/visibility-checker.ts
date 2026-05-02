@@ -105,3 +105,62 @@ export async function checkVisibility(opts: {
         return { visible: true, cited_companies: [], error: e?.message || 'unknown' };
     }
 }
+
+/**
+ * Verifie la visibilite via OpenAI ChatGPT (gpt-4o-mini par defaut).
+ * Necessite OPENAI_API_KEY dans l'env. Si absent, retourne une erreur claire.
+ */
+export async function checkVisibilityChatGPT(opts: {
+    entityName: string;
+    sectorPhrase: string;
+    country?: string;
+}): Promise<VisibilityResult> {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) {
+        return { visible: false, cited_companies: [], error: 'OPENAI_API_KEY missing — add it to .env.local on the VPS' };
+    }
+
+    const where = opts.country ? ` in ${opts.country}` : '';
+    const prompt = `List the 5 best-known ${opts.sectorPhrase}${where}. Reply STRICTLY in JSON, no markdown, no commentary, format exactly:
+{"companies": ["Name1", "Name2", "Name3", "Name4", "Name5"]}`;
+
+    try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                temperature: 0,
+                response_format: { type: 'json_object' },
+                messages: [{ role: 'user', content: prompt }],
+            }),
+            signal: controller.signal,
+        });
+        clearTimeout(timer);
+
+        if (!res.ok) {
+            const errText = await res.text();
+            return { visible: true, cited_companies: [], error: `OpenAI ${res.status}: ${errText.slice(0, 150)}` };
+        }
+        const data: { choices?: Array<{ message?: { content?: string } }> } = await res.json();
+        const content = data.choices?.[0]?.message?.content || '';
+        let parsed: { companies?: string[] };
+        try {
+            parsed = JSON.parse(content);
+        } catch {
+            return { visible: true, cited_companies: [], error: `JSON parse fail: ${content.slice(0, 100)}` };
+        }
+        const cited = (parsed.companies || []).map((s) => String(s).trim()).filter(Boolean);
+        const target = normalizeName(opts.entityName);
+        const position = cited.findIndex((c) => normalizeName(c).includes(target) || target.includes(normalizeName(c)));
+        if (position >= 0) {
+            return { visible: true, position: position + 1, cited_companies: cited };
+        }
+        return { visible: false, cited_companies: cited };
+    } catch (e: any) {
+        return { visible: true, cited_companies: [], error: e?.message || 'unknown' };
+    }
+}
