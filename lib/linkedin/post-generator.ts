@@ -34,56 +34,57 @@ export interface GeneratedPost {
 const CERTIFICATE_BASE_URL = 'https://ai-visionary.xyz/aya/e';
 const DIAGNOSTIC_URL = 'https://ai-visionary.xyz/diagnostic';
 
-function buildSectorQueryFr(sector: string | undefined, city: string | undefined): string {
-  if (sector && city) return `meilleure ${sector} a ${city}`;
-  if (sector) return `meilleure ${sector}`;
-  if (city) return `meilleure entreprise a ${city}`;
-  return 'meilleure entreprise dans son secteur';
+/**
+ * Builds a natural-sounding question that a real human would ask ChatGPT.
+ * Picks one of several templates at random to vary across posts.
+ *
+ * `sector` is already a noun phrase like "online retailer" or "supermarket chain".
+ * `country` is the country *name* (e.g. "Switzerland"), not the ISO code.
+ */
+function buildSectorQueryEn(sector: string | undefined, country: string | undefined): string {
+  if (!sector) return country ? `top company in ${country}` : 'top company in this sector';
+
+  const templates: string[] = [];
+  if (country) {
+    templates.push(`recommend a good ${sector} in ${country}`);
+    templates.push(`which ${sector} should I use in ${country}`);
+    templates.push(`top ${sector} in ${country}`);
+    templates.push(`best ${sector} for ${country} customers`);
+  }
+  templates.push(`recommend a good ${sector}`);
+  templates.push(`which ${sector} is the most reliable`);
+  templates.push(`top-rated ${sector}`);
+
+  return templates[Math.floor(Math.random() * templates.length)];
 }
 
-function buildSectorQueryEn(sector: string | undefined, city: string | undefined): string {
-  if (sector && city) return `best ${sector} in ${city}`;
-  if (sector) return `best ${sector}`;
-  if (city) return `top company in ${city}`;
-  return 'top company in its sector';
-}
+// FR template removed (2 May 2026): all LinkedIn posts are now in English.
+// Kept signature stable for callers — generatePost() always returns EN.
 
-export function generatePostFr(ctx: PostContext): string {
-  const query = buildSectorQueryFr(ctx.sectorPhrase, ctx.city);
-  // Mention "@Nom" si on a un slug LinkedIn (le tag reel cliquable est fait
-  // par Playwright autocomplete en mode auto-publish)
-  const mention = ctx.linkedinSlug ? `@${ctx.entityName}` : ctx.entityName;
+/** ISO country code → human-readable English country name */
+const COUNTRY_NAMES_EN: Record<string, string> = {
+  CH: 'Switzerland', FR: 'France', DE: 'Germany', GB: 'the UK', UK: 'the UK',
+  IT: 'Italy', ES: 'Spain', NL: 'the Netherlands', BE: 'Belgium', AT: 'Austria',
+  PL: 'Poland', SE: 'Sweden', DK: 'Denmark', NO: 'Norway', FI: 'Finland',
+  IE: 'Ireland', PT: 'Portugal', CZ: 'Czechia', GR: 'Greece', HU: 'Hungary',
+  US: 'the US', CA: 'Canada', AU: 'Australia', IL: 'Israel',
+};
 
-  return `🔍 Test : demandez a ChatGPT « ${query} ».
-
-${mention} n'apparaitra pas dans la reponse.
-
-Pourtant ${ctx.entityName} est legitime, opere, a des clients. Mais aux yeux des IA : score AI-readability ${ctx.currentScore}/100. Pas d'ASR. Donnees invisibles.
-
-C'est mecanique :
-Lisibilite → Recommandabilite → Visibilite.
-Pas de structure, pas de citation. Pas de citation, pas de leads.
-
-Avec un ASR (AI Singular Record signe cryptographiquement) :
-projection ${ctx.projectedScore}/100. Lisible par TOUTES les IA.
-Independant de Google, OpenAI, Anthropic.
-🇨🇭 Souverainete suisse, infrastructure suisse.
-
-👉 Et VOTRE entreprise ? Testez en 30 secondes :
-${DIAGNOSTIC_URL}
-
-#AIvisibility #AISearch #ASR #SwissTech #StructuredData`;
+function countryName(code: string | undefined): string | undefined {
+  if (!code) return undefined;
+  return COUNTRY_NAMES_EN[code.toUpperCase()] || undefined;
 }
 
 export function generatePostEn(ctx: PostContext): string {
-  const query = buildSectorQueryEn(ctx.sectorPhrase, ctx.city);
+  const country = countryName(ctx.country);
+  const query = buildSectorQueryEn(ctx.sectorPhrase, country);
   const mention = ctx.linkedinSlug ? `@${ctx.entityName}` : ctx.entityName;
 
   return `🔍 Test: ask ChatGPT "${query}".
 
 ${mention} won't show up in the answer.
 
-Yet ${ctx.entityName} is legitimate, operates, has customers. But to AI systems: AI-readability score ${ctx.currentScore}/100. No ASR. Invisible data.
+Yet ${ctx.entityName} is legitimate, operating, with real customers. But to AI systems: AI-readability score ${ctx.currentScore}/100. No ASR. Invisible data.
 
 It's mechanical:
 Readability → Recommendability → Visibility.
@@ -101,16 +102,13 @@ ${DIAGNOSTIC_URL}
 }
 
 export function generatePost(ctx: PostContext): GeneratedPost {
-  const text = ctx.locale === 'fr' ? generatePostFr(ctx) : generatePostEn(ctx);
-  return { text, locale: ctx.locale };
+  // All LinkedIn posts are now in English (decision 2 May 2026).
+  return { text: generatePostEn(ctx), locale: 'en' };
 }
 
 /**
- * Pick locale heuristically from entity country code.
- * FR par defaut pour FR/CH/BE/LU. EN pour le reste.
+ * Always returns 'en' — locale field kept for back-compat with callers.
  */
-export function pickLocale(country: string | undefined): 'fr' | 'en' {
-  if (!country) return 'en';
-  const fr = ['FR', 'CH', 'BE', 'LU', 'MC'];
-  return fr.includes(country.toUpperCase()) ? 'fr' : 'en';
+export function pickLocale(_country: string | undefined): 'fr' | 'en' {
+  return 'en';
 }

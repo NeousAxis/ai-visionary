@@ -81,6 +81,14 @@ function computeProjectedScore(asrPayloadData: any, currentScore: number): numbe
 }
 
 /**
+ * Nettoie un display_name : strip un TLD eventuellement collé au nom
+ * (ex. "Manor.ch" → "Manor", "Zalando.com" → "Zalando").
+ */
+function cleanDisplayName(name: string): string {
+  return name.replace(/\.(ch|fr|de|it|es|nl|be|com|co\.uk|uk|net|org|so|io|co|ai)$/i, '').trim();
+}
+
+/**
  * Extrait le domaine canonique depuis website (strip protocol/www/path).
  */
 function extractDomain(website: string | null | undefined): string {
@@ -127,7 +135,7 @@ export async function selectNextEntity(): Promise<SelectableEntity | null> {
   return {
     entity_id: picked.entity_id,
     domain,
-    display_name: picked.display_name || domain,
+    display_name: cleanDisplayName(picked.display_name || domain),
     current_score: picked.asr_score ?? 0,
     projected_score: projectedScore,
     sector_macro: picked.sector_macro || undefined, // garde la valeur DB pour compat (non utilisee si override)

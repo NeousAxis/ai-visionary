@@ -34,11 +34,11 @@ export const KNOWN_DOMAINS_META: Map<string, KnownEntityMeta> = new Map([
   // ──────────────────────────────────────────────────────────────────────────
   // SUISSE — entites nationales connues mais peu visibles globalement
   // ──────────────────────────────────────────────────────────────────────────
-  ['migros.ch',       { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'fr', country: 'CH', city: 'Zurich', linkedin_slug: 'migros' }],
-  ['coop.ch',         { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'fr', country: 'CH', city: 'Bale', linkedin_slug: 'coopgroup' }],
-  ['manor.ch',        { sector_fr: 'grands magasins', sector_en: 'department stores', locale: 'fr', country: 'CH', linkedin_slug: 'manor-ag' }],
-  ['galaxus.ch',      { sector_fr: 'e-commerce generaliste', sector_en: 'general e-commerce', locale: 'fr', country: 'CH', linkedin_slug: 'galaxus' }],
-  ['digitec.ch',      { sector_fr: 'e-commerce electronique', sector_en: 'electronics e-commerce', locale: 'fr', country: 'CH', linkedin_slug: 'digitec-galaxus-ag' }],
+  ['migros.ch',       { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'fr', country: 'CH', city: 'Zurich', linkedin_slug: 'migros' }],
+  ['coop.ch',         { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'fr', country: 'CH', city: 'Bale', linkedin_slug: 'coopgroup' }],
+  ['manor.ch',        { sector_fr: 'grands magasins', sector_en: 'department store', locale: 'fr', country: 'CH', linkedin_slug: 'manor-ag' }],
+  ['galaxus.ch',      { sector_fr: 'e-commerce generaliste', sector_en: 'online retailer', locale: 'fr', country: 'CH', linkedin_slug: 'galaxus' }],
+  ['digitec.ch',      { sector_fr: 'e-commerce electronique', sector_en: 'online electronics store', locale: 'fr', country: 'CH', linkedin_slug: 'digitec-galaxus-ag' }],
   ['swisscom.ch',     { sector_fr: 'operateur telecom', sector_en: 'telecom operator', locale: 'fr', country: 'CH', linkedin_slug: 'swisscom' }],
   ['salt.ch',         { sector_fr: 'operateur telecom', sector_en: 'telecom operator', locale: 'fr', country: 'CH', linkedin_slug: 'salt-mobile' }],
   ['sunrise.ch',      { sector_fr: 'operateur telecom', sector_en: 'telecom operator', locale: 'fr', country: 'CH', linkedin_slug: 'sunrise-communications' }],
@@ -55,30 +55,30 @@ export const KNOWN_DOMAINS_META: Map<string, KnownEntityMeta> = new Map([
   // ──────────────────────────────────────────────────────────────────────────
   // FRANCE — entites nationales connues
   // ──────────────────────────────────────────────────────────────────────────
-  ['fnac.com',                { sector_fr: 'e-commerce produits culturels et tech', sector_en: 'cultural and tech retail', locale: 'fr', country: 'FR', linkedin_slug: 'fnac' }],
-  ['darty.com',               { sector_fr: 'e-commerce electromenager', sector_en: 'home appliances retail', locale: 'fr', country: 'FR', linkedin_slug: 'darty' }],
-  ['cdiscount.com',           { sector_fr: 'e-commerce generaliste', sector_en: 'general e-commerce', locale: 'fr', country: 'FR', linkedin_slug: 'cdiscount' }],
-  ['rueducommerce.fr',        { sector_fr: 'e-commerce generaliste', sector_en: 'general e-commerce', locale: 'fr', country: 'FR', linkedin_slug: 'rueducommerce' }],
-  ['laredoute.fr',            { sector_fr: 'e-commerce mode et maison', sector_en: 'fashion and home retail', locale: 'fr', country: 'FR', linkedin_slug: 'la-redoute' }],
+  ['fnac.com',                { sector_fr: 'e-commerce produits culturels et tech', sector_en: 'tech and books retailer', locale: 'fr', country: 'FR', linkedin_slug: 'fnac' }],
+  ['darty.com',               { sector_fr: 'e-commerce electromenager', sector_en: 'home appliances retailer', locale: 'fr', country: 'FR', linkedin_slug: 'darty' }],
+  ['cdiscount.com',           { sector_fr: 'e-commerce generaliste', sector_en: 'online retailer', locale: 'fr', country: 'FR', linkedin_slug: 'cdiscount' }],
+  ['rueducommerce.fr',        { sector_fr: 'e-commerce generaliste', sector_en: 'online retailer', locale: 'fr', country: 'FR', linkedin_slug: 'rueducommerce' }],
+  ['laredoute.fr',            { sector_fr: 'e-commerce mode et maison', sector_en: 'fashion and home retailer', locale: 'fr', country: 'FR', linkedin_slug: 'la-redoute' }],
   ['galerieslafayette.com',   { sector_fr: 'grand magasin de mode', sector_en: 'fashion department store', locale: 'fr', country: 'FR', linkedin_slug: 'galeries-lafayette' }],
   ['orange.fr',               { sector_fr: 'operateur telecom', sector_en: 'telecom operator', locale: 'fr', country: 'FR', linkedin_slug: 'orange' }],
   ['sfr.fr',                  { sector_fr: 'operateur telecom', sector_en: 'telecom operator', locale: 'fr', country: 'FR', linkedin_slug: 'sfr' }],
   ['bouyguestelecom.fr',      { sector_fr: 'operateur telecom', sector_en: 'telecom operator', locale: 'fr', country: 'FR', linkedin_slug: 'bouygues-telecom' }],
   ['free.fr',                 { sector_fr: 'operateur telecom', sector_en: 'telecom operator', locale: 'fr', country: 'FR', linkedin_slug: 'free' }],
-  ['leclerc.com',             { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'fr', country: 'FR', linkedin_slug: 'e.leclerc' }],
-  ['auchan.fr',               { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'fr', country: 'FR', linkedin_slug: 'auchan-retail' }],
-  ['carrefour.fr',            { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'fr', country: 'FR', linkedin_slug: 'carrefour' }],
-  ['intermarche.com',         { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'fr', country: 'FR', linkedin_slug: 'intermarche' }],
-  ['monoprix.fr',             { sector_fr: 'distribution alimentaire', sector_en: 'urban food retail', locale: 'fr', country: 'FR', linkedin_slug: 'monoprix' }],
-  ['casino.fr',               { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'fr', country: 'FR', linkedin_slug: 'groupe-casino' }],
-  ['sephora.fr',              { sector_fr: 'distribution beaute', sector_en: 'beauty retail', locale: 'fr', country: 'FR', linkedin_slug: 'sephora' }],
-  ['decathlon.fr',            { sector_fr: 'distribution articles de sport', sector_en: 'sports equipment retail', locale: 'fr', country: 'FR', linkedin_slug: 'decathlon' }],
-  ['leroymerlin.fr',          { sector_fr: 'distribution bricolage', sector_en: 'home improvement retail', locale: 'fr', country: 'FR', linkedin_slug: 'leroy-merlin' }],
-  ['bricomarche.com',         { sector_fr: 'distribution bricolage', sector_en: 'home improvement retail', locale: 'fr', country: 'FR', linkedin_slug: 'bricomarche' }],
-  ['aubert.com',              { sector_fr: 'puericulture', sector_en: 'baby products retail', locale: 'fr', country: 'FR', linkedin_slug: 'aubert' }],
-  ['kiabi.com',               { sector_fr: 'distribution mode familiale', sector_en: 'family fashion retail', locale: 'fr', country: 'FR', linkedin_slug: 'kiabi' }],
-  ['jules.com',               { sector_fr: 'mode masculine', sector_en: 'menswear retail', locale: 'fr', country: 'FR', linkedin_slug: 'jules-mode-mens' }],
-  ['undiz.com',               { sector_fr: 'lingerie', sector_en: 'lingerie retail', locale: 'fr', country: 'FR', linkedin_slug: 'undiz' }],
+  ['leclerc.com',             { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'fr', country: 'FR', linkedin_slug: 'e.leclerc' }],
+  ['auchan.fr',               { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'fr', country: 'FR', linkedin_slug: 'auchan-retail' }],
+  ['carrefour.fr',            { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'fr', country: 'FR', linkedin_slug: 'carrefour' }],
+  ['intermarche.com',         { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'fr', country: 'FR', linkedin_slug: 'intermarche' }],
+  ['monoprix.fr',             { sector_fr: 'distribution alimentaire', sector_en: 'urban supermarket', locale: 'fr', country: 'FR', linkedin_slug: 'monoprix' }],
+  ['casino.fr',               { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'fr', country: 'FR', linkedin_slug: 'groupe-casino' }],
+  ['sephora.fr',              { sector_fr: 'distribution beaute', sector_en: 'cosmetics retailer', locale: 'fr', country: 'FR', linkedin_slug: 'sephora' }],
+  ['decathlon.fr',            { sector_fr: 'distribution articles de sport', sector_en: 'sports retailer', locale: 'fr', country: 'FR', linkedin_slug: 'decathlon' }],
+  ['leroymerlin.fr',          { sector_fr: 'distribution bricolage', sector_en: 'DIY store', locale: 'fr', country: 'FR', linkedin_slug: 'leroy-merlin' }],
+  ['bricomarche.com',         { sector_fr: 'distribution bricolage', sector_en: 'DIY store', locale: 'fr', country: 'FR', linkedin_slug: 'bricomarche' }],
+  ['aubert.com',              { sector_fr: 'puericulture', sector_en: 'baby goods store', locale: 'fr', country: 'FR', linkedin_slug: 'aubert' }],
+  ['kiabi.com',               { sector_fr: 'distribution mode familiale', sector_en: 'family fashion brand', locale: 'fr', country: 'FR', linkedin_slug: 'kiabi' }],
+  ['jules.com',               { sector_fr: 'mode masculine', sector_en: 'menswear store', locale: 'fr', country: 'FR', linkedin_slug: 'jules-mode-mens' }],
+  ['undiz.com',               { sector_fr: 'lingerie', sector_en: 'lingerie brand', locale: 'fr', country: 'FR', linkedin_slug: 'undiz' }],
   ['sncf-connect.com',        { sector_fr: 'reservation ferroviaire', sector_en: 'rail booking', locale: 'fr', country: 'FR', linkedin_slug: 'sncf-connect-tech' }],
   ['airfrance.fr',            { sector_fr: 'compagnie aerienne', sector_en: 'airline', locale: 'fr', country: 'FR', linkedin_slug: 'air-france' }],
 
@@ -98,35 +98,35 @@ export const KNOWN_DOMAINS_META: Map<string, KnownEntityMeta> = new Map([
   // ──────────────────────────────────────────────────────────────────────────
   // ALLEMAGNE — entites nationales connues
   // ──────────────────────────────────────────────────────────────────────────
-  ['otto.de',         { sector_fr: 'e-commerce generaliste', sector_en: 'general e-commerce', locale: 'en', country: 'DE', linkedin_slug: 'otto-gmbh-&-co-kg' }],
-  ['mediamarkt.de',   { sector_fr: 'distribution electronique', sector_en: 'electronics retail', locale: 'en', country: 'DE', linkedin_slug: 'mediamarkt' }],
-  ['saturn.de',       { sector_fr: 'distribution electronique', sector_en: 'electronics retail', locale: 'en', country: 'DE', linkedin_slug: 'saturn' }],
-  ['lidl.de',         { sector_fr: 'distribution discount alimentaire', sector_en: 'discount food retail', locale: 'en', country: 'DE', linkedin_slug: 'lidl' }],
-  ['aldi.de',         { sector_fr: 'distribution discount alimentaire', sector_en: 'discount food retail', locale: 'en', country: 'DE', linkedin_slug: 'aldi-sud' }],
-  ['rewe.de',         { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'en', country: 'DE', linkedin_slug: 'rewe-group' }],
-  ['edeka.de',        { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'en', country: 'DE', linkedin_slug: 'edeka' }],
-  ['douglas.de',      { sector_fr: 'distribution beaute', sector_en: 'beauty retail', locale: 'en', country: 'DE', linkedin_slug: 'douglas' }],
+  ['otto.de',         { sector_fr: 'e-commerce generaliste', sector_en: 'online retailer', locale: 'en', country: 'DE', linkedin_slug: 'otto-gmbh-&-co-kg' }],
+  ['mediamarkt.de',   { sector_fr: 'distribution electronique', sector_en: 'electronics retailer', locale: 'en', country: 'DE', linkedin_slug: 'mediamarkt' }],
+  ['saturn.de',       { sector_fr: 'distribution electronique', sector_en: 'electronics retailer', locale: 'en', country: 'DE', linkedin_slug: 'saturn' }],
+  ['lidl.de',         { sector_fr: 'distribution discount alimentaire', sector_en: 'discount supermarket', locale: 'en', country: 'DE', linkedin_slug: 'lidl' }],
+  ['aldi.de',         { sector_fr: 'distribution discount alimentaire', sector_en: 'discount supermarket', locale: 'en', country: 'DE', linkedin_slug: 'aldi-sud' }],
+  ['rewe.de',         { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'en', country: 'DE', linkedin_slug: 'rewe-group' }],
+  ['edeka.de',        { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'en', country: 'DE', linkedin_slug: 'edeka' }],
+  ['douglas.de',      { sector_fr: 'distribution beaute', sector_en: 'cosmetics retailer', locale: 'en', country: 'DE', linkedin_slug: 'douglas' }],
   ['thalia.de',       { sector_fr: 'librairie', sector_en: 'bookstore chain', locale: 'en', country: 'DE', linkedin_slug: 'thalia-bucher-gmbh' }],
 
   // ──────────────────────────────────────────────────────────────────────────
   // UK — entites nationales connues
   // ──────────────────────────────────────────────────────────────────────────
-  ['tesco.com',           { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'en', country: 'GB', linkedin_slug: 'tesco' }],
-  ['sainsburys.co.uk',    { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'en', country: 'GB', linkedin_slug: 'j-sainsbury' }],
-  ['asda.com',            { sector_fr: 'distribution alimentaire', sector_en: 'food retail', locale: 'en', country: 'GB', linkedin_slug: 'asda' }],
+  ['tesco.com',           { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'en', country: 'GB', linkedin_slug: 'tesco' }],
+  ['sainsburys.co.uk',    { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'en', country: 'GB', linkedin_slug: 'j-sainsbury' }],
+  ['asda.com',            { sector_fr: 'distribution alimentaire', sector_en: 'supermarket chain', locale: 'en', country: 'GB', linkedin_slug: 'asda' }],
   ['marksandspencer.com', { sector_fr: 'grands magasins', sector_en: 'department store', locale: 'en', country: 'GB', linkedin_slug: 'marks-and-spencer' }],
   ['johnlewis.com',       { sector_fr: 'grands magasins', sector_en: 'department store', locale: 'en', country: 'GB', linkedin_slug: 'john-lewis-partnership' }],
-  ['currys.co.uk',        { sector_fr: 'distribution electronique', sector_en: 'electronics retail', locale: 'en', country: 'GB', linkedin_slug: 'currys' }],
+  ['currys.co.uk',        { sector_fr: 'distribution electronique', sector_en: 'electronics retailer', locale: 'en', country: 'GB', linkedin_slug: 'currys' }],
   ['argos.co.uk',         { sector_fr: 'distribution generaliste', sector_en: 'general retail', locale: 'en', country: 'GB', linkedin_slug: 'argos' }],
-  ['next.co.uk',          { sector_fr: 'mode et maison', sector_en: 'fashion and home retail', locale: 'en', country: 'GB', linkedin_slug: 'next-plc' }],
-  ['boohoo.com',          { sector_fr: 'e-commerce mode', sector_en: 'fashion e-commerce', locale: 'en', country: 'GB', linkedin_slug: 'boohoo-com' }],
+  ['next.co.uk',          { sector_fr: 'mode et maison', sector_en: 'fashion and home retailer', locale: 'en', country: 'GB', linkedin_slug: 'next-plc' }],
+  ['boohoo.com',          { sector_fr: 'e-commerce mode', sector_en: 'online fashion store', locale: 'en', country: 'GB', linkedin_slug: 'boohoo-com' }],
   ['missguided.com',      { sector_fr: 'e-commerce mode feminine', sector_en: 'womenswear e-commerce', locale: 'en', country: 'GB', linkedin_slug: 'missguided' }],
 
   // ──────────────────────────────────────────────────────────────────────────
   // E-commerce mode regional EU
   // ──────────────────────────────────────────────────────────────────────────
-  ['zalando.fr',  { sector_fr: 'e-commerce mode', sector_en: 'fashion e-commerce', locale: 'fr', country: 'FR', linkedin_slug: 'zalando' }],
-  ['zalando.ch',  { sector_fr: 'e-commerce mode', sector_en: 'fashion e-commerce', locale: 'fr', country: 'CH', linkedin_slug: 'zalando' }],
+  ['zalando.fr',  { sector_fr: 'e-commerce mode', sector_en: 'online fashion store', locale: 'fr', country: 'FR', linkedin_slug: 'zalando' }],
+  ['zalando.ch',  { sector_fr: 'e-commerce mode', sector_en: 'online fashion store', locale: 'fr', country: 'CH', linkedin_slug: 'zalando' }],
 
   // NB: Sont VOLONTAIREMENT exclus de cette liste car les IA les citent deja
   // (cible inappropriee pour la doctrine du post) :

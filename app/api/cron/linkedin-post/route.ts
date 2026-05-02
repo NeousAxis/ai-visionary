@@ -66,11 +66,10 @@ export async function POST(req: NextRequest) {
     logger.info('CRON_ENTITY_PICKED', `${entity.display_name} (${entity.domain}) score=${entity.current_score}->${entity.projected_score}`);
 
     // --- 2. Generation post ---
-    // Locale : override KNOWN_DOMAINS_META d'abord, sinon heuristique pays
-    const locale = entity.override_locale || pickLocale(entity.country);
-    // Sector : phrase deja formee dans la bonne locale (override KNOWN_DOMAINS_META),
-    // car le sector_macro de la DB est une heuristique foireuse pour les Tranco
-    const sectorPhrase = locale === 'fr' ? entity.override_sector_fr : entity.override_sector_en;
+    // Decision 2 mai 2026 : tous les posts en EN (pas de FR).
+    const locale: 'en' = 'en';
+    void pickLocale; // import garde pour back-compat, plus utilise
+    const sectorPhrase = entity.override_sector_en;
     const post = generatePost({
       entityName: entity.display_name,
       entityDomain: entity.domain,
