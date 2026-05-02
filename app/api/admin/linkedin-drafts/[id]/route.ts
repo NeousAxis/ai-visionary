@@ -43,8 +43,20 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     }
 
     if (action === 'approve') {
-        // Pas de changement de status (deja draft), juste un signal logique
-        return NextResponse.json({ success: true, status: 'draft', message: 'Approuve, sera publie au prochain cron en mode auto-publish' });
+        // Status='approved' → entre en queue pour publication automatique par le cron
+        // /api/cron/linkedin-publish-approved (3x/jour : 9h, 13h, 18h CET)
+        const ok = await linkedinUpdatePostStatus(id, 'approved');
+        return NextResponse.json({
+            success: ok,
+            status: 'approved',
+            message: 'Approuve, sera publie automatiquement au prochain cron auto-publish',
+        });
+    }
+
+    if (action === 'unapprove') {
+        // Retour en draft (Cyril veut le re-tester ou changer d'avis)
+        const ok = await linkedinUpdatePostStatus(id, 'draft');
+        return NextResponse.json({ success: ok, status: 'draft' });
     }
 
     if (action === 'publish_now') {

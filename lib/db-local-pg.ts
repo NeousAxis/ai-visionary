@@ -410,7 +410,7 @@ export interface LinkedinPostInput {
     projected_score: number;
     post_text: string;
     post_locale: string;
-    status: 'draft' | 'published' | 'failed' | 'skipped';
+    status: 'draft' | 'approved' | 'published' | 'failed' | 'skipped';
     linkedin_post_url?: string | null;
     error_message?: string | null;
     /** 'passed' = Gemini check OK (entite non citee, safe a publier),
@@ -519,11 +519,37 @@ export async function linkedinListPosts(opts: {
 }
 
 /**
+ * Recupere le plus ancien post avec status='approved' (FIFO de la queue
+ * de publication automatique).
+ */
+export async function linkedinGetOldestApproved(): Promise<LinkedinPostRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult<LinkedinPostRow> = await pool.query(
+            `SELECT id::text, entity_id::text, entity_domain, entity_name,
+                    current_score, projected_score, post_text, post_locale,
+                    status, linkedin_post_url, error_message,
+                    scheduled_at::text, published_at::text, created_at::text,
+                    visibility_check
+             FROM linkedin_posts
+             WHERE status = 'approved'
+             ORDER BY scheduled_at ASC
+             LIMIT 1`
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinGetOldestApproved error:', err);
+        return null;
+    }
+}
+
+/**
  * Met a jour le status d'un post linkedin_posts.
  */
 export async function linkedinUpdatePostStatus(
     id: string,
-    status: 'draft' | 'published' | 'failed' | 'skipped',
+    status: 'draft' | 'approved' | 'published' | 'failed' | 'skipped',
     extra?: { linkedin_post_url?: string; error_message?: string }
 ): Promise<boolean> {
     const pool = getPool();

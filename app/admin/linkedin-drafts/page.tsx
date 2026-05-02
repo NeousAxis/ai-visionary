@@ -27,6 +27,7 @@ interface DraftRow {
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-yellow-100 text-yellow-800',
+  approved: 'bg-blue-100 text-blue-800',
   published: 'bg-green-100 text-green-800',
   failed: 'bg-red-100 text-red-800',
   skipped: 'bg-gray-100 text-gray-700',
@@ -113,7 +114,7 @@ export default function LinkedinDraftsPage() {
     }
   };
 
-  const handleAction = async (id: string, action: 'approve' | 'reject' | 'publish_now') => {
+  const handleAction = async (id: string, action: 'approve' | 'unapprove' | 'reject' | 'publish_now') => {
     if (action === 'publish_now' && !confirm('Publier ce post sur LinkedIn maintenant ?')) return;
     setActionLoading(id);
     try {
@@ -287,12 +288,40 @@ export default function LinkedinDraftsPage() {
               </a>
             )}
 
-            {d.status === 'draft' && (
+            {(d.status === 'draft' || d.status === 'approved') && (
               <>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {d.status === 'draft' && (
+                    <button
+                      onClick={() => handleAction(d.id, 'approve')}
+                      disabled={actionLoading === d.id}
+                      title="Ajouter ce post a la queue de publication automatique (cron 3x/jour)"
+                      style={{
+                        padding: '6px 14px', borderRadius: 6, border: 'none',
+                        background: '#1E40AF', color: '#fff', fontWeight: 700, fontSize: '0.85rem',
+                        cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                      }}
+                    >
+                      {actionLoading === d.id ? '...' : '✓ Approuver (auto)'}
+                    </button>
+                  )}
+                  {d.status === 'approved' && (
+                    <button
+                      onClick={() => handleAction(d.id, 'unapprove')}
+                      disabled={actionLoading === d.id}
+                      style={{
+                        padding: '6px 14px', borderRadius: 6, border: '1px solid #1E40AF',
+                        background: '#fff', color: '#1E40AF', fontWeight: 600, fontSize: '0.85rem',
+                        cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                      }}
+                    >
+                      ↺ Retirer de la queue
+                    </button>
+                  )}
                   <button
                     onClick={() => handleAction(d.id, 'publish_now')}
                     disabled={actionLoading === d.id}
+                    title="Publier immediatement (sans attendre le cron)"
                     style={{
                       padding: '6px 14px', borderRadius: 6, border: 'none',
                       background: '#4A919E', color: '#fff', fontWeight: 600, fontSize: '0.85rem',
