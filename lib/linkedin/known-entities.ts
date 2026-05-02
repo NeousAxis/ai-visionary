@@ -125,8 +125,7 @@ export const KNOWN_DOMAINS_META: Map<string, KnownEntityMeta> = new Map([
   // ──────────────────────────────────────────────────────────────────────────
   // E-commerce mode regional EU
   // ──────────────────────────────────────────────────────────────────────────
-  ['zalando.fr',  { sector_fr: 'e-commerce mode', sector_en: 'online fashion store', locale: 'fr', country: 'FR', linkedin_slug: 'zalando' }],
-  ['zalando.ch',  { sector_fr: 'e-commerce mode', sector_en: 'online fashion store', locale: 'fr', country: 'CH', linkedin_slug: 'zalando' }],
+  // Zalando : retire (Cyril 2 mai 2026 — teste sur ChatGPT, sort en 2e position).
 
   // NB: Sont VOLONTAIREMENT exclus de cette liste car les IA les citent deja
   // (cible inappropriee pour la doctrine du post) :
