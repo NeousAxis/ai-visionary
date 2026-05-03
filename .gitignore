@@ -78,3 +78,4 @@ Strategie AI*.txt
 mcp-server-aya/node_modules/
 mcp-server-aya/dist/
 .gitnexus
+.linkedin-session.json

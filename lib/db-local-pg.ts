@@ -397,3 +397,301 @@ export async function localPgSearch(q: string, limit: number): Promise<Entity[]>
         return [];
     }
 }
+
+// ── LinkedIn poster helpers (1er mai 2026) ────────────────────────────────────
+// Ces helpers ecrivent dans la table linkedin_posts (Postgres VPS uniquement,
+// pas Supabase, pour respecter la grace period jusqu'au 7 mai).
+
+export interface LinkedinPostInput {
+    entity_id: string;
+    entity_domain: string;
+    entity_name: string;
+    current_score: number;
+    projected_score: number;
+    post_text: string;
+    post_locale: string;
+    status: 'draft' | 'approved' | 'published' | 'failed' | 'skipped';
+    linkedin_post_url?: string | null;
+    error_message?: string | null;
+    /** 'passed' = Gemini check OK (entite non citee, safe a publier),
+     *  'skipped_visible' = entite citee par Gemini (skip auto),
+     *  null/undefined = pas teste (drafts pre-filtre). */
+    visibility_check?: string | null;
+}
+
+/**
+ * Insert dans linkedin_posts. Retourne l'id genere ou null si echec.
+ * Sur Vercel (sans Postgres VPS configure), retourne null silencieusement.
+ */
+export async function linkedinInsertPost(input: LinkedinPostInput): Promise<string | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const publishedAt = input.status === 'published' ? new Date() : null;
+        const res: QueryResult<{ id: string }> = await pool.query(
+            `INSERT INTO linkedin_posts (
+                entity_id, entity_domain, entity_name,
+                current_score, projected_score,
+                post_text, post_locale, status,
+                linkedin_post_url, error_message,
+                scheduled_at, published_at,
+                visibility_check
+             ) VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11, $12)
+             RETURNING id`,
+            [
+                input.entity_id,
+                input.entity_domain,
+                input.entity_name,
+                input.current_score,
+                input.projected_score,
+                input.post_text,
+                input.post_locale,
+                input.status,
+                input.linkedin_post_url ?? null,
+                input.error_message ?? null,
+                publishedAt,
+                input.visibility_check ?? null,
+            ]
+        );
+        return res.rows[0]?.id ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinInsertPost error:', err);
+        return null;
+    }
+}
+
+/**
+ * Liste paginee des linkedin_posts (admin UI).
+ */
+export interface LinkedinPostRow {
+    id: string;
+    entity_id: string;
+    entity_domain: string;
+    entity_name: string;
+    current_score: number;
+    projected_score: number;
+    post_text: string;
+    post_locale: string;
+    status: string;
+    linkedin_post_url: string | null;
+    error_message: string | null;
+    scheduled_at: string;
+    published_at: string | null;
+    created_at: string;
+    visibility_check: string | null;
+}
+
+export async function linkedinListPosts(opts: {
+    limit?: number;
+    offset?: number;
+    statusFilter?: string;
+}): Promise<{ rows: LinkedinPostRow[]; total: number }> {
+    const pool = getPool();
+    if (!pool) return { rows: [], total: 0 };
+    const { limit = 50, offset = 0, statusFilter } = opts;
+
+    try {
+        const params: unknown[] = [];
+        const whereClause = statusFilter ? `WHERE status = $${params.push(statusFilter)}` : '';
+        const countQuery = `SELECT COUNT(*)::text AS cnt FROM linkedin_posts ${whereClause}`;
+        const countRes = await pool.query<{ cnt: string }>(countQuery, params);
+        const total = parseInt(countRes.rows[0]?.cnt ?? '0', 10);
+
+        const limitIdx = params.push(limit);
+        const offsetIdx = params.push(offset);
+        const dataQuery = `
+            SELECT id::text, entity_id::text, entity_domain, entity_name,
+                   current_score, projected_score, post_text, post_locale,
+                   status, linkedin_post_url, error_message,
+                   scheduled_at::text, published_at::text, created_at::text,
+                   visibility_check
+            FROM linkedin_posts
+            ${whereClause}
+            ORDER BY scheduled_at DESC
+            LIMIT $${limitIdx} OFFSET $${offsetIdx}
+        `;
+        const dataRes = await pool.query<LinkedinPostRow>(dataQuery, params);
+        return { rows: dataRes.rows, total };
+    } catch (err) {
+        console.error('[db-local-pg] linkedinListPosts error:', err);
+        return { rows: [], total: 0 };
+    }
+}
+
+/**
+ * Recupere le plus ancien post avec status='approved' (FIFO de la queue
+ * de publication automatique).
+ */
+export async function linkedinGetOldestApproved(): Promise<LinkedinPostRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult<LinkedinPostRow> = await pool.query(
+            `SELECT id::text, entity_id::text, entity_domain, entity_name,
+                    current_score, projected_score, post_text, post_locale,
+                    status, linkedin_post_url, error_message,
+                    scheduled_at::text, published_at::text, created_at::text,
+                    visibility_check
+             FROM linkedin_posts
+             WHERE status = 'approved'
+             ORDER BY scheduled_at ASC
+             LIMIT 1`
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinGetOldestApproved error:', err);
+        return null;
+    }
+}
+
+/**
+ * Met a jour le status d'un post linkedin_posts.
+ */
+export async function linkedinUpdatePostStatus(
+    id: string,
+    status: 'draft' | 'approved' | 'published' | 'failed' | 'skipped',
+    extra?: { linkedin_post_url?: string; error_message?: string }
+): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const publishedAt = status === 'published' ? new Date() : null;
+        // Important : pour status='published' ou 'draft' ou 'approved', on
+        // EFFACE l'error_message precedent (sinon une vieille erreur reste
+        // affichee meme apres une publication reussie). Pour 'failed', on
+        // ecrit le nouveau message.
+        const shouldClearError = status === 'published' || status === 'draft' || status === 'approved';
+        const newErrorMessage = shouldClearError
+            ? null
+            : (extra?.error_message ?? null);
+
+        await pool.query(
+            `UPDATE linkedin_posts
+             SET status = $1,
+                 linkedin_post_url = COALESCE($2, linkedin_post_url),
+                 error_message = $3,
+                 published_at = COALESCE($4, published_at)
+             WHERE id = $5::uuid`,
+            [status, extra?.linkedin_post_url ?? null, newErrorMessage, publishedAt, id]
+        );
+        return true;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinUpdatePostStatus error:', err);
+        return false;
+    }
+}
+
+/**
+ * Liste des entity_id deja postes dans les N derniers jours.
+ * Utilise pour eviter les doublons.
+ */
+export async function linkedinGetRecentEntityIds(daysSinceCutoff: number): Promise<Set<string>> {
+    const pool = getPool();
+    if (!pool) return new Set();
+    try {
+        const res: QueryResult<{ entity_id: string }> = await pool.query(
+            `SELECT DISTINCT entity_id::text
+             FROM linkedin_posts
+             WHERE scheduled_at > NOW() - ($1 || ' days')::interval`,
+            [String(daysSinceCutoff)]
+        );
+        return new Set(res.rows.map((r) => r.entity_id));
+    } catch (err) {
+        console.error('[db-local-pg] linkedinGetRecentEntityIds error:', err);
+        return new Set();
+    }
+}
+
+/**
+ * Selection des entites candidates pour un post LinkedIn.
+ *
+ * Mode useKnownDomainsFilter=true (defaut, retro-compat) :
+ *   Filtres : score <= 50, payment_completed = false, contact_email present,
+ *             website dans la liste de domaines connus passee en argument,
+ *             asr_payload present.
+ *
+ * Mode useKnownDomainsFilter=false (pool elargi Tranco 25k+) :
+ *   Supprime le filtre sur knownDomains et ajoute des filtres qualite
+ *   supplementaires sur asr_payload, gemini_description et display_name.
+ */
+export async function linkedinSelectCandidates(opts: {
+    knownDomains: string[];
+    excludeEntityIds: string[];
+    limit: number;
+    /** Si false, ignore le filtre domain IN(knownDomains) et applique des
+     *  filtres qualite supplementaires pour ouvrir le pool aux ~25k entites
+     *  Tranco. Default : true (retro-compat). */
+    useKnownDomainsFilter?: boolean;
+}): Promise<Entity[]> {
+    const pool = getPool();
+    if (!pool) return [];
+
+    const useKnownFilter = opts.useKnownDomainsFilter !== false; // default true
+    if (useKnownFilter && opts.knownDomains.length === 0) return [];
+
+    try {
+        const params: unknown[] = [];
+
+        // Clause domaine connu (mode original)
+        let domainClause = '';
+        if (useKnownFilter) {
+            params.push(opts.knownDomains);
+            domainClause = `AND lower(
+                     regexp_replace(
+                       regexp_replace(COALESCE(website, ''), '^https?://(www\\.)?', ''),
+                       '/.*$', ''
+                     )
+                   ) = ANY($${params.length})`;
+        }
+
+        // Clause asr_payload + gemini_description (mode pool elargi uniquement)
+        let payloadClause = '';
+        if (!useKnownFilter) {
+            payloadClause = `
+               AND asr_payload IS NOT NULL
+               AND (asr_payload->'data'->'enrichment'->>'gemini_description') IS NOT NULL
+               AND LENGTH(asr_payload->'data'->'enrichment'->>'gemini_description') >= 100`;
+        }
+
+        // Clause display_name qualite (mode pool elargi uniquement)
+        let nameQualityClause = '';
+        if (!useKnownFilter) {
+            nameQualityClause = `
+               AND display_name IS NOT NULL
+               AND display_name != ''
+               AND LENGTH(display_name) >= 3
+               AND LENGTH(display_name) <= 60
+               AND display_name NOT LIKE 'http%'`;
+        }
+
+        // Clause exclude entity_ids
+        const excludeClause = opts.excludeEntityIds.length > 0
+            ? `AND entity_id::text != ALL($${params.length + 1})`
+            : '';
+        if (opts.excludeEntityIds.length > 0) params.push(opts.excludeEntityIds);
+
+        // LIMIT toujours en dernier param
+        params.push(opts.limit);
+        const limitIdx = params.length;
+
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS}
+             FROM aya_registry
+             WHERE asr_score <= 50
+               AND COALESCE(payment_completed, false) = false
+               AND contact_email IS NOT NULL
+               AND contact_email != ''
+               ${domainClause}
+               ${payloadClause}
+               ${nameQualityClause}
+               ${excludeClause}
+             ORDER BY RANDOM()
+             LIMIT $${limitIdx}`,
+            params
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] linkedinSelectCandidates error:', err);
+        return [];
+    }
+}

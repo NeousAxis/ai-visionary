@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
 
   reactCompiler: false,
 
+  // Playwright contient des binaires natifs (Chromium) qui ne peuvent pas
+  // etre bundles par Next.js. On le declare comme module externe pour qu'il
+  // soit charge depuis node_modules au runtime.
+  serverExternalPackages: ['playwright', 'playwright-core'],
+
   // Security headers
   async headers() {
     return [
