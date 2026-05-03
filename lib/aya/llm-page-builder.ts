@@ -46,6 +46,19 @@ export function entityDescription(entity: any, locale: 'en' | 'fr'): string {
             ? enrichment.gemini_description_fr || enrichment.gemini_description || ''
             : enrichment.gemini_description || enrichment.gemini_description_fr || '');
 
+    // 2nd priority: real scraped meta/og description from the bot pipeline
+    // (path used by Tranco-scraped VPS entities, where Gemini enrichment is absent)
+    if (!desc || desc.length < 10) {
+        desc =
+            asr.aio_blocks?.offre?.fields?.meta_description ||
+            asr.aio_blocks?.offre?.fields?.og_description ||
+            asr.identite?.description?.value ||
+            asr.source?.meta_description ||
+            '';
+    }
+
+    // Last resort: top-3 detected services (often generic keywords like "api, app, offre"
+    // — only useful when nothing else is available)
     if (!desc || desc.length < 10) {
         const services: string[] = Array.isArray(asr.offre?.services?.value)
             ? asr.offre.services.value
@@ -53,10 +66,6 @@ export function entityDescription(entity: any, locale: 'en' | 'fr'): string {
         if (services.length > 0) {
             desc = services.slice(0, 3).join(', ');
         }
-    }
-
-    if (!desc || desc.length < 10) {
-        desc = asr.identite?.description?.value || asr.source?.meta_description || '';
     }
 
     if (!desc) return '';
