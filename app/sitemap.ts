@@ -1,6 +1,6 @@
 
 import { MetadataRoute } from 'next';
-import { db } from '@/lib/db';
+import { db, getAyaEntitiesAggregated, getAyaSectorsAggregated, getAyaCountriesAggregated, getAyaSectorCountryCombinationsAggregated } from '@/lib/db';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://ai-visionary.xyz';
@@ -53,11 +53,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ];
 
-    // 2. Dynamic entity certificate pages (from Supabase aya_registry)
+    // 2. Dynamic entity certificate pages (Supabase + VPS Postgres aggregated)
     let entityPages: MetadataRoute.Sitemap = [];
     try {
-        const entities = await db.getAyaEntities(50000);
-        entityPages = entities
+        // getAyaEntitiesAggregated supports pagination; fetch a large first page to capture
+        // all ~30k entities (Supabase ~4 438 + VPS ~25 860).  pageSize=50 000 is safe for
+        // sitemap generation (server-side only, never sent to the browser).
+        const result = await getAyaEntitiesAggregated({ page: 1, pageSize: 50_000 });
+        entityPages = result.data
             .filter((entity: any) => entity.entity_id)
             .map((entity: any) => ({
                 url: `${baseUrl}/aya/e/${entity.entity_id}`,
@@ -66,14 +69,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 priority: 0.6,
             }));
     } catch (_err) {
-        // Supabase unavailable at build time — static sitemap only
-        console.warn('[sitemap] Could not fetch entities from Supabase:', _err);
+        // DB unavailable at build time — static sitemap only
+        console.warn('[sitemap] Could not fetch entities (aggregated):', _err);
     }
 
-    // 3. Sector landing pages (/aya/sector/[macro])
+    // 3. Sector landing pages (/aya/sector/[macro]) — aggregated
     let sectorPages: MetadataRoute.Sitemap = [];
     try {
-        const sectors = await db.getAyaSectors();
+        const sectors = await getAyaSectorsAggregated();
         sectorPages = sectors.map(({ sector }) => ({
             url: `${baseUrl}/aya/sector/${encodeURIComponent(sector)}`,
             lastModified: now,
@@ -81,13 +84,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.8,
         }));
     } catch (_err) {
-        console.warn('[sitemap] Could not fetch sectors from Supabase:', _err);
+        console.warn('[sitemap] Could not fetch sectors (aggregated):', _err);
     }
 
-    // 4. Country landing pages (/aya/country/[code])
+    // 4. Country landing pages (/aya/country/[code]) — aggregated
     let countryPages: MetadataRoute.Sitemap = [];
     try {
-        const countries = await db.getAyaCountries();
+        const countries = await getAyaCountriesAggregated();
         countryPages = countries.map(({ country }) => ({
             url: `${baseUrl}/aya/country/${country}`,
             lastModified: now,
@@ -95,14 +98,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.8,
         }));
     } catch (_err) {
-        console.warn('[sitemap] Could not fetch countries from Supabase:', _err);
+        console.warn('[sitemap] Could not fetch countries (aggregated):', _err);
     }
 
-    // 5. Sector × Country cross pages (/aya/sector/[macro]/country/[code])
+    // 5. Sector × Country cross pages (/aya/sector/[macro]/country/[code]) — aggregated
     //    Only includes combinations that actually have entities (count >= 1).
     let crossPages: MetadataRoute.Sitemap = [];
     try {
-        const combinations = await db.getAyaSectorCountryCombinations();
+        const combinations = await getAyaSectorCountryCombinationsAggregated();
         crossPages = combinations.map(({ sector, country }) => ({
             url: `${baseUrl}/aya/sector/${encodeURIComponent(sector)}/country/${country}`,
             lastModified: now,
@@ -110,7 +113,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.7,
         }));
     } catch (_err) {
-        console.warn('[sitemap] Could not fetch sector×country combinations from Supabase:', _err);
+        console.warn('[sitemap] Could not fetch sector×country combinations (aggregated):', _err);
     }
 
     // Safety check: Google Sitemaps support max 50 000 URLs and 50 MB per file.

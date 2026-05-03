@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { localPgGetEntityById as _localPgGetEntityById } from '@/lib/db-local-pg';
+import { resolveSectorMacro } from '@/lib/aya/llm-format';
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -1391,6 +1392,261 @@ export async function getAyaEntitiesAggregated(options: {
         certifiedCount: supabaseResult.certifiedCount,  // Only Supabase has paying customers
         indexedCount:   supabaseResult.indexedCount + vpsTotalFromApi,
     };
+}
+
+// ── getAyaEntitiesByFilterAggregated ─────────────────────────────────────────
+
+/**
+ * Fetch entities filtered by sector_macro and/or country_legal from Supabase +
+ * optional VPS Postgres.  Dedupes by entity_id — Supabase wins on conflicts.
+ *
+ * IMPORTANT: `sector` is resolved via resolveSectorMacro() before being sent to
+ * either source.  This fixes the FR/EN sector mismatch (e.g. URL param
+ * "Technology & SaaS" is converted to "Technologie & SaaS" before the SQL eq()).
+ *
+ * Falls back to Supabase-only if VPS is down or times out (5 s).
+ * NEVER throws.
+ */
+export async function getAyaEntitiesByFilterAggregated(options: {
+    sector?: string;
+    country?: string;
+    limit?: number;
+    offset?: number;
+}): Promise<{ data: any[]; total: number }> {
+    const { limit = 100, offset = 0 } = options;
+
+    // Resolve sector to the canonical FR key stored in DB
+    const sector  = options.sector  ? resolveSectorMacro(options.sector)  : undefined;
+    const country = options.country ? options.country.toUpperCase()       : undefined;
+
+    // Always start with Supabase (authoritative source — certified/paying customers)
+    const supabaseResult = await database.getAyaEntitiesByFilter({ sector, country, limit, offset });
+
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return supabaseResult;
+
+    const cacheKey = `_byfilter_${sector ?? ''}_${country ?? ''}_${limit}_${offset}`;
+    const cached = _vpsCache.get(cacheKey);
+    let vpsData: any[]  = [];
+    let vpsTotal = 0;
+
+    if (cached && Date.now() < cached.exp) {
+        vpsData  = cached.data;
+        vpsTotal = (cached as any).total ?? vpsData.length;
+    } else {
+        try {
+            const params = new URLSearchParams();
+            if (sector)  params.set('sector',  sector);
+            if (country) params.set('country', country);
+            params.set('limit',  String(limit));
+            params.set('offset', String(offset));
+
+            const vpsUrl = `${vpsBaseUrl}/by-filter?${params.toString()}`;
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+            const res = await fetch(vpsUrl, { signal: controller.signal });
+            clearTimeout(timeout);
+
+            if (!res.ok) {
+                console.warn(`[getAyaEntitiesByFilterAggregated] VPS returned ${res.status} — Supabase only`);
+            } else {
+                const json = await res.json() as { data?: any[]; total?: number };
+                vpsData  = Array.isArray(json.data) ? json.data : [];
+                vpsTotal = typeof json.total === 'number' ? json.total : vpsData.length;
+                const entry = Object.assign(
+                    { data: vpsData, exp: Date.now() + VPS_CACHE_TTL_MS },
+                    { total: vpsTotal }
+                );
+                _vpsCache.set(cacheKey, entry);
+            }
+        } catch (err) {
+            console.warn('[getAyaEntitiesByFilterAggregated] VPS fetch failed — Supabase only:', err);
+        }
+    }
+
+    if (vpsData.length === 0 && vpsTotal === 0) return supabaseResult;
+
+    const supabaseIds = new Set<string>(supabaseResult.data.map((e: any) => e.entity_id as string));
+    const vpsUnique   = vpsData.filter((e: any) => !supabaseIds.has(e.entity_id));
+
+    return {
+        data:  [...supabaseResult.data, ...vpsUnique],
+        total: supabaseResult.total + vpsTotal,
+    };
+}
+
+// ── getAyaSectorsAggregated ───────────────────────────────────────────────────
+
+/**
+ * Distinct sector_macro values with counts from Supabase + optional VPS.
+ * Counts are merged per FR key (additive).  Min count threshold: 2.
+ * NEVER throws.
+ */
+export async function getAyaSectorsAggregated(): Promise<{ sector: string; count: number }[]> {
+    const supabaseSectors = await database.getAyaSectors();
+
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return supabaseSectors;
+
+    const cacheKey = '_sectors_agg';
+    const cached = _vpsCache.get(cacheKey);
+    let vpsSectors: { sector: string; count: number }[] = [];
+
+    if (cached && Date.now() < cached.exp) {
+        vpsSectors = cached.data as { sector: string; count: number }[];
+    } else {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+            const res = await fetch(`${vpsBaseUrl}/sectors`, { signal: controller.signal });
+            clearTimeout(timeout);
+
+            if (res.ok) {
+                const json = await res.json() as { sectors?: { sector: string; count: number }[] };
+                vpsSectors = Array.isArray(json.sectors) ? json.sectors : [];
+                _vpsCache.set(cacheKey, { data: vpsSectors, exp: Date.now() + VPS_CACHE_TTL_MS });
+            } else {
+                console.warn(`[getAyaSectorsAggregated] VPS returned ${res.status} — Supabase only`);
+            }
+        } catch (err) {
+            console.warn('[getAyaSectorsAggregated] VPS fetch failed — Supabase only:', err);
+        }
+    }
+
+    if (vpsSectors.length === 0) return supabaseSectors;
+
+    // Merge counts per FR sector key
+    const merged: Record<string, number> = {};
+    for (const { sector, count } of supabaseSectors) {
+        merged[sector] = (merged[sector] || 0) + count;
+    }
+    for (const { sector, count } of vpsSectors) {
+        merged[sector] = (merged[sector] || 0) + count;
+    }
+
+    return Object.entries(merged)
+        .filter(([, c]) => c >= 2)
+        .sort((a, b) => b[1] - a[1])
+        .map(([sector, count]) => ({ sector, count }));
+}
+
+// ── getAyaCountriesAggregated ─────────────────────────────────────────────────
+
+/**
+ * Distinct country_legal ISO codes with counts from Supabase + optional VPS.
+ * Counts are merged per country code (additive).  Min count threshold: 2.
+ * NEVER throws.
+ */
+export async function getAyaCountriesAggregated(): Promise<{ country: string; count: number }[]> {
+    const supabaseCountries = await database.getAyaCountries();
+
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return supabaseCountries;
+
+    const cacheKey = '_countries_agg';
+    const cached = _vpsCache.get(cacheKey);
+    let vpsCountries: { country: string; count: number }[] = [];
+
+    if (cached && Date.now() < cached.exp) {
+        vpsCountries = cached.data as { country: string; count: number }[];
+    } else {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+            const res = await fetch(`${vpsBaseUrl}/countries`, { signal: controller.signal });
+            clearTimeout(timeout);
+
+            if (res.ok) {
+                const json = await res.json() as { countries?: { country: string; count: number }[] };
+                vpsCountries = Array.isArray(json.countries) ? json.countries : [];
+                _vpsCache.set(cacheKey, { data: vpsCountries, exp: Date.now() + VPS_CACHE_TTL_MS });
+            } else {
+                console.warn(`[getAyaCountriesAggregated] VPS returned ${res.status} — Supabase only`);
+            }
+        } catch (err) {
+            console.warn('[getAyaCountriesAggregated] VPS fetch failed — Supabase only:', err);
+        }
+    }
+
+    if (vpsCountries.length === 0) return supabaseCountries;
+
+    // Merge counts per ISO country code
+    const merged: Record<string, number> = {};
+    for (const { country, count } of supabaseCountries) {
+        merged[country] = (merged[country] || 0) + count;
+    }
+    for (const { country, count } of vpsCountries) {
+        merged[country] = (merged[country] || 0) + count;
+    }
+
+    return Object.entries(merged)
+        .filter(([, c]) => c >= 2)
+        .sort((a, b) => b[1] - a[1])
+        .map(([country, count]) => ({ country, count }));
+}
+
+// ── getAyaSectorCountryCombinationsAggregated ─────────────────────────────────
+
+/**
+ * Non-empty (sector_macro FR key, country_legal ISO code) pairs from Supabase +
+ * optional VPS.  Counts are merged per key pair.  Min count threshold: 1.
+ * NEVER throws.
+ */
+export async function getAyaSectorCountryCombinationsAggregated(): Promise<
+    { sector: string; country: string; count: number }[]
+> {
+    const supabaseCombinations = await database.getAyaSectorCountryCombinations();
+
+    const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
+    if (!vpsBaseUrl) return supabaseCombinations;
+
+    const cacheKey = '_sector_country_combos_agg';
+    const cached = _vpsCache.get(cacheKey);
+    let vpsCombinations: { sector: string; country: string; count: number }[] = [];
+
+    if (cached && Date.now() < cached.exp) {
+        vpsCombinations = cached.data as { sector: string; country: string; count: number }[];
+    } else {
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5_000);
+            const res = await fetch(`${vpsBaseUrl}/sector-country-combinations`, { signal: controller.signal });
+            clearTimeout(timeout);
+
+            if (res.ok) {
+                const json = await res.json() as {
+                    combinations?: { sector: string; country: string; count: number }[];
+                };
+                vpsCombinations = Array.isArray(json.combinations) ? json.combinations : [];
+                _vpsCache.set(cacheKey, { data: vpsCombinations, exp: Date.now() + VPS_CACHE_TTL_MS });
+            } else {
+                console.warn(`[getAyaSectorCountryCombinationsAggregated] VPS returned ${res.status} — Supabase only`);
+            }
+        } catch (err) {
+            console.warn('[getAyaSectorCountryCombinationsAggregated] VPS fetch failed — Supabase only:', err);
+        }
+    }
+
+    if (vpsCombinations.length === 0) return supabaseCombinations;
+
+    // Merge counts per (sector||country) key pair
+    const merged: Record<string, number> = {};
+    for (const { sector, country, count } of supabaseCombinations) {
+        const key = `${sector}||${country}`;
+        merged[key] = (merged[key] || 0) + count;
+    }
+    for (const { sector, country, count } of vpsCombinations) {
+        const key = `${sector}||${country}`;
+        merged[key] = (merged[key] || 0) + count;
+    }
+
+    return Object.entries(merged)
+        .filter(([, n]) => n >= 1)
+        .sort((a, b) => b[1] - a[1])
+        .map(([key, count]) => {
+            const [sector, country] = key.split('||');
+            return { sector, country, count };
+        });
 }
 
 // ── Shared result types ───────────────────────────────────────────────────────

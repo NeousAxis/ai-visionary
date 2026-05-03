@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { db } from '@/lib/db';
+import { getAyaEntitiesByFilterAggregated } from '@/lib/db';
 import { COUNTRY_LABELS, COUNTRY_LABELS_FR, SECTOR_LABELS } from '@/lib/aya/llm-format';
 import {
     buildItemListJsonLd,
@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 50;
 
-type Entity = Awaited<ReturnType<typeof db.getAyaEntitiesByFilter>>['data'][number];
+type Entity = Awaited<ReturnType<typeof getAyaEntitiesByFilterAggregated>>['data'][number];
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
@@ -32,7 +32,7 @@ export async function generateMetadata({
     const t = await getTranslations('countryPage');
     const locale = await getLocale();
 
-    const { total } = await db.getAyaEntitiesByFilter({ country, limit: 1, offset: 0 });
+    const { total } = await getAyaEntitiesByFilterAggregated({ country, limit: 1, offset: 0 });
     if (total === 0) return { title: t('notFound') };
 
     const countryMap = locale === 'fr' ? COUNTRY_LABELS_FR : COUNTRY_LABELS;
@@ -72,7 +72,7 @@ export default async function CountryPage({
     const ta = await getTranslations('aya');
     const locale = await getLocale();
 
-    const { data: entities, total } = await db.getAyaEntitiesByFilter({
+    const { data: entities, total } = await getAyaEntitiesByFilterAggregated({
         country,
         limit: PAGE_SIZE,
         offset,

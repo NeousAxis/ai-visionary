@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { db } from '@/lib/db';
-import { SECTOR_LABELS } from '@/lib/aya/llm-format';
+import { getAyaEntitiesByFilterAggregated } from '@/lib/db';
+import { SECTOR_LABELS, resolveSectorMacro } from '@/lib/aya/llm-format';
 import {
     buildItemListJsonLd,
     buildFaqJsonLd,
@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 
 const PAGE_SIZE = 50;
 
-type Entity = Awaited<ReturnType<typeof db.getAyaEntitiesByFilter>>['data'][number];
+type Entity = Awaited<ReturnType<typeof getAyaEntitiesByFilterAggregated>>['data'][number];
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
@@ -33,7 +33,7 @@ export async function generateMetadata({
     const t = await getTranslations('sectorPage');
     const locale = await getLocale();
 
-    const { total } = await db.getAyaEntitiesByFilter({ sector, limit: 1, offset: 0 });
+    const { total } = await getAyaEntitiesByFilterAggregated({ sector, limit: 1, offset: 0 });
     if (total === 0) return { title: t('notFound') };
 
     const label = locale === 'en' ? (SECTOR_LABELS[sector] || sector) : sector;
@@ -72,7 +72,7 @@ export default async function SectorPage({
     const ta = await getTranslations('aya');
     const locale = await getLocale();
 
-    const { data: entities, total } = await db.getAyaEntitiesByFilter({
+    const { data: entities, total } = await getAyaEntitiesByFilterAggregated({
         sector,
         limit: PAGE_SIZE,
         offset,

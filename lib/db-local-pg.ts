@@ -398,6 +398,93 @@ export async function localPgSearch(q: string, limit: number): Promise<Entity[]>
     }
 }
 
+// ── Filter / taxonomy helpers ─────────────────────────────────────────────────
+
+/**
+ * Distinct sector_macro values with entity counts.
+ * Mirrors db.getAyaSectors() but reads from VPS Postgres.
+ */
+export async function localPgGetSectors(): Promise<{ sector: string; count: number }[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<{ sector_macro: string; cnt: string }> = await pool.query(
+            `SELECT sector_macro, COUNT(*) AS cnt
+             FROM aya_registry
+             WHERE sector_macro IS NOT NULL
+               AND sector_macro <> ''
+             GROUP BY sector_macro
+             ORDER BY cnt DESC`
+        );
+        return res.rows
+            .map((r) => ({ sector: r.sector_macro, count: parseInt(r.cnt, 10) }))
+            .filter((r) => r.count >= 2);
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetSectors error:', err);
+        return [];
+    }
+}
+
+/**
+ * Distinct country_legal values with entity counts.
+ * Mirrors db.getAyaCountries() but reads from VPS Postgres.
+ */
+export async function localPgGetCountries(): Promise<{ country: string; count: number }[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<{ country_legal: string; cnt: string }> = await pool.query(
+            `SELECT country_legal, COUNT(*) AS cnt
+             FROM aya_registry
+             WHERE country_legal IS NOT NULL
+               AND country_legal <> ''
+               AND country_legal <> 'XX'
+             GROUP BY country_legal
+             ORDER BY cnt DESC`
+        );
+        return res.rows
+            .map((r) => ({ country: r.country_legal.toUpperCase(), count: parseInt(r.cnt, 10) }))
+            .filter((r) => r.count >= 2);
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetCountries error:', err);
+        return [];
+    }
+}
+
+/**
+ * Non-empty (sector_macro, country_legal) combinations with count >= 1.
+ * Mirrors db.getAyaSectorCountryCombinations() but reads from VPS Postgres.
+ */
+export async function localPgGetSectorCountryCombinations(): Promise<
+    { sector: string; country: string; count: number }[]
+> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<{ sector_macro: string; country_legal: string; cnt: string }> =
+            await pool.query(
+                `SELECT sector_macro, country_legal, COUNT(*) AS cnt
+                 FROM aya_registry
+                 WHERE sector_macro   IS NOT NULL
+                   AND country_legal  IS NOT NULL
+                   AND country_legal  <> ''
+                   AND country_legal  <> 'XX'
+                   AND asr_score      >= 20
+                 GROUP BY sector_macro, country_legal
+                 HAVING COUNT(*) >= 1
+                 ORDER BY cnt DESC`
+            );
+        return res.rows.map((r) => ({
+            sector:  r.sector_macro,
+            country: r.country_legal.toUpperCase(),
+            count:   parseInt(r.cnt, 10),
+        }));
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetSectorCountryCombinations error:', err);
+        return [];
+    }
+}
+
 // ── LinkedIn poster helpers (1er mai 2026) ────────────────────────────────────
 // Ces helpers ecrivent dans la table linkedin_posts (Postgres VPS uniquement,
 // pas Supabase, pour respecter la grace period jusqu'au 7 mai).

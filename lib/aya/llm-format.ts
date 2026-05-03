@@ -65,6 +65,25 @@ export const SECTOR_LABELS: Record<string, string> = {
     'Non détecté': 'Not detected',
 };
 
+/**
+ * Reverse mapping: EN label → FR sector_macro key (as stored in DB by the Python scraper).
+ * Automatically derived from SECTOR_LABELS so it never diverges.
+ */
+export const SECTOR_LABELS_REVERSE: Record<string, string> = Object.fromEntries(
+    Object.entries(SECTOR_LABELS).map(([fr, en]) => [en, fr])
+);
+
+/**
+ * Resolve a sector input (could be FR key or EN label) to the canonical FR
+ * sector_macro stored in the DB.  If the input is already a FR key it is
+ * returned as-is.
+ */
+export function resolveSectorMacro(input: string): string {
+    if (!input) return input;
+    // If the input is a known EN label → convert to FR key
+    return SECTOR_LABELS_REVERSE[input] ?? input;
+}
+
 const SECTOR_AUDIENCE_FALLBACK: Record<string, string> = {
     'Technology & SaaS': 'Businesses and developers.',
     'Finance & Insurance': 'Financial institutions and consumers.',
