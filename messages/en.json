@@ -293,7 +293,17 @@
     "subheading": "{count} entities indexed in this sector",
     "notFound": "Sector not found",
     "metaTitle": "AYA Registry — Sector: {sector} ({count} companies)",
-    "metaDescription": "Browse {count} companies in the {sector} sector indexed in the AYA registry for AI readability."
+    "metaDescription": "Browse {count} companies in the {sector} sector indexed in the AYA registry for AI readability.",
+    "llmH1": "{sector} companies — AYA registry",
+    "llmIntro": "AYA indexes {count} {sector} companies. This list is generated from the AYA structured business dataset (CC-BY-4.0). Each entry includes company name, activity description, location, and category.",
+    "llmListTitle": "Company list (top 50 by AIO score)",
+    "llmFaqTitle": "Frequently asked questions",
+    "llmFaqQ1": "What is the {sector} sector?",
+    "llmFaqQ2": "Which companies are indexed in the {sector} sector?",
+    "llmFaqQ3": "How many {sector} companies are in the AYA registry?",
+    "llmFaqA3": "The AYA registry currently indexes {count} companies in the {sector} sector.",
+    "llmDatasetTitle": "Open dataset",
+    "llmDatasetText": "This data is available as a structured open dataset (CC-BY-4.0)."
   },
   "countryPage": {
     "back": "← All countries",
@@ -301,7 +311,18 @@
     "subheading": "{count} entities indexed in this country",
     "notFound": "Country not found",
     "metaTitle": "AYA Registry — {country} ({count} companies)",
-    "metaDescription": "Browse {count} companies from {country} indexed in the AYA registry for AI readability."
+    "metaDescription": "Browse {count} companies from {country} indexed in the AYA registry for AI readability.",
+    "llmH1": "Companies in {country} — AYA registry",
+    "llmIntro": "AYA indexes {count} companies based in {country}. This list is generated from the AYA structured business dataset (CC-BY-4.0). Each entry includes company name, activity description, sector, and location.",
+    "llmListTitle": "Company list (top 50 by AIO score)",
+    "llmFaqTitle": "Frequently asked questions",
+    "llmFaqQ1": "Which companies are indexed in {country}?",
+    "llmFaqQ2": "How many companies are indexed in {country} in the AYA registry?",
+    "llmFaqA2": "The AYA registry currently indexes {count} companies based in {country}.",
+    "llmFaqQ3": "What is the AYA registry?",
+    "llmFaqA3": "AYA is a structured public index of companies, built for AI readability. Each entry is automatically generated from public data and verified by score.",
+    "llmDatasetTitle": "Open dataset",
+    "llmDatasetText": "This data is available as a structured open dataset (CC-BY-4.0)."
   },
   "certificate": {
     "notFound": "Certificate not found",

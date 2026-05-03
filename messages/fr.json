@@ -293,7 +293,17 @@
     "subheading": "{count} entit\u00e9s index\u00e9es dans ce secteur",
     "notFound": "Secteur introuvable",
     "metaTitle": "Registre AYA \u2014 Secteur\u00a0: {sector} ({count} entreprises)",
-    "metaDescription": "Explorez les {count} entreprises du secteur {sector} index\u00e9es dans le registre AYA pour leur lisibilit\u00e9 IA."
+    "metaDescription": "Explorez les {count} entreprises du secteur {sector} index\u00e9es dans le registre AYA pour leur lisibilit\u00e9 IA.",
+    "llmH1": "Entreprises {sector} \u2014 registre AYA",
+    "llmIntro": "AYA indexe {count} entreprises du secteur {sector}. Cette liste est g\u00e9n\u00e9r\u00e9e depuis le dataset structur\u00e9 AYA (CC-BY-4.0). Chaque entr\u00e9e inclut le nom, une description de l'activit\u00e9, la localisation et la cat\u00e9gorie.",
+    "llmListTitle": "Liste des entreprises (top 50 par score AIO)",
+    "llmFaqTitle": "Questions fr\u00e9quentes",
+    "llmFaqQ1": "Qu'est-ce que le secteur {sector}\u00a0?",
+    "llmFaqQ2": "Quelles entreprises sont index\u00e9es dans le secteur {sector}\u00a0?",
+    "llmFaqQ3": "Combien d'entreprises du secteur {sector} sont dans le registre AYA\u00a0?",
+    "llmFaqA3": "Le registre AYA indexe actuellement {count} entreprises du secteur {sector}.",
+    "llmDatasetTitle": "Dataset ouvert",
+    "llmDatasetText": "Ces donn\u00e9es sont disponibles sous forme de dataset structur\u00e9 ouvert (CC-BY-4.0)."
   },
   "countryPage": {
     "back": "\u2190 Tous les pays",
@@ -301,7 +311,18 @@
     "subheading": "{count} entit\u00e9s index\u00e9es dans ce pays",
     "notFound": "Pays introuvable",
     "metaTitle": "Registre AYA \u2014 {country} ({count} entreprises)",
-    "metaDescription": "Explorez les {count} entreprises de {country} index\u00e9es dans le registre AYA pour leur lisibilit\u00e9 IA."
+    "metaDescription": "Explorez les {count} entreprises de {country} index\u00e9es dans le registre AYA pour leur lisibilit\u00e9 IA.",
+    "llmH1": "Entreprises en {country} \u2014 registre AYA",
+    "llmIntro": "AYA indexe {count} entreprises bas\u00e9es en {country}. Cette liste est g\u00e9n\u00e9r\u00e9e depuis le dataset structur\u00e9 AYA (CC-BY-4.0). Chaque entr\u00e9e inclut le nom, une description de l'activit\u00e9, le secteur et la localisation.",
+    "llmListTitle": "Liste des entreprises (top 50 par score AIO)",
+    "llmFaqTitle": "Questions fr\u00e9quentes",
+    "llmFaqQ1": "Quelles entreprises sont index\u00e9es en {country}\u00a0?",
+    "llmFaqQ2": "Combien d'entreprises sont index\u00e9es en {country} dans le registre AYA\u00a0?",
+    "llmFaqA2": "Le registre AYA indexe actuellement {count} entreprises bas\u00e9es en {country}.",
+    "llmFaqQ3": "Qu'est-ce que le registre AYA\u00a0?",
+    "llmFaqA3": "AYA est un index public structur\u00e9 d'entreprises, con\u00e7u pour la lisibilit\u00e9 par les IA. Chaque fiche est g\u00e9n\u00e9r\u00e9e automatiquement \u00e0 partir de donn\u00e9es publiques et v\u00e9rifi\u00e9e par score.",
+    "llmDatasetTitle": "Dataset ouvert",
+    "llmDatasetText": "Ces donn\u00e9es sont disponibles sous forme de dataset structur\u00e9 ouvert (CC-BY-4.0)."
   },
   "certificate": {
     "notFound": "Certificat non trouv\u00e9",

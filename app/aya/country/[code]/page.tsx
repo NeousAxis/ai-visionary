@@ -4,6 +4,15 @@ import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { db } from '@/lib/db';
 import { COUNTRY_LABELS, COUNTRY_LABELS_FR, SECTOR_LABELS } from '@/lib/aya/llm-format';
+import {
+    buildItemListJsonLd,
+    buildFaqJsonLd,
+    buildCountryFaqs,
+    topSectorsFromEntities,
+    entityDisplayName,
+    entityDescription,
+    escapeHtml,
+} from '@/lib/aya/llm-page-builder';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,30 +84,32 @@ export default async function CountryPage({
     const countryMap = locale === 'fr' ? COUNTRY_LABELS_FR : COUNTRY_LABELS;
     const label = countryMap[country] || country;
 
-    // JSON-LD ItemList for the current page
-    const jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'ItemList',
-        name: `AYA Registry — ${label}`,
-        description: `${total} organizations from ${label} indexed for AI readability.`,
-        url: `https://ai-visionary.xyz/aya/country/${country}`,
-        numberOfItems: Math.min(total, PAGE_SIZE),
-        itemListElement: entities.slice(0, PAGE_SIZE).map((e: Entity, i: number) => ({
-            '@type': 'ListItem',
-            position: offset + i + 1,
-            item: {
-                '@type': 'Organization',
-                name: e.display_name || e.legal_name || e.website || 'Unknown',
-                ...(e.website ? { url: e.website } : {}),
-            },
-        })),
-    };
+    // JSON-LD ItemList (enriched with descriptions for LLM crawlers)
+    const localeCode = locale === 'fr' ? 'fr' : 'en';
+    const jsonLd = buildItemListJsonLd({
+        listName: `AYA Registry — ${label}`,
+        listDescription: `${total} organizations from ${label} indexed for AI readability.`,
+        listUrl: `https://ai-visionary.xyz/aya/country/${country}`,
+        entities,
+        locale: localeCode,
+        offset,
+    });
+
+    // FAQ JSON-LD
+    const topNames = entities.slice(0, 5).map((e: Entity) => entityDisplayName(e));
+    const topSectors = topSectorsFromEntities(entities, SECTOR_LABELS, localeCode, 3);
+    const countryFaqs = buildCountryFaqs({ countryLabel: label, total, topNames, topSectors, locale: localeCode });
+    const faqJsonLd = buildFaqJsonLd(countryFaqs);
 
     return (
         <div style={{ background: 'var(--bg-main)', minHeight: '100vh', fontFamily: 'var(--font-body)' }}>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
             />
 
             {/* HEADER */}
@@ -240,6 +251,68 @@ export default async function CountryPage({
                     )}
                 </div>
             </section>
+
+            {/* LLM-FRIENDLY SECTION — flat list + FAQ for AI crawlers */}
+            {page === 1 && (
+                <section style={{ paddingBottom: '3rem', borderTop: '1px solid var(--border-light)' }}>
+                    <div className="container">
+                        {/* LLM H1 + intro paragraph */}
+                        <h2 style={{ fontSize: '1.3rem', fontWeight: '700', color: 'var(--text-main)', margin: '2rem 0 0.75rem' }}>
+                            {t('llmH1', { country: label })}
+                        </h2>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: '1.6', marginBottom: '1.5rem', maxWidth: '700px' }}>
+                            {t('llmIntro', { count: total, country: label })}
+                        </p>
+
+                        {/* Flat entity list: Name = description */}
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                            {t('llmListTitle')}
+                        </h3>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {entities.slice(0, 50).map((entity: Entity) => {
+                                const name = entityDisplayName(entity);
+                                const desc = entityDescription(entity, localeCode);
+                                return (
+                                    <li key={entity.entity_id} style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
+                                        <Link
+                                            href={`/aya/e/${entity.entity_id}`}
+                                            style={{ color: 'var(--text-main)', fontWeight: '600', textDecoration: 'none' }}
+                                        >
+                                            {escapeHtml(name)}
+                                        </Link>
+                                        {desc ? <span> = {escapeHtml(desc)}</span> : null}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+
+                        {/* FAQ section */}
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                            {t('llmFaqTitle')}
+                        </h3>
+                        <dl style={{ margin: '0 0 2rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {countryFaqs.map((faq, i) => (
+                                <div key={i}>
+                                    <dt style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '2px' }}>
+                                        {escapeHtml(faq.question)}
+                                    </dt>
+                                    <dd style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.6' }}>
+                                        {escapeHtml(faq.answer)}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+
+                        {/* Dataset links */}
+                        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-light)', paddingTop: '1rem' }}>
+                            <strong>{t('llmDatasetTitle')}</strong> — {t('llmDatasetText')}{' '}
+                            <a href="https://huggingface.co/datasets/NeousAxis/aya-business-dataset" style={{ color: 'var(--primary-color)' }} rel="noopener">HuggingFace</a>
+                            {' · '}
+                            <a href="https://github.com/NeousAxis/aya-business-dataset" style={{ color: 'var(--primary-color)' }} rel="noopener">GitHub</a>
+                        </p>
+                    </div>
+                </section>
+            )}
 
             {/* CTA */}
             <section className="section" style={{ background: 'var(--text-main)', color: 'white', textAlign: 'center' }}>
