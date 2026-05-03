@@ -215,7 +215,12 @@ function extractEntityFields(entity: any, locale: 'fr' | 'en'): EntityFields {
     const geminiDescEn: string = enrichment.gemini_description || '';
     const geminiDesc = locale === 'fr' ? (geminiDescFr || geminiDescEn) : geminiDescEn;
 
-    const metaDesc: string = asr.identite?.description?.value || asr.source?.meta_description || '';
+    const metaDesc: string =
+        asr.aio_blocks?.offre?.fields?.meta_description ||
+        asr.aio_blocks?.offre?.fields?.og_description ||
+        asr.identite?.description?.value ||
+        asr.source?.meta_description ||
+        '';
 
     const rawAudience: string = Array.isArray(asr.offre?.target_audience?.value)
         ? asr.offre.target_audience.value.join(', ')
@@ -237,14 +242,14 @@ export function buildLlmSummary(entity: any, locale: 'fr' | 'en' = 'en'): LlmSum
     if (f.geminiDesc && f.geminiDesc.length > 10) {
         whatItDoes = cleanText(f.geminiDesc);
         if (!whatItDoes.endsWith('.')) whatItDoes += '.';
+    } else if (f.metaDesc && f.metaDesc.length > 20) {
+        whatItDoes = cleanText(f.metaDesc);
+        if (!whatItDoes.endsWith('.')) whatItDoes += '.';
     } else if (f.services.length > 0) {
         const svcText = f.services.slice(0, 3).join(', ');
         whatItDoes = f.businessType
             ? `${f.businessType} providing ${svcText.toLowerCase()}.`
             : `Provides ${svcText.toLowerCase()}.`;
-    } else if (f.metaDesc && f.metaDesc.length > 20 && f.metaDesc.length < 200) {
-        whatItDoes = cleanText(f.metaDesc);
-        if (!whatItDoes.endsWith('.')) whatItDoes += '.';
     } else if (f.businessType) {
         whatItDoes = `${f.businessType} based in ${f.location}.`;
     } else {
@@ -300,9 +305,9 @@ export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'en
     let phrase2 = '';
     let phrase3 = '';
 
-    // Phrase 1: identity + what it does (priority: gemini > services > meta > businessType > sector)
+    // Phrase 1: identity + what it does (priority: gemini > meta > services > businessType > sector)
     const hasGemini = f.geminiDesc && f.geminiDesc.length > 10;
-    const hasMeta = f.metaDesc && f.metaDesc.length > 20 && f.metaDesc.length < 200;
+    const hasMeta = f.metaDesc && f.metaDesc.length > 20;
 
     if (locale === 'fr') {
         const locationFr = COUNTRY_LABELS_FR[f.countryCode] || (f.countryCode === 'XX' ? '' : f.countryCode);
@@ -311,14 +316,14 @@ export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'en
         if (hasGemini) {
             phrase1 = `${f.name} : ${cleanText(f.geminiDesc)}`;
             if (!phrase1.endsWith('.')) phrase1 += '.';
+        } else if (hasMeta) {
+            phrase1 = `${f.name} : ${cleanText(f.metaDesc)}`;
+            if (!phrase1.endsWith('.')) phrase1 += '.';
         } else if (f.services.length > 0) {
             const svcFr = f.services.slice(0, 3).join(', ');
             phrase1 = f.businessType
                 ? `${f.name} est ${addArticle(f.businessType)} qui propose ${svcFr.toLowerCase()}.`
                 : `${f.name} propose ${svcFr.toLowerCase()}.`;
-        } else if (hasMeta) {
-            phrase1 = `${f.name} : ${cleanText(f.metaDesc)}`;
-            if (!phrase1.endsWith('.')) phrase1 += '.';
         } else if (f.businessType) {
             phrase1 = `${f.name} est ${addArticle(f.businessType)}.`;
         } else {
@@ -336,14 +341,14 @@ export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'en
         if (hasGemini) {
             phrase1 = `${f.name}: ${cleanText(f.geminiDesc)}`;
             if (!phrase1.endsWith('.')) phrase1 += '.';
+        } else if (hasMeta) {
+            phrase1 = `${f.name}: ${cleanText(f.metaDesc)}`;
+            if (!phrase1.endsWith('.')) phrase1 += '.';
         } else if (f.services.length > 0) {
             const svcEn = f.services.slice(0, 3).join(', ');
             phrase1 = f.businessType
                 ? `${f.name} is a ${f.businessType.toLowerCase()} that provides ${svcEn.toLowerCase()}.`
                 : `${f.name} provides ${svcEn.toLowerCase()}.`;
-        } else if (hasMeta) {
-            phrase1 = `${f.name}: ${cleanText(f.metaDesc)}`;
-            if (!phrase1.endsWith('.')) phrase1 += '.';
         } else if (f.businessType) {
             phrase1 = `${f.name} is a ${f.businessType.toLowerCase()}.`;
         } else {
