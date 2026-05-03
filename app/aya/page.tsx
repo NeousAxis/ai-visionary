@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata(): Promise<Metadata> {
     const t = await getTranslations('aya');
-    const stats = await db.getAyaEntitiesPaginated({ page: 1, pageSize: 1 });
+    const stats = await getAyaEntitiesAggregated({ page: 1, pageSize: 1 });
     const total = stats.total || 0;
     const rounded = Math.floor(total / 100) * 100;
     return {
