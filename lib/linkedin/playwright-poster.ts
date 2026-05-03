@@ -17,6 +17,13 @@
 
 import type { Browser, BrowserContext, Page } from 'playwright';
 import * as path from 'path';
+import { createRequire } from 'module';
+
+// Bypass Next.js bundler (turbopack/webpack) pour charger playwright directement
+// depuis node_modules au runtime. Sinon : "Failed to load chunk server/chunks/
+// [externals]_playwright_*.js" car turbopack n'arrive pas a bundler le binaire
+// natif chromium-headless-shell.
+const requireExt = createRequire(import.meta.url);
 
 let _browser: Browser | null = null;
 let _context: BrowserContext | null = null;
@@ -35,7 +42,9 @@ export interface PublishResult {
 }
 
 async function getBrowser(): Promise<Browser> {
-  const playwright = await import('playwright');
+  // Force runtime require natif (pas un import bundleable) pour eviter
+  // que Next.js essaie de bundler les binaires Chromium dans les server chunks.
+  const playwright = requireExt('playwright') as typeof import('playwright');
   if (!_browser) {
     _browser = await playwright.chromium.launch({
       headless: true,
