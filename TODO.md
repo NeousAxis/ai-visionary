@@ -20,6 +20,7 @@
 | 30 | Configurer Newsletter Infomaniak (50k credits/mois) | Haute | En attente des codes. Adapter template email ou utiliser API Newsletter Infomaniak |
 | 31 | Setup kSuite Business 3 users @ai-visionary.com | Moyenne | En attente des codes. 3 boites email pro |
 | 36 | Deblocage compte Newsletter Infomaniak | Critique | Reponse Infomaniak recue (28 avril) avec 4 questions. Reponse honnete envoyee. Newsletter ne sera utilisee qu'avec une vraie base opt-in. En attente confirmation Infomaniak. |
+| 37 | **Pipeline LinkedIn marketing — finir publication auto** (branche `feature/linkedin-marketing`) | Critique | Pipeline complet en place : generation drafts + verif Gemini/ChatGPT + admin avec login persistent + queue approuvee + 2 crons (gen+publish) + table Postgres VPS. **Bloqueur** : LinkedIn anti-bot rejette les sessions Playwright (toast "Sorry something went wrong" + invalidation auto). Decision Cyril : (a) bouton "Copier le texte" + paste manuel (5 min code, 100% fiable), (b) xvfb sur VPS + login depuis IP VPS (30 min setup), (c) Company Page → API officielle (semaines). Voir STATE.md pour details. |
 
 ---
 

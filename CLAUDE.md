@@ -3,7 +3,7 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 1er mai 2026 (fix faille H7 Stripe Portal + auto-migration Stripe TEST→LIVE + desengorgement CLAUDE.md vers STATE.md/MIGRATION.md/TODO.md/COSTS.md + alignement hardcodes 4400→30000)
+> Derniere mise a jour : 3 mai 2026 (pipeline LinkedIn marketing complet sur branche feature/linkedin-marketing — generation drafts + verif Gemini/ChatGPT + admin + queue auto-publish. Bloque sur anti-bot LinkedIn cote Playwright, decision Cyril sur copy-paste vs xvfb)
 
 ---
 

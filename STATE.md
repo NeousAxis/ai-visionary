@@ -83,6 +83,38 @@
 
 ---
 
+## Sessions 2-3 mai 2026 — Pipeline LinkedIn marketing (branche `feature/linkedin-marketing`)
+
+**Contexte** : Cyril veut poster automatiquement 3x/jour sur LinkedIn des constats d'AI-readability sur des entreprises connues (sans ASR). Pas de page entreprise → pas d'API LinkedIn officielle → tentative via Playwright headless.
+
+**Architecture livrée (fonctionne)** :
+- `migrations/2026-05-01_linkedin_posts.sql` : table sur Postgres VPS uniquement (pas Supabase pendant grace period)
+- `lib/linkedin/known-entities.ts` : ~80 KNOWN_DOMAINS_META curees regionales/sectorielles avec sector_en, country, locale, linkedin_slug. Mega-marques globales virees apres test (Stripe, Shopify, Notion, Booking, Airbnb, Anthropic, Mistral, etc.) — les LLMs les citent deja sans ASR.
+- `lib/linkedin/post-generator.ts` : template EN-only, queries naturelles randomisees ("recommend a good X in Y", "which X is most reliable"), CTA `https://ai-visionary.xyz/diagnostic`, mention `@CompanyName`, hashtags
+- `lib/linkedin/post-selector.ts` : selection FIFO Postgres VPS + cleanDisplayName (strip TLD)
+- `lib/linkedin/visibility-checker.ts` : avant post, demande a Gemini ET ChatGPT (gpt-4o-mini) "List 5 best X in Y" → si entite citee, status='skipped' + retry max 5
+- `lib/linkedin/playwright-poster.ts` : automation Playwright (createRequire bypass turbopack)
+- `app/api/cron/linkedin-post/route.ts` : genere drafts + check visibility
+- `app/api/cron/linkedin-publish-approved/route.ts` : prend le plus ancien `approved` et publie
+- `app/api/admin/linkedin-drafts/list/route.ts` + `[id]/route.ts` + `[id]/visibility/route.ts` : API admin
+- `app/admin/linkedin-drafts/page.tsx` : dashboard avec login persistent localStorage, bouton Deconnexion, badges (draft/✓teste/approved/published/skipped/failed), boutons Approuver/Rejeter/Publier maintenant/Tester Gemini/Tester ChatGPT
+- Crontab Linux VPS : `0 7,11,16` genere drafts, `30 7,11,16` auto-publie
+
+**Workflow autonome** : Cyril approuve les drafts en lot via admin (bouton ✓ Approuver) → cron auto-publie 3x/jour. Approuver 30 drafts un dimanche = 10 jours de posts auto.
+
+**Bloqueur final identifie** : LinkedIn anti-bot. Login session Playwright marche (via SSH SOCKS proxy `ssh -D 1080 ubuntu@beta.ai-visionary.xyz` + `playwright codegen --proxy-server=socks5://127.0.0.1:1080`). Mais apres click "Commencer un post", LinkedIn affiche un toast "Sorry, something went wrong" et invalide la session. Plusieurs tentatives (locale FR/EN, navigation directe `/feed/?shareActive=true` au lieu de click, multi-selectors editeur Quill/Lexical) — toutes echouent. **L'auto-publication via Playwright n'est pas viable a court terme.**
+
+**Solutions futures (a Cyril de trancher)** :
+- Bouton "Copier le texte" sur l'admin → Cyril colle manuellement dans LinkedIn (10 sec/post, 100% fiable)
+- xvfb sur VPS + login direct depuis IP VPS (30 min setup, fingerprint coherent)
+- LinkedIn Marketing Developer Platform (necessite Company Page que Cyril ne peut pas creer)
+
+**Commits** : `2ea71c6a` (initial pipeline), `e2c60a9b` (refactor VPS-only), `8475d91b` (admin page), `661f5464` (Gemini/ChatGPT visibility buttons), `da667d5f` (localStorage persist), `2fe6e9ef` (logout), `c7cd78f3` (Gemini auto-check), `576acbff` (badge teste), `ad9e8f3b` (queue + auto-publish), `7851fce6` (serverExternalPackages), `f23f277a` (clear error_message), `047e6b5f` (createRequire turbopack bypass).
+
+**Branche `feature/linkedin-marketing` non mergee dans main.** Cyril decide quoi en faire.
+
+---
+
 ## Session 1er mai 2026 — Securite Stripe Portal + desengorgement docs
 
 - **Fix faille H7 — Stripe Portal authentification** : `app/api/stripe/portal/route.ts` reecrit. Avant : check `sessionToken` truthy uniquement (n'importe quelle string passait). Apres : `verifyUpdateToken(token, entityId)` HMAC stateless (pattern aligne sur `/api/update-entity`, `/api/regenerate-files`, `/api/update-owner-email`). Stateless donc survit aux migrations Firestore→Supabase→Infomaniak. Code-reviewer subagent : 0 issue HIGH/CRITICAL. Aucun call site frontend (route etait dead code, donc 0 risque de regression).
