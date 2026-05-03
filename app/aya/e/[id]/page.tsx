@@ -111,19 +111,28 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     const audience = asrData.offre?.target_audience?.value || "";
     // Locale-aware description: FR prefers gemini_description_fr, EN prefers gemini_description
     const geminiDesc = locale === 'en' ? (geminiEn || geminiFr) : (geminiFr || geminiEn);
+    // Fallback to scraped meta/og description (real site description, often present on VPS Tranco entities)
+    const scrapedMeta: string =
+        asrData.aio_blocks?.offre?.fields?.meta_description ||
+        asrData.aio_blocks?.offre?.fields?.og_description ||
+        asrData.identite?.description?.value ||
+        asrData.source?.meta_description ||
+        '';
     const description = geminiDesc
         ? geminiDesc
-        : locale === 'en'
-            ? (services.length > 0
-                ? `${businessType ? `${businessType} \u2014 ` : ""}${services.slice(0, 3).join(", ")}${audience ? `. Serves ${audience}.` : "."}`
-                : (businessType
-                    ? `${businessType}. Certified entity with active semantic presence via AYO consensus.`
-                    : "Active semantic presence certification. This entity has validated its existence and areas of expertise via AYO consensus."))
-            : (services.length > 0
-                ? `${businessType ? `${businessType} \u2014 ` : ""}${services.slice(0, 3).join(", ")}${audience ? `. S'adresse \u00e0 ${audience}.` : "."}`
-                : (businessType
-                    ? `${businessType}. Entit\u00e9 certifi\u00e9e avec pr\u00e9sence s\u00e9mantique active aupr\u00e8s du consensus AYO.`
-                    : "Certification de pr\u00e9sence s\u00e9mantique active. Cette entit\u00e9 a valid\u00e9 son existence et ses champs d\u2019expertise aupr\u00e8s du consensus AYO."));
+        : (scrapedMeta && scrapedMeta.length > 20)
+            ? scrapedMeta
+            : locale === 'en'
+                ? (services.length > 0
+                    ? `${businessType ? `${businessType} \u2014 ` : ""}${services.slice(0, 3).join(", ")}${audience ? `. Serves ${audience}.` : "."}`
+                    : (businessType
+                        ? `${businessType}. Certified entity with active semantic presence via AYO consensus.`
+                        : "Active semantic presence certification. This entity has validated its existence and areas of expertise via AYO consensus."))
+                : (services.length > 0
+                    ? `${businessType ? `${businessType} \u2014 ` : ""}${services.slice(0, 3).join(", ")}${audience ? `. S'adresse \u00e0 ${audience}.` : "."}`
+                    : (businessType
+                        ? `${businessType}. Entit\u00e9 certifi\u00e9e avec pr\u00e9sence s\u00e9mantique active aupr\u00e8s du consensus AYO.`
+                        : "Certification de pr\u00e9sence s\u00e9mantique active. Cette entit\u00e9 a valid\u00e9 son existence et ses champs d\u2019expertise aupr\u00e8s du consensus AYO."));
 
     // Keywords — locale-aware
     const geminiKeywordsFr: string[] = Array.isArray(enrichment.gemini_keywords_fr) ? enrichment.gemini_keywords_fr : [];
