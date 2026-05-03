@@ -63,14 +63,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 url: `${baseUrl}/aya/e/${entity.entity_id}`,
                 lastModified: new Date(entity.updated_at || entity.created_at || now),
                 changeFrequency: 'monthly' as const,
-                priority: 0.7,
+                priority: 0.6,
             }));
     } catch (_err) {
         // Supabase unavailable at build time — static sitemap only
         console.warn('[sitemap] Could not fetch entities from Supabase:', _err);
     }
 
-    // 3. Sector landing pages
+    // 3. Sector landing pages (/aya/sector/[macro])
     let sectorPages: MetadataRoute.Sitemap = [];
     try {
         const sectors = await db.getAyaSectors();
@@ -78,13 +78,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             url: `${baseUrl}/aya/sector/${encodeURIComponent(sector)}`,
             lastModified: now,
             changeFrequency: 'weekly' as const,
-            priority: 0.6,
+            priority: 0.8,
         }));
     } catch (_err) {
         console.warn('[sitemap] Could not fetch sectors from Supabase:', _err);
     }
 
-    // 4. Country landing pages
+    // 4. Country landing pages (/aya/country/[code])
     let countryPages: MetadataRoute.Sitemap = [];
     try {
         const countries = await db.getAyaCountries();
@@ -92,11 +92,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             url: `${baseUrl}/aya/country/${country}`,
             lastModified: now,
             changeFrequency: 'weekly' as const,
-            priority: 0.6,
+            priority: 0.8,
         }));
     } catch (_err) {
         console.warn('[sitemap] Could not fetch countries from Supabase:', _err);
     }
 
-    return [...staticPages, ...entityPages, ...sectorPages, ...countryPages];
+    // 5. Sector × Country cross pages (/aya/sector/[macro]/country/[code])
+    //    Only includes combinations that actually have entities (count >= 1).
+    let crossPages: MetadataRoute.Sitemap = [];
+    try {
+        const combinations = await db.getAyaSectorCountryCombinations();
+        crossPages = combinations.map(({ sector, country }) => ({
+            url: `${baseUrl}/aya/sector/${encodeURIComponent(sector)}/country/${country}`,
+            lastModified: now,
+            changeFrequency: 'weekly' as const,
+            priority: 0.7,
+        }));
+    } catch (_err) {
+        console.warn('[sitemap] Could not fetch sector×country combinations from Supabase:', _err);
+    }
+
+    // Safety check: Google Sitemaps support max 50 000 URLs and 50 MB per file.
+    // With ~4 438 Supabase entities, ~14 sectors, ~73 countries and < 1 000 cross combos
+    // we are well within limits. Log a warning if we approach the threshold.
+    const total = staticPages.length + entityPages.length + sectorPages.length + countryPages.length + crossPages.length;
+    if (total > 45_000) {
+        console.warn(`[sitemap] URL count ${total} is approaching the 50 000 limit — consider splitting into multiple sitemaps.`);
+    }
+
+    return [...staticPages, ...sectorPages, ...countryPages, ...crossPages, ...entityPages];
 }

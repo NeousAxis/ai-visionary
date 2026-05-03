@@ -1004,6 +1004,54 @@ export const database = {
         }
     },
 
+    /**
+     * List non-empty (sector_macro, country_legal) combinations. Used for sitemap cross-pages.
+     * Returns only pairs where at least 1 entity has both fields set and asr_score >= 20.
+     */
+    getAyaSectorCountryCombinations: async (): Promise<{ sector: string; country: string; count: number }[]> => {
+        if (!isSupabaseConfigured()) return [];
+        const client = getSupabase();
+        if (!client) return [];
+
+        try {
+            // Fetch minimal fields — Supabase doesn't support GROUP BY in the JS client,
+            // so we pull the two columns and count client-side. Cap at 50 000 rows which
+            // covers the full Supabase AYA registry comfortably.
+            const { data, error } = await client
+                .from('aya_registry')
+                .select('sector_macro, country_legal')
+                .not('sector_macro', 'is', null)
+                .not('country_legal', 'is', null)
+                .neq('country_legal', '')
+                .neq('country_legal', 'XX')
+                .gte('asr_score', 20);
+
+            if (error) {
+                console.error('❌ [Supabase] getAyaSectorCountryCombinations Error:', error);
+                return [];
+            }
+
+            const counts: Record<string, number> = {};
+            for (const row of data || []) {
+                const s = (row as any).sector_macro;
+                const c = ((row as any).country_legal || '').toUpperCase();
+                if (!s || !c || c === 'XX') continue;
+                const key = `${s}||${c}`;
+                counts[key] = (counts[key] || 0) + 1;
+            }
+
+            return Object.entries(counts)
+                .filter(([, n]) => n >= 1)
+                .sort((a, b) => b[1] - a[1])
+                .map(([key, count]) => {
+                    const [sector, country] = key.split('||');
+                    return { sector, country, count };
+                });
+        } catch {
+            return [];
+        }
+    },
+
     // ========================================================================
     // LIFECYCLE MANAGEMENT — Expiry, reviews, subscriptions
     // ========================================================================

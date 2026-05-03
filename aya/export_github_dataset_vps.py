@@ -16,9 +16,11 @@ Requires (in ../.env.local on the VPS):
     GITHUB_TOKEN  (or GH_TOKEN)  — OR — SSH key configured for github.com
 
 Dedup strategy:
-    - slug derived from entity name or domain (lowercase, alphanum + dash, -2/-3 on collision)
-    - if a slug already exists in the GitHub repo → SKIP (preserves Supabase entities untouched)
-    - entity_id is embedded in the JSON so dedup is also possible at the ID level
+    - each JSON file in the repo is opened and its `entity_id` (UUID) is extracted
+    - if a VPS entity's entity_id is already present in the repo → SKIP
+    - slug naming for new filenames is unchanged (lowercase, alphanum + dash, -2/-3 on collision)
+    - this is collision-proof: two entities with the same name/domain but different UUIDs
+      are treated as distinct and both pushed
 """
 
 import argparse
@@ -273,7 +275,7 @@ def fetch_vps_entities() -> list:
             cur.execute(
                 """
                 SELECT
-                    entity_id, aya_entity_id, display_name, legal_name, website,
+                    entity_id, display_name, legal_name, website,
                     country_legal, sector_macro, entity_type, asr_score,
                     payment_completed, asr_payload, data_origin
                 FROM aya_registry
@@ -363,22 +365,55 @@ def clone_or_pull_repo(push_url: str, auth_method: str) -> Path:
     return TMP_REPO_DIR
 
 
-def get_existing_slugs(repo_dir: Path) -> set:
-    """Return the set of stem names (without .json) for all JSON files in the repo root."""
-    return {p.stem for p in repo_dir.glob("*.json")}
+def get_existing_entity_ids(repo_dir: Path) -> set:
+    """
+    Return the set of entity_id UUIDs already present in the cloned repo.
+
+    Reads the first 512 bytes of each JSON file — enough to capture `entity_id`
+    which is always the first field in the record (no need to parse the full file).
+    Falls back to a full json.loads() if the partial read doesn't find the key.
+
+    Performance: ~4 400 files × 512 bytes = ~2.2 MB I/O total, typically < 5 seconds.
+    """
+    import re as _re
+    _eid_re = _re.compile(rb'"entity_id"\s*:\s*"([^"]+)"')
+
+    existing_ids: set = set()
+    json_files = list(repo_dir.glob("*.json"))
+    for p in json_files:
+        try:
+            with open(p, "rb") as fh:
+                head = fh.read(512)
+            m = _eid_re.search(head)
+            if m:
+                existing_ids.add(m.group(1).decode("utf-8", errors="replace"))
+            else:
+                # Fallback: parse full file (handles edge case where entity_id is deep)
+                with open(p, "r", encoding="utf-8") as fh2:
+                    data = json.load(fh2)
+                eid = data.get("entity_id", "")
+                if eid:
+                    existing_ids.add(str(eid))
+        except Exception:
+            # Corrupt / non-entity JSON (e.g. README accidentally named .json) — skip
+            pass
+    return existing_ids
 
 
 # ─── JSON generation ──────────────────────────────────────────────────────────
 
 
-def generate_json_files(entities: list) -> tuple[dict, set]:
+def generate_json_files(entities: list) -> tuple[dict, dict]:
     """
     Generate JSON files into TMP_JSON_DIR.
-    Returns (slug_to_filepath, seen_slugs).
+    Returns:
+        slug_to_path:    {slug: Path}  — all generated files, keyed by slug
+        entity_id_to_slug: {entity_id: slug}  — reverse map for dedup by UUID
     """
     TMP_JSON_DIR.mkdir(parents=True, exist_ok=True)
     seen_slugs: set = set()
     slug_to_path: dict = {}
+    entity_id_to_slug: dict = {}
 
     for entity in entities:
         domain = domain_from_url(entity.get("website", ""))
@@ -392,8 +427,11 @@ def generate_json_files(entities: list) -> tuple[dict, set]:
             json.dump(record, f, indent=2, ensure_ascii=False)
 
         slug_to_path[slug] = filepath
+        eid = record.get("entity_id", "")
+        if eid:
+            entity_id_to_slug[eid] = slug
 
-    return slug_to_path, seen_slugs
+    return slug_to_path, entity_id_to_slug
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
@@ -429,7 +467,7 @@ def main() -> None:
 
     # ── Generate JSON files locally ──────────────────────────────────────────
     print(f"\n[2/4] Generating JSON files in {TMP_JSON_DIR}...")
-    slug_to_path, all_vps_slugs = generate_json_files(entities)
+    slug_to_path, entity_id_to_slug = generate_json_files(entities)
     print(f"      Generated: {len(slug_to_path)} JSON files")
 
     # ── Dedup against GitHub repo ────────────────────────────────────────────
@@ -441,13 +479,21 @@ def main() -> None:
         print(f"\n[4/4] Cloning/pulling {GITHUB_REPO_URL}...")
         repo_dir = clone_or_pull_repo(push_url, auth_method)
 
-        existing_slugs = get_existing_slugs(repo_dir)
-        print(f"      Existing files in repo: {len(existing_slugs)}")
+        print(f"      Reading entity_ids from existing repo JSON files...")
+        existing_entity_ids = get_existing_entity_ids(repo_dir)
+        print(f"      Existing entity_ids in repo: {len(existing_entity_ids)}")
 
-        new_slugs = [s for s in slug_to_path if s not in existing_slugs]
+        # Invert entity_id_to_slug → slug_to_entity_id for O(1) lookups
+        slug_to_entity_id: dict = {s: eid for eid, s in entity_id_to_slug.items()}
+
+        # Build list of new slugs whose entity_id is NOT already in the repo
+        new_slugs = [
+            slug for slug in slug_to_path
+            if slug_to_entity_id.get(slug, "") not in existing_entity_ids
+        ]
         skipped = len(slug_to_path) - len(new_slugs)
 
-        print(f"\n      New entities to push:  {len(new_slugs)}")
+        print(f"\n      New entities to push:    {len(new_slugs)}")
         print(f"      Skipped (already exist): {skipped}")
 
         if not new_slugs:
@@ -480,7 +526,7 @@ def main() -> None:
 
     else:
         # Dry-run: just show what would happen
-        print(f"\n[3/4] DRY-RUN: Checking GitHub repo for existing slugs...")
+        print(f"\n[3/4] DRY-RUN: entity_id dedup requires --apply (repo clone needed).")
         print("      (Skipping clone — dry-run mode. Use --apply to push.)")
 
         print(f"\n[4/4] Stats (dry-run, no dedup against live repo):")
@@ -494,7 +540,7 @@ def main() -> None:
             print(f"        ... and {len(slug_to_path) - 5} more")
 
         print(
-            "\nDRY-RUN complete. Re-run with --apply to clone repo, dedup, commit, and push."
+            "\nDRY-RUN complete. Re-run with --apply to clone repo, dedup by entity_id, commit, and push."
         )
 
 

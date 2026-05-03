@@ -324,6 +324,22 @@
     "llmDatasetTitle": "Open dataset",
     "llmDatasetText": "This data is available as a structured open dataset (CC-BY-4.0)."
   },
+  "sectorCountryPage": {
+    "backToSector": "← {sector} sector",
+    "heading": "{sector} companies in {country}",
+    "subheading": "{count} entities indexed in this sector and country",
+    "notFound": "No entities found",
+    "emptyHeading": "No {sector} companies in {country} indexed yet",
+    "emptySub": "No entities matching this sector and country combination have been indexed yet.",
+    "metaTitle": "AYA Registry — {sector} companies in {country} ({count})",
+    "metaDescription": "Browse {count} {sector} companies based in {country} indexed in the AYA registry for AI readability.",
+    "llmH2": "{sector} companies in {country} — AYA registry",
+    "llmIntro": "AYA indexes {count} {sector} companies based in {country}. This list is generated from the AYA structured business dataset (CC-BY-4.0). Each entry includes company name, activity description, location, and category.",
+    "llmListTitle": "Company list (top 50 by AIO score)",
+    "llmFaqTitle": "Frequently asked questions",
+    "llmDatasetTitle": "Open dataset",
+    "llmDatasetText": "This data is available as a structured open dataset (CC-BY-4.0)."
+  },
   "certificate": {
     "notFound": "Certificate not found",
     "notFoundDesc": "This AYA certificate does not exist or has been deleted.",

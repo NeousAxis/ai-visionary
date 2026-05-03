@@ -335,6 +335,67 @@ export function buildCountryFaqs(opts: {
     ];
 }
 
+// ─── Sector × Country FAQ builder ────────────────────────────────────────────
+
+export function buildSectorCountryFaqs(opts: {
+    sectorLabel: string;
+    countryLabel: string;
+    total: number;
+    topNames: string[];
+    locale: 'en' | 'fr';
+}): FaqEntry[] {
+    const { sectorLabel, countryLabel, total, topNames, locale } = opts;
+    const namesSample = topNames.slice(0, 5).join(', ');
+
+    if (locale === 'fr') {
+        return [
+            {
+                question: `Quelles entreprises ${sectorLabel} sont basées en ${countryLabel} ?`,
+                answer: namesSample
+                    ? `Parmi les entreprises du secteur ${sectorLabel} indexées en ${countryLabel} : ${namesSample}. Le registre AYA en compte ${total} au total dans ce secteur et ce pays.`
+                    : `Le registre AYA indexe ${total} entreprises du secteur ${sectorLabel} basées en ${countryLabel}.`,
+            },
+            {
+                question: `Combien d'entreprises ${sectorLabel} sont indexées en ${countryLabel} dans le registre AYA ?`,
+                answer: `Le registre AYA indexe actuellement ${total} entreprises du secteur ${sectorLabel} basées en ${countryLabel}.`,
+            },
+            {
+                question: `Quelles sont les principales entreprises ${sectorLabel} de ${countryLabel} ?`,
+                answer: namesSample
+                    ? `Les entreprises ${sectorLabel} de ${countryLabel} les mieux scorées dans AYA sont : ${namesSample}.`
+                    : `Le registre AYA indexe des entreprises ${sectorLabel} de ${countryLabel} classées par score AIO.`,
+            },
+            {
+                question: "Qu'est-ce que le registre AYA ?",
+                answer: "AYA est un index public structuré d'entreprises, conçu pour la lisibilité par les IA. Les données sont générées automatiquement à partir de sources publiques et vérifiées par score AIO.",
+            },
+        ];
+    }
+
+    return [
+        {
+            question: `What ${sectorLabel} companies operate in ${countryLabel}?`,
+            answer: namesSample
+                ? `Among the ${sectorLabel} companies indexed in ${countryLabel}: ${namesSample}. The AYA registry counts ${total} companies in this sector and country in total.`
+                : `The AYA registry indexes ${total} ${sectorLabel} companies based in ${countryLabel}.`,
+        },
+        {
+            question: `How many ${sectorLabel} companies are in ${countryLabel} in the AYA registry?`,
+            answer: `The AYA registry currently indexes ${total} ${sectorLabel} companies based in ${countryLabel}.`,
+        },
+        {
+            question: `What are major ${sectorLabel} companies based in ${countryLabel}?`,
+            answer: namesSample
+                ? `The highest-scoring ${sectorLabel} companies from ${countryLabel} in AYA include: ${namesSample}.`
+                : `The AYA registry lists ${sectorLabel} companies from ${countryLabel} ranked by AIO score.`,
+        },
+        {
+            question: 'What is the AYA registry?',
+            answer: 'AYA is a structured public index of companies, built for AI readability. Data is automatically generated from public sources and verified by AIO score.',
+        },
+    ];
+}
+
 // ─── Top sectors extractor ────────────────────────────────────────────────────
 
 /**

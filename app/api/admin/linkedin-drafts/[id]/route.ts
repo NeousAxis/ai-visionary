@@ -1,10 +1,12 @@
 /**
  * PATCH /api/admin/linkedin-drafts/[id]?secret=...
- * Body : { action: 'approve' | 'reject' | 'publish_now' }
+ * Body : { action: 'approve' | 'reject' | 'publish_now' | 'mark_published', linkedin_post_url?: string }
  *
- * - approve     : status = 'draft' (no-op, juste pour signaler "OK pour publication")
- * - reject      : status = 'skipped'
- * - publish_now : utilise Playwright pour publier immediatement, status = 'published' ou 'failed'
+ * - approve        : status = 'approved' (entre en queue cron auto-publish)
+ * - unapprove      : status = 'draft' (retire de la queue)
+ * - reject         : status = 'skipped'
+ * - publish_now    : utilise Playwright pour publier immediatement, status = 'published' ou 'failed'
+ * - mark_published : marque manuellement comme publie (copy-paste manuel), status = 'published', published_at = NOW()
  *
  * Auth : ADMIN_SECRET. Ne fonctionne que sur le VPS.
  */
@@ -80,5 +82,14 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
         }
     }
 
-    return NextResponse.json({ error: 'action invalide (approve | reject | publish_now)' }, { status: 400 });
+    if (action === 'mark_published') {
+        // Publication manuelle (copy-paste) : marque le post comme publie sans Playwright
+        const linkedinPostUrl = (body as any).linkedin_post_url ?? null;
+        const ok = await linkedinUpdatePostStatus(id, 'published', {
+            ...(linkedinPostUrl ? { linkedin_post_url: linkedinPostUrl } : {}),
+        });
+        return NextResponse.json({ ok, status: 'published' });
+    }
+
+    return NextResponse.json({ error: 'action invalide (approve | unapprove | reject | publish_now | mark_published)' }, { status: 400 });
 }

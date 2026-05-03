@@ -115,7 +115,7 @@ export default function LinkedinDraftsPage() {
     }
   };
 
-  const handleAction = async (id: string, action: 'approve' | 'unapprove' | 'reject' | 'publish_now') => {
+  const handleAction = async (id: string, action: 'approve' | 'unapprove' | 'reject' | 'publish_now' | 'mark_published', extra?: { linkedin_post_url?: string | null }) => {
     if (action === 'publish_now' && !confirm('Publier ce post sur LinkedIn maintenant ?')) return;
     setActionLoading(id);
     try {
@@ -124,13 +124,15 @@ export default function LinkedinDraftsPage() {
       const res = await fetch(url.toString(), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, ...extra }),
       });
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || 'Erreur');
       } else if (action === 'publish_now' && data.success) {
         alert('Publie ! ' + (data.linkedin_post_url || ''));
+      } else if (action === 'mark_published' && data.ok) {
+        // Pas d'alert : le refresh suffit, l'UX est fluide
       }
       await fetchDrafts();
     } finally {
@@ -357,6 +359,24 @@ export default function LinkedinDraftsPage() {
                     }}
                   >
                     {copiedId === d.id ? '✓ Copié' : '📋 Copier le texte'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const rawUrl = window.prompt('URL du post LinkedIn (optionnel — laisser vide si inconnue) :') ?? '';
+                      const linkedin_post_url = rawUrl.trim() || null;
+                      handleAction(d.id, 'mark_published', { linkedin_post_url });
+                    }}
+                    disabled={actionLoading === d.id}
+                    title="Marquer ce post comme publie manuellement (copy-paste LinkedIn)"
+                    style={{
+                      padding: '6px 14px', borderRadius: 6, border: 'none',
+                      background: actionLoading === d.id ? '#D1FAE5' : '#059669',
+                      color: '#fff', fontWeight: 700, fontSize: '0.85rem',
+                      cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                      opacity: actionLoading === d.id ? 0.7 : 1,
+                    }}
+                  >
+                    {actionLoading === d.id ? '...' : '✅ Marquer comme publié'}
                   </button>
                   {(d.status === 'draft' || d.status === 'failed') && (
                     <button
