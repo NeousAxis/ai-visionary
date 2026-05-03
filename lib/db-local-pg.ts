@@ -556,14 +556,23 @@ export async function linkedinUpdatePostStatus(
     if (!pool) return false;
     try {
         const publishedAt = status === 'published' ? new Date() : null;
+        // Important : pour status='published' ou 'draft' ou 'approved', on
+        // EFFACE l'error_message precedent (sinon une vieille erreur reste
+        // affichee meme apres une publication reussie). Pour 'failed', on
+        // ecrit le nouveau message.
+        const shouldClearError = status === 'published' || status === 'draft' || status === 'approved';
+        const newErrorMessage = shouldClearError
+            ? null
+            : (extra?.error_message ?? null);
+
         await pool.query(
             `UPDATE linkedin_posts
              SET status = $1,
                  linkedin_post_url = COALESCE($2, linkedin_post_url),
-                 error_message = COALESCE($3, error_message),
+                 error_message = $3,
                  published_at = COALESCE($4, published_at)
              WHERE id = $5::uuid`,
-            [status, extra?.linkedin_post_url ?? null, extra?.error_message ?? null, publishedAt, id]
+            [status, extra?.linkedin_post_url ?? null, newErrorMessage, publishedAt, id]
         );
         return true;
     } catch (err) {

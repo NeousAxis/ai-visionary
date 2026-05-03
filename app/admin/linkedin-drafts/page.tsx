@@ -297,7 +297,7 @@ export default function LinkedinDraftsPage() {
               {d.post_text}
             </pre>
 
-            {d.error_message && (
+            {d.error_message && (d.status === 'failed' || d.status === 'skipped') && (
               <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '8px 12px', borderRadius: 6, fontSize: '0.8rem', marginBottom: '0.75rem' }}>
                 ❌ {d.error_message}
               </div>
