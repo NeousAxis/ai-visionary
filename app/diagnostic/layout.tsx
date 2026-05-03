@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'AYO Diagnostic V2 — AI Readability Analysis',
+  title: 'AYO Diagnostic — Make your company readable by all AI',
   description: 'Analyze your website AI readability with 8 specialized agents. Get your AIO score and ASR files instantly.',
   openGraph: {
-    title: 'AYO Diagnostic V2 — AI Readability Analysis',
+    title: 'AYO Diagnostic — Make your company readable by all AI',
     description: 'Analyze your website AI readability with 8 specialized agents.',
     type: 'website',
     url: 'https://ai-visionary.xyz/diagnostic',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AYO Diagnostic V2 — AI Readability Analysis',
+    title: 'AYO Diagnostic — Make your company readable by all AI',
     description: 'Analyze your website AI readability with 8 specialized agents.',
   },
 };
