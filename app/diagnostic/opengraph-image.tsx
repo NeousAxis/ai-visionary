@@ -39,7 +39,7 @@ export default async function Image() {
                         padding: '60px 80px 40px 80px',
                     }}
                 >
-                    {/* Left column — logo (40%) */}
+                    {/* Left column — logo in white circular badge (40%) */}
                     <div
                         style={{
                             width: '40%',
@@ -48,16 +48,29 @@ export default async function Image() {
                             justifyContent: 'center',
                         }}
                     >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={logoBase64}
-                            alt="AI Visionary logo"
+                        <div
                             style={{
-                                width: 320,
-                                height: 320,
-                                objectFit: 'contain',
+                                width: 380,
+                                height: 380,
+                                borderRadius: '50%',
+                                background: '#FFFFFF',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
                             }}
-                        />
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={logoBase64}
+                                alt="AI Visionary logo"
+                                style={{
+                                    width: 300,
+                                    height: 300,
+                                    objectFit: 'contain',
+                                }}
+                            />
+                        </div>
                     </div>
 
                     {/* Right column — text (60%) */}
