@@ -604,26 +604,75 @@ export async function linkedinGetRecentEntityIds(daysSinceCutoff: number): Promi
 
 /**
  * Selection des entites candidates pour un post LinkedIn.
- * Filtres : score <= 50, payment_completed = false, contact_email present,
- *           website dans la liste de domaines connus passee en argument,
- *           asr_payload.enrichment.gemini_description present.
+ *
+ * Mode useKnownDomainsFilter=true (defaut, retro-compat) :
+ *   Filtres : score <= 50, payment_completed = false, contact_email present,
+ *             website dans la liste de domaines connus passee en argument,
+ *             asr_payload present.
+ *
+ * Mode useKnownDomainsFilter=false (pool elargi Tranco 25k+) :
+ *   Supprime le filtre sur knownDomains et ajoute des filtres qualite
+ *   supplementaires sur asr_payload, gemini_description et display_name.
  */
 export async function linkedinSelectCandidates(opts: {
     knownDomains: string[];
     excludeEntityIds: string[];
     limit: number;
+    /** Si false, ignore le filtre domain IN(knownDomains) et applique des
+     *  filtres qualite supplementaires pour ouvrir le pool aux ~25k entites
+     *  Tranco. Default : true (retro-compat). */
+    useKnownDomainsFilter?: boolean;
 }): Promise<Entity[]> {
     const pool = getPool();
     if (!pool) return [];
-    if (opts.knownDomains.length === 0) return [];
+
+    const useKnownFilter = opts.useKnownDomainsFilter !== false; // default true
+    if (useKnownFilter && opts.knownDomains.length === 0) return [];
 
     try {
-        // On utilise un ANY array pour matcher les domaines (insensible a la casse via lower)
-        const params: unknown[] = [opts.knownDomains, opts.limit];
+        const params: unknown[] = [];
+
+        // Clause domaine connu (mode original)
+        let domainClause = '';
+        if (useKnownFilter) {
+            params.push(opts.knownDomains);
+            domainClause = `AND lower(
+                     regexp_replace(
+                       regexp_replace(COALESCE(website, ''), '^https?://(www\\.)?', ''),
+                       '/.*$', ''
+                     )
+                   ) = ANY($${params.length})`;
+        }
+
+        // Clause asr_payload + gemini_description (mode pool elargi uniquement)
+        let payloadClause = '';
+        if (!useKnownFilter) {
+            payloadClause = `
+               AND asr_payload IS NOT NULL
+               AND (asr_payload->'data'->'enrichment'->>'gemini_description') IS NOT NULL
+               AND LENGTH(asr_payload->'data'->'enrichment'->>'gemini_description') >= 100`;
+        }
+
+        // Clause display_name qualite (mode pool elargi uniquement)
+        let nameQualityClause = '';
+        if (!useKnownFilter) {
+            nameQualityClause = `
+               AND display_name IS NOT NULL
+               AND display_name != ''
+               AND LENGTH(display_name) >= 3
+               AND LENGTH(display_name) <= 60
+               AND display_name NOT LIKE 'http%'`;
+        }
+
+        // Clause exclude entity_ids
         const excludeClause = opts.excludeEntityIds.length > 0
             ? `AND entity_id::text != ALL($${params.length + 1})`
             : '';
         if (opts.excludeEntityIds.length > 0) params.push(opts.excludeEntityIds);
+
+        // LIMIT toujours en dernier param
+        params.push(opts.limit);
+        const limitIdx = params.length;
 
         const res: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
@@ -631,15 +680,13 @@ export async function linkedinSelectCandidates(opts: {
              WHERE asr_score <= 50
                AND COALESCE(payment_completed, false) = false
                AND contact_email IS NOT NULL
-               AND lower(
-                     regexp_replace(
-                       regexp_replace(COALESCE(website, ''), '^https?://(www\\.)?', ''),
-                       '/.*$', ''
-                     )
-                   ) = ANY($1)
+               AND contact_email != ''
+               ${domainClause}
+               ${payloadClause}
+               ${nameQualityClause}
                ${excludeClause}
              ORDER BY RANDOM()
-             LIMIT $2`,
+             LIMIT $${limitIdx}`,
             params
         );
         return res.rows;

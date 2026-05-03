@@ -19,7 +19,7 @@ import {
   linkedinSelectCandidates,
   type Entity,
 } from '@/lib/db-local-pg';
-import { KNOWN_DOMAINS, getKnownEntityMeta } from './known-entities';
+import { getKnownEntityMeta } from './known-entities';
 
 export interface SelectableEntity {
   entity_id: string;
@@ -105,21 +105,27 @@ function extractDomain(website: string | null | undefined): string {
 /**
  * Selectionne une entite eligible pour un post LinkedIn.
  * Retourne null si rien d'eligible.
+ *
+ * Pool source : toutes les entites Tranco VPS (~25k) qui passent les filtres
+ * qualite SQL (asr_payload, gemini_description >= 100 chars, display_name propre).
+ * Les overrides KNOWN_DOMAINS_META restent appliques en post-filtre si l'entite
+ * pickee fait partie de la liste curee (locale, sector_fr/en, linkedin_slug, city).
  */
 export async function selectNextEntity(): Promise<SelectableEntity | null> {
   // 1. Charger les entity_id recemment postees (anti-doublon 30j)
   const excludedIds = await linkedinGetRecentEntityIds(POST_FREQUENCY_DAYS);
 
-  // 2. Charger les candidates depuis Postgres VPS
+  // 2. Charger les candidates depuis Postgres VPS — pool elargi (pas de filtre KNOWN_DOMAINS)
   const candidates: Entity[] = await linkedinSelectCandidates({
-    knownDomains: Array.from(KNOWN_DOMAINS),
+    knownDomains: [],          // inutilise en mode useKnownDomainsFilter=false
     excludeEntityIds: Array.from(excludedIds),
     limit: 50,
+    useKnownDomainsFilter: false,
   });
 
   if (candidates.length === 0) {
     console.warn(
-      `[linkedin-selector] No eligible entity (KNOWN_DOMAINS=${KNOWN_DOMAINS.size}, excluded=${excludedIds.size})`
+      `[linkedin-selector] No eligible entity (pool elargi, excluded=${excludedIds.size})`
     );
     return null;
   }
@@ -129,7 +135,11 @@ export async function selectNextEntity(): Promise<SelectableEntity | null> {
   const domain = extractDomain(picked.website);
   const projectedScore = computeProjectedScore(picked.asr_payload?.data, picked.asr_score ?? 0);
 
-  // Override metadata depuis KNOWN_DOMAINS_META (DB sector/country foireuse pour Tranco)
+  // 4. Override metadata depuis KNOWN_DOMAINS_META si l'entite est dans la liste curee.
+  //    Sinon fallback sur les donnees DB directement.
+  //    - linkedin_slug : undefined si non connu (le generateur de post utilise le nom seul)
+  //    - locale : pickLocale() retourne toujours 'en' (decision 2 mai 2026)
+  //    - sector_fr / sector_en : sector_macro de la DB tel quel
   const meta = getKnownEntityMeta(domain);
 
   return {
@@ -138,13 +148,16 @@ export async function selectNextEntity(): Promise<SelectableEntity | null> {
     display_name: cleanDisplayName(picked.display_name || domain),
     current_score: picked.asr_score ?? 0,
     projected_score: projectedScore,
-    sector_macro: picked.sector_macro || undefined, // garde la valeur DB pour compat (non utilisee si override)
-    city: meta?.city,
+    sector_macro: picked.sector_macro || undefined,
+    city: meta?.city || undefined,
     country: meta?.country || picked.country_legal || undefined,
     contact_email: picked.contact_email || undefined,
-    override_locale: meta?.locale,
-    override_sector_fr: meta?.sector_fr,
-    override_sector_en: meta?.sector_en,
+    // Locale : override curee si dispo, sinon 'en' (pickLocale retourne toujours 'en')
+    override_locale: meta?.locale ?? 'en',
+    // Sector : override curee si dispo, sinon sector_macro brut de la DB
+    override_sector_fr: meta?.sector_fr ?? picked.sector_macro ?? undefined,
+    override_sector_en: meta?.sector_en ?? picked.sector_macro ?? undefined,
+    // Slug LinkedIn : uniquement si connu dans KNOWN_DOMAINS_META
     linkedin_slug: meta?.linkedin_slug,
   };
 }

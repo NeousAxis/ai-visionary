@@ -40,10 +40,11 @@ export default function LinkedinDraftsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('draft');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [visibilityResults, setVisibilityResults] = useState<Record<string, { provider: string; visible: boolean; position?: number; cited_companies: string[]; query: string; error?: string }>>({});
   const [visibilityLoading, setVisibilityLoading] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Try to load secret on mount : (1) URL query (?secret=...), (2) localStorage
   useEffect(() => {
@@ -309,21 +310,21 @@ export default function LinkedinDraftsPage() {
               </a>
             )}
 
-            {(d.status === 'draft' || d.status === 'approved') && (
+            {(d.status === 'draft' || d.status === 'approved' || d.status === 'failed') && (
               <>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   {d.status === 'draft' && (
                     <button
                       onClick={() => handleAction(d.id, 'approve')}
                       disabled={actionLoading === d.id}
-                      title="Ajouter ce post a la queue de publication automatique (cron 3x/jour)"
+                      title="Ajouter ce post a la queue pour publication manuelle"
                       style={{
                         padding: '6px 14px', borderRadius: 6, border: 'none',
                         background: '#1E40AF', color: '#fff', fontWeight: 700, fontSize: '0.85rem',
                         cursor: actionLoading === d.id ? 'wait' : 'pointer',
                       }}
                     >
-                      {actionLoading === d.id ? '...' : '✓ Approuver (auto)'}
+                      {actionLoading === d.id ? '...' : '✓ Approuver'}
                     </button>
                   )}
                   {d.status === 'approved' && (
@@ -340,50 +341,62 @@ export default function LinkedinDraftsPage() {
                     </button>
                   )}
                   <button
-                    onClick={() => handleAction(d.id, 'publish_now')}
-                    disabled={actionLoading === d.id}
-                    title="Publier immediatement (sans attendre le cron)"
-                    style={{
-                      padding: '6px 14px', borderRadius: 6, border: 'none',
-                      background: '#4A919E', color: '#fff', fontWeight: 600, fontSize: '0.85rem',
-                      cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                    onClick={() => {
+                      navigator.clipboard.writeText(d.post_text).then(() => {
+                        setCopiedId(d.id);
+                        setTimeout(() => setCopiedId(prev => prev === d.id ? null : prev), 2000);
+                      }).catch(() => {});
                     }}
-                  >
-                    {actionLoading === d.id ? '...' : '🚀 Publier maintenant'}
-                  </button>
-                  <button
-                    onClick={() => handleAction(d.id, 'reject')}
-                    disabled={actionLoading === d.id}
+                    title="Copier le texte du post pour publication manuelle sur LinkedIn"
                     style={{
                       padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
-                      background: '#fff', color: '#991B1B', fontWeight: 600, fontSize: '0.85rem',
-                      cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                      background: copiedId === d.id ? '#D1FAE5' : '#fff',
+                      color: copiedId === d.id ? '#065F46' : '#374151',
+                      fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
+                      transition: 'background 0.2s, color 0.2s',
                     }}
                   >
-                    ✗ Rejeter
+                    {copiedId === d.id ? '✓ Copié' : '📋 Copier le texte'}
                   </button>
-                  <button
-                    onClick={() => handleVisibilityCheck(d.id, 'gemini')}
-                    disabled={visibilityLoading === `${d.id}-gemini`}
-                    style={{
-                      padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
-                      background: '#EEF2FF', color: '#3730A3', fontWeight: 600, fontSize: '0.85rem',
-                      cursor: visibilityLoading === `${d.id}-gemini` ? 'wait' : 'pointer',
-                    }}
-                  >
-                    {visibilityLoading === `${d.id}-gemini` ? '...' : '🔬 Tester Gemini'}
-                  </button>
-                  <button
-                    onClick={() => handleVisibilityCheck(d.id, 'chatgpt')}
-                    disabled={visibilityLoading === `${d.id}-chatgpt`}
-                    style={{
-                      padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
-                      background: '#F0FDF4', color: '#166534', fontWeight: 600, fontSize: '0.85rem',
-                      cursor: visibilityLoading === `${d.id}-chatgpt` ? 'wait' : 'pointer',
-                    }}
-                  >
-                    {visibilityLoading === `${d.id}-chatgpt` ? '...' : '🔬 Tester ChatGPT'}
-                  </button>
+                  {(d.status === 'draft' || d.status === 'failed') && (
+                    <button
+                      onClick={() => handleAction(d.id, 'reject')}
+                      disabled={actionLoading === d.id}
+                      style={{
+                        padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
+                        background: '#fff', color: '#991B1B', fontWeight: 600, fontSize: '0.85rem',
+                        cursor: actionLoading === d.id ? 'wait' : 'pointer',
+                      }}
+                    >
+                      ✗ Rejeter
+                    </button>
+                  )}
+                  {(d.status === 'draft' || d.status === 'approved') && (
+                    <>
+                      <button
+                        onClick={() => handleVisibilityCheck(d.id, 'gemini')}
+                        disabled={visibilityLoading === `${d.id}-gemini`}
+                        style={{
+                          padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
+                          background: '#EEF2FF', color: '#3730A3', fontWeight: 600, fontSize: '0.85rem',
+                          cursor: visibilityLoading === `${d.id}-gemini` ? 'wait' : 'pointer',
+                        }}
+                      >
+                        {visibilityLoading === `${d.id}-gemini` ? '...' : '🔬 Tester Gemini'}
+                      </button>
+                      <button
+                        onClick={() => handleVisibilityCheck(d.id, 'chatgpt')}
+                        disabled={visibilityLoading === `${d.id}-chatgpt`}
+                        style={{
+                          padding: '6px 14px', borderRadius: 6, border: '1px solid #e5e7eb',
+                          background: '#F0FDF4', color: '#166534', fontWeight: 600, fontSize: '0.85rem',
+                          cursor: visibilityLoading === `${d.id}-chatgpt` ? 'wait' : 'pointer',
+                        }}
+                      >
+                        {visibilityLoading === `${d.id}-chatgpt` ? '...' : '🔬 Tester ChatGPT'}
+                      </button>
+                    </>
+                  )}
                 </div>
                 {(['gemini', 'chatgpt'] as const).map(prov => {
                   const r = visibilityResults[`${d.id}-${prov}`];

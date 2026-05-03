@@ -44,6 +44,16 @@ function authIsValid(authHeader: string): boolean {
 export async function POST(req: NextRequest) {
     const logger = createLogger(generateCorrelationId(), 'cron');
 
+    // Auto-publish disabled: LinkedIn anti-bot blocks Playwright sessions.
+    // Use the "Copier le texte" button in admin and paste manually.
+    return NextResponse.json(
+        {
+            error: 'Auto-publish disabled',
+            reason: 'LinkedIn anti-bot blocks Playwright sessions. Use the "Copier le texte" button in admin and paste manually.',
+        },
+        { status: 410 }
+    );
+
     if (!authIsValid(req.headers.get('authorization') || '')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -56,11 +66,13 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const post = await linkedinGetOldestApproved();
-        if (!post) {
+        const postOrNull = await linkedinGetOldestApproved();
+        if (!postOrNull) {
             logger.info('CRON_AUTOPUB_EMPTY', 'Queue approved vide — rien a publier');
             return NextResponse.json({ skipped: true, reason: 'queue_empty' });
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const post = postOrNull!;
 
         logger.info(
             'CRON_AUTOPUB_PICK',
