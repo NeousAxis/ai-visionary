@@ -1,0 +1,24 @@
+#!/bin/bash
+# Pre-commit hook: scan staged changes for leaked secrets (API keys, tokens, etc.)
+# Installed after the AIzaSy... GitHub leak incident (May 2026).
+# To enable on a fresh clone: git config core.hooksPath .githooks
+
+if ! command -v gitleaks &> /dev/null; then
+    echo "WARNING: gitleaks not installed. Skipping secret scan."
+    echo "  Install with: brew install gitleaks  (or your package manager)"
+    exit 0
+fi
+
+echo "Scanning staged changes for secrets with gitleaks..."
+gitleaks protect --staged --redact --no-banner
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "BLOCKED: gitleaks detected potential secrets in staged changes."
+    echo "If this is a false positive, add the file to .gitleaksignore or use:"
+    echo "  git commit --no-verify   (use only if you are SURE)"
+    exit 1
+fi
+
+echo "OK: no secrets detected."
+exit 0
