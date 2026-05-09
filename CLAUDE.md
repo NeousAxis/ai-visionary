@@ -3,7 +3,7 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 3 mai 2026 (pipeline LinkedIn marketing complet sur branche feature/linkedin-marketing — generation drafts + verif Gemini/ChatGPT + admin + queue auto-publish. Bloque sur anti-bot LinkedIn cote Playwright, decision Cyril sur copy-paste vs xvfb)
+> Derniere mise a jour : 9 mai 2026 (incident cle Gemini exposee GitHub 12 dec 2025 -> projet Better-ESG suspendu Trust & Safety + ~73€ brules sur projet `gen-lang-client-0314106061` par script `reclassify_and_enrich_vps.py` mal configure -> projet aussi suspendu. Cleanup git history via `git-filter-repo` + force-push 4 branches + hook gitleaks installe `.githooks/pre-commit`. Script refactorise `gemini-2.0-flash` + BATCH_SIZE 20 + 4 outputs/prompt unique. 2 mails support envoyes. Batch enrichissement VPS BLOQUE jusqu'a deblocage Google.)
 
 ---
 
@@ -511,7 +511,7 @@ cd aya && uvicorn api.main:app --reload  # http://127.0.0.1:8000
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **AI VISIONARY** (5570 symbols, 7127 relationships, 92 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **AI VISIONARY** (6076 symbols, 8426 relationships, 130 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

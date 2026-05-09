@@ -1,10 +1,12 @@
 """
 Reclassify sector_macro + add gemini_description/gemini_description_fr
-for all VPS Postgres entities (aya_local.aya_registry, ~25 860 Tranco scraped).
++ gemini_keywords/gemini_keywords_fr for all VPS Postgres entities
+(aya_local.aya_registry, ~25 860 Tranco scraped).
 
-Solves two problems simultaneously:
-  1. Wrong sectors (e.g. Zweifel Chips classified as "Technologie & SaaS")
-  2. Missing gemini_description on all ~25 860 VPS entities
+Single-pass enrichment: 1 Gemini call per batch returns 4 outputs
+(sector + EN/FR descriptions + EN/FR keywords) — replaces the legacy
+4-script chain (enrich_with_gemini, enrich_keywords, translate_to_fr,
+enrich_keywords_fr) that used 4x more API calls.
 
 Usage:
     # Dry-run: samples 20 entities, prints comparison table, NO DB writes
@@ -22,9 +24,8 @@ Requires in ../.env.local:
     GOOGLE_GENERATIVE_AI_API_KEY  (or GEMINI_API_KEY as alias)
     VPS_PG_HOST, VPS_PG_PORT, VPS_PG_DB, VPS_PG_USER, VPS_PG_PASSWORD
 
-Cost estimate:
-    25 860 entities / 20 per batch = 1 293 Gemini calls × ~$0.001 = ~CHF 1.30
-    Duration: ~30–45 min
+Model: gemini-2.0-flash (10-20x cheaper than gemini-3-flash-preview).
+Batch size: 20 entities per Gemini call.
 
 Crash recovery:
     Progress is checkpointed in /tmp/reclassify_progress.json.
@@ -61,7 +62,7 @@ PROJECT_DIR = os.path.dirname(SCRIPT_DIR)
 ENV_FILE = os.path.join(PROJECT_DIR, ".env.local")
 PROGRESS_FILE = "/tmp/reclassify_progress.json"
 
-BATCH_SIZE = 5
+BATCH_SIZE = 20
 SLEEP_BETWEEN_BATCHES = 0.5   # billing active = no rate limit; small delay for politeness
 MAX_RETRIES = 3
 RETRY_BASE_WAIT = 10           # seconds (exponential: 10, 20, 30)
@@ -89,8 +90,8 @@ ALLOWED_SECTORS = [
 
 ALLOWED_SECTORS_SET = set(ALLOWED_SECTORS)
 
-# Gemini model — gemini-3-flash-preview (current AYO standard, May 2026).
-GEMINI_MODEL = "gemini-3-flash-preview"
+# Gemini model — gemini-2.0-flash (stable, ~10-20x cheaper than gemini-3-flash-preview).
+GEMINI_MODEL = "gemini-2.0-flash"
 
 # ---------------------------------------------------------------------------
 # Prompt template
@@ -265,17 +266,25 @@ def fetch_entities(limit: int | None = None) -> list:
         except Exception:
             pass
 
-        # Also check if gemini_description already exists (skip if so)
-        existing_desc = ""
+        # Also check if all 4 enrichment fields already exist (skip if so)
+        enr = {}
         try:
-            existing_desc = (
-                payload.get("data", {})
-                .get("enrichment", {})
-                .get("gemini_description", "")
-                or ""
-            )
+            enr = payload.get("data", {}).get("enrichment", {}) or {}
         except Exception:
             pass
+
+        existing_desc = str(enr.get("gemini_description", "") or "")
+        existing_desc_fr = str(enr.get("gemini_description_fr", "") or "")
+        existing_kws = enr.get("gemini_keywords") or []
+        existing_kws_fr = enr.get("gemini_keywords_fr") or []
+
+        # An entity is "fully enriched" only if all 4 fields are present.
+        fully_enriched = (
+            len(existing_desc) >= 10
+            and len(existing_desc_fr) >= 10
+            and isinstance(existing_kws, list) and len(existing_kws) > 0
+            and isinstance(existing_kws_fr, list) and len(existing_kws_fr) > 0
+        )
 
         entities.append({
             "entity_id": str(r["entity_id"]),
@@ -284,7 +293,8 @@ def fetch_entities(limit: int | None = None) -> list:
             "current_sector": r["sector_macro"] or "General",
             "meta_description": str(meta_description)[:300] if meta_description else "",
             "services": services,
-            "existing_description": str(existing_desc),
+            "existing_description": existing_desc,
+            "fully_enriched": fully_enriched,
             "payload": payload,   # kept for UPDATE later
         })
 
@@ -356,16 +366,18 @@ def call_gemini_batch(model, entities: list) -> list | None:
 
     sectors_list = " / ".join(ALLOWED_SECTORS)
 
-    prompt = f"""Classify each company and write short factual descriptions.
+    prompt = f"""Classify each company, write short factual descriptions, and extract business keywords.
 
 RULES:
 - sector_macro: choose EXACTLY one from this list (no variation allowed):
   {sectors_list}
 - description_en: 2-3 sentences in English. FACTUAL only.
 - description_fr: 2-3 sentences in French. FACTUAL only.
-- FORBIDDEN words: leader, best, premium, world-class, innovative, cutting-edge, top, #1, excellent, superior, unrivalled
+- keywords_en: 5-8 business keywords in English describing the actual activity (e.g. football, automobile, banking, cloud computing). NO generic terms (service, platform, app, website, solution, digital, company, business).
+- keywords_fr: 5-8 business keywords in French. Adapt to French business vocabulary (do not translate literally). Lowercase except proper nouns. Keep technical terms unchanged (blockchain, API, SaaS, NFT, DeFi, etc.).
+- FORBIDDEN words in descriptions: leader, best, premium, world-class, innovative, cutting-edge, top, #1, excellent, superior, unrivalled
 - State what the company does, who it serves, where it operates.
-- If the entity is unclear or the website seems dead → use sector_macro="General" and a generic factual description.
+- If the entity is unclear or the website seems dead → use sector_macro="General", generic factual description, and 5 broad keywords.
 - Echo back the entity_id exactly as given.
 - Return ONLY a JSON array, one object per company, in the SAME ORDER as the input.
 
@@ -375,7 +387,9 @@ Expected format:
     "entity_id": "...",
     "sector_macro": "...",
     "description_en": "...",
-    "description_fr": "..."
+    "description_fr": "...",
+    "keywords_en": ["...", "...", "..."],
+    "keywords_fr": ["...", "...", "..."]
   }},
   ...
 ]
@@ -449,7 +463,8 @@ Return ONLY the JSON array. No markdown fences. No explanation."""
 def apply_updates(updates: list):
     """
     Apply a list of updates to Postgres VPS.
-    Each update: {entity_id, sector_macro, description_en, description_fr}
+    Each update: {entity_id, sector_macro, description_en, description_fr,
+                  keywords_en, keywords_fr}
     Uses jsonb_set to write into asr_payload.data.enrichment without touching other fields.
     """
     conn = get_pg_conn()
@@ -463,13 +478,23 @@ def apply_updates(updates: list):
                         sector_macro = %s,
                         asr_payload = jsonb_set(
                             jsonb_set(
-                                COALESCE(asr_payload, '{}'::jsonb),
-                                '{data,enrichment,gemini_description}',
-                                to_jsonb(%s::text),
+                                jsonb_set(
+                                    jsonb_set(
+                                        COALESCE(asr_payload, '{}'::jsonb),
+                                        '{data,enrichment,gemini_description}',
+                                        to_jsonb(%s::text),
+                                        true
+                                    ),
+                                    '{data,enrichment,gemini_description_fr}',
+                                    to_jsonb(%s::text),
+                                    true
+                                ),
+                                '{data,enrichment,gemini_keywords}',
+                                %s::jsonb,
                                 true
                             ),
-                            '{data,enrichment,gemini_description_fr}',
-                            to_jsonb(%s::text),
+                            '{data,enrichment,gemini_keywords_fr}',
+                            %s::jsonb,
                             true
                         )
                     WHERE entity_id = %s::uuid
@@ -478,6 +503,8 @@ def apply_updates(updates: list):
                         u["sector_macro"],
                         u["description_en"],
                         u["description_fr"],
+                        json.dumps(u["keywords_en"], ensure_ascii=False),
+                        json.dumps(u["keywords_fr"], ensure_ascii=False),
                         u["entity_id"],
                     ),
                 )
@@ -583,11 +610,11 @@ def main():
     entities = fetch_entities(limit=effective_limit)
     print(f"  Fetched: {len(entities)} entities")
 
-    # Filter entities that already have a description (unless --force)
+    # Filter entities missing any of the 4 enrichment fields (unless --force)
     if skip_existing:
-        needs_work = [e for e in entities if len(e["existing_description"]) < 10]
+        needs_work = [e for e in entities if not e.get("fully_enriched")]
         already_done_count = len(entities) - len(needs_work)
-        print(f"  Already have description: {already_done_count}")
+        print(f"  Already fully enriched (desc EN+FR + kws EN+FR): {already_done_count}")
         print(f"  Need enrichment: {len(needs_work)}")
     else:
         needs_work = entities
@@ -705,6 +732,15 @@ def main():
             new_sector = r.get("sector_macro", "").strip()
             desc_en = r.get("description_en", "").strip()
             desc_fr = r.get("description_fr", "").strip()
+            kws_en = r.get("keywords_en", []) or []
+            kws_fr = r.get("keywords_fr", []) or []
+            if not isinstance(kws_en, list):
+                kws_en = []
+            if not isinstance(kws_fr, list):
+                kws_fr = []
+            # Sanitize keywords: lowercase strings, strip empties, cap length
+            kws_en = [str(k).strip() for k in kws_en if k and str(k).strip()][:10]
+            kws_fr = [str(k).strip() for k in kws_fr if k and str(k).strip()][:10]
 
             # Validate sector
             if new_sector not in ALLOWED_SECTORS_SET:
@@ -730,6 +766,8 @@ def main():
                 "sector_macro": new_sector,
                 "description_en": desc_en,
                 "description_fr": desc_fr,
+                "keywords_en": kws_en,
+                "keywords_fr": kws_fr,
             })
             newly_done.add(eid)
             desc_ok += 1

@@ -115,6 +115,32 @@
 
 ---
 
+## Session 7-9 mai 2026 — Incident clé Gemini exposée + cleanup git history + hook gitleaks
+
+**Contexte** : projet Google Cloud `gen-lang-client-0091131679` (Better-ESG) suspendu pour "ressources piratées" + projet `gen-lang-client-0314106061` facturé ~73€ entre 1-4 mai sur `gemini-3-flash-preview`.
+
+**Cause 1 (Better-ESG)** : clé `[REDACTED-Gemini-key-was-here]` introduite le 12 déc 2025 (commit `693beb99`) dans `landing-page/script.js` puis "retirée" 13 min plus tard (commit `0e92bb8c`). Mais la clé est restée recoverable dans l'historique Git public ~5 mois → bots GitHub l'ont exploitée → suspension automatique pour activité abusive.
+
+**Cause 2 (gen-lang-client-0314106061)** : `aya/reclassify_and_enrich_vps.py` tournait sur le VPS avec :
+- Modèle `gemini-3-flash-preview` (preview, ~10-20× plus cher que `gemini-2.0-flash`)
+- BATCH_SIZE=5 au lieu de 20 (4× plus d'overhead prompt)
+- 4 scripts séparés (`enrich_with_gemini.py`, `enrich_keywords.py`, `enrich_keywords_fr.py`, `translate_to_fr.py`) → 4 appels Gemini par entité au lieu d'1
+→ ~73€ consommés en 4 jours pour ce que devait coûter ~$1.
+
+**Actions correctives appliquées (9 mai 2026)** :
+
+1. **Cleanup git history** via `git-filter-repo` (alternative moderne à BFG) : clé `AIzaSy...` remplacée par `***REMOVED***` dans tous les commits passés sur 4 branches (`main`, `feature/ayo-v4-evidence-based`, `feature/linkedin-marketing`, `fix/domain-xyz`). Force-push effectué. Backup miroir préservé dans `/tmp/ai-visionary-backup-*.git`.
+2. **Hook gitleaks** installé (`brew install gitleaks` + `.githooks/pre-commit` versionné dans le repo + `core.hooksPath = .githooks` configuré). Tout commit futur contenant un secret (`AIza...`, `sk-...`, etc.) est automatiquement bloqué.
+3. **Script `reclassify_and_enrich_vps.py` refactorisé** : modèle → `gemini-2.0-flash`, BATCH_SIZE → 20, prompt unique retournant 4 outputs (description EN/FR + keywords EN/FR), filtre skip si les 4 champs présents, jsonb_set 4-niveaux pour write Postgres VPS. Estimation coût : ~$0.50–$1 pour 25 860 entités (vs ~73€ avant).
+4. **2 mails de support** envoyés par Cyril : (a) Trust & Safety (Better-ESG) avec preuve fuite GitHub, (b) Cloud Support case 70874317 pour goodwill credit ~73€ avec full transparency sur cause Claude Code mal configuré.
+5. **Repo local resync** : `~/AI VISIONARY` reset sur nouveau `main` (SHA `ebe149f1`), modifs locales préservées via stash/pop.
+
+**Bloqueur actuel** : les 2 projets GCP sont suspendus (Better-ESG + gen-lang-client-0314106061), donc impossible de relancer le batch d'enrichissement VPS. En attente réponse Google.
+
+**Note résiduelle** : la clé exposée traîne encore dans 2 branches locales (`claude/festive-satoshi-169a07` + `claude/heuristic-ellis-da6d78`) qui ne sont pas sur GitHub. Pas un risque public, mais à nettoyer (rebase + `git gc --prune=now`) quand Cyril veut.
+
+---
+
 ## Session 1er mai 2026 — Securite Stripe Portal + desengorgement docs
 
 - **Fix faille H7 — Stripe Portal authentification** : `app/api/stripe/portal/route.ts` reecrit. Avant : check `sessionToken` truthy uniquement (n'importe quelle string passait). Apres : `verifyUpdateToken(token, entityId)` HMAC stateless (pattern aligne sur `/api/update-entity`, `/api/regenerate-files`, `/api/update-owner-email`). Stateless donc survit aux migrations Firestore→Supabase→Infomaniak. Code-reviewer subagent : 0 issue HIGH/CRITICAL. Aucun call site frontend (route etait dead code, donc 0 risque de regression).
