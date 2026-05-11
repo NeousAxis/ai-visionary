@@ -27,6 +27,49 @@ const getSupabase = (): any => {
 // Export for modules that need direct access (admin/logs, debug/clean)
 export const supabase = isSupabaseConfigured() ? createClient(supabaseUrl, supabaseKey) : null as any;
 
+// In-process caches for AYA registry reads — reduces Supabase Disk IO.
+// The full registry rarely changes (batch pushes are weekly).
+// Survives across warm Lambda/Edge invocations; cold starts re-fetch (acceptable).
+const AYA_ENTITIES_TTL_MS = 15 * 60 * 1000;
+const _ayaEntitiesCache = new Map<string, { ts: number; data: any[] }>();
+
+// 10 min TTL for filtered reads (sector/country landing pages — hit hard by SEO crawlers).
+// Shorter than full-registry TTL so new certifications surface faster.
+const AYA_BY_FILTER_TTL_MS = 10 * 60 * 1000;
+// Cap entries — high key cardinality under deep crawler pagination.
+// FIFO eviction via Map insertion order: oldest entry dropped when at cap.
+const AYA_BY_FILTER_MAX_ENTRIES = 1000;
+const _ayaByFilterCache = new Map<string, { ts: number; result: { data: any[]; total: number } }>();
+
+// Generation counter — bumped on every invalidation. Read paths capture a snapshot at
+// the start of their fetch and refuse to .set() if the generation changed mid-flight.
+// Prevents the classic race where a write's _clearAyaCaches() lands between a read's
+// cache miss and its .set(), and would otherwise be silently undone with a fresher ts.
+let _ayaCacheGen = 0;
+function _ayaCacheGenSnapshot(): number {
+    return _ayaCacheGen;
+}
+
+function _setAyaByFilterCache(key: string, result: { data: any[]; total: number }): void {
+    // Only evict when the key is new — Map.set on an existing key updates in place,
+    // so evicting would shrink the Map below cap for no reason.
+    if (!_ayaByFilterCache.has(key) && _ayaByFilterCache.size >= AYA_BY_FILTER_MAX_ENTRIES) {
+        const oldest = _ayaByFilterCache.keys().next().value;
+        if (oldest !== undefined) _ayaByFilterCache.delete(oldest);
+    }
+    _ayaByFilterCache.set(key, { ts: Date.now(), result });
+}
+
+// Invalidate both AYA caches — call after any write to aya_registry.
+// Bumps the generation counter so in-flight reads can't write stale data back.
+// Exported for callers that write directly via the raw supabase client (e.g. routes
+// that bypass the db.ts helpers).
+export function _clearAyaCaches(): void {
+    _ayaCacheGen++;
+    _ayaEntitiesCache.clear();
+    _ayaByFilterCache.clear();
+}
+
 // Type definition for analysis records
 type AnalysisRecord = {
     id: string;
@@ -322,6 +365,7 @@ export const database = {
                 console.error('❌ [Supabase] AYA Update Error:', error);
                 return;
             }
+            _clearAyaCaches();
             console.log(`💾 [Supabase] AYA Entity updated: ${entityId}`);
         } catch (error) {
             console.error('❌ [Supabase] AYA Update Error:', error);
@@ -350,6 +394,7 @@ export const database = {
                 console.error('❌ [Supabase] AYA updateEntityData Error:', error);
                 return false;
             }
+            _clearAyaCaches();
             console.log(`💾 [Supabase] AYA Entity data updated (safe): ${entityId}`);
             return true;
         } catch (error) {
@@ -362,16 +407,34 @@ export const database = {
      * Get all entities from AYA Registry (certified + indexed)
      * Sorted: payment_completed=true first, then by score DESC
      */
+    // In-process cache for getAyaEntities — reduces Supabase Disk IO pressure.
+    // The full registry rarely changes (batch pushes weekly), so a 15 min TTL is safe.
+    // Cache key includes the limit so different callers don't collide.
+    // Survives across warm Lambda/Edge invocations; cold starts re-fetch (acceptable).
     getAyaEntities: async (limit: number = 10000): Promise<any[]> => {
         if (!isSupabaseConfigured()) return [];
+
+        const cacheKey = `aya_entities_${limit}`;
+        const cached = _ayaEntitiesCache.get(cacheKey);
+        if (cached && Date.now() - cached.ts < AYA_ENTITIES_TTL_MS) {
+            return cached.data;
+        }
+
         const client = getSupabase();
         if (!client) return [];
+
+        // Snapshot the cache generation before starting the multi-page fetch. If a
+        // concurrent write calls _clearAyaCaches() between now and our final .set(),
+        // _ayaCacheGen will have changed and we'll skip the write to avoid pinning
+        // pre-write data with a post-write timestamp.
+        const startGen = _ayaCacheGenSnapshot();
 
         try {
             // Supabase limits to 1000 rows per query — paginate to get all
             const allData: any[] = [];
             const pageSize = 1000;
             let offset = 0;
+            let hadError = false;
 
             while (offset < limit) {
                 const { data, error } = await client
@@ -382,6 +445,7 @@ export const database = {
 
                 if (error) {
                     console.error('❌ [Supabase] Get AYA Entities Error:', error);
+                    hadError = true;
                     break;
                 }
 
@@ -391,6 +455,12 @@ export const database = {
                 offset += pageSize;
             }
 
+            // Only cache a fully-successful, non-empty result. Caching a partial or empty
+            // result on transient Supabase errors would pin a bad snapshot for the full TTL.
+            // Generation check guards against the in-flight write race.
+            if (!hadError && allData.length > 0 && _ayaCacheGenSnapshot() === startGen) {
+                _ayaEntitiesCache.set(cacheKey, { ts: Date.now(), data: allData });
+            }
             return allData;
         } catch (error) {
             console.error('❌ [Supabase] Get AYA Entities Error:', error);
@@ -577,6 +647,7 @@ export const database = {
                 console.error('❌ [Supabase] updateOwnerEmail Error:', error);
                 return false;
             }
+            _clearAyaCaches();
             console.log(`✅ [Supabase] owner_email updated for ${entityId}`);
             return true;
         } catch {
@@ -906,16 +977,43 @@ export const database = {
         offset?: number;
     }): Promise<{ data: any[]; total: number }> => {
         if (!isSupabaseConfigured()) return { data: [], total: 0 };
+
+        const { sector, country, limit = 100, offset = 0 } = options;
+        const cacheKey = `byfilter_${sector ?? ''}_${country ?? ''}_${limit}_${offset}`;
+        const cached = _ayaByFilterCache.get(cacheKey);
+        if (cached && Date.now() - cached.ts < AYA_BY_FILTER_TTL_MS) {
+            return cached.result;
+        }
+
         const client = getSupabase();
         if (!client) return { data: [], total: 0 };
 
-        const { sector, country, limit = 100, offset = 0 } = options;
+        // Snapshot generation before any read — see comment in getAyaEntities.
+        const startGen = _ayaCacheGenSnapshot();
 
         try {
-            let countQuery = client.from('aya_registry').select('*', { count: 'exact', head: true });
+            // Count query must mirror the data query's NSFW/garbage exclusions, otherwise
+            // total > data.length, pagination shows trailing empty pages, and JSON-LD
+            // numberOfItems lies to crawlers.
+            let countQuery = client
+                .from('aya_registry')
+                .select('*', { count: 'exact', head: true })
+                .not('display_name', 'ilike', '%porn%')
+                .not('display_name', 'ilike', '%xxx%')
+                .not('display_name', 'ilike', '%escort%')
+                .not('display_name', 'ilike', '%onlyfans%')
+                .not('display_name', 'ilike', "['%")
+                .not('display_name', 'ilike', '{{%');
             if (sector) countQuery = countQuery.eq('sector_macro', sector);
             if (country) countQuery = countQuery.eq('country_legal', country.toUpperCase());
-            const { count: total } = await countQuery;
+            const { count: total, error: countErr } = await countQuery;
+            // Count and data are separate Supabase HTTP requests. If count fails silently
+            // (Supabase returns soft errors, not throws), caching { data: [N rows], total: 0 }
+            // would make landing pages 404 for the full TTL. Bail without caching.
+            if (countErr || total == null) {
+                if (countErr) console.error('❌ [Supabase] getAyaEntitiesByFilter count error:', countErr);
+                return { data: [], total: 0 };
+            }
 
             let query = client
                 .from('aya_registry')
@@ -938,7 +1036,12 @@ export const database = {
                 return { data: [], total: 0 };
             }
 
-            return { data: data || [], total: total || 0 };
+            const result = { data: data || [], total };
+            // Skip cache write if a write invalidated mid-flight (race guard).
+            if (_ayaCacheGenSnapshot() === startGen) {
+                _setAyaByFilterCache(cacheKey, result);
+            }
+            return result;
         } catch (error) {
             console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
             return { data: [], total: 0 };
@@ -1161,6 +1264,7 @@ export const database = {
                 return false;
             }
 
+            _clearAyaCaches();
             console.log(`💾 [Supabase] Lifecycle updated for entity: ${entityId}`);
             return true;
         } catch (error) {
@@ -1242,6 +1346,7 @@ export const database = {
                 return [];
             }
 
+            _clearAyaCaches();
             console.log(`⏰ [Supabase] Marked ${entityIds.length} entities as expired`);
             return entityIds;
         } catch (error) {

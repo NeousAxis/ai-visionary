@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { db, supabase } from '@/lib/db';
+import { db, supabase, _clearAyaCaches } from '@/lib/db';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { verifyUpdateToken } from '@/lib/update-token';
@@ -58,10 +58,19 @@ export async function POST(req: NextRequest) {
         const persistCustomerId = async (cid: string) => {
             try {
                 if (supabase) {
-                    await supabase
+                    // Supabase reports soft failures (RLS, constraints, schema) via the
+                    // resolved { error } property without throwing. Without this check
+                    // the cache would be needlessly cleared and the success log emitted
+                    // even on failure. Convention matches the 5 write paths in lib/db.ts.
+                    const { error } = await supabase
                         .from('aya_registry')
                         .update({ stripe_customer_id: cid })
                         .eq('entity_id', entityId);
+                    if (error) {
+                        logger.warn('PORTAL_PERSIST_FAILED', `Supabase update failed: ${error.message}`);
+                        return;
+                    }
+                    _clearAyaCaches();
                     logger.info('PORTAL_CUSTOMER_PERSISTED', `Updated stripe_customer_id for entity ${entityId}`);
                 }
             } catch (e: any) {
