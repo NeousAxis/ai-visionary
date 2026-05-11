@@ -179,22 +179,23 @@ function mergeLegal(a: LegalResult, b: LegalResult): LegalResult {
 }
 
 /**
- * Run an agent 3x in parallel and merge results to stabilize LLM variance.
+ * Run an agent. Historically did 3x in parallel to stabilize Gemini variance.
+ * With Infomaniak/Apertus + json_schema mode, output is deterministic enough
+ * that 1 call is sufficient — restores 2-3x performance.
  */
 async function runAgentWithRetry<T>(
   name: AgentName,
   fn: () => Promise<T>,
-  merge: (a: T, b: T) => T,
+  _merge: (a: T, b: T) => T,
 ): Promise<{ result: T | null; event: AgentEvent }> {
   const start = Date.now();
   try {
-    const [r1, r2, r3] = await Promise.all([fn(), fn(), fn()]);
-    const merged = merge(merge(r1, r2), r3);
+    const result = await fn();
     const ms = Date.now() - start;
-    console.log(`[retry-merge] ${name}: merged 3 results in ${ms}ms`);
+    console.log(`[agent] ${name}: completed in ${ms}ms`);
     return {
-      result: merged,
-      event: { agent: name, status: 'done', data: merged as any, durationMs: ms },
+      result,
+      event: { agent: name, status: 'done', data: result as any, durationMs: ms },
     };
   } catch (err) {
     const ms = Date.now() - start;
@@ -299,81 +300,49 @@ export async function runAllAgents(
   // Build enriched content for agents that need DOM context (links + footer + text)
   const enrichedContent = buildEnrichedContent(renderedHtml, textContent);
 
-  // Step 2: Run agents SEQUENTIALLY — so the client sees each one work in real-time
+  // Step 2: Run all 8 agents IN PARALLEL — emit 'running' for all upfront so the UI
+  // sees the cards spin simultaneously, then emit each 'done' as it completes.
+  // Was sequential (~30-40s); parallel cuts to ~8-12s on Infomaniak Apertus.
   const events: AgentEvent[] = [];
-
-  // Agent 1: JSON-LD (deterministic) — needs renderedHtml (DOM with <script type="application/ld+json">)
-  onEvent?.({ agent: 'detect-jsonld', status: 'running', data: null, durationMs: 0 });
-  const jsonldRun = await runAgent('detect-jsonld', () => detectJsonLd(renderedHtml));
-  events.push(jsonldRun.event);
-  onEvent?.(jsonldRun.event);
-
-  // Agent 2: Contact (LLM) — needs enrichedContent (footer has email, phone, mailto links)
-  onEvent?.({ agent: 'detect-contact', status: 'running', data: null, durationMs: 0 });
-  const contactRun = await runAgent('detect-contact', () => detectContact(enrichedContent));
-  events.push(contactRun.event);
-  onEvent?.(contactRun.event);
-
-  // Agent 3: Location (LLM) — needs enrichedContent (footer has address, city, country)
-  onEvent?.({ agent: 'detect-location', status: 'running', data: null, durationMs: 0 });
-  const locationRun = await runAgent('detect-location', () =>
-    detectLocation(enrichedContent, jsonldRun.result || undefined, fetchResult.url)
-  );
-  events.push(locationRun.event);
-  onEvent?.(locationRun.event);
-
-  // Agent 4: Services (LLM) — textContent is enough (services are in page body)
-  onEvent?.({ agent: 'detect-services', status: 'running', data: null, durationMs: 0 });
-  const servicesRun = await runAgentWithRetry('detect-services', () => detectServices(textContent), mergeServices);
-  events.push(servicesRun.event);
-  onEvent?.(servicesRun.event);
-
-  // Agent 5: Legal/Compliance (LLM + deterministic merge)
-  // Step A: Deterministic regex scan on BOTH rawHtml + renderedHtml (catches SPA JS bundles)
-  const deterministicLegal = detectLegalLinksDeterministic([fetchResult.rawHtml, renderedHtml]);
-  console.log(`[orchestrator] Deterministic legal: policies=[${deterministicLegal.policies.join(', ')}], frameworks=[${deterministicLegal.frameworks.join(', ')}]`);
-
-  // Step B: LLM extraction on enrichedContent (retry x3 for stability)
-  onEvent?.({ agent: 'detect-legal', status: 'running', data: null, durationMs: 0 });
-  const legalRun = await runAgentWithRetry('detect-legal', () => detectLegal(enrichedContent), mergeLegal);
-
-  // Step C: Merge deterministic findings into LLM results (union, no duplicates)
-  if (legalRun.result) {
-    legalRun.result.policies = unionStrings(legalRun.result.policies, deterministicLegal.policies);
-    legalRun.result.frameworks = unionStrings(legalRun.result.frameworks, deterministicLegal.frameworks);
-    // If we found policies/frameworks deterministically, ensure q >= 0.5
-    if ((deterministicLegal.policies.length + deterministicLegal.frameworks.length) > 0 && legalRun.result.q === 0) {
-      legalRun.result.q = 0.5;
-    }
-    // Update the event data to reflect merged results
-    legalRun.event.data = legalRun.result;
-  }
-
-  events.push(legalRun.event);
-  onEvent?.(legalRun.event);
-
-  // Agent 6: Security (deterministic headers + LLM text) — textContent is enough
-  onEvent?.({ agent: 'detect-security', status: 'running', data: null, durationMs: 0 });
-  const securityRun = await runAgent('detect-security', () => detectSecurity(textContent, headers));
-  events.push(securityRun.event);
-  onEvent?.(securityRun.event);
-
-  // Agent 7: Social (deterministic) — search both rawHtml AND renderedHtml for social URLs
-  // SPA sites may have social links in rawHtml shell that Jina/markdown doesn't preserve
-  onEvent?.({ agent: 'detect-social', status: 'running', data: null, durationMs: 0 });
   const combinedHtmlForSocial = fetchResult.rawHtml !== renderedHtml
     ? `${fetchResult.rawHtml}\n${renderedHtml}`
     : renderedHtml;
-  const socialRun = await runAgent('detect-social', () => detectSocial(combinedHtmlForSocial));
-  events.push(socialRun.event);
-  onEvent?.(socialRun.event);
-
-  // Agent 8: Pedagogy — consumes renderedHtml (no additional Jina calls)
   console.log(`[orchestrator] Passing renderedHtml to pedagogy: ${renderedHtml.length} chars, sourceType=${sourceType}, has <footer>: ${/<footer/i.test(renderedHtml)}`);
-  onEvent?.({ agent: 'detect-pedagogy', status: 'running', data: null, durationMs: 0 });
-  const pedagogyRun = await runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml));
-  events.push(pedagogyRun.event);
-  onEvent?.(pedagogyRun.event);
+
+  // Deterministic legal regex (sync, instant)
+  const deterministicLegal = detectLegalLinksDeterministic([fetchResult.rawHtml, renderedHtml]);
+  console.log(`[orchestrator] Deterministic legal: policies=[${deterministicLegal.policies.join(', ')}], frameworks=[${deterministicLegal.frameworks.join(', ')}]`);
+
+  // Emit all 'running' events upfront (UI shows 8 spinners immediately)
+  const agentNames: AgentName[] = ['detect-jsonld', 'detect-contact', 'detect-location', 'detect-services', 'detect-legal', 'detect-security', 'detect-social', 'detect-pedagogy'];
+  for (const name of agentNames) {
+    onEvent?.({ agent: name, status: 'running', data: null, durationMs: 0 });
+  }
+
+  // Run jsonld first (sync, fast, feeds location)
+  const jsonldRun = await runAgent('detect-jsonld', () => detectJsonLd(renderedHtml));
+  events.push(jsonldRun.event); onEvent?.(jsonldRun.event);
+
+  // Run the 7 remaining agents in parallel — emit 'done' as each settles
+  const parallelRuns = await Promise.all([
+    runAgent('detect-contact', () => detectContact(enrichedContent)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+    runAgent('detect-location', () => detectLocation(enrichedContent, jsonldRun.result || undefined, fetchResult.url)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+    runAgentWithRetry('detect-services', () => detectServices(textContent), mergeServices).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+    runAgentWithRetry('detect-legal', () => detectLegal(enrichedContent), mergeLegal).then(r => {
+      // Merge deterministic findings into LLM result
+      if (r.result) {
+        r.result.policies = unionStrings(r.result.policies, deterministicLegal.policies);
+        r.result.frameworks = unionStrings(r.result.frameworks, deterministicLegal.frameworks);
+        if ((deterministicLegal.policies.length + deterministicLegal.frameworks.length) > 0 && r.result.q === 0) r.result.q = 0.5;
+        r.event.data = r.result;
+      }
+      events.push(r.event); onEvent?.(r.event); return r;
+    }),
+    runAgent('detect-security', () => detectSecurity(textContent, headers)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+    runAgent('detect-social', () => detectSocial(combinedHtmlForSocial)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+    runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+  ]);
+  const [contactRun, locationRun, servicesRun, legalRun, securityRun, socialRun, pedagogyRun] = parallelRuns;
 
   const results: AllAgentResults = {
     contact: contactRun.result || { email: null, phone: null, q: 0 },
@@ -464,7 +433,7 @@ export async function mergeAgentResultsToExtract(
 Return ONLY JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
 Do NOT invent.`;
 
-    // Retry+merge: 3 parallel LLM calls to stabilize variance
+    // Single LLM call (was 3x for Gemini variance — Infomaniak json_schema is deterministic enough)
     type ProcessData = {
       process_steps?: string[];
       delivery_mode?: string;
@@ -472,21 +441,15 @@ Do NOT invent.`;
       quality_assurance?: string;
       indicators?: string[];
     };
-    const [raw1, raw2, raw3] = await Promise.all([
-      llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}'),
-      llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}'),
-      llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}'),
-    ]);
-    const data1 = parseJson<ProcessData>(raw1);
-    const data2 = parseJson<ProcessData>(raw2);
-    const data3 = parseJson<ProcessData>(raw3);
-    console.log('[retry-merge] process/indicators: merged 3 results');
+    const raw = await llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}');
+    const data = parseJson<ProcessData>(raw);
+    console.log('[agent] process/indicators: completed');
 
-    processSteps = unionStrings(unionStrings(data1?.process_steps || [], data2?.process_steps || []), data3?.process_steps || []);
-    deliveryMode = keepLongest(keepLongest(data1?.delivery_mode || '', data2?.delivery_mode || ''), data3?.delivery_mode || '');
-    if (data1?.geographies || data2?.geographies || data3?.geographies) geographies = keepLongest(keepLongest(data1?.geographies || '', data2?.geographies || ''), data3?.geographies || '');
-    qaText = keepLongest(keepLongest(data1?.quality_assurance || '', data2?.quality_assurance || ''), data3?.quality_assurance || '');
-    indicators = unionStrings(unionStrings(data1?.indicators || [], data2?.indicators || []), data3?.indicators || []);
+    processSteps = data?.process_steps || [];
+    deliveryMode = data?.delivery_mode || '';
+    if (data?.geographies) geographies = data.geographies;
+    qaText = data?.quality_assurance || '';
+    indicators = data?.indicators || [];
   } catch { /* fallback: empty */ }
 
   // --- Industry Keywords = LLM cible (for competitor matching against AYA gemini_keywords) ---

@@ -408,8 +408,12 @@ export default function DiagnosticV2Page() {
         setOtpVerified(true);
         setEmailVerified(true);
         setOtpLoading(false);
-        // Auto-trigger scan immediately after verification
-        startScan(true);
+        // Only re-scan if the scan never completed (e.g. user landed on OTP step
+        // without having scanned first). Otherwise the OTP just unlocks payment —
+        // the scan results from step 2 are still valid.
+        if (!score) {
+          startScan(true);
+        }
         return;
       } else {
         setOtpError(t('otpError'));
