@@ -15,15 +15,40 @@ Extract:
 Return ONLY JSON: {"email": "x@y.com" or null, "phone": "+41..." or null, "hasContactForm": true/false}
 Do NOT invent. If not found, return null.`;
 
+// Strip non-digit characters for phone literal-match comparison
+function stripPhone(s: string): string {
+  return s.replace(/[^\d]/g, '');
+}
+
 export async function detectContact(content: string): Promise<ContactResult> {
   try {
     const raw = await llmExtract(PROMPT, content, 10000);
     const data = parseJson<{ email?: string | null; phone?: string | null; hasContactForm?: boolean }>(raw);
     if (!data) return { email: null, phone: null, q: 0 };
 
-    const email = data.email || null;
-    const phone = data.phone || null;
+    let email = data.email || null;
+    let phone = data.phone || null;
     const hasContactForm = data.hasContactForm || false;
+
+    // ANTI-HALLUCINATION: AYO doctrine says "ne jamais inventer". Validate that the
+    // email and phone returned are LITERALLY present in the source content.
+    // Models (especially Apertus) sometimes fabricate plausible emails from author
+    // names + site domain (e.g. cyril.leger@re-ge-nere.app from "Cyril Leger" on the page).
+    if (email) {
+      const lcContent = content.toLowerCase();
+      if (!lcContent.includes(email.toLowerCase())) {
+        console.warn(`[detect-contact] HALLUCINATION REJECTED: email "${email}" not found in source content. Dropping.`);
+        email = null;
+      }
+    }
+    if (phone) {
+      const digits = stripPhone(phone);
+      // Need at least 7 digits and they must be in the content (allowing for formatting).
+      if (digits.length < 7 || !stripPhone(content).includes(digits)) {
+        console.warn(`[detect-contact] HALLUCINATION REJECTED: phone "${phone}" not found in source content. Dropping.`);
+        phone = null;
+      }
+    }
 
     let q: Quality = 0;
     if (email && phone) q = 1;
