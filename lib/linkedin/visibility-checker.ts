@@ -12,23 +12,16 @@
  * Zalando sortait en 2e position derriere ASOS — donc inadequate pour le post.
  */
 
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { llmJson } from '@/lib/llm-provider';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-const GEMINI_TIMEOUT_MS = 20_000;
+const HAS_LLM = !!(process.env.INFOMANIAK_AI_TOKEN || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY);
+const LLM_TIMEOUT_MS = 20_000;
 
 export interface VisibilityResult {
     visible: boolean;
     position?: number;          // 1-N si listed, undefined sinon
     cited_companies: string[];  // Top 5 cites par le LLM
     error?: string;             // Si la verification a echoue (par defaut on skip = visible:true)
-}
-
-function getModel() {
-    if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY missing');
-    const google = createGoogleGenerativeAI({ apiKey: GEMINI_API_KEY });
-    return google('gemini-3-flash-preview');
 }
 
 /**
@@ -55,9 +48,9 @@ export async function checkVisibility(opts: {
     sectorPhrase: string;
     country?: string;
 }): Promise<VisibilityResult> {
-    if (!GEMINI_API_KEY) {
-        // En l'absence de la cle, on est conservateur : on assume visible (skip)
-        return { visible: true, cited_companies: [], error: 'GEMINI_API_KEY missing' };
+    if (!HAS_LLM) {
+        // En l'absence d'une cle LLM, on est conservateur : on assume visible (skip)
+        return { visible: true, cited_companies: [], error: 'No LLM provider configured' };
     }
 
     const where = opts.country ? ` in ${opts.country}` : '';
@@ -66,10 +59,9 @@ export async function checkVisibility(opts: {
 
     try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+        const timer = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
 
-        const { text } = await generateText({
-            model: getModel(),
+        const { text } = await llmJson({
             prompt,
             temperature: 0,
             abortSignal: controller.signal,
@@ -126,7 +118,7 @@ export async function checkVisibilityChatGPT(opts: {
 
     try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+        const timer = setTimeout(() => controller.abort(), LLM_TIMEOUT_MS);
 
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',

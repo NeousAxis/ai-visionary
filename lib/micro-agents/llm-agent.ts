@@ -1,19 +1,11 @@
 // lib/micro-agents/llm-agent.ts — Shared LLM caller for micro-agents
-// Each agent = 1 focused Gemini Flash call + Zod validation
+//
+// Thin wrapper over lib/llm-provider.ts that adds the agents' content-truncation
+// strategy. Provider routing (Infomaniak Apertus vs Gemini fallback) and JSON-mode
+// enforcement live in lib/llm-provider.ts. The micro-agents' system prompts stay
+// untouched — JSON shape is guaranteed at the API level (json_schema on Infomaniak).
 
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
-
-let _model: ReturnType<ReturnType<typeof createGoogleGenerativeAI>> | null = null;
-
-function getModel() {
-  if (_model) return _model;
-  const key = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '').trim();
-  if (!key) throw new Error('No Gemini API key found (GEMINI_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY)');
-  const google = createGoogleGenerativeAI({ apiKey: key });
-  _model = google('gemini-3-flash-preview');
-  return _model;
-}
+import { llmJson, llmProvider } from '@/lib/llm-provider';
 
 /**
  * Run a focused LLM extraction.
@@ -26,7 +18,6 @@ export async function llmExtract(
   content: string,
   maxChars = 8000,
 ): Promise<string> {
-  const model = getModel();
   // Smart truncation: keep start (70%) + end (30%) to preserve footer content
   // Footer often contains critical data: legal pages, contact, address, copyright
   let truncated: string;
@@ -38,30 +29,43 @@ export async function llmExtract(
     truncated = content;
   }
 
+  const provider = llmProvider();
   try {
-    console.log(`[llm-agent] Calling Gemini with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
-    const { text } = await generateText({
-      model,
-      temperature: 0,
-      maxOutputTokens: 4000,
+    console.log(`[llm-agent] Calling ${provider} with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
+    const { text } = await llmJson({
       system: systemPrompt,
       prompt: truncated,
+      temperature: 0,
+      maxTokens: 4000,
     });
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
     return text;
   } catch (err) {
-    console.error('[llm-agent] Gemini call FAILED:', err instanceof Error ? err.message : err);
+    console.error(`[llm-agent] ${provider} call FAILED:`, err instanceof Error ? err.message : err);
     throw err;
   }
 }
 
 /**
  * Parse JSON from LLM response, stripping markdown code fences if present.
+ * Apertus sometimes wraps the JSON in {"response": {...}} — unwrap when that is
+ * the sole top-level key and its value is an object/array (safe heuristic).
  */
 export function parseJson<T>(text: string): T | null {
+  const tryUnwrap = (parsed: any): T => {
+    if (
+      parsed && typeof parsed === 'object' && !Array.isArray(parsed) &&
+      Object.keys(parsed).length === 1 && 'response' in parsed &&
+      parsed.response !== null && typeof parsed.response === 'object'
+    ) {
+      return parsed.response as T;
+    }
+    return parsed as T;
+  };
+
   try {
     const cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
-    return JSON.parse(cleaned);
+    return tryUnwrap(JSON.parse(cleaned));
   } catch {
     // Try to fix truncated JSON by closing brackets
     try {
@@ -76,7 +80,7 @@ export function parseJson<T>(text: string): T | null {
       for (let i = 0; i < arrOpens - arrCloses; i++) fixed += ']';
       for (let i = 0; i < opens - closes; i++) fixed += '}';
       console.log('[parseJson] Fixed truncated JSON, attempting parse...');
-      return JSON.parse(fixed);
+      return tryUnwrap(JSON.parse(fixed));
     } catch {
       console.error('[parseJson] Failed to parse even after fix attempt:', text.substring(0, 200));
       return null;
