@@ -16,7 +16,11 @@
 | 25 | Patcher `aya/fetch_sirene.py` rate limit (HTTP 429) | Moyenne | REQUEST_DELAY 0.4s → 1.5s + retry exponentiel + MAX_PAGES_PER_CODE 8 → 4 |
 | 26 | Trouver alternative Zefix CH (401 auth sur `/search`) | Moyenne | Candidate : opendata.swiss, Swiss Startup Map, OpenCorporates. Tranco a deja 3277 .ch, pas urgent |
 | 28 | thepiratebay.se + politique warez | Moyenne | EN ATTENTE — Cyril a reporte la decision (14 avril). Pas dans blocklist pour l'instant |
-| MV | **Migration Vercel → VPS Infomaniak (100% suisse)** | Critique | En cours. 13 etapes documentees dans `MIGRATION.md`. ~6-7h de travail. Cyril decide du planning. |
+| MV | ~~Migration Vercel → VPS Infomaniak (100% suisse)~~ | ✅ **DONE 11 mai 2026** | Bascule effectuée. DNS `ai-visionary.xyz` + `www` pointent sur VPS Infomaniak `83.228.229.212`. Cert Let's Encrypt étendu. nginx + cron jobs configurés. Vercel à désactiver après 24-48h surveillance. |
+| MV+ | **Migration totale `aya_registry` Supabase → Postgres VPS** | ✅ **DONE 11 mai 2026** | 4 437 entités dumped + importées (26 254 total VPS, 5 certifiées). `lib/db.ts` refactor : reads/writes via `lib/db-local-pg.ts` quand `VPS_PG_PASSWORD` set. PR #4 merged (`a505aa5d`). |
+| MV.cleanup | **Désactiver Vercel + retirer auto-deploy GitHub** | Moyenne | Attendre 24-48h surveillance VPS, puis : (a) suspendre projet Vercel, (b) retirer webhook GitHub Vercel, (c) supprimer record DNS `beta.ai-visionary.xyz`. |
+| MV.cleanup2 | **Migration Supabase opérationnelles → Postgres VPS** (optionnel) | Basse | Reste `analyses`, `scan_states`, `system_logs`, `otp_codes`, `sessions`, `aya_api_analytics` sur Supabase. Pas urgent (data short-lived). À faire si quota Supabase devient problématique ou pour doctrine 100% suisse stricte. |
+| MV.cleanup3 | **Recharger fichier JSON `regenereplus.ch`** | Critique post-vidéo | Cyril a supprimé regenereplus.ch de Supabase + VPS pour faire vidéo démo. Recharger après tournage via Supabase REST ou `/api/admin/enrich`. Cyril a le fichier JSON local. |
 | 30 | Configurer Newsletter Infomaniak (50k credits/mois) | Haute | En attente des codes. Adapter template email ou utiliser API Newsletter Infomaniak |
 | 31 | Setup kSuite Business 3 users @ai-visionary.com | Moyenne | En attente des codes. 3 boites email pro |
 | 36 | Deblocage compte Newsletter Infomaniak | Critique | Reponse Infomaniak recue (28 avril) avec 4 questions. Reponse honnete envoyee. Newsletter ne sera utilisee qu'avec une vraie base opt-in. En attente confirmation Infomaniak. |
@@ -69,6 +73,11 @@
 | H7 | Stripe Portal authentification HMAC + auto-migration TEST→LIVE | 1er mai 2026 (commit `2ea71c6a`) |
 | — | Désengorgement CLAUDE.md → STATE/MIGRATION/TODO/COSTS.md | 1er mai 2026 (commit `2ea71c6a`) |
 | — | Alignement hardcodes "4400+/887" → "30000+/30298" | 1er mai 2026 (commit `35806291`) |
+| — | Fix Supabase Disk IO (cache mémoire `aya_registry`) + 10 bugs `/ultrareview` | 11 mai 2026 (PR #1, commit `a77ac36f`) |
+| — | Migration LLM Gemini → Infomaniak AI (`lib/llm-provider.ts`, Apertus puis Ministral-3-14B) | 11 mai 2026 (PR #2, commit `7d880762`) |
+| — | Perf diagnostic V2 : 2 min → 19s (parallélisation 8 agents + retry x3 supprimé + double-scan supprimé + anti-hallucination email/phone) | 11 mai 2026 (PR #3, commit `75126da8`) |
+| MV | Migration hosting Vercel → VPS Infomaniak (DNS switch, TLS, nginx, cron jobs) | 11 mai 2026 |
+| MV+ | Migration `aya_registry` Supabase → Postgres VPS (4 437 entités + refactor `lib/db.ts`) | 11 mai 2026 (PR #4, commit `a505aa5d`) |
 
 ---
 

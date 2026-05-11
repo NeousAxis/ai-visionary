@@ -83,6 +83,52 @@
 
 ---
 
+## Session 11 mai 2026 — Bascule prod 100% suisse (hosting + LLM + DB aya_registry)
+
+**Contexte** : matin = alerte Supabase Disk IO Budget en cours d'épuisement (incident Tranco rescoring egress en grace period expiré le 7 mai). Pivot complet vers infrastructure 100% suisse en une session.
+
+### Étape 1 — Fix Supabase Disk IO (PR #1, commit `a77ac36f`)
+- Cache mémoire in-process sur `getAyaEntities` (15min TTL) et `getAyaEntitiesByFilter` (10min TTL)
+- 3 passes `/ultrareview` → 10 bugs trouvés/corrigés (cache poisoning, race condition, mutation cache, NSFW count mismatch, unbounded eviction, no invalidation, external writers, stripe error check, generation counter, deep-clone enrichment)
+
+### Étape 2 — Migration LLM Gemini → Infomaniak AI (PR #2, commit `7d880762`)
+- Nouveau `lib/llm-provider.ts` : `llmJson` (json_schema mode) + `llmText` (free text)
+- Provider routing implicite via `INFOMANIAK_AI_TOKEN`
+- Migration des 4 call sites Gemini : `lib/micro-agents/llm-agent.ts`, `app/api/chat/route.ts`, `lib/ayo-semantics.ts`, `lib/linkedin/visibility-checker.ts` (ChatGPT path conservé pour cross-check)
+- Modèle initial Apertus-70B (pure swiss-ai) puis switch sur **Ministral-3-14B** pour latence (`mistralai/Ministral-3-14B-Instruct-2512`, ~5x plus rapide, hosted Suisse Infomaniak)
+
+### Étape 3 — Perf diagnostic V2 (PR #3, commit `75126da8`)
+- 8 micro-agents **en parallèle** via `Promise.all` (étaient séquentiels)
+- **Retry x3 supprimé** (services, legal, process — json_schema rend l'output deterministe)
+- **Double-scan post-OTP supprimé** : `startScan(true)` après verify-OTP était lancé même si `score` déjà calculé
+- **Anti-hallucination email/phone** dans `detect-contact.ts` : si l'email retourné par le LLM n'est pas littéralement dans le HTML source → rejeté avec warning "HALLUCINATION REJECTED" (doctrine AYO "n'invente rien")
+- **Résultat** : diagnostic E2E **2 min → 19s** (~6x plus rapide)
+
+### Étape 4 — Bascule hosting Vercel → VPS Infomaniak
+- DNS Infomaniak : `ai-visionary.xyz` A `216.198.79.1` (Vercel) → `83.228.229.212` (VPS), `www` CNAME Vercel → A VPS (TTL 60s)
+- Certbot `--nginx --expand` : SAN ajouté pour `ai-visionary.xyz` + `www.*` (en plus de `beta.*`), Let's Encrypt valide jusqu'au 9 août 2026
+- nginx config : `proxy_read_timeout 300s`, `proxy_buffering off` (pour SSE longs)
+- 3 cron jobs Linux ajoutés sur le VPS : `expire-entities` (hourly), `expiry-reminders` (07:00 UTC), `review-reminders` (07:05 UTC) via curl localhost:3000 avec Bearer CRON_SECRET
+- Env vars sync local → VPS (merge): 7 vars critiques manquantes ajoutées (SMTP_*, NEXT_PUBLIC_BASE_URL, STRIPE_PRICE_*, etc). Stripe LIVE keys restaurées depuis Vercel après sync overrode par les test keys local.
+
+### Étape 5 — Migration totale `aya_registry` Supabase → Postgres VPS (PR #4, commit `a505aa5d`)
+- Dump des 4 437 entités Supabase via SDK REST (paginé 1000) → JSON 22 MB
+- ALTER TABLE VPS : `asr_score` INTEGER → NUMERIC(5,1), +10 colonnes manquantes (admin_*, owner_email, pack_type, subscription_*, etc.)
+- Import via Python `psycopg2` avec ON CONFLICT UPDATE → 394 nouvelles + 4 043 updated, 0 erreurs
+- **Total VPS** : 26 254 entités (5 certifiées : WHTG1, Global Workflow, Association Éclore, AI VISIONARY, API Glossaries)
+- `lib/db-local-pg.ts` étendu : `localPgUpsertEntity`, `localPgUpdateEntity`, `localPgGetEntityBySubscriptionId`, `localPgMarkEntitiesExpired`, `localPgGetAyaEntities`, `LocalPgStats` enrichie
+- `lib/db.ts` : early-return VPS-only sur toutes les fonctions `aya_registry` (reads + writes) quand `isLocalPgConfigured()`
+- Supabase rows `aya_registry` **gardées en backup** (pas de DELETE) pour rollback eventuel
+- Live tests post-bascule (https://ai-visionary.xyz) : `/api/aya/stats` 67ms, `/api/aya/search` 100ms, pages SSR `/aya/sector/*` 150-180ms, diagnostic E2E anthropic.com 19s
+
+### Reliquats
+- Vercel reste actif 24-48h pour surveillance, puis désactivation manuelle
+- DNS staging `beta.ai-visionary.xyz` à supprimer après confiance prod établie
+- Tables Supabase opérationnelles (`analyses`, `scan_states`, `system_logs`, `otp_codes`, `sessions`, `aya_api_analytics`) restent sur Supabase (migration plus tard si besoin)
+- DELETE pour démo : entité `regenereplus.ch` (entity_id `48147436-...`) supprimée de Supabase pour permettre re-scan en vidéo démo. Fichier JSON de la fiche conservé par Cyril pour rechargement post-démo.
+
+---
+
 ## Sessions 2-3 mai 2026 — Pipeline LinkedIn marketing (branche `feature/linkedin-marketing`)
 
 **Contexte** : Cyril veut poster automatiquement 3x/jour sur LinkedIn des constats d'AI-readability sur des entreprises connues (sans ASR). Pas de page entreprise → pas d'API LinkedIn officielle → tentative via Playwright headless.
@@ -192,12 +238,16 @@ Ces clés sont la cause probable du pic 1 413,62 CHF sur Gemini API : exposées 
 
 ## Référence rapide
 
-| Métrique | Valeur (28 avril 2026) |
-|----------|------------------------|
-| Entités AYA totales (live) | 30 298 |
-| - Supabase (legacy/certifiées) | 4 438 |
-| - Postgres VPS (Tranco scrapées) | 25 860 |
+| Métrique | Valeur (11 mai 2026) |
+|----------|----------------------|
+| Entités AYA totales (live, Postgres VPS) | **26 254** |
+| - Issues du dump Supabase (legacy/certifiées) | 4 437 (394 nouvelles + 4 043 overlap déjà sur VPS) |
+| - Issues du scraping Tranco EU | ~25 860 |
 | Pays | 73+ |
-| ASR certifiés | 4 |
+| ASR certifiés (`payment_completed=true`) | **5** (WHTG1, Global Workflow, Éclore, AI VISIONARY, API Glossaries) |
 | JSONs locaux dans `aya/data/` | ~46 000 |
 | Domaines Tranco restants à scraper | ~110 000 (11 batches de 10k) |
+| Hosting | VPS Infomaniak (IP `83.228.229.212`) |
+| LLM | Infomaniak AI / Ministral-3-14B (`mistralai/Ministral-3-14B-Instruct-2512`) |
+| DB `aya_registry` | Postgres VPS local (`aya_local`) |
+| DB tables operationnelles | Supabase (residuel) |
