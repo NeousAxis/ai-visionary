@@ -265,6 +265,9 @@ export async function localPgGetEntitiesByFilter(options: {
 
 export type LocalPgStats = {
     total: number;
+    total_entities: number;
+    certified_count: number;
+    indexed_count: number;
     scores: { average: number; min: number; max: number; median: number };
     sectors: { sector: string; count: number }[];
     countries: { country: string; count: number }[];
@@ -276,6 +279,9 @@ export type LocalPgStats = {
 export async function localPgGetStats(): Promise<LocalPgStats> {
     const empty: LocalPgStats = {
         total: 0,
+        total_entities: 0,
+        certified_count: 0,
+        indexed_count: 0,
         scores: { average: 0, min: 0, max: 0, median: 0 },
         sectors: [],
         countries: [],
@@ -284,9 +290,12 @@ export async function localPgGetStats(): Promise<LocalPgStats> {
     if (!pool) return empty;
 
     try {
-        const [totalRes, scoreRes, sectorRes, countryRes] = await Promise.all([
+        const [totalRes, certifiedRes, scoreRes, sectorRes, countryRes] = await Promise.all([
             pool.query<{ cnt: string }>(
                 `SELECT COUNT(*) AS cnt FROM aya_registry`
+            ),
+            pool.query<{ cnt: string }>(
+                `SELECT COUNT(*) AS cnt FROM aya_registry WHERE payment_completed = true`
             ),
             pool.query<{ avg: string; min_s: string; max_s: string; med: string }>(
                 `SELECT
@@ -316,9 +325,14 @@ export async function localPgGetStats(): Promise<LocalPgStats> {
         ]);
 
         const s = scoreRes.rows[0];
+        const total = parseInt(totalRes.rows[0]?.cnt ?? '0', 10);
+        const certified = parseInt(certifiedRes.rows[0]?.cnt ?? '0', 10);
 
         return {
-            total: parseInt(totalRes.rows[0]?.cnt ?? '0', 10),
+            total,
+            total_entities: total,
+            certified_count: certified,
+            indexed_count: total - certified,
             scores: {
                 average: s ? parseInt(s.avg   ?? '0', 10) : 0,
                 min:     s ? parseInt(s.min_s ?? '0', 10) : 0,
@@ -481,6 +495,99 @@ export async function localPgGetSectorCountryCombinations(): Promise<
         }));
     } catch (err) {
         console.error('[db-local-pg] localPgGetSectorCountryCombinations error:', err);
+        return [];
+    }
+}
+
+// ── aya_registry write helpers (added during full Supabase -> VPS migration) ───
+// All writes that used to go to Supabase aya_registry now go to Postgres VPS local.
+
+/** Upsert by entity_id — used by updateEntityRecommendability (new/existing). */
+export async function localPgUpsertEntity(entityId: string, data: Record<string, unknown>): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    const { aya_entity_id: _drop, entity_id: _drop2, ...clean } = data as any;
+    const cols = Object.keys(clean);
+    if (cols.length === 0) return false;
+    const setExpr = cols.map((c, i) => `${c}=EXCLUDED.${c}`).join(', ');
+    const placeholders = cols.map((_, i) => `$${i + 2}`).join(', ');
+    const sql = `INSERT INTO aya_registry (entity_id, ${cols.join(', ')}) VALUES ($1, ${placeholders})
+                 ON CONFLICT (entity_id) DO UPDATE SET ${setExpr}`;
+    const values = [entityId, ...cols.map(c => {
+        const v = (clean as any)[c];
+        return (typeof v === 'object' && v !== null) ? JSON.stringify(v) : v;
+    })];
+    try {
+        await pool.query(sql, values);
+        return true;
+    } catch (e) {
+        console.error('[db-local-pg] localPgUpsertEntity error:', e);
+        return false;
+    }
+}
+
+/** Update specific fields on an existing entity by entity_id. */
+export async function localPgUpdateEntity(entityId: string, fields: Record<string, unknown>): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    const { aya_entity_id: _drop, entity_id: _drop2, ...clean } = fields as any;
+    const cols = Object.keys(clean);
+    if (cols.length === 0) return true;
+    const setExpr = cols.map((c, i) => `${c}=$${i + 2}`).join(', ');
+    const sql = `UPDATE aya_registry SET ${setExpr}, last_update=NOW() WHERE entity_id=$1`;
+    const values = [entityId, ...cols.map(c => {
+        const v = (clean as any)[c];
+        return (typeof v === 'object' && v !== null) ? JSON.stringify(v) : v;
+    })];
+    try {
+        const res = await pool.query(sql, values);
+        return (res.rowCount ?? 0) > 0;
+    } catch (e) {
+        console.error('[db-local-pg] localPgUpdateEntity error:', e);
+        return false;
+    }
+}
+
+/** Find entity by Stripe subscription_id. */
+export async function localPgGetEntityBySubscriptionId(subscriptionId: string): Promise<Entity | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<Entity>(`SELECT * FROM aya_registry WHERE subscription_id=$1 LIMIT 1`, [subscriptionId]);
+        return res.rows[0] ?? null;
+    } catch (e) {
+        console.error('[db-local-pg] localPgGetEntityBySubscriptionId error:', e);
+        return null;
+    }
+}
+
+/** Mark entities past valid_until as expired. Returns the list of expired entity_ids. */
+export async function localPgMarkEntitiesExpired(): Promise<string[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res = await pool.query<{ entity_id: string }>(
+            `UPDATE aya_registry
+             SET payment_completed=false, subscription_status='expired', last_update=NOW()
+             WHERE payment_completed=true AND valid_until IS NOT NULL AND valid_until < NOW()
+             RETURNING entity_id`
+        );
+        return res.rows.map(r => r.entity_id);
+    } catch (e) {
+        console.error('[db-local-pg] localPgMarkEntitiesExpired error:', e);
+        return [];
+    }
+}
+
+/** Get count of entities matching a payment_completed status. */
+export async function localPgGetAyaEntities(limit: number = 10000): Promise<any[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res = await pool.query(`SELECT * FROM aya_registry ORDER BY created_at DESC LIMIT $1`, [limit]);
+        return res.rows;
+    } catch (e) {
+        console.error('[db-local-pg] localPgGetAyaEntities error:', e);
         return [];
     }
 }

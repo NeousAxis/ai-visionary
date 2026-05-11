@@ -1,5 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
-import { localPgGetEntityById as _localPgGetEntityById } from '@/lib/db-local-pg';
+import {
+    isLocalPgConfigured,
+    localPgGetEntities,
+    localPgGetEntityByDomain,
+    localPgGetEntitiesByFilter,
+    localPgGetStats,
+    localPgGetEntityById as _localPgGetEntityById,
+    localPgSearch,
+    localPgGetSectors,
+    localPgGetCountries,
+    localPgGetSectorCountryCombinations,
+    localPgUpsertEntity,
+    localPgUpdateEntity,
+    localPgGetEntityBySubscriptionId,
+    localPgMarkEntitiesExpired,
+    localPgGetAyaEntities,
+} from '@/lib/db-local-pg';
 import { resolveSectorMacro } from '@/lib/aya/llm-format';
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -348,6 +364,16 @@ export const database = {
      * Update an AYA entity's recommendability data
      */
     updateEntityRecommendability: async (entityId: string, data: any): Promise<void> => {
+        // Migration totale Supabase -> VPS Postgres for aya_registry.
+        if (isLocalPgConfigured()) {
+            const { aya_entity_id: _drop, ...cleanData } = (data || {}) as any;
+            const ok = await localPgUpsertEntity(entityId, cleanData);
+            if (ok) {
+                _clearAyaCaches();
+                console.log(`💾 [VPS-PG] AYA Entity upserted: ${entityId}`);
+            }
+            return;
+        }
         if (!isSupabaseConfigured()) {
             console.log(`⚠️ DB Disabled: Skipping AYA update for ${entityId}`);
             return;
@@ -377,6 +403,15 @@ export const database = {
      * Safe: will NOT create a new row if entity_id doesn't exist.
      */
     updateEntityData: async (entityId: string, data: Record<string, any>): Promise<boolean> => {
+        if (isLocalPgConfigured()) {
+            const { aya_entity_id: _drop, ...cleanData } = data as any;
+            const ok = await localPgUpdateEntity(entityId, cleanData);
+            if (ok) {
+                _clearAyaCaches();
+                console.log(`💾 [VPS-PG] AYA Entity data updated: ${entityId}`);
+            }
+            return ok;
+        }
         if (!isSupabaseConfigured()) {
             console.log(`⚠️ DB Disabled: Skipping AYA update for ${entityId}`);
             return false;
@@ -412,6 +447,10 @@ export const database = {
     // Cache key includes the limit so different callers don't collide.
     // Survives across warm Lambda/Edge invocations; cold starts re-fetch (acceptable).
     getAyaEntities: async (limit: number = 10000): Promise<any[]> => {
+        // Migration totale Supabase -> VPS Postgres : aya_registry now lives locally.
+        if (isLocalPgConfigured()) {
+            return localPgGetAyaEntities(limit);
+        }
         if (!isSupabaseConfigured()) return [];
 
         const cacheKey = `aya_entities_${limit}`;
@@ -635,6 +674,11 @@ export const database = {
      * Update the owner_email for an entity (delegation of access)
      */
     updateOwnerEmail: async (entityId: string, newOwnerEmail: string): Promise<boolean> => {
+        if (isLocalPgConfigured()) {
+            const ok = await localPgUpdateEntity(entityId, { owner_email: newOwnerEmail.trim().toLowerCase() });
+            if (ok) _clearAyaCaches();
+            return ok;
+        }
         if (!isSupabaseConfigured()) return false;
         const client = getSupabase();
         if (!client) return false;
@@ -1249,6 +1293,14 @@ export const database = {
             expiry_reminder_90d_sent_at: string;
         }>
     ): Promise<boolean> => {
+        if (isLocalPgConfigured()) {
+            const ok = await localPgUpdateEntity(entityId, fields as Record<string, unknown>);
+            if (ok) {
+                _clearAyaCaches();
+                console.log(`💾 [VPS-PG] Lifecycle updated for entity: ${entityId}`);
+            }
+            return ok;
+        }
         if (!isSupabaseConfigured()) return false;
         const client = getSupabase();
         if (!client) return false;
@@ -1277,6 +1329,9 @@ export const database = {
      * Find an AYA entity by Stripe subscription_id
      */
     getEntityBySubscriptionId: async (subscriptionId: string): Promise<any | null> => {
+        if (isLocalPgConfigured()) {
+            return localPgGetEntityBySubscriptionId(subscriptionId);
+        }
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;
@@ -1307,6 +1362,11 @@ export const database = {
      * Returns the list of entity IDs that were expired
      */
     markEntitiesExpired: async (): Promise<string[]> => {
+        if (isLocalPgConfigured()) {
+            const ids = await localPgMarkEntitiesExpired();
+            if (ids.length > 0) _clearAyaCaches();
+            return ids;
+        }
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -1417,6 +1477,20 @@ export async function getAyaEntitiesAggregated(options: {
     search?: string;
     sort?: 'default' | 'alpha' | 'score' | 'country' | 'certified';
 }): Promise<{ data: any[]; total: number; certifiedCount: number; indexedCount: number }> {
+    // Migration totale Supabase -> VPS Postgres : when VPS_PG_PASSWORD is set, read
+    // directly from local Postgres (the full aya_registry now lives there, 26k+ rows).
+    if (isLocalPgConfigured()) {
+        const limit = options.pageSize;
+        const offset = (options.page - 1) * options.pageSize;
+        const r = await localPgGetEntities({ limit, offset, search: options.search, sort: options.sort });
+        const stats = await localPgGetStats();
+        return {
+            data: r.data,
+            total: r.total,
+            certifiedCount: stats.certified_count,
+            indexedCount: stats.indexed_count,
+        };
+    }
     // Always start with Supabase (authoritative source)
     const supabaseResult = await database.getAyaEntitiesPaginated(options);
 
@@ -1524,6 +1598,11 @@ export async function getAyaEntitiesByFilterAggregated(options: {
     const sector  = options.sector  ? resolveSectorMacro(options.sector)  : undefined;
     const country = options.country ? options.country.toUpperCase()       : undefined;
 
+    // Migration totale Supabase -> VPS Postgres : read locally.
+    if (isLocalPgConfigured()) {
+        return localPgGetEntitiesByFilter({ sector, country, limit, offset });
+    }
+
     // Always start with Supabase (authoritative source — certified/paying customers)
     const supabaseResult = await database.getAyaEntitiesByFilter({ sector, country, limit, offset });
 
@@ -1588,6 +1667,7 @@ export async function getAyaEntitiesByFilterAggregated(options: {
  * NEVER throws.
  */
 export async function getAyaSectorsAggregated(): Promise<{ sector: string; count: number }[]> {
+    if (isLocalPgConfigured()) return localPgGetSectors();
     const supabaseSectors = await database.getAyaSectors();
 
     const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
@@ -1643,6 +1723,7 @@ export async function getAyaSectorsAggregated(): Promise<{ sector: string; count
  * NEVER throws.
  */
 export async function getAyaCountriesAggregated(): Promise<{ country: string; count: number }[]> {
+    if (isLocalPgConfigured()) return localPgGetCountries();
     const supabaseCountries = await database.getAyaCountries();
 
     const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
@@ -1700,6 +1781,7 @@ export async function getAyaCountriesAggregated(): Promise<{ country: string; co
 export async function getAyaSectorCountryCombinationsAggregated(): Promise<
     { sector: string; country: string; count: number }[]
 > {
+    if (isLocalPgConfigured()) return localPgGetSectorCountryCombinations();
     const supabaseCombinations = await database.getAyaSectorCountryCombinations();
 
     const vpsBaseUrl = process.env.AYA_VPS_API_URL?.replace(/\/$/, '');
@@ -1793,6 +1875,23 @@ export async function getAyaSearchAggregated(
     q: string,
     limit: number,
 ): Promise<AyaSearchResult[]> {
+    const mapToResultBase = (e: any): AyaSearchResult => ({
+        name:      e.display_name || e.legal_name || '',
+        domain:    e.website ? e.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : '',
+        country:   e.country_legal || '',
+        sector:    e.sector_macro || '',
+        score:     e.asr_score ?? 0,
+        certified: e.payment_completed === true,
+        entity_id: e.entity_id || '',
+        url:       `https://ai-visionary.xyz/aya/e/${e.entity_id || ''}`,
+    });
+
+    // Migration totale Supabase -> VPS Postgres : search locally.
+    if (isLocalPgConfigured()) {
+        const rows = await localPgSearch(q, limit);
+        return rows.map(mapToResultBase);
+    }
+
     // ── Supabase search ──────────────────────────────────────────────────────
     const stopWords = new Set(['le','la','les','de','du','des','un','une','et','en','à','a','au','aux','dans','pour','sur','par','avec','the','of','in','and','for','on','at','to','is','an']);
     const qLower = q.toLowerCase();
@@ -1881,6 +1980,19 @@ export async function getAyaSearchAggregated(
  * NEVER throws.
  */
 export async function getAyaStatsAggregated(): Promise<AyaStatsShape> {
+    // Migration totale Supabase -> VPS Postgres : stats now live in local DB.
+    if (isLocalPgConfigured()) {
+        const s = await localPgGetStats();
+        return {
+            total_entities: s.total_entities,
+            certified_count: s.certified_count,
+            indexed_count: s.indexed_count,
+            scores: s.scores,
+            sectors: s.sectors,
+            countries: s.countries,
+            last_updated: new Date().toISOString(),
+        };
+    }
     // ── Supabase stats ───────────────────────────────────────────────────────
     let supabaseStats: AyaStatsShape = {
         total_entities: 0,
@@ -2003,6 +2115,11 @@ export async function getAyaLiveAggregated(
     limit: number = 5000,
     offset: number = 0,
 ): Promise<{ success: boolean; data: any[] }> {
+    // Migration totale Supabase -> VPS Postgres : paginate locally.
+    if (isLocalPgConfigured()) {
+        const r = await localPgGetEntities({ limit, offset });
+        return { success: true, data: r.data };
+    }
     // ── Supabase live ────────────────────────────────────────────────────────
     let supabaseEntities: any[] = [];
     try {
@@ -2066,6 +2183,10 @@ export async function getAyaLiveAggregated(
  *  3. NEVER throws — any error returns null.
  */
 export async function getAyaEntityByIdAggregated(id: string): Promise<any | null> {
+    // Migration totale Supabase -> VPS Postgres : read locally.
+    if (isLocalPgConfigured()) {
+        return _localPgGetEntityById(id);
+    }
     // 1. Supabase first (authoritative, paying customers)
     try {
         const sbEntity = await database.getAyaEntityById(id);
@@ -2128,6 +2249,11 @@ export async function getAyaEntityByUrlAggregated(url: string): Promise<any | nu
         .split('/')[0]
         .split('?')[0]
         .split('#')[0];
+
+    // Migration totale Supabase -> VPS Postgres : read locally.
+    if (isLocalPgConfigured()) {
+        return localPgGetEntityByDomain(bare);
+    }
 
     // 1. Supabase first — try without www, then with www
     try {
