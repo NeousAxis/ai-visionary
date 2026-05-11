@@ -10,14 +10,15 @@
 
 ## Budget mensuel
 
-| Service | Plan | Budget/mois | Limites |
-|---------|------|-------------|---------|
-| **Google Cloud (Gemini API)** | Pay-as-you-go | CHF 20.00 | Budget alert a 100% |
-| **Supabase** | Free/Pro (org NeousAxis) | Quota plan | Depasse = bloque ou surcharge |
-| **Vercel** | Pro | Inclus | maxDuration=120s par fonction |
-| **Resend** | Free tier | 0 | 100 emails/jour, 3000/mois (deja remplace par SMTP Infomaniak via nodemailer pour transactionnel) |
-| **Infomaniak Public Cloud** | Partenariat gratuit 2 ans | 0 | VPS 4C/8G/160GB + Swiss Backup 200GB + kSuite 3 users + Newsletter 50k/mois |
+| Service | Plan | Budget/mois | Statut (11 mai 2026) |
+|---------|------|-------------|----------------------|
+| **Infomaniak Public Cloud** | Partenariat gratuit 2 ans | 0 | **Hosting prod actif** : VPS 4C/8G/160GB + Swiss Backup 200GB + kSuite 3 users + Newsletter 50k/mois |
+| **Infomaniak AI Tools** | Partenariat | Inclus (a confirmer apres usage) | **LLM prod actif** : Ministral-3-14B en prod, Apertus-70B dispo. Quota par product_id 106746. |
 | **Stripe** | Mode LIVE | Commission standard (~2.9% + 0.30 CHF) | Production depuis 11 avril 2026 |
+| **Google Cloud (Gemini API)** | Pay-as-you-go | CHF 20.00 | ⚠️ **Fallback dev only** depuis 11 mai 2026 (prod migrée vers Infomaniak AI). Clés gen-lang-client-0314106061 + Better-ESG toujours suspendues. |
+| **Supabase** | Free/Pro (org NeousAxis) | Quota plan | **Usage résiduel** depuis 11 mai 2026 : tables `analyses`, `scan_states`, `system_logs`, `otp_codes`, `sessions`, `aya_api_analytics` uniquement. `aya_registry` frozen en backup. Charge attendue : ~10% du précédent. |
+| **Vercel** | Pro | Inclus | ⚠️ **À désactiver** après 24-48h de surveillance VPS (depuis 11 mai 2026). DNS basculé sur VPS. |
+| **Resend** | Free tier | 0 | Remplacé par SMTP Infomaniak (nodemailer) pour transactionnel. |
 
 ## Cout par operation Gemini
 
@@ -37,6 +38,8 @@
 | 1-4 mai 2026 | ~73€ brûlés sur projet `gen-lang-client-0314106061` (Gemini API) | `aya/reclassify_and_enrich_vps.py` tournait sur le VPS avec `gemini-3-flash-preview` (preview ~10-20× plus cher que `gemini-2.0-flash`) + BATCH_SIZE=5 + 4 scripts séparés au lieu d'1 unifié | Projet temporairement suspendu par Google ("potential account hijacking"). Case Cloud Support 70874317 ouvert pour goodwill credit. Script refactorisé le 9 mai (modèle → 2.0-flash, batch → 20, 4 outputs/prompt unique, estimation ~$1 pour terminer les 25 860 entités). |
 | 9 mai 2026 | Projet Better-ESG (`gen-lang-client-0091131679`) SUSPENDU par Trust & Safety pour "ressources piratées" | Clé Gemini `[REDACTED-Gemini-key-was-here]` exposée dans repo GitHub public depuis 12 déc 2025 (commit `693beb99`, "retirée" 13 min après mais visible dans git log pendant ~5 mois) → bots GitHub l'ont exploitée | Cleanup git history via `git-filter-repo` + force-push 4 branches + hook gitleaks installé (`.githooks/pre-commit` versionné). Appel Trust & Safety envoyé par Cyril avec preuve fuite GitHub. |
 | 10 mai 2026 | **CHF 1 592,74 cumulés** sur le billing account `015BAF-B06CBF-E23957` en mai (dont CHF 1 413,62 sur Gemini API du projet Better-ESG) — tentative de prélèvement ~$400 sur la carte de Cyril a échoué | **2 nouvelles clés Gemini exposées** dans le repo public `https://github.com/NeousAxis/Wise-Weather-App` (`AIzaSyAxhl...hwSs` + `AIzaSyDiGm...gRhw`) → exploitées plusieurs mois par bots GitHub, imputées au compte. Le cleanup du 9 mai a aussi laissé la clé `AIzaSy...22bI` dans 19 tags publics (deploy-* + v1.0.0 etc.) qui n'avaient pas été force-pushés. | Google a désactivé automatiquement la facturation sur **TOUS les projets**. Régularisation manuelle (via Claude in Chrome MCP) : réactivation `wise-weather-app` + `WiseWeatherPollen` (app App Store en lancement), tous les autres restent désactivés. **Tags GitHub réécrits** via `git-filter-repo` + `git push --force --tags origin` → repo `ai-visionary` désormais 100% propre (verif re-clone : 0 occurrence). Mail demande remboursement CHF 1 592 à envoyer (preuve : 2 clés exposées Wise-Weather-App). |
+| 11 mai 2026 matin | **Alerte Supabase Disk IO Budget en cours d'épuisement** (sur Nano compute, RAM 80% saturée) | 84% du Disk IO sur table `aya_registry` (top : pages SSR `/aya/sector/*`, `/aya/country/*` en `force-dynamic` hit par les crawlers SEO). Grace period (depuis incident rescoring V2 du 7 avril) expirée le 7 mai 2026. | **Action immédiate** : cache mémoire `getAyaEntities` (15 min) + `getAyaEntitiesByFilter` (10 min) → -80% IO (PR #1 `a77ac36f`). **Action durable** : bascule complète sur Postgres VPS l'après-midi (PR #4 `a505aa5d`). |
+| 11 mai 2026 soir | **Bascule prod 100% suisse** (hosting + LLM + DB) | Stratégie 100% suisse atteinte. Hosting Vercel → VPS Infomaniak, LLM Gemini → Infomaniak AI (Ministral-3-14B), DB `aya_registry` Supabase → Postgres VPS local. Diagnostic 2 min → 19s. Vercel à désactiver après 24-48h surveillance. | Gain : zéro dépendance US sur les composants critiques. Budget Gemini CHF 20/mois devient inutile pour la prod (Gemini reste fallback dev). Vercel Pro à résilier après surveillance. |
 
 ## Regles anti-depassement
 

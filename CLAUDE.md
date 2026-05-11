@@ -3,7 +3,12 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 10 mai 2026 (suite incident facturation : pic CHF 1 592 sur billing account, Google a auto-desactive TOUS les projets, 2e fuite trouvee dans repo public Wise-Weather-App = 2 cles Gemini exposees + 19 tags publics non force-pushes le 9 mai. Reactivation manuelle wise-weather-app + WiseWeatherPollen pour app App Store. Cleanup tags GitHub + verif re-clone OK. Hooks adaptive-model neutralises (causaient des doublons de reponse) -> stubs `exit 0` dans `~/.claude/hooks/`, originaux preserves en `*.bak`.)
+> Derniere mise a jour : **11 mai 2026** — bascule prod 100% suisse en une session (apres incident Supabase Disk IO le matin) :
+> 1. Hosting : Vercel (US) → VPS Infomaniak `aya-bot` (CH, IP 83.228.229.212) via DNS switch ai-visionary.xyz/www → VPS. Cert Let's Encrypt etendu.
+> 2. LLM : Gemini Flash (Google US) → Infomaniak AI (Apertus-70B puis Ministral-3-14B pour perf, CH). Wrapper `lib/llm-provider.ts`.
+> 3. DB aya_registry : 4 437 entites Supabase (US) → Postgres VPS local (`aya_local.aya_registry`, 26 254 entites totales). `lib/db.ts` shortcircuit via `lib/db-local-pg.ts` quand `VPS_PG_PASSWORD` set.
+> 4. Perf diagnostic : 8 micro-agents en parallele, retry x3 supprime, double-scan post-OTP fixe, anti-hallucination email/phone, json_schema mode OpenAI sur Infomaniak. **Latence: 2 min → 19 s** (~6x).
+> Supabase residuel : tables operationnelles `analyses`, `scan_states`, `system_logs`, `otp_codes`, `sessions`, `aya_api_analytics`. Rows `aya_registry` Supabase gardees en backup (pas de DELETE).
 
 ---
 
@@ -96,13 +101,14 @@ URL -> Scanner (aio-scanner.ts) -> Score initial (aio-score-engine.ts)
 
 ### Hebergement
 
-**Stratégie 100 % suisse (decidee 28 avril 2026)** : aucun service US ni hors-CH pour les composants critiques. Migration Vercel → VPS Infomaniak en cours. Cloudflare/AWS/Vercel/Mailchimp/Resend interdits. Que Infomaniak + self-hosted, ou rien.
+**Stratégie 100 % suisse (atteinte le 11 mai 2026)** : aucun service US ni hors-CH pour les composants critiques. Hosting + LLM + DB `aya_registry` migrés. Cloudflare/AWS/Vercel/Mailchimp/Resend bannis. Que Infomaniak + self-hosted.
 
-- **Frontend + API** : Vercel (en sortie — pivot vers VPS Infomaniak en cours, etapes detaillees dans la section "Migration Vercel -> VPS")
-- **VPS Infomaniak `aya-bot`** : Public Cloud 4C/8G/160GB NVMe (partenariat gratuit 2 ans, 17 avril 2026). Hostname `aya-bot`, IP `83.228.229.212`, accessible aussi via `beta.ai-visionary.xyz` (DNS staging temporaire — sera supprime apres bascule). SSH `ubuntu@beta.ai-visionary.xyz`, path `/home/ubuntu/app/`, PM2 app `ai-visionary` sur `:3000`, nginx `:443`. Cible : devient la prod 100 % suisse.
+- **Frontend + API** : VPS Infomaniak `aya-bot` (CH) depuis le 11 mai 2026 (DNS switch `ai-visionary.xyz` A → `83.228.229.212`). Vercel à désactiver après 24-48h de surveillance.
+- **VPS Infomaniak `aya-bot`** : Public Cloud 4C/8G/160GB NVMe (partenariat gratuit 2 ans, 17 avril 2026). Hostname `aya-bot`, IP `83.228.229.212`, accessible aussi via `beta.ai-visionary.xyz` (DNS staging — sera supprime). SSH `ubuntu@beta.ai-visionary.xyz`, path `/home/ubuntu/app/`, PM2 app `ai-visionary` sur `:3000`, nginx `:443` (TLS Let's Encrypt SAN `ai-visionary.xyz` + `www.*` + `beta.*`). nginx `proxy_read_timeout 300s` + `proxy_buffering off` (SSE long).
+- **LLM** : **Infomaniak AI** (`api.infomaniak.com/2/ai/{product_id}/openai/v1`). Modele en prod : **`mistralai/Ministral-3-14B-Instruct-2512`** (14B, hosted Suisse, ~2-3s/call, json_schema mode). Alternative pure suisse : `swiss-ai/Apertus-70B-Instruct-2509` (plus lent, ~10-20s/call). Wrapper `lib/llm-provider.ts` expose `llmJson` (json_schema) + `llmText` (free text). Fallback Gemini conservé pour dev. Env vars : `INFOMANIAK_AI_TOKEN`, `INFOMANIAK_AI_PRODUCT_ID=106746`, `INFOMANIAK_AI_MODEL`.
 - **Base de donnees** :
-  - **Supabase PostgreSQL** — sanctuaire intouchable (~4 438 entites + analyses + scan_states + otp_codes + sessions + system_logs). Lecture seule depuis l'app, JAMAIS de migration ni d'ecriture batch sans accord explicite Cyril.
-  - **Postgres 16 self-hosted sur VPS aya-bot** (active 28 avril 2026) — DB `aya_local`, role `aya_app`, table `aya_registry` reproduite a l'identique. Contient ~25 860 entites scrapees Tranco EU (push fait le 28 avril). localhost-only, pg_hba scram-sha-256, pg_dump quotidien dans `/home/ubuntu/backups/`.
+  - **Postgres 16 self-hosted sur VPS aya-bot** (active 28 avril 2026, **migration totale `aya_registry` le 11 mai 2026**) — DB `aya_local`, role `aya_app`, table `aya_registry` (4 437 entites legacy/certifiees + 25 860 scrapees Tranco EU = **26 254 totales**, 5 certifiees). Schema etendu (asr_score NUMERIC(5,1), +10 colonnes subscription/admin/owner). localhost-only, pg_hba scram-sha-256, pg_dump quotidien dans `/home/ubuntu/backups/`. Code : `lib/db.ts` shortcircuit via `lib/db-local-pg.ts` quand `VPS_PG_PASSWORD` set.
+  - **Supabase PostgreSQL** — usage residuel uniquement : `analyses`, `scan_states`, `system_logs`, `otp_codes`, `sessions`, `aya_api_analytics` (tables operationnelles court-terme). `aya_registry` Supabase **gardee en backup frozen** (pas de DELETE) pour rollback eventuel.
 - **CDN / DDoS / WAF** : aucun service externe. Anti-DDoS niveau reseau **inclus** avec Public Cloud Infomaniak. Hardening local : nginx (rate limiting + cache + gzip/brotli) + fail2ban + ufw.
 - **Emails** : Infomaniak SMTP (nodemailer). Adresses : hello@ + security@ (alias). TODO: ajouter alias delivery@ et registry@.
 - **Newsletter** : Infomaniak Newsletter (domain ID 62227, 50k credits/mois). Strict opt-in, pas de cold marketing (CGU). Compte bloque depuis 25 avril, ticket support en attente.
@@ -114,8 +120,11 @@ URL -> Scanner (aio-scanner.ts) -> Score initial (aio-score-engine.ts)
 ### Variables d'environnement requises
 
 ```
-SUPABASE_URL=https://hxoywzhrvacdmtopureh.supabase.co
+SUPABASE_URL=https://hxoywzhrvacdmtopureh.supabase.co  # tables operationnelles uniquement (analyses, otp, sessions, etc.)
 SUPABASE_SERVICE_ROLE_KEY
+INFOMANIAK_AI_TOKEN                                   # 80 chars Bearer
+INFOMANIAK_AI_PRODUCT_ID=106746                       # AI Tools product
+INFOMANIAK_AI_MODEL=mistralai/Ministral-3-14B-Instruct-2512
 STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -139,7 +148,7 @@ INFOMANIAK_NEWSLETTER_TOKEN
 INFOMANIAK_NEWSLETTER_DOMAIN_ID=62227
 ```
 
-> Note : `AYA_VPS_API_URL` (var Vercel pour fetch HTTP vers le VPS) est obsolete depuis le pivot 100% suisse — l'app sera sur le VPS et lira directement Postgres en local.
+> Note : `AYA_VPS_API_URL` (var Vercel pour fetch HTTP vers le VPS) est obsolete depuis le 11 mai 2026 — l'app tourne sur le VPS et lit directement Postgres local via `lib/db-local-pg.ts`.
 
 ### Base de donnees Supabase
 
