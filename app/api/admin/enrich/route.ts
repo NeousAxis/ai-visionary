@@ -152,9 +152,13 @@ async function enrichEntity(entityId: string, logger: any, preloaded?: any): Pro
             return { entity_id: entityId, name: inputs.name, success: false, error: 'Gemini returned empty', inputs };
         }
 
-        // Update entity in Supabase
+        // Update entity in Supabase. The top-level spread is shallow, so we MUST
+        // also clone the nested `enrichment` object — `entity` may be a reference into
+        // the in-process cache in lib/db.ts (getAyaEntities), and mutating it in place
+        // would leak uncommitted writes to concurrent readers and survive a failed
+        // updateEntityData (cache only clears on success).
         const payload = { ...(entity.asr_payload || {}) };
-        if (!payload.enrichment) payload.enrichment = {};
+        payload.enrichment = { ...((payload.enrichment as Record<string, any>) || {}) };
         payload.enrichment.gemini_description = translations.gemini_description;
         payload.enrichment.gemini_description_fr = translations.gemini_description_fr;
         payload.enrichment.gemini_keywords = translations.gemini_keywords;

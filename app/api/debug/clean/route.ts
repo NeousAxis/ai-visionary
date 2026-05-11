@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import { db, supabase } from '@/lib/db';
+import { db, supabase, _clearAyaCaches } from '@/lib/db';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
             }
         }
 
+        if (deleted > 0) _clearAyaCaches();
         logger.info('CLEAN_DONE', `Deleted ${deleted} records for ${targetUrl}`);
         return NextResponse.json({ success: true, deleted });
 

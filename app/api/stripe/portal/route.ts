@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { db, supabase } from '@/lib/db';
+import { db, supabase, _clearAyaCaches } from '@/lib/db';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { verifyUpdateToken } from '@/lib/update-token';
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
                         .from('aya_registry')
                         .update({ stripe_customer_id: cid })
                         .eq('entity_id', entityId);
+                    _clearAyaCaches();
                     logger.info('PORTAL_CUSTOMER_PERSISTED', `Updated stripe_customer_id for entity ${entityId}`);
                 }
             } catch (e: any) {

@@ -36,13 +36,24 @@ const _ayaEntitiesCache = new Map<string, { ts: number; data: any[] }>();
 // 10 min TTL for filtered reads (sector/country landing pages — hit hard by SEO crawlers).
 // Shorter than full-registry TTL so new certifications surface faster.
 const AYA_BY_FILTER_TTL_MS = 10 * 60 * 1000;
-// Cap entries — high key cardinality (sector, country, limit, offset) under deep crawler pagination.
+// Cap entries — high key cardinality under deep crawler pagination.
 // FIFO eviction via Map insertion order: oldest entry dropped when at cap.
 const AYA_BY_FILTER_MAX_ENTRIES = 1000;
 const _ayaByFilterCache = new Map<string, { ts: number; result: { data: any[]; total: number } }>();
 
+// Generation counter — bumped on every invalidation. Read paths capture a snapshot at
+// the start of their fetch and refuse to .set() if the generation changed mid-flight.
+// Prevents the classic race where a write's _clearAyaCaches() lands between a read's
+// cache miss and its .set(), and would otherwise be silently undone with a fresher ts.
+let _ayaCacheGen = 0;
+function _ayaCacheGenSnapshot(): number {
+    return _ayaCacheGen;
+}
+
 function _setAyaByFilterCache(key: string, result: { data: any[]; total: number }): void {
-    if (_ayaByFilterCache.size >= AYA_BY_FILTER_MAX_ENTRIES) {
+    // Only evict when the key is new — Map.set on an existing key updates in place,
+    // so evicting would shrink the Map below cap for no reason.
+    if (!_ayaByFilterCache.has(key) && _ayaByFilterCache.size >= AYA_BY_FILTER_MAX_ENTRIES) {
         const oldest = _ayaByFilterCache.keys().next().value;
         if (oldest !== undefined) _ayaByFilterCache.delete(oldest);
     }
@@ -50,8 +61,11 @@ function _setAyaByFilterCache(key: string, result: { data: any[]; total: number 
 }
 
 // Invalidate both AYA caches — call after any write to aya_registry.
-// Cheap: clears two in-process Maps; cold path doesn't need to be fast.
-function _clearAyaCaches(): void {
+// Bumps the generation counter so in-flight reads can't write stale data back.
+// Exported for callers that write directly via the raw supabase client (e.g. routes
+// that bypass the db.ts helpers).
+export function _clearAyaCaches(): void {
+    _ayaCacheGen++;
     _ayaEntitiesCache.clear();
     _ayaByFilterCache.clear();
 }
@@ -409,6 +423,12 @@ export const database = {
         const client = getSupabase();
         if (!client) return [];
 
+        // Snapshot the cache generation before starting the multi-page fetch. If a
+        // concurrent write calls _clearAyaCaches() between now and our final .set(),
+        // _ayaCacheGen will have changed and we'll skip the write to avoid pinning
+        // pre-write data with a post-write timestamp.
+        const startGen = _ayaCacheGenSnapshot();
+
         try {
             // Supabase limits to 1000 rows per query — paginate to get all
             const allData: any[] = [];
@@ -437,7 +457,8 @@ export const database = {
 
             // Only cache a fully-successful, non-empty result. Caching a partial or empty
             // result on transient Supabase errors would pin a bad snapshot for the full TTL.
-            if (!hadError && allData.length > 0) {
+            // Generation check guards against the in-flight write race.
+            if (!hadError && allData.length > 0 && _ayaCacheGenSnapshot() === startGen) {
                 _ayaEntitiesCache.set(cacheKey, { ts: Date.now(), data: allData });
             }
             return allData;
@@ -967,8 +988,22 @@ export const database = {
         const client = getSupabase();
         if (!client) return { data: [], total: 0 };
 
+        // Snapshot generation before any read — see comment in getAyaEntities.
+        const startGen = _ayaCacheGenSnapshot();
+
         try {
-            let countQuery = client.from('aya_registry').select('*', { count: 'exact', head: true });
+            // Count query must mirror the data query's NSFW/garbage exclusions, otherwise
+            // total > data.length, pagination shows trailing empty pages, and JSON-LD
+            // numberOfItems lies to crawlers.
+            let countQuery = client
+                .from('aya_registry')
+                .select('*', { count: 'exact', head: true })
+                .not('display_name', 'ilike', '%porn%')
+                .not('display_name', 'ilike', '%xxx%')
+                .not('display_name', 'ilike', '%escort%')
+                .not('display_name', 'ilike', '%onlyfans%')
+                .not('display_name', 'ilike', "['%")
+                .not('display_name', 'ilike', '{{%');
             if (sector) countQuery = countQuery.eq('sector_macro', sector);
             if (country) countQuery = countQuery.eq('country_legal', country.toUpperCase());
             const { count: total, error: countErr } = await countQuery;
@@ -1002,7 +1037,10 @@ export const database = {
             }
 
             const result = { data: data || [], total };
-            _setAyaByFilterCache(cacheKey, result);
+            // Skip cache write if a write invalidated mid-flight (race guard).
+            if (_ayaCacheGenSnapshot() === startGen) {
+                _setAyaByFilterCache(cacheKey, result);
+            }
             return result;
         } catch (error) {
             console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
