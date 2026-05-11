@@ -1,48 +1,11 @@
 // lib/micro-agents/llm-agent.ts — Shared LLM caller for micro-agents
-// Routes to Infomaniak AI (Apertus-70B, Swiss-hosted) if INFOMANIAK_AI_TOKEN is set,
-// otherwise falls back to Google Gemini Flash. OpenAI-compatible API on both sides.
+//
+// Thin wrapper over lib/llm-provider.ts that adds the agents' content-truncation
+// strategy. Provider routing (Infomaniak Apertus vs Gemini fallback) and JSON-mode
+// enforcement live in lib/llm-provider.ts. The micro-agents' system prompts stay
+// untouched — JSON shape is guaranteed at the API level (json_schema on Infomaniak).
 
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-
-type Provider = 'infomaniak' | 'gemini';
-
-function pickProvider(): Provider {
-  if ((process.env.INFOMANIAK_AI_TOKEN || '').trim()) return 'infomaniak';
-  return 'gemini';
-}
-
-let _model: any = null;
-let _provider: Provider | null = null;
-
-function getModel() {
-  if (_model) return { model: _model, provider: _provider! };
-
-  const provider = pickProvider();
-  if (provider === 'infomaniak') {
-    const token = (process.env.INFOMANIAK_AI_TOKEN || '').trim();
-    const productId = (process.env.INFOMANIAK_AI_PRODUCT_ID || '').trim();
-    const modelName = (process.env.INFOMANIAK_AI_MODEL || 'swiss-ai/Apertus-70B-Instruct-2509').trim();
-    if (!productId) throw new Error('INFOMANIAK_AI_TOKEN set but INFOMANIAK_AI_PRODUCT_ID missing');
-
-    const infomaniak = createOpenAI({
-      apiKey: token,
-      baseURL: `https://api.infomaniak.com/2/ai/${productId}/openai/v1`,
-    });
-    _model = infomaniak(modelName);
-    _provider = 'infomaniak';
-    return { model: _model, provider: _provider };
-  }
-
-  // Fallback: Gemini
-  const key = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '').trim();
-  if (!key) throw new Error('No LLM provider configured (INFOMANIAK_AI_TOKEN or GEMINI_API_KEY)');
-  const google = createGoogleGenerativeAI({ apiKey: key });
-  _model = google('gemini-3-flash-preview');
-  _provider = 'gemini';
-  return { model: _model, provider: _provider };
-}
+import { llmJson, llmProvider } from '@/lib/llm-provider';
 
 /**
  * Run a focused LLM extraction.
@@ -55,7 +18,6 @@ export async function llmExtract(
   content: string,
   maxChars = 8000,
 ): Promise<string> {
-  const { model, provider } = getModel();
   // Smart truncation: keep start (70%) + end (30%) to preserve footer content
   // Footer often contains critical data: legal pages, contact, address, copyright
   let truncated: string;
@@ -67,14 +29,14 @@ export async function llmExtract(
     truncated = content;
   }
 
+  const provider = llmProvider();
   try {
     console.log(`[llm-agent] Calling ${provider} with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
-    const { text } = await generateText({
-      model,
-      temperature: 0,
-      maxOutputTokens: 4000,
+    const { text } = await llmJson({
       system: systemPrompt,
       prompt: truncated,
+      temperature: 0,
+      maxTokens: 4000,
     });
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
     return text;
@@ -86,13 +48,11 @@ export async function llmExtract(
 
 /**
  * Parse JSON from LLM response, stripping markdown code fences if present.
- * Apertus often wraps the JSON in a "response" key — unwrap it if present and
- * the inner shape matches what callers expect.
+ * Apertus sometimes wraps the JSON in {"response": {...}} — unwrap when that is
+ * the sole top-level key and its value is an object/array (safe heuristic).
  */
 export function parseJson<T>(text: string): T | null {
   const tryUnwrap = (parsed: any): T => {
-    // Apertus quirk: when asked for a JSON object, it sometimes wraps it as { response: {...} }.
-    // Unwrap only if "response" is the sole top-level key AND its value is an object/array.
     if (
       parsed && typeof parsed === 'object' && !Array.isArray(parsed) &&
       Object.keys(parsed).length === 1 && 'response' in parsed &&

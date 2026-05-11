@@ -1,8 +1,7 @@
 // Force static for reliability? No, dynamic for streaming.
 export const dynamic = 'force-dynamic';
 
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { llmJson, llmText } from '@/lib/llm-provider';
 import { sendEmail } from '@/lib/mailer';
 import { scanUrlForAioSignals } from '@/lib/aio-scanner';
 import { db } from '@/lib/db';
@@ -84,11 +83,6 @@ function getStripe(): Stripe {
 
 import { AyoExtract } from '@/lib/aio-score-engine';
 
-// Cache resolved Gemini model ID to avoid hitting the models API on every request
-let cachedModelId: string | null = null;
-let cachedModelTimestamp = 0;
-const MODEL_CACHE_TTL = 3600000; // 1 hour
-
 export async function POST(req: Request) {
     // Rate limit: 15 requests/min per IP
     const rateLimited = checkRateLimit(req as any, 'chat', RATE_LIMITS.chat);
@@ -106,59 +100,9 @@ export async function POST(req: Request) {
         logger.info('CHAT_START', `New chat request, ${messages.length} messages, locale=${locale}`);
 
 
-        // 1. DYNAMIC PROVIDER SELECTION (GEMINI ONLY - FORCE AYO)
-        let modelToUse;
-
-        // Force Gemini
-        let googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-
-        if (googleKey) {
-            googleKey = googleKey.trim();
-            // Gemini key loaded
-            const google = createGoogleGenerativeAI({ apiKey: googleKey });
-
-            try {
-                // 1. AUTO-DETECT AVAILABLE MODELS (Robust Way) — cached for 1 hour
-                if (!cachedModelId || Date.now() - cachedModelTimestamp > MODEL_CACHE_TTL) {
-                    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${googleKey}`);
-
-                    if (!modelsResponse.ok) {
-                        throw new Error(`Failed to list models: ${modelsResponse.statusText}`);
-                    }
-
-                    const modelsData = await modelsResponse.json();
-
-                    if (modelsData.models) {
-                        // Find best model: Prioritize GEMINI 2.0 FLASH (User Request)
-                        const bestModel = modelsData.models.find((m: any) =>
-                            m.supportedGenerationMethods.includes('generateContent') &&
-                            m.name.includes('flash') &&
-                            m.name.includes('2.0') // Priority 1: Gemini 2.0 Flash (Speed/Smart)
-                        ) || modelsData.models.find((m: any) =>
-                            m.supportedGenerationMethods.includes('generateContent') &&
-                            m.name.includes('pro') &&
-                            m.name.includes('1.5') // Priority 2: Gemini 1.5 Pro (Fallback)
-                        ) || modelsData.models.find((m: any) =>
-                            m.supportedGenerationMethods.includes('generateContent') &&
-                            m.name.includes('flash') // Priority 3: Any Flash
-                        );
-
-                        cachedModelId = bestModel ? bestModel.name.replace('models/', '') : 'gemini-pro';
-                    } else {
-                        cachedModelId = 'gemini-pro';
-                    }
-                    cachedModelTimestamp = Date.now();
-                }
-
-                modelToUse = google(cachedModelId!);
-            } catch (e) {
-                logger.warn('GEMINI_DETECT_FAIL', e instanceof Error ? e.message : 'Unknown');
-                // Ultimate Fallback: Try a known stable alias
-                modelToUse = google('gemini-pro');
-            }
-        } else {
-            throw new Error("CRITICAL: No GEMINI_API_KEY found. OpenAI is BANNED. System halted.");
-        }
+        // LLM provider is selected centrally in lib/llm-provider.ts.
+        // Infomaniak AI (Apertus-70B, Swiss-hosted) if INFOMANIAK_AI_TOKEN is set,
+        // otherwise falls back to Gemini. All call sites in this file use llmJson/llmText.
 
         // 🧠 REAL-TIME GENERATION
         // 🧠 SESSION & ANALYSIS ID (Stable logic — MUST be stable across all API calls for same session)
@@ -903,8 +847,7 @@ GÉNÈRE CE JSON MAINTENANT :
             let extractedAnswers: any[] = [];
             try {
                 const extractionResult = await Promise.race([
-                    generateText({
-                        model: modelToUse,
+                    llmJson({
                         temperature: 0.1,
                         system: EXTRACTION_ATTEMPT_PROMPT,
                         messages: [{ role: 'user', content: locale === 'en' ? `Extract the answers from the scan of ${urlToScan}` : `Extrait les réponses du scan de ${urlToScan}` }],
@@ -2212,8 +2155,7 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                     );
 
                     // LLM extraction promise (with AbortSignal as belt-and-suspenders)
-                    const extractionPromise = generateText({
-                        model: modelToUse,
+                    const extractionPromise = llmJson({
                         temperature: 0,
                         system: EXTRACTION_PROMPT,
                         abortSignal: AbortSignal.timeout(90000),
@@ -3085,8 +3027,7 @@ Vous offrez à votre entreprise la possibilité réelle d'être visible et recom
         if (!finalResponseText) {
             console.log("🧠 NO TRIGGER MATCHED -> Standard Chat Generation...");
 
-            const chatResult = await generateText({
-                model: modelToUse,
+            const chatResult = await llmText({
                 temperature: 0.7, // More creative for chat
                 system: finalSystemPrompt + (locale === 'en'
                     ? "\n\n⚠️ IMPORTANT: Stay focused on the AYO mission. If the user has not provided a URL, politely ask for it."

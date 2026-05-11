@@ -1,5 +1,4 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { llmJson } from './llm-provider';
 import { AyoExtract } from './aio-score-engine';
 import { createLogger, generateCorrelationId } from './logger';
 
@@ -8,20 +7,13 @@ import { createLogger, generateCorrelationId } from './logger';
  * Responsabilité : Transformer la donnée brute du scanner en actifs IA riches et rédigés.
  * Entrée : AyoExtract (JSON brut) + Contexte optionnel
  * Sortie : Objets JSON pour Manifeste, FAQ, Glossaire, External Contexte
+ *
+ * Provider is routed centrally in lib/llm-provider.ts (Infomaniak AI if INFOMANIAK_AI_TOKEN
+ * is set, otherwise Gemini fallback).
  */
 
-// SECURITY: Single env var for Gemini API key (B6 fix)
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-
-// Timeout for Gemini API calls (H11 fix)
-const GEMINI_TIMEOUT_MS = 30_000; // 30 seconds
-
-// Fail-safe model init
-const getModel = () => {
-    if (!GEMINI_API_KEY) throw new Error("Missing GEMINI_API_KEY env var");
-    const google = createGoogleGenerativeAI({ apiKey: GEMINI_API_KEY });
-    return google('gemini-3-flash-preview');
-};
+// Timeout for LLM API calls
+const GEMINI_TIMEOUT_MS = 30_000; // 30 seconds — kept name for diff legibility
 
 export interface SemanticAssets {
     manifest: Record<string, unknown>;
@@ -38,7 +30,6 @@ export async function generateSemanticAssets(extract: AyoExtract): Promise<Seman
     logger.info('SEMANTICS_START', 'Starting Intelligence Layer');
 
     try {
-        const model = getModel();
         const companyName = extract.fields.identite.name.value;
         const businessType = extract.fields.identite.business_type.value;
 
@@ -76,8 +67,7 @@ export async function generateSemanticAssets(extract: AyoExtract): Promise<Seman
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
 
-        const result = await generateText({
-            model: model,
+        const result = await llmJson({
             system: SYSTEM_PROMPT,
             messages: [{ role: 'user', content: "Génère les actifs sémantiques maintenant." }],
             temperature: 0.2,
@@ -141,7 +131,6 @@ export async function generateCertifiedTranslations(
 ): Promise<{ gemini_description: string; gemini_description_fr: string; gemini_keywords: string[]; gemini_keywords_fr: string[] }> {
     const logger = createLogger(generateCorrelationId(), 'system');
     try {
-        const model = getModel();
         const svcText = services.length > 0 ? services.join(', ') : '';
         const context = [
             entityName ? `Name: ${entityName}` : '',
@@ -151,8 +140,7 @@ export async function generateCertifiedTranslations(
             location ? `Location: ${location}` : '',
         ].filter(Boolean).join('\n');
 
-        const { text } = await generateText({
-            model,
+        const { text } = await llmJson({
             prompt: `You are a professional business translator. Given this company information:
 
 ${context}
