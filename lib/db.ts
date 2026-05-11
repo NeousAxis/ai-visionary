@@ -27,6 +27,17 @@ const getSupabase = (): any => {
 // Export for modules that need direct access (admin/logs, debug/clean)
 export const supabase = isSupabaseConfigured() ? createClient(supabaseUrl, supabaseKey) : null as any;
 
+// In-process caches for AYA registry reads — reduces Supabase Disk IO.
+// The full registry rarely changes (batch pushes are weekly).
+// Survives across warm Lambda/Edge invocations; cold starts re-fetch (acceptable).
+const AYA_ENTITIES_TTL_MS = 15 * 60 * 1000;
+const _ayaEntitiesCache = new Map<string, { ts: number; data: any[] }>();
+
+// 10 min TTL for filtered reads (sector/country landing pages — hit hard by SEO crawlers).
+// Shorter than full-registry TTL so new certifications surface faster.
+const AYA_BY_FILTER_TTL_MS = 10 * 60 * 1000;
+const _ayaByFilterCache = new Map<string, { ts: number; result: { data: any[]; total: number } }>();
+
 // Type definition for analysis records
 type AnalysisRecord = {
     id: string;
@@ -362,8 +373,19 @@ export const database = {
      * Get all entities from AYA Registry (certified + indexed)
      * Sorted: payment_completed=true first, then by score DESC
      */
+    // In-process cache for getAyaEntities — reduces Supabase Disk IO pressure.
+    // The full registry rarely changes (batch pushes weekly), so a 15 min TTL is safe.
+    // Cache key includes the limit so different callers don't collide.
+    // Survives across warm Lambda/Edge invocations; cold starts re-fetch (acceptable).
     getAyaEntities: async (limit: number = 10000): Promise<any[]> => {
         if (!isSupabaseConfigured()) return [];
+
+        const cacheKey = `aya_entities_${limit}`;
+        const cached = _ayaEntitiesCache.get(cacheKey);
+        if (cached && Date.now() - cached.ts < AYA_ENTITIES_TTL_MS) {
+            return cached.data;
+        }
+
         const client = getSupabase();
         if (!client) return [];
 
@@ -391,6 +413,7 @@ export const database = {
                 offset += pageSize;
             }
 
+            _ayaEntitiesCache.set(cacheKey, { ts: Date.now(), data: allData });
             return allData;
         } catch (error) {
             console.error('❌ [Supabase] Get AYA Entities Error:', error);
@@ -906,10 +929,16 @@ export const database = {
         offset?: number;
     }): Promise<{ data: any[]; total: number }> => {
         if (!isSupabaseConfigured()) return { data: [], total: 0 };
-        const client = getSupabase();
-        if (!client) return { data: [], total: 0 };
 
         const { sector, country, limit = 100, offset = 0 } = options;
+        const cacheKey = `byfilter_${sector ?? ''}_${country ?? ''}_${limit}_${offset}`;
+        const cached = _ayaByFilterCache.get(cacheKey);
+        if (cached && Date.now() - cached.ts < AYA_BY_FILTER_TTL_MS) {
+            return cached.result;
+        }
+
+        const client = getSupabase();
+        if (!client) return { data: [], total: 0 };
 
         try {
             let countQuery = client.from('aya_registry').select('*', { count: 'exact', head: true });
@@ -938,7 +967,9 @@ export const database = {
                 return { data: [], total: 0 };
             }
 
-            return { data: data || [], total: total || 0 };
+            const result = { data: data || [], total: total || 0 };
+            _ayaByFilterCache.set(cacheKey, { ts: Date.now(), result });
+            return result;
         } catch (error) {
             console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
             return { data: [], total: 0 };
