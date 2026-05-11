@@ -115,6 +115,43 @@
 
 ---
 
+## Session 10 mai 2026 — Suite incident facturation Google + 2e fuite (Wise-Weather-App) + désactivation hooks adaptive-model
+
+**Pic facturation détecté** : 1 592,74 CHF cumulés en mai 2026 sur le billing account `015BAF-B06CBF-E23957` (1 413,62 CHF sur Gemini API du projet Better-ESG, +3 235% vs avril). Tentative de prélèvement ~$400 sur la carte de Cyril → **échec** → Google a flaggé "potential account hijacking" et désactivé automatiquement la facturation sur **TOUS les projets** du compte.
+
+**2e fuite découverte (repo public Wise-Weather-App)** : 2 nouvelles clés Gemini exposées dans le repo public `https://github.com/NeousAxis/Wise-Weather-App` :
+- `[REDACTED-WiseWeather-key-1]`
+- `[REDACTED-WiseWeather-key-2]`
+
+Ces clés sont la cause probable du pic 1 413,62 CHF sur Gemini API : exposées plusieurs mois → exploitées par bots GitHub → activité abusive imputée au compte.
+
+**Régularisation manuelle effectuée** :
+1. Désactivation manuelle (via Claude in Chrome MCP) de plusieurs projets dans `https://console.cloud.google.com/billing/015BAF-B06CBF-E23957/manage` : Better-ESG, wise-weather-app, Body Twin, WiseWeatherPollen.
+2. **Réactivation** de `wise-weather-app` (project ID `wise-weather-app`) + `WiseWeatherPollen` (`gen-lang-client-0641825525`) car l'app Wise-Weather-App est en lancement App Store. Vérification effectuée : `wise-weather-app` est confirmé comme le bon project ID via `.env.production` + `package.json` + workflows GitHub Actions du repo. Les 3 autres projets "WiseWeather*" sont des doublons obsolètes.
+3. **Nettoyage tags GitHub manquants** : la clé `[REDACTED-Gemini-key-was-here]` traînait encore dans 19 tags publics (`deploy-202601*`, `v1.0.0`, `v2.0.0`, `v2026-01-15-working-state`, etc.) qui n'avaient pas été force-pushés lors du cleanup du 9 mai. Tags réécrits via `git-filter-repo` + `git push --force --tags origin`. Repo public `ai-visionary` désormais 100% propre (vérification re-clone : 0 occurrence de la clé).
+
+**État sécurité AI-VISIONARY (vérifié 10 mai)** : aucune clé Gemini exposée dans le code source (working tree), aucune dans l'historique Git public (branches + tags), `.env.local` privé contient `GEMINI_API_KEY=...sL4` qui est sur le projet `gen-lang-client-0314106061` (suspendu).
+
+**Désactivation des hooks `adaptive-model`** (cause de doublons de réponse) :
+- Les 3 hooks (`adaptive-model-verify.sh`, `adaptive-model-reminder.sh`, `adaptive-model-delegation-verify.sh`) remplacés par des stubs `exit 0` dans `~/.claude/hooks/`. Originaux préservés dans `*.bak`.
+- `~/.claude/CLAUDE.md` (instructions globales) : règle "Honest model annotation" remplacée par note `DISABLED 2026-05-10`.
+- `~/.claude/commands/adaptive-model.md` : nettoyé.
+- `~/.claude/skills/adaptive-model/SKILL.md` : note en tête désactivant les tags `[Session: ...]` et `[Delegating to: ...]` (logique de routing préservée).
+
+**3 mails support en cours** :
+1. Trust & Safety pour Better-ESG (envoyé 8 mai par Cyril).
+2. Cloud Support case 70874317 pour `gen-lang-client-0314106061` ~73€ (envoyé par Cyril).
+3. Suite à découverte 2e fuite Wise-Weather-App : nouveau mail à envoyer pour contester les 1 592 CHF cumulés.
+
+**État final compte facturation** :
+- ✅ wise-weather-app (réactivé, app App Store)
+- ✅ WiseWeatherPollen (réactivé)
+- 🚫 Better-ESG (suspendu Google + désactivé)
+- 🚫 AI-VISIONARY x2 (gen-lang-client-0314106061 suspendu, ai-visionary-3786e désactivé Google)
+- 🚫 9 autres projets (Body Twin, BODY TWIN, COSMOS-APP, Gemini API, wikiflow, Wise-Weather-App, WiseWeatherApp, digitalqrcard, better-esg) : tous "Facturation désactivée" automatiquement par Google
+
+---
+
 ## Session 7-9 mai 2026 — Incident clé Gemini exposée + cleanup git history + hook gitleaks
 
 **Contexte** : projet Google Cloud `gen-lang-client-0091131679` (Better-ESG) suspendu pour "ressources piratées" + projet `gen-lang-client-0314106061` facturé ~73€ entre 1-4 mai sur `gemini-3-flash-preview`.

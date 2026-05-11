@@ -3,7 +3,7 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : 9 mai 2026 (incident cle Gemini exposee GitHub 12 dec 2025 -> projet Better-ESG suspendu Trust & Safety + ~73€ brules sur projet `gen-lang-client-0314106061` par script `reclassify_and_enrich_vps.py` mal configure -> projet aussi suspendu. Cleanup git history via `git-filter-repo` + force-push 4 branches + hook gitleaks installe `.githooks/pre-commit`. Script refactorise `gemini-2.0-flash` + BATCH_SIZE 20 + 4 outputs/prompt unique. 2 mails support envoyes. Batch enrichissement VPS BLOQUE jusqu'a deblocage Google.)
+> Derniere mise a jour : 10 mai 2026 (suite incident facturation : pic CHF 1 592 sur billing account, Google a auto-desactive TOUS les projets, 2e fuite trouvee dans repo public Wise-Weather-App = 2 cles Gemini exposees + 19 tags publics non force-pushes le 9 mai. Reactivation manuelle wise-weather-app + WiseWeatherPollen pour app App Store. Cleanup tags GitHub + verif re-clone OK. Hooks adaptive-model neutralises (causaient des doublons de reponse) -> stubs `exit 0` dans `~/.claude/hooks/`, originaux preserves en `*.bak`.)
 
 ---
 
