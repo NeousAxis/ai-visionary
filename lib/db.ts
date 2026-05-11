@@ -36,7 +36,25 @@ const _ayaEntitiesCache = new Map<string, { ts: number; data: any[] }>();
 // 10 min TTL for filtered reads (sector/country landing pages — hit hard by SEO crawlers).
 // Shorter than full-registry TTL so new certifications surface faster.
 const AYA_BY_FILTER_TTL_MS = 10 * 60 * 1000;
+// Cap entries — high key cardinality (sector, country, limit, offset) under deep crawler pagination.
+// FIFO eviction via Map insertion order: oldest entry dropped when at cap.
+const AYA_BY_FILTER_MAX_ENTRIES = 1000;
 const _ayaByFilterCache = new Map<string, { ts: number; result: { data: any[]; total: number } }>();
+
+function _setAyaByFilterCache(key: string, result: { data: any[]; total: number }): void {
+    if (_ayaByFilterCache.size >= AYA_BY_FILTER_MAX_ENTRIES) {
+        const oldest = _ayaByFilterCache.keys().next().value;
+        if (oldest !== undefined) _ayaByFilterCache.delete(oldest);
+    }
+    _ayaByFilterCache.set(key, { ts: Date.now(), result });
+}
+
+// Invalidate both AYA caches — call after any write to aya_registry.
+// Cheap: clears two in-process Maps; cold path doesn't need to be fast.
+function _clearAyaCaches(): void {
+    _ayaEntitiesCache.clear();
+    _ayaByFilterCache.clear();
+}
 
 // Type definition for analysis records
 type AnalysisRecord = {
@@ -333,6 +351,7 @@ export const database = {
                 console.error('❌ [Supabase] AYA Update Error:', error);
                 return;
             }
+            _clearAyaCaches();
             console.log(`💾 [Supabase] AYA Entity updated: ${entityId}`);
         } catch (error) {
             console.error('❌ [Supabase] AYA Update Error:', error);
@@ -361,6 +380,7 @@ export const database = {
                 console.error('❌ [Supabase] AYA updateEntityData Error:', error);
                 return false;
             }
+            _clearAyaCaches();
             console.log(`💾 [Supabase] AYA Entity data updated (safe): ${entityId}`);
             return true;
         } catch (error) {
@@ -394,6 +414,7 @@ export const database = {
             const allData: any[] = [];
             const pageSize = 1000;
             let offset = 0;
+            let hadError = false;
 
             while (offset < limit) {
                 const { data, error } = await client
@@ -404,6 +425,7 @@ export const database = {
 
                 if (error) {
                     console.error('❌ [Supabase] Get AYA Entities Error:', error);
+                    hadError = true;
                     break;
                 }
 
@@ -413,7 +435,11 @@ export const database = {
                 offset += pageSize;
             }
 
-            _ayaEntitiesCache.set(cacheKey, { ts: Date.now(), data: allData });
+            // Only cache a fully-successful, non-empty result. Caching a partial or empty
+            // result on transient Supabase errors would pin a bad snapshot for the full TTL.
+            if (!hadError && allData.length > 0) {
+                _ayaEntitiesCache.set(cacheKey, { ts: Date.now(), data: allData });
+            }
             return allData;
         } catch (error) {
             console.error('❌ [Supabase] Get AYA Entities Error:', error);
@@ -600,6 +626,7 @@ export const database = {
                 console.error('❌ [Supabase] updateOwnerEmail Error:', error);
                 return false;
             }
+            _clearAyaCaches();
             console.log(`✅ [Supabase] owner_email updated for ${entityId}`);
             return true;
         } catch {
@@ -944,7 +971,14 @@ export const database = {
             let countQuery = client.from('aya_registry').select('*', { count: 'exact', head: true });
             if (sector) countQuery = countQuery.eq('sector_macro', sector);
             if (country) countQuery = countQuery.eq('country_legal', country.toUpperCase());
-            const { count: total } = await countQuery;
+            const { count: total, error: countErr } = await countQuery;
+            // Count and data are separate Supabase HTTP requests. If count fails silently
+            // (Supabase returns soft errors, not throws), caching { data: [N rows], total: 0 }
+            // would make landing pages 404 for the full TTL. Bail without caching.
+            if (countErr || total == null) {
+                if (countErr) console.error('❌ [Supabase] getAyaEntitiesByFilter count error:', countErr);
+                return { data: [], total: 0 };
+            }
 
             let query = client
                 .from('aya_registry')
@@ -967,8 +1001,8 @@ export const database = {
                 return { data: [], total: 0 };
             }
 
-            const result = { data: data || [], total: total || 0 };
-            _ayaByFilterCache.set(cacheKey, { ts: Date.now(), result });
+            const result = { data: data || [], total };
+            _setAyaByFilterCache(cacheKey, result);
             return result;
         } catch (error) {
             console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
@@ -1192,6 +1226,7 @@ export const database = {
                 return false;
             }
 
+            _clearAyaCaches();
             console.log(`💾 [Supabase] Lifecycle updated for entity: ${entityId}`);
             return true;
         } catch (error) {
@@ -1273,6 +1308,7 @@ export const database = {
                 return [];
             }
 
+            _clearAyaCaches();
             console.log(`⏰ [Supabase] Marked ${entityIds.length} entities as expired`);
             return entityIds;
         } catch (error) {
