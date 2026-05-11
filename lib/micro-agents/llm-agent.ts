@@ -1,18 +1,47 @@
 // lib/micro-agents/llm-agent.ts — Shared LLM caller for micro-agents
-// Each agent = 1 focused Gemini Flash call + Zod validation
+// Routes to Infomaniak AI (Apertus-70B, Swiss-hosted) if INFOMANIAK_AI_TOKEN is set,
+// otherwise falls back to Google Gemini Flash. OpenAI-compatible API on both sides.
 
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 
-let _model: ReturnType<ReturnType<typeof createGoogleGenerativeAI>> | null = null;
+type Provider = 'infomaniak' | 'gemini';
+
+function pickProvider(): Provider {
+  if ((process.env.INFOMANIAK_AI_TOKEN || '').trim()) return 'infomaniak';
+  return 'gemini';
+}
+
+let _model: any = null;
+let _provider: Provider | null = null;
 
 function getModel() {
-  if (_model) return _model;
+  if (_model) return { model: _model, provider: _provider! };
+
+  const provider = pickProvider();
+  if (provider === 'infomaniak') {
+    const token = (process.env.INFOMANIAK_AI_TOKEN || '').trim();
+    const productId = (process.env.INFOMANIAK_AI_PRODUCT_ID || '').trim();
+    const modelName = (process.env.INFOMANIAK_AI_MODEL || 'swiss-ai/Apertus-70B-Instruct-2509').trim();
+    if (!productId) throw new Error('INFOMANIAK_AI_TOKEN set but INFOMANIAK_AI_PRODUCT_ID missing');
+
+    const infomaniak = createOpenAI({
+      apiKey: token,
+      baseURL: `https://api.infomaniak.com/2/ai/${productId}/openai/v1`,
+    });
+    _model = infomaniak(modelName);
+    _provider = 'infomaniak';
+    return { model: _model, provider: _provider };
+  }
+
+  // Fallback: Gemini
   const key = (process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '').trim();
-  if (!key) throw new Error('No Gemini API key found (GEMINI_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY)');
+  if (!key) throw new Error('No LLM provider configured (INFOMANIAK_AI_TOKEN or GEMINI_API_KEY)');
   const google = createGoogleGenerativeAI({ apiKey: key });
   _model = google('gemini-3-flash-preview');
-  return _model;
+  _provider = 'gemini';
+  return { model: _model, provider: _provider };
 }
 
 /**
@@ -26,7 +55,7 @@ export async function llmExtract(
   content: string,
   maxChars = 8000,
 ): Promise<string> {
-  const model = getModel();
+  const { model, provider } = getModel();
   // Smart truncation: keep start (70%) + end (30%) to preserve footer content
   // Footer often contains critical data: legal pages, contact, address, copyright
   let truncated: string;
@@ -39,7 +68,7 @@ export async function llmExtract(
   }
 
   try {
-    console.log(`[llm-agent] Calling Gemini with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
+    console.log(`[llm-agent] Calling ${provider} with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
     const { text } = await generateText({
       model,
       temperature: 0,
@@ -50,18 +79,33 @@ export async function llmExtract(
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
     return text;
   } catch (err) {
-    console.error('[llm-agent] Gemini call FAILED:', err instanceof Error ? err.message : err);
+    console.error(`[llm-agent] ${provider} call FAILED:`, err instanceof Error ? err.message : err);
     throw err;
   }
 }
 
 /**
  * Parse JSON from LLM response, stripping markdown code fences if present.
+ * Apertus often wraps the JSON in a "response" key — unwrap it if present and
+ * the inner shape matches what callers expect.
  */
 export function parseJson<T>(text: string): T | null {
+  const tryUnwrap = (parsed: any): T => {
+    // Apertus quirk: when asked for a JSON object, it sometimes wraps it as { response: {...} }.
+    // Unwrap only if "response" is the sole top-level key AND its value is an object/array.
+    if (
+      parsed && typeof parsed === 'object' && !Array.isArray(parsed) &&
+      Object.keys(parsed).length === 1 && 'response' in parsed &&
+      parsed.response !== null && typeof parsed.response === 'object'
+    ) {
+      return parsed.response as T;
+    }
+    return parsed as T;
+  };
+
   try {
     const cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
-    return JSON.parse(cleaned);
+    return tryUnwrap(JSON.parse(cleaned));
   } catch {
     // Try to fix truncated JSON by closing brackets
     try {
@@ -76,7 +120,7 @@ export function parseJson<T>(text: string): T | null {
       for (let i = 0; i < arrOpens - arrCloses; i++) fixed += ']';
       for (let i = 0; i < opens - closes; i++) fixed += '}';
       console.log('[parseJson] Fixed truncated JSON, attempting parse...');
-      return JSON.parse(fixed);
+      return tryUnwrap(JSON.parse(fixed));
     } catch {
       console.error('[parseJson] Failed to parse even after fix attempt:', text.substring(0, 200));
       return null;
