@@ -89,8 +89,8 @@ export async function localPgGetEntities(options: {
 
     const { limit, offset, search, sort = 'default' } = options;
 
-    // Default order: certified first, then by score DESC, then by entity_id (UUID = natural shuffle for ~25K rows at score 50)
-    let orderBy = 'payment_completed DESC NULLS LAST, asr_score DESC NULLS LAST, entity_id';
+    // Default order: certified first, then by score DESC, then md5(entity_id) for deterministic shuffle (~25K rows at score 50)
+    let orderBy = "payment_completed DESC NULLS LAST, asr_score DESC NULLS LAST, md5(entity_id::text)";
     if (sort === 'alpha')    orderBy = 'display_name ASC NULLS LAST';
     if (sort === 'score')    orderBy = 'asr_score DESC NULLS LAST';
     if (sort === 'country')  orderBy = 'country_legal ASC NULLS LAST';
