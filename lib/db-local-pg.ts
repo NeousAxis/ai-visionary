@@ -32,7 +32,9 @@ const ENTITY_COLS = `
     entity_id, legal_name, display_name, entity_type,
     country_legal, sector_macro, website, asr_score,
     payment_completed, contact_email, data_origin,
-    asr_payload, recommendability
+    asr_payload, recommendability,
+    valid_until, created_at, last_update, updated_at,
+    pack_type, subscription_status
 `;
 
 // ── Singleton Pool ────────────────────────────────────────────────────────────

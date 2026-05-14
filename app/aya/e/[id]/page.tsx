@@ -75,9 +75,10 @@ export default async function CertificatePage({ params }: { params: Promise<{ id
     }
 
     // Bug 1 fix: differentiate certified vs bot-indexed entities
+    // Lifetime access: valid_until=NULL on a certified entity = no expiration (always active)
     const isCertified = entity.payment_completed === true;
     const hasValidDate = entity.valid_until && new Date(entity.valid_until).getFullYear() >= 2020;
-    const isValid = hasValidDate ? new Date(entity.valid_until) > new Date() : false;
+    const isValid = isCertified && (!entity.valid_until || (hasValidDate && new Date(entity.valid_until) > new Date()));
 
     const creationDate = new Date(entity.created_at).toLocaleDateString("fr-FR", { year: 'numeric', month: 'long', day: 'numeric' });
 
