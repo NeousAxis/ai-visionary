@@ -285,6 +285,10 @@ export default function Home() {
                 {t('solution.summaryAsr')}
               </p>
             </div>
+
+            <p style={{ fontSize: '1.05rem', fontWeight: 'bold', color: '#0F766E', lineHeight: '1.7', textAlign: 'center', marginTop: '20px', padding: '20px 24px', background: '#F0FDFA', borderRadius: '12px', borderLeft: '4px solid #0D9488' }}>
+              {t('solution.openStandard')}
+            </p>
           </div>
         </div>
       </section>
