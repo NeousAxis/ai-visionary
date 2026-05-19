@@ -277,10 +277,11 @@ def fetch_entities(limit: int | None = None) -> list:
         except Exception:
             pass
 
-        # Also check if all 4 enrichment fields already exist (skip if so)
+        # Also check if all 4 enrichment fields already exist (skip if so).
+        # Top-level asr_payload.enrichment — same path the cert page reads.
         enr = {}
         try:
-            enr = payload.get("data", {}).get("enrichment", {}) or {}
+            enr = payload.get("enrichment", {}) or {}
         except Exception:
             pass
 
@@ -507,8 +508,11 @@ def apply_updates(updates: list):
     Apply a list of updates to Postgres VPS.
     Each update: {entity_id, sector_macro, description_en, description_fr,
                   keywords_en, keywords_fr}
-    Uses jsonb_set to write into asr_payload.data.enrichment without touching other fields.
+    Writes into the TOP-LEVEL asr_payload.enrichment object (same path the
+    certificate page and the Next.js enrich route read/write), merging with
+    any existing enrichment subkeys. Does not touch other fields.
     """
+    enriched_at = datetime.now().isoformat()
     conn = get_pg_conn()
     try:
         with conn.cursor() as cur:
@@ -519,24 +523,15 @@ def apply_updates(updates: list):
                     SET
                         sector_macro = %s,
                         asr_payload = jsonb_set(
-                            jsonb_set(
-                                jsonb_set(
-                                    jsonb_set(
-                                        COALESCE(asr_payload, '{}'::jsonb),
-                                        '{data,enrichment,gemini_description}',
-                                        to_jsonb(%s::text),
-                                        true
-                                    ),
-                                    '{data,enrichment,gemini_description_fr}',
-                                    to_jsonb(%s::text),
-                                    true
-                                ),
-                                '{data,enrichment,gemini_keywords}',
-                                %s::jsonb,
-                                true
+                            COALESCE(asr_payload, '{}'::jsonb),
+                            '{enrichment}',
+                            COALESCE(asr_payload->'enrichment', '{}'::jsonb) || jsonb_build_object(
+                                'gemini_description',    %s::text,
+                                'gemini_description_fr', %s::text,
+                                'gemini_keywords',       %s::jsonb,
+                                'gemini_keywords_fr',    %s::jsonb,
+                                'enriched_at',           %s::text
                             ),
-                            '{data,enrichment,gemini_keywords_fr}',
-                            %s::jsonb,
                             true
                         )
                     WHERE entity_id = %s::uuid
@@ -547,6 +542,7 @@ def apply_updates(updates: list):
                         u["description_fr"],
                         json.dumps(u["keywords_en"], ensure_ascii=False),
                         json.dumps(u["keywords_fr"], ensure_ascii=False),
+                        enriched_at,
                         u["entity_id"],
                     ),
                 )
