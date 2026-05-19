@@ -3,10 +3,12 @@ Reclassify sector_macro + add gemini_description/gemini_description_fr
 + gemini_keywords/gemini_keywords_fr for all VPS Postgres entities
 (aya_local.aya_registry, ~25 860 Tranco scraped).
 
-Single-pass enrichment: 1 Gemini call per batch returns 4 outputs
+Single-pass enrichment: 1 Euria call per batch of 20 returns 4 outputs
 (sector + EN/FR descriptions + EN/FR keywords) — replaces the legacy
 4-script chain (enrich_with_gemini, enrich_keywords, translate_to_fr,
 enrich_keywords_fr) that used 4x more API calls.
+
+LLM: Euria (Infomaniak AI), Swiss-hosted, OpenAI-compatible. No Google.
 
 Usage:
     # Dry-run: samples 20 entities, prints comparison table, NO DB writes
@@ -21,11 +23,10 @@ Usage:
 Must run ON the VPS (Postgres is localhost-only).
 
 Requires in ../.env.local:
-    GOOGLE_GENERATIVE_AI_API_KEY  (or GEMINI_API_KEY as alias)
+    INFOMANIAK_AI_TOKEN, INFOMANIAK_AI_PRODUCT_ID, INFOMANIAK_AI_MODEL
     VPS_PG_HOST, VPS_PG_PORT, VPS_PG_DB, VPS_PG_USER, VPS_PG_PASSWORD
 
-Model: gemini-2.0-flash (10-20x cheaper than gemini-3-flash-preview).
-Batch size: 20 entities per Gemini call.
+Batch size: 20 entities per Euria call.
 
 Crash recovery:
     Progress is checkpointed in /tmp/reclassify_progress.json.
@@ -47,11 +48,10 @@ except ImportError:
     print("ERROR: psycopg2-binary not installed. Run: pip install psycopg2-binary")
     sys.exit(1)
 
-try:
-    import google.generativeai as genai
-except ImportError:
-    print("ERROR: google-generativeai not installed. Run: pip install google-generativeai")
-    sys.exit(1)
+# LLM: Euria (Infomaniak AI) — OpenAI-compatible API. No Google, 100% Swiss.
+import json as _json
+import urllib.request
+import urllib.error
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -67,7 +67,7 @@ SLEEP_BETWEEN_BATCHES = 0.5   # billing active = no rate limit; small delay for 
 MAX_RETRIES = 3
 RETRY_BASE_WAIT = 10           # seconds (exponential: 10, 20, 30)
 
-# Closed list — Gemini MUST return one of these exactly.
+# Closed list — the LLM MUST return one of these exactly.
 ALLOWED_SECTORS = [
     "Technologie & SaaS",
     "Finance & Assurance",
@@ -90,8 +90,9 @@ ALLOWED_SECTORS = [
 
 ALLOWED_SECTORS_SET = set(ALLOWED_SECTORS)
 
-# Gemini model — gemini-2.0-flash (stable, ~10-20x cheaper than gemini-3-flash-preview).
-GEMINI_MODEL = "gemini-2.0-flash"
+# Euria (Infomaniak AI) — Swiss-hosted, OpenAI-compatible. Default model: Ministral-3-14B.
+EURIA_BASE_URL = "https://api.infomaniak.com/2/ai"
+DEFAULT_EURIA_MODEL = "mistralai/Ministral-3-14B-Instruct-2512"
 
 # ---------------------------------------------------------------------------
 # Prompt template
@@ -165,7 +166,7 @@ def load_env():
         print(f"ERROR: {ENV_FILE} not found")
         sys.exit(1)
     needed = {
-        "GOOGLE_GENERATIVE_AI_API_KEY", "GEMINI_API_KEY",
+        "INFOMANIAK_AI_TOKEN", "INFOMANIAK_AI_PRODUCT_ID", "INFOMANIAK_AI_MODEL",
         "VPS_PG_HOST", "VPS_PG_PORT", "VPS_PG_DB", "VPS_PG_USER", "VPS_PG_PASSWORD",
     }
     with open(ENV_FILE, "r") as f:
@@ -180,12 +181,22 @@ def load_env():
                 os.environ[key] = value
 
 
-def get_gemini_key() -> str:
-    key = os.environ.get("GOOGLE_GENERATIVE_AI_API_KEY") or os.environ.get("GEMINI_API_KEY", "")
-    if not key:
-        print("ERROR: GOOGLE_GENERATIVE_AI_API_KEY (or GEMINI_API_KEY) missing in .env.local")
+def get_euria_config() -> dict:
+    """Read Euria (Infomaniak AI) config from environment."""
+    token = os.environ.get("INFOMANIAK_AI_TOKEN", "").strip()
+    product_id = os.environ.get("INFOMANIAK_AI_PRODUCT_ID", "").strip()
+    model = os.environ.get("INFOMANIAK_AI_MODEL", "").strip() or DEFAULT_EURIA_MODEL
+    if not token:
+        print("ERROR: INFOMANIAK_AI_TOKEN missing in .env.local")
         sys.exit(1)
-    return key
+    if not product_id:
+        print("ERROR: INFOMANIAK_AI_PRODUCT_ID missing in .env.local")
+        sys.exit(1)
+    return {
+        "token": token,
+        "url": f"{EURIA_BASE_URL}/{product_id}/openai/v1/chat/completions",
+        "model": model,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -330,10 +341,35 @@ def save_progress(done_ids: set):
 # Gemini call with retry
 # ---------------------------------------------------------------------------
 
-def call_gemini_batch(model, entities: list) -> list | None:
+def _euria_chat(cfg: dict, prompt: str) -> str:
+    """One Euria (Infomaniak AI) chat completion call. Returns the raw text content."""
+    body = _json.dumps({
+        "model": cfg["model"],
+        "messages": [
+            {"role": "system", "content": SYSTEM_INSTRUCTION},
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.0,
+        "max_tokens": 16000,
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        cfg["url"],
+        data=body,
+        headers={
+            "Authorization": f"Bearer {cfg['token']}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=180) as resp:
+        payload = _json.loads(resp.read().decode("utf-8"))
+    return (payload.get("choices") or [{}])[0].get("message", {}).get("content", "") or ""
+
+
+def call_euria_batch(cfg: dict, entities: list) -> list | None:
     """
-    Send one batch to Gemini. Returns list of dicts with keys:
-    entity_id, sector_macro, description_en, description_fr.
+    Send one batch to Euria (Infomaniak AI). Returns list of dicts with keys:
+    entity_id, sector_macro, description_en, description_fr, keywords_en, keywords_fr.
     Returns None on total failure.
     """
     # Inject entity_ids into the prompt so Gemini echoes them back
@@ -401,8 +437,7 @@ Return ONLY the JSON array. No markdown fences. No explanation."""
 
     for attempt in range(MAX_RETRIES):
         try:
-            response = model.generate_content(prompt)
-            text = response.text.strip()
+            text = _euria_chat(cfg, prompt).strip()
 
             # Strip markdown code fences if present
             text = re.sub(r'^```(?:json)?\s*', '', text)
@@ -412,12 +447,8 @@ Return ONLY the JSON array. No markdown fences. No explanation."""
             # Extract JSON array
             match = re.search(r'\[.*\]', text, re.DOTALL)
             if not match:
-                print(f"    WARNING: Gemini returned no JSON array (attempt {attempt+1})")
+                print(f"    WARNING: Euria returned no JSON array (attempt {attempt+1})")
                 print(f"    DEBUG raw text (first 500 chars): {text[:500]!r}")
-                try:
-                    print(f"    DEBUG finish_reason: {response.candidates[0].finish_reason}")
-                except Exception:
-                    pass
                 if attempt < MAX_RETRIES - 1:
                     time.sleep(RETRY_BASE_WAIT * (attempt + 1))
                     continue
@@ -425,7 +456,7 @@ Return ONLY the JSON array. No markdown fences. No explanation."""
 
             results = json.loads(match.group())
             if not isinstance(results, list):
-                print(f"    WARNING: Gemini result is not a list (attempt {attempt+1})")
+                print(f"    WARNING: Euria result is not a list (attempt {attempt+1})")
                 if attempt < MAX_RETRIES - 1:
                     time.sleep(RETRY_BASE_WAIT * (attempt + 1))
                     continue
@@ -440,14 +471,25 @@ Return ONLY the JSON array. No markdown fences. No explanation."""
                 continue
             return None
 
-        except Exception as ex:
-            err_str = str(ex)
-            if "429" in err_str or "quota" in err_str.lower():
+        except urllib.error.HTTPError as ex:
+            err_body = ""
+            try:
+                err_body = ex.read().decode("utf-8", "ignore")[:300]
+            except Exception:
+                pass
+            if ex.code == 429:
                 wait = 30 * (attempt + 1)
                 print(f"    Rate limit 429 — retry in {wait}s (attempt {attempt+1}/{MAX_RETRIES})")
                 time.sleep(wait)
                 continue
-            print(f"    ERROR Gemini: {ex}")
+            print(f"    ERROR Euria HTTP {ex.code}: {err_body}")
+            if attempt < MAX_RETRIES - 1:
+                time.sleep(RETRY_BASE_WAIT * (attempt + 1))
+                continue
+            return None
+
+        except Exception as ex:
+            print(f"    ERROR Euria: {ex}")
             if attempt < MAX_RETRIES - 1:
                 time.sleep(RETRY_BASE_WAIT * (attempt + 1))
                 continue
@@ -573,26 +615,17 @@ def main():
     # Resolve skip logic
     skip_existing = not args.force
 
+    # Load environment + Euria config
+    load_env()
+    cfg = get_euria_config()
+
     print("=" * 65)
-    print("AYA VPS — Sector Reclassification + Gemini Description Enrichment")
+    print("AYA VPS — Sector Reclassification + Euria Description Enrichment")
     print(f"Mode   : {'APPLY (real DB writes)' if args.apply else 'DRY-RUN (no DB writes, 20 sample entities)'}")
-    print(f"Model  : {GEMINI_MODEL}")
+    print(f"LLM    : Euria (Infomaniak AI) — {cfg['model']}")
     print(f"Limit  : {args.limit or 'all'}")
     print(f"Skip existing descriptions: {skip_existing}")
     print("=" * 65)
-
-    # Load environment
-    load_env()
-    api_key = get_gemini_key()
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(
-        GEMINI_MODEL,
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.0,         # fully deterministic — classification task
-            max_output_tokens=16384, # plenty of room for 5 × bilingual JSON output
-            response_mime_type='application/json',  # force valid JSON output, no markdown
-        ),
-    )
 
     # Reset progress if requested
     if args.reset_progress and os.path.exists(PROGRESS_FILE):
@@ -649,7 +682,7 @@ def main():
     if not args.apply:
         print(f"\n--- DRY-RUN: sample of {len(needs_work)} entities ---\n")
         batch = needs_work[:BATCH_SIZE]
-        results = call_gemini_batch(model, batch)
+        results = call_euria_batch(cfg, batch)
 
         if not results:
             print("ERROR: Gemini returned nothing for the sample batch.")
@@ -696,7 +729,7 @@ def main():
     for batch_idx, batch in enumerate(batches):
         print(f"Batch {batch_idx + 1}/{total_batches} | {progress_bar(batch_idx * BATCH_SIZE, total, start_time)}")
 
-        results = call_gemini_batch(model, batch)
+        results = call_euria_batch(cfg, batch)
 
         if results is None:
             print(f"  BATCH FAILED — skipping {len(batch)} entities")
