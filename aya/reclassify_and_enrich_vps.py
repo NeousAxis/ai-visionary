@@ -410,8 +410,8 @@ RULES:
   {sectors_list}
 - description_en: 2-3 sentences in English. FACTUAL only.
 - description_fr: 2-3 sentences in French. FACTUAL only.
-- keywords_en: 5-8 business keywords in English describing the actual activity (e.g. football, automobile, banking, cloud computing). NO generic terms (service, platform, app, website, solution, digital, company, business).
-- keywords_fr: 5-8 business keywords in French. Adapt to French business vocabulary (do not translate literally). Lowercase except proper nouns. Keep technical terms unchanged (blockchain, API, SaaS, NFT, DeFi, etc.).
+- keywords_en: EXACTLY 8 business keywords in English describing the actual activity (e.g. football, automobile, banking, cloud computing). NO generic terms (service, platform, app, website, solution, digital, company, business). Always return 8.
+- keywords_fr: EXACTLY 8 business keywords in French. Adapt to French business vocabulary (do not translate literally). Lowercase except proper nouns. Keep technical terms unchanged (blockchain, API, SaaS, NFT, DeFi, etc.). Always return 8.
 - FORBIDDEN words in descriptions: leader, best, premium, world-class, innovative, cutting-edge, top, #1, excellent, superior, unrivalled
 - State what the company does, who it serves, where it operates.
 - If the entity is unclear or the website seems dead → use sector_macro="General", generic factual description, and 5 broad keywords.
