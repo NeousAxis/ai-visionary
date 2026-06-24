@@ -9,12 +9,20 @@
  * en lecture seule, timeouts courts, nombre de requêtes plafonné par domaine.
  */
 
-const KEYWORDS = [
-    'affiliate', 'affiliates', 'affiliate program', 'affiliate-program', 'affiliation',
-    'referral', 'referrals', 'refer a friend', 'refer-a-friend', 'parrainage',
-    'partner program', 'partner-program', 'become a partner', 'devenez partenaire',
-    'earn commission', 'commission program', "programme d'affiliation", 'programme d’affiliation',
+// Mots-clés EXIGÉS DANS LE CHEMIN d'une URL (haute précision : un vrai programme a
+// une page dédiée /affiliates, /referral-scheme, /programme-daffiliation…).
+// On EXCLUT volontairement "referral"/"commission" en query string (utm_*=referral
+// = tracking, pas un programme) et les simples mentions dans le corps de la home.
+const PATH_KEYWORDS = [
+    'affiliate', 'affiliates', 'affiliation', 'affilie', 'affilié',
+    'referral', 'referral-scheme', 'referral-program', 'refer-a-friend',
+    'parrainage', 'partenaire', 'programme-affiliation', 'programme-daffiliation', "programme-d-affiliation",
+    'partner-program', 'partnerprogram', 'partner-programme',
 ];
+// Anchor text fort (mot rare hors contexte affiliation).
+const TEXT_RE = /affiliat|parrain|referral program|programme d.?affiliation/i;
+// Mots-clés de corps de page (pour CONFIRMER une page /affiliates qui répond 200).
+const BODY_KEYWORDS = ['affiliate', 'affiliation', 'referral', 'parrainage', 'commission'];
 
 const PROBE_PATHS = [
     '/affiliates', '/affiliate', '/affiliate-program', '/partners', '/partner-program',
@@ -52,21 +60,27 @@ async function fetchText(url: string, timeoutMs: number): Promise<{ ok: boolean;
 function scanForKeywords(html: string): string[] {
     const lower = html.toLowerCase();
     const hits = new Set<string>();
-    for (const kw of KEYWORDS) {
+    for (const kw of BODY_KEYWORDS) {
         if (lower.includes(kw)) hits.add(kw);
     }
     return [...hits];
 }
 
-/** Cherche un lien (href/anchor) qui sent l'affiliation, renvoie l'URL absolue si trouvé. */
+/**
+ * Cherche un lien dont le CHEMIN (pas la query) sent l'affiliation, ou dont le texte
+ * d'ancre matche un mot fort. Ignore les liens utm_*=referral (tracking, pas un programme).
+ */
 function findAffiliateLink(html: string, base: string): string | null {
     const re = /<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
     let m: RegExpExecArray | null;
     while ((m = re.exec(html)) !== null) {
         const href = m[1] || '';
-        const anchor = (m[2] || '').replace(/<[^>]+>/g, '');
-        const hay = (href + ' ' + anchor).toLowerCase();
-        if (KEYWORDS.some((kw) => hay.includes(kw))) {
+        const anchor = (m[2] || '').replace(/<[^>]+>/g, ' ').trim();
+        let path = '';
+        try { path = new URL(href, base).pathname.toLowerCase(); } catch { path = href.toLowerCase().split('?')[0]; }
+        const pathHit = PATH_KEYWORDS.some((kw) => path.includes(kw));
+        const textHit = TEXT_RE.test(anchor);
+        if (pathHit || textHit) {
             try { return new URL(href, base).toString(); } catch { return href; }
         }
     }
@@ -85,22 +99,23 @@ export async function detectAffiliateProgram(domain: string, opts: { timeoutMs?:
     if (!bare || !bare.includes('.')) return { has_affiliate: false, affiliate_url: null, signals: [], error: 'invalid_domain' };
     const origin = `https://${bare}`;
 
-    // 1) Homepage : lien d'affiliation explicite > simple mention de mot-clé.
+    // 1) Homepage : un lien dont le CHEMIN pointe une page programme (haute précision).
     const home = await fetchText(origin, timeoutMs);
     if (home.ok) {
         const link = findAffiliateLink(home.text, home.finalUrl);
         if (link) return { has_affiliate: true, affiliate_url: link, signals: ['homepage-link'] };
-        const kw = scanForKeywords(home.text);
-        if (kw.length) return { has_affiliate: true, affiliate_url: home.finalUrl, signals: ['homepage-text', ...kw.slice(0, 3)] };
     }
 
-    // 2) Sonde quelques chemins classiques.
+    // 2) Sonde des chemins classiques, avec anti soft-404 : l'URL finale doit GARDER
+    //    un segment d'affiliation (sinon = redirect vers la home = page inexistante).
     for (const path of PROBE_PATHS.slice(0, maxProbes)) {
         const probe = await fetchText(origin + path, timeoutMs);
-        if (probe.ok && probe.status === 200) {
-            const kw = scanForKeywords(probe.text);
-            // page existe ET parle d'affiliation -> signal fort
-            if (kw.length) return { has_affiliate: true, affiliate_url: probe.finalUrl, signals: [`path:${path}`, ...kw.slice(0, 2)] };
+        if (!probe.ok || probe.status !== 200) continue;
+        let finalPath = '';
+        try { finalPath = new URL(probe.finalUrl).pathname.toLowerCase(); } catch { finalPath = ''; }
+        const pathStillAffiliate = PATH_KEYWORDS.some((kw) => finalPath.includes(kw));
+        if (pathStillAffiliate && scanForKeywords(probe.text).length) {
+            return { has_affiliate: true, affiliate_url: probe.finalUrl, signals: [`path:${path}`] };
         }
     }
 
