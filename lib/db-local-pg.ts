@@ -1723,3 +1723,59 @@ export async function localPgListPartnerCandidates(opts: { onlyAffiliate?: boole
         return { rows: [], affiliate_count: 0, scanned_count: 0 };
     }
 }
+
+// ── FERME À AGENTS (bootstrap côté demande) ─────────────────────────────────
+
+export async function localPgInsertAgentFarmRun(row: {
+    persona: string; lang: string; query: string; keyword: string | null;
+    picksCount: number; chosenDomain: string | null; chosenName: string | null;
+    hadCashback: boolean; answer: string | null;
+}): Promise<void> {
+    const pool = getPool();
+    if (!pool) return;
+    try {
+        await pool.query(
+            `INSERT INTO agent_farm_runs
+                (persona, lang, query, keyword, picks_count, chosen_domain, chosen_name, had_cashback, answer)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+            [row.persona, row.lang, row.query, row.keyword, row.picksCount,
+             row.chosenDomain, row.chosenName, row.hadCashback, row.answer ? row.answer.slice(0, 2000) : null],
+        );
+    } catch (err) {
+        console.error('[db-local-pg] localPgInsertAgentFarmRun error:', err);
+    }
+}
+
+export async function localPgAgentFarmStats(): Promise<{
+    total: number; with_picks: number; with_cashback: number;
+    by_persona: Array<{ persona: string; runs: number }>;
+    recent: Array<{ persona: string; query: string; chosen_name: string | null; had_cashback: boolean; created_at: string }>;
+}> {
+    const pool = getPool();
+    if (!pool) return { total: 0, with_picks: 0, with_cashback: 0, by_persona: [], recent: [] };
+    try {
+        const agg = await pool.query(
+            `SELECT count(*)::int AS total,
+                    count(*) FILTER (WHERE picks_count > 0)::int AS with_picks,
+                    count(*) FILTER (WHERE had_cashback)::int AS with_cashback
+             FROM agent_farm_runs`,
+        );
+        const byP = await pool.query(
+            `SELECT persona, count(*)::int AS runs FROM agent_farm_runs GROUP BY persona ORDER BY runs DESC`,
+        );
+        const recent = await pool.query(
+            `SELECT persona, query, chosen_name, had_cashback, created_at::text
+             FROM agent_farm_runs ORDER BY created_at DESC LIMIT 15`,
+        );
+        return {
+            total: agg.rows[0]?.total ?? 0,
+            with_picks: agg.rows[0]?.with_picks ?? 0,
+            with_cashback: agg.rows[0]?.with_cashback ?? 0,
+            by_persona: byP.rows as any[],
+            recent: recent.rows as any[],
+        };
+    } catch (err) {
+        console.error('[db-local-pg] localPgAgentFarmStats error:', err);
+        return { total: 0, with_picks: 0, with_cashback: 0, by_persona: [], recent: [] };
+    }
+}
