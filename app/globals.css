@@ -250,6 +250,20 @@ ul {
     box-shadow: 0 6px 15px rgba(74, 145, 158, 0.4);
 }
 
+/* Accent button (couleur accent du système) — utilisé pour Pollen Agents */
+.btn-accent {
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 4px 10px rgba(206, 106, 107, 0.3);
+    border: none;
+}
+
+.btn-accent:hover {
+    filter: brightness(0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(206, 106, 107, 0.4);
+}
+
 /* --- MODERN QCM --- */
 .ay-qcm-container {
     margin-top: 10px;

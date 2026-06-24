@@ -70,7 +70,7 @@ export default function Home() {
             <Link href="/aya" className="btn" style={{ background: 'transparent', border: '2px solid #e2e8f0', color: '#334155', fontWeight: '600', padding: '12px 24px', borderRadius: '8px', transition: 'all 0.2s' }}>
               {t('hero.ctaRegistry')}
             </Link>
-            <Link href="/pollen-agents" className="btn" style={{ background: '#fef3c7', border: '2px solid #f59e0b', color: '#92400e', fontWeight: '600', padding: '12px 24px', borderRadius: '8px', transition: 'all 0.2s' }}>
+            <Link href="/pollen-agents" className="btn btn-accent">
               {t('hero.ctaPollen')}
             </Link>
           </div>
