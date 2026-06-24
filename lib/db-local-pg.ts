@@ -1635,11 +1635,14 @@ export async function localPgQueuePartnerRecipient(row: {
     const pool = getPool();
     if (!pool) return false;
     try {
+        // brand = 1er label du domaine (24mx.co.uk -> "24mx") ; ON CONFLICT non ciblé
+        // dédupe sur l'email OU la marque (index partiel uq_outreach_partner_brand).
         const r = await pool.query(
             `INSERT INTO outreach_recipients
-                (entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, kind, unsubscribe_token)
-             VALUES ($1,$2,lower($3),$4,$5,$6,$7,$8,$9,'partner', gen_random_uuid()::text)
-             ON CONFLICT (lower(email), campaign) DO NOTHING`,
+                (entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, kind, brand, unsubscribe_token)
+             VALUES ($1,$2,lower($3),$4,$5,$6,$7,$8,$9,'partner',
+                     split_part(regexp_replace(lower($2),'^www\\.',''),'.',1), gen_random_uuid()::text)
+             ON CONFLICT DO NOTHING`,
             [row.entityId ?? null, row.domain, row.email, row.displayName ?? null, row.sector ?? null,
              row.country ?? null, row.lang, row.asrScore ?? null, row.campaign],
         );
@@ -1661,15 +1664,28 @@ export async function localPgListPartnerCandidates(opts: { onlyAffiliate?: boole
     if (!pool) return { rows: [], affiliate_count: 0, scanned_count: 0 };
     try {
         const where = opts.onlyAffiliate ? 'WHERE has_affiliate = true' : '';
+        // Dédup par MARQUE (1 ligne par brand : 24mx.* -> 1 seule entrée).
         const dataRes = await pool.query(
             `SELECT domain, display_name, sector_macro, country_legal, contact_email,
-                    asr_score::float8 AS asr_score, has_affiliate, affiliate_url, queued
-             FROM partner_candidates ${where}
+                    asr_score, has_affiliate, affiliate_url, queued
+             FROM (
+               SELECT DISTINCT ON (split_part(regexp_replace(lower(domain),'^www\\.',''),'.',1))
+                      domain, display_name, sector_macro, country_legal, contact_email,
+                      asr_score::float8 AS asr_score, has_affiliate, affiliate_url, queued
+               FROM partner_candidates ${where}
+               ORDER BY split_part(regexp_replace(lower(domain),'^www\\.',''),'.',1), has_affiliate DESC, asr_score DESC NULLS LAST
+             ) q
              ORDER BY has_affiliate DESC, asr_score DESC NULLS LAST
              LIMIT $1`,
             [Math.min(Math.max(opts.limit ?? 100, 1), 1000)],
         );
-        const c = await pool.query(`SELECT count(*) FILTER (WHERE has_affiliate)::int AS aff, count(*)::int AS tot FROM partner_candidates`);
+        // Comptes dédupés par marque.
+        const c = await pool.query(
+            `SELECT count(DISTINCT brand) FILTER (WHERE has_affiliate)::int AS aff,
+                    count(DISTINCT brand)::int AS tot
+             FROM (SELECT split_part(regexp_replace(lower(domain),'^www\\.',''),'.',1) AS brand, has_affiliate
+                   FROM partner_candidates) x`,
+        );
         return {
             rows: dataRes.rows as any[],
             affiliate_count: (c.rows[0]?.aff as number) ?? 0,
