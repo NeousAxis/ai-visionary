@@ -3,7 +3,11 @@
 > Ce fichier est lu automatiquement par Claude Code. Il contient le contexte essentiel et le plan d'action.
 > Pour l'historique complet des sessions et changelogs, voir `MEMORY.md`.
 > Pour le plan de remediation original (10 sprints, tous termines), voir `PLAN-ACTION-AYO-COMPLET.md`.
-> Derniere mise a jour : **11 mai 2026** — bascule prod 100% suisse en une session (apres incident Supabase Disk IO le matin) :
+> Derniere mise a jour : **24 juin 2026** — **chantier marketing (machine à deux côtés)** : (1) moteur d'**outreach automatisé** cold B2B (`lib/outreach/`, SMTP throttlé via `hello@`, List-Unsubscribe one-click, désinscription, cron warmup) — **ARMÉ mais INERTE** (`OUTREACH_ENABLED` absent = dry-run forcé) ; cible ASR = 4 456 emails digital/SaaS/fintech/crypto ; test réel reçu en inbox. (2) **pipeline partenaires cashback** : détecteur de programme d'affiliation (`lib/outreach/affiliate-detector.ts`) + table `partner_candidates` + dédup par marque + **connecteur réseaux Awin/Impact** (`lib/pollen/network-connector.ts` → `cashback_offers`). (3) **pivot copy « gratuit pour l'instant »** (FAQ/CGV FR+EN, Stripe sous le capot). (4) **Pollen Agents rendu visible** : section home `#pollen` + lien footer. Migrations 24 juin (outreach_*, partner_candidates, kind/brand). Docs : `NEOUSBOT-OUTREACH-RUNBOOK.md`, `POLLEN-DEAL-KIT.md`. **Décisions verrouillées** : Pollen = route (PAS un domaine), gratuit pour l'instant, `hello@` pour l'outreach. **Gated Cyril** : clés API Awin, filtre qualité email, GO envoi, signature des deals. Voir STATE.md §Marketing.
+>
+> Mise a jour precedente : **4 juin 2026** — **ingestion massive SANS scraping** : registre AYA **32 333 → 367 301 entités** (×11, mondial). Moteur **Web Data Commons** (domain-keyed) chargé en prod VPS + qualité (pays 72 %, +127k secteurs) + recadrage Wikidata/Infomaniak (M&S Belgique→GB & co). **Résolveur de domaine mondial** (`aya/ingestion/domain_resolver.py`) pour réveiller les pools sans-site (LINDAS CH 789k, annuaires WDC 4,6M, registres FR/UK/DE…). Packagé : **skill `/aya-ingestion`** + scripts `aya/ingestion/` (gitignored) + `aya/ingestion/HANDOFF.md` + `PLAN-INGESTION-ANNUAIRES.md`. Réversible (`data_origin IN ('FUSION-WDC','FUSION-WDC-MIN3','FUSION-RESOLVED')`). Accès VPS : clé `~/.ssh/aya-bot`.
+>
+> Mise a jour precedente : **11 mai 2026** — bascule prod 100% suisse en une session (apres incident Supabase Disk IO le matin) :
 > 1. Hosting : Vercel (US) → VPS Infomaniak `aya-bot` (CH, IP 83.228.229.212) via DNS switch ai-visionary.xyz/www → VPS. Cert Let's Encrypt etendu.
 > 2. LLM : Gemini Flash (Google US) → Infomaniak AI (Apertus-70B puis Ministral-3-14B pour perf, CH). Wrapper `lib/llm-provider.ts`.
 > 3. DB aya_registry : 4 437 entites Supabase (US) → Postgres VPS local (`aya_local.aya_registry`, 26 254 entites totales). `lib/db.ts` shortcircuit via `lib/db-local-pg.ts` quand `VPS_PG_PASSWORD` set.
@@ -20,7 +24,7 @@
 |-------|-----------|
 | **AYO** | Agent IA qui diagnostique la lisibilite IA d'un site web. V1=chatbot Gemini (page /diagnostic). V2=micro-agents LLM cibles Gemini 3 Flash (page /diagnostic-v2, branche feature/micro-agents-diagnostic). |
 | **AIO Score** | Score 0-100, deterministe, base sur 7 blocs ponderes (la "Bible AIO"). |
-| **AYA** | Registre public d'entites indexees/certifiees. **Deux sources**: Supabase `aya_registry` (~4 438 entites legacy/certifiees, intouchable) + Postgres VPS Infomaniak `aya_local.aya_registry` (~25 860 entites scrapees Tranco EU, push 28 avril 2026). Objectif 100k. Total live au 28 avril : ~30 298. |
+| **AYA** | Registre public d'entites indexees/certifiees. **Deux sources**: Supabase `aya_registry` (~4 438 entites legacy/certifiees, intouchable) + Postgres VPS Infomaniak `aya_local.aya_registry` (~25 860 entites scrapees Tranco EU, push 28 avril 2026). Objectif 100k **DÉPASSÉ** (4 juin) → **367 301 entités** via ingestion Web Data Commons mondiale (sans scraping). Voir `PLAN-INGESTION-ANNUAIRES.md` + `aya/ingestion/HANDOFF.md`. |
 | **ASR** | AI Singular Record — fichier JSON-LD signe Ed25519, identite numerique de l'entite. |
 | **Hard cap** | Pas de JSON-LD + pas d'AYA = score max 50. **Pas d'ASR = max 50** (doctrine stricte depuis 21 avril 2026). Score max 78 sans preuves externes. |
 | **q values** | Qualite de chaque donnee extraite : 0 (absent), 0.5 (vague), 1 (concret/verifie). |

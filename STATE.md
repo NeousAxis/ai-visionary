@@ -6,6 +6,24 @@
 
 ---
 
+## Marketing — machine à deux côtés (24 juin 2026)
+
+> Voir `NEOUSBOT-OUTREACH-RUNBOOK.md` (exploitation outreach) + `POLLEN-DEAL-KIT.md` (BD partenaires) + `VISION-POLLEN-AGENTS.md` (stratégie). Tout déployé + vérifié en prod VPS.
+
+- **Pivot « gratuit pour l'instant »** (décision verrouillée) : paywall retiré du parcours public ; copy FAQ (a4/a7) + CGV (s2/s3) alignés FR/EN ; Stripe gardé sous le capot. Vérifié en prod (texte visible sans 19/499 CHF).
+- **Pollen Agents rendu visible** : la page `/pollen-agents` (déjà live) est désormais liée — **section dédiée `#pollen`** sur la home (fond `#F1F5F9`, badge teal, 3 cartes blanches à liseré teal « Pour les entreprises / Pour les utilisateurs / Ouvert & neutre », bouton `btn-primary` « Découvrir Pollen Agents ») + **lien footer** (FR/EN). Construit 100% sur le design system (pas d'emoji abeille ni couleurs hors-palette).
+- **Moteur d'outreach automatisé** (`lib/outreach/`) — **ARMÉ mais INERTE** (`OUTREACH_ENABLED` absent = dry-run forcé) : SMTP throttlé via identité dédiée `hello@` (décision Cyril), List-Unsubscribe one-click RFC 8058, suppression globale, désinscription publique, cron warmup gated. Tables `outreach_recipients`/`outreach_suppression`/`outreach_events`. Templates FR/EN (angle standard ouvert). Cible ASR = **4 456 emails** digital/SaaS/fintech/crypto. `verify` SMTP OK, test réel reçu en **inbox**. Endpoints `/api/admin/outreach` (preview/import/send/test/suppress/verify), `/api/outreach/unsubscribe`, `/api/cron/outreach`.
+- **Pipeline partenaires cashback** (BD automatisée) : détecteur de programme d'affiliation `lib/outreach/affiliate-detector.ts` (haute précision, path-based) → table `partner_candidates` (shortlist BD persistante) + **dédup par marque** (`outreach_recipients.kind`/`brand`). ~177 marques scannées → ~16 avec affiliation détectée. **Connecteur réseaux d'affiliation Awin/Impact** `lib/pollen/network-connector.ts` → `cashback_offers` (marques connues), admin `import-network` (dry-run/réel) — attend le compte éditeur Awin de Cyril + clés API.
+- **Moteur cashback Pollen** (déployé 16 juin) : jeton d'attribution Ed25519, `/api/pollen-agents/*` (offer/claim/ask), admin/cashback, validation manuelle outcome-only.
+- **Gated (Cyril, external-facing)** : clés API Awin/Impact, filtre qualité email avant envoi (junk type `info@domain.com`), GO `OUTREACH_ENABLED=true` + ramp, signature des deals.
+
+## Ingestion & croissance registre (4 juin 2026) — registre 32 333 → 367 301 (×11)
+
+- **Moteur de masse mondial = Web Data Commons** (annuaires Common Crawl) : entreprises domain-keyed chargées en prod VPS sans scraping, ~0 CHF. `FUSION-WDC` (321 893) + `FUSION-WDC-MIN3` (13 075).
+- **Qualité appliquée live** : pays normalisés + remplis par ccTLD (couverture **72 %**), +126 791 secteurs par mots-clés, recadrage Wikidata/Infomaniak (55 pays + secteurs corrigés, ex. M&S Belgique→GB).
+- **Résolveur de domaine MONDIAL** (`aya/ingestion/domain_resolver.py`) : trouve le site d'une boîte à partir de son nom (teste en vrai + vérifie, ccTLD par pays, ~25-39 %) → réveille les pools sans-site (LINDAS CH, annuaires WDC, registres FR/UK/DE).
+- **Packagé** : skill `/aya-ingestion`, pipeline `aya/ingestion/run_all.sh` + `resolve_and_load.sh`, doc `aya/ingestion/HANDOFF.md`, stratégie `PLAN-INGESTION-ANNUAIRES.md`. Réversible par `data_origin`. Accès VPS : clé `~/.ssh/aya-bot`.
+
 ## Site & Frontend
 
 - Site bilingue FR/EN : toggle header, `next-intl` + cookie `NEXT_LOCALE`, toutes pages + chatbot + emails + formulaires + API
