@@ -1266,6 +1266,7 @@ export type OutreachRecipientRow = {
     campaign: string;
     status: string;
     unsubscribe_token: string;
+    kind: string;
 };
 
 /**
@@ -1397,7 +1398,7 @@ export async function localPgGetOutreachBatch(campaign: string, limit: number): 
         const res: QueryResult<OutreachRecipientRow> = await pool.query(
             `SELECT rec.id::text, rec.entity_id::text, rec.domain, rec.email, rec.display_name,
                     rec.sector_macro, rec.country_legal, rec.lang, rec.asr_score::float8 AS asr_score,
-                    rec.campaign, rec.status, rec.unsubscribe_token
+                    rec.campaign, rec.status, rec.unsubscribe_token, rec.kind
              FROM outreach_recipients rec
              LEFT JOIN outreach_suppression s ON s.email = lower(rec.email)
              WHERE rec.campaign = $1 AND rec.status = 'pending' AND s.email IS NULL
@@ -1553,5 +1554,129 @@ export async function localPgOutreachStats(campaign?: string): Promise<{
     } catch (err) {
         console.error('[db-local-pg] localPgOutreachStats error:', err);
         return { by_status: {}, total: 0, suppressed: 0, campaigns: [] };
+    }
+}
+
+// ── PARTENAIRES CASHBACK (détection programme d'affiliation) ─────────────────
+
+export type PartnerScanCandidate = {
+    domain: string;
+    entity_id: string | null;
+    display_name: string | null;
+    sector_macro: string | null;
+    country_legal: string | null;
+    contact_email: string | null;
+    asr_score: number | null;
+};
+
+/** Domaines candidats à scanner (digital/SaaS/fintech/crypto, email présent) PAS encore scannés. */
+export async function localPgGetPartnerScanCandidates(opts: {
+    sectors: string[];
+    excludeCountries?: string[];
+    limit?: number;
+}): Promise<PartnerScanCandidate[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    const exclude = (opts.excludeCountries ?? []).map((c) => c.toUpperCase());
+    const limit = Math.min(Math.max(opts.limit ?? 25, 1), 200);
+    try {
+        const res = await pool.query(
+            `SELECT DISTINCT ON (dom) dom AS domain, entity_id::text, display_name, sector_macro,
+                    country_legal, contact_email, asr_score::float8 AS asr_score
+             FROM (
+               SELECT r.entity_id, r.display_name, r.sector_macro, r.country_legal, r.contact_email, r.asr_score,
+                      regexp_replace(regexp_replace(lower(r.website), '^https?://(www\\.)?', '', 'g'), '/.*$', '', 'g') AS dom
+               FROM aya_registry r
+               WHERE r.contact_email IS NOT NULL AND position('@' in r.contact_email) > 1
+                 AND r.sector_macro = ANY($1::text[])
+                 AND (cardinality($2::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($2::text[]))
+                 AND coalesce(r.website,'') <> ''
+             ) q
+             WHERE dom <> '' AND dom NOT IN (SELECT domain FROM partner_candidates)
+             ORDER BY dom, asr_score DESC NULLS LAST
+             LIMIT $3`,
+            [opts.sectors, exclude, limit],
+        );
+        return res.rows as PartnerScanCandidate[];
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetPartnerScanCandidates error:', err);
+        return [];
+    }
+}
+
+export async function localPgUpsertPartnerCandidate(row: {
+    domain: string; entityId?: string | null; displayName?: string | null; sector?: string | null;
+    country?: string | null; email?: string | null; asrScore?: number | null;
+    hasAffiliate: boolean; affiliateUrl?: string | null; signals?: unknown;
+}): Promise<void> {
+    const pool = getPool();
+    if (!pool) return;
+    try {
+        await pool.query(
+            `INSERT INTO partner_candidates
+                (domain, entity_id, display_name, sector_macro, country_legal, contact_email, asr_score, has_affiliate, affiliate_url, signals, scanned_at)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb, NOW())
+             ON CONFLICT (domain) DO UPDATE SET
+                has_affiliate=EXCLUDED.has_affiliate, affiliate_url=EXCLUDED.affiliate_url,
+                signals=EXCLUDED.signals, scanned_at=NOW()`,
+            [row.domain, row.entityId ?? null, row.displayName ?? null, row.sector ?? null, row.country ?? null,
+             row.email ?? null, row.asrScore ?? null, row.hasAffiliate, row.affiliateUrl ?? null, JSON.stringify(row.signals ?? [])],
+        );
+    } catch (err) {
+        console.error('[db-local-pg] localPgUpsertPartnerCandidate error:', err);
+    }
+}
+
+/** Met un partenaire qualifié dans la file outreach (kind=partner) + marque queued. */
+export async function localPgQueuePartnerRecipient(row: {
+    domain: string; entityId?: string | null; email: string; displayName?: string | null;
+    sector?: string | null; country?: string | null; lang: string; asrScore?: number | null; campaign: string;
+}): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const r = await pool.query(
+            `INSERT INTO outreach_recipients
+                (entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, kind, unsubscribe_token)
+             VALUES ($1,$2,lower($3),$4,$5,$6,$7,$8,$9,'partner', gen_random_uuid()::text)
+             ON CONFLICT (lower(email), campaign) DO NOTHING`,
+            [row.entityId ?? null, row.domain, row.email, row.displayName ?? null, row.sector ?? null,
+             row.country ?? null, row.lang, row.asrScore ?? null, row.campaign],
+        );
+        await pool.query(`UPDATE partner_candidates SET queued=true WHERE domain=$1`, [row.domain]);
+        return (r.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgQueuePartnerRecipient error:', err);
+        return false;
+    }
+}
+
+/** Shortlist BD : candidats partenaires (par défaut ceux avec affiliation détectée). */
+export async function localPgListPartnerCandidates(opts: { onlyAffiliate?: boolean; limit?: number } = {}): Promise<{
+    rows: Array<{ domain: string; display_name: string | null; sector_macro: string | null; country_legal: string | null; contact_email: string | null; asr_score: number | null; has_affiliate: boolean; affiliate_url: string | null; queued: boolean }>;
+    affiliate_count: number;
+    scanned_count: number;
+}> {
+    const pool = getPool();
+    if (!pool) return { rows: [], affiliate_count: 0, scanned_count: 0 };
+    try {
+        const where = opts.onlyAffiliate ? 'WHERE has_affiliate = true' : '';
+        const dataRes = await pool.query(
+            `SELECT domain, display_name, sector_macro, country_legal, contact_email,
+                    asr_score::float8 AS asr_score, has_affiliate, affiliate_url, queued
+             FROM partner_candidates ${where}
+             ORDER BY has_affiliate DESC, asr_score DESC NULLS LAST
+             LIMIT $1`,
+            [Math.min(Math.max(opts.limit ?? 100, 1), 1000)],
+        );
+        const c = await pool.query(`SELECT count(*) FILTER (WHERE has_affiliate)::int AS aff, count(*)::int AS tot FROM partner_candidates`);
+        return {
+            rows: dataRes.rows as any[],
+            affiliate_count: (c.rows[0]?.aff as number) ?? 0,
+            scanned_count: (c.rows[0]?.tot as number) ?? 0,
+        };
+    } catch (err) {
+        console.error('[db-local-pg] localPgListPartnerCandidates error:', err);
+        return { rows: [], affiliate_count: 0, scanned_count: 0 };
     }
 }

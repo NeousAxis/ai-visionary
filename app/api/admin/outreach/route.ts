@@ -5,16 +5,22 @@ import {
     localPgOutreachStats,
     localPgAddOutreachSuppression,
     localPgPreviewOutreachTargets,
+    localPgGetPartnerScanCandidates,
+    localPgUpsertPartnerCandidate,
+    localPgQueuePartnerRecipient,
+    localPgListPartnerCandidates,
 } from '@/lib/db-local-pg';
 import { runOutreachBatch } from '@/lib/outreach/run';
 import { buildOutreachEmail } from '@/lib/outreach/templates';
+import { buildPartnerEmail } from '@/lib/outreach/templates-partner';
 import { pickOutreachLang } from '@/lib/outreach/lang';
+import { detectAffiliateProgram } from '@/lib/outreach/affiliate-detector';
 import { sendOutreachEmail, isOutreachSenderConfigured, verifyOutreachTransport, outreachFrom } from '@/lib/outreach/sender';
 
 // Admin outreach — pilotage du moteur d'envoi cold B2B.
 // Auth : ?secret=ADMIN_SECRET ou Authorization: Bearer.
 // Actions POST : import | send | test | suppress | verify.
-export const maxDuration = 120;
+export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 // Verticale pilote par defaut : digital / SaaS / crypto / fintech / e-commerce.
@@ -26,6 +32,14 @@ export async function GET(req: NextRequest) {
     if (!auth.authorized) return auth.response!;
 
     const url = new URL(req.url);
+
+    // Vue shortlist BD : partenaires cashback détectés (affiliation).
+    if (url.searchParams.get('view') === 'partners') {
+        const onlyAffiliate = url.searchParams.get('all') !== 'true';
+        const list = await localPgListPartnerCandidates({ onlyAffiliate, limit: 500 });
+        return NextResponse.json({ ok: true, only_affiliate: onlyAffiliate, ...list });
+    }
+
     const campaign = url.searchParams.get('campaign') || undefined;
     const stats = await localPgOutreachStats(campaign);
     return NextResponse.json({
@@ -60,6 +74,45 @@ export async function POST(req: NextRequest) {
             limit: body.limit != null ? Number(body.limit) : 100,
         });
         return NextResponse.json({ ok: true, sectors, ...result });
+    }
+
+    // 0bis) DETECT-PARTNERS — scanne des domaines, détecte un programme d'affiliation,
+    //       persiste dans partner_candidates, met en file (kind=partner) les qualifiés.
+    if (action === 'detect-partners') {
+        const sectors: string[] = Array.isArray(body.sectors) && body.sectors.length ? body.sectors : DEFAULT_SECTORS;
+        const limit = Math.min(Math.max(Number(body.limit ?? 12), 1), 60);
+        const campaign = (body.campaign ?? 'partners').toString();
+        const exclude = Array.isArray(body.exclude_countries) ? body.exclude_countries : ['DE'];
+        const candidates = await localPgGetPartnerScanCandidates({ sectors, excludeCountries: exclude, limit });
+
+        let scanned = 0, affiliate = 0, queued = 0;
+        const found: any[] = [];
+        const CONC = 5;
+        for (let i = 0; i < candidates.length; i += CONC) {
+            const chunk = candidates.slice(i, i + CONC);
+            await Promise.all(chunk.map(async (c) => {
+                const r = await detectAffiliateProgram(c.domain, { timeoutMs: 6000, maxProbes: 3 });
+                scanned++;
+                await localPgUpsertPartnerCandidate({
+                    domain: c.domain, entityId: c.entity_id, displayName: c.display_name, sector: c.sector_macro,
+                    country: c.country_legal, email: c.contact_email, asrScore: c.asr_score,
+                    hasAffiliate: r.has_affiliate, affiliateUrl: r.affiliate_url, signals: r.signals,
+                });
+                if (r.has_affiliate) {
+                    affiliate++;
+                    if (c.contact_email) {
+                        const ok = await localPgQueuePartnerRecipient({
+                            domain: c.domain, entityId: c.entity_id, email: c.contact_email, displayName: c.display_name,
+                            sector: c.sector_macro, country: c.country_legal, lang: pickOutreachLang(c.country_legal),
+                            asrScore: c.asr_score, campaign,
+                        });
+                        if (ok) queued++;
+                    }
+                    found.push({ domain: c.domain, name: c.display_name, sector: c.sector_macro, country: c.country_legal, email: c.contact_email, affiliate_url: r.affiliate_url });
+                }
+            }));
+        }
+        return NextResponse.json({ ok: true, scanned, affiliate_found: affiliate, queued, campaign, found });
     }
 
     // 1) IMPORT — peuple la file depuis le registre.
@@ -98,15 +151,24 @@ export async function POST(req: NextRequest) {
         const base = (process.env.NEXT_PUBLIC_BASE_URL || 'https://ai-visionary.xyz').replace(/\/$/, '');
         const token = 'test-' + Date.now();
         const unsubscribeUrl = `${base}/api/outreach/unsubscribe?token=${token}`;
-        const email = buildOutreachEmail({
-            lang,
-            displayName: body.display_name ?? 'Votre entreprise',
-            domain: body.domain ?? 'exemple.com',
-            asrScore: body.asr_score != null ? Number(body.asr_score) : 41,
-            diagnosticUrl: `${base}/diagnostic`,
-            registryUrl: `${base}/aya`,
-            unsubscribeUrl,
-        });
+        const email = body.kind === 'partner'
+            ? buildPartnerEmail({
+                lang,
+                displayName: body.display_name ?? 'Votre entreprise',
+                domain: body.domain ?? 'exemple.com',
+                hasAffiliate: body.has_affiliate !== false,
+                pollenUrl: `${base}/pollen-agents`,
+                unsubscribeUrl,
+            })
+            : buildOutreachEmail({
+                lang,
+                displayName: body.display_name ?? 'Votre entreprise',
+                domain: body.domain ?? 'exemple.com',
+                asrScore: body.asr_score != null ? Number(body.asr_score) : 41,
+                diagnosticUrl: `${base}/diagnostic`,
+                registryUrl: `${base}/aya`,
+                unsubscribeUrl,
+            });
         const res = await sendOutreachEmail({
             to, subject: `[TEST] ${email.subject}`, html: email.html, text: email.text,
             unsubscribeUrl, unsubscribeMailto: process.env.OUTREACH_SMTP_USER,
@@ -128,5 +190,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(res);
     }
 
-    return NextResponse.json({ error: 'unknown_action', actions: ['preview', 'import', 'send', 'test', 'suppress', 'verify'] }, { status: 400 });
+    return NextResponse.json({ error: 'unknown_action', actions: ['preview', 'detect-partners', 'import', 'send', 'test', 'suppress', 'verify'] }, { status: 400 });
 }

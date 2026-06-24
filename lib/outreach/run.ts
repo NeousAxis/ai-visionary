@@ -19,6 +19,7 @@ import {
     type OutreachRecipientRow,
 } from '@/lib/db-local-pg';
 import { buildOutreachEmail } from './templates';
+import { buildPartnerEmail } from './templates-partner';
 import { pickOutreachLang, type OutreachLang } from './lang';
 import { sendOutreachEmail, isOutreachSenderConfigured } from './sender';
 
@@ -79,15 +80,24 @@ export async function runOutreachBatch(opts: RunOutreachOptions = {}): Promise<R
             : pickOutreachLang(rec.country_legal);
 
         const unsubscribeUrl = `${b}/api/outreach/unsubscribe?token=${encodeURIComponent(rec.unsubscribe_token)}`;
-        const email = buildOutreachEmail({
-            lang,
-            displayName: rec.display_name,
-            domain: rec.domain,
-            asrScore: rec.asr_score,
-            diagnosticUrl: `${b}/diagnostic`,
-            registryUrl: registryUrlFor(rec),
-            unsubscribeUrl,
-        });
+        const email = rec.kind === 'partner'
+            ? buildPartnerEmail({
+                lang,
+                displayName: rec.display_name,
+                domain: rec.domain,
+                hasAffiliate: true, // on ne met en file que les candidats avec affiliation détectée
+                pollenUrl: `${b}/pollen-agents`,
+                unsubscribeUrl,
+            })
+            : buildOutreachEmail({
+                lang,
+                displayName: rec.display_name,
+                domain: rec.domain,
+                asrScore: rec.asr_score,
+                diagnosticUrl: `${b}/diagnostic`,
+                registryUrl: registryUrlFor(rec),
+                unsubscribeUrl,
+            });
 
         if (dryRun) {
             summary.skipped++;
