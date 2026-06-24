@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Footer from './components/Footer';
 import StatsBar from './components/StatsBar';
 // AyoChat widget REMOVED from Home Page.
@@ -10,6 +10,7 @@ import LanguageToggle from './components/LanguageToggle';
 
 export default function Home() {
   const t = useTranslations('home');
+  const locale = useLocale();
   return (
     <main>
       <script
@@ -356,56 +357,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRICING */}
+      {/* OFFRE GRATUITE (ex-pricing — paywall supprimé) */}
       <section id="pricing" className="section pricing-section">
         <div className="container" style={{ textAlign: "center" }}>
-          <h2 className="section-title" style={{ fontSize: "2.5rem" }}>{t('pricing.title')}</h2>
-          <div className="grid-2 pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', maxWidth: '900px', margin: '0 auto' }}>
-
-            {/* OPTION 1 : ABONNEMENT (LOCATION VISIBILITÉ) */}
-            <div className="card pricing-card featured" style={{ border: '2px solid var(--primary-color)' }}>
-              <div style={{ background: 'var(--primary-color)', color: 'white', padding: '5px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', display: 'inline-block', marginBottom: '10px' }}>
-                {t('pricing.recommended')}
-              </div>
-              <h3>{t('pricing.plan1Title')} <br /><span className="card-subtitle">{t('pricing.plan1Sub')}</span></h3>
-              <div className="price">{t('pricing.plan1Price')} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>{t('pricing.plan1Period')}</span></div>
-              <p className="price-details">{t('pricing.plan1Desc')}</p>
-              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <li>&#x2705; <strong>{t('pricing.plan1f1')}</strong></li>
-                <li>&#x2705; {t('pricing.plan1f2')}</li>
-                <li>&#x2705; {t('pricing.plan1f3')}</li>
-                <li>&#x2705; {t('pricing.plan1f4')}</li>
-                <li>&#x2705; {t('pricing.plan1f5')}</li>
-              </ul>
-              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary w-full" style={{ width: '100%' }}>
-                  {t('pricing.plan1cta')}
-                </Link>
-              </div>
+          <h2 className="section-title" style={{ fontSize: "2.5rem" }}>
+            {locale === 'fr' ? 'Désormais 100% gratuit' : 'Now 100% free'}
+          </h2>
+          <p style={{ maxWidth: 640, margin: '0 auto 28px', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6 }}>
+            {locale === 'fr'
+              ? "Plus d'abonnement, plus de pack à acheter. On génère vos 5 fichiers sémantiques, on vous les envoie par email et on publie votre fiche sur AYA — gratuitement."
+              : 'No subscription, no pack to buy. We generate your 5 semantic files, email them to you and publish your record on AYA — for free.'}
+          </p>
+          <div className="card pricing-card" style={{ maxWidth: 460, margin: '0 auto', textAlign: 'left' }}>
+            <ul style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 2, listStyle: 'none', padding: 0 }}>
+              <li>&#x2705; <strong>{locale === 'fr' ? 'Vos 5 fichiers ASR (JSON-LD signés)' : 'Your 5 ASR files (signed JSON-LD)'}</strong></li>
+              <li>&#x2705; {locale === 'fr' ? 'Publication sur le registre AYA' : 'Published on the AYA registry'}</li>
+              <li>&#x2705; {locale === 'fr' ? 'Signature cryptographique Ed25519' : 'Ed25519 cryptographic signature'}</li>
+              <li>&#x2705; {locale === 'fr' ? 'Accès admin : vous seul consultez, mettez à jour ou transférez' : 'Admin access: only you view, update or transfer'}</li>
+            </ul>
+            <div style={{ marginTop: 24, textAlign: 'center' }}>
+              <Link href="/diagnostic" className="btn btn-primary w-full" style={{ width: '100%' }}>
+                {locale === 'fr' ? 'Recevoir mes fichiers — gratuit →' : 'Get my files — free →'}
+              </Link>
             </div>
-
-            {/* OPTION 2 : ACHAT (INVESTISSEMENT PATRIMONIAL) */}
-            <div className="card pricing-card">
-              <h3>{t('pricing.plan2Title')} <br /><span className="card-subtitle">{t('pricing.plan2Sub')}</span></h3>
-
-              <div className="price" style={{ marginBottom: 0 }}>{t('pricing.plan2Price')} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>{t('pricing.plan2Period')}</span></div>
-              <div style={{ fontSize: '0.8rem', color: '#4A919E', fontWeight: 600, marginTop: '-4px', marginBottom: '8px' }}>{t('pricing.plan2f5')}</div>
-              <p className="price-details">{t('pricing.plan2Desc')}<br /><strong>{t('pricing.plan2Own')}</strong></p>
-              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <li>&#x2705; <strong>{t('pricing.plan2f1')}</strong></li>
-                <li>&#x2705; {t('pricing.plan2f2')}</li>
-                <li>&#x2705; {t('pricing.plan2f3')}</li>
-                <li>&#x2705; {t('pricing.plan2f4')}</li>
-              </ul>
-              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic?pack=pro" className="btn btn-secondary w-full" style={{ width: '100%' }}>
-                  {t('pricing.plan2cta')}
-                </Link>
-              </div>
-            </div>
-
           </div>
-
         </div>
       </section>
 

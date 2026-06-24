@@ -6,7 +6,8 @@
  * Safe to import on Vercel — every helper returns empty results when unconfigured.
  */
 
-import { Pool, QueryResult } from 'pg';
+import { Pool } from 'pg';
+import type { QueryResult } from 'pg';
 
 // ── Entity type — mirrors aya_registry columns ───────────────────────────────
 
@@ -890,5 +891,667 @@ export async function linkedinSelectCandidates(opts: {
     } catch (err) {
         console.error('[db-local-pg] linkedinSelectCandidates error:', err);
         return [];
+    }
+}
+
+// ── Cashback Pollen helpers (16 juin 2026) ────────────────────────────────────
+// Tables cashback_offers + cashback_claims (Postgres VPS uniquement).
+// Voir migrations/2026-06-16_cashback_pollen.sql.
+
+export interface CashbackOfferRow {
+    id: string;
+    entity_id: string | null;
+    entity_domain: string;
+    service_name: string | null;
+    cashback_type: string;        // flat | percent
+    cashback_value: number;
+    currency: string;
+    cpa_total: number | null;
+    honey_value: number | null;
+    vertical: string | null;
+    status: string;               // active | paused | ended
+    notes: string | null;
+}
+
+function bareDomain(input: string): string {
+    return input
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0]
+        .trim();
+}
+
+/** Offre cashback ACTIVE pour un domaine (ou null). Lecture indexee, ms. */
+export async function localPgGetActiveCashbackOffer(domain: string): Promise<CashbackOfferRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<CashbackOfferRow>(
+            `SELECT id::text, entity_id::text, entity_domain, service_name,
+                    cashback_type, cashback_value::float8 AS cashback_value, currency,
+                    cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
+                    vertical, status, notes
+             FROM cashback_offers
+             WHERE entity_domain = $1 AND status = 'active'
+             LIMIT 1`,
+            [bareDomain(domain)],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetActiveCashbackOffer error:', err);
+        return null;
+    }
+}
+
+/** Cree/active une offre (admin). Upsert sur (entity_domain) actif. */
+export async function localPgUpsertCashbackOffer(input: {
+    entityId?: string | null;
+    entityDomain: string;
+    serviceName?: string | null;
+    cashbackType?: 'flat' | 'percent';
+    cashbackValue: number;
+    currency?: string;
+    cpaTotal?: number | null;
+    honeyValue?: number | null;
+    vertical?: string | null;
+    notes?: string | null;
+}): Promise<string | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<{ id: string }>(
+            `INSERT INTO cashback_offers
+                (entity_id, entity_domain, service_name, cashback_type, cashback_value,
+                 currency, cpa_total, honey_value, vertical, status)
+             VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, 'active')
+             ON CONFLICT (entity_domain) WHERE status = 'active'
+             DO UPDATE SET service_name=EXCLUDED.service_name,
+                           cashback_type=EXCLUDED.cashback_type,
+                           cashback_value=EXCLUDED.cashback_value,
+                           currency=EXCLUDED.currency,
+                           cpa_total=EXCLUDED.cpa_total,
+                           honey_value=EXCLUDED.honey_value,
+                           vertical=EXCLUDED.vertical,
+                           updated_at=NOW()
+             RETURNING id::text`,
+            [
+                input.entityId ?? null,
+                bareDomain(input.entityDomain),
+                input.serviceName ?? null,
+                input.cashbackType ?? 'flat',
+                input.cashbackValue,
+                input.currency ?? 'CHF',
+                input.cpaTotal ?? null,
+                input.honeyValue ?? null,
+                input.vertical ?? null,
+            ],
+        );
+        return res.rows[0]?.id ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgUpsertCashbackOffer error:', err);
+        return null;
+    }
+}
+
+/** Un claim existe-t-il deja pour ce jti ? (anti-rejeu). */
+export async function localPgGetCashbackClaimByJti(jti: string): Promise<{ id: string; status: string } | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<{ id: string; status: string }>(
+            `SELECT id::text, status FROM cashback_claims WHERE jti = $1 LIMIT 1`,
+            [jti],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetCashbackClaimByJti error:', err);
+        return null;
+    }
+}
+
+/** Enregistre un claim (status 'claimed' → validation manuelle). Retourne l'id ou null. */
+export async function localPgInsertCashbackClaim(input: {
+    jti: string;
+    offerId: string;
+    entityId?: string | null;
+    entityDomain: string;
+    agentId?: string | null;
+    principalRef?: string | null;
+    proof?: unknown;
+    currency?: string;
+    tokenIssuedAt?: Date | null;
+    tokenExp?: Date | null;
+}): Promise<string | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<{ id: string }>(
+            `INSERT INTO cashback_claims
+                (jti, offer_id, entity_id, entity_domain, agent_id, principal_ref,
+                 status, proof, currency, token_issued_at, token_exp)
+             VALUES ($1, $2::uuid, $3::uuid, $4, $5, $6, 'claimed', $7::jsonb, $8, $9, $10)
+             ON CONFLICT (jti) DO NOTHING
+             RETURNING id::text`,
+            [
+                input.jti,
+                input.offerId,
+                input.entityId ?? null,
+                bareDomain(input.entityDomain),
+                input.agentId ?? null,
+                input.principalRef ?? null,
+                input.proof != null ? JSON.stringify(input.proof) : null,
+                input.currency ?? 'CHF',
+                input.tokenIssuedAt ?? null,
+                input.tokenExp ?? null,
+            ],
+        );
+        return res.rows[0]?.id ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgInsertCashbackClaim error:', err);
+        return null;
+    }
+}
+
+/** Offres actives pour un lot de domaines → Map(domain → offre). Pour annoter les resultats agent. */
+export async function localPgGetActiveCashbackOffersForDomains(
+    domains: string[],
+): Promise<Map<string, CashbackOfferRow>> {
+    const out = new Map<string, CashbackOfferRow>();
+    const pool = getPool();
+    if (!pool || domains.length === 0) return out;
+    const bare = Array.from(new Set(domains.map(bareDomain).filter(Boolean)));
+    if (bare.length === 0) return out;
+    try {
+        const res = await pool.query<CashbackOfferRow>(
+            `SELECT id::text, entity_id::text, entity_domain, service_name,
+                    cashback_type, cashback_value::float8 AS cashback_value, currency,
+                    cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
+                    vertical, status, notes
+             FROM cashback_offers
+             WHERE status = 'active' AND entity_domain = ANY($1)`,
+            [bare],
+        );
+        for (const row of res.rows) out.set(row.entity_domain, row);
+        return out;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetActiveCashbackOffersForDomains error:', err);
+        return out;
+    }
+}
+
+/** Liste des offres (admin). */
+export async function localPgListCashbackOffers(limit = 200): Promise<CashbackOfferRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res = await pool.query<CashbackOfferRow>(
+            `SELECT id::text, entity_id::text, entity_domain, service_name,
+                    cashback_type, cashback_value::float8 AS cashback_value, currency,
+                    cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
+                    vertical, status, notes
+             FROM cashback_offers
+             ORDER BY created_at DESC
+             LIMIT $1`,
+            [limit],
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgListCashbackOffers error:', err);
+        return [];
+    }
+}
+
+/** Change le status d'une offre (active | paused | ended). */
+export async function localPgSetCashbackOfferStatus(id: string, status: string): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res = await pool.query(
+            `UPDATE cashback_offers SET status=$2, updated_at=NOW() WHERE id=$1::uuid`,
+            [id, status],
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgSetCashbackOfferStatus error:', err);
+        return false;
+    }
+}
+
+export interface CashbackClaimRow {
+    id: string;
+    jti: string;
+    offer_id: string;
+    entity_id: string | null;
+    entity_domain: string;
+    agent_id: string | null;
+    principal_ref: string | null;
+    status: string;
+    proof: unknown;
+    amount_cashback: number | null;
+    amount_honey: number | null;
+    currency: string;
+    claimed_at: string;
+    validated_at: string | null;
+    paid_at: string | null;
+    review_notes: string | null;
+    // jointure offre (pour resoudre les montants)
+    offer_cashback_type?: string;
+    offer_cashback_value?: number;
+    offer_honey_value?: number | null;
+}
+
+/** Liste paginee des claims (admin), filtrable par status, avec champs offre joints. */
+export async function localPgListCashbackClaims(opts: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+}): Promise<{ rows: CashbackClaimRow[]; total: number }> {
+    const pool = getPool();
+    if (!pool) return { rows: [], total: 0 };
+    const { status, limit = 100, offset = 0 } = opts;
+    try {
+        const params: unknown[] = [];
+        const where = status ? `WHERE c.status = $${params.push(status)}` : '';
+        const countRes = await pool.query<{ cnt: string }>(
+            `SELECT COUNT(*)::text AS cnt FROM cashback_claims c ${where}`,
+            params,
+        );
+        const total = parseInt(countRes.rows[0]?.cnt ?? '0', 10);
+        const limitIdx = params.push(limit);
+        const offsetIdx = params.push(offset);
+        const res = await pool.query<CashbackClaimRow>(
+            `SELECT c.id::text, c.jti, c.offer_id::text, c.entity_id::text, c.entity_domain,
+                    c.agent_id, c.principal_ref, c.status, c.proof,
+                    c.amount_cashback::float8 AS amount_cashback,
+                    c.amount_honey::float8 AS amount_honey, c.currency,
+                    c.claimed_at::text, c.validated_at::text, c.paid_at::text, c.review_notes,
+                    o.cashback_type AS offer_cashback_type,
+                    o.cashback_value::float8 AS offer_cashback_value,
+                    o.honey_value::float8 AS offer_honey_value
+             FROM cashback_claims c
+             LEFT JOIN cashback_offers o ON o.id = c.offer_id
+             ${where}
+             ORDER BY c.claimed_at DESC
+             LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+            params,
+        );
+        return { rows: res.rows, total };
+    } catch (err) {
+        console.error('[db-local-pg] localPgListCashbackClaims error:', err);
+        return { rows: [], total: 0 };
+    }
+}
+
+/** Un claim + son offre (pour la validation, resolution des montants). */
+export async function localPgGetClaimWithOffer(id: string): Promise<CashbackClaimRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<CashbackClaimRow>(
+            `SELECT c.id::text, c.jti, c.offer_id::text, c.entity_id::text, c.entity_domain,
+                    c.agent_id, c.principal_ref, c.status, c.proof,
+                    c.amount_cashback::float8 AS amount_cashback,
+                    c.amount_honey::float8 AS amount_honey, c.currency,
+                    c.claimed_at::text, c.validated_at::text, c.paid_at::text, c.review_notes,
+                    o.cashback_type AS offer_cashback_type,
+                    o.cashback_value::float8 AS offer_cashback_value,
+                    o.honey_value::float8 AS offer_honey_value
+             FROM cashback_claims c
+             LEFT JOIN cashback_offers o ON o.id = c.offer_id
+             WHERE c.id = $1::uuid LIMIT 1`,
+            [id],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetClaimWithOffer error:', err);
+        return null;
+    }
+}
+
+/** Met a jour un claim lors de la validation manuelle (validate | pay | reject). */
+export async function localPgUpdateCashbackClaim(id: string, fields: {
+    status?: string;
+    amountCashback?: number | null;
+    amountHoney?: number | null;
+    validatedAt?: Date | null;
+    paidAt?: Date | null;
+    reviewNotes?: string | null;
+}): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    const sets: string[] = [];
+    const params: unknown[] = [id];
+    const add = (col: string, val: unknown) => { params.push(val); sets.push(`${col}=$${params.length}`); };
+    if (fields.status !== undefined)        add('status', fields.status);
+    if (fields.amountCashback !== undefined) add('amount_cashback', fields.amountCashback);
+    if (fields.amountHoney !== undefined)    add('amount_honey', fields.amountHoney);
+    if (fields.validatedAt !== undefined)    add('validated_at', fields.validatedAt);
+    if (fields.paidAt !== undefined)         add('paid_at', fields.paidAt);
+    if (fields.reviewNotes !== undefined)    add('review_notes', fields.reviewNotes);
+    if (sets.length === 0) return true;
+    try {
+        const res = await pool.query(
+            `UPDATE cashback_claims SET ${sets.join(', ')} WHERE id=$1::uuid`,
+            params,
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgUpdateCashbackClaim error:', err);
+        return false;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// OUTREACH ENGINE — cold B2B SMTP individuel throttle.
+// Tables outreach_recipients / outreach_suppression / outreach_events.
+// Voir migrations/2026-06-24_outreach_engine.sql + [[project_outreach_engine]].
+// ════════════════════════════════════════════════════════════════════════════
+
+// Pays servis en francais — DOIT rester aligne avec lib/outreach/lang.ts.
+const OUTREACH_FR_COUNTRIES = ['FR', 'MC', 'CH', 'LU', 'BE', 'MQ', 'GP', 'GF', 'RE', 'NC', 'PF'];
+
+export type OutreachRecipientRow = {
+    id: string;
+    entity_id: string | null;
+    domain: string | null;
+    email: string;
+    display_name: string | null;
+    sector_macro: string | null;
+    country_legal: string | null;
+    lang: string;
+    asr_score: number | null;
+    campaign: string;
+    status: string;
+    unsubscribe_token: string;
+};
+
+/**
+ * Importe des cibles depuis aya_registry dans la file outreach_recipients.
+ * Filtre : email present + secteur dans la liste + pays non exclus + non supprime.
+ * Deduplique par email (garde le meilleur score). ON CONFLICT DO NOTHING (idempotent).
+ * Retourne le nombre de lignes REELLEMENT inserees.
+ */
+export async function localPgImportOutreachRecipients(opts: {
+    sectors: string[];
+    campaign: string;
+    excludeCountries?: string[];
+    minScore?: number | null;
+    limit?: number;
+}): Promise<{ inserted: number; error?: string }> {
+    const pool = getPool();
+    if (!pool) return { inserted: 0, error: 'pg_unconfigured' };
+
+    const sectors = opts.sectors;
+    const campaign = opts.campaign || 'default';
+    const exclude = (opts.excludeCountries ?? []).map((c) => c.toUpperCase());
+    const minScore = opts.minScore ?? null;
+    const limit = Math.min(Math.max(opts.limit ?? 5000, 1), 100_000);
+
+    const frList = OUTREACH_FR_COUNTRIES.map((c) => `'${c}'`).join(',');
+
+    try {
+        const res = await pool.query(
+            `INSERT INTO outreach_recipients
+                (entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, unsubscribe_token)
+             (
+               SELECT entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, token
+               FROM (
+                 SELECT DISTINCT ON (lower(r.contact_email))
+                   r.entity_id AS entity_id,
+                   regexp_replace(regexp_replace(lower(r.website), '^https?://(www\\.)?', '', 'g'), '/.*$', '', 'g') AS domain,
+                   lower(r.contact_email) AS email,
+                   r.display_name AS display_name,
+                   r.sector_macro AS sector_macro,
+                   r.country_legal AS country_legal,
+                   CASE WHEN upper(coalesce(r.country_legal,'')) IN (${frList}) THEN 'fr' ELSE 'en' END AS lang,
+                   r.asr_score AS asr_score,
+                   $1::text AS campaign,
+                   gen_random_uuid()::text AS token
+                 FROM aya_registry r
+                 LEFT JOIN outreach_suppression s ON s.email = lower(r.contact_email)
+                 WHERE r.contact_email IS NOT NULL
+                   AND position('@' in r.contact_email) > 1
+                   AND r.sector_macro = ANY($2::text[])
+                   AND s.email IS NULL
+                   AND (cardinality($3::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($3::text[]))
+                   AND ($4::numeric IS NULL OR r.asr_score >= $4::numeric)
+                   AND coalesce(r.display_name,'') NOT ILIKE '%porn%'
+                   AND coalesce(r.display_name,'') NOT ILIKE '%escort%'
+                   AND coalesce(r.display_name,'') NOT ILIKE '%xxx%'
+                   AND coalesce(r.display_name,'') NOT ILIKE '%onlyfans%'
+                 ORDER BY lower(r.contact_email), r.asr_score DESC NULLS LAST
+               ) q
+               LIMIT $5
+             )
+             ON CONFLICT (lower(email), campaign) DO NOTHING`,
+            [campaign, sectors, exclude, minScore, limit],
+        );
+        return { inserted: res.rowCount ?? 0 };
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('[db-local-pg] localPgImportOutreachRecipients error:', msg);
+        return { inserted: 0, error: msg };
+    }
+}
+
+/**
+ * Apercu (lecture seule) des cibles potentielles, sans rien importer.
+ * Sert a la BD (liste de candidats deal cashback) et a valider un ciblage.
+ */
+export async function localPgPreviewOutreachTargets(opts: {
+    sectors: string[];
+    excludeCountries?: string[];
+    minScore?: number | null;
+    limit?: number;
+}): Promise<{ rows: Array<{ domain: string | null; display_name: string | null; sector_macro: string | null; country_legal: string | null; contact_email: string | null; asr_score: number | null }>; total_with_email: number }> {
+    const pool = getPool();
+    if (!pool) return { rows: [], total_with_email: 0 };
+
+    const sectors = opts.sectors;
+    const exclude = (opts.excludeCountries ?? []).map((c) => c.toUpperCase());
+    const minScore = opts.minScore ?? null;
+    const limit = Math.min(Math.max(opts.limit ?? 100, 1), 5000);
+
+    const where = `
+        r.contact_email IS NOT NULL
+        AND position('@' in r.contact_email) > 1
+        AND r.sector_macro = ANY($1::text[])
+        AND (cardinality($2::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($2::text[]))
+        AND ($3::numeric IS NULL OR r.asr_score >= $3::numeric)
+        AND coalesce(r.display_name,'') NOT ILIKE '%porn%'
+        AND coalesce(r.display_name,'') NOT ILIKE '%escort%'
+        AND coalesce(r.display_name,'') NOT ILIKE '%xxx%'
+        AND coalesce(r.display_name,'') NOT ILIKE '%onlyfans%'`;
+
+    try {
+        const countRes = await pool.query(
+            `SELECT COUNT(DISTINCT lower(r.contact_email))::int AS cnt FROM aya_registry r WHERE ${where}`,
+            [sectors, exclude, minScore],
+        );
+        const dataRes = await pool.query(
+            `SELECT DISTINCT ON (lower(r.contact_email))
+               regexp_replace(regexp_replace(lower(r.website), '^https?://(www\\.)?', '', 'g'), '/.*$', '', 'g') AS domain,
+               r.display_name, r.sector_macro, r.country_legal, lower(r.contact_email) AS contact_email,
+               r.asr_score::float8 AS asr_score
+             FROM aya_registry r
+             WHERE ${where}
+             ORDER BY lower(r.contact_email), r.asr_score DESC NULLS LAST
+             LIMIT $4`,
+            [sectors, exclude, minScore, limit],
+        );
+        return { rows: dataRes.rows as any[], total_with_email: (countRes.rows[0]?.cnt as number) ?? 0 };
+    } catch (err) {
+        console.error('[db-local-pg] localPgPreviewOutreachTargets error:', err);
+        return { rows: [], total_with_email: 0 };
+    }
+}
+
+/** Prochaine fournee a envoyer : pending, non supprimes, pour une campagne. */
+export async function localPgGetOutreachBatch(campaign: string, limit: number): Promise<OutreachRecipientRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<OutreachRecipientRow> = await pool.query(
+            `SELECT rec.id::text, rec.entity_id::text, rec.domain, rec.email, rec.display_name,
+                    rec.sector_macro, rec.country_legal, rec.lang, rec.asr_score::float8 AS asr_score,
+                    rec.campaign, rec.status, rec.unsubscribe_token
+             FROM outreach_recipients rec
+             LEFT JOIN outreach_suppression s ON s.email = lower(rec.email)
+             WHERE rec.campaign = $1 AND rec.status = 'pending' AND s.email IS NULL
+             ORDER BY rec.asr_score DESC NULLS LAST, rec.created_at ASC
+             LIMIT $2`,
+            [campaign, Math.min(Math.max(limit, 1), 1000)],
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetOutreachBatch error:', err);
+        return [];
+    }
+}
+
+export async function localPgMarkOutreachSent(id: string, messageId?: string | null): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res = await pool.query(
+            `UPDATE outreach_recipients
+             SET status='sent', message_id=$2, attempts=attempts+1, sent_at=NOW(), updated_at=NOW()
+             WHERE id=$1::uuid`,
+            [id, messageId ?? null],
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgMarkOutreachSent error:', err);
+        return false;
+    }
+}
+
+export async function localPgMarkOutreachFailed(id: string, error: string, status: 'failed' | 'bounced' = 'failed'): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res = await pool.query(
+            `UPDATE outreach_recipients
+             SET status=$3, error=$2, attempts=attempts+1, updated_at=NOW()
+             WHERE id=$1::uuid`,
+            [id, error.slice(0, 500), status],
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgMarkOutreachFailed error:', err);
+        return false;
+    }
+}
+
+export async function localPgAddOutreachSuppression(email: string, reason: string, source: string): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        await pool.query(
+            `INSERT INTO outreach_suppression (email, reason, source)
+             VALUES (lower($1), $2, $3)
+             ON CONFLICT (email) DO NOTHING`,
+            [email, reason, source],
+        );
+        return true;
+    } catch (err) {
+        console.error('[db-local-pg] localPgAddOutreachSuppression error:', err);
+        return false;
+    }
+}
+
+export async function localPgGetOutreachByToken(token: string): Promise<OutreachRecipientRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult<OutreachRecipientRow> = await pool.query(
+            `SELECT id::text, entity_id::text, domain, email, display_name, sector_macro,
+                    country_legal, lang, asr_score::float8 AS asr_score, campaign, status, unsubscribe_token
+             FROM outreach_recipients WHERE unsubscribe_token = $1 LIMIT 1`,
+            [token],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetOutreachByToken error:', err);
+        return null;
+    }
+}
+
+/** Desinscription via jeton : marque le destinataire + ajoute a la suppression globale. */
+export async function localPgUnsubscribeOutreach(token: string, source: string): Promise<{ ok: boolean; email?: string }> {
+    const pool = getPool();
+    if (!pool) return { ok: false };
+    try {
+        const res = await pool.query(
+            `UPDATE outreach_recipients SET status='unsubscribed', updated_at=NOW()
+             WHERE unsubscribe_token=$1 RETURNING email`,
+            [token],
+        );
+        const email: string | undefined = res.rows[0]?.email;
+        if (!email) return { ok: false };
+        await localPgAddOutreachSuppression(email, 'unsubscribe', source);
+        await localPgInsertOutreachEvent({ email, type: 'unsubscribe', detail: { source } });
+        return { ok: true, email };
+    } catch (err) {
+        console.error('[db-local-pg] localPgUnsubscribeOutreach error:', err);
+        return { ok: false };
+    }
+}
+
+export async function localPgInsertOutreachEvent(input: {
+    recipientId?: string | null;
+    email?: string | null;
+    type: string;
+    detail?: Record<string, unknown> | null;
+}): Promise<void> {
+    const pool = getPool();
+    if (!pool) return;
+    try {
+        await pool.query(
+            `INSERT INTO outreach_events (recipient_id, email, type, detail)
+             VALUES ($1, $2, $3, $4::jsonb)`,
+            [input.recipientId ?? null, input.email ?? null, input.type, JSON.stringify(input.detail ?? {})],
+        );
+    } catch (err) {
+        console.error('[db-local-pg] localPgInsertOutreachEvent error:', err);
+    }
+}
+
+/** Compteurs par statut + adressables restants + supprimes. */
+export async function localPgOutreachStats(campaign?: string): Promise<{
+    by_status: Record<string, number>;
+    total: number;
+    suppressed: number;
+    campaigns: string[];
+}> {
+    const pool = getPool();
+    if (!pool) return { by_status: {}, total: 0, suppressed: 0, campaigns: [] };
+    try {
+        const clause = campaign ? 'WHERE campaign = $1' : '';
+        const params = campaign ? [campaign] : [];
+        const statusRes = await pool.query(
+            `SELECT status, COUNT(*)::int AS cnt FROM outreach_recipients ${clause} GROUP BY status`,
+            params,
+        );
+        const by_status: Record<string, number> = {};
+        let total = 0;
+        for (const r of statusRes.rows as { status: string; cnt: number }[]) {
+            by_status[r.status] = r.cnt;
+            total += r.cnt;
+        }
+        const supRes = await pool.query(`SELECT COUNT(*)::int AS cnt FROM outreach_suppression`);
+        const campRes = await pool.query(`SELECT DISTINCT campaign FROM outreach_recipients ORDER BY campaign`);
+        return {
+            by_status,
+            total,
+            suppressed: (supRes.rows[0]?.cnt as number) ?? 0,
+            campaigns: (campRes.rows as { campaign: string }[]).map((r) => r.campaign),
+        };
+    } catch (err) {
+        console.error('[db-local-pg] localPgOutreachStats error:', err);
+        return { by_status: {}, total: 0, suppressed: 0, campaigns: [] };
     }
 }

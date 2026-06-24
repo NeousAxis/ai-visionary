@@ -99,6 +99,8 @@ export default function DiagnosticV2Page() {
   const [otpMaskedEmail, setOtpMaskedEmail] = useState('');
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [genLoading, setGenLoading] = useState(false);
+  const [genError, setGenError] = useState('');
   const [analysisId, setAnalysisId] = useState('');
   const [legalName, setLegalName] = useState('');
   const [legalNameConfirmed, setLegalNameConfirmed] = useState(false);
@@ -424,11 +426,32 @@ export default function DiagnosticV2Page() {
     setOtpLoading(false);
   };
 
-  // ─── Plan selection handler ───
-  const handleSelectPlan = (plan: 'aya_sub' | 'pro') => {
-    setSelectedPlan(plan);
-    setCurrentStep(7);
-    scrollTo('step-7');
+  // ─── Free claim handler: vérifie l'OTP + génère + email + publie sur AYA ───
+  const handleClaimAndGenerate = async () => {
+    setGenLoading(true);
+    setGenError('');
+    try {
+      const res = await fetch('/api/diagnostic/generate-free', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, code: otpCode, analysisId, url: scanUrl, locale }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCurrentStep(8);
+        setTimeout(() => scrollTo('step-8'), 100);
+      } else {
+        setGenError(
+          data.error ||
+            (locale === 'fr'
+              ? 'Échec. Vérifie le code et réessaie.'
+              : 'Failed. Check the code and retry.'),
+        );
+      }
+    } catch {
+      setGenError(locale === 'fr' ? 'Erreur réseau.' : 'Network error.');
+    }
+    setGenLoading(false);
   };
 
   // ─── Domain match for email verification ───
@@ -478,7 +501,7 @@ export default function DiagnosticV2Page() {
                 }
               }
             } catch { /* ignore, proceed normally */ }
-            startScan();
+            startScan(true); // scan ouvert — l'OTP arrive au moment de réclamer les fichiers (step 6)
           }}>
             <div className="dv2-search-box">
               <input
@@ -496,8 +519,8 @@ export default function DiagnosticV2Page() {
             </div>
           </form>
 
-          {/* ─── Email Verification (appears after URL is entered) ─── */}
-          {url && !emailVerified && currentStep === 1 && (
+          {/* Email/OTP déplacé au step 6 (réclamation gratuite) — le scan est désormais ouvert */}
+          {false && url && !emailVerified && currentStep === 1 && (
             <div className="dv2-otp-section">
               <div className="dv2-otp-title">{t('otpTitle')}</div>
               <p className="dv2-otp-desc">{t('otpDesc')}</p>
@@ -863,54 +886,77 @@ export default function DiagnosticV2Page() {
       {currentStep >= 6 && (
         <section id="step-6" className={`dv2-step dv2-step-reveal ${currentStep === 6 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">06</div>
-          <h2>{t('choosePlan')}</h2>
+          <h2>{locale === 'fr' ? 'Recevez vos 5 fichiers — gratuitement' : 'Get your 5 files — for free'}</h2>
           <p className="dv2-step-sub">
-            {isExistingClient
-              ? t('existingClient')
-              : t('newClient')}
+            {locale === 'fr'
+              ? 'On vous envoie vos 5 fichiers ASR par email et on publie votre fiche sur AYA. Confirmez votre email : il devient votre accès admin (consulter / mettre à jour / transférer à un collaborateur).'
+              : 'We email you your 5 ASR files and publish your record on AYA. Confirm your email: it becomes your admin access (view / update / transfer to a colleague).'}
           </p>
 
-          <div className="dv2-plans">
-            <div
-              className={`dv2-plan${selectedPlan === 'aya_sub' ? ' dv2-plan--selected' : ''}`}
-              onClick={() => handleSelectPlan('aya_sub')}
-            >
-              <div className="dv2-plan-name">{t('ayaName')}</div>
-              <div className="dv2-plan-price">{t('ayaPrice')} <span>{t('ayaPriceUnit')}</span></div>
-              <ul className="dv2-plan-list">
-                <li>{t('ayaFeature1')}</li>
-                <li>{t('ayaFeature2')}</li>
-                <li>{t('ayaFeature3')}</li>
-                <li>{t('ayaFeature4')}</li>
-              </ul>
-              <button className="dv2-plan-btn dv2-plan-btn--outline">
-                {selectedPlan === 'aya_sub' ? t('selected') : t('selectAya')}
+          <div className="dv2-otp-section">
+            <input
+              type="email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              placeholder={`you@${urlDomain}`}
+              className="dv2-otp-email-input"
+              style={{ border: `1px solid ${userEmail && !domainMatch ? '#CE6A6B' : '#ccc'}` }}
+            />
+            {userEmail.includes('@') && (
+              <p className="dv2-otp-domain-badge" style={{ color: domainMatch ? '#4A919E' : '#CE6A6B' }}>
+                {domainMatch ? t('domainMatch') : t('domainMismatch', { domain: urlDomain })}
+              </p>
+            )}
+            {domainMatch && !otpSent && (
+              <button
+                onClick={handleSendOtp}
+                disabled={otpLoading}
+                className="dv2-search-btn"
+                style={{ marginTop: '1rem', width: '100%', maxWidth: 300 }}
+              >
+                {otpLoading ? t('sending') : t('sendCode')}
               </button>
-            </div>
-            <div
-              className={`dv2-plan dv2-plan--pro${selectedPlan === 'pro' ? ' dv2-plan--selected' : ''}`}
-              onClick={() => handleSelectPlan('pro')}
-            >
-              <div className="dv2-plan-tag">{t('proTag')}</div>
-              <div className="dv2-plan-name">{t('proName')}</div>
-              <div className="dv2-plan-price">{t('proPrice')} <span>{t('proPriceUnit')}</span></div>
-              <ul className="dv2-plan-list">
-                <li>{t('proFeature1')}</li>
-                <li>{t('proFeature2')}</li>
-                <li>{t('proFeature3')}</li>
-                <li>{t('proFeature4')}</li>
-              </ul>
-              <button className="dv2-plan-btn dv2-plan-btn--solid">
-                {selectedPlan === 'pro' ? t('selected') : t('selectPro')}
-              </button>
-            </div>
+            )}
+            {otpSent && (
+              <div style={{ marginTop: '1rem' }}>
+                <p className="dv2-otp-code-sent">{t('codeSentTo', { email: otpMaskedEmail || userEmail })}</p>
+                <input
+                  type="text" inputMode="numeric" maxLength={6}
+                  value={otpCode}
+                  onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="000000"
+                  className="dv2-otp-code-input"
+                  style={{ border: `2px solid ${genError ? '#CE6A6B' : '#ccc'}` }}
+                  autoFocus
+                />
+                {genError && <p className="dv2-otp-error">{genError}</p>}
+                <div style={{ marginTop: '1rem' }}>
+                  <button
+                    onClick={handleClaimAndGenerate}
+                    disabled={genLoading || otpCode.length !== 6}
+                    className="dv2-search-btn"
+                    style={{ width: '100%', maxWidth: 320, opacity: otpCode.length !== 6 ? 0.5 : 1 }}
+                  >
+                    {genLoading
+                      ? (locale === 'fr' ? 'Génération…' : 'Generating…')
+                      : (locale === 'fr' ? 'Recevoir mes 5 fichiers' : 'Get my 5 files')}
+                  </button>
+                </div>
+                <button
+                  onClick={() => { setOtpCode(''); setGenError(''); setOtpSent(false); }}
+                  className="dv2-otp-resend"
+                >
+                  {t('resendCode')}
+                </button>
+              </div>
+            )}
           </div>
 
         </section>
       )}
 
-      {/* ═══ STEP 7 — PAYMENT ═══ */}
-      {currentStep >= 7 && (
+      {/* ═══ STEP 7 — PAYMENT (neutralisé : livraison 100% gratuite, le flux va step 6 → step 8) ═══ */}
+      {false && (
         <section id="step-7" className={`dv2-step dv2-step-reveal ${currentStep === 7 ? 'dv2-step-active' : ''}`}>
           <div className="dv2-step-num">07</div>
 
