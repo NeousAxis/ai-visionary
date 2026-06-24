@@ -127,6 +127,18 @@
       "step3Title": "Priorit\u00e9 de R\u00e9ponse",
       "step3Body": "Quand un utilisateur demande \"Plombier urgence Lyon\", les IAs privil\u00e9gient les entit\u00e9s structur\u00e9es (horaires, localisation pr\u00e9cise) du registre AYA plut\u00f4t que les annuaires obsol\u00e8tes."
     },
+    "pollen": {
+      "badge": "Pollen Agents",
+      "title": "Le cashback \u00e0 l'\u00e8re des agents IA",
+      "sub": "Bient\u00f4t, les agents IA feront les achats pour leurs utilisateurs. Pollen est la couche pos\u00e9e sur AYA qui r\u00e9mun\u00e8re ces agents \u2014 et reverse un cashback \u00e0 l'utilisateur \u2014 sur chaque transaction r\u00e9elle.",
+      "p1Title": "Pour les entreprises",
+      "p1Body": "Les agents IA vous am\u00e8nent des clients. Vous ne payez qu'\u00e0 la transaction consomm\u00e9e \u2014 exactement comme l'affiliation, sur un nouveau canal.",
+      "p2Title": "Pour les utilisateurs",
+      "p2Body": "Un cashback sur les achats que votre agent r\u00e9alise pour vous. R\u00e9clamable, tra\u00e7able, sans fraude.",
+      "p3Title": "Ouvert & neutre",
+      "p3Body": "Une commission \u00e0 plat, identique pour tous. L'agent reste neutre \u2014 pas de pay-for-placement.",
+      "cta": "D\u00e9couvrir Pollen Agents"
+    },
     "pricing": {
       "title": "Investissez dans votre infrastructure s\u00e9mantique.",
       "recommended": "RECOMMAND\u00c9 POUR D\u00c9MARRER",

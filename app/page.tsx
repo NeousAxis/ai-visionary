@@ -70,9 +70,6 @@ export default function Home() {
             <Link href="/aya" className="btn" style={{ background: 'transparent', border: '2px solid #e2e8f0', color: '#334155', fontWeight: '600', padding: '12px 24px', borderRadius: '8px', transition: 'all 0.2s' }}>
               {t('hero.ctaRegistry')}
             </Link>
-            <Link href="/pollen-agents" className="btn btn-accent">
-              {t('hero.ctaPollen')}
-            </Link>
           </div>
         </div>
         <div className="hero-visual">
@@ -356,6 +353,38 @@ export default function Home() {
                 {t('aya.step3Body')}
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION — Pollen Agents */}
+      <section id="pollen" className="section" style={{ background: '#F1F5F9' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <span className="badge" style={{ display: 'inline-block', background: 'rgba(74, 145, 158, 0.12)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', padding: '6px 18px', borderRadius: '20px', fontSize: '0.85rem', letterSpacing: '1.2px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+            {t('pollen.badge')}
+          </span>
+          <h2 className="section-title" style={{ marginTop: '24px' }}>{t('pollen.title')}</h2>
+          <p style={{ maxWidth: '740px', margin: '0 auto 48px', color: 'var(--text-muted)', fontSize: '1.15rem', lineHeight: 1.7 }}>
+            {t('pollen.sub')}
+          </p>
+          <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', textAlign: 'left' }}>
+            <div className="card" style={{ padding: '28px', borderTop: '3px solid var(--primary-color)' }}>
+              <h3 style={{ color: 'var(--text-main)', marginBottom: '10px', fontSize: '1.15rem' }}>{t('pollen.p1Title')}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.6 }}>{t('pollen.p1Body')}</p>
+            </div>
+            <div className="card" style={{ padding: '28px', borderTop: '3px solid var(--primary-color)' }}>
+              <h3 style={{ color: 'var(--text-main)', marginBottom: '10px', fontSize: '1.15rem' }}>{t('pollen.p2Title')}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.6 }}>{t('pollen.p2Body')}</p>
+            </div>
+            <div className="card" style={{ padding: '28px', borderTop: '3px solid var(--primary-color)' }}>
+              <h3 style={{ color: 'var(--text-main)', marginBottom: '10px', fontSize: '1.15rem' }}>{t('pollen.p3Title')}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.6 }}>{t('pollen.p3Body')}</p>
+            </div>
+          </div>
+          <div style={{ marginTop: '48px' }}>
+            <Link href="/pollen-agents" className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '15px 34px' }}>
+              {t('pollen.cta')}
+            </Link>
           </div>
         </div>
       </section>

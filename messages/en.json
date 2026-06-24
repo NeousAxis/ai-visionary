@@ -127,6 +127,18 @@
       "step3Title": "Response Priority",
       "step3Body": "When a user asks \"Emergency plumber Lyon\", AIs prioritize structured entities (hours, precise location) from the AYA registry over outdated directories."
     },
+    "pollen": {
+      "badge": "Pollen Agents",
+      "title": "Cashback for the AI-agent era",
+      "sub": "Soon, AI agents will shop for their users. Pollen is the layer on top of AYA that rewards these agents — and passes a cashback to the user — on every real transaction.",
+      "p1Title": "For businesses",
+      "p1Body": "AI agents bring you customers. You pay only on the consumed transaction — exactly like affiliate marketing, on a new channel.",
+      "p2Title": "For users",
+      "p2Body": "A cashback on the purchases your agent makes for you. Claimable, traceable, fraud-proof.",
+      "p3Title": "Open & neutral",
+      "p3Body": "A flat commission, identical for everyone. The agent stays neutral — no pay-for-placement.",
+      "cta": "Discover Pollen Agents"
+    },
     "pricing": {
       "title": "Invest in your semantic infrastructure.",
       "recommended": "RECOMMENDED TO START",
