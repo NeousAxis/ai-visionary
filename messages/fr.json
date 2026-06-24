@@ -11,6 +11,7 @@
   "nav": {
     "home": "Accueil",
     "ayaRegistry": "Registre AYA",
+    "pollenAgents": "Pollen Agents",
     "aiAndBusiness": "IA & votre entreprise",
     "apiDevelopers": "API & D\u00e9veloppeurs",
     "contact": "Contact",
@@ -30,7 +31,8 @@
       "sub1": "Rendez votre entreprise visible pour les millions d\u2019utilisateurs qui posent des questions \u00e0 l\u2019IA chaque jour (ChatGPT, Gemini, Claude, Mistral, Llama, Groq...).",
       "tagline": "Ne laissez pas les IA deviner qui vous \u00eates. Prenez le contr\u00f4le de votre recommandation.",
       "ctaDiagnostic": "\u2192 V\u00e9rifier si mon site est correctement document\u00e9",
-      "ctaRegistry": "\ud83d\udd0d Explorer le Registre AYA"
+      "ctaRegistry": "\ud83d\udd0d Explorer le Registre AYA",
+      "ctaPollen": "\ud83d\udc1d Pollen Agents \u2014 cashback"
     },
     "problem": {
       "title": "Pourquoi votre site web ne suffit plus.",

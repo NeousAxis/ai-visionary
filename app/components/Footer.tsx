@@ -15,6 +15,7 @@ export default function Footer() {
                 <div className="footer-links">
                     <Link href="/">{t('home')}</Link>
                     <Link href="/aya">{t('ayaRegistry')}</Link>
+                    <Link href="/pollen-agents">{t('pollenAgents')}</Link>
                     <Link href="/ai-et-votre-entreprise">{t('aiAndBusiness')}</Link>
                     <Link href="/developers">{t('apiDevelopers')}</Link>
                     <a href="mailto:hello@ai-visionary.xyz">{t('contact')}</a>
