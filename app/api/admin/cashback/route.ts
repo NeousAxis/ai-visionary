@@ -10,6 +10,7 @@ import {
     localPgGetEntityByDomain,
 } from '@/lib/db-local-pg';
 import { resolveCashbackAmount } from '@/lib/pollen-cashback';
+import { fetchNetworkMerchants, networkConfigStatus, type AffiliateNetwork } from '@/lib/pollen/network-connector';
 
 // Admin cashback Pollen — gestion des deals (offres) + validation manuelle des claims.
 // Auth : ?secret=ADMIN_SECRET ou Authorization: Bearer.
@@ -34,6 +35,51 @@ export async function POST(req: NextRequest) {
 
     let body: any = {};
     try { body = await req.json(); } catch { /* */ }
+
+    // ── IMPORT RÉSEAU D'AFFILIATION (marques connues) → cashback_offers ──────────
+    if (body.action === 'import-network') {
+        const network = (body.network as AffiliateNetwork) || 'awin';
+        if (!['awin', 'impact'].includes(network)) {
+            return NextResponse.json({ error: 'unknown_network', supported: ['awin', 'impact'], config: networkConfigStatus() }, { status: 400 });
+        }
+        const dryRun = body.dry_run !== false; // dry-run par défaut (sécurité)
+        const defaultCashback = Number.isFinite(Number(body.default_cashback)) ? Number(body.default_cashback) : 3; // % cashback utilisateur par défaut
+        const limit = Math.min(Math.max(Number(body.limit ?? 500), 1), 2000);
+
+        let merchants;
+        try {
+            merchants = await fetchNetworkMerchants(network);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            return NextResponse.json({ ok: false, error: 'network_fetch_failed', detail: msg, config: networkConfigStatus() }, { status: 502 });
+        }
+        merchants = merchants.slice(0, limit);
+
+        if (dryRun) {
+            return NextResponse.json({
+                ok: true, dry_run: true, network, fetched: merchants.length,
+                sample: merchants.slice(0, 20),
+            });
+        }
+
+        let created = 0;
+        for (const m of merchants) {
+            if (!m.domain) continue;
+            const id = await localPgUpsertCashbackOffer({
+                entityDomain: m.domain,
+                serviceName: m.name,
+                cashbackType: 'percent',
+                cashbackValue: defaultCashback,
+                currency: m.currency ?? 'CHF',
+                cpaTotal: null,
+                honeyValue: null,
+                vertical: `network:${network}`,
+                notes: `${network} id=${m.external_id} commission=${m.commission_label ?? '?'} cat=${m.category ?? '?'}`,
+            });
+            if (id) created++;
+        }
+        return NextResponse.json({ ok: true, dry_run: false, network, fetched: merchants.length, offers_upserted: created, default_cashback_pct: defaultCashback });
+    }
 
     const entityDomain = (body.entity_domain ?? '').toString().trim();
     if (!entityDomain) {
