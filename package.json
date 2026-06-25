@@ -11,6 +11,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^2.0.86",
     "@ai-sdk/react": "^2.0.115",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@sparticuz/chromium": "^143.0.4",
     "@supabase/supabase-js": "^2.99.2",
     "@types/jszip": "^3.4.0",
@@ -18,6 +19,7 @@
     "dotenv": "^17.3.1",
     "firebase-admin": "^13.6.0",
     "jszip": "^3.10.1",
+    "mcp-handler": "^1.1.0",
     "next": "16.0.10",
     "next-intl": "^4.8.3",
     "nodemailer": "^8.0.5",
@@ -30,7 +32,7 @@
     "resend": "^6.6.0",
     "stripe": "^20.3.1",
     "tweetnacl": "^1.0.3",
-    "zod": "^4.1.13"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
