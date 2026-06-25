@@ -93,7 +93,7 @@ const COPY: Record<string, Copy> = {
       },
       {
         t: 'Sovereign',
-        d: 'European, no ad-ranking, no training on your data.',
+        d: 'Swiss-hosted & sovereign, no ad-ranking, no training on your data.',
       },
     ],
     devTitle: 'Connect your agent',
@@ -156,7 +156,7 @@ const COPY: Record<string, Copy> = {
       },
       {
         t: 'Souverain',
-        d: 'Européen, sans classement publicitaire, sans entraînement sur tes données.',
+        d: 'Hébergé en Suisse & souverain, sans classement publicitaire, sans entraînement sur tes données.',
       },
     ],
     devTitle: 'Branche ton agent',

@@ -777,7 +777,7 @@
   "developers": {
     "badge": "API OUVERTE",
     "title": "AYA \u2014 API Registre Ouvert",
-    "sub": "Acc\u00e9dez aux donn\u00e9es structur\u00e9es de 3 000+ organisations index\u00e9es pour la lisibilit\u00e9 IA. Gratuit, sans authentification, compatible avec tous les principaux frameworks IA.",
+    "sub": "Acc\u00e9dez aux donn\u00e9es structur\u00e9es de 367 000+ organisations index\u00e9es pour la lisibilit\u00e9 IA. Gratuit, sans authentification, compatible avec tous les principaux frameworks IA.",
     "statsEntities": "Entit\u00e9s index\u00e9es",
     "statsAi": "IA connect\u00e9es",
     "statsCountries": "Pays",
@@ -1062,7 +1062,7 @@
   },
   "developersPage": {
     "metaTitle": "API AYA \u2014 Documentation d\u00e9veloppeurs",
-    "metaDesc": "Documentation de l'API AYA : 3000+ entreprises v\u00e9rifi\u00e9es, scoring AIO, donn\u00e9es ASR structur\u00e9es. Connect\u00e9e \u00e0 ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
+    "metaDesc": "Documentation de l'API AYA : 367 000+ entreprises v\u00e9rifi\u00e9es, scoring AIO, donn\u00e9es ASR structur\u00e9es. Connect\u00e9e \u00e0 ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
     "metaOgTitle": "API AYA \u2014 Documentation d\u00e9veloppeurs | AI Visionary",
     "metaOgDesc": "API ouverte AYA : recherche d'entreprises, scores AIO, donn\u00e9es structur\u00e9es ASR. Sans authentification, 30 req/min, JSON.",
     "backLink": "\u2190 AI Visionary",

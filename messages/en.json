@@ -777,7 +777,7 @@
   "developers": {
     "badge": "OPEN API",
     "title": "AYA \u2014 Open Registry API",
-    "sub": "Access structured data on 3,000+ organizations indexed for AI readability. Free, no authentication, compatible with all major AI frameworks.",
+    "sub": "Access structured data on 367,000+ organizations indexed for AI readability. Free, no authentication, compatible with all major AI frameworks.",
     "statsEntities": "Indexed entities",
     "statsAi": "Connected AIs",
     "statsCountries": "Countries",
@@ -1062,7 +1062,7 @@
   },
   "developersPage": {
     "metaTitle": "AYA API \u2014 Developer Documentation",
-    "metaDesc": "AYA API documentation: 3,000+ verified companies, AIO scoring, structured ASR data. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
+    "metaDesc": "AYA API documentation: 367,000+ verified companies, AIO scoring, structured ASR data. Connected to ChatGPT, Claude, Gemini, Mistral, Grok, Perplexity, DeepSeek, Qwen, Llama.",
     "metaOgTitle": "AYA API \u2014 Developer Documentation | AI Visionary",
     "metaOgDesc": "Open AYA API: company search, AIO scores, structured ASR data. No authentication, 30 req/min, JSON.",
     "backLink": "\u2190 AI Visionary",
