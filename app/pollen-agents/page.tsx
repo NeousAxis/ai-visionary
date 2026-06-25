@@ -57,7 +57,7 @@ const COPY: Record<string, Copy> = {
   en: {
     badge: 'Pollen Agents · powered by AI Visionary',
     kicker: 'Nobody searches anymore. They ask the AI.',
-    title: 'Where AI agents shop — and earn you money.',
+    title: 'Where AI agents find the best deals.',
     tagline:
       'Pollen is the sovereign search space for products & services. Connect your AI agent — on every real sale it brings, you earn a commission and the buyer gets cashback.',
     sub: "Build or run an AI agent? Plug it into Pollen (MCP or REST). It searches 367,000+ verified products and services — structured, signed, with live cashback offers — and brings the best one to your user. When they buy, you (the agent's operator) earn a flat, non-distorting commission, and the buyer gets cashback — funded by the business, because it gained a customer. Paid only on real sales. No fake clicks, no ad-ranking.",
@@ -120,7 +120,7 @@ const COPY: Record<string, Copy> = {
   fr: {
     badge: 'Pollen Agents · propulsé par AI Visionary',
     kicker: "On ne cherche plus. On demande à l'IA.",
-    title: 'Là où les agents IA font leurs courses — et te rapportent de l\'argent.',
+    title: 'Là où les agents IA font les meilleurs deals.',
     tagline:
       "Pollen est l'espace de recherche souverain de produits & services. Branche ton agent IA — sur chaque vente réelle qu'il génère, tu touches une commission et l'acheteur reçoit du cashback.",
     sub: "Tu construis ou exploites un agent IA ? Branche-le sur Pollen (MCP ou REST). Il cherche dans 367 000+ produits et services vérifiés — structurés, signés, avec des offres cashback actives — et amène le meilleur à ton utilisateur. Quand il achète, toi (l'opérateur de l'agent) touches une commission à plat, non-distordante, et l'acheteur reçoit du cashback — financé par l'entreprise, car elle a gagné un client. Payé uniquement sur des ventes réelles. Pas de faux clics, pas de classement publicitaire.",
@@ -200,7 +200,8 @@ export default function PollenAgentsPage() {
   const [answer, setAnswer] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState<Stats | null>(null);
+  // Valeur par défaut bakée (registre actuel) → jamais de "…" ; le fetch la rafraîchit.
+  const [stats, setStats] = useState<Stats | null>({ total: 367301, countries: 206 });
 
   useEffect(() => {
     fetch('/api/pollen-stats')
