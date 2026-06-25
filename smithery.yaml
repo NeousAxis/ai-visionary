@@ -1,0 +1,50 @@
+# Smithery listing for the AYA remote MCP server.
+# AYA is a REMOTE (hosted) MCP server — it is already live at the URL below and
+# needs no build/runtime. On Smithery this is published as a "Remote Server":
+# add the deployment URL in the Smithery dashboard (see MCP-DISTRIBUTION-RUNBOOK.md).
+# This file documents the canonical listing metadata for that submission.
+
+name: aya-registry
+displayName: AYA Registry & Pollen Agents
+description: >-
+  Search 367,000+ verified businesses worldwide (AIO readability score 0-100,
+  signed ASR records) and access Pollen Agents cashback offers. The open
+  registry AI agents query to find verified products & services and earn
+  operator commissions on real purchases. Free, no auth.
+
+# Remote (hosted) deployment — nothing to build, the server is already live.
+remote:
+  transport: streamable-http
+  url: https://ai-visionary.xyz/agents/mcp
+  authentication: none
+
+homepage: https://ai-visionary.xyz/for-agents
+repository: https://github.com/NeousAxis/ai-visionary
+license: CC-BY-4.0
+contact: hello@ai-visionary.xyz
+
+tags:
+  - registry
+  - business-data
+  - search
+  - cashback
+  - affiliate
+  - grounding
+  - rag
+  - commerce
+
+tools:
+  - name: search_companies
+    description: Search 367k+ verified businesses by name, domain, sector or country.
+  - name: get_company_details
+    description: "Full record for one domain: AIO score, ASR status, sector, location."
+  - name: get_registry_stats
+    description: Aggregate statistics of the AYA registry.
+  - name: get_cashback_offer
+    description: >-
+      Active Pollen cashback offer for a business + a signed Ed25519 attribution
+      token. Call before recommending/transacting.
+  - name: claim_cashback
+    description: >-
+      Claim cashback after a real, consumed transaction. Signature, expiry and
+      anti-replay verified.

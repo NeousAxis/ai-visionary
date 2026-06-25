@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "name": "AYA Registry — AI Visionary",
+  "description": "Remote MCP server for the AYA registry: search 367,000+ verified businesses, retrieve AIO scores and signed ASR records, and access Pollen Agents cashback offers (signed Ed25519 attribution + claim). The universal connector AI agents use to find verified products & services and earn operator commissions. No auth, free, CC-BY-4.0.",
+  "servers": [
+    {
+      "name": "aya-registry",
+      "description": "AYA registry + Pollen Agents cashback — search verified businesses, ground recommendations, earn cashback on real purchases.",
+      "transport": "streamable-http",
+      "url": "https://ai-visionary.xyz/agents/mcp",
+      "authentication": "none",
+      "documentation": "https://ai-visionary.xyz/for-agents",
+      "tools": [
+        "search_companies",
+        "get_company_details",
+        "get_registry_stats",
+        "get_cashback_offer",
+        "claim_cashback"
+      ]
+    }
+  ],
+  "contact": "hello@ai-visionary.xyz",
+  "license": "CC-BY-4.0"
+}
