@@ -57,10 +57,10 @@ const COPY: Record<string, Copy> = {
   en: {
     badge: 'Pollen Agents · powered by AI Visionary',
     kicker: 'Nobody searches anymore. They ask the AI.',
-    title: 'Your agent makes money for you!',
+    title: 'Where AI agents shop — and earn you money.',
     tagline:
-      'The first sovereign marketplace where AI agents find the best answer!',
-    sub: "Millions already ask an AI what to buy, and from whom. If you're not in Pollen, the AI doesn't even know you exist. Here, agents find you, recommend you and bring you paying customers — you pay only on a real sale, and the buyer walks away with cashback. Random ads are over.",
+      'Pollen is the sovereign search space for products & services. Connect your AI agent — on every real sale it brings, you earn a commission and the buyer gets cashback.',
+    sub: "Build or run an AI agent? Plug it into Pollen (MCP or REST). It searches 367,000+ verified products and services — structured, signed, with live cashback offers — and brings the best one to your user. When they buy, you (the agent's operator) earn a flat, non-distorting commission, and the buyer gets cashback — funded by the business, because it gained a customer. Paid only on real sales. No fake clicks, no ad-ranking.",
     statIndexed: 'indexed companies',
     statSources: 'data sources',
     statCountries: 'countries',
@@ -102,16 +102,16 @@ const COPY: Record<string, Copy> = {
     howTitle: 'How it works',
     howSteps: [
       {
-        t: '1 · Your business is indexed in AYA',
-        d: 'AI agents read it — structured, signed, sovereign. Not buried under marketing copy.',
+        t: '1 · Connect your agent',
+        d: 'Plug your agent into Pollen (MCP or REST). It searches 367,000+ verified products & services — structured, signed, ready to compare.',
       },
       {
-        t: '2 · An agent finds you',
-        d: 'When a user asks their AI for a service, the agent queries Pollen and picks a verified business — not a random web result.',
+        t: '2 · It finds & recommends',
+        d: 'Your agent picks the best verified business for the user, with its live cashback offer and a signed attribution token.',
       },
       {
-        t: '3 · A purchase triggers cashback',
-        d: 'On a confirmed purchase, a cashback is paid — funded by the business, because it gained a customer. That reward is what brings the agents.',
+        t: '3 · Everyone gets paid on the real sale',
+        d: "On a confirmed purchase: the buyer gets cashback, and you — the agent's operator — earn a flat, neutral commission. Funded by the business, because it gained a customer.",
       },
     ],
     howFlywheel:
@@ -120,10 +120,10 @@ const COPY: Record<string, Copy> = {
   fr: {
     badge: 'Pollen Agents · propulsé par AI Visionary',
     kicker: "On ne cherche plus. On demande à l'IA.",
-    title: "Votre agent gagne de l'argent pour vous !",
+    title: 'Là où les agents IA font leurs courses — et te rapportent de l\'argent.',
     tagline:
-      'La première place de marché souveraine où les agents IA trouvent la meilleure réponse !',
-    sub: "Des millions de gens demandent déjà à une IA quoi acheter, et à qui. Si vous n'êtes pas dans Pollen, l'IA ignore jusqu'à votre existence. Ici, les agents vous trouvent, vous recommandent et vous amènent des clients qui paient — vous ne payez que sur une vente réelle, et l'acheteur repart avec du cashback. La pub au hasard, c'est fini.",
+      "Pollen est l'espace de recherche souverain de produits & services. Branche ton agent IA — sur chaque vente réelle qu'il génère, tu touches une commission et l'acheteur reçoit du cashback.",
+    sub: "Tu construis ou exploites un agent IA ? Branche-le sur Pollen (MCP ou REST). Il cherche dans 367 000+ produits et services vérifiés — structurés, signés, avec des offres cashback actives — et amène le meilleur à ton utilisateur. Quand il achète, toi (l'opérateur de l'agent) touches une commission à plat, non-distordante, et l'acheteur reçoit du cashback — financé par l'entreprise, car elle a gagné un client. Payé uniquement sur des ventes réelles. Pas de faux clics, pas de classement publicitaire.",
     statIndexed: 'entreprises indexées',
     statSources: 'sources de données',
     statCountries: 'pays',
@@ -165,16 +165,16 @@ const COPY: Record<string, Copy> = {
     howTitle: 'Comment ça marche',
     howSteps: [
       {
-        t: '1 · Ton entreprise est indexée dans AYA',
-        d: 'Les agents IA la lisent — structurée, signée, souveraine. Pas noyée sous le marketing.',
+        t: '1 · Branche ton agent',
+        d: 'Connecte ton agent à Pollen (MCP ou REST). Il cherche dans 367 000+ produits & services vérifiés — structurés, signés, prêts à comparer.',
       },
       {
-        t: '2 · Un agent te trouve',
-        d: "Quand un utilisateur demande un service à son IA, l'agent interroge Pollen et choisit une entreprise vérifiée — pas un résultat web au hasard.",
+        t: '2 · Il trouve & recommande',
+        d: "Ton agent choisit la meilleure entreprise vérifiée pour l'utilisateur, avec son offre cashback active et un jeton d'attribution signé.",
       },
       {
-        t: "3 · L'achat déclenche un cashback",
-        d: "À l'achat confirmé, un cashback est versé — financé par l'entreprise, car elle a gagné un client. C'est cette récompense qui fait venir les agents.",
+        t: '3 · Tout le monde est payé sur la vente réelle',
+        d: "À l'achat confirmé : l'acheteur reçoit du cashback, et toi — l'opérateur de l'agent — touches une commission à plat. Financé par l'entreprise, car elle a gagné un client.",
       },
     ],
     howFlywheel:
@@ -264,7 +264,7 @@ export default function PollenAgentsPage() {
             marginBottom: '22px',
           }}
         >
-          🐝 {c.badge}
+          {c.badge}
         </span>
 
         <p
@@ -428,7 +428,7 @@ export default function PollenAgentsPage() {
               padding: '18px 22px',
             }}
           >
-            🐝 {c.howFlywheel}
+            {c.howFlywheel}
           </p>
         </section>
 
@@ -509,7 +509,7 @@ export default function PollenAgentsPage() {
                   marginBottom: '10px',
                 }}
               >
-                🐝 {c.agentLabel} · {c.poweredBy}
+                {c.agentLabel} · {c.poweredBy}
               </div>
               <div
                 style={{
