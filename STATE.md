@@ -17,6 +17,15 @@
 - **Moteur cashback Pollen** (déployé 16 juin) : jeton d'attribution Ed25519, `/api/pollen-agents/*` (offer/claim/ask), admin/cashback, validation manuelle outcome-only.
 - **Gated (Cyril, external-facing)** : clés API Awin/Impact, filtre qualité email avant envoi (junk type `info@domain.com`), GO `OUTREACH_ENABLED=true` + ramp, signature des deals.
 
+### MAJ 24 juin (soir) — côté DEMANDE + machine d'adoption autonome
+
+- **Serveur MCP DISTANT (connecteur universel agents) — LIVE** : `https://ai-visionary.xyz/agents/mcp` (`app/agents/[transport]/route.ts`, mcp-handler Streamable HTTP, stateless). 5 outils : `search_companies`, `get_company_details`, `get_registry_stats`, `get_cashback_offer`, `claim_cashback`. N'importe quel agent ajoute l'URL dans sa config MCP → outils AYA, **zéro code**. Vérifié prod (initialize + tools/list). Le serveur **stdio** `mcp-server-aya` reste pour les clients locaux (Claude Desktop).
+- **DISTRIBUTION (priorité n°1 suivante, PAS encore faite)** : pour que les agents TROUVENT l'URL → publier le MCP sur les registres (Smithery, mcp.so, Glama, PulseMCP, registre Anthropic, awesome-mcp) + `llms.txt` + page `/for-agents` + `.well-known` auto-descriptifs + broadcast incitation cashback aux communautés de builders d'agents.
+- **Machine d'adoption du standard ASR (autonome)** : `aya/email_recover_lite.py` (requests-only, ~0 CHF, ~32% hit) récupère les emails manquants (355 632/367 301 entités sans email). 2 crons VPS : `30 2 * * *` récup 2000/nuit + réimport file outreach (`aya/run_email_recovery.sh`) ; `0 9 * * *` envoi outreach 40/j. **Outreach élargi à TOUS les secteurs** (8291 pending, le standard vise toutes les entreprises).
+- **Page Pollen reframe** : titre « Where AI agents find the best deals » / « font les meilleurs deals » ; centré **opérateur d'agent rémunéré** ; stats bakées (plus de « … ») ; abeille retirée. Filtre email = adresses de rôle exclues.
+- **Outreach ACTIF** : `OUTREACH_ENABLED=true`, 1ers emails partis (warmup 40/j). **5 offres cashback pilotes live** (11teamsports.cz 5%, 10ninety.co.uk 8%…). **Boucle agent→cashback prouvée end-to-end** en prod (offer→token→claim, anti-rejeu 409).
+- **Incident résolu** (prod 502 ~30min) : voir [[incident_vps_deploy_turbopack_stale]] (playwright-poster stubé, fichiers périmés rm sur VPS, `rm -rf .next` obligatoire).
+
 ## Ingestion & croissance registre (4 juin 2026) — registre 32 333 → 367 301 (×11)
 
 - **Moteur de masse mondial = Web Data Commons** (annuaires Common Crawl) : entreprises domain-keyed chargées en prod VPS sans scraping, ~0 CHF. `FUSION-WDC` (321 893) + `FUSION-WDC-MIN3` (13 075).
