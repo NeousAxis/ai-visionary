@@ -10,6 +10,12 @@ Liens à réutiliser :
 - Connecteur MCP : `https://ai-visionary.xyz/agents/mcp`
 - Page builders : `https://ai-visionary.xyz/for-agents`
 - Repo : `https://github.com/NeousAxis/ai-visionary`
+- **Preuve sociale** : fiche registre officiel `io.github.NeousAxis/aya-registry` (publiée, status active) → renforce le « ce n'est pas du vaporware ».
+
+> **Statut posting (25 juin)** : textes prêts. Le posting reste manuel et délibéré — raisons concrètes, PAS un blocage technique :
+> - **X** : le compte connecté dans le Chrome est **@WeatherAgentApp** (mauvaise marque pour AYA). Poster depuis le bon compte (ou en créer un AI Visionary) — décision Cyril.
+> - **Reddit / Show HN / Product Hunt** : lancements one-shot, gatekeepés (karma/automod) et sensibles au timing ; il faut être présent pour répondre aux commentaires. À tirer délibérément, pas à l'aveugle.
+> - **Discord MCP** : OK à poster quand connecté au serveur.
 
 ---
 
