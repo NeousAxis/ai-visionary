@@ -1,7 +1,7 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
-  "name": "xyz.ai-visionary/aya-registry",
-  "description": "Search 367,000+ verified businesses worldwide (AIO readability score 0-100, signed ASR records) and access Pollen Agents cashback offers. The open registry AI agents query to find verified products & services and earn operator commissions on real purchases. Free, no auth, CC-BY-4.0.",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.NeousAxis/aya-registry",
+  "description": "Search 367k+ verified businesses; earn cashback when an agent routes a real purchase.",
   "version": "1.0.0",
   "websiteUrl": "https://ai-visionary.xyz/for-agents",
   "repository": {

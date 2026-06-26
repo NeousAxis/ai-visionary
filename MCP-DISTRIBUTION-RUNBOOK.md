@@ -37,8 +37,12 @@ curl -s -X POST https://ai-visionary.xyz/agents/mcp \
 Tous pointent vers le **même endpoint distant**. Aucun build, aucun hébergement de leur côté.
 Identité de soumission recommandée : compte GitHub **NeousAxis** + email **hello@ai-visionary.xyz**.
 
-### 1A. Registre officiel MCP (registry.modelcontextprotocol.io) — `server.json`
-**Le plus important** : c'est la source que la plupart des autres agrègent.
+### 1A. Registre officiel MCP (registry.modelcontextprotocol.io) — `server.json` — ✅ **FAIT (25 juin)**
+**PUBLIÉ** : `io.github.NeousAxis/aya-registry` v1.0.0, status **active**, remote `https://ai-visionary.xyz/agents/mcp`.
+Vérif : `curl -s "https://registry.modelcontextprotocol.io/v0/servers?search=aya-registry"`.
+Publié via le binaire officiel `mcp-publisher` v1.7.9 + `login github` (device-flow, namespace GitHub `io.github.NeousAxis/*` — **casse exacte du username**) + `publish`. Le `server.json` du repo reflète exactement ce qui a été publié (re-publier = `mcp-publisher publish` après bump `version`).
+
+**Le plus important** : c'est la source que la plupart des autres agrègent (Glama, PulseMCP, mcp.so l'ingèrent automatiquement sous 24-72h).
 - Manifeste prêt : `server.json` (racine du repo). Namespace reverse-DNS = `xyz.ai-visionary/aya-registry`.
 - **CLIC CYRIL** (≈10 min, une fois) :
   1. Installer le publisher : `brew install mcp-publisher` *(ou télécharger la release `modelcontextprotocol/registry`)*.
@@ -64,9 +68,8 @@ Identité de soumission recommandée : compte GitHub **NeousAxis** + email **hel
 - Agrège depuis le registre officiel + soumissions manuelles.
 - **CLIC CYRIL** : https://www.pulsemcp.com/submit → URL serveur + repo + description.
 
-### 1F. awesome-mcp-servers (GitHub, punkpeye/awesome-mcp-servers)
-- **AUTONOME possible** : c'est une PR GitHub. Entrée prête (voir `BROADCAST` ci-dessous, bloc "awesome-mcp"). Fork → ajouter la ligne sous la catégorie *Search* / *Commerce* → PR depuis le compte NeousAxis.
-- **CLIC CYRIL** : valider/ouvrir la PR depuis son compte GitHub.
+### 1F. awesome-mcp-servers (GitHub, punkpeye/awesome-mcp-servers) — ✅ **PR OUVERTE (25 juin)**
+- **PR #8751** : https://github.com/punkpeye/awesome-mcp-servers/pull/8751 (entrée dans *Search & Data Extraction*, depuis le compte NeousAxis). En attente de merge mainteneur.
 
 ---
 
@@ -110,9 +113,11 @@ SSH port 22 parfois bloqué par le WiFi de Cyril → **hotspot iPhone** ([[feedb
 
 ## 5. État
 
-- [x] Surfaces auto-descriptives créées (`llms.txt`, `/for-agents`, `.well-known/mcp.json`, `ai-plugin` MAJ).
+- [x] Surfaces auto-descriptives créées + **déployées prod** (`llms.txt`, `/for-agents`, `.well-known/mcp.json`, `ai-plugin` MAJ).
 - [x] Manifestes registres prêts (`server.json`, `smithery.yaml`).
 - [x] Runbook + broadcast rédigés.
-- [ ] Déploiement front VPS.
-- [ ] Soumissions registres (CLIC CYRIL — §1).
-- [ ] Broadcast communautés (CLIC CYRIL — fichier dédié).
+- [x] Déploiement front VPS (25 juin).
+- [x] **Registre officiel MCP — PUBLIÉ + active** (`io.github.NeousAxis/aya-registry` v1.0.0).
+- [x] **awesome-mcp — PR ouverte** (#8751).
+- [ ] Smithery (compte GitHub Cyril — §1B). *Glama/PulseMCP/mcp.so : ingestion auto depuis le registre officiel, vérifier sous 72h.*
+- [ ] Broadcast communautés (§ `POLLEN-AGENTS-BROADCAST.md`).
