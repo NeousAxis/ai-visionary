@@ -51,22 +51,18 @@ Publié via le binaire officiel `mcp-publisher` v1.7.9 + `login github` (device-
   3. `mcp-publisher publish` depuis la racine du repo (lit `server.json`).
 - Si le `$schema`/format a évolué : `mcp-publisher init` régénère un squelette valide → y recopier `description`, `remotes[].url`, `websiteUrl`, `repository`.
 
-### 1B. Smithery (smithery.ai)
-- Type : **Remote Server** (serveur déjà hébergé, rien à builder).
-- Métadonnées prêtes : `smithery.yaml`.
-- **CLIC CYRIL** : se connecter sur https://smithery.ai (GitHub), "Add Server" → "Connect a remote/hosted server" → URL `https://ai-visionary.xyz/agents/mcp`, transport `streamable-http`, auth `none`. Copier description + tags depuis `smithery.yaml`. Homepage = `/for-agents`.
+### 1B. Smithery (smithery.ai) — ⏳ compte requis (1 clic Cyril)
+- Type : **Remote Server** (serveur déjà hébergé, rien à builder). Métadonnées prêtes : `smithery.yaml`.
+- **Bloqué sur création de compte** (login WorkOS → « Continue with GitHub »). **CLIC CYRIL** : se connecter sur https://smithery.ai/new (GitHub), "Add Server" → serveur remote → URL `https://ai-visionary.xyz/agents/mcp`, transport `streamable-http`, auth `none`. Description + tags depuis `smithery.yaml`. Homepage = `/for-agents`.
 
-### 1C. mcp.so
-- Annuaire communautaire. Soumission via formulaire "Submit" sur https://mcp.so/submit (ou PR sur leur repo selon la période).
-- **CLIC CYRIL** : remplir le formulaire — nom `AYA Registry & Pollen Agents`, URL serveur `https://ai-visionary.xyz/agents/mcp`, repo `github.com/NeousAxis/ai-visionary`, description (voir §3), tags (registry, business-data, cashback, search, rag).
+### 1C. mcp.so — ⏳ formulaire PRÉ-REMPLI, bloqué sur sign-in
+- Formulaire ouvert https://mcp.so/submit déjà rempli (Type=MCP Server, Name `AYA Registry & Pollen Agents`, URL `github.com/NeousAxis/ai-visionary`, config remote). **MAIS** le bouton Submit exige « Sign in » (Google/GitHub) = création de compte → **CLIC CYRIL** : se connecter (GitHub) puis Submit. (mcp.so crawle aussi GitHub, donc apparition possible sans action.)
 
-### 1D. Glama (glama.ai/mcp/servers)
-- Glama **crawle automatiquement** les serveurs depuis GitHub + le registre officiel. Publier sur le registre officiel (1A) suffit souvent à y apparaître.
-- **CLIC CYRIL** (accélérer) : sur https://glama.ai, se connecter (GitHub) → "Add server" → coller l'URL distante + repo.
+### 1D. Glama (glama.ai/mcp/servers) — ✅ AUTO (aucune action)
+- Glama **crawle automatiquement** depuis le registre officiel + GitHub. Le 1A étant publié, AYA y apparaîtra seul. Vérifier sous ~72h : https://glama.ai/mcp/servers (rechercher "aya").
 
-### 1E. PulseMCP (pulsemcp.com)
-- Agrège depuis le registre officiel + soumissions manuelles.
-- **CLIC CYRIL** : https://www.pulsemcp.com/submit → URL serveur + repo + description.
+### 1E. PulseMCP (pulsemcp.com) — ✅ AUTO (aucune action)
+- **Confirmé sur leur page submit** : « We ingest entries from the Official MCP Registry daily and process them weekly. » Le 1A étant publié, AYA apparaîtra sous ~1 semaine. Pour ajuster la fiche : email hello@pulsemcp.com.
 
 ### 1F. awesome-mcp-servers (GitHub, punkpeye/awesome-mcp-servers) — ✅ **PR OUVERTE (25 juin)**
 - **PR #8751** : https://github.com/punkpeye/awesome-mcp-servers/pull/8751 (entrée dans *Search & Data Extraction*, depuis le compte NeousAxis). En attente de merge mainteneur.
