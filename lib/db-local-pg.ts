@@ -911,6 +911,7 @@ export interface CashbackOfferRow {
     vertical: string | null;
     status: string;               // active | paused | ended
     notes: string | null;
+    affiliate_url: string | null; // lien d'affiliation taggé servi à l'agent (Amazon, Hostinger, etc.)
 }
 
 function bareDomain(input: string): string {
@@ -933,7 +934,7 @@ export async function localPgGetActiveCashbackOffer(domain: string): Promise<Cas
             `SELECT id::text, entity_id::text, entity_domain, service_name,
                     cashback_type, cashback_value::float8 AS cashback_value, currency,
                     cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
-                    vertical, status, notes
+                    vertical, status, notes, affiliate_url
              FROM cashback_offers
              WHERE entity_domain = $1 AND status = 'active'
              LIMIT 1`,
@@ -958,6 +959,7 @@ export async function localPgUpsertCashbackOffer(input: {
     honeyValue?: number | null;
     vertical?: string | null;
     notes?: string | null;
+    affiliateUrl?: string | null;
 }): Promise<string | null> {
     const pool = getPool();
     if (!pool) return null;
@@ -965,8 +967,8 @@ export async function localPgUpsertCashbackOffer(input: {
         const res = await pool.query<{ id: string }>(
             `INSERT INTO cashback_offers
                 (entity_id, entity_domain, service_name, cashback_type, cashback_value,
-                 currency, cpa_total, honey_value, vertical, status)
-             VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, 'active')
+                 currency, cpa_total, honey_value, vertical, affiliate_url, status)
+             VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active')
              ON CONFLICT (entity_domain) WHERE status = 'active'
              DO UPDATE SET service_name=EXCLUDED.service_name,
                            cashback_type=EXCLUDED.cashback_type,
@@ -975,6 +977,7 @@ export async function localPgUpsertCashbackOffer(input: {
                            cpa_total=EXCLUDED.cpa_total,
                            honey_value=EXCLUDED.honey_value,
                            vertical=EXCLUDED.vertical,
+                           affiliate_url=EXCLUDED.affiliate_url,
                            updated_at=NOW()
              RETURNING id::text`,
             [
@@ -987,6 +990,7 @@ export async function localPgUpsertCashbackOffer(input: {
                 input.cpaTotal ?? null,
                 input.honeyValue ?? null,
                 input.vertical ?? null,
+                input.affiliateUrl ?? null,
             ],
         );
         return res.rows[0]?.id ?? null;
@@ -1069,7 +1073,7 @@ export async function localPgGetActiveCashbackOffersForDomains(
             `SELECT id::text, entity_id::text, entity_domain, service_name,
                     cashback_type, cashback_value::float8 AS cashback_value, currency,
                     cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
-                    vertical, status, notes
+                    vertical, status, notes, affiliate_url
              FROM cashback_offers
              WHERE status = 'active' AND entity_domain = ANY($1)`,
             [bare],
@@ -1091,7 +1095,7 @@ export async function localPgListCashbackOffers(limit = 200): Promise<CashbackOf
             `SELECT id::text, entity_id::text, entity_domain, service_name,
                     cashback_type, cashback_value::float8 AS cashback_value, currency,
                     cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
-                    vertical, status, notes
+                    vertical, status, notes, affiliate_url
              FROM cashback_offers
              ORDER BY created_at DESC
              LIMIT $1`,

@@ -56,6 +56,9 @@ export async function POST(req: Request) {
             cashback_value: offer.cashback_value,
             currency: offer.currency,
             vertical: offer.vertical,
+            // Lien d'affiliation taggé : l'agent route l'achat via ce lien pour que la
+            // commission soit attribuee (Amazon ?tag=, Hostinger, Travelpayouts, etc.).
+            affiliate_url: offer.affiliate_url ?? null,
         },
         token,
         expires_at: new Date(exp * 1000).toISOString(),
