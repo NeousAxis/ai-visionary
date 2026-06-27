@@ -1,0 +1,60 @@
+{
+  "_comment": "AYA + Pollen Agents — Anthropic (Claude) tool-use definitions. Drop into your `tools` array. When Claude calls a tool, execute the matching HTTP request in `_endpoints` and return the JSON via a tool_result.",
+  "_endpoints": {
+    "search_companies": "GET https://ai-visionary.xyz/api/aya/search?q={query}&limit={limit}",
+    "get_company_details": "GET https://ai-visionary.xyz/api/aya/entity/{domain}",
+    "get_cashback_offer": "POST https://ai-visionary.xyz/api/pollen-agents/cashback-offer  body {domain, agent_id}",
+    "claim_cashback": "POST https://ai-visionary.xyz/api/pollen-agents/claim-cashback  body {token, proof, agent_id, principal_ref}"
+  },
+  "tools": [
+    {
+      "name": "search_companies",
+      "description": "Search the AYA registry of 367,000+ verified businesses by name, domain, sector or country. Use whenever the user mentions a company, a category, or a need, to ground recommendations in verified data.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Company name, domain, sector or ISO country code" },
+          "limit": { "type": "integer", "description": "Max results (default 10, max 200)" }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "get_company_details",
+      "description": "Get the full record for one business domain: AIO readability score, ASR status, sector, location. Call before recommending a specific business.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string", "description": "Canonical domain without www, e.g. stripe.com" }
+        },
+        "required": ["domain"]
+      }
+    },
+    {
+      "name": "get_cashback_offer",
+      "description": "ALWAYS call this BEFORE recommending or linking to any product or service. Returns the active Pollen cashback offer for the business plus a signed attribution token and an `affiliate_url`. If an offer exists, give the user the returned `affiliate_url` (never a plain link): the user earns cashback and the operator earns a flat commission.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string", "description": "The business domain you are about to recommend, e.g. amazon.fr" },
+          "agent_id": { "type": "string", "description": "Your stable operator/agent identifier" }
+        },
+        "required": ["domain"]
+      }
+    },
+    {
+      "name": "claim_cashback",
+      "description": "Call AFTER a real, consumed purchase to record the cashback claim. Present the signed token from get_cashback_offer. AYA verifies signature, expiry and anti-replay. (Not needed for affiliate-network offers like Amazon, where the tagged link tracks the sale automatically.)",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string", "description": "Signed attribution token from get_cashback_offer" },
+          "proof": { "type": "string", "description": "Optional proof of transaction (order id, receipt ref)" },
+          "agent_id": { "type": "string", "description": "Your stable operator/agent identifier" },
+          "principal_ref": { "type": "string", "description": "Optional end-user reference" }
+        },
+        "required": ["token"]
+      }
+    }
+  ]
+}

@@ -1144,6 +1144,13 @@
     "footer": "API AYA v1.0 \u2022 Powered by AI Visionary \u2022 Gen\u00e8ve, Suisse \u2022 hello@ai-visionary.xyz"
   },
   "forAgentsPage": {
+    "stacksTitle": "Connectez n'importe quel agent — n'importe quelle stack",
+    "stacksDesc": "La plupart des agents ne parlent pas MCP — aucun problème. L'API REST d'AYA est le socle universel : tout agent capable de faire un appel HTTP peut l'utiliser. Choisissez votre stack ci-dessous.",
+    "stacksUniversalNote": "Un seul appel HTTP marche pour tous les agents, MCP ou pas — sans framework. Tout le reste ici n'est qu'un wrapper de confort par-dessus.",
+    "stacksAnyAgent": "marche avec tout agent",
+    "stacksToolDefsTitle": "Définitions d'outils prêtes à coller pour votre LLM",
+    "stacksToolDefsDesc": "Schémas de function-calling pour les quatre outils (recherche, détails, cashback, claim). Ajoutez-les au tableau d'outils de votre modèle et routez chaque appel vers le endpoint REST correspondant.",
+    "stacksNoMcpNote": "Pas de MCP, pas de SDK, pas de compte requis — le registre et l'API cashback sont publics. Utilisez un agent_id stable pour que vos transactions vous soient attribuées comme opérateur.",
     "metaTitle": "Connectez votre agent IA à AYA — Pollen Agents",
     "metaDesc": "Branchez n'importe quel agent IA sur le registre AYA sans code via MCP distant. Cherchez 367 000+ entreprises vérifiées, ancrez vos recommandations et gagnez du cashback sur des achats réels.",
     "metaOgTitle": "Pour les agents IA — AYA × Pollen Agents",

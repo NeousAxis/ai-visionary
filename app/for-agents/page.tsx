@@ -40,6 +40,42 @@ const CURSOR_CONFIG = `{
 
 const CLI_SNIPPET = `claude mcp add --transport http aya https://ai-visionary.xyz/agents/mcp`;
 
+// ── Universal substrate: plain HTTP. Works for ANY agent, MCP or not. ──
+const REST_SNIPPET = `# Before recommending a business, get its cashback offer + tagged link:
+curl -s -X POST https://ai-visionary.xyz/api/pollen-agents/cashback-offer \\
+  -H "Content-Type: application/json" \\
+  -d '{"domain":"amazon.fr","agent_id":"my-agent"}'
+# -> { "offer": { "affiliate_url": "...", "cashback_value": 2, ... }, "token": "..." }`;
+
+const PYTHON_SNIPPET = `import requests
+
+def aya_cashback(domain, agent_id="my-agent"):
+    r = requests.post("https://ai-visionary.xyz/api/pollen-agents/cashback-offer",
+                      json={"domain": domain, "agent_id": agent_id}, timeout=15)
+    return r.json()
+
+# When your agent is about to recommend e.g. an Amazon product:
+data = aya_cashback("amazon.fr")
+if data.get("offer"):
+    link = data["offer"]["affiliate_url"]   # give THIS to the user (not a plain link)`;
+
+const NODE_SNIPPET = `const ayaCashback = async (domain, agentId = "my-agent") => {
+  const r = await fetch("https://ai-visionary.xyz/api/pollen-agents/cashback-offer", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ domain, agent_id: agentId }),
+  });
+  return r.json();
+};
+const data = await ayaCashback("amazon.fr");
+if (data.offer) sendToUser(data.offer.affiliate_url); // tagged link`;
+
+const TOOL_DEFS = [
+    { label: 'OpenAI (GPT) function tools', url: '/integrations/openai-tools.json' },
+    { label: 'Anthropic (Claude) tool-use', url: '/integrations/anthropic-tools.json' },
+    { label: 'Google Gemini function declarations', url: '/integrations/gemini-functions.json' },
+    { label: 'Mistral / Grok / DeepSeek / Qwen', url: '/integrations/mistral-tools.json' },
+];
+
 export default async function ForAgentsPage() {
     const t = await getTranslations('forAgentsPage');
 
@@ -142,6 +178,43 @@ export default async function ForAgentsPage() {
                         <h3 style={{ fontSize: '1rem', color: '#212E53', marginTop: 0, marginBottom: '10px' }}>{t('connectCliTitle')}</h3>
                         <pre style={codeBlock}>{CLI_SNIPPET}</pre>
                         <p style={{ color: '#64748b', fontSize: '0.88rem', marginTop: '12px', marginBottom: 0 }}>{t('connectNote')}</p>
+                    </div>
+                </section>
+
+                {/* INTEGRATE ANY STACK */}
+                <section style={{ padding: '20px 0' }}>
+                    <h2 style={h2}>{t('stacksTitle')}</h2>
+                    <p style={{ color: '#64748b', marginBottom: '16px' }}>{t('stacksDesc')}</p>
+
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '14px 20px', color: '#15803d', fontSize: '0.9rem', marginBottom: '18px' }}>
+                        {t('stacksUniversalNote')}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '16px' }}>
+                        <div style={card}>
+                            <h3 style={{ fontSize: '0.95rem', color: '#212E53', marginTop: 0, marginBottom: '10px' }}>REST / cURL — {t('stacksAnyAgent')}</h3>
+                            <pre style={codeBlock}>{REST_SNIPPET}</pre>
+                        </div>
+                        <div style={card}>
+                            <h3 style={{ fontSize: '0.95rem', color: '#212E53', marginTop: 0, marginBottom: '10px' }}>Python</h3>
+                            <pre style={codeBlock}>{PYTHON_SNIPPET}</pre>
+                        </div>
+                        <div style={card}>
+                            <h3 style={{ fontSize: '0.95rem', color: '#212E53', marginTop: 0, marginBottom: '10px' }}>Node.js / TypeScript</h3>
+                            <pre style={codeBlock}>{NODE_SNIPPET}</pre>
+                        </div>
+                    </div>
+
+                    {/* Provider tool definitions */}
+                    <div style={{ ...card, marginTop: '16px' }}>
+                        <h3 style={{ fontSize: '0.95rem', color: '#212E53', marginTop: 0, marginBottom: '6px' }}>{t('stacksToolDefsTitle')}</h3>
+                        <p style={{ color: '#64748b', fontSize: '0.88rem', marginTop: 0, marginBottom: '12px' }}>{t('stacksToolDefsDesc')}</p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                            {TOOL_DEFS.map((td, i) => (
+                                <a key={i} href={td.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', background: '#eef2f7', color: '#212E53', padding: '8px 14px', borderRadius: '6px', fontSize: '0.85rem', textDecoration: 'none', border: '1px solid #e2e8f0' }}>{td.label} &darr;</a>
+                            ))}
+                        </div>
+                        <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '14px', marginBottom: 0 }}>{t('stacksNoMcpNote')}</p>
                     </div>
                 </section>
 
