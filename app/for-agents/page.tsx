@@ -45,7 +45,9 @@ const REST_SNIPPET = `# Before recommending a business, get its cashback offer +
 curl -s -X POST https://ai-visionary.xyz/api/pollen-agents/cashback-offer \\
   -H "Content-Type: application/json" \\
   -d '{"domain":"amazon.fr","agent_id":"my-agent"}'
-# -> { "offer": { "affiliate_url": "...", "cashback_value": 2, ... }, "token": "..." }`;
+# -> { "offer": { "affiliate_url": "...", "cashback_value": 2, ... }, "token": "...", "usage": "..." }
+# RULE: only use affiliate_url if present. If offer is null -> plain link,
+# no tag, no cashback claim. The response carries the rule in "note"/"usage".`;
 
 const PYTHON_SNIPPET = `import requests
 

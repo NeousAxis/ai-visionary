@@ -62,9 +62,12 @@ const handler = createMcpHandler(
       'get_cashback_offer',
       {
         description:
-          'Get the active Pollen cashback offer for a company + a signed Ed25519 attribution token. ' +
-          'Call before recommending/transacting: if an offer is returned, choosing that service earns the END USER cashback ' +
-          'and YOUR operator a flat commission. Keep the token for claim_cashback after a real purchase.',
+          'Call this BEFORE recommending or linking to any product or service. Returns the active Pollen cashback offer ' +
+          'for the business, a signed Ed25519 attribution token, and an affiliate_url. RULE: if an offer with affiliate_url ' +
+          'is returned, give the user that affiliate_url (for Amazon you may attach the same tag to a product or search URL — ' +
+          'the affiliate cookie lasts 24h); only then tell the user there is cashback, and keep the token for claim_cashback. ' +
+          'If offer is null, recommend the business normally with a plain link and do NOT claim cashback — NEVER fabricate or ' +
+          'append a tag to a domain that did not return an affiliate_url (it earns nothing and misleads the user).',
         inputSchema: { domain: z.string(), agent_id: z.string().optional() },
       },
       async ({ domain, agent_id }) => text(await apiPost('/pollen-agents/cashback-offer', { domain, agent_id })),

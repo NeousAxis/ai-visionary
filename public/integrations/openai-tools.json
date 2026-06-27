@@ -15,10 +15,18 @@
         "parameters": {
           "type": "object",
           "properties": {
-            "query": { "type": "string", "description": "Company name, domain, sector or ISO country code" },
-            "limit": { "type": "integer", "description": "Max results (default 10, max 200)" }
+            "query": {
+              "type": "string",
+              "description": "Company name, domain, sector or ISO country code"
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max results (default 10, max 200)"
+            }
           },
-          "required": ["query"]
+          "required": [
+            "query"
+          ]
         }
       }
     },
@@ -30,9 +38,14 @@
         "parameters": {
           "type": "object",
           "properties": {
-            "domain": { "type": "string", "description": "Canonical domain without www, e.g. stripe.com" }
+            "domain": {
+              "type": "string",
+              "description": "Canonical domain without www, e.g. stripe.com"
+            }
           },
-          "required": ["domain"]
+          "required": [
+            "domain"
+          ]
         }
       }
     },
@@ -40,14 +53,22 @@
       "type": "function",
       "function": {
         "name": "get_cashback_offer",
-        "description": "ALWAYS call this BEFORE recommending or linking to any product or service. Returns the active Pollen cashback offer for the business plus a signed attribution token and an `affiliate_url`. If an offer exists, give the user the returned `affiliate_url` (never a plain link): the user earns cashback and the operator earns a flat commission.",
+        "description": "Call this BEFORE recommending or linking to any product or service. Returns the active Pollen cashback offer for the business, a signed attribution token, and an affiliate_url. RULE: if an offer with affiliate_url is returned, give the user that affiliate_url (for Amazon you may attach the same tag to a product or search URL — the affiliate cookie lasts 24h); only then tell the user there is cashback. If offer is null, recommend the business normally with a plain link and do NOT claim cashback — NEVER fabricate or append a tag to a domain that did not return an affiliate_url (it earns nothing and misleads the user).",
         "parameters": {
           "type": "object",
           "properties": {
-            "domain": { "type": "string", "description": "The business domain you are about to recommend, e.g. amazon.fr" },
-            "agent_id": { "type": "string", "description": "Your stable operator/agent identifier" }
+            "domain": {
+              "type": "string",
+              "description": "The business domain you are about to recommend, e.g. amazon.fr"
+            },
+            "agent_id": {
+              "type": "string",
+              "description": "Your stable operator/agent identifier"
+            }
           },
-          "required": ["domain"]
+          "required": [
+            "domain"
+          ]
         }
       }
     },
@@ -59,12 +80,26 @@
         "parameters": {
           "type": "object",
           "properties": {
-            "token": { "type": "string", "description": "Signed attribution token from get_cashback_offer" },
-            "proof": { "type": "string", "description": "Optional proof of transaction (order id, receipt ref)" },
-            "agent_id": { "type": "string", "description": "Your stable operator/agent identifier" },
-            "principal_ref": { "type": "string", "description": "Optional end-user reference" }
+            "token": {
+              "type": "string",
+              "description": "Signed attribution token from get_cashback_offer"
+            },
+            "proof": {
+              "type": "string",
+              "description": "Optional proof of transaction (order id, receipt ref)"
+            },
+            "agent_id": {
+              "type": "string",
+              "description": "Your stable operator/agent identifier"
+            },
+            "principal_ref": {
+              "type": "string",
+              "description": "Optional end-user reference"
+            }
           },
-          "required": ["token"]
+          "required": [
+            "token"
+          ]
         }
       }
     }

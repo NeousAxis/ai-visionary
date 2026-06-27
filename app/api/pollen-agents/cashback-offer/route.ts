@@ -26,8 +26,13 @@ export async function POST(req: Request) {
 
     const offer = await localPgGetActiveCashbackOffer(domain);
     if (!offer) {
-        // Pas d'offre = reponse honnete, pas une erreur.
-        return NextResponse.json({ offer: null, token: null });
+        // Pas d'offre = reponse honnete, pas une erreur. Le `note` porte la regle
+        // pour que TOUT agent l'applique sans configuration : pas d'offre => lien normal.
+        return NextResponse.json({
+            offer: null,
+            token: null,
+            note: 'No cashback offer for this domain. Recommend the business normally with a plain link. Do NOT add any affiliate tag and do NOT claim cashback — fabricating a tag earns nothing and misleads the user.',
+        });
     }
 
     let token: string;
@@ -62,5 +67,7 @@ export async function POST(req: Request) {
         },
         token,
         expires_at: new Date(exp * 1000).toISOString(),
+        // La regle voyage avec la donnee : tout agent sait quoi faire, sans config.
+        usage: 'Give the user the affiliate_url so the purchase is attributed (the user earns cashback, the operator a commission). For Amazon you may attach the same tag to a specific product or search URL — the affiliate cookie lasts 24h. Only state there is cashback when affiliate_url is present.',
     });
 }
