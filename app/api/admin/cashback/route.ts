@@ -109,6 +109,8 @@ export async function POST(req: NextRequest) {
         honeyValue: body.honey_value != null ? Number(body.honey_value) : null,
         vertical: body.vertical ?? null,
         notes: body.notes ?? null,
+        // Lien d'affiliation taggé (Amazon ?tag=, Hostinger, etc.) — sinon l'offre ne rapporte rien.
+        affiliateUrl: body.affiliate_url ?? null,
     });
 
     if (!id) {
