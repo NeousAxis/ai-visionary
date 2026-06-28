@@ -6,6 +6,18 @@
 
 ---
 
+## Agents — AYA grossit depuis l'usage : AYO→AYA (28 juin 2026)
+
+> Déployé + vérifié end-to-end en prod VPS. Commit `1c607c02` (branche `feature/pollen-agents`, pushé). Réversible : `DELETE FROM aya_registry WHERE data_origin='AYO-SCAN'`. Voir mémoire `project_diagnostic_auto_index_aya`.
+
+- **Tout diagnostic AYO inscrit l'entreprise dans AYA** (avant : seulement à l'étape « réclamer mes fichiers »). `app/api/diagnostic/scan/route.ts` appelle `indexEntityFromDiagnostic()` (`lib/aya/registry.ts`) après le scan, en non bloquant. Entrée **INDEXÉE** (pas certifiée — doctrine : pas d'ASR généré = pas certifié) : `data_origin='AYO-SCAN'`, `payment_completed=false`, nom/pays(ccTLD)/secteur(industry_keywords)/score du scan, plafond 50 sans ASR. **Dédup par URL** : si l'entité existe déjà (bot `AYA-BOT`/`FUSION-WDC` ou certifiée `AYO`) → ne touche à rien.
+- **Les recherches des agents alimentent AYA** : le serveur MCP distant expose un **6e outil `index_company(domain)`** — quand la recherche d'un agent trouve une entreprise absente d'AYA, il l'ajoute via AYO. **Auto-seed** : `get_company_details` sur une entreprise inconnue (404) lance l'indexation en tâche de fond. Endpoint `app/api/aya/index-company/route.ts` : dédup-first (renvoie `exists` sans rescanner = économie), sinon scan AYO en tâche de fond via `next/after` (le process PM2 du VPS le mène à terme), réponse immédiate `indexing` (entrée dispo ~30s).
+- **À brancher Swiss Agents / tout opérateur d'agent** : donner l'URL MCP `https://ai-visionary.xyz/agents/mcp` (zéro code) OU les endpoints REST (`/api/aya/search`, `/api/aya/entity/{domain}`, `POST /api/aya/index-company`, `/api/pollen-agents/cashback-offer`). Règle système agents : « cherche AYA d'abord → sinon `index_company` → `get_cashback_offer` avant de recommander ».
+- **Fix latent corrigé** : `db.getAyaEntityByUrl` était la seule méthode de `db.ts` sans shortcircuit `isLocalPgConfigured()` → sur le VPS elle interrogeait le Supabase frozen et ratait toutes les entités VPS (dédup cassée pour `registerOrUpdateEntity` + `is_aya_registered` de l'orchestrateur micro-agents). Routé vers `localPgGetEntityByDomain`.
+- ⚠️ **À surveiller** : chaque indexation = un scan AYO (appels Infomaniak) — mitigé par la dédup-first ; spam possible (domaines bidon) — mitigé par la description de l'outil + réversibilité.
+
+---
+
 ## Marketing — machine à deux côtés (24 juin 2026)
 
 > Voir `NEOUSBOT-OUTREACH-RUNBOOK.md` (exploitation outreach) + `POLLEN-DEAL-KIT.md` (BD partenaires) + `VISION-POLLEN-AGENTS.md` (stratégie). Tout déployé + vérifié en prod VPS.
