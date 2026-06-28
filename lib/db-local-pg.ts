@@ -1328,6 +1328,7 @@ export async function localPgImportOutreachRecipients(opts: {
                    AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
+                   AND split_part(r.contact_email,'@',1) ~* '^[a-z0-9]'  -- pas de local-part malformé (tiret/point en tête = artefact de scraping)
                    AND length(split_part(r.contact_email,'@',1)) >= 3
                    AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|info|contact|sales|support|hello|mail|office|enquiry|enquiries|ventes|vente|kontakt|hi|team|service|reception|accueil|shop|boutique|booking|reservation|reservations)$'
                    AND r.sector_macro = ANY($2::text[])
@@ -1383,6 +1384,7 @@ export async function localPgPreviewOutreachTargets(opts: {
                    AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
+                   AND split_part(r.contact_email,'@',1) ~* '^[a-z0-9]'  -- pas de local-part malformé (tiret/point en tête = artefact de scraping)
                    AND length(split_part(r.contact_email,'@',1)) >= 3
                    AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|info|contact|sales|support|hello|mail|office|enquiry|enquiries|ventes|vente|kontakt|hi|team|service|reception|accueil|shop|boutique|booking|reservation|reservations)$'
         AND r.sector_macro = ANY($1::text[])
@@ -1623,6 +1625,7 @@ export async function localPgGetPartnerScanCandidates(opts: {
                    AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
+                   AND split_part(r.contact_email,'@',1) ~* '^[a-z0-9]'  -- pas de local-part malformé (tiret/point en tête = artefact de scraping)
                    AND length(split_part(r.contact_email,'@',1)) >= 3
                    AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|info|contact|sales|support|hello|mail|office|enquiry|enquiries|ventes|vente|kontakt|hi|team|service|reception|accueil|shop|boutique|booking|reservation|reservations)$'
                  AND r.sector_macro = ANY($1::text[])
