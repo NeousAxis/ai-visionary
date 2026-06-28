@@ -25,7 +25,9 @@ export interface AyaEntity {
     valid_until: string;     // ISO Date - Fin de droit de priorité
 
     // Origine
-    data_origin: 'AYO';
+    // 'AYO'      = entité issue d'une génération ASR (payée/gratuite) -> certifiée
+    // 'AYO-SCAN' = entité indexée automatiquement par un simple diagnostic (non certifiée)
+    data_origin: 'AYO' | 'AYO-SCAN';
 
     // Payload ASR (Le trésor)
     asr_payload: {

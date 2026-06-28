@@ -614,6 +614,17 @@ export const database = {
      * Retrieve an AYA Entity by its URL (Smart Search via normalized URL)
      */
     getAyaEntityByUrl: async (url: string): Promise<any | null> => {
+        // Migration totale Supabase -> VPS Postgres : aya_registry vit en local.
+        // (sans ce shortcircuit, le lookup tape Supabase frozen et rate toutes les
+        //  entités VPS -> dédup cassée pour registerOrUpdateEntity + indexEntityFromDiagnostic)
+        if (isLocalPgConfigured()) {
+            try {
+                return await localPgGetEntityByDomain(url);
+            } catch (e) {
+                console.error('❌ [VPS-PG] getAyaEntityByUrl error:', e);
+                return null;
+            }
+        }
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;

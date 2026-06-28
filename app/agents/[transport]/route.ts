@@ -50,8 +50,30 @@ const handler = createMcpHandler(
     );
     server.registerTool(
       'get_company_details',
-      { description: 'Full details of one company (AIO score, ASR, sector). Pass the bare domain.', inputSchema: { domain: z.string() } },
-      async ({ domain }) => text(await apiGet(`/aya/entity/${encodeURIComponent(domain)}`)),
+      { description: 'Full details of one company (AIO score, ASR, sector). Pass the bare domain. If the company is not in AYA yet, it is automatically scanned via AYO and indexed — call again in ~30s to read its score.', inputSchema: { domain: z.string() } },
+      async ({ domain }) => {
+        const res = await apiGet(`/aya/entity/${encodeURIComponent(domain)}`);
+        // Auto-seed : entreprise absente d'AYA → on la fait entrer via AYO (best-effort, non bloquant).
+        if (res.includes('Entity not found') || res.includes('"error"')) {
+          const seed = await apiPost('/aya/index-company', { domain });
+          return text(
+            `This company is not in AYA yet. It is now being indexed via AYO so future agents find it.\n${seed}`,
+          );
+        }
+        return text(res);
+      },
+    );
+    server.registerTool(
+      'index_company',
+      {
+        description:
+          'Add a company to AYA via AYO. Call this when your research surfaces a real business that search_companies / ' +
+          'get_company_details did NOT find in the registry. AYO scans the company website and indexes it into AYA (the open ' +
+          'registry), so every future agent can discover it. Returns immediately; the entry appears within ~30s. ' +
+          'Pass the bare domain you found (e.g. acme.com). Only submit real companies you actually found — not guesses.',
+        inputSchema: { domain: z.string().describe('bare domain of the company to add to AYA, e.g. acme.com') },
+      },
+      async ({ domain }) => text(await apiPost('/aya/index-company', { domain })),
     );
     server.registerTool(
       'get_registry_stats',

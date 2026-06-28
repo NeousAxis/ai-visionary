@@ -112,6 +112,24 @@ export async function POST(req: NextRequest) {
           console.error('[scan] Failed to save analysis:', e instanceof Error ? e.message : e);
         }
 
+        // Inscription automatique dans AYA : toute entreprise diagnostiquée entre au
+        // registre comme entrée INDEXÉE (non certifiée). Dédup par URL + non bloquant.
+        try {
+          const { indexEntityFromDiagnostic } = await import('@/lib/aya/registry');
+          const id = extract.fields.identite;
+          await indexEntityFromDiagnostic({
+            url: fetchResult.url,
+            score: score.total,
+            name: id.legal_name?.value || id.name?.value || '',
+            country: id.country?.value || '',
+            sector: extract.source.scan.industry_keywords?.[0] || '',
+            contactEmail: (id.contact_email?.value && id.contact_email.value !== 'contact_form')
+              ? id.contact_email.value : undefined,
+          });
+        } catch (e) {
+          console.error('[scan] AYA index failed:', e instanceof Error ? e.message : e);
+        }
+
         // Phase 5: Final summary
         send({
           phase: 'complete',
