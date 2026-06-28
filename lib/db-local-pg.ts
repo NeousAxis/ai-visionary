@@ -1319,16 +1319,17 @@ export async function localPgImportOutreachRecipients(opts: {
                  LEFT JOIN outreach_suppression s ON s.email = lower(r.contact_email)
                  WHERE r.contact_email IS NOT NULL
                    AND position('@' in r.contact_email) > 1
-                   AND r.contact_email !~* '@pec\\.'
+                   AND r.contact_email !~* '(@pec\\.|legalmail|postecert|pecimprese|@cert\\.)'
                    AND r.contact_email !~* '\\.apix\\.fi'
                    AND r.contact_email !~* '\\.netvisor\\.fi'
                    AND r.contact_email !~* 'procountor'
                    AND r.contact_email !~* 'posrednik'
                    AND lower(split_part(r.contact_email,'@',2)) <> 'domain.com'
+                   AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
                    AND length(split_part(r.contact_email,'@',1)) >= 3
-                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse)$'
+                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|info|contact|sales|support|hello|mail|office|enquiry|enquiries|ventes|vente|kontakt|hi|team|service|reception|accueil|shop|boutique|booking|reservation|reservations)$'
                    AND r.sector_macro = ANY($2::text[])
                    AND s.email IS NULL
                    AND (cardinality($3::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($3::text[]))
@@ -1373,16 +1374,17 @@ export async function localPgPreviewOutreachTargets(opts: {
     const where = `
         r.contact_email IS NOT NULL
         AND position('@' in r.contact_email) > 1
-                   AND r.contact_email !~* '@pec\\.'
+                   AND r.contact_email !~* '(@pec\\.|legalmail|postecert|pecimprese|@cert\\.)'
                    AND r.contact_email !~* '\\.apix\\.fi'
                    AND r.contact_email !~* '\\.netvisor\\.fi'
                    AND r.contact_email !~* 'procountor'
                    AND r.contact_email !~* 'posrednik'
                    AND lower(split_part(r.contact_email,'@',2)) <> 'domain.com'
+                   AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
                    AND length(split_part(r.contact_email,'@',1)) >= 3
-                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse)$'
+                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|info|contact|sales|support|hello|mail|office|enquiry|enquiries|ventes|vente|kontakt|hi|team|service|reception|accueil|shop|boutique|booking|reservation|reservations)$'
         AND r.sector_macro = ANY($1::text[])
         AND (cardinality($2::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($2::text[]))
         AND ($3::numeric IS NULL OR r.asr_score >= $3::numeric)
@@ -1612,16 +1614,17 @@ export async function localPgGetPartnerScanCandidates(opts: {
                       regexp_replace(regexp_replace(lower(r.website), '^https?://(www\\.)?', '', 'g'), '/.*$', '', 'g') AS dom
                FROM aya_registry r
                WHERE r.contact_email IS NOT NULL AND position('@' in r.contact_email) > 1
-                   AND r.contact_email !~* '@pec\\.'
+                   AND r.contact_email !~* '(@pec\\.|legalmail|postecert|pecimprese|@cert\\.)'
                    AND r.contact_email !~* '\\.apix\\.fi'
                    AND r.contact_email !~* '\\.netvisor\\.fi'
                    AND r.contact_email !~* 'procountor'
                    AND r.contact_email !~* 'posrednik'
                    AND lower(split_part(r.contact_email,'@',2)) <> 'domain.com'
+                   AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
                    AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
                    AND length(split_part(r.contact_email,'@',1)) >= 3
-                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse)$'
+                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|info|contact|sales|support|hello|mail|office|enquiry|enquiries|ventes|vente|kontakt|hi|team|service|reception|accueil|shop|boutique|booking|reservation|reservations)$'
                  AND r.sector_macro = ANY($1::text[])
                  AND (cardinality($2::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($2::text[]))
                  AND coalesce(r.website,'') <> ''

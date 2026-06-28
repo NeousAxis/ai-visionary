@@ -4,8 +4,10 @@
  * Templates d'email d'outreach AI Visionary, bilingues FR/EN.
  *
  * Angle canonique ([[strategy_open_standard]]) : "les IA ne vous voient pas
- * correctement -> rendez-vous lisible via un STANDARD OUVERT suisse, sans devenir
- * client d'OpenAI/Google". Court, personnel, factuel, anti-spam.
+ * correctement -> rendez-vous lisible via un STANDARD OUVERT UNIVERSEL : publiez
+ * une fois, lisible par TOUTES les IA, sans dependre d'aucun fournisseur".
+ * Court, personnel, factuel, anti-spam. Le standard est universel, PAS "suisse"
+ * (la Suisse = souverainete de l'hebergement/entreprise, pas l'identite du standard).
  *
  * Conformite (cold B2B) : identite postale de l'expediteur + lien de desinscription
  * en clair + en-tete List-Unsubscribe (gere par le sender).
@@ -63,7 +65,7 @@ function buildFr(input: OutreachTemplateInput, name: string, hasScore: boolean):
         '',
         stripTags(scoreLine),
         '',
-        'AI Visionary est un STANDARD OUVERT suisse pour rendre une entreprise lisible par les IA. Vous publiez vos propres données signées, vous en gardez la propriété, et vous n\'avez à devenir client d\'aucun fournisseur d\'IA américain.',
+        'AI Visionary, c\'est un STANDARD OUVERT UNIVERSEL : vous publiez une seule fois vos propres données signées, et toutes les IA (ChatGPT, Claude, Gemini…) peuvent vous lire correctement — au lieu de ré-optimiser pour le moteur fermé de chacune. Vous gardez la propriété de vos données et ne dépendez d\'aucun fournisseur d\'IA.',
         '',
         `Voir ce que les IA voient de vous aujourd'hui : ${input.registryUrl}`,
         `Diagnostic gratuit (et fichiers offerts pour l'instant) : ${input.diagnosticUrl}`,
@@ -81,7 +83,7 @@ function buildFr(input: OutreachTemplateInput, name: string, hasScore: boolean):
         <p>${esc(greeting)}</p>
         <p>Quand quelqu'un demande à ChatGPT, Claude ou Gemini « <em>qui peut faire X&nbsp;?</em> », ces IA répondent à partir de ce qu'elles arrivent à lire sur le web. Si vos informations ne sont pas structurées, vous êtes <strong>invisible — ou mal représenté</strong>.</p>
         <p>${scoreLine}</p>
-        <p><strong>AI Visionary</strong> est un <strong>standard ouvert suisse</strong> pour rendre une entreprise lisible par les IA. Vous publiez vos propres données signées, vous en gardez la propriété, et vous n'avez à devenir client d'aucun fournisseur d'IA américain.</p>
+        <p><strong>AI Visionary</strong>, c'est un <strong>standard ouvert universel</strong> : vous publiez <strong>une seule fois</strong> vos propres données signées, et <strong>toutes les IA</strong> (ChatGPT, Claude, Gemini…) peuvent vous lire correctement — au lieu de ré-optimiser pour le moteur fermé de chacune. Vous gardez la propriété de vos données et ne dépendez d'aucun fournisseur d'IA.</p>
         <p>
             👉 <a href="${esc(input.registryUrl)}">Voir ce que les IA voient de vous aujourd'hui</a><br/>
             👉 <a href="${esc(input.diagnosticUrl)}">Diagnostic gratuit</a> — les fichiers sont offerts pour l'instant
@@ -111,7 +113,7 @@ function buildEn(input: OutreachTemplateInput, name: string, hasScore: boolean):
         '',
         stripTags(scoreLine),
         '',
-        'AI Visionary is a Swiss OPEN STANDARD to make a business readable by AIs. You publish your own signed data, you keep ownership of it, and you don\'t have to become a customer of any US AI provider.',
+        'AI Visionary is a UNIVERSAL OPEN STANDARD: you publish your own signed data once, and every AI (ChatGPT, Claude, Gemini…) can read you correctly — instead of re-optimizing for each closed engine. You keep ownership of your data and depend on no single AI provider.',
         '',
         `See what AIs see of you today: ${input.registryUrl}`,
         `Free diagnostic (files are free for now): ${input.diagnosticUrl}`,
@@ -129,7 +131,7 @@ function buildEn(input: OutreachTemplateInput, name: string, hasScore: boolean):
         <p>${esc(greeting)}</p>
         <p>When someone asks ChatGPT, Claude or Gemini "<em>who can do X?</em>", these AIs answer from what they can actually read on the web. If your information isn't structured, you're <strong>invisible — or misrepresented</strong>.</p>
         <p>${scoreLine}</p>
-        <p><strong>AI Visionary</strong> is a <strong>Swiss open standard</strong> to make a business readable by AIs. You publish your own signed data, you keep ownership of it, and you don't have to become a customer of any US AI provider.</p>
+        <p><strong>AI Visionary</strong> is a <strong>universal open standard</strong>: you publish your own signed data <strong>once</strong>, and <strong>every AI</strong> (ChatGPT, Claude, Gemini…) can read you correctly — instead of re-optimizing for each closed engine. You keep ownership of your data and depend on no single AI provider.</p>
         <p>
             👉 <a href="${esc(input.registryUrl)}">See what AIs see of you today</a><br/>
             👉 <a href="${esc(input.diagnosticUrl)}">Free diagnostic</a> — files are free for now
