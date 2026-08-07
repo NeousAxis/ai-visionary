@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { checkMailDomain } from '@/lib/mx-check';
 
 // Infomaniak SMTP configuration
 // Docs: https://www.infomaniak.com/en/support/faq/2604/send-or-receive-emails-from-a-third-party-software
@@ -24,6 +25,8 @@ interface SendEmailOptions {
     html: string;
     replyTo?: string;
     attachments?: EmailAttachment[];
+    /** Court-circuite la verification DNS du domaine destinataire (diagnostic uniquement). */
+    skipMxCheck?: boolean;
 }
 
 export async function sendEmail(options: SendEmailOptions): Promise<{ success: boolean; error?: string }> {
@@ -32,10 +35,27 @@ export async function sendEmail(options: SendEmailOptions): Promise<{ success: b
         return { success: false, error: 'SMTP credentials missing' };
     }
 
+    // Garde-fou DNS : un domaine sans MX ne recevra jamais le message, il resterait 5 jours
+    // dans la file Infomaniak avant de bouncer (cf. lib/mx-check.ts, incident animedekho.cam).
+    // On echoue tout de suite et bruyamment plutot que d'envoyer dans le vide.
+    const recipients = (Array.isArray(options.to) ? options.to : [options.to]).filter(Boolean);
+    let deliverable = recipients;
+    if (!options.skipMxCheck && recipients.length > 0) {
+        const checks = await Promise.all(recipients.map(async (to) => ({ to, check: await checkMailDomain(to) })));
+        deliverable = checks.filter(c => c.check.ok).map(c => c.to);
+        for (const c of checks) {
+            if (!c.check.ok) console.warn(`[mx-check] REJECTED ${c.check.reason} domain=${c.check.domain || '?'} — email non envoye`);
+        }
+        if (deliverable.length === 0) {
+            const reason = checks[0]?.check.reason || 'invalid';
+            return { success: false, error: `undeliverable_domain (${reason})` };
+        }
+    }
+
     try {
         await transporter.sendMail({
             from: options.from,
-            to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+            to: deliverable.join(', '),
             subject: options.subject,
             html: options.html,
             replyTo: options.replyTo,

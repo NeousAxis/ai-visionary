@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { sendEmail } from '@/lib/mailer';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { maskEmail } from '@/lib/sanitize';
+import { checkMailDomain, mailDomainErrorMessage } from '@/lib/mx-check';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(
                 { error: en ? 'Email domain must match the website domain.' : "Le domaine de l'email doit correspondre au domaine du site." },
                 { status: 403 }
+            );
+        }
+
+        // 3bis. Verifier que le domaine peut recevoir du courrier AVANT de generer un code.
+        // Sans ce controle, une adresse sur un domaine sans MX (animedekho.cam, 7 aout 2026)
+        // laisse l'utilisateur attendre indefiniment un code parti dans le vide.
+        const mx = await checkMailDomain(trimmedEmail);
+        if (!mx.ok) {
+            console.log(`[otp-v2] Undeliverable domain: ${mx.domain} (${mx.reason})`);
+            return NextResponse.json(
+                { error: mailDomainErrorMessage(mx, locale) },
+                { status: 400 }
             );
         }
 

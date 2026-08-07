@@ -5,6 +5,7 @@ import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { urlSchema } from '@/lib/validators';
 import { maskEmail } from '@/lib/sanitize';
+import { checkMailDomain, mailDomainErrorMessage } from '@/lib/mx-check';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +70,15 @@ export async function POST(req: NextRequest) {
                 logger.warn('OTP_EMAIL_MISMATCH', `Email ${maskEmail(email)} does not match owner/contact for ${lookupLabel}`);
                 return NextResponse.json({ error: en ? "This email does not match the registered email for this entity." : "Cet email ne correspond pas a celui enregistre pour cette entite." }, { status: 403 });
             }
+        }
+
+        // Verifier que l'adresse enregistree peut encore recevoir du courrier AVANT de generer
+        // un code : une entite dont le domaine a expire piegerait sinon l'utilisateur dans une
+        // attente sans fin (cf. lib/mx-check.ts).
+        const mx = await checkMailDomain(adminEmail);
+        if (!mx.ok) {
+            logger.warn('OTP_UNDELIVERABLE_DOMAIN', `Undeliverable domain ${mx.domain} (${mx.reason}) for ${lookupLabel}`);
+            return NextResponse.json({ error: mailDomainErrorMessage(mx, locale) }, { status: 400 });
         }
 
         const entityName = entity.display_name || entity.legal_name || '';
