@@ -83,6 +83,21 @@ ssh -i ~/.ssh/aya-bot ubuntu@83.228.229.212 'pm2 logs ai-visionary --lines 60 --
 
 ## Rollback
 
-```bash
-ssh -i ~/.ssh/aya-bot ubuntu@83.228.229.212 'cd /home/ubuntu/app && tar xzf /home/ubuntu/backups/app-src-pre-scan-timeout-20260821.tgz && rm -rf .next && mv .next.pre-scan-timeout .next && pm2 restart ai-visionary'
-```
+> **Corrige apres la revue du 21 aout** : trois archives se sont accumulees dans
+> `/home/ubuntu/backups/`, et restaurer la premiere SEULE casserait le build (les
+> `detect-*.ts` de db9b4b62 importent `LlmCallError`, qui disparaitrait de
+> `llm-agent.ts`). Ordre correct selon le point de retour vise :
+
+- **Annuler uniquement le lot revue (fixes 5xx/troncature/chat/rescore/clients)** :
+  ```bash
+  ssh -i ~/.ssh/aya-bot ubuntu@83.228.229.212 'cd /home/ubuntu/app && tar xzf /home/ubuntu/backups/app-src-pre-reviewfixes-20260821.tgz && rm -rf .next && npm run build && pm2 restart ai-visionary'
+  ```
+- **Revenir a l'etat d'avant tout le chantier du 21 aout** (extraire les DEUX archives,
+  la seconde par-dessus la premiere) :
+  ```bash
+  ssh -i ~/.ssh/aya-bot ubuntu@83.228.229.212 'cd /home/ubuntu/app && tar xzf /home/ubuntu/backups/app-src-pre-incomplete-20260821.tgz && tar xzf /home/ubuntu/backups/app-src-pre-scan-timeout-20260821.tgz && rm -rf .next && npm run build && pm2 restart ai-visionary'
+  ```
+
+Le snapshot `.next.pre-scan-timeout` (hardlinks) reste utilisable pour un retour
+instantane du build : `rm -rf .next && mv .next.pre-scan-timeout .next && pm2 restart ai-visionary`,
+mais UNIQUEMENT couple a la restauration des sources correspondantes ci-dessus.

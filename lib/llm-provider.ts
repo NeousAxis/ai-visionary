@@ -25,8 +25,16 @@ type Provider = 'infomaniak';
  */
 const DEFAULT_TIMEOUT_MS = Number(process.env.INFOMANIAK_AI_TIMEOUT_MS || 35_000);
 
-/** An HTTP-level rejection (4xx/5xx). Never worth retrying, unlike a stall. */
-class InfomaniakHttpError extends Error {}
+/**
+ * An HTTP-level rejection. 5xx and 429 are transient upstream failures worth one more
+ * attempt (the historical outages in the PM2 log are 502/500) ; other 4xx are our own
+ * fault (auth, payload) and are never retried.
+ */
+class InfomaniakHttpError extends Error {
+    constructor(message: string, readonly status: number) {
+        super(message);
+    }
+}
 
 export type LlmInput = {
     system?: string;
@@ -41,7 +49,11 @@ export type LlmInput = {
     retries?: number;
 };
 
-export type LlmResult = { text: string };
+export type LlmResult = {
+    text: string;
+    /** true si la generation a ete coupee par max_tokens (finish_reason 'length'). */
+    truncated?: boolean;
+};
 
 // ── Normalise input to OpenAI-style messages ─────────────────────────────────
 function buildOpenAiMessages(input: LlmInput): { role: string; content: string }[] {
@@ -61,7 +73,7 @@ function buildOpenAiMessages(input: LlmInput): { role: string; content: string }
 }
 
 // ── Infomaniak direct fetch ──────────────────────────────────────────────────
-async function callInfomaniak(input: LlmInput, forceJson: boolean): Promise<string> {
+async function callInfomaniak(input: LlmInput, forceJson: boolean): Promise<LlmResult> {
     const token = (process.env.INFOMANIAK_AI_TOKEN || '').trim();
     const productId = (process.env.INFOMANIAK_AI_PRODUCT_ID || '').trim();
     const model = (process.env.INFOMANIAK_AI_MODEL || 'mistralai/Ministral-3-14B-Instruct-2512').trim();
@@ -113,12 +125,20 @@ async function callInfomaniak(input: LlmInput, forceJson: boolean): Promise<stri
 
             if (!res.ok) {
                 const errBody = await res.text().catch(() => '');
-                throw new InfomaniakHttpError(`Infomaniak AI ${res.status}: ${errBody.slice(0, 400)}`);
+                throw new InfomaniakHttpError(`Infomaniak AI ${res.status}: ${errBody.slice(0, 400)}`, res.status);
             }
             const json = (await res.json()) as {
-                choices?: { message?: { content?: string } }[];
+                choices?: { message?: { content?: string }; finish_reason?: string }[];
             };
-            return json.choices?.[0]?.message?.content ?? '';
+            const choice = json.choices?.[0];
+            // Une 200 coupee a max_tokens n'est PAS un succes ordinaire : sans ce signal,
+            // un JSON tronque irreparable devenait un resultat vide q=0 et le score
+            // sous-estime partait en base (biais groupealliance, 19 aout 2026).
+            const truncated = choice?.finish_reason === 'length';
+            if (truncated) {
+                console.warn(`[llm-provider] response truncated at max_tokens=${body.max_tokens}`);
+            }
+            return { text: choice?.message?.content ?? '', truncated };
         } catch (err) {
             // The caller gave up (visitor closed the tab): propagate as-is, never retry.
             if (input.abortSignal?.aborted) throw err;
@@ -128,11 +148,11 @@ async function callInfomaniak(input: LlmInput, forceJson: boolean): Promise<stri
                 ? new Error(`Infomaniak AI timeout after ${timeoutMs}ms (attempt ${attempt}/${attempts})`)
                 : err;
 
-            const retryable = timedOut || !(err instanceof InfomaniakHttpError);
+            const httpTransient = err instanceof InfomaniakHttpError && (err.status >= 500 || err.status === 429);
+            const retryable = timedOut || httpTransient || !(err instanceof InfomaniakHttpError);
             if (!retryable || attempt === attempts) throw lastErr;
-            console.warn(
-                `[llm-provider] attempt ${attempt}/${attempts} failed (${timedOut ? 'timeout' : 'network'}), retrying`,
-            );
+            const why = timedOut ? 'timeout' : (err instanceof InfomaniakHttpError ? `http ${err.status}` : 'network');
+            console.warn(`[llm-provider] attempt ${attempt}/${attempts} failed (${why}), retrying`);
         }
     }
     throw lastErr;
@@ -145,7 +165,7 @@ async function callInfomaniak(input: LlmInput, forceJson: boolean): Promise<stri
  * required to be JSON.
  */
 export async function llmText(input: LlmInput): Promise<LlmResult> {
-    return { text: await callInfomaniak(input, false) };
+    return callInfomaniak(input, false);
 }
 
 /**
@@ -153,7 +173,7 @@ export async function llmText(input: LlmInput): Promise<LlmResult> {
  * Returns { text } where text is the raw JSON string — caller must JSON.parse.
  */
 export async function llmJson(input: LlmInput): Promise<LlmResult> {
-    return { text: await callInfomaniak(input, true) };
+    return callInfomaniak(input, true);
 }
 
 /** Reports which provider is currently active. */

@@ -852,6 +852,7 @@ GÉNÈRE CE JSON MAINTENANT :
                         system: EXTRACTION_ATTEMPT_PROMPT,
                         messages: [{ role: 'user', content: locale === 'en' ? `Extract the answers from the scan of ${urlToScan}` : `Extrait les réponses du scan de ${urlToScan}` }],
                         abortSignal: AbortSignal.timeout(50000),
+                        timeoutMs: 50_000, // sinon le plafond par defaut (35 s) ecrase ce budget via AbortSignal.any
                     }),
                     new Promise<never>((_, reject) => setTimeout(() => reject(new Error('EXTRACTION_TIMEOUT')), 50000))
                 ]);
@@ -2159,6 +2160,7 @@ ${sanitizeForPrompt(scanResult.text || '', 15000)}
                         temperature: 0,
                         system: EXTRACTION_PROMPT,
                         abortSignal: AbortSignal.timeout(90000),
+                        timeoutMs: 90_000, // sinon le plafond par defaut (35 s) ecrase ce budget via AbortSignal.any
                         messages: [
                             { role: 'user', content: locale === 'en'
                                 ? "Extract JSON now. Do not forget to set q=1 when information is found, especially from USER CONTEXT."

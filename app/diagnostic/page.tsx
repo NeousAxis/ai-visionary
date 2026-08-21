@@ -238,11 +238,16 @@ export default function DiagnosticV2Page() {
 
   // ─── SSE Stream Reader (shared by startScan + startScanWithHtml) ───
   const processSseStream = useCallback(async (res: Response) => {
+    // Une reponse non-SSE (502/504 nginx, redemarrage PM2) n'a aucune ligne "data: " :
+    // sans ces gardes, la boucle se terminait proprement et le visiteur restait devant
+    // 8 spinners infinis, sans message ni retour possible.
+    if (!res.ok) { setError(t('scanFailed')); return; }
     if (!res.body) { setError(t('noResponse')); return; }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let sawTerminal = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -255,6 +260,7 @@ export default function DiagnosticV2Page() {
         if (!line.startsWith('data: ')) continue;
         try {
           const ev = JSON.parse(line.slice(6));
+          if (ev.phase === 'complete' || ev.phase === 'error') sawTerminal = true;
           if (ev.phase === 'agent') {
             setAgents(prev => prev.map(a =>
               a.name === ev.agent ? { ...a, status: ev.status, data: ev.data, durationMs: ev.durationMs } : a
@@ -320,6 +326,8 @@ export default function DiagnosticV2Page() {
         } catch { /* skip */ }
       }
     }
+    // Flux termine sans 'complete' ni 'error' : connexion coupee en route.
+    if (!sawTerminal) setError(t('scanFailed'));
   }, [t]);
 
   // ─── Start Scan ───

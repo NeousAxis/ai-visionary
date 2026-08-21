@@ -51,7 +51,7 @@ export async function llmExtract(
   const provider = llmProvider();
   try {
     console.log(`[llm-agent] Calling ${provider} with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
-    const { text } = await llmJson({
+    const { text, truncated: cut } = await llmJson({
       system: systemPrompt,
       prompt: truncated,
       temperature: 0,
@@ -59,6 +59,11 @@ export async function llmExtract(
       retries: opts.retries ?? 1,
     });
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
+    if (cut && parseJson(text) === null) {
+      // Coupee a max_tokens ET irreparable : c'est une panne technique, pas un site sans
+      // donnees. Rejouer ne servirait a rien (temperature 0 = meme sortie), on signale.
+      throw new LlmCallError(`response truncated at max_tokens and unparseable (${text.length} chars)`);
+    }
     return text;
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
