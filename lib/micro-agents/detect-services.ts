@@ -1,7 +1,7 @@
 // lib/micro-agents/detect-services.ts — Extract services/products/audience/use-cases via focused LLM
 
 import type { ServicesResult, Quality } from './types';
-import { llmExtract, parseJson } from './llm-agent';
+import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
 const PROMPT = `You extract business offering details from websites. Content can be in ANY language (French, English, German, etc.).
 
@@ -40,7 +40,10 @@ export async function detectServices(content: string): Promise<ServicesResult> {
       use_cases: data.use_cases || [],
       pricing: data.pricing || '',
     };
-  } catch {
+  } catch (err) {
+    // Panne du fournisseur : on la laisse remonter pour que le diagnostic soit signale
+    // incomplet, plutot que de faire passer une absence technique pour une absence reelle.
+    if (err instanceof LlmCallError) throw err;
     return { services: [], products: [], q: 0 };
   }
 }

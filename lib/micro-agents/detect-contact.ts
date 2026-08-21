@@ -1,7 +1,7 @@
 // lib/micro-agents/detect-contact.ts — Extract contact info via focused LLM
 
 import type { ContactResult, Quality } from './types';
-import { llmExtract, parseJson } from './llm-agent';
+import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
 const PROMPT = `You extract contact information from websites. The content can be in ANY language (French, English, German, etc.).
 
@@ -57,7 +57,10 @@ export async function detectContact(content: string): Promise<ContactResult> {
     else if (hasContactForm) q = 0.5;
 
     return { email, phone, hasContactForm, q };
-  } catch {
+  } catch (err) {
+    // Panne du fournisseur : on la laisse remonter pour que le diagnostic soit signale
+    // incomplet, plutot que de faire passer une absence technique pour une absence reelle.
+    if (err instanceof LlmCallError) throw err;
     return { email: null, phone: null, q: 0 };
   }
 }

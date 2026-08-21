@@ -125,7 +125,7 @@ async function rescoreEntity(entity: any, dryRun: boolean, logger: any): Promise
         logger.info('RESCORE_START', `Rescoring ${name} (${website})`);
 
         // Run V2 pipeline
-        const { fetchResult, results } = await runAllAgents(website);
+        const { fetchResult, results, events } = await runAllAgents(website);
 
         if (!fetchResult.isReachable) {
             logger.warn('RESCORE_UNREACHABLE', `${website} unreachable (status ${fetchResult.statusCode})`);
@@ -133,7 +133,18 @@ async function rescoreEntity(entity: any, dryRun: boolean, logger: any): Promise
         }
 
         // Merge agent results → AyoExtract
-        const extract = await mergeAgentResultsToExtract(website, fetchResult, results);
+        // Panne LLM ≠ site vide : sans ce garde-fou, un batch lance pendant une panne
+        // Infomaniak ecrasait asr_score avec un plancher ET marquait l'entite rescoree
+        // (donc sautee aux batchs suivants) — degradation definitive, cf. incident
+        // groupealliance.eu du 19 aout 2026 sur la route diagnostic.
+        const degraded: string[] = events.filter((e) => e.status === 'error').map((e) => e.agent);
+        const extract = await mergeAgentResultsToExtract(website, fetchResult, results, (a) => {
+            if (!degraded.includes(a)) degraded.push(a);
+        });
+        if (degraded.length > 0) {
+            logger.warn('RESCORE_DEGRADED', `${name}: agents en panne (${degraded.join(', ')}) — score non modifie, entite non marquee`);
+            return { entity_id: entityId, name, website, success: false, skipped: false, old_score: oldScore, new_score: null, duration_ms: Date.now() - start, dry_run: dryRun, error: `llm_degraded:${degraded.join(',')}` };
+        }
 
         // Compute score
         const score = computeAioScore(extract);

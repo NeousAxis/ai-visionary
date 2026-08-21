@@ -8,15 +8,34 @@
 import { llmJson, llmProvider } from '@/lib/llm-provider';
 
 /**
+ * Panne technique de l'appel LLM lui-meme : timeout, coupure reseau, 4xx ou 5xx.
+ * A distinguer d'une reponse valide qui ne contient simplement rien.
+ *
+ * Les agents la laissent remonter au lieu de renvoyer un resultat vide : sans cela, un
+ * 500 d'Infomaniak passait pour "ce site n'a pas d'offre" et le score sous-estime partait
+ * en base et au registre AYA. Cas verifie le 19 aout 2026 sur groupealliance.eu.
+ */
+export class LlmCallError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'LlmCallError';
+  }
+}
+
+/**
  * Run a focused LLM extraction.
  * - systemPrompt: what the agent does (2-3 lines)
  * - content: the text to analyze (truncated to maxChars)
  * - maxChars: limit content size (default 8000)
+ * - opts.retries: extra attempts when Infomaniak stalls (default 1). Scoring-critical
+ *   agents keep the retry; callers that already degrade gracefully pass 0 so the scan
+ *   stays inside its budget when the provider is slow across the board.
  */
 export async function llmExtract(
   systemPrompt: string,
   content: string,
   maxChars = 8000,
+  opts: { retries?: number } = {},
 ): Promise<string> {
   // Smart truncation: keep start (70%) + end (30%) to preserve footer content
   // Footer often contains critical data: legal pages, contact, address, copyright
@@ -32,17 +51,24 @@ export async function llmExtract(
   const provider = llmProvider();
   try {
     console.log(`[llm-agent] Calling ${provider} with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
-    const { text } = await llmJson({
+    const { text, truncated: cut } = await llmJson({
       system: systemPrompt,
       prompt: truncated,
       temperature: 0,
       maxTokens: 4000,
+      retries: opts.retries ?? 1,
     });
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
+    if (cut && parseJson(text) === null) {
+      // Coupee a max_tokens ET irreparable : c'est une panne technique, pas un site sans
+      // donnees. Rejouer ne servirait a rien (temperature 0 = meme sortie), on signale.
+      throw new LlmCallError(`response truncated at max_tokens and unparseable (${text.length} chars)`);
+    }
     return text;
   } catch (err) {
-    console.error(`[llm-agent] ${provider} call FAILED:`, err instanceof Error ? err.message : err);
-    throw err;
+    const detail = err instanceof Error ? err.message : String(err);
+    console.error(`[llm-agent] ${provider} call FAILED:`, detail);
+    throw new LlmCallError(detail);
   }
 }
 

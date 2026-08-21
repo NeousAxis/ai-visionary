@@ -261,6 +261,10 @@ export default function DashboardClient(props: DashboardProps) {
   const [rescanLoading, setRescanLoading] = useState(false);
   const [rescanScore, setRescanScore] = useState<number | null>(null);
   const [rescanBlocks, setRescanBlocks] = useState<ScoreBlock[] | null>(null);
+  const [rescanError, setRescanError] = useState<string | null>(null);
+  // Les codes machine scan_timeout / scan_incomplete sont traduits dans le namespace
+  // diagnostic (les cles y vivent deja pour la page publique).
+  const tDiag = useTranslations('diagnostic');
   const [competitors, setCompetitors] = useState<{ name: string; score: number; country: string; certified?: boolean }[]>([]);
   const [avgScore, setAvgScore] = useState(0);
   const [compareLoading, setCompareLoading] = useState(false);
@@ -298,17 +302,19 @@ export default function DashboardClient(props: DashboardProps) {
     setRescanLoading(true);
     setRescanScore(null);
     setRescanBlocks(null);
+    setRescanError(null);
     try {
       const res = await fetch('/api/diagnostic/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: props.url }),
       });
-      if (!res.body) { setRescanLoading(false); return; }
+      if (!res.ok || !res.body) { setRescanError(tDiag('scanFailed')); setRescanLoading(false); return; }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let sawTerminal = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -321,6 +327,7 @@ export default function DashboardClient(props: DashboardProps) {
           if (!line.startsWith('data: ')) continue;
           try {
             const ev = JSON.parse(line.slice(6));
+            if (ev.phase === 'complete' || ev.phase === 'error') sawTerminal = true;
             if (ev.phase === 'complete' && ev.score) {
               const blocksObj = ev.score.blocks || {};
               const blocksArr = Object.entries(blocksObj).map(([key, val]) => ({
@@ -334,10 +341,16 @@ export default function DashboardClient(props: DashboardProps) {
               const currentTotal = props.score ?? 0;
               setRescanScore(Math.max(newTotal, currentTotal));
               setRescanBlocks(blocksArr);
+            } else if (ev.phase === 'error') {
+              setRescanError(
+                ev.message === 'scan_timeout' ? tDiag('scanTimeout')
+                  : ev.message === 'scan_incomplete' ? tDiag('scanIncomplete')
+                    : (ev.message || tDiag('scanFailed')));
             }
           } catch { /* skip */ }
         }
       }
+      if (!sawTerminal) setRescanError(tDiag('scanFailed'));
     } catch { /* ignore */ }
     setRescanLoading(false);
   };
@@ -497,6 +510,9 @@ export default function DashboardClient(props: DashboardProps) {
               {rescanLoading ? t('rescanRunning') : t('rescan')}
             </span>
             <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>{t('rescanDesc')}</span>
+            {rescanError && (
+              <span style={{ fontSize: '0.78rem', color: '#b91c1c' }}>{rescanError}</span>
+            )}
           </button>
 
           {/* Regenerate files — only active for PRO pack */}

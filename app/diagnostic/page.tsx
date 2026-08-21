@@ -238,11 +238,16 @@ export default function DiagnosticV2Page() {
 
   // ─── SSE Stream Reader (shared by startScan + startScanWithHtml) ───
   const processSseStream = useCallback(async (res: Response) => {
+    // Une reponse non-SSE (502/504 nginx, redemarrage PM2) n'a aucune ligne "data: " :
+    // sans ces gardes, la boucle se terminait proprement et le visiteur restait devant
+    // 8 spinners infinis, sans message ni retour possible.
+    if (!res.ok) { setError(t('scanFailed')); return; }
     if (!res.body) { setError(t('noResponse')); return; }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let sawTerminal = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -255,6 +260,7 @@ export default function DiagnosticV2Page() {
         if (!line.startsWith('data: ')) continue;
         try {
           const ev = JSON.parse(line.slice(6));
+          if (ev.phase === 'complete' || ev.phase === 'error') sawTerminal = true;
           if (ev.phase === 'agent') {
             setAgents(prev => prev.map(a =>
               a.name === ev.agent ? { ...a, status: ev.status, data: ev.data, durationMs: ev.durationMs } : a
@@ -305,7 +311,12 @@ export default function DiagnosticV2Page() {
               document.getElementById('legal-name-prompt')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 800);
           } else if (ev.phase === 'error') {
-            setError(ev.message || t('scanFailed'));
+            // 'scan_timeout' est un code machine emis par le serveur quand le scan depasse
+            // son budget : le visiteur doit lire une phrase traduite, pas le code brut.
+            setError(
+              ev.message === 'scan_timeout' ? t('scanTimeout')
+                : ev.message === 'scan_incomplete' ? t('scanIncomplete')
+                  : (ev.message || t('scanFailed')));
             // Show fallback UI if site was blocked/unreachable
             if (ev.statusCode === 403 || ev.statusCode === 429 || ev.statusCode === 503 || ev.message === 'Site unreachable') {
               setShowFallback(true);
@@ -315,6 +326,8 @@ export default function DiagnosticV2Page() {
         } catch { /* skip */ }
       }
     }
+    // Flux termine sans 'complete' ni 'error' : connexion coupee en route.
+    if (!sawTerminal) setError(t('scanFailed'));
   }, [t]);
 
   // ─── Start Scan ───

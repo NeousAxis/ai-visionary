@@ -1,7 +1,7 @@
 // lib/micro-agents/detect-security.ts — Extract security info (headers deterministic + content LLM)
 
 import type { SecurityResult, Quality } from './types';
-import { llmExtract, parseJson } from './llm-agent';
+import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
 // Headers are checked deterministically (no LLM needed)
 const SECURITY_HEADERS: [string, string][] = [
@@ -44,7 +44,12 @@ export async function detectSecurity(content: string, headers: Record<string, st
         }
       }
     }
-  } catch { /* headers only */ }
+  } catch (err) {
+    // Panne du fournisseur : on la laisse remonter. Les mesures deduites des headers ne
+    // suffisent pas a couvrir le bloc conformite, le diagnostic serait sous-estime.
+    if (err instanceof LlmCallError) throw err;
+    /* sinon : headers seuls */
+  }
 
   const q: Quality = measures.length >= 3 ? 1 : measures.length > 0 ? 0.5 : 0;
   return { measures, q };
