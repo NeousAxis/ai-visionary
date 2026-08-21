@@ -12,11 +12,15 @@ import { llmJson, llmProvider } from '@/lib/llm-provider';
  * - systemPrompt: what the agent does (2-3 lines)
  * - content: the text to analyze (truncated to maxChars)
  * - maxChars: limit content size (default 8000)
+ * - opts.retries: extra attempts when Infomaniak stalls (default 1). Scoring-critical
+ *   agents keep the retry; callers that already degrade gracefully pass 0 so the scan
+ *   stays inside its budget when the provider is slow across the board.
  */
 export async function llmExtract(
   systemPrompt: string,
   content: string,
   maxChars = 8000,
+  opts: { retries?: number } = {},
 ): Promise<string> {
   // Smart truncation: keep start (70%) + end (30%) to preserve footer content
   // Footer often contains critical data: legal pages, contact, address, copyright
@@ -37,6 +41,7 @@ export async function llmExtract(
       prompt: truncated,
       temperature: 0,
       maxTokens: 4000,
+      retries: opts.retries ?? 1,
     });
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
     return text;

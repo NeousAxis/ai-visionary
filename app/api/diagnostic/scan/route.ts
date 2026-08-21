@@ -8,6 +8,14 @@ import type { AgentEvent } from '@/lib/micro-agents/types';
 
 export const maxDuration = 60; // Puppeteer SPA rendering can take up to 15s
 
+/**
+ * Delai maximum accorde a un scan complet. Au-dela, le visiteur reprend la main avec un
+ * message clair au lieu de rester devant un ecran qui tourne. Le 21 aout 2026, un
+ * ralentissement d'Infomaniak a etire un scan a 179 s : le flux restait ouvert grace au
+ * keepalive, mais aucun score n'arrivait jamais. Budget nominal : environ 18 s.
+ */
+const SCAN_DEADLINE_MS = Number(process.env.SCAN_DEADLINE_MS || 150_000);
+
 export async function POST(req: NextRequest) {
   const { url, email, htmlContent } = await req.json();
 
@@ -26,9 +34,25 @@ export async function POST(req: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
+      let closed = false;
       const send = (data: Record<string, unknown>) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        } catch {
+          closed = true; // le visiteur a ferme l'onglet, on arrete d'ecrire
+        }
       };
+
+      // Filet de securite de bout en bout : le pipeline peut se bloquer ailleurs que dans le
+      // LLM (Puppeteer, Postgres), donc on garantit une reponse au visiteur quoi qu'il arrive.
+      const deadline = setTimeout(() => {
+        if (closed) return;
+        console.error(`[scan] deadline ${SCAN_DEADLINE_MS}ms depassee pour ${url}, flux ferme sans score`);
+        send({ phase: 'error', message: 'scan_timeout', timeoutMs: SCAN_DEADLINE_MS });
+        closed = true;
+        try { controller.close(); } catch { /* deja ferme */ }
+      }, SCAN_DEADLINE_MS);
 
       try {
         // Phase 1: Fetch HTML
@@ -126,7 +150,9 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         send({ phase: 'error', message: err instanceof Error ? err.message : 'Unknown error' });
       } finally {
-        controller.close();
+        clearTimeout(deadline);
+        closed = true;
+        try { controller.close(); } catch { /* deja ferme par la deconnexion du client */ }
       }
     },
   });

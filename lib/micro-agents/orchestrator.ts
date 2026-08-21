@@ -415,16 +415,29 @@ export async function mergeAgentResultsToExtract(
   const hasSitemap = /sitemap\.xml/i.test(fetchResult.renderedHtml);
   const hasMobileViewport = /meta[^>]*name=["']viewport["']/i.test(fetchResult.rawHtml);
 
-  // --- Process & Indicators = LLM cible (1 petite mission) ---
+  // --- Process & Indicators + Industry Keywords = 2 LLM cibles, lancees EN PARALLELE ---
+  // Les deux lisent le meme enrichedContent et ne dependent pas l'une de l'autre. En serie,
+  // leurs latences s'additionnaient en fin de scan : 59 s puis 36 s le 21 aout 2026, apres
+  // un detect-services deja monte a 82 s, soit 179 s sans le moindre score rendu au visiteur.
+  // En parallele, la phase coute le plus lent des deux au lieu de la somme.
+  // retries: 0 car les deux retombent proprement sur une valeur vide, et le budget du scan
+  // doit rester tenable quand Infomaniak ralentit sur toute la ligne.
   let processSteps: string[] = [];
   let deliveryMode = '';
   let geographies = country || '';
   let qaText = '';
   let indicators: string[] = [];
+  let industryKeywords: string[] = [];
 
-  try {
-    const { llmExtract, parseJson } = await import('./llm-agent');
-    const processPrompt = `Extract business methodology and key metrics. Content can be in ANY language.
+  type ProcessData = {
+    process_steps?: string[];
+    delivery_mode?: string;
+    geographies?: string;
+    quality_assurance?: string;
+    indicators?: string[];
+  };
+
+  const processPrompt = `Extract business methodology and key metrics. Content can be in ANY language.
 - process_steps: methodology steps or workflow phases (max 6)
 - delivery_mode: "online", "on-site", or "hybrid"
 - geographies: operating regions
@@ -433,30 +446,7 @@ export async function mergeAgentResultsToExtract(
 Return ONLY JSON: {"process_steps":[],"delivery_mode":"","geographies":"","quality_assurance":"","indicators":[]}
 Do NOT invent.`;
 
-    // Single LLM call (was 3x for Gemini variance — Infomaniak json_schema is deterministic enough)
-    type ProcessData = {
-      process_steps?: string[];
-      delivery_mode?: string;
-      geographies?: string;
-      quality_assurance?: string;
-      indicators?: string[];
-    };
-    const raw = await llmExtract(processPrompt, enrichedContent, 10000).catch(() => '{}');
-    const data = parseJson<ProcessData>(raw);
-    console.log('[agent] process/indicators: completed');
-
-    processSteps = data?.process_steps || [];
-    deliveryMode = data?.delivery_mode || '';
-    if (data?.geographies) geographies = data.geographies;
-    qaText = data?.quality_assurance || '';
-    indicators = data?.indicators || [];
-  } catch { /* fallback: empty */ }
-
-  // --- Industry Keywords = LLM cible (for competitor matching against AYA gemini_keywords) ---
-  let industryKeywords: string[] = [];
-  try {
-    const { llmExtract, parseJson } = await import('./llm-agent');
-    const keywordsPrompt = `You are a business classifier. Based on the company's products and services, generate 5-10 specific INDUSTRY KEYWORDS that describe what this company actually sells or does.
+  const keywordsPrompt = `You are a business classifier. Based on the company's products and services, generate 5-10 specific INDUSTRY KEYWORDS that describe what this company actually sells or does.
 Rules:
 - Keywords must be SPECIFIC product/service categories, not generic words
 - Think: what would you search for to find this company's competitors?
@@ -465,7 +455,23 @@ Rules:
 - Do NOT include: company name, locations, generic words like "innovation", "quality", "leader"
 Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
 
-    const kwRaw = await llmExtract(keywordsPrompt, enrichedContent, 8000).catch(() => '[]');
+  try {
+    const { llmExtract, parseJson } = await import('./llm-agent');
+
+    // Single LLM call each (was 3x for Gemini variance — Infomaniak json_schema is deterministic enough)
+    const [raw, kwRaw] = await Promise.all([
+      llmExtract(processPrompt, enrichedContent, 10000, { retries: 0 }).catch(() => '{}'),
+      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0 }).catch(() => '[]'),
+    ]);
+
+    const data = parseJson<ProcessData>(raw);
+    console.log('[agent] process/indicators: completed');
+    processSteps = data?.process_steps || [];
+    deliveryMode = data?.delivery_mode || '';
+    if (data?.geographies) geographies = data.geographies;
+    qaText = data?.quality_assurance || '';
+    indicators = data?.indicators || [];
+
     const parsed = parseJson<string[]>(kwRaw);
     if (Array.isArray(parsed)) {
       industryKeywords = parsed.filter((k): k is string => typeof k === 'string' && k.length > 2).slice(0, 10);

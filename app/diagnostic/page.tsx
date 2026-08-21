@@ -305,7 +305,9 @@ export default function DiagnosticV2Page() {
               document.getElementById('legal-name-prompt')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 800);
           } else if (ev.phase === 'error') {
-            setError(ev.message || t('scanFailed'));
+            // 'scan_timeout' est un code machine emis par le serveur quand le scan depasse
+            // son budget : le visiteur doit lire une phrase traduite, pas le code brut.
+            setError(ev.message === 'scan_timeout' ? t('scanTimeout') : (ev.message || t('scanFailed')));
             // Show fallback UI if site was blocked/unreachable
             if (ev.statusCode === 403 || ev.statusCode === 429 || ev.statusCode === 503 || ev.message === 'Site unreachable') {
               setShowFallback(true);

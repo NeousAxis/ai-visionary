@@ -14,6 +14,20 @@ import { type CoreMessage } from 'ai';
 
 type Provider = 'infomaniak';
 
+/**
+ * Ceiling on a single Infomaniak call.
+ *
+ * Node's fetch carries no request timeout, so an upstream stall used to hang the whole
+ * visitor journey. On 21 Aug 2026 a detect-services call took 90s (normal: 4 to 13s), the
+ * two post-agent calls added 59s and 36s on top, and the diagnostic returned no score for
+ * 179s. Every call is bounded from now on, so a slow provider degrades one block instead
+ * of stranding the visitor.
+ */
+const DEFAULT_TIMEOUT_MS = Number(process.env.INFOMANIAK_AI_TIMEOUT_MS || 35_000);
+
+/** An HTTP-level rejection (4xx/5xx). Never worth retrying, unlike a stall. */
+class InfomaniakHttpError extends Error {}
+
 export type LlmInput = {
     system?: string;
     prompt?: string;
@@ -21,6 +35,10 @@ export type LlmInput = {
     temperature?: number;
     maxTokens?: number;
     abortSignal?: AbortSignal;
+    /** Per-call ceiling in ms. Defaults to INFOMANIAK_AI_TIMEOUT_MS (35s). */
+    timeoutMs?: number;
+    /** Extra attempts when the call times out or the socket drops. Default 0. */
+    retries?: number;
 };
 
 export type LlmResult = { text: string };
@@ -69,27 +87,55 @@ async function callInfomaniak(input: LlmInput, forceJson: boolean): Promise<stri
         };
     }
 
-    const res = await fetch(
-        `https://api.infomaniak.com/2/ai/${productId}/openai/v1/chat/completions`,
-        {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-            signal: input.abortSignal,
-        },
-    );
+    const timeoutMs = Math.max(1_000, input.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+    const attempts = 1 + Math.max(0, input.retries ?? 0);
+    const payload = JSON.stringify(body);
+    let lastErr: unknown;
 
-    if (!res.ok) {
-        const errBody = await res.text().catch(() => '');
-        throw new Error(`Infomaniak AI ${res.status}: ${errBody.slice(0, 400)}`);
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+        const deadline = AbortSignal.timeout(timeoutMs);
+        const signal = input.abortSignal
+            ? AbortSignal.any([input.abortSignal, deadline])
+            : deadline;
+        try {
+            const res = await fetch(
+                `https://api.infomaniak.com/2/ai/${productId}/openai/v1/chat/completions`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: payload,
+                    signal,
+                },
+            );
+
+            if (!res.ok) {
+                const errBody = await res.text().catch(() => '');
+                throw new InfomaniakHttpError(`Infomaniak AI ${res.status}: ${errBody.slice(0, 400)}`);
+            }
+            const json = (await res.json()) as {
+                choices?: { message?: { content?: string } }[];
+            };
+            return json.choices?.[0]?.message?.content ?? '';
+        } catch (err) {
+            // The caller gave up (visitor closed the tab): propagate as-is, never retry.
+            if (input.abortSignal?.aborted) throw err;
+
+            const timedOut = deadline.aborted;
+            lastErr = timedOut
+                ? new Error(`Infomaniak AI timeout after ${timeoutMs}ms (attempt ${attempt}/${attempts})`)
+                : err;
+
+            const retryable = timedOut || !(err instanceof InfomaniakHttpError);
+            if (!retryable || attempt === attempts) throw lastErr;
+            console.warn(
+                `[llm-provider] attempt ${attempt}/${attempts} failed (${timedOut ? 'timeout' : 'network'}), retrying`,
+            );
+        }
     }
-    const json = (await res.json()) as {
-        choices?: { message?: { content?: string } }[];
-    };
-    return json.choices?.[0]?.message?.content ?? '';
+    throw lastErr;
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────

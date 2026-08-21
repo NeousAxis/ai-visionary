@@ -609,6 +609,7 @@
     "pedagoDoc": "Documentation",
     "ayaRegistryLink": "Registre AYA",
     "scanFailed": "Échec du scan",
+    "scanTimeout": "Le scan a dépassé le temps imparti et a été interrompu. Notre fournisseur IA est lent en ce moment, merci de réessayer dans quelques minutes.",
     "checkoutFailed": "Échec de la création de la session de paiement",
     "fallbackTitle": "Site bloqué ou inaccessible",
     "fallbackDesc": "AYOBot n'a pas pu accéder à ce site (protection Cloudflare, erreur 403 ou timeout). Vous pouvez coller ou téléverser le code source HTML de votre page pour lancer le diagnostic manuellement.",
