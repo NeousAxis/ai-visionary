@@ -27,7 +27,7 @@ export async function detectLocation(content: string, jsonldResult?: JsonLdResul
   try {
     // Add site URL as context for TLD detection
     const extra = siteUrl ? `\nSite URL: ${siteUrl}` : '';
-    const raw = await llmExtract(PROMPT, content + extra);
+    const raw = await llmExtract(PROMPT, content + extra, 8000, { maxTokens: 300 });
     const data = parseJson<{ city?: string | null; country?: string | null }>(raw);
     if (!data) return { city: null, country: null, q: 0 };
 

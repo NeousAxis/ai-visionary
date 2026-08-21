@@ -135,7 +135,7 @@ export async function detectPedagogy(renderedHtml: string, textContent = '', url
     // LLM pass over links/headings — catches nav-based FAQ + documentation (blog/guides/resources).
     let llmFaq = false, llmGlossary = false, llmDocs = false;
     if (extracted && extracted.length >= 20) {
-      const raw = await llmExtract(PROMPT, extracted, 8000);
+      const raw = await llmExtract(PROMPT, extracted, 8000, { maxTokens: 300 });
       const data = parseJson<{ has_faq?: boolean; has_glossary?: boolean; has_documentation?: boolean }>(raw);
       llmFaq = data?.has_faq || false;
       llmGlossary = data?.has_glossary || false;

@@ -101,6 +101,11 @@ export async function POST(req: NextRequest) {
         send({ phase: 'merge', status: 'running' });
         const extract = await mergeAgentResultsToExtract(url, fetchResult, results, (a) => {
           if (!degraded.includes(a)) degraded.push(a);
+        }, {
+          // Plus de 50 s deja consommees = provider en stall generalise : le retry de la
+          // phase merge (35 s de plus) ne sauverait rien et ferait crever le plafond des
+          // 150 s. Budget pire cas ramene sous SCAN_DEADLINE_MS.
+          llmRetries: Date.now() - startTime > 50_000 ? 0 : 1,
         });
         send({ phase: 'merge', status: 'done' });
 

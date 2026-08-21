@@ -22,7 +22,7 @@ function stripPhone(s: string): string {
 
 export async function detectContact(content: string, jsonld?: JsonLdResult): Promise<ContactResult> {
   try {
-    const raw = await llmExtract(PROMPT, content, 10000);
+    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 300 });
     const data = parseJson<{ email?: string | null; phone?: string | null; hasContactForm?: boolean }>(raw);
     // Even if the LLM returns nothing, fall through so the JSON-LD fallback below can apply.
     let email = data?.email || null;

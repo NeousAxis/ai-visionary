@@ -429,6 +429,15 @@ export async function mergeAgentResultsToExtract(
    * quoi en faire : la route de diagnostic refuse alors de publier un score sous-estime.
    */
   onDegraded?: (agent: string) => void,
+  opts: {
+    /**
+     * Retries accordes aux extractions LLM de la phase merge. La route les coupe (0)
+     * quand la phase agents a deja consomme une grosse part du budget du scan : pendant
+     * un stall generalise du provider, rejouer a 35 s la tentative n'a quasi aucune
+     * chance et ferait depasser SCAN_DEADLINE_MS (150 s).
+     */
+    llmRetries?: number;
+  } = {},
 ): Promise<AyoExtract> {
   const { contact, services, legal, location, security, jsonld, social } = results;
 
@@ -527,14 +536,14 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
     const [raw, kwRaw] = await Promise.all([
       // Porte les blocs 3 (processus) et 5 (indicateurs), soit 35 points : elle merite un
       // second essai, et son echec rend le diagnostic incomplet.
-      llmExtract(processPrompt, enrichedContent, 10000, { retries: 1 }).catch((e) => {
+      llmExtract(processPrompt, enrichedContent, 10000, { retries: opts.llmRetries ?? 1, maxTokens: 1000 }).catch((e) => {
         console.error('[agent] process/indicators: ECHEC —', e instanceof Error ? e.message : e);
         onDegraded?.('process/indicators');
         return '{}';
       }),
       // Sert uniquement l'appariement concurrentiel, aucun point de score : son absence
       // ne rend pas le diagnostic incomplet.
-      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0 }).catch(() => '[]'),
+      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0, maxTokens: 400 }).catch(() => '[]'),
     ]);
 
     const data = parseJson<ProcessData>(raw);
