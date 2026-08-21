@@ -307,7 +307,10 @@ export default function DiagnosticV2Page() {
           } else if (ev.phase === 'error') {
             // 'scan_timeout' est un code machine emis par le serveur quand le scan depasse
             // son budget : le visiteur doit lire une phrase traduite, pas le code brut.
-            setError(ev.message === 'scan_timeout' ? t('scanTimeout') : (ev.message || t('scanFailed')));
+            setError(
+              ev.message === 'scan_timeout' ? t('scanTimeout')
+                : ev.message === 'scan_incomplete' ? t('scanIncomplete')
+                  : (ev.message || t('scanFailed')));
             // Show fallback UI if site was blocked/unreachable
             if (ev.statusCode === 403 || ev.statusCode === 429 || ev.statusCode === 503 || ev.message === 'Site unreachable') {
               setShowFallback(true);

@@ -1,7 +1,7 @@
 // lib/micro-agents/detect-location.ts — Extract location via focused LLM
 
 import type { LocationResult, Quality, JsonLdResult } from './types';
-import { llmExtract, parseJson } from './llm-agent';
+import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
 const PROMPT = `You are a location extractor. From the website content below, extract:
 - city: the city where the business is located (e.g. "Geneva", "Paris", "New York")
@@ -39,7 +39,10 @@ export async function detectLocation(content: string, jsonldResult?: JsonLdResul
     else if (city || country) q = 0.5;
 
     return { city, country, q };
-  } catch {
+  } catch (err) {
+    // Panne du fournisseur : on la laisse remonter pour que le diagnostic soit signale
+    // incomplet, plutot que de faire passer une absence technique pour une absence reelle.
+    if (err instanceof LlmCallError) throw err;
     return { city: null, country: null, q: 0 };
   }
 }

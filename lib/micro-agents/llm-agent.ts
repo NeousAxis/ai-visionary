@@ -8,6 +8,21 @@
 import { llmJson, llmProvider } from '@/lib/llm-provider';
 
 /**
+ * Panne technique de l'appel LLM lui-meme : timeout, coupure reseau, 4xx ou 5xx.
+ * A distinguer d'une reponse valide qui ne contient simplement rien.
+ *
+ * Les agents la laissent remonter au lieu de renvoyer un resultat vide : sans cela, un
+ * 500 d'Infomaniak passait pour "ce site n'a pas d'offre" et le score sous-estime partait
+ * en base et au registre AYA. Cas verifie le 19 aout 2026 sur groupealliance.eu.
+ */
+export class LlmCallError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'LlmCallError';
+  }
+}
+
+/**
  * Run a focused LLM extraction.
  * - systemPrompt: what the agent does (2-3 lines)
  * - content: the text to analyze (truncated to maxChars)
@@ -46,8 +61,9 @@ export async function llmExtract(
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
     return text;
   } catch (err) {
-    console.error(`[llm-agent] ${provider} call FAILED:`, err instanceof Error ? err.message : err);
-    throw err;
+    const detail = err instanceof Error ? err.message : String(err);
+    console.error(`[llm-agent] ${provider} call FAILED:`, detail);
+    throw new LlmCallError(detail);
   }
 }
 

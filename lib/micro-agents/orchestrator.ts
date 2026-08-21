@@ -366,6 +366,11 @@ export async function mergeAgentResultsToExtract(
   url: string,
   fetchResult: FetchResult,
   results: AllAgentResults,
+  /**
+   * Appele quand une extraction porteuse de score n'a pas repondu. L'appelant decide
+   * quoi en faire : la route de diagnostic refuse alors de publier un score sous-estime.
+   */
+  onDegraded?: (agent: string) => void,
 ): Promise<AyoExtract> {
   const { contact, services, legal, location, security, jsonld, social } = results;
 
@@ -460,7 +465,15 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
 
     // Single LLM call each (was 3x for Gemini variance — Infomaniak json_schema is deterministic enough)
     const [raw, kwRaw] = await Promise.all([
-      llmExtract(processPrompt, enrichedContent, 10000, { retries: 0 }).catch(() => '{}'),
+      // Porte les blocs 3 (processus) et 5 (indicateurs), soit 35 points : elle merite un
+      // second essai, et son echec rend le diagnostic incomplet.
+      llmExtract(processPrompt, enrichedContent, 10000, { retries: 1 }).catch((e) => {
+        console.error('[agent] process/indicators: ECHEC —', e instanceof Error ? e.message : e);
+        onDegraded?.('process/indicators');
+        return '{}';
+      }),
+      // Sert uniquement l'appariement concurrentiel, aucun point de score : son absence
+      // ne rend pas le diagnostic incomplet.
       llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0 }).catch(() => '[]'),
     ]);
 

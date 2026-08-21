@@ -610,6 +610,7 @@
     "ayaRegistryLink": "AYA Registry",
     "scanFailed": "Scan failed",
     "scanTimeout": "The scan took longer than expected and was stopped. Our AI provider is slow right now, please try again in a few minutes.",
+    "scanIncomplete": "Diagnostic incomplete: one of our analysis agents did not answer. We would rather show you no score than a wrong one, so nothing was saved. Please run the scan again in a few minutes.",
     "checkoutFailed": "Failed to create checkout session",
     "fallbackTitle": "Site blocked or unreachable",
     "fallbackDesc": "AYOBot could not access this site (Cloudflare protection, 403, or timeout). You can paste or upload your page's HTML source to run the diagnostic manually.",

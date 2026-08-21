@@ -2,7 +2,7 @@
 // Consumes renderedHtml from html-fetcher — NO additional Jina calls.
 
 import type { PedagogyResult, Quality } from './types';
-import { llmExtract, parseJson } from './llm-agent';
+import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
 const PROMPT = `You detect educational/pedagogical content on websites. The content can be in ANY language (French, English, German, etc.).
 
@@ -73,7 +73,10 @@ export async function detectPedagogy(renderedHtml: string): Promise<PedagogyResu
 
     const q: Quality = (has_faq || has_glossary || has_documentation) ? 1 : 0;
     return { has_faq, has_glossary, has_documentation, q };
-  } catch {
+  } catch (err) {
+    // Panne du fournisseur : on la laisse remonter pour que le diagnostic soit signale
+    // incomplet, plutot que de faire passer une absence technique pour une absence reelle.
+    if (err instanceof LlmCallError) throw err;
     return { has_faq: false, has_glossary: false, has_documentation: false, q: 0 };
   }
 }

@@ -1,7 +1,7 @@
 // lib/micro-agents/detect-legal.ts — Extract legal/compliance info via focused LLM
 
 import type { LegalResult, Quality } from './types';
-import { llmExtract, parseJson } from './llm-agent';
+import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
 const PROMPT = `You extract legal and compliance information from websites. The content can be in ANY language (French, English, German, etc.).
 
@@ -37,7 +37,10 @@ export async function detectLegal(content: string): Promise<LegalResult> {
     else if (total > 0) q = 0.5;
 
     return { policies, frameworks, certifications, urls, q };
-  } catch {
+  } catch (err) {
+    // Panne du fournisseur : on la laisse remonter pour que le diagnostic soit signale
+    // incomplet, plutot que de faire passer une absence technique pour une absence reelle.
+    if (err instanceof LlmCallError) throw err;
     return { policies: [], frameworks: [], certifications: [], urls: [], q: 0 };
   }
 }

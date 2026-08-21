@@ -77,9 +77,21 @@ export async function POST(req: NextRequest) {
         send({ phase: 'fetch', status: 'done', durationMs: Date.now() - startTime });
 
         // Phase 3: Merge results into AyoExtract
+        // Un agent qui n'a pas repondu, ce n'est pas "ce site n'a rien" : c'est une panne.
+        // Publier le score dans ce cas revient a sous-estimer le site, a l'ecrire en base et
+        // a l'inscrire au registre AYA avec un chiffre faux. On refuse.
+        const degraded: string[] = events.filter((e) => e.status === 'error').map((e) => e.agent);
         send({ phase: 'merge', status: 'running' });
-        const extract = await mergeAgentResultsToExtract(url, fetchResult, results);
+        const extract = await mergeAgentResultsToExtract(url, fetchResult, results, (a) => {
+          if (!degraded.includes(a)) degraded.push(a);
+        });
         send({ phase: 'merge', status: 'done' });
+
+        if (degraded.length > 0) {
+          console.error(`[scan] diagnostic INCOMPLET pour ${fetchResult.url} : ${degraded.join(', ')} sans reponse. Aucun score publie, aucune ecriture en base ni au registre.`);
+          send({ phase: 'error', message: 'scan_incomplete', agents: degraded });
+          return; // le finally ferme le flux
+        }
 
         // Phase 4: Compute current score
         // V2: caps V1 désactivés SAUF le cap ASR doctrinal (50 sans ASR)
