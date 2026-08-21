@@ -33,7 +33,7 @@ export async function detectSecurity(content: string, headers: Record<string, st
 
   // LLM: extract security mentions from content
   try {
-    const raw = await llmExtract(PROMPT, content);
+    const raw = await llmExtract(PROMPT, content, 8000, { maxTokens: 800 });
     const data = parseJson<{ measures?: string[] }>(raw);
     if (data?.measures) {
       const seen = new Set(measures.map(m => m.toLowerCase()));

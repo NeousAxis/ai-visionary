@@ -17,7 +17,7 @@ Extract ONLY what is explicitly mentioned. Do NOT invent.`;
 
 export async function detectServices(content: string): Promise<ServicesResult> {
   try {
-    const raw = await llmExtract(PROMPT, content, 10000);
+    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 2000 });
     const data = parseJson<{
       services?: string[];
       products?: string[];

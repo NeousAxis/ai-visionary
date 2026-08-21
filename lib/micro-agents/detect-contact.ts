@@ -1,6 +1,6 @@
 // lib/micro-agents/detect-contact.ts — Extract contact info via focused LLM
 
-import type { ContactResult, Quality } from './types';
+import type { ContactResult, Quality, JsonLdResult } from './types';
 import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
 const PROMPT = `You extract contact information from websites. The content can be in ANY language (French, English, German, etc.).
@@ -20,15 +20,14 @@ function stripPhone(s: string): string {
   return s.replace(/[^\d]/g, '');
 }
 
-export async function detectContact(content: string): Promise<ContactResult> {
+export async function detectContact(content: string, jsonld?: JsonLdResult): Promise<ContactResult> {
   try {
-    const raw = await llmExtract(PROMPT, content, 10000);
+    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 300 });
     const data = parseJson<{ email?: string | null; phone?: string | null; hasContactForm?: boolean }>(raw);
-    if (!data) return { email: null, phone: null, q: 0 };
-
-    let email = data.email || null;
-    let phone = data.phone || null;
-    const hasContactForm = data.hasContactForm || false;
+    // Even if the LLM returns nothing, fall through so the JSON-LD fallback below can apply.
+    let email = data?.email || null;
+    let phone = data?.phone || null;
+    const hasContactForm = data?.hasContactForm || false;
 
     // ANTI-HALLUCINATION: AYO doctrine says "ne jamais inventer". Validate that the
     // email and phone returned are LITERALLY present in the source content.
@@ -49,6 +48,12 @@ export async function detectContact(content: string): Promise<ContactResult> {
         phone = null;
       }
     }
+
+    // JSON-LD fallback: structured contactPoint is authoritative (parsed, not LLM), so it
+    // is not subject to the anti-hallucination check. Catches sites whose email lives only
+    // in the SSR JSON-LD while the rendered page is a login gate (e.g. Next.js apps).
+    if (!email && jsonld?.contactPoint?.email) email = jsonld.contactPoint.email;
+    if (!phone && jsonld?.contactPoint?.phone) phone = jsonld.contactPoint.phone;
 
     let q: Quality = 0;
     if (email && phone) q = 1;

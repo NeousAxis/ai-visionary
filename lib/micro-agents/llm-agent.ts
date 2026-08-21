@@ -35,7 +35,7 @@ export async function llmExtract(
   systemPrompt: string,
   content: string,
   maxChars = 8000,
-  opts: { retries?: number } = {},
+  opts: { retries?: number; maxTokens?: number } = {},
 ): Promise<string> {
   // Smart truncation: keep start (70%) + end (30%) to preserve footer content
   // Footer often contains critical data: legal pages, contact, address, copyright
@@ -51,18 +51,34 @@ export async function llmExtract(
   const provider = llmProvider();
   try {
     console.log(`[llm-agent] Calling ${provider} with ${truncated.length} chars, system prompt: ${systemPrompt.substring(0, 80)}...`);
-    const { text, truncated: cut } = await llmJson({
+    // Plafond calibre par agent sur les sorties reelles observees en prod (contact et
+    // location tiennent en moins de 100 caracteres, seuls services et process depassent
+    // 2000). Un plafond juste convertit les generations en boucle (40 s et plus a 4000
+    // tokens, source des timeouts) en reponses rapides.
+    const maxTokens = opts.maxTokens ?? 4000;
+    let { text, truncated: cut } = await llmJson({
       system: systemPrompt,
       prompt: truncated,
       temperature: 0,
-      maxTokens: 4000,
+      maxTokens,
       retries: opts.retries ?? 1,
     });
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
     if (cut && parseJson(text) === null) {
-      // Coupee a max_tokens ET irreparable : c'est une panne technique, pas un site sans
-      // donnees. Rejouer ne servirait a rien (temperature 0 = meme sortie), on signale.
-      throw new LlmCallError(`response truncated at max_tokens and unparseable (${text.length} chars)`);
+      // Coupee au plafond ET irreparable. Rejouer a l'identique reproduirait la meme
+      // coupure (temperature 0) : UNE relance a budget double la depasse. Si meme le
+      // double ne suffit pas, c'est une panne technique, pas un site sans donnees.
+      console.warn(`[llm-agent] truncated+unparseable at ${maxTokens} tokens, retrying once at ${maxTokens * 2}`);
+      ({ text, truncated: cut } = await llmJson({
+        system: systemPrompt,
+        prompt: truncated,
+        temperature: 0,
+        maxTokens: maxTokens * 2,
+        retries: 0,
+      }));
+      if (cut && parseJson(text) === null) {
+        throw new LlmCallError(`response truncated at ${maxTokens * 2} tokens and unparseable (${text.length} chars)`);
+      }
     }
     return text;
   } catch (err) {
