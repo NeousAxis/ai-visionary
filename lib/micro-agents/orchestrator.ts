@@ -82,6 +82,57 @@ function detectLegalLinksDeterministic(htmlSources: string[]): { policies: strin
   return { policies, frameworks };
 }
 
+/**
+ * Probe common legal/compliance URLs and confirm real content, for sites whose legal pages
+ * are public but NOT linked from the scanned page (unlinked pages, or a login-gated homepage
+ * whose footer links only appear after auth — e.g. Next.js apps). Each category stops at its
+ * first matching page. Content keywords guard against soft-404 SPA shells that 200 everywhere.
+ */
+const LEGAL_PAGE_PROBES: { paths: string[]; label: string; type: 'policy' | 'framework'; kw: RegExp }[] = [
+  { paths: ['/mentions-legales', '/mentions', '/impressum', '/legal-notice'], label: 'Mentions légales', type: 'policy', kw: /mentions\s+l[eé]gales|legal\s+notice|impressum|[eé]diteur|responsable\s+de\s+la\s+publication/i },
+  { paths: ['/cgv', '/conditions-generales-de-vente'], label: 'CGV', type: 'policy', kw: /conditions\s+g[eé]n[eé]rales(\s+de\s+vente)?|terms\s+of\s+sale|\bcgv\b/i },
+  { paths: ['/cgu', '/terms', '/terms-of-service', '/terms-of-use'], label: 'Terms of Use', type: 'policy', kw: /conditions\s+(g[eé]n[eé]rales\s+)?d.utilisation|terms\s+of\s+(use|service)|\bcgu\b/i },
+  { paths: ['/confidentialite', '/politique-de-confidentialite', '/privacy', '/privacy-policy', '/datenschutz'], label: 'Privacy Policy', type: 'policy', kw: /(politique\s+de\s+)?confidentialit[eé]|privacy\s+policy|datenschutz|donn[eé]es\s+personnelles/i },
+  { paths: ['/rgpd', '/gdpr'], label: 'GDPR', type: 'framework', kw: /\brgpd\b|\bgdpr\b|r[eè]glement\s+g[eé]n[eé]ral|protection\s+des\s+donn[eé]es/i },
+];
+/**
+ * Soft-404 guard: a clearly-nonexistent path returning 200 means the site echoes content on
+ * every path (SPA catch-all), so URL existence probes are unreliable — used to skip them.
+ */
+async function isSoftNotFound(baseUrl: string): Promise<boolean> {
+  try {
+    const u = new URL(baseUrl);
+    u.pathname = '/_ayo_nonexistent_probe_9z7x';
+    const res = await fetch(u.toString(), { headers: { 'User-Agent': AYOBOT_UA }, redirect: 'manual', signal: AbortSignal.timeout(3500) });
+    return res.status === 200;
+  } catch {
+    return false;
+  }
+}
+
+async function detectLegalPages(baseUrl: string): Promise<{ policies: string[]; frameworks: string[] }> {
+  if (await isSoftNotFound(baseUrl)) return { policies: [], frameworks: [] };
+  const policies: string[] = [];
+  const frameworks: string[] = [];
+  await Promise.all(LEGAL_PAGE_PROBES.map(async (probe) => {
+    for (const p of probe.paths) {
+      try {
+        const u = new URL(baseUrl);
+        u.pathname = p;
+        const res = await fetch(u.toString(), { headers: { 'User-Agent': AYOBOT_UA }, redirect: 'follow', signal: AbortSignal.timeout(3500) });
+        if (!res.ok) continue;
+        const text = (await res.text()).replace(/<[^>]+>/g, ' ');
+        if (probe.kw.test(text)) {
+          if (probe.type === 'policy') policies.push(probe.label);
+          else frameworks.push(probe.label);
+          break;
+        }
+      } catch { /* try next path */ }
+    }
+  }));
+  return { policies, frameworks };
+}
+
 // --- Source preparation ---
 
 /**
@@ -252,7 +303,7 @@ async function runAgent<T>(
  * - renderedHtml → detect-jsonld, detect-social (need DOM structure)
  * - enrichedContent (links + footer + text) → detect-legal, detect-contact, detect-location
  * - textContent → detect-services, detect-security (text is enough)
- * - renderedHtml + url → detect-pedagogy (has its own Jina fallback)
+ * - renderedHtml + textContent → detect-pedagogy (text markers catch accordion FAQ/glossary)
  */
 export async function runAllAgents(
   url: string,
@@ -320,27 +371,34 @@ export async function runAllAgents(
   }
 
   // Run jsonld first (sync, fast, feeds location)
-  const jsonldRun = await runAgent('detect-jsonld', () => detectJsonLd(renderedHtml));
+  const jsonldRun = await runAgent('detect-jsonld', () => detectJsonLd(combinedHtmlForSocial));
   events.push(jsonldRun.event); onEvent?.(jsonldRun.event);
 
   // Run the 7 remaining agents in parallel — emit 'done' as each settles
   const parallelRuns = await Promise.all([
-    runAgent('detect-contact', () => detectContact(enrichedContent)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+    runAgent('detect-contact', () => detectContact(enrichedContent, jsonldRun.result || undefined)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
     runAgent('detect-location', () => detectLocation(enrichedContent, jsonldRun.result || undefined, fetchResult.url)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
     runAgentWithRetry('detect-services', () => detectServices(textContent), mergeServices).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
-    runAgentWithRetry('detect-legal', () => detectLegal(enrichedContent), mergeLegal).then(r => {
+    runAgentWithRetry('detect-legal', () => detectLegal(enrichedContent), mergeLegal).then(async r => {
       // Merge deterministic findings into LLM result
       if (r.result) {
         r.result.policies = unionStrings(r.result.policies, deterministicLegal.policies);
         r.result.frameworks = unionStrings(r.result.frameworks, deterministicLegal.frameworks);
-        if ((deterministicLegal.policies.length + deterministicLegal.frameworks.length) > 0 && r.result.q === 0) r.result.q = 0.5;
+        // Nothing found on the scanned page? Probe common legal/compliance URLs (unlinked
+        // pages, or a login-gated homepage whose legal footer links only appear after auth).
+        if (r.result.policies.length === 0 && r.result.frameworks.length === 0) {
+          const probed = await detectLegalPages(url);
+          r.result.policies = unionStrings(r.result.policies, probed.policies);
+          r.result.frameworks = unionStrings(r.result.frameworks, probed.frameworks);
+        }
+        if ((r.result.policies.length + r.result.frameworks.length) > 0 && r.result.q === 0) r.result.q = 0.5;
         r.event.data = r.result;
       }
       events.push(r.event); onEvent?.(r.event); return r;
     }),
     runAgent('detect-security', () => detectSecurity(textContent, headers)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
     runAgent('detect-social', () => detectSocial(combinedHtmlForSocial)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
-    runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
+    runAgent('detect-pedagogy', () => detectPedagogy(renderedHtml, textContent, url)).then(r => { events.push(r.event); onEvent?.(r.event); return r; }),
   ]);
   const [contactRun, locationRun, servicesRun, legalRun, securityRun, socialRun, pedagogyRun] = parallelRuns;
 
@@ -413,6 +471,8 @@ export async function mergeAgentResultsToExtract(
 
   // --- FAQ / Glossary / Doc = via detect-pedagogy LLM agent (merged with JSON-LD schema) ---
   const { pedagogy } = results;
+  // pedagogy.has_faq already includes the /faq URL probe (done inside the agent, so the
+  // scan card reflects it too).
   const hasFaqContent = jsonld.hasFaqSchema || pedagogy.has_faq;
   const hasGlossary = pedagogy.has_glossary;
   const hasDocumentation = pedagogy.has_documentation;

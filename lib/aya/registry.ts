@@ -113,6 +113,126 @@ export async function registerOrUpdateEntity(
     return entityId;
 }
 
+// ccTLD -> ISO country (couverture des suffixes les plus courants ; le cron qualité affine ensuite)
+const CCTLD_COUNTRY: Record<string, string> = {
+    ch: 'CH', fr: 'FR', de: 'DE', uk: 'GB', be: 'BE', nl: 'NL', it: 'IT', es: 'ES',
+    at: 'AT', lu: 'LU', us: 'US', ca: 'CA', pt: 'PT', se: 'SE', no: 'NO', dk: 'DK',
+    fi: 'FI', ie: 'IE', pl: 'PL', cz: 'CZ', io: 'GB', eu: 'EU',
+};
+
+// Noms de pays usuels -> ISO (pour les valeurs textuelles renvoyées par le scan)
+const COUNTRY_NAME_ISO: Record<string, string> = {
+    switzerland: 'CH', suisse: 'CH', schweiz: 'CH', svizzera: 'CH',
+    france: 'FR', germany: 'DE', deutschland: 'DE', allemagne: 'DE',
+    'united kingdom': 'GB', uk: 'GB', england: 'GB', 'royaume-uni': 'GB',
+    belgium: 'BE', belgique: 'BE', netherlands: 'NL', 'pays-bas': 'NL',
+    italy: 'IT', italie: 'IT', spain: 'ES', espagne: 'ES', austria: 'AT', autriche: 'AT',
+    luxembourg: 'LU', 'united states': 'US', usa: 'US', 'états-unis': 'US', canada: 'CA',
+};
+
+/** Déduit un code ISO pays depuis la valeur scannée (texte) ou, à défaut, le ccTLD du domaine. */
+function resolveCountryISO(rawCountry: string, url: string): string {
+    const c = (rawCountry || '').trim();
+    if (/^[A-Za-z]{2}$/.test(c)) return c.toUpperCase();
+    if (c) {
+        const iso = COUNTRY_NAME_ISO[c.toLowerCase()];
+        if (iso) return iso;
+    }
+    try {
+        const host = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+        const tld = host.split('.').pop()?.toLowerCase() || '';
+        if (CCTLD_COUNTRY[tld]) return CCTLD_COUNTRY[tld];
+    } catch { /* ignore */ }
+    return 'XX';
+}
+
+/**
+ * Indexe automatiquement une entité dans AYA dès qu'un diagnostic est lancé.
+ *
+ * Entrée INDEXÉE (non certifiée) : `payment_completed=false`, `data_origin='AYO-SCAN'`.
+ * Doctrine : pas d'ASR généré = pas certifié. L'entité apparaît dans le registre
+ * (volume / API / pages crawlables) mais reste distincte des entités certifiées AYO.
+ *
+ * Dédup par URL : si l'entité existe déjà (bot indexé OU certifiée), on NE TOUCHE À RIEN
+ * (on ne dégrade jamais une entité existante) et on renvoie son id.
+ *
+ * @returns l'entity_id (existant ou nouveau), ou null en cas d'échec.
+ */
+export async function indexEntityFromDiagnostic(input: {
+    url: string;
+    score: number;
+    name?: string;
+    country?: string;
+    sector?: string;
+    contactEmail?: string;
+}): Promise<string | null> {
+    const targetUrl = input.url;
+    if (!targetUrl) return null;
+
+    // 1. Dédup par URL — ne jamais dupliquer ni écraser une entité existante
+    try {
+        const existing = await db.getAyaEntityByUrl(targetUrl);
+        const existingId = existing?.entity_id || existing?.aya_entity_id;
+        if (existing && existingId) {
+            console.log(`♻️ AYA INDEX: Already in registry (${existingId}) — diagnostic ne modifie rien.`);
+            return existingId;
+        }
+    } catch (checkErr) {
+        console.error('⚠️ AYA INDEX: duplicate check failed', checkErr);
+        // En cas d'erreur de lecture, on s'abstient d'écrire pour éviter les doublons.
+        return null;
+    }
+
+    // 2. Construire l'entrée indexée
+    const now = new Date();
+    const entityId = crypto.randomUUID();
+    const host = (() => {
+        try { return new URL(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`).hostname.replace(/^www\./, ''); }
+        catch { return targetUrl; }
+    })();
+    const cleanName = (input.name || '').trim();
+    const displayName = cleanName || host;
+    const sector = (() => {
+        const s = (input.sector || '').trim();
+        if (!s) return 'General';
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    })();
+
+    const record: AyaEntity = {
+        aya_entity_id: entityId,
+        legal_name: cleanName || displayName,
+        display_name: displayName,
+        entity_type: 'company',
+        country_legal: resolveCountryISO(input.country || '', targetUrl),
+        sector_macro: sector,
+        website: targetUrl,
+        asr_score: typeof input.score === 'number' ? input.score : 0,
+        created_at: now.toISOString(),
+        last_update: now.toISOString(),
+        valid_until: now.toISOString(), // non pertinent pour une entrée indexée (payment_completed=false)
+        data_origin: 'AYO-SCAN',
+        payment_completed: false, // INDEXÉE, pas certifiée
+        contact_email: input.contactEmail || undefined,
+        asr_payload: { version: '1.0', data: {}, signature: { hash: '', public_key: '' } },
+        recommendability: {
+            machine_readable: true,
+            status: 'fresh',
+            freshness_score: 1.0,
+            priority_level: 'normal',
+            source_url: `https://ai-visionary.xyz/aya/e/${entityId}`,
+        },
+    };
+
+    try {
+        await db.updateEntityRecommendability(entityId, record);
+        console.log(`✅ AYA INDEX: Entité indexée depuis diagnostic — ${entityId} (${host}, score ${record.asr_score})`);
+        return entityId;
+    } catch (err) {
+        console.error(`❌ AYA INDEX: échec sauvegarde ${entityId}`, err);
+        return null;
+    }
+}
+
 /**
  * Fetch all active entities from the Supabase database
  */

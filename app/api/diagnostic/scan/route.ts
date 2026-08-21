@@ -44,12 +44,29 @@ export async function POST(req: NextRequest) {
         }
       };
 
-      // Filet de securite de bout en bout : le pipeline peut se bloquer ailleurs que dans le
-      // LLM (Puppeteer, Postgres), donc on garantit une reponse au visiteur quoi qu'il arrive.
+      // Battement de coeur SSE. Sans le moindre octet pendant ~45 s, les proxys et les
+      // reseaux mobiles coupent la connexion : le visiteur reste devant un ecran fige et
+      // le scan ne rend jamais son score (cas denimtearsofficial.fr, 3 aout 2026, coupe
+      // deux fois a 48 s). Un commentaire toutes les 10 s garde le tuyau ouvert pendant
+      // les phases longues (Puppeteer sur les SPA, appels LLM). Le client ignore toute
+      // ligne qui ne commence pas par "data: ", c'est donc transparent pour lui.
+      const heartbeat = setInterval(() => {
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(": keepalive\n\n"));
+        } catch {
+          closed = true;
+        }
+      }, 10000);
+
+      // Filet de securite de bout en bout : le keepalive garde le tuyau ouvert, il ne garantit
+      // pas un resultat. Le pipeline peut se bloquer ailleurs que dans le LLM (Puppeteer,
+      // Postgres), donc on rend la main au visiteur quoi qu'il arrive.
       const deadline = setTimeout(() => {
         if (closed) return;
         console.error(`[scan] deadline ${SCAN_DEADLINE_MS}ms depassee pour ${url}, flux ferme sans score`);
         send({ phase: 'error', message: 'scan_timeout', timeoutMs: SCAN_DEADLINE_MS });
+        clearInterval(heartbeat);
         closed = true;
         try { controller.close(); } catch { /* deja ferme */ }
       }, SCAN_DEADLINE_MS);
@@ -148,6 +165,24 @@ export async function POST(req: NextRequest) {
           console.error('[scan] Failed to save analysis:', e instanceof Error ? e.message : e);
         }
 
+        // Inscription automatique dans AYA : toute entreprise diagnostiquée entre au
+        // registre comme entrée INDEXÉE (non certifiée). Dédup par URL + non bloquant.
+        try {
+          const { indexEntityFromDiagnostic } = await import('@/lib/aya/registry');
+          const id = extract.fields.identite;
+          await indexEntityFromDiagnostic({
+            url: fetchResult.url,
+            score: score.total,
+            name: id.legal_name?.value || id.name?.value || '',
+            country: id.country?.value || '',
+            sector: extract.source.scan.industry_keywords?.[0] || '',
+            contactEmail: (id.contact_email?.value && id.contact_email.value !== 'contact_form')
+              ? id.contact_email.value : undefined,
+          });
+        } catch (e) {
+          console.error('[scan] AYA index failed:', e instanceof Error ? e.message : e);
+        }
+
         // Phase 5: Final summary
         send({
           phase: 'complete',
@@ -162,6 +197,7 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         send({ phase: 'error', message: err instanceof Error ? err.message : 'Unknown error' });
       } finally {
+        clearInterval(heartbeat);
         clearTimeout(deadline);
         closed = true;
         try { controller.close(); } catch { /* deja ferme par la deconnexion du client */ }
@@ -174,6 +210,8 @@ export async function POST(req: NextRequest) {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
+      // Interdit tout tampon intermediaire : chaque evenement part immediatement.
+      'X-Accel-Buffering': 'no',
     },
   });
 }
