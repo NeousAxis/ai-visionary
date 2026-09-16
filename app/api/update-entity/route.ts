@@ -10,6 +10,7 @@ import { verifyUpdateToken } from '@/lib/update-token';
 import { formDataToAyoExtract } from '@/lib/form-to-extract';
 import { sanitizeExtract } from '@/lib/ayo-generators';
 import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
+import { normalizeCountryCode } from '@/lib/aya/country-iso';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -194,9 +195,7 @@ export async function POST(req: NextRequest) {
             display_name: displayName,
             legal_name: legalName,
             sector_macro: sector,
-            country_legal: typeof country === 'string' && country.length === 2
-                ? country.toUpperCase()
-                : entity.country_legal,
+            country_legal: normalizeCountryCode(country) ?? entity.country_legal,
             asr_payload: updatedPayload,
             asr_score: newScore,
             last_update: new Date().toISOString(),

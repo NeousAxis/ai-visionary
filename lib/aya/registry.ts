@@ -1,6 +1,7 @@
 
 import { db } from '../db';
 import { AyaEntity } from './schema';
+import { normalizeCountryCode } from './country-iso';
 import crypto from 'crypto';
 
 /**
@@ -113,31 +114,18 @@ export async function registerOrUpdateEntity(
     return entityId;
 }
 
-// ccTLD -> ISO country (couverture des suffixes les plus courants ; le cron qualité affine ensuite)
+// ccTLD -> ISO country (couverture des suffixes les plus courants ; le cron qualité affine ensuite).
+// Ni .io ni .eu : le premier est un suffixe générique, le second n'est pas un pays.
 const CCTLD_COUNTRY: Record<string, string> = {
     ch: 'CH', fr: 'FR', de: 'DE', uk: 'GB', be: 'BE', nl: 'NL', it: 'IT', es: 'ES',
     at: 'AT', lu: 'LU', us: 'US', ca: 'CA', pt: 'PT', se: 'SE', no: 'NO', dk: 'DK',
-    fi: 'FI', ie: 'IE', pl: 'PL', cz: 'CZ', io: 'GB', eu: 'EU',
-};
-
-// Noms de pays usuels -> ISO (pour les valeurs textuelles renvoyées par le scan)
-const COUNTRY_NAME_ISO: Record<string, string> = {
-    switzerland: 'CH', suisse: 'CH', schweiz: 'CH', svizzera: 'CH',
-    france: 'FR', germany: 'DE', deutschland: 'DE', allemagne: 'DE',
-    'united kingdom': 'GB', uk: 'GB', england: 'GB', 'royaume-uni': 'GB',
-    belgium: 'BE', belgique: 'BE', netherlands: 'NL', 'pays-bas': 'NL',
-    italy: 'IT', italie: 'IT', spain: 'ES', espagne: 'ES', austria: 'AT', autriche: 'AT',
-    luxembourg: 'LU', 'united states': 'US', usa: 'US', 'états-unis': 'US', canada: 'CA',
+    fi: 'FI', ie: 'IE', pl: 'PL', cz: 'CZ',
 };
 
 /** Déduit un code ISO pays depuis la valeur scannée (texte) ou, à défaut, le ccTLD du domaine. */
 function resolveCountryISO(rawCountry: string, url: string): string {
-    const c = (rawCountry || '').trim();
-    if (/^[A-Za-z]{2}$/.test(c)) return c.toUpperCase();
-    if (c) {
-        const iso = COUNTRY_NAME_ISO[c.toLowerCase()];
-        if (iso) return iso;
-    }
+    const iso = normalizeCountryCode(rawCountry);
+    if (iso) return iso;
     try {
         const host = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
         const tld = host.split('.').pop()?.toLowerCase() || '';

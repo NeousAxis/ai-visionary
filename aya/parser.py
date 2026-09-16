@@ -8,6 +8,8 @@ from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
 
+from country_iso import to_iso_country
+
 KEY_PAGES = [
     "/about",
     "/a-propos",
@@ -380,24 +382,6 @@ def detect_sector(text: str, jsonld_payloads: list, domain: str) -> dict:
     }
 
 
-COUNTRY_NAME_TO_ISO = {
-    # English
-    "united states": "US", "usa": "US", "us": "US", "u.s.": "US", "u.s.a.": "US", "america": "US",
-    "united kingdom": "GB", "uk": "GB", "england": "GB", "great britain": "GB",
-    "switzerland": "CH", "suisse": "CH", "schweiz": "CH", "svizzera": "CH",
-    "france": "FR", "germany": "DE", "deutschland": "DE", "italy": "IT", "italia": "IT",
-    "spain": "ES", "españa": "ES", "netherlands": "NL", "nederland": "NL", "holland": "NL",
-    "belgium": "BE", "belgique": "BE", "austria": "AT", "österreich": "AT",
-    "portugal": "PT", "sweden": "SE", "norway": "NO", "denmark": "DK", "finland": "FI",
-    "poland": "PL", "czech republic": "CZ", "ireland": "IE", "luxembourg": "LU",
-    "japan": "JP", "south korea": "KR", "china": "CN", "australia": "AU",
-    "new zealand": "NZ", "canada": "CA", "brazil": "BR", "brasil": "BR",
-    "mexico": "MX", "india": "IN", "russia": "RU", "south africa": "ZA",
-    "singapore": "SG", "hong kong": "HK", "taiwan": "TW", "israel": "IL",
-    "united arab emirates": "AE", "uae": "AE",
-}
-
-
 def _coerce_to_str(raw) -> str:
     """
     Coerce any value (str, dict, list, None, int...) to a clean string.
@@ -431,15 +415,12 @@ def _coerce_to_str(raw) -> str:
 
 
 def normalize_country(raw) -> str:
-    """Normalize a country name or code to ISO 3166-1 alpha-2."""
-    cleaned = _coerce_to_str(raw)
-    if not cleaned:
-        return ""
-    # Already a 2-letter ISO code
-    if len(cleaned) == 2 and cleaned.isalpha():
-        return cleaned.upper()
-    # Lookup by name
-    return COUNTRY_NAME_TO_ISO.get(cleaned.lower(), "")
+    """Normalize a country name or code to ISO 3166-1 alpha-2 ("" if unknown).
+
+    Strict validation lives in country_iso.py: the former `isalpha()` shortcut
+    let values such as "日本" or "РФ" through as if they were ISO codes.
+    """
+    return to_iso_country(_coerce_to_str(raw)) or ""
 
 
 def detect_country_from_hreflang(meta: dict) -> str:
@@ -464,8 +445,8 @@ def detect_country_from_hreflang(meta: dict) -> str:
         # Format: lang-REGION  (e.g. fr-CH, de-DE, en-US)
         if "-" in val:
             parts = val.split("-")
-            if len(parts) >= 2 and len(parts[-1]) == 2:
-                region = parts[-1].upper()
+            region = to_iso_country(parts[-1]) if len(parts[-1]) == 2 else None
+            if region:  # skips non-country regions such as "en-EU"
                 region_counts[region] = region_counts.get(region, 0) + 1
 
     if not region_counts:
