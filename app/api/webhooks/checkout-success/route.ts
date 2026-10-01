@@ -14,6 +14,7 @@ import { computeAioScore } from '@/lib/aio-score-engine';
 import {
     sanitizeBusinessType, sanitizeExtract,
 } from '@/lib/ayo-generators';
+import { normalizeCountryCode } from '@/lib/aya/country-iso';
 // 🤖 Agent Architecte — génération + QC des fichiers PRO
 import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
 
@@ -648,15 +649,8 @@ export async function POST(req: Request) {
             || lowerEName.startsWith("association ") || lowerEName.includes("asso ")
             || lowerEUrl.includes(".org");
         const resolvedEntityType = isAssociationType ? 'association' as const : 'company' as const;
-        // Map country name to ISO code
-        const countryIsoMap: Record<string, string> = {
-            'france': 'FR', 'suisse': 'CH', 'switzerland': 'CH', 'belgique': 'BE', 'belgium': 'BE',
-            'allemagne': 'DE', 'germany': 'DE', 'italie': 'IT', 'italy': 'IT', 'espagne': 'ES', 'spain': 'ES',
-            'luxembourg': 'LU', 'canada': 'CA', 'états-unis': 'US', 'united states': 'US', 'usa': 'US',
-            'royaume-uni': 'GB', 'united kingdom': 'GB', 'uk': 'GB', 'maroc': 'MA', 'tunisie': 'TN',
-            'sénégal': 'SN', 'côte d\'ivoire': 'CI', 'cameroun': 'CM'
-        };
-        const resolvedCountryLegal = (entityCountry.length === 2 ? entityCountry.toUpperCase() : countryIsoMap[entityCountry.toLowerCase()] || entityCountry.toUpperCase().slice(0, 2)) || 'XX';
+        // Map country name to ISO code (strict: unknown values become 'XX', never a guessed code)
+        const resolvedCountryLegal = normalizeCountryCode(entityCountry) ?? 'XX';
         const resolvedSector = sanitizeBusinessType(entityBusinessType) || ext.offre?.services?.value?.[0] || 'General';
 
         let ayaId = "pending";

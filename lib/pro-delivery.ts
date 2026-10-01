@@ -13,14 +13,7 @@ import { sendEmail } from '@/lib/mailer';
 import { sanitizeBusinessType, sanitizeExtract } from '@/lib/ayo-generators';
 import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
-
-const COUNTRY_ISO: Record<string, string> = {
-  france: 'FR', suisse: 'CH', switzerland: 'CH', belgique: 'BE', belgium: 'BE',
-  allemagne: 'DE', germany: 'DE', italie: 'IT', italy: 'IT', espagne: 'ES', spain: 'ES',
-  luxembourg: 'LU', canada: 'CA', 'états-unis': 'US', 'united states': 'US', usa: 'US',
-  'royaume-uni': 'GB', 'united kingdom': 'GB', uk: 'GB', maroc: 'MA', tunisie: 'TN',
-  'sénégal': 'SN', "côte d'ivoire": 'CI', cameroun: 'CM',
-};
+import { normalizeCountryCode } from '@/lib/aya/country-iso';
 
 export interface FreeDeliveryInput {
   analysisData: {
@@ -67,11 +60,7 @@ export async function deliverProPackFree(
     lowerEBT.includes('nonprofit') || lowerEName.startsWith('association ') ||
     lowerEName.includes('asso ') || lowerEUrl.includes('.org');
   const entityType = isAssociation ? ('association' as const) : ('company' as const);
-  const countryLegal =
-    (entityCountry.length === 2
-      ? entityCountry.toUpperCase()
-      : COUNTRY_ISO[entityCountry.toLowerCase()] ||
-        entityCountry.toUpperCase().slice(0, 2)) || 'XX';
+  const countryLegal = normalizeCountryCode(entityCountry) ?? 'XX';
   const sectorMacro =
     sanitizeBusinessType(entityBusinessType) ||
     ext.offre?.services?.value?.[0] ||
