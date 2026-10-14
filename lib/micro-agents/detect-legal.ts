@@ -1,5 +1,6 @@
 // lib/micro-agents/detect-legal.ts — Extract legal/compliance info via focused LLM
 
+import type { AgentRunOpts } from './llm-agent';
 import type { LegalResult, Quality } from './types';
 import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
@@ -18,10 +19,15 @@ IMPORTANT: A link in the footer to "CGV", "Mentions légales", "Politique de con
 Return ONLY JSON: {"policies": [], "frameworks": [], "certifications": [], "urls": []}
 Extract ONLY what is explicitly mentioned. Do NOT invent.`;
 
-export async function detectLegal(content: string): Promise<LegalResult> {
+/**
+ * `opts` permet a la passe de secours du scan de rejouer l'agent avec un seul essai et un
+ * plafond de temps reduit : au rattrapage il reste peu de budget, mieux vaut un essai
+ * franc qu'une serie qui deborde.
+ */
+export async function detectLegal(content: string, opts: AgentRunOpts = {}): Promise<LegalResult> {
   try {
     console.log(`[detect-legal] Input length: ${content.length}`);
-    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 800 });
+    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 800, ...opts });
     console.log(`[detect-legal] Raw response: ${raw.substring(0, 300)}`);
     const data = parseJson<{ policies?: string[]; frameworks?: string[]; certifications?: string[]; urls?: string[] }>(raw);
     if (!data) return { policies: [], frameworks: [], certifications: [], urls: [], q: 0 };

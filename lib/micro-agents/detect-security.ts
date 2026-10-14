@@ -1,5 +1,6 @@
 // lib/micro-agents/detect-security.ts — Extract security info (headers deterministic + content LLM)
 
+import type { AgentRunOpts } from './llm-agent';
 import type { SecurityResult, Quality } from './types';
 import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
@@ -22,7 +23,12 @@ const PROMPT = `You are a security measure extractor. From the website content b
 Return ONLY valid JSON: {"measures": ["TLS 1.3", "2FA", "WAF"]}
 Extract ONLY what is explicitly mentioned. Do NOT invent. No explanation.`;
 
-export async function detectSecurity(content: string, headers: Record<string, string>): Promise<SecurityResult> {
+/**
+ * `opts` permet a la passe de secours du scan de rejouer l'agent avec un seul essai et un
+ * plafond de temps reduit : au rattrapage il reste peu de budget, mieux vaut un essai
+ * franc qu'une serie qui deborde.
+ */
+export async function detectSecurity(content: string, headers: Record<string, string>, opts: AgentRunOpts = {}): Promise<SecurityResult> {
   const measures: string[] = [];
 
   // Deterministic: check HTTP headers
@@ -33,7 +39,7 @@ export async function detectSecurity(content: string, headers: Record<string, st
 
   // LLM: extract security mentions from content
   try {
-    const raw = await llmExtract(PROMPT, content, 8000, { maxTokens: 800 });
+    const raw = await llmExtract(PROMPT, content, 8000, { maxTokens: 800, ...opts });
     const data = parseJson<{ measures?: string[] }>(raw);
     if (data?.measures) {
       const seen = new Set(measures.map(m => m.toLowerCase()));

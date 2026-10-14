@@ -1,5 +1,6 @@
 // lib/micro-agents/detect-contact.ts — Extract contact info via focused LLM
 
+import type { AgentRunOpts } from './llm-agent';
 import type { ContactResult, Quality, JsonLdResult } from './types';
 import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
@@ -20,9 +21,14 @@ function stripPhone(s: string): string {
   return s.replace(/[^\d]/g, '');
 }
 
-export async function detectContact(content: string, jsonld?: JsonLdResult): Promise<ContactResult> {
+/**
+ * `opts` permet a la passe de secours du scan de rejouer l'agent avec un seul essai et un
+ * plafond de temps reduit : au rattrapage il reste peu de budget, mieux vaut un essai
+ * franc qu'une serie qui deborde.
+ */
+export async function detectContact(content: string, jsonld?: JsonLdResult, opts: AgentRunOpts = {}): Promise<ContactResult> {
   try {
-    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 300 });
+    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 300, ...opts });
     const data = parseJson<{ email?: string | null; phone?: string | null; hasContactForm?: boolean }>(raw);
     // Even if the LLM returns nothing, fall through so the JSON-LD fallback below can apply.
     let email = data?.email || null;

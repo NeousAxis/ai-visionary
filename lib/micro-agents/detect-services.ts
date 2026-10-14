@@ -1,5 +1,6 @@
 // lib/micro-agents/detect-services.ts — Extract services/products/audience/use-cases via focused LLM
 
+import type { AgentRunOpts } from './llm-agent';
 import type { ServicesResult, Quality } from './types';
 import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
@@ -15,9 +16,14 @@ Extract:
 Return ONLY JSON: {"services":[],"products":[],"target_audience":"","use_cases":[],"pricing":""}
 Extract ONLY what is explicitly mentioned. Do NOT invent.`;
 
-export async function detectServices(content: string): Promise<ServicesResult> {
+/**
+ * `opts` permet a la passe de secours du scan de rejouer l'agent avec un seul essai et un
+ * plafond de temps reduit : au rattrapage il reste peu de budget, mieux vaut un essai
+ * franc qu'une serie qui deborde.
+ */
+export async function detectServices(content: string, opts: AgentRunOpts = {}): Promise<ServicesResult> {
   try {
-    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 2000 });
+    const raw = await llmExtract(PROMPT, content, 10000, { maxTokens: 2000, ...opts });
     const data = parseJson<{
       services?: string[];
       products?: string[];

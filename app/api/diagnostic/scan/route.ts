@@ -1,7 +1,7 @@
 // app/api/diagnostic/scan/route.ts — SSE endpoint for micro-agent scanning
 
 import { NextRequest } from 'next/server';
-import { runAllAgents, mergeAgentResultsToExtract } from '@/lib/micro-agents/orchestrator';
+import { runAllAgents, mergeAgentResultsToExtract, retryFailedAgents } from '@/lib/micro-agents/orchestrator';
 import { computeAioScore } from '@/lib/aio-score-engine';
 import { db } from '@/lib/db';
 import type { AgentEvent } from '@/lib/micro-agents/types';
@@ -15,6 +15,26 @@ export const maxDuration = 60; // Puppeteer SPA rendering can take up to 15s
  * keepalive, mais aucun score n'arrivait jamais. Budget nominal : environ 18 s.
  */
 const SCAN_DEADLINE_MS = Number(process.env.SCAN_DEADLINE_MS || 150_000);
+
+/**
+ * Reglages de la passe de secours du scan.
+ *
+ * RESCUE_PAUSE_MS : le temps laisse a la vague de latence pour retomber. Mesure du
+ * 26 aout 2026 : les memes six appels passent de 3 s a 16 s puis reviennent a 3 s d'un
+ * essai a l'autre. Rejouer sans attendre, c'est rejouer dans le creux.
+ * RESCUE_RESERVE_MS : ce qu'on garde pour le calcul du score, l'ecriture en base et
+ * l'inscription au registre, une fois le rattrapage fini.
+ * RESCUE_MIN_ATTEMPT_MS : sous ce plancher, un essai n'a aucune chance d'aboutir ; on
+ * rend la main plutot que de faire patienter le visiteur pour rien.
+ */
+const RESCUE_PAUSE_MS = Number(process.env.SCAN_RESCUE_PAUSE_MS || 4_000);
+const RESCUE_RESERVE_MS = 10_000;
+/**
+ * Reserve gardee pour le rejeu du merge quand son extraction LLM avait deja repondu :
+ * un appel qui vient de passer coute quelques secondes, pas un plafond entier.
+ */
+const MERGE_REPLAY_RESERVE_MS = 30_000;
+const RESCUE_MIN_ATTEMPT_MS = 8_000;
 
 export async function POST(req: NextRequest) {
   const { url, email, htmlContent } = await req.json();
@@ -97,20 +117,72 @@ export async function POST(req: NextRequest) {
         // Un agent qui n'a pas repondu, ce n'est pas "ce site n'a rien" : c'est une panne.
         // Publier le score dans ce cas revient a sous-estimer le site, a l'ecrire en base et
         // a l'inscrire au registre AYA avec un chiffre faux. On refuse.
-        const degraded: string[] = events.filter((e) => e.status === 'error').map((e) => e.agent);
-        send({ phase: 'merge', status: 'running' });
-        const extract = await mergeAgentResultsToExtract(url, fetchResult, results, (a) => {
-          if (!degraded.includes(a)) degraded.push(a);
-        }, {
-          // Plus de 50 s deja consommees = provider en stall generalise : le retry de la
-          // phase merge (35 s de plus) ne sauverait rien et ferait crever le plafond des
-          // 150 s. Budget pire cas ramene sous SCAN_DEADLINE_MS.
-          llmRetries: Date.now() - startTime > 50_000 ? 0 : 1,
-        });
-        send({ phase: 'merge', status: 'done' });
+        // La phase merge porte elle aussi une extraction LLM (process/indicateurs). Elle est
+        // rejouable telle quelle, d'ou la closure : la passe de secours la relance a
+        // l'identique une fois les agents repares.
+        // llmRetries: 0 — aucune relance sur place. Une extraction muette part en secours
+        // apres une pause, la ou un retry colle a la tentative precedente retombe dans la
+        // meme vague de latence tout en mangeant une seconde tranche du budget.
+        const runMerge = async (llmTimeoutMs?: number) => {
+          const failures: string[] = [];
+          send({ phase: 'merge', status: 'running' });
+          const merged = await mergeAgentResultsToExtract(url, fetchResult, results, (a) => {
+            if (!failures.includes(a)) failures.push(a);
+          }, { llmRetries: 0, llmTimeoutMs });
+          send({ phase: 'merge', status: 'done' });
+          return { merged, failures };
+        };
+
+        let degraded: string[] = events.filter((e) => e.status === 'error').map((e) => e.agent);
+        let { merged: extract, failures } = await runMerge();
+        for (const f of failures) if (!degraded.includes(f)) degraded.push(f);
+
+        // Passe de secours. Le refus de publier un score ampute est la bonne regle, mais
+        // sans seconde chance elle rendait le visiteur a un ecran vide des qu'Infomaniak
+        // ralentissait (sondes des 21, 24 et 25 aout 2026, toujours sur detect-services
+        // puis process/indicateurs). Ces vagues durent quelques secondes : une pause puis
+        // un essai franc les traverse, et le budget du scan a de quoi le payer.
+        if (degraded.length > 0) {
+          const elapsed = Date.now() - startTime;
+          const budgetLeft = SCAN_DEADLINE_MS - elapsed - RESCUE_RESERVE_MS;
+          if (budgetLeft >= RESCUE_PAUSE_MS + RESCUE_MIN_ATTEMPT_MS) {
+            console.warn(`[scan] passe de secours pour ${degraded.join(', ')} sur ${fetchResult.url} — ${Math.round(budgetLeft / 1000)}s de budget restant`);
+            await new Promise((r) => setTimeout(r, RESCUE_PAUSE_MS));
+            // Repartition du budget entre le rattrapage des agents et le rejeu du merge.
+            // Quand process/indicateurs a repondu du premier coup, le merge rejoue n'a
+            // qu'a refaire un appel deja connu pour passer : une reserve suffit, et tout
+            // le reste va a l'agent en panne, qui est justement le plus lent a repondre.
+            // Quand c'est lui qui est tombe, les deux etapes ont un vrai cout LLM et se
+            // partagent le budget a parts egales.
+            const agentFailures = degraded.filter((a) => a !== 'process/indicators');
+            const rescueBudget = budgetLeft - RESCUE_PAUSE_MS;
+            const perStage = degraded.length > agentFailures.length
+              ? Math.floor(rescueBudget / 2)
+              : Math.max(RESCUE_MIN_ATTEMPT_MS, rescueBudget - MERGE_REPLAY_RESERVE_MS);
+            let stillFailed = agentFailures.length > 0
+              ? await retryFailedAgents(url, fetchResult, results, agentFailures,
+                  (event: AgentEvent) => send({ phase: 'agent', ...event }),
+                  { timeoutMs: perStage })
+              : [];
+            // Le merge est rejoue des que le rattrapage n'a laisse aucun agent au tapis :
+            // c'est lui qui reconstruit l'extract avec les resultats repares, et c'est lui
+            // aussi qui redonne sa chance a process/indicateurs.
+            if (stillFailed.length === 0) {
+              const second = await runMerge(perStage);
+              extract = second.merged;
+              stillFailed = second.failures;
+            }
+            if (stillFailed.length === 0) {
+              console.log(`[scan] passe de secours reussie pour ${fetchResult.url} — diagnostic complet en ${Date.now() - startTime}ms`);
+            }
+            degraded = stillFailed;
+          } else {
+            console.error(`[scan] budget epuise apres ${elapsed}ms pour ${fetchResult.url} : pas de passe de secours possible.`);
+          }
+        }
 
         if (degraded.length > 0) {
-          console.error(`[scan] diagnostic INCOMPLET pour ${fetchResult.url} : ${degraded.join(', ')} sans reponse. Aucun score publie, aucune ecriture en base ni au registre.`);
+          console.error(`[scan] diagnostic INCOMPLET pour ${fetchResult.url} : ${degraded.join(', ')} sans reponse, rattrapage compris. Aucun score publie, aucune ecriture en base ni au registre.`);
           send({ phase: 'error', message: 'scan_incomplete', agents: degraded });
           return; // le finally ferme le flux
         }

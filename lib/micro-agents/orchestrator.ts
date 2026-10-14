@@ -416,6 +416,95 @@ export async function runAllAgents(
   return { fetchResult, results, events };
 }
 
+/** Agents que la passe de secours sait rejouer : ceux dont la panne vient d'un appel LLM. */
+const REPLAYABLE_AGENTS = new Set<string>([
+  'detect-contact', 'detect-location', 'detect-services',
+  'detect-legal', 'detect-security', 'detect-pedagogy',
+]);
+
+/**
+ * Passe de secours : rejoue UNIQUEMENT les agents tombes en panne.
+ *
+ * Pourquoi elle existe. Depuis le 19 aout 2026 un agent muet ne peut plus passer pour
+ * "ce site n'a rien" : le scan refuse de publier un score sous-estime. La regle est juste,
+ * mais elle etait sans issue de secours — la moindre vague de latence chez Infomaniak
+ * (mesure du 26 aout : les memes appels passent de 3 s a 16 s, avec des 502 immediats
+ * sporadiques) renvoyait le visiteur a un ecran vide. Les sondes du 21, 24 et 25 aout sont
+ * toutes tombees sur ce meme mur, toujours sur detect-services puis process/indicateurs.
+ *
+ * Ces vagues sont breves. Une pause courte puis un second essai franc les traverse, la ou
+ * un retry colle a la premiere tentative retombe dans le meme trou. Les agents qui avaient
+ * repondu ne sont pas rejoues : leur resultat est deja acquis et le budget est compte.
+ *
+ * Retourne la liste des agents toujours en panne apres le rattrapage.
+ */
+export async function retryFailedAgents(
+  url: string,
+  fetchResult: FetchResult,
+  results: AllAgentResults,
+  failed: string[],
+  onEvent?: (event: AgentEvent) => void,
+  opts: { timeoutMs?: number } = {},
+): Promise<string[]> {
+  const { renderedHtml, textContent, headers } = fetchResult;
+  const enrichedContent = buildEnrichedContent(renderedHtml, textContent);
+  // Un seul essai : au rattrapage le budget restant ne permet pas une serie.
+  const runOpts = { retries: 0, timeoutMs: opts.timeoutMs };
+  const stillFailed: string[] = [];
+  const jobs: Promise<void>[] = [];
+
+  const attempt = <T,>(name: AgentName, fn: () => Promise<T>, assign: (v: T) => void) => {
+    if (!failed.includes(name)) return;
+    onEvent?.({ agent: name, status: 'running', data: null, durationMs: 0 });
+    jobs.push((async () => {
+      const started = Date.now();
+      try {
+        const value = await fn();
+        assign(value);
+        const ms = Date.now() - started;
+        console.log(`[rescue] ${name}: recupere en ${ms}ms`);
+        onEvent?.({ agent: name, status: 'done', data: value as any, durationMs: ms });
+      } catch (err) {
+        const ms = Date.now() - started;
+        const detail = err instanceof Error ? err.message : String(err);
+        stillFailed.push(name);
+        console.error(`[rescue] ${name}: toujours en panne apres rattrapage — ${detail}`);
+        onEvent?.({ agent: name, status: 'error', data: null, durationMs: ms, error: detail });
+      }
+    })());
+  };
+
+  attempt('detect-services', () => detectServices(textContent, runOpts), (v) => { results.services = v; });
+  attempt('detect-legal', async () => {
+    const r = await detectLegal(enrichedContent, runOpts);
+    // Meme enrichissement qu'au premier passage : sans lui, un site rattrape perdrait les
+    // mentions legales trouvees par regex et sortirait avec un bloc conformite plus pauvre.
+    const deterministic = detectLegalLinksDeterministic([fetchResult.rawHtml, renderedHtml]);
+    r.policies = unionStrings(r.policies, deterministic.policies);
+    r.frameworks = unionStrings(r.frameworks, deterministic.frameworks);
+    if (r.policies.length === 0 && r.frameworks.length === 0) {
+      const probed = await detectLegalPages(url);
+      r.policies = unionStrings(r.policies, probed.policies);
+      r.frameworks = unionStrings(r.frameworks, probed.frameworks);
+    }
+    if ((r.policies.length + r.frameworks.length) > 0 && r.q === 0) r.q = 0.5;
+    return r;
+  }, (v) => { results.legal = v; });
+  attempt('detect-contact', () => detectContact(enrichedContent, results.jsonld, runOpts), (v) => { results.contact = v; });
+  attempt('detect-location', () => detectLocation(enrichedContent, results.jsonld, fetchResult.url, runOpts), (v) => { results.location = v; });
+  attempt('detect-security', () => detectSecurity(textContent, headers, runOpts), (v) => { results.security = v; });
+  attempt('detect-pedagogy', () => detectPedagogy(renderedHtml, textContent, url, runOpts), (v) => { results.pedagogy = v; });
+
+  await Promise.all(jobs);
+
+  // Une panne hors LLM (jsonld, social, site injoignable) n'est pas rejouable : elle reste
+  // comptee comme telle, sinon le scan publierait un score ampute sans le dire.
+  for (const name of failed) {
+    if (!REPLAYABLE_AGENTS.has(name)) stillFailed.push(name);
+  }
+  return stillFailed;
+}
+
 /**
  * Merge all agent results into AyoExtract format.
  * Compatible with computeAioScore() and all generators.
@@ -437,6 +526,12 @@ export async function mergeAgentResultsToExtract(
      * chance et ferait depasser SCAN_DEADLINE_MS (150 s).
      */
     llmRetries?: number;
+    /**
+     * Plafond de temps accorde a l'extraction process/indicateurs. La passe de secours le
+     * releve : au rattrapage il reste du budget, et le refuser reviendrait a rejouer sous
+     * la meme contrainte que la tentative qui vient d'echouer.
+     */
+    llmTimeoutMs?: number;
   } = {},
 ): Promise<AyoExtract> {
   const { contact, services, legal, location, security, jsonld, social } = results;
@@ -536,14 +631,14 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
     const [raw, kwRaw] = await Promise.all([
       // Porte les blocs 3 (processus) et 5 (indicateurs), soit 35 points : elle merite un
       // second essai, et son echec rend le diagnostic incomplet.
-      llmExtract(processPrompt, enrichedContent, 10000, { retries: opts.llmRetries ?? 1, maxTokens: 1000 }).catch((e) => {
+      llmExtract(processPrompt, enrichedContent, 10000, { retries: opts.llmRetries ?? 1, maxTokens: 1000, timeoutMs: opts.llmTimeoutMs }).catch((e) => {
         console.error('[agent] process/indicators: ECHEC —', e instanceof Error ? e.message : e);
         onDegraded?.('process/indicators');
         return '{}';
       }),
       // Sert uniquement l'appariement concurrentiel, aucun point de score : son absence
       // ne rend pas le diagnostic incomplet.
-      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0, maxTokens: 400 }).catch(() => '[]'),
+      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0, maxTokens: 400, timeoutMs: opts.llmTimeoutMs }).catch(() => '[]'),
     ]);
 
     const data = parseJson<ProcessData>(raw);

@@ -88,7 +88,7 @@ export interface AgentEvent {
 
 // --- Orchestrator merged output ---
 
-export type SourceType = 'ssr' | 'spa_puppeteer' | 'spa_jina';
+export type SourceType = 'ssr' | 'spa_puppeteer' | 'spa_degraded';
 
 export interface FetchResult {
   url: string;
