@@ -12,7 +12,7 @@ Regles :
   traitee n'est jamais relue (relancer le script reprend ou il s'est arrete) ;
 - un site que le bot n'a pas vraiment pu lire garde son score actuel : injoignable,
   mur anti-bot, domaine en parking, page sans texte, redirection vers un autre
-  site (voir page_check.py) ;
+  site, page par defaut ou site en construction (voir page_check.py) ;
 - si le reseau du VPS tombe (presque tout echoue sans reponse HTTP), le run
   s'arrete sans enregistrer ces faux echecs, PM2 le relance plus tard ;
 - seules les lignes encore d'origine WDC et non payantes sont modifiees ;
@@ -83,7 +83,7 @@ def ensure_table(conn):
                 entity_id    uuid PRIMARY KEY,
                 domain       text NOT NULL,
                 data_origin  text NOT NULL,
-                status       text NOT NULL,  -- read | unreachable | blocked | parked | no_text | error | skipped
+                status       text NOT NULL,  -- read | unreachable | blocked | parked | no_text | redirected | placeholder | error | skipped
                 http_status  int,
                 final_url    text,
                 score_before numeric(5,1),
@@ -178,7 +178,8 @@ def flush(conn_box: list, batch: list):
 
 STATUS_LABELS = {"read": "lus et notes", "unreachable": "injoignables", "blocked": "bloques (anti-bot)",
                  "parked": "domaines en parking", "no_text": "sans texte (JS)",
-                 "redirected": "rediriges vers un autre site", "error": "erreurs",
+                 "redirected": "rediriges vers un autre site",
+                 "placeholder": "pages par defaut ou en construction", "error": "erreurs",
                  "skipped": "ecartes (blocklist/adulte)"}
 
 
@@ -289,7 +290,8 @@ def main():
     signal.signal(signal.SIGTERM, on_signal)
     signal.signal(signal.SIGINT, on_signal)
 
-    counts = {"read": 0, "unreachable": 0, "blocked": 0, "parked": 0, "no_text": 0, "redirected": 0, "error": 0}
+    counts = {"read": 0, "unreachable": 0, "blocked": 0, "parked": 0, "no_text": 0, "redirected": 0,
+              "placeholder": 0, "error": 0}
     scores, batch = [], []
     t0, done, it = time.time(), 0, iter(todo)
 
@@ -300,7 +302,8 @@ def main():
         print(f"[{datetime.now():%m-%d %H:%M}] {done:,}/{total:,} · lus {counts['read']:,}"
               f" · injoignables {counts['unreachable']:,} · bloques {counts['blocked']:,}"
               f" · parking {counts['parked']:,} · sans texte {counts['no_text']:,}"
-              f" · rediriges {counts['redirected']:,} · erreurs {counts['error']:,}"
+              f" · rediriges {counts['redirected']:,} · en construction {counts['placeholder']:,}"
+              f" · erreurs {counts['error']:,}"
               f" · {rate:,.0f}/h · reste {eta:.1f} j · mediane {med:g}", flush=True)
 
     ex = ThreadPoolExecutor(max_workers=workers)

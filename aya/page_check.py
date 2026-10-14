@@ -20,15 +20,19 @@ BLOCKED = "blocked"           # 401/403/429, page anti-bot (Cloudflare, captcha.
 PARKED = "parked"             # domaine en parking ou a vendre : l'entreprise n'y est plus
 NO_TEXT = "no_text"           # coquille JavaScript : aucun texte visible sans executer JS
 REDIRECTED = "redirected"     # renvoie vers un autre site : ce n'est plus celui de l'entreprise
+PLACEHOLDER = "placeholder"   # page par defaut du serveur, site en construction ou hors ligne
 
 MIN_VISIBLE_TEXT = 40   # caracteres visibles en dessous desquels la page ne dit rien
 SHORT_PAGE = 1500       # les pages de parking et murs anti-bot sont courtes
+TINY_PAGE = 300         # page quasi vide : quelques mots suffisent alors a reconnaitre un refus
 
+# Memes regles que assessPageContent dans lib/micro-agents/html-fetcher.ts (scan AYO).
 PARKING_HOSTS = (
     "sedoparking.com", "sedo.com", "dan.com", "afternic.com", "hugedomains.com",
     "bodis.com", "parkingcrew.net", "above.com", "undeveloped.com", "domainmarket.com",
     "buydomains.com", "parklogic.com", "domainlore.com", "efty.com", "squadhelp.com",
     "atom.com", "brandbucket.com", "epik.com", "uni.domains", "spaceship.com",
+    "expireddomains.com",
 )
 PARKING_RE = re.compile(
     r"domain (name )?(is|may be) for sale|this domain (is|has been) (parked|registered)|"
@@ -37,17 +41,42 @@ PARKING_RE = re.compile(
     r"is for sale!?\s*$|inquire about this domain",
     re.I,
 )
-CHALLENGE_RE = re.compile(
+CHALLENGE_TEXT_RE = re.compile(
     r"just a moment|attention required|checking (if the site connection is secure|your browser)|"
-    r"ddos-guard|enable javascript and cookies to continue|sgcaptcha|captcha|"
-    r"access denied|request unsuccessful|incapsula incident|are you a (human|robot)|"
-    r"bot verification|verify you are human",
+    r"enable javascript and cookies to continue|performing security verification|"
+    r"verify(ing)? (that )?you are (a )?human|are you a (human|robot)|bot verification|"
+    r"pardon our interruption|request unsuccessful|incapsula incident|ddos-guard|"
+    r"(your|the) request is being verified|one moment,? please\.{0,3}\s*loader",
     re.I,
 )
+# Trop courants pour etre testes ailleurs que sur une page quasi vide. \bcaptcha\b laisse
+# passer le "protected by reCAPTCHA" (ou hCaptcha) d'un simple formulaire de contact.
+CHALLENGE_TINY_RE = re.compile(r"access denied|\bcaptcha\b|forbidden", re.I)
 LANDER_RE = re.compile(r"""location(\.href)?\s*=\s*["']/lander""", re.I)
-# murs anti-bot reconnaissables dans le HTML brut, meme servis en 200
-CHALLENGE_HTML_RE = re.compile(r"_cf_chl_opt|cf-browser-verification|/cdn-cgi/challenge-platform/|"
-                               r"sgcaptcha|incapsula incident|ddos-guard", re.I)
+# Murs anti-bot reconnaissables dans le HTML brut, meme servis en 200. Le script
+# /cdn-cgi/challenge-platform/ n'y figure pas : Cloudflare l'injecte aussi dans des pages
+# normales, il faisait refuser de petits sites parfaitement lisibles.
+CHALLENGE_HTML_RE = re.compile(r"_cf_chl_opt|cf-browser-verification|sgcaptcha|incapsula incident|ddos-guard",
+                               re.I)
+# Page par defaut d'un serveur, compte suspendu, site en construction : rien sur l'entreprise.
+# En plus de la version TS : compte inactif et site en panne (erreur PHP, base WordPress
+# injoignable), vus en 200 dans aya_bot_reads le 14.10.2026.
+PLACEHOLDER_RE = re.compile(
+    r"welcome to nginx|apache2? [\w ]{0,20}default page|^\s*index of /|account (has been )?suspended|"
+    r"account (is )?inactive|fatal error\s*:|failed to open stream|error establishing a database connection|"
+    r"this (account|site|website) (has been|is) suspended|default (web )?(site|server) page|future home of|"
+    r"(site|website|page|we are|we're)\s+(is\s+)?(coming soon|under construction)|under construction|"
+    r"launching soon|site (web )?en (cours de )?construction|(site|website) bient[oô]t en ligne|"
+    r"(site|website) (is )?(offline|down for maintenance)|(site|website) will be back soon|"
+    r"under maintenance|maintenance mode|site (web )?en maintenance",
+    re.I,
+)
+# Page qui ne s'affiche qu'avec JavaScript.
+JS_REQUIRED_RE = re.compile(
+    r"(enable|activate|turn on) javascript|javascript (is )?(required|disabled|must be enabled)|"
+    r"requires javascript|activ(ez|er) (le )?javascript|javascript aktivieren",
+    re.I,
+)
 # deuxiemes niveaux generiques (exemple.co.uk, exemple.com.au) pour retrouver le nom du site
 _GENERIC_SLD = {"co", "com", "org", "net", "ac", "gov", "edu", "ltd", "plc", "gob", "nom", "or", "ne"}
 
@@ -66,11 +95,12 @@ def _site_name(host: str) -> str:
 
 def same_site(requested_host: str, final_host: str) -> bool:
     """Vrai si la page finale appartient encore a l'entreprise : meme domaine,
-    sous-domaine, ou meme nom sous une autre extension (exemple.ch vers exemple.com)."""
+    sous-domaine, ou meme nom sous une autre extension (exemple.ch vers exemple.com). Les
+    tirets ne comptent pas : tecease.com vers tec-ease.com reste le meme site."""
     a, b = requested_host.lower().removeprefix("www."), final_host.lower().removeprefix("www.")
     if not a or not b or a == b or a.endswith("." + b) or b.endswith("." + a):
         return True
-    return _site_name(a) == _site_name(b)
+    return _site_name(a).replace("-", "") == _site_name(b).replace("-", "")
 
 
 def classify_homepage(home: dict, requested_url: str = "") -> tuple:
@@ -113,8 +143,12 @@ def classify_homepage(home: dict, requested_url: str = "") -> tuple:
         probe = f"{title} {text}"
         if PARKING_RE.search(probe):
             return PARKED, "parking page"
-        if CHALLENGE_RE.search(probe):
+        if CHALLENGE_TEXT_RE.search(probe) or (len(text) < TINY_PAGE and CHALLENGE_TINY_RE.search(probe)):
             return BLOCKED, "challenge page"
+        if PLACEHOLDER_RE.search(f"{title} {text[:400]}"):
+            return PLACEHOLDER, "default or placeholder page"
+        if len(text) < TINY_PAGE and JS_REQUIRED_RE.search(probe):
+            return NO_TEXT, "javascript required"
     if len(text) < MIN_VISIBLE_TEXT:
         return NO_TEXT, f"{len(text)} visible chars"
     return READABLE, ""
