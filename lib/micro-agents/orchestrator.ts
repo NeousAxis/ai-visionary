@@ -514,6 +514,43 @@ export async function retryFailedAgents(
   return stillFailed;
 }
 
+/** Au-dela, c'est une phrase descriptive et non une categorie : le premier mot-cle devient le secteur du registre. */
+const MAX_KEYWORD_CHARS = 60;
+
+/**
+ * Mots-cles d'industrie lus dans la reponse du modele, quelle qu'en soit la forme.
+ *
+ * llmJson impose un objet JSON (json_schema de type object). Le prompt demandait un tableau :
+ * le modele rendait {"industry_keywords":[...]} ou un objet dont les cles etaient les
+ * mots-cles, Array.isArray echouait et la liste restait vide (535 scans sur 535 dans le log
+ * PM2 au 14 octobre 2026). Le prompt demande desormais {"keywords":[...]} ; les autres formes
+ * restent lues si le modele s'en ecarte.
+ */
+export function readIndustryKeywords(parsed: unknown): string[] {
+  let list: unknown[] = [];
+  if (Array.isArray(parsed)) {
+    list = parsed;
+  } else if (parsed && typeof parsed === 'object') {
+    const obj = parsed as Record<string, unknown>;
+    const firstArray = Object.values(obj).find(Array.isArray);
+    if (Array.isArray(obj.keywords)) list = obj.keywords;
+    else if (firstArray) list = firstArray; // {"industry_keywords": [...]}
+    else list = Object.keys(obj); // {"mot-cle 1": ..., "mot-cle 2": ...}
+  }
+
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const k of list) {
+    if (typeof k !== 'string') continue;
+    const kw = k.replace(/\s+/g, ' ').trim();
+    if (kw.length <= 2 || kw.length > MAX_KEYWORD_CHARS || seen.has(kw.toLowerCase())) continue;
+    seen.add(kw.toLowerCase());
+    out.push(kw);
+    if (out.length === 10) break;
+  }
+  return out;
+}
+
 /**
  * Merge all agent results into AyoExtract format.
  * Compatible with computeAioScore() and all generators.
@@ -627,11 +664,13 @@ Do NOT invent.`;
   const keywordsPrompt = `You are a business classifier. Based on the company's products and services, generate 5-10 specific INDUSTRY KEYWORDS that describe what this company actually sells or does.
 Rules:
 - Keywords must be SPECIFIC product/service categories, not generic words
+- Each keyword is a short category of 1 to 4 words, never a sentence or a description
+- The FIRST keyword names the company's main activity
 - Think: what would you search for to find this company's competitors?
 - Use the SAME language as the site content
 - Examples: "couteaux de cuisine", "peripheriques informatiques", "logiciel comptable", "assurance auto"
 - Do NOT include: company name, locations, generic words like "innovation", "quality", "leader"
-Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
+Return ONLY a JSON object: {"keywords": ["keyword1", "keyword2", ...]}`;
 
   try {
     const { llmExtract, parseJson } = await import('./llm-agent');
@@ -647,7 +686,7 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
       }),
       // Sert uniquement l'appariement concurrentiel, aucun point de score : son absence
       // ne rend pas le diagnostic incomplet.
-      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0, maxTokens: 400, timeoutMs: opts.llmTimeoutMs }).catch(() => '[]'),
+      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0, maxTokens: 400, timeoutMs: opts.llmTimeoutMs }).catch(() => '{}'),
     ]);
 
     const data = parseJson<ProcessData>(raw);
@@ -658,10 +697,7 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
     qaText = data?.quality_assurance || '';
     indicators = data?.indicators || [];
 
-    const parsed = parseJson<string[]>(kwRaw);
-    if (Array.isArray(parsed)) {
-      industryKeywords = parsed.filter((k): k is string => typeof k === 'string' && k.length > 2).slice(0, 10);
-    }
+    industryKeywords = readIndustryKeywords(parseJson<unknown>(kwRaw));
     console.log(`[orchestrator] Industry keywords: [${industryKeywords.join(', ')}]`);
   } catch { /* fallback: empty */ }
 
