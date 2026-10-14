@@ -1,5 +1,6 @@
 // lib/micro-agents/detect-location.ts — Extract location via focused LLM
 
+import type { AgentRunOpts } from './llm-agent';
 import type { LocationResult, Quality, JsonLdResult } from './types';
 import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 
@@ -13,7 +14,12 @@ Look for addresses, footer info, "Based in", "Located in", contact sections, dom
 Return ONLY valid JSON: {"city": "Geneva" or null, "country": "Switzerland" or null}
 Do NOT invent. If not found, return null. No explanation.`;
 
-export async function detectLocation(content: string, jsonldResult?: JsonLdResult, siteUrl?: string): Promise<LocationResult> {
+/**
+ * `opts` permet a la passe de secours du scan de rejouer l'agent avec un seul essai et un
+ * plafond de temps reduit : au rattrapage il reste peu de budget, mieux vaut un essai
+ * franc qu'une serie qui deborde.
+ */
+export async function detectLocation(content: string, jsonldResult?: JsonLdResult, siteUrl?: string, opts: AgentRunOpts = {}): Promise<LocationResult> {
   // Priority 1: JSON-LD (already parsed, no LLM needed)
   if (jsonldResult?.address?.city || jsonldResult?.address?.country) {
     return {
@@ -27,7 +33,7 @@ export async function detectLocation(content: string, jsonldResult?: JsonLdResul
   try {
     // Add site URL as context for TLD detection
     const extra = siteUrl ? `\nSite URL: ${siteUrl}` : '';
-    const raw = await llmExtract(PROMPT, content + extra, 8000, { maxTokens: 300 });
+    const raw = await llmExtract(PROMPT, content + extra, 8000, { maxTokens: 300, ...opts });
     const data = parseJson<{ city?: string | null; country?: string | null }>(raw);
     if (!data) return { city: null, country: null, q: 0 };
 
