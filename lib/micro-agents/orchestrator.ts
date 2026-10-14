@@ -1,6 +1,6 @@
 // lib/micro-agents/orchestrator.ts — Run all 8 agents, merge into AyoExtract
 
-import { fetchHtml, getTextContent } from './html-fetcher';
+import { fetchHtml, getTextContent, assessPageContent } from './html-fetcher';
 import { AYOBOT_UA } from './constants';
 import { detectContact } from './detect-contact';
 import { detectJsonLd } from './detect-jsonld';
@@ -314,17 +314,26 @@ export async function runAllAgents(
   let fetchResult: FetchResult;
   if (providedHtmlContent && providedHtmlContent.trim().length > 100) {
     const textContent = getTextContent(providedHtmlContent);
+    // 'user_provided' : AYO n'a pas lu ce site, le visiteur a fourni la page. Le score est
+    // montre au visiteur, mais la route ne l'inscrit jamais au registre sous ce domaine.
     fetchResult = {
       url,
       rawHtml: providedHtmlContent,
       renderedHtml: providedHtmlContent,
       textContent,
-      sourceType: 'ssr',
+      sourceType: 'user_provided',
       headers: {},
       statusCode: 200,
       isReachable: true,
     };
     console.log(`[orchestrator] Using provided HTML: ${providedHtmlContent.length} chars, ${textContent.length} text chars`);
+    // Meme porte que pour une page lue par AYO : un parking ou un mur anti-bot colle par
+    // le visiteur ne se note pas davantage.
+    const verdict = assessPageContent(providedHtmlContent);
+    if (verdict) {
+      console.warn(`[orchestrator] Provided HTML non lisible (${verdict.reason}: ${verdict.detail}), aucun score`);
+      fetchResult = { ...fetchResult, textContent: '', isReachable: false, unreadableReason: verdict.reason, unreadableDetail: verdict.detail };
+    }
   } else {
     fetchResult = await fetchHtml(url);
   }
@@ -703,8 +712,9 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
         name: field(name, name ? 1 : 0, name ? ['scan_micro_agent'] : []),
         legal_name: field(name || '', name ? 1 : 0, name ? ['scan_micro_agent'] : []),
         business_type: field(businessType, businessType ? 1 : 0, businessType ? ['scan_micro_agent'] : []),
-        city: field(city, location.q, city ? ['scan_micro_agent'] : []),
-        country: field(country, location.q, country ? ['scan_micro_agent'] : []),
+        // Une valeur absente vaut 0 : la confiance de l'agent ne donne aucun point a un champ vide.
+        city: field(city, city ? location.q : 0, city ? ['scan_micro_agent'] : []),
+        country: field(country, country ? location.q : 0, country ? ['scan_micro_agent'] : []),
         contact_email: field(
           email || (contact.hasContactForm ? 'contact_form' : ''),
           email ? 1 : contact.hasContactForm ? 0.5 : 0,

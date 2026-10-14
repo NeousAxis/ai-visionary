@@ -88,7 +88,14 @@ export interface AgentEvent {
 
 // --- Orchestrator merged output ---
 
-export type SourceType = 'ssr' | 'spa_puppeteer' | 'spa_degraded';
+/** 'user_provided' : HTML colle ou televerse par le visiteur, jamais lu par AYO sur le site. */
+export type SourceType = 'ssr' | 'spa_puppeteer' | 'spa_degraded' | 'user_provided';
+
+/**
+ * Pourquoi un site n'a pas pu etre lu. Memes statuts que aya/page_check.py (bot Python),
+ * plus 'placeholder' pour les pages par defaut de serveur et les sites en construction.
+ */
+export type UnreadableReason = 'unreachable' | 'blocked' | 'parked' | 'no_text' | 'redirected' | 'placeholder';
 
 export interface FetchResult {
   url: string;
@@ -102,7 +109,14 @@ export interface FetchResult {
   sourceType: SourceType;
   headers: Record<string, string>;
   statusCode: number;
+  /** Vrai seulement si AYO a reellement lu du contenu de l'entreprise : sinon, aucun score. */
   isReachable: boolean;
+  /** URL ou la lecture a abouti, apres les redirections HTTP et JavaScript. */
+  finalUrl?: string;
+  /** Renseigne quand isReachable est faux. */
+  unreadableReason?: UnreadableReason;
+  /** Precision lisible (statut HTTP, hote d'arrivee, nombre de caracteres...). */
+  unreadableDetail?: string;
 }
 
 export interface AllAgentResults {

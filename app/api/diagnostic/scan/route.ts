@@ -106,8 +106,18 @@ export async function POST(req: NextRequest) {
           send({ phase: 'agent', ...event });
         }, safeHtml);
 
+        // Site non lu (injoignable, mur anti-bot, parking, page vide, redirection vers un autre
+        // site) : aucun score, aucune ligne dans analyses, rien au registre. Le message reste
+        // 'Site unreachable' pour le client, la raison precise part a cote.
         if (!fetchResult.isReachable) {
-          send({ phase: 'error', message: 'Site unreachable', statusCode: fetchResult.statusCode });
+          console.warn(`[scan] ${url} non lisible (${fetchResult.unreadableReason || 'unreachable'}: ${fetchResult.unreadableDetail || ''}) : aucun score publie`);
+          send({
+            phase: 'error',
+            message: 'Site unreachable',
+            statusCode: fetchResult.statusCode,
+            reason: fetchResult.unreadableReason || 'unreachable',
+            detail: fetchResult.unreadableDetail || '',
+          });
           return; // finally block will close controller
         }
 
@@ -244,20 +254,27 @@ export async function POST(req: NextRequest) {
 
         // Inscription automatique dans AYA : toute entreprise diagnostiquée entre au
         // registre comme entrée INDEXÉE (non certifiée). Dédup par URL + non bloquant.
-        try {
-          const { indexEntityFromDiagnostic } = await import('@/lib/aya/registry');
-          const id = extract.fields.identite;
-          await indexEntityFromDiagnostic({
-            url: fetchResult.url,
-            score: score.total,
-            name: id.legal_name?.value || id.name?.value || '',
-            country: id.country?.value || '',
-            sector: extract.source.scan.industry_keywords?.[0] || '',
-            contactEmail: (id.contact_email?.value && id.contact_email.value !== 'contact_form')
-              ? id.contact_email.value : undefined,
-          });
-        } catch (e) {
-          console.error('[scan] AYA index failed:', e instanceof Error ? e.message : e);
+        // Jamais pour du HTML fourni par le visiteur : AYO n'a pas lu ce site, rien ne
+        // prouve que cette page est la sienne.
+        if (fetchResult.sourceType === 'user_provided') {
+          console.log(`[scan] ${fetchResult.url} : score calcule sur le HTML fourni par le visiteur, pas d'inscription au registre`);
+        } else {
+          try {
+            const { indexEntityFromDiagnostic } = await import('@/lib/aya/registry');
+            const id = extract.fields.identite;
+            await indexEntityFromDiagnostic({
+              url: fetchResult.url,
+              score: score.total,
+              contentChars: fetchResult.textContent.length,
+              name: id.legal_name?.value || id.name?.value || '',
+              country: id.country?.value || '',
+              sector: extract.source.scan.industry_keywords?.[0] || '',
+              contactEmail: (id.contact_email?.value && id.contact_email.value !== 'contact_form')
+                ? id.contact_email.value : undefined,
+            });
+          } catch (e) {
+            console.error('[scan] AYA index failed:', e instanceof Error ? e.message : e);
+          }
         }
 
         // Phase 5: Final summary
@@ -269,6 +286,7 @@ export async function POST(req: NextRequest) {
           score,
           proScore, // Score WITH AYO PRO files
           url: fetchResult.url,
+          source: fetchResult.sourceType, // 'user_provided' : score calcule sur la page fournie
           analysisId: savedAnalysisId, // Pass to client so checkout can reference it
         });
       } catch (err) {
