@@ -40,6 +40,33 @@ export class LlmCallError extends Error {
 }
 
 /**
+ * Guillemets droits du contenu, rendus typographiques avant l'appel LLM.
+ *
+ * Le texte des sites rendus par React garde ses guillemets sous forme `&quot;`, que
+ * getTextContent ne decode pas. Le modele les recopie en `"` nu au milieu d'une valeur ;
+ * le decodage JSON contraint d'Infomaniak y voit la fin de la chaine, le modele ne peut
+ * plus continuer sa phrase et emet des tabulations jusqu'au plafond de tokens. La
+ * reparation de parseJson rendait alors un JSON ampute (process/indicateurs vides) et le
+ * score d'ai-visionary.xyz alternait entre 90.4 et 62.9 (sondes des 5 au 14 octobre 2026,
+ * 5 generations sur 8 bloquees au meme endroit, « &quot;Signature File&quot; »).
+ * Des guillemets typographiques ne ferment aucune chaine JSON : le declencheur disparait
+ * sans changer le sens du texte.
+ */
+export function softenQuotes(text: string): string {
+  return text
+    .replace(/&quot;|&#x0*22;|&#0*34;/gi, '"')
+    .replace(/"([^"\n]{0,300}?)"/g, '“$1”')
+    .replace(/"/g, '”');
+}
+
+/**
+ * Signature d'une generation bloquee : coupee au plafond sur une longue plage de blancs.
+ * Une sortie simplement longue est coupee au milieu d'un mot ; l'indentation d'un JSON
+ * ne depasse jamais quelques espaces.
+ */
+const STALL_TAIL_RE = /\s{40,}$/;
+
+/**
  * Run a focused LLM extraction.
  * - systemPrompt: what the agent does (2-3 lines)
  * - content: the text to analyze (truncated to maxChars)
@@ -64,6 +91,7 @@ export async function llmExtract(
   } else {
     truncated = content;
   }
+  truncated = softenQuotes(truncated);
 
   const provider = llmProvider();
   try {
@@ -83,6 +111,13 @@ export async function llmExtract(
       retries: opts.retries ?? 1,
     });
     console.log(`[llm-agent] Response (${text.length} chars): ${text.substring(0, 200)}`);
+    if (cut && STALL_TAIL_RE.test(text)) {
+      // Bloquee, pas seulement longue : parseJson saurait "reparer" ce JSON, mais tout ce
+      // que le modele n'a pas pu ecrire apres le blocage serait compte comme absent du site.
+      // Doubler le budget doublerait les tabulations. C'est une panne, la passe de secours
+      // du scan la rejoue.
+      throw new LlmCallError(`generation stalled on whitespace at ${maxTokens} tokens (${text.trimEnd().length} useful chars)`);
+    }
     if (cut && parseJson(text) === null) {
       // Coupee au plafond ET irreparable. Rejouer a l'identique reproduirait la meme
       // coupure (temperature 0) : UNE relance a budget double la depasse. Si meme le
@@ -98,7 +133,7 @@ export async function llmExtract(
         timeoutMs: Math.round(timeoutMs * 1.6),
         retries: 0,
       }));
-      if (cut && parseJson(text) === null) {
+      if (cut && (STALL_TAIL_RE.test(text) || parseJson(text) === null)) {
         throw new LlmCallError(`response truncated at ${maxTokens * 2} tokens and unparseable (${text.length} chars)`);
       }
     }
