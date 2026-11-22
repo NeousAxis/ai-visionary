@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { db, getAyaEntitiesAggregated } from '@/lib/db';
 import AyaRegistryClient from '@/app/components/AyaRegistryClient';
+import AyaAsk from '@/app/components/AyaAsk';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -34,10 +35,15 @@ const VALID_SORTS: SortMode[] = ['default', 'alpha', 'score', 'country', 'certif
 export default async function AyaPage({
     searchParams,
 }: {
-    searchParams: Promise<{ page?: string; q?: string; sort?: string }>;
+    searchParams: Promise<{ page?: string; q?: string; sort?: string; apercu?: string; ask?: string }>;
 }) {
     const t = await getTranslations('aya');
     const params = await searchParams;
+    // Nouvelle recherche (proposition A), validée et ouverte à tous par Cyril le
+    // 22.11.2026. Pour revenir à l'ancienne page : NEW_SEARCH = false (?apercu=1
+    // la montre alors encore).
+    const NEW_SEARCH = true;
+    const showAsk = NEW_SEARCH || params.apercu === '1';
     const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
     const search = (params.q || '').trim();
     const sort: SortMode = VALID_SORTS.includes(params.sort as SortMode) ? (params.sort as SortMode) : 'default';
@@ -80,24 +86,29 @@ export default async function AyaPage({
 
             {/* HEADER */}
             <header style={{ background: 'white', borderBottom: '1px solid var(--border-light)', position: 'sticky', top: 0, zIndex: 100, padding: '15px 0' }}>
-                <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '15px', textDecoration: 'none' }}>
-                        <img src="/logo-v2.png" alt="AI Visionary" style={{ height: '40px', width: 'auto' }} />
-                        <div style={{ height: '24px', width: '1px', background: 'var(--border-light)' }}></div>
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
+                {/* En-tête qui passe sur deux lignes sur petit écran au lieu de se
+                    chevaucher (globals.css met tous les .btn en pleine largeur sur mobile). */}
+                <div className="container" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '10px 16px' }}>
+                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', minWidth: 0 }}>
+                        <img src="/logo-v2.png" alt="AI Visionary" style={{ height: '40px', width: 'auto', flex: 'none' }} />
+                        <div style={{ height: '24px', width: '1px', background: 'var(--border-light)', flex: 'none' }}></div>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-main)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
                             {t('registryTitle')} <span style={{ color: 'var(--primary-color)', fontWeight: '400' }}>{t('registryName')}</span>
                         </span>
                     </Link>
 
-                    <div style={{ display: 'flex', gap: '15px' }}>
-                        <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
+                    <div style={{ display: 'flex', gap: '15px', flex: 'none' }}>
+                        <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', width: 'auto', marginBottom: 0, whiteSpace: 'nowrap' }}>
                             {t('registerEntity')}
                         </Link>
                     </div>
                 </div>
             </header>
 
-            {/* CLIENT INTERACTIVE SECTION (search, sort, grid, pagination) */}
+            {/* RECHERCHE EN LANGAGE COURANT (proposition A, 22.11.2026) */}
+            {showAsk && <AyaAsk totalCount={totalAll} />}
+
+            {/* CLIENT INTERACTIVE SECTION (index : tri, grille, pagination) */}
             <Suspense fallback={
                 <div style={{ textAlign: 'center', padding: '80px 20px' }}>{t('loading')}</div>
             }>
@@ -110,6 +121,7 @@ export default async function AyaPage({
                     pageSize={PAGE_SIZE}
                     currentSearch={search}
                     currentSort={sort}
+                    hideHero={showAsk}
                 />
             </Suspense>
 

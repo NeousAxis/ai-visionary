@@ -42,15 +42,31 @@ export function detectJsonLd(html: string): JsonLdResult {
         result.name = data.name || data.legalName || null;
         result.description = data.description || null;
 
-        // Extract address
+        // Extract address (city/country). areaServed is a country fallback — many schemas
+        // declare the served country there instead of a postal address (e.g. a nationwide
+        // service: "areaServed":{"@type":"Country","name":"Switzerland"}).
+        let addrCity: string | null = null;
+        let addrCountry: string | null = null;
         if (data.address) {
-          const addr = typeof data.address === 'string'
-            ? { city: null, country: data.address }
-            : {
-                city: data.address.addressLocality || null,
-                country: data.address.addressCountry || null,
-              };
-          result.address = addr;
+          if (typeof data.address === 'string') {
+            addrCountry = data.address;
+          } else {
+            addrCity = data.address.addressLocality || null;
+            addrCountry = data.address.addressCountry || null;
+          }
+        }
+        if (!addrCountry && data.areaServed) {
+          // Only trust areaServed as a location signal when it names exactly ONE country.
+          // A multi-country list is a multinational's served markets, not where it is based
+          // (e.g. a US company that serves Switzerland among 40 others must NOT read as Swiss).
+          const arr = Array.isArray(data.areaServed) ? data.areaServed : [data.areaServed];
+          if (arr.length === 1) {
+            const as = arr[0];
+            addrCountry = (typeof as === 'string' ? as : as?.name) || null;
+          }
+        }
+        if (addrCity || addrCountry) {
+          result.address = { city: addrCity || undefined, country: addrCountry || undefined };
         }
 
         // Extract contact

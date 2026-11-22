@@ -5,6 +5,7 @@ import Link from 'next/link';
 import BackButton from '@/app/components/BackButton';
 import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
+import { localizedAlternates } from '@/lib/i18n-alternates';
 
 // Force dynamic
 export const revalidate = 0;
@@ -41,13 +42,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         ? `${name}${scoreText}. ${descriptionText}`
         : t('metaFallback', { name, score: scoreText, status: statusText });
 
+    const pageUrl = `https://ai-visionary.xyz/aya/e/${entity.entity_id || id}`;
+
     return {
         title: t('metaTitle', { name, score: scoreText }),
         description: metaDescription.slice(0, 160),
+        // Canonical auto-référent + hreflang EN/FR. Sans hreflang, Google ne
+        // sait pas que /aya/e/<id> et /fr/aya/e/<id> sont la même page en deux
+        // langues, et peut en écarter une comme duplicat.
+        alternates: await localizedAlternates(`/aya/e/${entity.entity_id || id}`),
         openGraph: {
             title: t('metaOgTitle', { name }),
             description: metaDescription.slice(0, 200),
-            url: `https://ai-visionary.xyz/aya/e/${entity.entity_id || id}`,
+            url: pageUrl,
             siteName: 'AI Visionary',
             type: 'website',
         },

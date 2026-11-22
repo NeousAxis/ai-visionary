@@ -5,6 +5,13 @@ import { trackAyaCall } from '@/lib/aya/api-tracker';
 
 export const dynamic = 'force-dynamic';
 
+/** Email public d'une fiche, selon son format (AYO, robot AYA-BOT). Vide sinon. */
+function publicEmail(asr: any): string {
+    const d = asr?.data || {};
+    const v = d?.identite?.contact_email?.value || d?.entity?.contacts?.email || d?.aio_blocks?.identite?.fields?.email || '';
+    return typeof v === 'string' && /^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/i.test(v.trim()) ? v.trim() : '';
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ domain: string }> }) {
     const rateLimited = checkRateLimit(req, 'aya-entity', RATE_LIMITS.default);
     if (rateLimited) return rateLimited;
@@ -34,7 +41,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ doma
                 country: entity.country_legal || '',
                 sector: entity.sector_macro || '',
                 entity_type: entity.entity_type || 'company',
-                contact_email: entity.contact_email || '',
+                // Adresse PUBLIQUE de l'entreprise (lue sur son site), jamais la
+                // colonne contact_email du registre, qui est l'adresse de la
+                // personne ayant réclamé la fiche (fuite corrigée le 22.11.2026).
+                contact_email: publicEmail(asr),
                 entity_id: entity.entity_id || '',
                 certificate_url: `https://ai-visionary.xyz/aya/e/${entity.entity_id || ''}`,
             },

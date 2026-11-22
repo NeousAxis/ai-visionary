@@ -1,15 +1,20 @@
 "use client";
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Footer from './components/Footer';
 import StatsBar from './components/StatsBar';
 // AyoChat widget REMOVED from Home Page.
 import PaymentSuccessModal from './components/PaymentSuccessModal';
 import LanguageToggle from './components/LanguageToggle';
 
+// Section Pollen Agents masquée le 22.11.2026 à la demande de Cyril.
+// Pour la réafficher : passer SHOW_POLLEN à true (voir aussi Footer.tsx).
+const SHOW_POLLEN = false;
+
 export default function Home() {
   const t = useTranslations('home');
+  const locale = useLocale();
   return (
     <main>
       <script
@@ -73,6 +78,34 @@ export default function Home() {
         </div>
         <div className="hero-visual">
           <div className="abstract-network"></div>
+        </div>
+      </section>
+
+      {/* SECTION 1.5 — Demo video */}
+      <section id="demo" className="section" style={{ paddingTop: '60px', paddingBottom: '70px' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <h2 className="section-title">{t('demo.title')}</h2>
+          <p style={{ maxWidth: '660px', margin: '14px auto 40px', color: 'var(--text-muted)', fontSize: '1.15rem', lineHeight: 1.7 }}>
+            {t('demo.sub')}
+          </p>
+          <div style={{
+            maxWidth: '960px',
+            margin: '0 auto',
+            borderRadius: '18px',
+            overflow: 'hidden',
+            border: '1px solid var(--border-light)',
+            boxShadow: '0 24px 60px rgba(15, 23, 42, 0.18)',
+            background: '#000',
+          }}>
+            <video
+              src="/ayo-demo.mp4"
+              poster="/ayo-demo-poster.jpg"
+              controls
+              playsInline
+              preload="none"
+              style={{ width: '100%', height: 'auto', display: 'block' }}
+            />
+          </div>
         </div>
       </section>
 
@@ -356,56 +389,64 @@ export default function Home() {
         </div>
       </section>
 
-      {/* PRICING */}
+      {/* SECTION — Pollen Agents (masquée, drapeau SHOW_POLLEN) */}
+      {SHOW_POLLEN && (
+      <section id="pollen" className="section" style={{ background: '#F1F5F9' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <span className="badge" style={{ display: 'inline-block', background: 'rgba(74, 145, 158, 0.12)', color: 'var(--primary-color)', border: '1px solid var(--primary-color)', padding: '6px 18px', borderRadius: '20px', fontSize: '0.85rem', letterSpacing: '1.2px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+            {t('pollen.badge')}
+          </span>
+          <h2 className="section-title" style={{ marginTop: '24px' }}>{t('pollen.title')}</h2>
+          <p style={{ maxWidth: '740px', margin: '0 auto 48px', color: 'var(--text-muted)', fontSize: '1.15rem', lineHeight: 1.7 }}>
+            {t('pollen.sub')}
+          </p>
+          <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', textAlign: 'left' }}>
+            <div className="card" style={{ padding: '28px', borderTop: '3px solid var(--primary-color)' }}>
+              <h3 style={{ color: 'var(--text-main)', marginBottom: '10px', fontSize: '1.15rem' }}>{t('pollen.p1Title')}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.6 }}>{t('pollen.p1Body')}</p>
+            </div>
+            <div className="card" style={{ padding: '28px', borderTop: '3px solid var(--primary-color)' }}>
+              <h3 style={{ color: 'var(--text-main)', marginBottom: '10px', fontSize: '1.15rem' }}>{t('pollen.p2Title')}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.6 }}>{t('pollen.p2Body')}</p>
+            </div>
+            <div className="card" style={{ padding: '28px', borderTop: '3px solid var(--primary-color)' }}>
+              <h3 style={{ color: 'var(--text-main)', marginBottom: '10px', fontSize: '1.15rem' }}>{t('pollen.p3Title')}</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.98rem', lineHeight: 1.6 }}>{t('pollen.p3Body')}</p>
+            </div>
+          </div>
+          <div style={{ marginTop: '48px' }}>
+            <Link href="/pollen-agents" className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '15px 34px' }}>
+              {t('pollen.cta')}
+            </Link>
+          </div>
+        </div>
+      </section>
+      )}
+
+      {/* OFFRE GRATUITE (ex-pricing — paywall supprimé) */}
       <section id="pricing" className="section pricing-section">
         <div className="container" style={{ textAlign: "center" }}>
-          <h2 className="section-title" style={{ fontSize: "2.5rem" }}>{t('pricing.title')}</h2>
-          <div className="grid-2 pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', maxWidth: '900px', margin: '0 auto' }}>
-
-            {/* OPTION 1 : ABONNEMENT (LOCATION VISIBILITÉ) */}
-            <div className="card pricing-card featured" style={{ border: '2px solid var(--primary-color)' }}>
-              <div style={{ background: 'var(--primary-color)', color: 'white', padding: '5px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', display: 'inline-block', marginBottom: '10px' }}>
-                {t('pricing.recommended')}
-              </div>
-              <h3>{t('pricing.plan1Title')} <br /><span className="card-subtitle">{t('pricing.plan1Sub')}</span></h3>
-              <div className="price">{t('pricing.plan1Price')} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>{t('pricing.plan1Period')}</span></div>
-              <p className="price-details">{t('pricing.plan1Desc')}</p>
-              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <li>&#x2705; <strong>{t('pricing.plan1f1')}</strong></li>
-                <li>&#x2705; {t('pricing.plan1f2')}</li>
-                <li>&#x2705; {t('pricing.plan1f3')}</li>
-                <li>&#x2705; {t('pricing.plan1f4')}</li>
-                <li>&#x2705; {t('pricing.plan1f5')}</li>
-              </ul>
-              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary w-full" style={{ width: '100%' }}>
-                  {t('pricing.plan1cta')}
-                </Link>
-              </div>
+          <h2 className="section-title" style={{ fontSize: "2.5rem" }}>
+            {locale === 'fr' ? 'Désormais 100% gratuit' : 'Now 100% free'}
+          </h2>
+          <p style={{ maxWidth: 640, margin: '0 auto 28px', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6 }}>
+            {locale === 'fr'
+              ? "Plus d'abonnement, plus de pack à acheter. On génère vos 5 fichiers sémantiques, on vous les envoie par email et on publie votre fiche sur AYA — gratuitement."
+              : 'No subscription, no pack to buy. We generate your 5 semantic files, email them to you and publish your record on AYA — for free.'}
+          </p>
+          <div className="card pricing-card" style={{ maxWidth: 460, margin: '0 auto', textAlign: 'left' }}>
+            <ul style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 2, listStyle: 'none', padding: 0 }}>
+              <li>&#x2705; <strong>{locale === 'fr' ? 'Vos 5 fichiers ASR (JSON-LD signés)' : 'Your 5 ASR files (signed JSON-LD)'}</strong></li>
+              <li>&#x2705; {locale === 'fr' ? 'Publication sur le registre AYA' : 'Published on the AYA registry'}</li>
+              <li>&#x2705; {locale === 'fr' ? 'Signature cryptographique Ed25519' : 'Ed25519 cryptographic signature'}</li>
+              <li>&#x2705; {locale === 'fr' ? 'Accès admin : vous seul consultez, mettez à jour ou transférez' : 'Admin access: only you view, update or transfer'}</li>
+            </ul>
+            <div style={{ marginTop: 24, textAlign: 'center' }}>
+              <Link href="/diagnostic" className="btn btn-primary w-full" style={{ width: '100%' }}>
+                {locale === 'fr' ? 'Recevoir mes fichiers — gratuit →' : 'Get my files — free →'}
+              </Link>
             </div>
-
-            {/* OPTION 2 : ACHAT (INVESTISSEMENT PATRIMONIAL) */}
-            <div className="card pricing-card">
-              <h3>{t('pricing.plan2Title')} <br /><span className="card-subtitle">{t('pricing.plan2Sub')}</span></h3>
-
-              <div className="price" style={{ marginBottom: 0 }}>{t('pricing.plan2Price')} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>{t('pricing.plan2Period')}</span></div>
-              <div style={{ fontSize: '0.8rem', color: '#4A919E', fontWeight: 600, marginTop: '-4px', marginBottom: '8px' }}>{t('pricing.plan2f5')}</div>
-              <p className="price-details">{t('pricing.plan2Desc')}<br /><strong>{t('pricing.plan2Own')}</strong></p>
-              <ul style={{ textAlign: 'left', marginTop: '20px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                <li>&#x2705; <strong>{t('pricing.plan2f1')}</strong></li>
-                <li>&#x2705; {t('pricing.plan2f2')}</li>
-                <li>&#x2705; {t('pricing.plan2f3')}</li>
-                <li>&#x2705; {t('pricing.plan2f4')}</li>
-              </ul>
-              <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
-                <Link href="/diagnostic?pack=pro" className="btn btn-secondary w-full" style={{ width: '100%' }}>
-                  {t('pricing.plan2cta')}
-                </Link>
-              </div>
-            </div>
-
           </div>
-
         </div>
       </section>
 

@@ -1,0 +1,26 @@
+{
+  "name": "AYA + Pollen Agents — integrations for any agent",
+  "description": "Connect any AI agent to AYA (verified-business registry + cashback) in any stack. The REST API is the universal substrate; the rest are convenience wrappers.",
+  "guide": "https://ai-visionary.xyz/for-agents",
+  "rest_api": {
+    "search_companies": "GET https://ai-visionary.xyz/api/aya/search?q={query}&limit={limit}",
+    "get_company_details": "GET https://ai-visionary.xyz/api/aya/entity/{domain}",
+    "get_cashback_offer": "POST https://ai-visionary.xyz/api/pollen-agents/cashback-offer  body {domain, agent_id}",
+    "claim_cashback": "POST https://ai-visionary.xyz/api/pollen-agents/claim-cashback  body {token, proof, agent_id, principal_ref}"
+  },
+  "mcp": {
+    "transport": "streamable-http",
+    "url": "https://ai-visionary.xyz/agents/mcp",
+    "authentication": "none"
+  },
+  "tool_definitions": {
+    "openai": "https://ai-visionary.xyz/integrations/openai-tools.json",
+    "anthropic": "https://ai-visionary.xyz/integrations/anthropic-tools.json",
+    "gemini": "https://ai-visionary.xyz/integrations/gemini-functions.json",
+    "mistral": "https://ai-visionary.xyz/integrations/mistral-tools.json"
+  },
+  "openapi": "https://ai-visionary.xyz/.well-known/openapi.json",
+  "auth": "none",
+  "license": "CC-BY-4.0",
+  "contact": "hello@ai-visionary.xyz"
+}

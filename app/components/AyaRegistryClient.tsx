@@ -101,6 +101,8 @@ interface AyaRegistryClientProps {
     pageSize: number;
     currentSearch: string;
     currentSort: SortMode;
+    /** Masque l'ancien bandeau titre + recherche par nom (remplacé par AyaAsk). */
+    hideHero?: boolean;
 }
 
 export default function AyaRegistryClient({
@@ -112,6 +114,7 @@ export default function AyaRegistryClient({
     pageSize,
     currentSearch,
     currentSort,
+    hideHero = false,
 }: AyaRegistryClientProps) {
     const t = useTranslations('aya');
     const locale = useLocale();
@@ -173,6 +176,7 @@ export default function AyaRegistryClient({
     return (
         <>
             {/* HERO SECTION */}
+            {!hideHero && (
             <section className="section" style={{ textAlign: 'center', paddingBottom: '3rem' }}>
                 <div className="container">
                     <span style={{ display: 'inline-block', padding: '5px 15px', borderRadius: '20px', background: 'var(--bg-accent)', color: 'var(--primary-color)', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '20px', letterSpacing: '1px' }}>
@@ -210,6 +214,7 @@ export default function AyaRegistryClient({
                     </div>
                 </div>
             </section>
+            )}
 
             {/* STATS BAR */}
             <div style={{ background: 'white', borderTop: '1px solid var(--border-light)', borderBottom: '1px solid var(--border-light)', padding: '12px 0' }}>

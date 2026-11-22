@@ -109,6 +109,7 @@ export async function POST(req: NextRequest) {
             score,
             date: new Date().toISOString(),
             asrId,
+            locale, // without it the files were regenerated in English for a French client
         };
 
         const architecteResult = await generateProPack(architecteInput);

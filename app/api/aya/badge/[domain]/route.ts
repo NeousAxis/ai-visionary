@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getAyaEntityByUrlAggregated } from '@/lib/db';
 import { trackAyaCall } from '@/lib/aya/api-tracker';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -68,11 +68,9 @@ export async function GET(
     // Track (fire-and-forget)
     trackAyaCall(req, 'badge', domain);
 
-    // Lookup entity
-    let entity: any = await db.getAyaEntityByUrl('https://' + domain);
-    if (!entity) {
-        entity = await db.getAyaEntityByUrl('https://www.' + domain);
-    }
+    // Lookup entity — surface publique : passe par l'accesseur filtré (adulte
+    // exclu), qui gère déjà lui-même la variante www.
+    const entity: any = await getAyaEntityByUrlAggregated('https://' + domain);
 
     const svg = entity && entity.asr_score !== null && entity.asr_score !== undefined
         ? buildFoundBadge(

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
-import { db, supabase, _clearAyaCaches } from '@/lib/db';
+import { db, _clearAyaCaches } from '@/lib/db';
+import { localPgDeleteEntitiesByWebsite } from '@/lib/db-local-pg';
 import { createLogger, generateCorrelationId } from '@/lib/logger';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 
@@ -37,19 +38,7 @@ export async function GET(req: NextRequest) {
             targetUrl,
         ];
 
-        let deleted = 0;
-
-        for (const variant of variants) {
-            const { data, error } = await supabase
-                .from('aya_registry')
-                .delete()
-                .eq('website', variant)
-                .select('entity_id');
-
-            if (!error && data) {
-                deleted += data.length;
-            }
-        }
+        const deleted = await localPgDeleteEntitiesByWebsite(variants);
 
         if (deleted > 0) _clearAyaCaches();
         logger.info('CLEAN_DONE', `Deleted ${deleted} records for ${targetUrl}`);

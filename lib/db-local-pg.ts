@@ -6,7 +6,8 @@
  * Safe to import on Vercel — every helper returns empty results when unconfigured.
  */
 
-import { Pool, QueryResult } from 'pg';
+import { Pool } from 'pg';
+import type { QueryResult } from 'pg';
 
 // ── Entity type — mirrors aya_registry columns ───────────────────────────────
 
@@ -36,6 +37,66 @@ const ENTITY_COLS = `
     valid_until, created_at, last_update, updated_at,
     pack_type, subscription_status
 `;
+
+/**
+ * RÈGLE PRODUIT posée par Cyril le 19 juillet 2026 : tout ce qui a un rapport
+ * avec la pornographie est exclu des surfaces publiques.
+ *
+ * Le classement est PRÉCALCULÉ dans la colonne `is_adult`, maintenue par le
+ * trigger `trg_aya_set_is_adult` (fonction SQL `aya_is_adult`). Évaluer les
+ * motifs à chaque requête coûtait ~3 s sur 367 000 lignes et faisait échouer le
+ * build des sitemaps par timeout de connexion. Ici c'est un simple test booléen
+ * sur colonne indexée.
+ *
+ * La règle elle-même vit donc dans `aya_is_adult` côté Postgres (voir
+ * `docs/migrations/2026-07-19-is-adult.sql`). Elle distingue trois niveaux :
+ * termes sans ambiguïté cherchés partout, termes ambigus cherchés seulement
+ * dans le nom et le domaine et en mots entiers (pour ne pas bloquer Essex ou
+ * Sussex), et une exception pour le contexte médical ou éducatif (un cabinet de
+ * sexologie n'est pas de la pornographie). Résultat mesuré : 316 entités
+ * exclues, 5 cabinets de thérapie correctement épargnés.
+ *
+ * Modifier la règle = modifier la fonction SQL puis relancer le backfill, PAS
+ * toucher à cette constante.
+ *
+ * Partagé par TOUTES les surfaces publiques : liste du registre, pages
+ * secteur/pays, sitemap. Une entité masquée d'une surface mais visible d'une
+ * autre est un défaut.
+ */
+const JUNK_EXCLUDE = `
+    is_adult = false
+    AND display_name NOT ILIKE '[''%'
+    AND display_name NOT ILIKE '{{%'
+`;
+
+/**
+ * Source de lecture des SURFACES PUBLIQUES.
+ *
+ * Toute requête destinée à un humain ou à un agent (liste du registre, pages
+ * secteur/pays, recherche, sitemap, compteurs, fiche entité, API /api/aya/*)
+ * lit `FROM ${publicRegistry()}` et JAMAIS `FROM aya_registry`.
+ *
+ * L'alias est volontairement `aya_registry` : les colonnes, les WHERE et les
+ * ORDER BY existants continuent de fonctionner sans être réécrits, et la
+ * sous-requête est aplatie par le planificateur (le prédicat est poussé dans le
+ * scan, `is_adult` est un booléen NOT NULL).
+ *
+ * Le 21 juillet 2026, `JUNK_EXCLUDE` était appliqué à la main sur 9 requêtes et
+ * oublié sur 6 autres : /api/aya/search renvoyait 32 sites pornographiques, et
+ * /api/aya/entity, /api/aya/llm, /api/aya/badge et /aya/e/<id> servaient la
+ * fiche complète. Le filtre est donc porté par la SOURCE et non par chaque
+ * requête, pour qu'un nouveau chemin de lecture publique l'hérite au lieu de
+ * devoir y penser.
+ *
+ * Les chemins INTERNES (déduplication de scan, OTP/authentification,
+ * facturation Stripe, cron d'expiration, endpoints admin) lisent au contraire
+ * `aya_registry` en direct : ils doivent retrouver une entité même exclue du
+ * public, sinon un site adulte serait redupliqué à chaque scan et son
+ * propriétaire ne pourrait plus s'authentifier.
+ */
+function publicRegistry(alias: string = 'aya_registry'): string {
+    return `(SELECT * FROM aya_registry WHERE ${JUNK_EXCLUDE}) AS ${alias}`;
+}
 
 // ── Singleton Pool ────────────────────────────────────────────────────────────
 
@@ -103,35 +164,21 @@ export async function localPgGetEntities(options: {
             const q = `%${search}%`;
             const countRes: QueryResult<{ cnt: string }> = await pool.query(
                 `SELECT COUNT(*) AS cnt
-                 FROM aya_registry
+                 FROM ${publicRegistry()}
                  WHERE (display_name ILIKE $1 OR legal_name ILIKE $1 OR website ILIKE $1
-                        OR sector_macro ILIKE $1 OR country_legal ILIKE $1)
-                 AND display_name NOT ILIKE '%porn%'
-                 AND display_name NOT ILIKE '% sex %'
-                 AND display_name NOT ILIKE '%xxx%'
-                 AND display_name NOT ILIKE '%escort%'
-                 AND display_name NOT ILIKE '%onlyfans%'
-                 AND display_name NOT ILIKE $2
-                 AND display_name NOT ILIKE $3`,
-                [q, "['%", '{{%']
+                        OR sector_macro ILIKE $1 OR country_legal ILIKE $1)`,
+                [q]
             );
             const total = parseInt(countRes.rows[0]?.cnt ?? '0', 10);
 
             const dataRes: QueryResult<Entity> = await pool.query(
                 `SELECT ${ENTITY_COLS}
-                 FROM aya_registry
+                 FROM ${publicRegistry()}
                  WHERE (display_name ILIKE $1 OR legal_name ILIKE $1 OR website ILIKE $1
                         OR sector_macro ILIKE $1 OR country_legal ILIKE $1)
-                 AND display_name NOT ILIKE '%porn%'
-                 AND display_name NOT ILIKE '% sex %'
-                 AND display_name NOT ILIKE '%xxx%'
-                 AND display_name NOT ILIKE '%escort%'
-                 AND display_name NOT ILIKE '%onlyfans%'
-                 AND display_name NOT ILIKE $2
-                 AND display_name NOT ILIKE $3
                  ORDER BY ${orderBy}
-                 LIMIT $4 OFFSET $5`,
-                [q, "['%", '{{%', limit, offset]
+                 LIMIT $2 OFFSET $3`,
+                [q, limit, offset]
             );
             return { data: dataRes.rows, total };
         }
@@ -139,33 +186,18 @@ export async function localPgGetEntities(options: {
         // No search
         const countRes: QueryResult<{ cnt: string }> = await pool.query(
             `SELECT COUNT(*) AS cnt
-             FROM aya_registry
-             WHERE 1=1 ${certFilter}
-             AND display_name NOT ILIKE '%porn%'
-             AND display_name NOT ILIKE '% sex %'
-             AND display_name NOT ILIKE '%xxx%'
-             AND display_name NOT ILIKE '%escort%'
-             AND display_name NOT ILIKE '%onlyfans%'
-             AND display_name NOT ILIKE $1
-             AND display_name NOT ILIKE $2`,
-            ["['%", '{{%']
+             FROM ${publicRegistry()}
+             WHERE 1=1 ${certFilter}`
         );
         const total = parseInt(countRes.rows[0]?.cnt ?? '0', 10);
 
         const dataRes: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
-             FROM aya_registry
+             FROM ${publicRegistry()}
              WHERE 1=1 ${certFilter}
-             AND display_name NOT ILIKE '%porn%'
-             AND display_name NOT ILIKE '% sex %'
-             AND display_name NOT ILIKE '%xxx%'
-             AND display_name NOT ILIKE '%escort%'
-             AND display_name NOT ILIKE '%onlyfans%'
-             AND display_name NOT ILIKE $1
-             AND display_name NOT ILIKE $2
              ORDER BY ${orderBy}
-             LIMIT $3 OFFSET $4`,
-            ["['%", '{{%', limit, offset]
+             LIMIT $1 OFFSET $2`,
+            [limit, offset]
         );
         return { data: dataRes.rows, total };
     } catch (err) {
@@ -175,7 +207,15 @@ export async function localPgGetEntities(options: {
 }
 
 /**
- * Find one entity by domain.
+ * Find one entity by domain — LECTURE INTERNE, sans filtre adulte.
+ *
+ * Réservé à la déduplication de scan, à l'OTP/authentification, à la
+ * facturation et aux endpoints admin : ces chemins doivent retrouver une entité
+ * même exclue des surfaces publiques. La filtrer ici recréerait un doublon à
+ * chaque scan d'un site adulte et empêcherait son propriétaire de se connecter.
+ *
+ * Pour toute surface publique, utiliser `localPgGetPublicEntityByDomain`.
+ *
  * Accepts bare domain (e.g. "stripe.com") or full URL.
  *
  * Bug 3 fix: uses regexp_replace to normalise the stored website column before
@@ -183,6 +223,18 @@ export async function localPgGetEntities(options: {
  * match.  Input is also normalised the same way.
  */
 export async function localPgGetEntityByDomain(domain: string): Promise<Entity | null> {
+    return queryEntityByDomain(domain, 'aya_registry');
+}
+
+/**
+ * Find one entity by domain — SURFACE PUBLIQUE (adulte exclu).
+ * Utilisé par /api/aya/entity/<domain>, /api/aya/llm/<domain> et le badge.
+ */
+export async function localPgGetPublicEntityByDomain(domain: string): Promise<Entity | null> {
+    return queryEntityByDomain(domain, publicRegistry());
+}
+
+async function queryEntityByDomain(domain: string, source: string): Promise<Entity | null> {
     const pool = getPool();
     if (!pool) return null;
 
@@ -201,7 +253,7 @@ export async function localPgGetEntityByDomain(domain: string): Promise<Entity |
         // https://stripe.com/de-ch, https://www.example.com/, etc.
         const res: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
-             FROM aya_registry
+             FROM ${source}
              WHERE
                regexp_replace(
                  regexp_replace(lower(website), '^https?://(www\\.)?', '', 'g'),
@@ -239,7 +291,7 @@ export async function localPgGetEntitiesByFilter(options: {
     try {
         const countRes: QueryResult<{ cnt: string }> = await pool.query(
             `SELECT COUNT(*) AS cnt
-             FROM aya_registry
+             FROM ${publicRegistry()}
              WHERE 1=1 ${sectorClause} ${countryClause}`,
             params
         );
@@ -253,7 +305,7 @@ export async function localPgGetEntitiesByFilter(options: {
 
         const dataRes: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
-             FROM aya_registry
+             FROM ${publicRegistry()}
              WHERE 1=1 ${sectorClause} ${countryClause}
              ORDER BY asr_score DESC NULLS LAST
              LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
@@ -295,10 +347,10 @@ export async function localPgGetStats(): Promise<LocalPgStats> {
     try {
         const [totalRes, certifiedRes, scoreRes, sectorRes, countryRes] = await Promise.all([
             pool.query<{ cnt: string }>(
-                `SELECT COUNT(*) AS cnt FROM aya_registry`
+                `SELECT COUNT(*) AS cnt FROM ${publicRegistry()}`
             ),
             pool.query<{ cnt: string }>(
-                `SELECT COUNT(*) AS cnt FROM aya_registry WHERE payment_completed = true`
+                `SELECT COUNT(*) AS cnt FROM ${publicRegistry()} WHERE payment_completed = true`
             ),
             pool.query<{ avg: string; min_s: string; max_s: string; med: string }>(
                 `SELECT
@@ -306,19 +358,19 @@ export async function localPgGetStats(): Promise<LocalPgStats> {
                    MIN(asr_score)::text         AS min_s,
                    MAX(asr_score)::text         AS max_s,
                    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY asr_score)::text AS med
-                 FROM aya_registry
+                 FROM ${publicRegistry()}
                  WHERE asr_score IS NOT NULL`
             ),
             pool.query<{ sector_macro: string; cnt: string }>(
                 `SELECT sector_macro, COUNT(*) AS cnt
-                 FROM aya_registry
+                 FROM ${publicRegistry()}
                  WHERE sector_macro IS NOT NULL
                  GROUP BY sector_macro
                  ORDER BY cnt DESC`
             ),
             pool.query<{ country_legal: string; cnt: string }>(
                 `SELECT country_legal, COUNT(*) AS cnt
-                 FROM aya_registry
+                 FROM ${publicRegistry()}
                  WHERE country_legal IS NOT NULL
                    AND country_legal <> ''
                    AND country_legal <> 'XX'
@@ -352,14 +404,30 @@ export async function localPgGetStats(): Promise<LocalPgStats> {
 }
 
 /**
- * Find one entity by its UUID primary key.
+ * Find one entity by its UUID primary key — LECTURE INTERNE, sans filtre adulte.
+ *
+ * Réservé au dashboard propriétaire, au portail Stripe, aux webhooks de
+ * paiement et aux endpoints admin. Pour la fiche publique `/aya/e/<id>`,
+ * utiliser `localPgGetPublicEntityById`.
  */
 export async function localPgGetEntityById(id: string): Promise<Entity | null> {
+    return queryEntityById(id, 'aya_registry');
+}
+
+/**
+ * Find one entity by its UUID primary key — SURFACE PUBLIQUE (adulte exclu).
+ * Utilisé par la page certificat /aya/e/<id> et son image OpenGraph.
+ */
+export async function localPgGetPublicEntityById(id: string): Promise<Entity | null> {
+    return queryEntityById(id, publicRegistry());
+}
+
+async function queryEntityById(id: string, source: string): Promise<Entity | null> {
     const pool = getPool();
     if (!pool) return null;
     try {
         const res: QueryResult<Entity> = await pool.query(
-            `SELECT ${ENTITY_COLS} FROM aya_registry WHERE entity_id = $1::uuid LIMIT 1`,
+            `SELECT ${ENTITY_COLS} FROM ${source} WHERE entity_id = $1::uuid LIMIT 1`,
             [id]
         );
         return res.rows[0] ?? null;
@@ -402,7 +470,7 @@ export async function localPgSearch(q: string, limit: number): Promise<Entity[]>
 
         const res: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
-             FROM aya_registry
+             FROM ${publicRegistry()}
              WHERE ${clauses.join(' AND ')}
              ORDER BY payment_completed DESC NULLS LAST, asr_score DESC NULLS LAST
              LIMIT $${limitIdx}`,
@@ -413,6 +481,59 @@ export async function localPgSearch(q: string, limit: number): Promise<Entity[]>
         console.error('[db-local-pg] localPgSearch error:', err);
         return [];
     }
+}
+
+// ── Sitemap helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Count the entities eligible for the sitemap. Used to size the chunk list.
+ */
+export async function localPgCountSitemapEntities(): Promise<number> {
+    const pool = getPool();
+    if (!pool) throw new Error('[db-local-pg] localPgCountSitemapEntities: no Postgres pool');
+    // Pas de catch : une erreur doit remonter pour casser le build plutôt que de
+    // produire un robots.txt appauvri figé 24 h. Voir getAyaSitemapCount.
+    const res: QueryResult<{ cnt: string }> = await pool.query(
+        `SELECT COUNT(*) AS cnt FROM ${publicRegistry()}`
+    );
+    return parseInt(res.rows[0]?.cnt ?? '0', 10);
+}
+
+/**
+ * One sitemap chunk. Selects ONLY the two columns a sitemap needs — pulling
+ * ENTITY_COLS here would drag the asr_payload / recommendability jsonb blobs of
+ * tens of thousands of rows into memory on every crawl.
+ *
+ * The ORDER BY must stay deterministic: chunks are fetched as independent
+ * requests, so any unstable ordering would duplicate entities in one file and
+ * drop them from another. Best entities land in the low-numbered chunks.
+ *
+ * Compromis assumé : les 9 chunks ne partagent pas un snapshot commun. Si une
+ * entité change de rang dans le tri global entre deux régénérations (typiquement
+ * `payment_completed` qui passe à true après un paiement), elle peut se
+ * dupliquer ou manquer sur une frontière de chunk. Google déduplique par URL, et
+ * la régénération suivante répare. Une pagination par clé corrigerait cela au
+ * prix d'une complexité disproportionnée.
+ *
+ * Pas de catch : voir getAyaSitemapPage, un [] silencieux ferait mettre un
+ * sitemap vide en cache pour 24 h.
+ */
+export async function localPgGetSitemapPage(
+    limit: number,
+    offset: number,
+): Promise<Array<{ entity_id: string; updated_at: Date | null }>> {
+    const pool = getPool();
+    if (!pool) throw new Error('[db-local-pg] localPgGetSitemapPage: no Postgres pool');
+    const res: QueryResult<{ entity_id: string; updated_at: Date | null }> = await pool.query(
+        `SELECT entity_id, updated_at
+         FROM ${publicRegistry()}
+         ORDER BY payment_completed DESC NULLS LAST,
+                  asr_score DESC NULLS LAST,
+                  entity_id
+         LIMIT $1 OFFSET $2`,
+        [limit, offset]
+    );
+    return res.rows;
 }
 
 // ── Filter / taxonomy helpers ─────────────────────────────────────────────────
@@ -427,7 +548,7 @@ export async function localPgGetSectors(): Promise<{ sector: string; count: numb
     try {
         const res: QueryResult<{ sector_macro: string; cnt: string }> = await pool.query(
             `SELECT sector_macro, COUNT(*) AS cnt
-             FROM aya_registry
+             FROM ${publicRegistry()}
              WHERE sector_macro IS NOT NULL
                AND sector_macro <> ''
              GROUP BY sector_macro
@@ -452,7 +573,7 @@ export async function localPgGetCountries(): Promise<{ country: string; count: n
     try {
         const res: QueryResult<{ country_legal: string; cnt: string }> = await pool.query(
             `SELECT country_legal, COUNT(*) AS cnt
-             FROM aya_registry
+             FROM ${publicRegistry()}
              WHERE country_legal IS NOT NULL
                AND country_legal <> ''
                AND country_legal <> 'XX'
@@ -481,7 +602,7 @@ export async function localPgGetSectorCountryCombinations(): Promise<
         const res: QueryResult<{ sector_macro: string; country_legal: string; cnt: string }> =
             await pool.query(
                 `SELECT sector_macro, country_legal, COUNT(*) AS cnt
-                 FROM aya_registry
+                 FROM ${publicRegistry()}
                  WHERE sector_macro   IS NOT NULL
                    AND country_legal  IS NOT NULL
                    AND country_legal  <> ''
@@ -584,10 +705,23 @@ export async function localPgMarkEntitiesExpired(): Promise<string[]> {
 
 /** Get count of entities matching a payment_completed status. */
 export async function localPgGetAyaEntities(limit: number = 10000): Promise<any[]> {
+    return queryAyaEntities(limit, 'aya_registry');
+}
+
+/**
+ * Idem mais sur la SURFACE PUBLIQUE (adulte exclu).
+ * Utilisé par /api/diagnostic/compare, qui affiche des « concurrents » à
+ * l'utilisateur : une entité adulte ne doit jamais y remonter.
+ */
+export async function localPgGetPublicAyaEntities(limit: number = 10000): Promise<any[]> {
+    return queryAyaEntities(limit, publicRegistry());
+}
+
+async function queryAyaEntities(limit: number, source: string): Promise<any[]> {
     const pool = getPool();
     if (!pool) return [];
     try {
-        const res = await pool.query(`SELECT * FROM aya_registry ORDER BY created_at DESC LIMIT $1`, [limit]);
+        const res = await pool.query(`SELECT * FROM ${source} ORDER BY created_at DESC LIMIT $1`, [limit]);
         return res.rows;
     } catch (e) {
         console.error('[db-local-pg] localPgGetAyaEntities error:', e);
@@ -873,7 +1007,7 @@ export async function linkedinSelectCandidates(opts: {
 
         const res: QueryResult<Entity> = await pool.query(
             `SELECT ${ENTITY_COLS}
-             FROM aya_registry
+             FROM ${publicRegistry()}
              WHERE asr_score <= 50
                AND COALESCE(payment_completed, false) = false
                AND contact_email IS NOT NULL
@@ -890,5 +1024,1532 @@ export async function linkedinSelectCandidates(opts: {
     } catch (err) {
         console.error('[db-local-pg] linkedinSelectCandidates error:', err);
         return [];
+    }
+}
+
+// ── Cashback Pollen helpers (16 juin 2026) ────────────────────────────────────
+// Tables cashback_offers + cashback_claims (Postgres VPS uniquement).
+// Voir migrations/2026-06-16_cashback_pollen.sql.
+
+export interface CashbackOfferRow {
+    id: string;
+    entity_id: string | null;
+    entity_domain: string;
+    service_name: string | null;
+    cashback_type: string;        // flat | percent
+    cashback_value: number;
+    currency: string;
+    cpa_total: number | null;
+    honey_value: number | null;
+    vertical: string | null;
+    status: string;               // active | paused | ended
+    notes: string | null;
+    affiliate_url: string | null; // lien d'affiliation taggé servi à l'agent (Amazon, Hostinger, etc.)
+}
+
+function bareDomain(input: string): string {
+    return input
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .split('/')[0]
+        .split('?')[0]
+        .split('#')[0]
+        .trim();
+}
+
+/** Offre cashback ACTIVE pour un domaine (ou null). Lecture indexee, ms. */
+export async function localPgGetActiveCashbackOffer(domain: string): Promise<CashbackOfferRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<CashbackOfferRow>(
+            `SELECT id::text, entity_id::text, entity_domain, service_name,
+                    cashback_type, cashback_value::float8 AS cashback_value, currency,
+                    cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
+                    vertical, status, notes, affiliate_url
+             FROM cashback_offers
+             WHERE entity_domain = $1 AND status = 'active'
+             LIMIT 1`,
+            [bareDomain(domain)],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetActiveCashbackOffer error:', err);
+        return null;
+    }
+}
+
+/** Cree/active une offre (admin). Upsert sur (entity_domain) actif. */
+export async function localPgUpsertCashbackOffer(input: {
+    entityId?: string | null;
+    entityDomain: string;
+    serviceName?: string | null;
+    cashbackType?: 'flat' | 'percent';
+    cashbackValue: number;
+    currency?: string;
+    cpaTotal?: number | null;
+    honeyValue?: number | null;
+    vertical?: string | null;
+    notes?: string | null;
+    affiliateUrl?: string | null;
+}): Promise<string | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<{ id: string }>(
+            `INSERT INTO cashback_offers
+                (entity_id, entity_domain, service_name, cashback_type, cashback_value,
+                 currency, cpa_total, honey_value, vertical, affiliate_url, status)
+             VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active')
+             ON CONFLICT (entity_domain) WHERE status = 'active'
+             DO UPDATE SET service_name=EXCLUDED.service_name,
+                           cashback_type=EXCLUDED.cashback_type,
+                           cashback_value=EXCLUDED.cashback_value,
+                           currency=EXCLUDED.currency,
+                           cpa_total=EXCLUDED.cpa_total,
+                           honey_value=EXCLUDED.honey_value,
+                           vertical=EXCLUDED.vertical,
+                           affiliate_url=EXCLUDED.affiliate_url,
+                           updated_at=NOW()
+             RETURNING id::text`,
+            [
+                input.entityId ?? null,
+                bareDomain(input.entityDomain),
+                input.serviceName ?? null,
+                input.cashbackType ?? 'flat',
+                input.cashbackValue,
+                input.currency ?? 'CHF',
+                input.cpaTotal ?? null,
+                input.honeyValue ?? null,
+                input.vertical ?? null,
+                input.affiliateUrl ?? null,
+            ],
+        );
+        return res.rows[0]?.id ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgUpsertCashbackOffer error:', err);
+        return null;
+    }
+}
+
+/** Un claim existe-t-il deja pour ce jti ? (anti-rejeu). */
+export async function localPgGetCashbackClaimByJti(jti: string): Promise<{ id: string; status: string } | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<{ id: string; status: string }>(
+            `SELECT id::text, status FROM cashback_claims WHERE jti = $1 LIMIT 1`,
+            [jti],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetCashbackClaimByJti error:', err);
+        return null;
+    }
+}
+
+/** Enregistre un claim (status 'claimed' → validation manuelle). Retourne l'id ou null. */
+export async function localPgInsertCashbackClaim(input: {
+    jti: string;
+    offerId: string;
+    entityId?: string | null;
+    entityDomain: string;
+    agentId?: string | null;
+    principalRef?: string | null;
+    proof?: unknown;
+    currency?: string;
+    tokenIssuedAt?: Date | null;
+    tokenExp?: Date | null;
+}): Promise<string | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<{ id: string }>(
+            `INSERT INTO cashback_claims
+                (jti, offer_id, entity_id, entity_domain, agent_id, principal_ref,
+                 status, proof, currency, token_issued_at, token_exp)
+             VALUES ($1, $2::uuid, $3::uuid, $4, $5, $6, 'claimed', $7::jsonb, $8, $9, $10)
+             ON CONFLICT (jti) DO NOTHING
+             RETURNING id::text`,
+            [
+                input.jti,
+                input.offerId,
+                input.entityId ?? null,
+                bareDomain(input.entityDomain),
+                input.agentId ?? null,
+                input.principalRef ?? null,
+                input.proof != null ? JSON.stringify(input.proof) : null,
+                input.currency ?? 'CHF',
+                input.tokenIssuedAt ?? null,
+                input.tokenExp ?? null,
+            ],
+        );
+        return res.rows[0]?.id ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgInsertCashbackClaim error:', err);
+        return null;
+    }
+}
+
+/** Offres actives pour un lot de domaines → Map(domain → offre). Pour annoter les resultats agent. */
+export async function localPgGetActiveCashbackOffersForDomains(
+    domains: string[],
+): Promise<Map<string, CashbackOfferRow>> {
+    const out = new Map<string, CashbackOfferRow>();
+    const pool = getPool();
+    if (!pool || domains.length === 0) return out;
+    const bare = Array.from(new Set(domains.map(bareDomain).filter(Boolean)));
+    if (bare.length === 0) return out;
+    try {
+        const res = await pool.query<CashbackOfferRow>(
+            `SELECT id::text, entity_id::text, entity_domain, service_name,
+                    cashback_type, cashback_value::float8 AS cashback_value, currency,
+                    cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
+                    vertical, status, notes, affiliate_url
+             FROM cashback_offers
+             WHERE status = 'active' AND entity_domain = ANY($1)`,
+            [bare],
+        );
+        for (const row of res.rows) out.set(row.entity_domain, row);
+        return out;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetActiveCashbackOffersForDomains error:', err);
+        return out;
+    }
+}
+
+/** Liste des offres (admin). */
+export async function localPgListCashbackOffers(limit = 200): Promise<CashbackOfferRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res = await pool.query<CashbackOfferRow>(
+            `SELECT id::text, entity_id::text, entity_domain, service_name,
+                    cashback_type, cashback_value::float8 AS cashback_value, currency,
+                    cpa_total::float8 AS cpa_total, honey_value::float8 AS honey_value,
+                    vertical, status, notes, affiliate_url
+             FROM cashback_offers
+             ORDER BY created_at DESC
+             LIMIT $1`,
+            [limit],
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgListCashbackOffers error:', err);
+        return [];
+    }
+}
+
+/** Change le status d'une offre (active | paused | ended). */
+export async function localPgSetCashbackOfferStatus(id: string, status: string): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res = await pool.query(
+            `UPDATE cashback_offers SET status=$2, updated_at=NOW() WHERE id=$1::uuid`,
+            [id, status],
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgSetCashbackOfferStatus error:', err);
+        return false;
+    }
+}
+
+export interface CashbackClaimRow {
+    id: string;
+    jti: string;
+    offer_id: string;
+    entity_id: string | null;
+    entity_domain: string;
+    agent_id: string | null;
+    principal_ref: string | null;
+    status: string;
+    proof: unknown;
+    amount_cashback: number | null;
+    amount_honey: number | null;
+    currency: string;
+    claimed_at: string;
+    validated_at: string | null;
+    paid_at: string | null;
+    review_notes: string | null;
+    // jointure offre (pour resoudre les montants)
+    offer_cashback_type?: string;
+    offer_cashback_value?: number;
+    offer_honey_value?: number | null;
+}
+
+/** Liste paginee des claims (admin), filtrable par status, avec champs offre joints. */
+export async function localPgListCashbackClaims(opts: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+}): Promise<{ rows: CashbackClaimRow[]; total: number }> {
+    const pool = getPool();
+    if (!pool) return { rows: [], total: 0 };
+    const { status, limit = 100, offset = 0 } = opts;
+    try {
+        const params: unknown[] = [];
+        const where = status ? `WHERE c.status = $${params.push(status)}` : '';
+        const countRes = await pool.query<{ cnt: string }>(
+            `SELECT COUNT(*)::text AS cnt FROM cashback_claims c ${where}`,
+            params,
+        );
+        const total = parseInt(countRes.rows[0]?.cnt ?? '0', 10);
+        const limitIdx = params.push(limit);
+        const offsetIdx = params.push(offset);
+        const res = await pool.query<CashbackClaimRow>(
+            `SELECT c.id::text, c.jti, c.offer_id::text, c.entity_id::text, c.entity_domain,
+                    c.agent_id, c.principal_ref, c.status, c.proof,
+                    c.amount_cashback::float8 AS amount_cashback,
+                    c.amount_honey::float8 AS amount_honey, c.currency,
+                    c.claimed_at::text, c.validated_at::text, c.paid_at::text, c.review_notes,
+                    o.cashback_type AS offer_cashback_type,
+                    o.cashback_value::float8 AS offer_cashback_value,
+                    o.honey_value::float8 AS offer_honey_value
+             FROM cashback_claims c
+             LEFT JOIN cashback_offers o ON o.id = c.offer_id
+             ${where}
+             ORDER BY c.claimed_at DESC
+             LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+            params,
+        );
+        return { rows: res.rows, total };
+    } catch (err) {
+        console.error('[db-local-pg] localPgListCashbackClaims error:', err);
+        return { rows: [], total: 0 };
+    }
+}
+
+/** Un claim + son offre (pour la validation, resolution des montants). */
+export async function localPgGetClaimWithOffer(id: string): Promise<CashbackClaimRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res = await pool.query<CashbackClaimRow>(
+            `SELECT c.id::text, c.jti, c.offer_id::text, c.entity_id::text, c.entity_domain,
+                    c.agent_id, c.principal_ref, c.status, c.proof,
+                    c.amount_cashback::float8 AS amount_cashback,
+                    c.amount_honey::float8 AS amount_honey, c.currency,
+                    c.claimed_at::text, c.validated_at::text, c.paid_at::text, c.review_notes,
+                    o.cashback_type AS offer_cashback_type,
+                    o.cashback_value::float8 AS offer_cashback_value,
+                    o.honey_value::float8 AS offer_honey_value
+             FROM cashback_claims c
+             LEFT JOIN cashback_offers o ON o.id = c.offer_id
+             WHERE c.id = $1::uuid LIMIT 1`,
+            [id],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetClaimWithOffer error:', err);
+        return null;
+    }
+}
+
+/** Met a jour un claim lors de la validation manuelle (validate | pay | reject). */
+export async function localPgUpdateCashbackClaim(id: string, fields: {
+    status?: string;
+    amountCashback?: number | null;
+    amountHoney?: number | null;
+    validatedAt?: Date | null;
+    paidAt?: Date | null;
+    reviewNotes?: string | null;
+}): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    const sets: string[] = [];
+    const params: unknown[] = [id];
+    const add = (col: string, val: unknown) => { params.push(val); sets.push(`${col}=$${params.length}`); };
+    if (fields.status !== undefined)        add('status', fields.status);
+    if (fields.amountCashback !== undefined) add('amount_cashback', fields.amountCashback);
+    if (fields.amountHoney !== undefined)    add('amount_honey', fields.amountHoney);
+    if (fields.validatedAt !== undefined)    add('validated_at', fields.validatedAt);
+    if (fields.paidAt !== undefined)         add('paid_at', fields.paidAt);
+    if (fields.reviewNotes !== undefined)    add('review_notes', fields.reviewNotes);
+    if (sets.length === 0) return true;
+    try {
+        const res = await pool.query(
+            `UPDATE cashback_claims SET ${sets.join(', ')} WHERE id=$1::uuid`,
+            params,
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgUpdateCashbackClaim error:', err);
+        return false;
+    }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// OUTREACH ENGINE — cold B2B SMTP individuel throttle.
+// Tables outreach_recipients / outreach_suppression / outreach_events.
+// Voir migrations/2026-06-24_outreach_engine.sql + [[project_outreach_engine]].
+// ════════════════════════════════════════════════════════════════════════════
+
+// Pays servis en francais — DOIT rester aligne avec lib/outreach/lang.ts.
+const OUTREACH_FR_COUNTRIES = ['FR', 'MC', 'CH', 'LU', 'BE', 'MQ', 'GP', 'GF', 'RE', 'NC', 'PF'];
+
+export type OutreachRecipientRow = {
+    id: string;
+    entity_id: string | null;
+    domain: string | null;
+    email: string;
+    display_name: string | null;
+    sector_macro: string | null;
+    country_legal: string | null;
+    lang: string;
+    asr_score: number | null;
+    campaign: string;
+    status: string;
+    unsubscribe_token: string;
+    kind: string;
+};
+
+/**
+ * Importe des cibles depuis aya_registry dans la file outreach_recipients.
+ * Filtre : email present + secteur dans la liste + pays non exclus + non supprime.
+ * Deduplique par email (garde le meilleur score). ON CONFLICT DO NOTHING (idempotent).
+ * Retourne le nombre de lignes REELLEMENT inserees.
+ */
+export async function localPgImportOutreachRecipients(opts: {
+    sectors: string[];
+    campaign: string;
+    excludeCountries?: string[];
+    minScore?: number | null;
+    limit?: number;
+}): Promise<{ inserted: number; error?: string }> {
+    const pool = getPool();
+    if (!pool) return { inserted: 0, error: 'pg_unconfigured' };
+
+    const sectors = opts.sectors;
+    const campaign = opts.campaign || 'default';
+    const exclude = (opts.excludeCountries ?? []).map((c) => c.toUpperCase());
+    const minScore = opts.minScore ?? null;
+    const limit = Math.min(Math.max(opts.limit ?? 5000, 1), 100_000);
+
+    const frList = OUTREACH_FR_COUNTRIES.map((c) => `'${c}'`).join(',');
+
+    try {
+        const res = await pool.query(
+            `INSERT INTO outreach_recipients
+                (entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, unsubscribe_token)
+             (
+               SELECT entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, token
+               FROM (
+                 SELECT DISTINCT ON (lower(r.contact_email))
+                   r.entity_id AS entity_id,
+                   regexp_replace(regexp_replace(lower(r.website), '^https?://(www\\.)?', '', 'g'), '/.*$', '', 'g') AS domain,
+                   lower(r.contact_email) AS email,
+                   r.display_name AS display_name,
+                   r.sector_macro AS sector_macro,
+                   r.country_legal AS country_legal,
+                   CASE WHEN upper(coalesce(r.country_legal,'')) IN (${frList}) THEN 'fr' ELSE 'en' END AS lang,
+                   r.asr_score AS asr_score,
+                   $1::text AS campaign,
+                   gen_random_uuid()::text AS token
+                 FROM ${publicRegistry('r')}
+                 LEFT JOIN outreach_suppression s ON s.email = lower(r.contact_email)
+                 WHERE r.contact_email IS NOT NULL
+                   AND position('@' in r.contact_email) > 1
+                   AND r.contact_email !~* '(@pec\\.|legalmail|postecert|pecimprese|@cert\\.)'
+                   AND r.contact_email !~* '\\.apix\\.fi'
+                   AND r.contact_email !~* '\\.netvisor\\.fi'
+                   AND r.contact_email !~* 'procountor'
+                   AND r.contact_email !~* 'posrednik'
+                   AND lower(split_part(r.contact_email,'@',2)) <> 'domain.com'
+                   AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
+                   AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
+                   AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
+                   AND split_part(r.contact_email,'@',1) ~* '^[a-z0-9]'  -- pas de local-part malformé (tiret/point en tête = artefact de scraping)
+                   AND length(split_part(r.contact_email,'@',1)) >= 3
+                   -- adresses génériques de rôle, MULTILINGUES (registre mondial) : non-personnelles,
+                   -- fort risque spam/bot/mauvais département, souvent inexistantes.
+                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|media|invoice|invoices|billing|accounts|accounting|orders|order|jobs|careers|career|recruitment|hr|rh|complaints|complaint|appeals|appeal|bereavements|feedback|survey|info|infos|information|contact|contacts|kontakt|contacto|contato|contatto|contatti|hello|hallo|hola|ciao|ola|bonjour|hi|hey|welcome|willkommen|bienvenue|benvenuto|general|generalinquiries|sales|ventes|vente|ventas|vendite|verkoop|vertrieb|vanzari|salg|salj|comercial|commercial|support|soporte|supporto|suporte|assistance|assistenza|asistencia|asistenta|asistente|aide|ayuda|help|helpdesk|pomoc|ajutor|care|customercare|customer-care|customerservice|customer-service|serviceclient|service-client|sav|kundenservice|kundendienst|kundeservice|kundtjanst|kundservice|klantenservice|klantendienst|servicedesk|service|services|office|ufficio|oficina|buero|buro|bureau|birou|biuro|kantoor|reception|accueil|empfang|secretariat|segreteria|sekretariat|administration|amministrazione|administracion|admin|direction|management|shop|store|sklep|boutique|negozio|tienda|loja|winkel|team|teams|mail|email|e-mail|webmail|enquiry|enquiries|inquiry|inquiries|questions|ask|ordini|pedidos|commande|commandes|comenzi|zamowienia|encomendas|bestellung|bestellingen|bestilling|ordre|booking|bookings|reservation|reservations|reservas|prenotazioni|atendimento|atencion|apoio)$'
+                   AND r.sector_macro = ANY($2::text[])
+                   AND s.email IS NULL
+                   AND (cardinality($3::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($3::text[]))
+                   AND ($4::numeric IS NULL OR r.asr_score >= $4::numeric)
+                   AND coalesce(r.display_name,'') NOT ILIKE '%porn%'
+                   AND coalesce(r.display_name,'') NOT ILIKE '%escort%'
+                   AND coalesce(r.display_name,'') NOT ILIKE '%xxx%'
+                   AND coalesce(r.display_name,'') NOT ILIKE '%onlyfans%'
+                 ORDER BY lower(r.contact_email), r.asr_score DESC NULLS LAST
+               ) q
+               LIMIT $5
+             )
+             ON CONFLICT (lower(email), campaign) DO NOTHING`,
+            [campaign, sectors, exclude, minScore, limit],
+        );
+        return { inserted: res.rowCount ?? 0 };
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error('[db-local-pg] localPgImportOutreachRecipients error:', msg);
+        return { inserted: 0, error: msg };
+    }
+}
+
+/**
+ * Apercu (lecture seule) des cibles potentielles, sans rien importer.
+ * Sert a la BD (liste de candidats deal cashback) et a valider un ciblage.
+ */
+export async function localPgPreviewOutreachTargets(opts: {
+    sectors: string[];
+    excludeCountries?: string[];
+    minScore?: number | null;
+    limit?: number;
+}): Promise<{ rows: Array<{ domain: string | null; display_name: string | null; sector_macro: string | null; country_legal: string | null; contact_email: string | null; asr_score: number | null }>; total_with_email: number }> {
+    const pool = getPool();
+    if (!pool) return { rows: [], total_with_email: 0 };
+
+    const sectors = opts.sectors;
+    const exclude = (opts.excludeCountries ?? []).map((c) => c.toUpperCase());
+    const minScore = opts.minScore ?? null;
+    const limit = Math.min(Math.max(opts.limit ?? 100, 1), 5000);
+
+    const where = `
+        r.contact_email IS NOT NULL
+        AND position('@' in r.contact_email) > 1
+                   AND r.contact_email !~* '(@pec\\.|legalmail|postecert|pecimprese|@cert\\.)'
+                   AND r.contact_email !~* '\\.apix\\.fi'
+                   AND r.contact_email !~* '\\.netvisor\\.fi'
+                   AND r.contact_email !~* 'procountor'
+                   AND r.contact_email !~* 'posrednik'
+                   AND lower(split_part(r.contact_email,'@',2)) <> 'domain.com'
+                   AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
+                   AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
+                   AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
+                   AND split_part(r.contact_email,'@',1) ~* '^[a-z0-9]'  -- pas de local-part malformé (tiret/point en tête = artefact de scraping)
+                   AND length(split_part(r.contact_email,'@',1)) >= 3
+                   -- adresses génériques de rôle, MULTILINGUES (registre mondial) : non-personnelles,
+                   -- fort risque spam/bot/mauvais département, souvent inexistantes.
+                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|media|invoice|invoices|billing|accounts|accounting|orders|order|jobs|careers|career|recruitment|hr|rh|complaints|complaint|appeals|appeal|bereavements|feedback|survey|info|infos|information|contact|contacts|kontakt|contacto|contato|contatto|contatti|hello|hallo|hola|ciao|ola|bonjour|hi|hey|welcome|willkommen|bienvenue|benvenuto|general|generalinquiries|sales|ventes|vente|ventas|vendite|verkoop|vertrieb|vanzari|salg|salj|comercial|commercial|support|soporte|supporto|suporte|assistance|assistenza|asistencia|asistenta|asistente|aide|ayuda|help|helpdesk|pomoc|ajutor|care|customercare|customer-care|customerservice|customer-service|serviceclient|service-client|sav|kundenservice|kundendienst|kundeservice|kundtjanst|kundservice|klantenservice|klantendienst|servicedesk|service|services|office|ufficio|oficina|buero|buro|bureau|birou|biuro|kantoor|reception|accueil|empfang|secretariat|segreteria|sekretariat|administration|amministrazione|administracion|admin|direction|management|shop|store|sklep|boutique|negozio|tienda|loja|winkel|team|teams|mail|email|e-mail|webmail|enquiry|enquiries|inquiry|inquiries|questions|ask|ordini|pedidos|commande|commandes|comenzi|zamowienia|encomendas|bestellung|bestellingen|bestilling|ordre|booking|bookings|reservation|reservations|reservas|prenotazioni|atendimento|atencion|apoio)$'
+        AND r.sector_macro = ANY($1::text[])
+        AND (cardinality($2::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($2::text[]))
+        AND ($3::numeric IS NULL OR r.asr_score >= $3::numeric)
+        AND coalesce(r.display_name,'') NOT ILIKE '%porn%'
+        AND coalesce(r.display_name,'') NOT ILIKE '%escort%'
+        AND coalesce(r.display_name,'') NOT ILIKE '%xxx%'
+        AND coalesce(r.display_name,'') NOT ILIKE '%onlyfans%'`;
+
+    try {
+        const countRes = await pool.query(
+            `SELECT COUNT(DISTINCT lower(r.contact_email))::int AS cnt FROM ${publicRegistry('r')} WHERE ${where}`,
+            [sectors, exclude, minScore],
+        );
+        const dataRes = await pool.query(
+            `SELECT DISTINCT ON (lower(r.contact_email))
+               regexp_replace(regexp_replace(lower(r.website), '^https?://(www\\.)?', '', 'g'), '/.*$', '', 'g') AS domain,
+               r.display_name, r.sector_macro, r.country_legal, lower(r.contact_email) AS contact_email,
+               r.asr_score::float8 AS asr_score
+             FROM ${publicRegistry('r')}
+             WHERE ${where}
+             ORDER BY lower(r.contact_email), r.asr_score DESC NULLS LAST
+             LIMIT $4`,
+            [sectors, exclude, minScore, limit],
+        );
+        return { rows: dataRes.rows as any[], total_with_email: (countRes.rows[0]?.cnt as number) ?? 0 };
+    } catch (err) {
+        console.error('[db-local-pg] localPgPreviewOutreachTargets error:', err);
+        return { rows: [], total_with_email: 0 };
+    }
+}
+
+/** Prochaine fournee a envoyer : pending, non supprimes, pour une campagne. */
+export async function localPgGetOutreachBatch(campaign: string, limit: number): Promise<OutreachRecipientRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<OutreachRecipientRow> = await pool.query(
+            `SELECT rec.id::text, rec.entity_id::text, rec.domain, rec.email, rec.display_name,
+                    rec.sector_macro, rec.country_legal, rec.lang, rec.asr_score::float8 AS asr_score,
+                    rec.campaign, rec.status, rec.unsubscribe_token, rec.kind
+             FROM outreach_recipients rec
+             LEFT JOIN outreach_suppression s ON s.email = lower(rec.email)
+             WHERE rec.campaign = $1 AND rec.status = 'pending' AND s.email IS NULL
+             ORDER BY rec.asr_score DESC NULLS LAST, rec.created_at ASC
+             LIMIT $2`,
+            [campaign, Math.min(Math.max(limit, 1), 1000)],
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetOutreachBatch error:', err);
+        return [];
+    }
+}
+
+export async function localPgMarkOutreachSent(id: string, messageId?: string | null): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res = await pool.query(
+            `UPDATE outreach_recipients
+             SET status='sent', message_id=$2, attempts=attempts+1, sent_at=NOW(), updated_at=NOW()
+             WHERE id=$1::uuid`,
+            [id, messageId ?? null],
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgMarkOutreachSent error:', err);
+        return false;
+    }
+}
+
+export async function localPgMarkOutreachFailed(id: string, error: string, status: 'failed' | 'bounced' = 'failed'): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res = await pool.query(
+            `UPDATE outreach_recipients
+             SET status=$3, error=$2, attempts=attempts+1, updated_at=NOW()
+             WHERE id=$1::uuid`,
+            [id, error.slice(0, 500), status],
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgMarkOutreachFailed error:', err);
+        return false;
+    }
+}
+
+export async function localPgAddOutreachSuppression(email: string, reason: string, source: string): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        await pool.query(
+            `INSERT INTO outreach_suppression (email, reason, source)
+             VALUES (lower($1), $2, $3)
+             ON CONFLICT (email) DO NOTHING`,
+            [email, reason, source],
+        );
+        return true;
+    } catch (err) {
+        console.error('[db-local-pg] localPgAddOutreachSuppression error:', err);
+        return false;
+    }
+}
+
+export async function localPgGetOutreachByToken(token: string): Promise<OutreachRecipientRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult<OutreachRecipientRow> = await pool.query(
+            `SELECT id::text, entity_id::text, domain, email, display_name, sector_macro,
+                    country_legal, lang, asr_score::float8 AS asr_score, campaign, status, unsubscribe_token
+             FROM outreach_recipients WHERE unsubscribe_token = $1 LIMIT 1`,
+            [token],
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetOutreachByToken error:', err);
+        return null;
+    }
+}
+
+/** Desinscription via jeton : marque le destinataire + ajoute a la suppression globale. */
+export async function localPgUnsubscribeOutreach(token: string, source: string): Promise<{ ok: boolean; email?: string }> {
+    const pool = getPool();
+    if (!pool) return { ok: false };
+    try {
+        const res = await pool.query(
+            `UPDATE outreach_recipients SET status='unsubscribed', updated_at=NOW()
+             WHERE unsubscribe_token=$1 RETURNING email`,
+            [token],
+        );
+        const email: string | undefined = res.rows[0]?.email;
+        if (!email) return { ok: false };
+        await localPgAddOutreachSuppression(email, 'unsubscribe', source);
+        await localPgInsertOutreachEvent({ email, type: 'unsubscribe', detail: { source } });
+        return { ok: true, email };
+    } catch (err) {
+        console.error('[db-local-pg] localPgUnsubscribeOutreach error:', err);
+        return { ok: false };
+    }
+}
+
+export async function localPgInsertOutreachEvent(input: {
+    recipientId?: string | null;
+    email?: string | null;
+    type: string;
+    detail?: Record<string, unknown> | null;
+}): Promise<void> {
+    const pool = getPool();
+    if (!pool) return;
+    try {
+        await pool.query(
+            `INSERT INTO outreach_events (recipient_id, email, type, detail)
+             VALUES ($1, $2, $3, $4::jsonb)`,
+            [input.recipientId ?? null, input.email ?? null, input.type, JSON.stringify(input.detail ?? {})],
+        );
+    } catch (err) {
+        console.error('[db-local-pg] localPgInsertOutreachEvent error:', err);
+    }
+}
+
+/** Compteurs par statut + adressables restants + supprimes. */
+export async function localPgOutreachStats(campaign?: string): Promise<{
+    by_status: Record<string, number>;
+    total: number;
+    suppressed: number;
+    campaigns: string[];
+}> {
+    const pool = getPool();
+    if (!pool) return { by_status: {}, total: 0, suppressed: 0, campaigns: [] };
+    try {
+        const clause = campaign ? 'WHERE campaign = $1' : '';
+        const params = campaign ? [campaign] : [];
+        const statusRes = await pool.query(
+            `SELECT status, COUNT(*)::int AS cnt FROM outreach_recipients ${clause} GROUP BY status`,
+            params,
+        );
+        const by_status: Record<string, number> = {};
+        let total = 0;
+        for (const r of statusRes.rows as { status: string; cnt: number }[]) {
+            by_status[r.status] = r.cnt;
+            total += r.cnt;
+        }
+        const supRes = await pool.query(`SELECT COUNT(*)::int AS cnt FROM outreach_suppression`);
+        const campRes = await pool.query(`SELECT DISTINCT campaign FROM outreach_recipients ORDER BY campaign`);
+        return {
+            by_status,
+            total,
+            suppressed: (supRes.rows[0]?.cnt as number) ?? 0,
+            campaigns: (campRes.rows as { campaign: string }[]).map((r) => r.campaign),
+        };
+    } catch (err) {
+        console.error('[db-local-pg] localPgOutreachStats error:', err);
+        return { by_status: {}, total: 0, suppressed: 0, campaigns: [] };
+    }
+}
+
+// ── PARTENAIRES CASHBACK (détection programme d'affiliation) ─────────────────
+
+export type PartnerScanCandidate = {
+    domain: string;
+    entity_id: string | null;
+    display_name: string | null;
+    sector_macro: string | null;
+    country_legal: string | null;
+    contact_email: string | null;
+    asr_score: number | null;
+};
+
+/** Domaines candidats à scanner (digital/SaaS/fintech/crypto, email présent) PAS encore scannés. */
+export async function localPgGetPartnerScanCandidates(opts: {
+    sectors: string[];
+    excludeCountries?: string[];
+    limit?: number;
+}): Promise<PartnerScanCandidate[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    const exclude = (opts.excludeCountries ?? []).map((c) => c.toUpperCase());
+    const limit = Math.min(Math.max(opts.limit ?? 25, 1), 200);
+    try {
+        const res = await pool.query(
+            `SELECT DISTINCT ON (dom) dom AS domain, entity_id::text, display_name, sector_macro,
+                    country_legal, contact_email, asr_score::float8 AS asr_score
+             FROM (
+               SELECT r.entity_id, r.display_name, r.sector_macro, r.country_legal, r.contact_email, r.asr_score,
+                      regexp_replace(regexp_replace(lower(r.website), '^https?://(www\\.)?', '', 'g'), '/.*$', '', 'g') AS dom
+               FROM ${publicRegistry('r')}
+               WHERE r.contact_email IS NOT NULL AND position('@' in r.contact_email) > 1
+                   AND r.contact_email !~* '(@pec\\.|legalmail|postecert|pecimprese|@cert\\.)'
+                   AND r.contact_email !~* '\\.apix\\.fi'
+                   AND r.contact_email !~* '\\.netvisor\\.fi'
+                   AND r.contact_email !~* 'procountor'
+                   AND r.contact_email !~* 'posrednik'
+                   AND lower(split_part(r.contact_email,'@',2)) <> 'domain.com'
+                   AND lower(split_part(r.contact_email,'@',2)) !~ '^(gmail|yahoo|ymail|hotmail|outlook|live|msn|libero|virgilio|aol|gmx|orange|wanadoo|free|laposte|sfr|t-online)\\.'
+                   AND split_part(r.contact_email,'@',1) !~ '^[0-9]{5,}'
+                   AND split_part(r.contact_email,'@',1) !~ '^[0-9]+$'
+                   AND split_part(r.contact_email,'@',1) ~* '^[a-z0-9]'  -- pas de local-part malformé (tiret/point en tête = artefact de scraping)
+                   AND length(split_part(r.contact_email,'@',1)) >= 3
+                   -- adresses génériques de rôle, MULTILINGUES (registre mondial) : non-personnelles,
+                   -- fort risque spam/bot/mauvais département, souvent inexistantes.
+                   AND lower(split_part(r.contact_email,'@',1)) !~ '^(copyright|legal|abuse|postmaster|webmaster|hostmaster|noreply|no-reply|donotreply|do-not-reply|mailer-daemon|privacy|dpo|compliance|gdpr|rgpd|spam|root|nobody|notification|notifications|newsletter|unsubscribe|marketing|press|presse|media|invoice|invoices|billing|accounts|accounting|orders|order|jobs|careers|career|recruitment|hr|rh|complaints|complaint|appeals|appeal|bereavements|feedback|survey|info|infos|information|contact|contacts|kontakt|contacto|contato|contatto|contatti|hello|hallo|hola|ciao|ola|bonjour|hi|hey|welcome|willkommen|bienvenue|benvenuto|general|generalinquiries|sales|ventes|vente|ventas|vendite|verkoop|vertrieb|vanzari|salg|salj|comercial|commercial|support|soporte|supporto|suporte|assistance|assistenza|asistencia|asistenta|asistente|aide|ayuda|help|helpdesk|pomoc|ajutor|care|customercare|customer-care|customerservice|customer-service|serviceclient|service-client|sav|kundenservice|kundendienst|kundeservice|kundtjanst|kundservice|klantenservice|klantendienst|servicedesk|service|services|office|ufficio|oficina|buero|buro|bureau|birou|biuro|kantoor|reception|accueil|empfang|secretariat|segreteria|sekretariat|administration|amministrazione|administracion|admin|direction|management|shop|store|sklep|boutique|negozio|tienda|loja|winkel|team|teams|mail|email|e-mail|webmail|enquiry|enquiries|inquiry|inquiries|questions|ask|ordini|pedidos|commande|commandes|comenzi|zamowienia|encomendas|bestellung|bestellingen|bestilling|ordre|booking|bookings|reservation|reservations|reservas|prenotazioni|atendimento|atencion|apoio)$'
+                 AND r.sector_macro = ANY($1::text[])
+                 AND (cardinality($2::text[]) = 0 OR upper(coalesce(r.country_legal,'')) <> ALL($2::text[]))
+                 AND coalesce(r.website,'') <> ''
+             ) q
+             WHERE dom <> '' AND dom NOT IN (SELECT domain FROM partner_candidates)
+             ORDER BY dom, asr_score DESC NULLS LAST
+             LIMIT $3`,
+            [opts.sectors, exclude, limit],
+        );
+        return res.rows as PartnerScanCandidate[];
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetPartnerScanCandidates error:', err);
+        return [];
+    }
+}
+
+export async function localPgUpsertPartnerCandidate(row: {
+    domain: string; entityId?: string | null; displayName?: string | null; sector?: string | null;
+    country?: string | null; email?: string | null; asrScore?: number | null;
+    hasAffiliate: boolean; affiliateUrl?: string | null; signals?: unknown;
+}): Promise<void> {
+    const pool = getPool();
+    if (!pool) return;
+    try {
+        await pool.query(
+            `INSERT INTO partner_candidates
+                (domain, entity_id, display_name, sector_macro, country_legal, contact_email, asr_score, has_affiliate, affiliate_url, signals, scanned_at)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb, NOW())
+             ON CONFLICT (domain) DO UPDATE SET
+                has_affiliate=EXCLUDED.has_affiliate, affiliate_url=EXCLUDED.affiliate_url,
+                signals=EXCLUDED.signals, scanned_at=NOW()`,
+            [row.domain, row.entityId ?? null, row.displayName ?? null, row.sector ?? null, row.country ?? null,
+             row.email ?? null, row.asrScore ?? null, row.hasAffiliate, row.affiliateUrl ?? null, JSON.stringify(row.signals ?? [])],
+        );
+    } catch (err) {
+        console.error('[db-local-pg] localPgUpsertPartnerCandidate error:', err);
+    }
+}
+
+/** Met un partenaire qualifié dans la file outreach (kind=partner) + marque queued. */
+export async function localPgQueuePartnerRecipient(row: {
+    domain: string; entityId?: string | null; email: string; displayName?: string | null;
+    sector?: string | null; country?: string | null; lang: string; asrScore?: number | null; campaign: string;
+}): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        // brand = 1er label du domaine (24mx.co.uk -> "24mx") ; ON CONFLICT non ciblé
+        // dédupe sur l'email OU la marque (index partiel uq_outreach_partner_brand).
+        const r = await pool.query(
+            `INSERT INTO outreach_recipients
+                (entity_id, domain, email, display_name, sector_macro, country_legal, lang, asr_score, campaign, kind, brand, unsubscribe_token)
+             VALUES ($1,$2,lower($3),$4,$5,$6,$7,$8,$9,'partner',
+                     split_part(regexp_replace(lower($2),'^www\\.',''),'.',1), gen_random_uuid()::text)
+             ON CONFLICT DO NOTHING`,
+            [row.entityId ?? null, row.domain, row.email, row.displayName ?? null, row.sector ?? null,
+             row.country ?? null, row.lang, row.asrScore ?? null, row.campaign],
+        );
+        await pool.query(`UPDATE partner_candidates SET queued=true WHERE domain=$1`, [row.domain]);
+        return (r.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgQueuePartnerRecipient error:', err);
+        return false;
+    }
+}
+
+/** Shortlist BD : candidats partenaires (par défaut ceux avec affiliation détectée). */
+export async function localPgListPartnerCandidates(opts: { onlyAffiliate?: boolean; limit?: number } = {}): Promise<{
+    rows: Array<{ domain: string; display_name: string | null; sector_macro: string | null; country_legal: string | null; contact_email: string | null; asr_score: number | null; has_affiliate: boolean; affiliate_url: string | null; queued: boolean }>;
+    affiliate_count: number;
+    scanned_count: number;
+}> {
+    const pool = getPool();
+    if (!pool) return { rows: [], affiliate_count: 0, scanned_count: 0 };
+    try {
+        const where = opts.onlyAffiliate ? 'WHERE has_affiliate = true' : '';
+        // Dédup par MARQUE (1 ligne par brand : 24mx.* -> 1 seule entrée).
+        const dataRes = await pool.query(
+            `SELECT domain, display_name, sector_macro, country_legal, contact_email,
+                    asr_score, has_affiliate, affiliate_url, queued
+             FROM (
+               SELECT DISTINCT ON (split_part(regexp_replace(lower(domain),'^www\\.',''),'.',1))
+                      domain, display_name, sector_macro, country_legal, contact_email,
+                      asr_score::float8 AS asr_score, has_affiliate, affiliate_url, queued
+               FROM partner_candidates ${where}
+               ORDER BY split_part(regexp_replace(lower(domain),'^www\\.',''),'.',1), has_affiliate DESC, asr_score DESC NULLS LAST
+             ) q
+             ORDER BY has_affiliate DESC, asr_score DESC NULLS LAST
+             LIMIT $1`,
+            [Math.min(Math.max(opts.limit ?? 100, 1), 1000)],
+        );
+        // Comptes dédupés par marque.
+        const c = await pool.query(
+            `SELECT count(DISTINCT brand) FILTER (WHERE has_affiliate)::int AS aff,
+                    count(DISTINCT brand)::int AS tot
+             FROM (SELECT split_part(regexp_replace(lower(domain),'^www\\.',''),'.',1) AS brand, has_affiliate
+                   FROM partner_candidates) x`,
+        );
+        return {
+            rows: dataRes.rows as any[],
+            affiliate_count: (c.rows[0]?.aff as number) ?? 0,
+            scanned_count: (c.rows[0]?.tot as number) ?? 0,
+        };
+    } catch (err) {
+        console.error('[db-local-pg] localPgListPartnerCandidates error:', err);
+        return { rows: [], affiliate_count: 0, scanned_count: 0 };
+    }
+}
+
+// ── Tables opérationnelles rapatriées de Supabase (9 août 2026) ───────────────
+//
+// analyses, otp_codes, sessions, scan_states, system_logs, aya_api_analytics
+// vivaient encore chez Supabase (États-Unis, projet derrière Cloudflare) alors
+// que le reste de l'application tournait déjà entièrement en Suisse. Deux de ces
+// tables portaient de la donnée personnelle : les URL scannées avec l'adresse
+// e-mail du visiteur dans `analyses`, et les codes de connexion dans
+// `otp_codes`. C'est ce qui empêchait de dire qu'aucune donnée utilisateur ne
+// quitte le territoire, et c'est la seule raison de ce bloc.
+//
+// `url_normalized` est une colonne GENERATED côté Postgres, comme chez Supabase :
+// le code ne l'écrit jamais, il la lit seulement. L'expression a été vérifiée sur
+// les 185 lignes reprises, elle reproduit exactement les valeurs d'origine.
+
+export type LocalAnalysisRow = {
+    id: string;
+    url: string | null;
+    email: string | null;
+    score: number | null;
+    data: any;
+    created_at: string | null;
+    updated_at: string | null;
+};
+
+/**
+ * Upsert d'une analyse, avec la même stratégie de fusion que la version Supabase :
+ * une sauvegarde partielle (l'e-mail seul, par exemple) ne doit jamais écraser le
+ * score ni les données déjà enrichies.
+ */
+export async function localPgSaveAnalysis(id: string, record: Record<string, any>): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+
+    try {
+        const existingRes: QueryResult = await pool.query(
+            'SELECT id, url, email, score, data FROM analyses WHERE id = $1',
+            [id]
+        );
+        const existing = existingRes.rows[0] || null;
+
+        const url = record.url ?? existing?.url ?? null;
+        const email = record.email !== undefined ? record.email : (existing?.email ?? null);
+        const score = record.score !== undefined ? record.score : (existing?.score ?? 0);
+
+        let data = record.data !== undefined ? record.data : (existing?.data ?? {});
+        if (record.data && existing?.data && typeof record.data === 'object' && typeof existing.data === 'object') {
+            data = {
+                ...existing.data,
+                ...record.data,
+                fields: {
+                    ...(existing.data.fields || {}),
+                    ...(record.data.fields || {}),
+                },
+            };
+        }
+
+        await pool.query(
+            `INSERT INTO analyses (id, url, email, score, data, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, now(), now())
+             ON CONFLICT (id) DO UPDATE
+             SET url = EXCLUDED.url,
+                 email = EXCLUDED.email,
+                 score = EXCLUDED.score,
+                 data = EXCLUDED.data,
+                 updated_at = now()`,
+            [id, url, email, score, JSON.stringify(data ?? {})]
+        );
+        return true;
+    } catch (err) {
+        console.error('[db-local-pg] localPgSaveAnalysis error:', err);
+        return false;
+    }
+}
+
+export async function localPgGetAnalysis(id: string): Promise<LocalAnalysisRow | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult = await pool.query('SELECT * FROM analyses WHERE id = $1', [id]);
+        return res.rows[0] || null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetAnalysis error:', err);
+        return null;
+    }
+}
+
+/** Analyses d'une URL normalisée, les plus récentes d'abord. L'appelant choisit la meilleure. */
+export async function localPgGetAnalysesByUrlNormalized(normalizedUrl: string, limit = 10): Promise<any[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult = await pool.query(
+            'SELECT * FROM analyses WHERE url_normalized = $1 ORDER BY created_at DESC LIMIT $2',
+            [normalizedUrl, limit]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetAnalysesByUrlNormalized error:', err);
+        return [];
+    }
+}
+
+export async function localPgGetAnalysesHistoryByUrl(normalizedUrl: string, limit = 5): Promise<any[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult = await pool.query(
+            'SELECT id, url, score, data, created_at FROM analyses WHERE url_normalized = $1 ORDER BY created_at DESC LIMIT $2',
+            [normalizedUrl, limit]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetAnalysesHistoryByUrl error:', err);
+        return [];
+    }
+}
+
+export async function localPgGetAnalysesByEmail(email: string, limit = 10): Promise<any[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult = await pool.query(
+            'SELECT * FROM analyses WHERE email = $1 ORDER BY created_at DESC LIMIT $2',
+            [email, limit]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetAnalysesByEmail error:', err);
+        return [];
+    }
+}
+
+/** E-mail utilisé à l'inscription, retrouvé par correspondance partielle sur l'URL. */
+export async function localPgGetRegistrationEmail(urlFragment: string): Promise<string | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult = await pool.query(
+            `SELECT email FROM analyses
+             WHERE url ILIKE '%' || $1 || '%' AND email IS NOT NULL
+             ORDER BY created_at DESC LIMIT 1`,
+            [urlFragment]
+        );
+        return res.rows[0]?.email || null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetRegistrationEmail error:', err);
+        return null;
+    }
+}
+
+// ── OTP ───────────────────────────────────────────────────────────────────────
+
+/** Un seul code actif par adresse : on supprime les précédents puis on insère. */
+export async function localPgSaveOTP(email: string, code: string): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query('DELETE FROM otp_codes WHERE email = $1', [email]);
+        await client.query(
+            `INSERT INTO otp_codes (email, code, expires_at, used, created_at)
+             VALUES ($1, $2, now() + interval '10 minutes', false, now())`,
+            [email, code]
+        );
+        await client.query('COMMIT');
+        return true;
+    } catch (err) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error('[db-local-pg] localPgSaveOTP error:', err);
+        return false;
+    } finally {
+        client.release();
+    }
+}
+
+/**
+ * Vérifie puis brûle le code. La comparaison et la suppression se font dans la même
+ * requête : un DELETE ... RETURNING ne peut pas valider deux fois le même code, même
+ * si deux requêtes arrivent en parallèle.
+ */
+export async function localPgVerifyOTP(email: string, code: string): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res: QueryResult = await pool.query(
+            `DELETE FROM otp_codes
+             WHERE id = (
+                 SELECT id FROM otp_codes
+                 WHERE email = $1 AND used = false AND code = $2 AND expires_at > now()
+                 ORDER BY created_at DESC
+                 LIMIT 1
+             )
+             RETURNING id`,
+            [email, code]
+        );
+        if (res.rowCount && res.rowCount > 0) return true;
+
+        // Rien brûlé : soit le code est faux, soit il a expiré. On nettoie les expirés
+        // pour que la table ne serve pas de journal des tentatives.
+        await pool.query('DELETE FROM otp_codes WHERE email = $1 AND expires_at <= now()', [email]);
+        return false;
+    } catch (err) {
+        console.error('[db-local-pg] localPgVerifyOTP error:', err);
+        return false;
+    }
+}
+
+// ── Scan states ───────────────────────────────────────────────────────────────
+
+export async function localPgSaveScanState(url: string, state: any): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        // url_normalized étant généré, on compare sur l'expression via la colonne elle-même.
+        await client.query(
+            `DELETE FROM scan_states
+             WHERE url_normalized = regexp_replace(regexp_replace(regexp_replace(lower(btrim($1)), '^https?://', ''), '^www\\.', ''), '/$', '')`,
+            [url]
+        );
+        await client.query('INSERT INTO scan_states (url, state, created_at) VALUES ($1, $2, now())', [
+            url,
+            JSON.stringify(state ?? {}),
+        ]);
+        await client.query('COMMIT');
+        return true;
+    } catch (err) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error('[db-local-pg] localPgSaveScanState error:', err);
+        return false;
+    } finally {
+        client.release();
+    }
+}
+
+export async function localPgGetScanState(normalizedUrl: string): Promise<any | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult = await pool.query(
+            'SELECT state FROM scan_states WHERE url_normalized = $1 ORDER BY created_at DESC LIMIT 1',
+            [normalizedUrl]
+        );
+        return res.rows[0]?.state ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetScanState error:', err);
+        return null;
+    }
+}
+
+// ── Journaux et analytics ─────────────────────────────────────────────────────
+
+export async function localPgLogPersist(entry: {
+    correlation_id: string;
+    level: string;
+    source: string;
+    step: string;
+    message: string;
+    data?: any;
+}): Promise<void> {
+    const pool = getPool();
+    if (!pool) return;
+    try {
+        await pool.query(
+            `INSERT INTO system_logs (correlation_id, level, source, step, message, data, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, now())`,
+            [
+                entry.correlation_id,
+                entry.level,
+                entry.source,
+                entry.step,
+                entry.message,
+                entry.data === undefined || entry.data === null ? null : JSON.stringify(entry.data),
+            ]
+        );
+    } catch (err) {
+        console.error('[db-local-pg] localPgLogPersist error:', err);
+    }
+}
+
+export async function localPgInsertAnalytics(
+    rows: { recorded_at: string; endpoint: string; caller_type: string; call_count: number; sample_ua: string | null; domain: string | null }[]
+): Promise<void> {
+    const pool = getPool();
+    if (!pool || rows.length === 0) return;
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        for (const r of rows) {
+            await client.query(
+                `INSERT INTO aya_api_analytics (recorded_at, endpoint, caller_type, call_count, sample_ua, domain, created_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, now())`,
+                [r.recorded_at, r.endpoint, r.caller_type, r.call_count, r.sample_ua, r.domain]
+            );
+        }
+        await client.query('COMMIT');
+    } catch (err) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error('[db-local-pg] localPgInsertAnalytics error:', err);
+    } finally {
+        client.release();
+    }
+}
+
+export async function localPgGetAnalytics(days = 7): Promise<any[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult = await pool.query(
+            `SELECT * FROM aya_api_analytics
+             WHERE recorded_at >= now() - ($1 || ' days')::interval
+             ORDER BY recorded_at DESC`,
+            [String(days)]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetAnalytics error:', err);
+        return [];
+    }
+}
+
+/**
+ * Contrôle de relecture après écriture, sans consommer le code.
+ * localPgVerifyOTP brûle le code à la validation, il ne peut donc pas servir ici.
+ */
+export async function localPgOtpExists(email: string, code: string): Promise<boolean> {
+    const pool = getPool();
+    if (!pool) return false;
+    try {
+        const res: QueryResult = await pool.query(
+            'SELECT 1 FROM otp_codes WHERE email = $1 AND code = $2 AND expires_at > now() LIMIT 1',
+            [email, code]
+        );
+        return (res.rowCount ?? 0) > 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgOtpExists error:', err);
+        return false;
+    }
+}
+
+/** Journaux système, avec les mêmes filtres facultatifs que la version Supabase. */
+export async function localPgQueryLogs(opts: {
+    limit: number;
+    level?: string | null;
+    source?: string | null;
+    correlationId?: string | null;
+}): Promise<any[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const where: string[] = [];
+        const params: any[] = [];
+        if (opts.correlationId) { params.push(opts.correlationId); where.push(`correlation_id = $${params.length}`); }
+        if (opts.level)         { params.push(opts.level);         where.push(`level = $${params.length}`); }
+        if (opts.source)        { params.push(opts.source);        where.push(`source = $${params.length}`); }
+        params.push(opts.limit);
+
+        const res: QueryResult = await pool.query(
+            `SELECT * FROM system_logs
+             ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+             ORDER BY created_at DESC
+             LIMIT $${params.length}`,
+            params
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgQueryLogs error:', err);
+        return [];
+    }
+}
+
+// ── Chemins internes restes sur Supabase jusqu'au 26 aout 2026 ───────────────
+// Authentification, facturation, crons de cycle de vie et outillage admin. Tous
+// lisent `aya_registry` en direct et non `publicRegistry()` : un proprietaire doit
+// pouvoir s'authentifier et etre relance meme si sa fiche est exclue du registre
+// public. Voir le commentaire de `publicRegistry` plus haut.
+
+/**
+ * Entite certifiee rattachee a une adresse de contact. Sert a l'OTP du dashboard.
+ */
+export async function localPgGetEntityByContactEmail(email: string): Promise<Entity | null> {
+    const pool = getPool();
+    if (!pool) return null;
+    try {
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS} FROM aya_registry
+              WHERE contact_email = $1 AND payment_completed = true
+              ORDER BY created_at DESC LIMIT 1`,
+            [email]
+        );
+        return res.rows[0] ?? null;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetEntityByContactEmail error:', err);
+        return null;
+    }
+}
+
+/**
+ * Abonnements qui arrivent a echeance dans les `days` jours. Nourrit le cron de
+ * relance avant expiration.
+ */
+export async function localPgGetExpiringEntities(days: number): Promise<Entity[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS} FROM aya_registry
+              WHERE payment_completed = true
+                AND valid_until IS NOT NULL
+                AND valid_until >= now()
+                AND valid_until <= now() + ($1::int * INTERVAL '1 day')
+              ORDER BY valid_until ASC`,
+            [days]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetExpiringEntities error:', err);
+        return [];
+    }
+}
+
+/**
+ * Entites dont la revue annuelle est echue et qui n'ont pas encore ete relancees.
+ */
+export async function localPgGetEntitiesNeedingReview(): Promise<Entity[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS} FROM aya_registry
+              WHERE payment_completed = true
+                AND next_review_due IS NOT NULL
+                AND next_review_due <= now()
+                AND COALESCE(renewal_reminder_sent, false) = false
+              ORDER BY next_review_due ASC`
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetEntitiesNeedingReview error:', err);
+        return [];
+    }
+}
+
+/** Lot d'entites indexees par le bot, pour l'outillage admin de re-scoring. */
+export async function localPgGetEntitiesForRescore(limit: number, offset: number): Promise<any[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    try {
+        const res: QueryResult<any> = await pool.query(
+            `SELECT entity_id, display_name, legal_name, website, asr_score,
+                    payment_completed, asr_payload, created_at
+               FROM aya_registry
+              WHERE COALESCE(payment_completed, false) = false
+                AND website IS NOT NULL
+              ORDER BY entity_id ASC
+              LIMIT $1 OFFSET $2`,
+            [limit, offset]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetEntitiesForRescore error:', err);
+        return [];
+    }
+}
+
+/** Compteurs du meme lot : total eligible et deja re-score en V2. */
+export async function localPgCountEntitiesForRescore(): Promise<{ total: number; rescored: number }> {
+    const pool = getPool();
+    if (!pool) return { total: 0, rescored: 0 };
+    try {
+        const res: QueryResult<{ total: string; rescored: string }> = await pool.query(
+            `SELECT COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE asr_payload -> 'rescore_v2' ->> 'scored_at' IS NOT NULL) AS rescored
+               FROM aya_registry
+              WHERE COALESCE(payment_completed, false) = false
+                AND website IS NOT NULL`
+        );
+        const row = res.rows[0];
+        return { total: Number(row?.total ?? 0), rescored: Number(row?.rescored ?? 0) };
+    } catch (err) {
+        console.error('[db-local-pg] localPgCountEntitiesForRescore error:', err);
+        return { total: 0, rescored: 0 };
+    }
+}
+
+/**
+ * Supprime les fiches d'un site, toutes variantes d'URL confondues. Sert a la route
+ * admin de nettoyage, quand une entite a ete indexee sous plusieurs formes.
+ */
+export async function localPgDeleteEntitiesByWebsite(variants: string[]): Promise<number> {
+    const pool = getPool();
+    if (!pool || variants.length === 0) return 0;
+    try {
+        const res = await pool.query(
+            'DELETE FROM aya_registry WHERE website = ANY($1::text[])',
+            [variants]
+        );
+        return res.rowCount ?? 0;
+    } catch (err) {
+        console.error('[db-local-pg] localPgDeleteEntitiesByWebsite error:', err);
+        return 0;
+    }
+}
+
+// ── Recherche en langage courant (page /aya, route /api/aya/ask) ─────────────
+
+export type SearchDocRow = {
+    entity_id: string;
+    country_legal: string | null;
+    sector_macro: string | null;
+    payment_completed: boolean | null;
+    asr_score: number | null;
+    /** Nom, raison sociale et site : ce qu'on tape pour chercher une entreprise précise. */
+    head: string;
+    doc: string;
+};
+
+/**
+ * Une tranche du registre public sous forme de texte compact cherchable (nom,
+ * domaine, secteur, ville et descriptions des trois formats de fiches, offre des
+ * fiches AYO). Pagination par entity_id. Sert à construire l'index en mémoire de
+ * lib/aya/ask/memindex.ts. Lecture seule, bornée à 20 s.
+ */
+export async function localPgScanSearchDocs(afterId: string | null, limit: number): Promise<SearchDocRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    let client: import('pg').PoolClient | null = null;
+    try {
+        client = await pool.connect();
+        await client.query('BEGIN');
+        await client.query("SET LOCAL statement_timeout = '20s'");
+        const res: QueryResult<SearchDocRow> = await client.query(
+            `SELECT a.entity_id, a.country_legal, a.sector_macro, a.payment_completed, a.asr_score,
+                    concat_ws(' ', a.display_name, a.legal_name, a.website) AS head,
+                    concat_ws(' ',
+                        a.display_name, a.legal_name, a.website, a.sector_macro,
+                        a.asr_payload->>'city',
+                        left(a.asr_payload->>'description', 240),
+                        a.asr_payload->'data'->'identite'->'city'->>'value',
+                        a.asr_payload->'data'->'entity'->>'city',
+                        left(a.asr_payload->'data'->'source'->>'meta_description', 240),
+                        left(a.asr_payload->'data'->'aio_blocks'->'offre'->'fields'->>'meta_description', 240),
+                        left(a.asr_payload->'enrichment'->>'gemini_description_fr', 300),
+                        left(a.asr_payload->'enrichment'->>'gemini_description', 300),
+                        left((a.asr_payload->'data'->'offre')::text, 2000),
+                        left((a.asr_payload->'data'->'processus_methodes'->'geographies_served')::text, 300)
+                    ) AS doc
+             FROM ${publicRegistry('a')}
+             WHERE ($1::uuid IS NULL OR a.entity_id > $1::uuid)
+             ORDER BY a.entity_id
+             LIMIT $2`,
+            [afterId, limit]
+        );
+        await client.query('COMMIT');
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgScanSearchDocs error:', err);
+        if (client) await client.query('ROLLBACK').catch(() => {});
+        throw err;
+    } finally {
+        client?.release();
+    }
+}
+
+/** Fiches complètes du registre public pour une liste d'identifiants. */
+export async function localPgGetPublicEntitiesByIds(ids: string[]): Promise<Entity[]> {
+    const pool = getPool();
+    if (!pool || ids.length === 0) return [];
+    try {
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS} FROM ${publicRegistry()} WHERE entity_id = ANY($1::uuid[])`,
+            [ids.slice(0, 200)]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetPublicEntitiesByIds error:', err);
+        return [];
+    }
+}
+
+export type AskSearchParams = {
+    /** Mots ou expressions à chercher. */
+    terms: string[];
+    /** Code pays ISO à 2 lettres. Filtre doux : les fiches sans pays restent candidates. */
+    country?: string | null;
+    /** Ville ou région citée dans la demande. Bonus fort quand la fiche la mentionne. */
+    city?: string | null;
+    /** Macro-secteur du registre (sector_macro). Bonus quand il correspond. */
+    sector?: string | null;
+    limit: number;
+};
+
+export type AskSearchRow = Entity & { match_score: number };
+
+/**
+ * Cherche dans tout le registre public les fiches qui répondent à au moins un
+ * terme de la demande, dans le nom, le domaine, le secteur ou le contenu de la
+ * fiche (asr_payload). Le classement additionne les correspondances, puis
+ * favorise la ville demandée, le secteur, les fiches certifiées et les fiches
+ * détaillées. Lecture seule.
+ */
+export async function localPgAskSearch(p: AskSearchParams): Promise<AskSearchRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+
+    const terms = Array.from(new Set(
+        p.terms.map((t) => t.trim().toLowerCase()).filter((t) => t.length >= 3)
+    )).slice(0, 10);
+    const city = p.city?.trim().toLowerCase() || null;
+    if (terms.length === 0 && !city) return [];
+
+    const params: unknown[] = [];
+    const add = (v: unknown) => { params.push(v); return `$${params.length}`; };
+    // % et _ tapés par le visiteur restent des caractères, pas des jokers LIKE.
+    const lit = (s: string) => s.replace(/[\\%_]/g, (m) => `\\${m}`);
+
+    const scoreParts: string[] = [];
+    const matchParts: string[] = [];
+    for (const t of terms) {
+        const ph = add(`%${lit(t)}%`);
+        scoreParts.push(`(CASE WHEN r.h LIKE ${ph} THEN 3 WHEN r.pl LIKE ${ph} THEN 2 ELSE 0 END)`);
+        matchParts.push(`r.h LIKE ${ph} OR r.pl LIKE ${ph}`);
+    }
+    let cityLike = 'FALSE';
+    if (city) {
+        const ph = add(`%${lit(city)}%`);
+        cityLike = `(r.h LIKE ${ph} OR r.pl LIKE ${ph})`;
+        scoreParts.push(`(CASE WHEN ${cityLike} THEN 5 ELSE 0 END)`);
+        if (matchParts.length === 0) matchParts.push(cityLike);
+    }
+    if (p.sector) {
+        const ph = add(p.sector);
+        scoreParts.push(`(CASE WHEN r.sector_macro = ${ph} THEN 2 ELSE 0 END)`);
+    }
+    scoreParts.push(`(CASE WHEN r.payment_completed THEN 3 ELSE 0 END)`);
+    scoreParts.push(`(CASE WHEN r.asr_payload->'data'->'offre' IS NOT NULL THEN 1 ELSE 0 END)`);
+
+    let countryClause = 'TRUE';
+    if (p.country && /^[A-Za-z]{2}$/.test(p.country)) {
+        const ph = add(p.country.toUpperCase());
+        // Pays demandé : ce pays, ou une fiche sans pays qui cite le lieu demandé.
+        countryClause = `(r.country_legal = ${ph} OR (coalesce(r.country_legal, '') IN ('', 'XX') AND ${cityLike}))`;
+    }
+    const limitPh = add(Math.min(Math.max(p.limit, 1), 120));
+
+    // Requête bornée à 6 s pour ne jamais bloquer le pool partagé avec le site.
+    let client: import('pg').PoolClient | null = null;
+    try {
+        client = await pool.connect();
+        await client.query('BEGIN');
+        await client.query("SET LOCAL statement_timeout = '6s'");
+        const res: QueryResult<AskSearchRow> = await client.query(
+            `SELECT ${ENTITY_COLS}, (${scoreParts.join(' + ')}) AS match_score
+             FROM (
+                SELECT a.*,
+                       lower(coalesce(a.display_name,'') || ' ' || coalesce(a.legal_name,'') || ' ' ||
+                             coalesce(a.website,'') || ' ' || coalesce(a.sector_macro,'')) AS h,
+                       lower(coalesce(a.asr_payload::text, '')) AS pl
+                FROM ${publicRegistry('a')}
+             ) r
+             WHERE ${countryClause} AND (${matchParts.join(' OR ')})
+             ORDER BY match_score DESC, r.payment_completed DESC NULLS LAST, r.asr_score DESC NULLS LAST
+             LIMIT ${limitPh}`,
+            params
+        );
+        await client.query('COMMIT');
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgAskSearch error:', err);
+        if (client) await client.query('ROLLBACK').catch(() => {});
+        return [];
+    } finally {
+        client?.release();
     }
 }

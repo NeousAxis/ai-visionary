@@ -300,7 +300,7 @@ export default function DiagnosticV2Page() {
             if (ev.proScore) setProScore(ev.proScore.total ?? null);
             if (ev.analysisId) setAnalysisId(ev.analysisId);
             const eName = ev.extract?.fields?.identite?.name?.value || '';
-            const shortName = eName.split(/\s*[|–—]\s*/)[0].trim();
+            const shortName = eName.split(/\s*[|–—·•]\s*/)[0].trim();
             if (shortName) setDetectedName(shortName);
             // Capture the contact-email domain the scan detected (the email the site itself
             // publishes) so the owner can verify with it even if it differs from the site domain.
@@ -328,12 +328,27 @@ export default function DiagnosticV2Page() {
           } else if (ev.phase === 'error') {
             // 'scan_timeout' et 'scan_incomplete' sont des codes machine emis par le
             // serveur : le visiteur doit lire une phrase traduite, pas le code brut.
+            // 'Site unreachable' porte la raison exacte : AYO n'a pas lu le site, il n'y a
+            // donc aucun score, et le visiteur doit savoir pourquoi.
+            const unreadable = (reason?: string, detail?: string) => {
+              switch (reason) {
+                case 'blocked': return t('siteUnreadableBlocked');
+                case 'parked': return t('siteUnreadableParked');
+                case 'no_text': return t('siteUnreadableNoText');
+                case 'redirected': return t('siteUnreadableRedirected', { host: detail || '' });
+                case 'placeholder': return t('siteUnreadablePlaceholder');
+                default: return t('siteUnreadableUnreachable');
+              }
+            };
             setError(
               ev.message === 'scan_timeout' ? t('scanTimeout')
                 : ev.message === 'scan_incomplete' ? t('scanIncomplete')
-                  : (ev.message || t('scanFailed')));
-            // Show fallback UI if site was blocked/unreachable
-            if (ev.statusCode === 403 || ev.statusCode === 429 || ev.statusCode === 503 || ev.message === 'Site unreachable') {
+                  : ev.message === 'Site unreachable' ? unreadable(ev.reason, ev.detail)
+                    : (ev.message || t('scanFailed')));
+            // Show fallback UI if site was blocked/unreachable. Pas pour un parking, une page
+            // par defaut ou une redirection : fournir le HTML de cette page n'aiderait pas.
+            const uploadUseless = ev.reason === 'parked' || ev.reason === 'placeholder' || ev.reason === 'redirected';
+            if (!uploadUseless && (ev.statusCode === 403 || ev.statusCode === 429 || ev.statusCode === 503 || ev.message === 'Site unreachable')) {
               setShowFallback(true);
               setCurrentStep(1);
             }
@@ -460,7 +475,9 @@ export default function DiagnosticV2Page() {
       const res = await fetch('/api/diagnostic/generate-free', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail, code: otpCode, analysisId, url: scanUrl, locale }),
+        // legalName = the name the owner confirmed at the step-2 prompt. It is the entity's
+        // name in AYA and in the 5 files (the free path used to drop it).
+        body: JSON.stringify({ email: userEmail, code: otpCode, analysisId, url: scanUrl, locale, legalName: legalName.trim() || undefined }),
       });
       const data = await res.json();
       if (res.ok && data.success) {

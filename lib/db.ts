@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import {
     isLocalPgConfigured,
     localPgGetEntities,
@@ -15,33 +14,70 @@ import {
     localPgGetEntityBySubscriptionId,
     localPgMarkEntitiesExpired,
     localPgGetAyaEntities,
+    localPgCountSitemapEntities,
+    localPgGetSitemapPage,
+    localPgGetPublicEntityById,
+    localPgGetPublicEntityByDomain,
+    localPgGetPublicAyaEntities,
+    localPgSaveAnalysis,
+    localPgGetAnalysis,
+    localPgGetAnalysesByUrlNormalized,
+    localPgGetAnalysesHistoryByUrl,
+    localPgGetAnalysesByEmail,
+    localPgGetRegistrationEmail,
+    localPgSaveOTP,
+    localPgVerifyOTP,
+    localPgSaveScanState,
+    localPgGetScanState,
+    localPgLogPersist,
+    localPgInsertAnalytics,
+    localPgGetAnalytics,
+    localPgOtpExists,
+    localPgGetEntityByContactEmail,
+    localPgGetExpiringEntities,
+    localPgGetEntitiesNeedingReview,
+    localPgGetEntitiesForRescore,
+    localPgCountEntitiesForRescore,
 } from '@/lib/db-local-pg';
 import { resolveSectorMacro } from '@/lib/aya/llm-format';
 
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-// Check if Supabase is configured (must be checked before any DB operation)
-const isSupabaseConfigured = (): boolean => {
-    return !!(supabaseUrl && supabaseKey);
-};
+/**
+ * Exclusion adulte pour le SEUL chemin Supabase (gelé depuis la migration VPS,
+ * et dépourvu de la colonne `is_adult`). Reprend mot pour mot les motifs déjà
+ * utilisés par les autres requêtes Supabase de ce fichier — ce n'est pas une
+ * seconde règle produit.
+ *
+ * La règle qui fait foi est la fonction SQL `aya_is_adult` sur le VPS, appliquée
+ * via `publicRegistry()` dans lib/db-local-pg.ts. Ne pas la recopier ici : elle
+ * gère des nuances (toponymes type Pornic, exception sexologie/thérapie) qu'une
+ * copie JavaScript finirait par contredire.
+ */
+function supabaseLooksAdult(displayName: unknown): boolean {
+    const n = typeof displayName === 'string' ? displayName.toLowerCase() : '';
+    if (!n) return false;
+    return n.includes('porn')
+        || n.includes(' sex ')
+        || n.includes('xxx')
+        || n.includes('escort')
+        || n.includes('onlyfans');
+}
 
-// Lazy-init: only create client if configured (prevents crash at build time)
-// Using 'any' type to avoid Supabase generics issues with untyped tables
-let _supabaseClient: any = null;
-const getSupabase = (): any => {
-    if (!_supabaseClient) {
-        if (!isSupabaseConfigured()) {
-            console.warn('⚠️ Supabase not configured — SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required');
-            return null;
-        }
-        _supabaseClient = createClient(supabaseUrl, supabaseKey);
-    }
-    return _supabaseClient;
-};
-
-// Export for modules that need direct access (admin/logs, debug/clean)
-export const supabase = isSupabaseConfigured() ? createClient(supabaseUrl, supabaseKey) : null as any;
+/**
+ * Supabase est mort. Le projet a ete supprime le 26 aout 2026 et la totalite des
+ * donnees vit desormais dans le Postgres suisse du VPS.
+ *
+ * Ces deux fonctions ne joignent plus rien : elles disent "non configure", donc chaque
+ * methode retourne sa valeur degradee sans le moindre appel reseau. Elles restent le
+ * temps que les corps d'appel historiques soient retires un par un ; d'ici la, ce
+ * garde-fou vaut mieux qu'un client fantome qui irait resoudre un domaine disparu a
+ * chaque requete (ENOTFOUND en boucle dans les logs, le 26 aout au matin).
+ *
+ * Corollaire : si VPS_PG_PASSWORD venait a manquer, la couche ne se rabat plus sur
+ * rien. Elle rend vide, bruyamment, au lieu de faire semblant.
+ */
+const isSupabaseConfigured = (): boolean => false;
+const getSupabase = (): any => null;
 
 // In-process caches for AYA registry reads — reduces Supabase Disk IO.
 // The full registry rarely changes (batch pushes are weekly).
@@ -101,6 +137,11 @@ export const database = {
      * Save or update an analysis record
      */
     saveAnalysis: async (id: string, record: Partial<AnalysisRecord>): Promise<void> => {
+        if (isLocalPgConfigured()) {
+            const ok = await localPgSaveAnalysis(id, record as Record<string, any>);
+            if (ok) console.log(`💾 [VPS-PG] Analysis saved for ID: ${id}`);
+            return;
+        }
         if (!isSupabaseConfigured()) {
             console.log(`⚠️ DB Disabled: Skipping save for ID ${id}`);
             return;
@@ -108,7 +149,7 @@ export const database = {
 
         const client = getSupabase();
         if (!client) {
-            console.error('❌ [Supabase] Client not available for saveAnalysis');
+            console.error('❌ [DB] Client not available for saveAnalysis');
             return;
         }
 
@@ -124,7 +165,7 @@ export const database = {
 
             if (!readErr && existingRow) {
                 existing = existingRow as AnalysisRecord;
-                console.log(`🔄 [Supabase] Merging into existing record: id=${id}, existing score=${existing.score}`);
+                console.log(`🔄 [DB] Merging into existing record: id=${id}, existing score=${existing.score}`);
             }
 
             // Build merged record: existing values are preserved unless explicitly overridden
@@ -160,12 +201,12 @@ export const database = {
                 .upsert(dataToSave, { onConflict: 'id' });
 
             if (error) {
-                console.error('❌ [Supabase] Save Error:', error);
+                console.error('❌ [DB] Save Error:', error);
                 return;
             }
-            console.log(`💾 [Supabase] Analysis saved for ID: ${id} (score=${dataToSave.score}, hasData=${!!dataToSave.data?.fields})`);
+            console.log(`💾 [DB] Analysis saved for ID: ${id} (score=${dataToSave.score}, hasData=${!!dataToSave.data?.fields})`);
         } catch (error) {
-            console.error('❌ [Supabase] Save Error:', error);
+            console.error('❌ [DB] Save Error:', error);
         }
     },
 
@@ -173,6 +214,9 @@ export const database = {
      * Retrieve an analysis record by ID
      */
     getAnalysis: async (id: string): Promise<AnalysisRecord | null> => {
+        if (isLocalPgConfigured()) {
+            return (await localPgGetAnalysis(id)) as AnalysisRecord | null;
+        }
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;
@@ -187,17 +231,17 @@ export const database = {
             if (error) {
                 if (error.code === 'PGRST116') {
                     // No rows returned
-                    console.warn(`⚠️ [Supabase] No analysis found for ID: ${id}`);
+                    console.warn(`⚠️ [DB] No analysis found for ID: ${id}`);
                     return null;
                 }
-                console.error('❌ [Supabase] Read Error:', error);
+                console.error('❌ [DB] Read Error:', error);
                 return null;
             }
 
-            console.log(`✅ [Supabase] Analysis retrieved for ID: ${id}`);
+            console.log(`✅ [DB] Analysis retrieved for ID: ${id}`);
             return data as AnalysisRecord;
         } catch (error) {
-            console.error('❌ [Supabase] Read Error:', error);
+            console.error('❌ [DB] Read Error:', error);
             return null;
         }
     },
@@ -225,29 +269,34 @@ export const database = {
      * Uses url_normalized GENERATED column for matching
      */
     getLatestAnalysisByUrl: async (url: string): Promise<AnalysisRecord | null> => {
-        if (!isSupabaseConfigured()) return null;
-        const client = getSupabase();
-        if (!client) return null;
+        const useLocal = isLocalPgConfigured();
+        if (!useLocal && !isSupabaseConfigured()) return null;
+        const client = useLocal ? null : getSupabase();
+        if (!useLocal && !client) return null;
 
         try {
             const normalizedUrl = database.normalizeUrl(url);
 
             // Query by normalized URL, order by score DESC to get the best result
-            const { data: rawData, error } = await client
-                .from('analyses')
-                .select('*')
-                .eq('url_normalized', normalizedUrl)
-                .order('created_at', { ascending: false })
-                .limit(10);
+            let data: any[];
+            if (useLocal) {
+                data = await localPgGetAnalysesByUrlNormalized(normalizedUrl, 10);
+            } else {
+                const { data: rawData, error } = await client!
+                    .from('analyses')
+                    .select('*')
+                    .eq('url_normalized', normalizedUrl)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
 
-            if (error) {
-                console.error('❌ [Supabase] Query By URL Error:', error);
-                return null;
+                if (error) {
+                    console.error('❌ [DB] Query By URL Error:', error);
+                    return null;
+                }
+                data = rawData as any[];
             }
-
-            const data = rawData as any[];
             if (!data || data.length === 0) {
-                console.log(`⚠️ [Supabase] No analysis found for URL: ${url}`);
+                console.log(`⚠️ [DB] No analysis found for URL: ${url}`);
                 return null;
             }
 
@@ -264,28 +313,31 @@ export const database = {
                 if (hasBlocks && !bestHasBlocks) {
                     bestResult = row as AnalysisRecord;
                     bestHasBlocks = true;
-                    console.log(`🔍 [Supabase] Analysis with blocks found: score=${score}, id=${row.id}`);
+                    console.log(`🔍 [DB] Analysis with blocks found: score=${score}, id=${row.id}`);
                 } else if (hasBlocks === bestHasBlocks && score > (bestResult?.score || 0)) {
                     bestResult = row as AnalysisRecord;
                     bestHasBlocks = hasBlocks;
-                    console.log(`🔍 [Supabase] Better analysis found: score=${score}, id=${row.id}`);
+                    console.log(`🔍 [DB] Better analysis found: score=${score}, id=${row.id}`);
                 }
             }
 
             if (bestResult) {
-                console.log(`✅ [Supabase] Best analysis for URL ${url}: score=${bestResult.score}, id=${bestResult.id}`);
+                console.log(`✅ [DB] Best analysis for URL ${url}: score=${bestResult.score}, id=${bestResult.id}`);
                 return bestResult;
             }
 
-            console.log(`⚠️ [Supabase] No analysis with data found for URL: ${url}`);
+            console.log(`⚠️ [DB] No analysis with data found for URL: ${url}`);
             return null;
         } catch (error) {
-            console.error('❌ [Supabase] Query By URL Error:', error);
+            console.error('❌ [DB] Query By URL Error:', error);
             return null;
         }
     },
 
     getAnalysesHistoryByUrl: async (url: string, limit = 5): Promise<any[]> => {
+        if (isLocalPgConfigured()) {
+            return await localPgGetAnalysesHistoryByUrl(database.normalizeUrl(url), limit);
+        }
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -300,12 +352,12 @@ export const database = {
                 .limit(limit);
 
             if (error) {
-                console.error('❌ [Supabase] Analyses history error:', error);
+                console.error('❌ [DB] Analyses history error:', error);
                 return [];
             }
             return data || [];
         } catch (err) {
-            console.error('❌ [Supabase] Analyses history exception:', err);
+            console.error('❌ [DB] Analyses history exception:', err);
             return [];
         }
     },
@@ -314,26 +366,31 @@ export const database = {
      * Retrieve the latest analysis for a given EMAIL
      */
     getLatestAnalysisByEmail: async (email: string): Promise<AnalysisRecord | null> => {
-        if (!isSupabaseConfigured()) return null;
-        const client = getSupabase();
-        if (!client) return null;
+        const useLocal = isLocalPgConfigured();
+        if (!useLocal && !isSupabaseConfigured()) return null;
+        const client = useLocal ? null : getSupabase();
+        if (!useLocal && !client) return null;
 
         try {
-            const { data: rawData, error } = await client
-                .from('analyses')
-                .select('*')
-                .eq('email', email)
-                .order('created_at', { ascending: false })
-                .limit(10);
+            let data: any[];
+            if (useLocal) {
+                data = await localPgGetAnalysesByEmail(email, 10);
+            } else {
+                const { data: rawData, error } = await client!
+                    .from('analyses')
+                    .select('*')
+                    .eq('email', email)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
 
-            if (error) {
-                console.error('❌ [Supabase] Query By EMAIL Error:', error);
-                return null;
+                if (error) {
+                    console.error('❌ [DB] Query By EMAIL Error:', error);
+                    return null;
+                }
+                data = rawData as any[];
             }
-
-            const data = rawData as any[];
             if (!data || data.length === 0) {
-                console.log(`⚠️ [Supabase] No analysis found for EMAIL: ${email}`);
+                console.log(`⚠️ [DB] No analysis found for EMAIL: ${email}`);
                 return null;
             }
 
@@ -348,14 +405,14 @@ export const database = {
             }
 
             if (bestResult) {
-                console.log(`✅ [Supabase] Best analysis for EMAIL ${email}: score=${bestResult.score}, id=${bestResult.id}`);
+                console.log(`✅ [DB] Best analysis for EMAIL ${email}: score=${bestResult.score}, id=${bestResult.id}`);
                 return bestResult;
             }
 
             // Fallback: return the most recent one
             return data[0] as AnalysisRecord;
         } catch (error) {
-            console.error('❌ [Supabase] Query By EMAIL Error:', error);
+            console.error('❌ [DB] Query By EMAIL Error:', error);
             return null;
         }
     },
@@ -388,13 +445,13 @@ export const database = {
                 .upsert({ entity_id: entityId, ...cleanData }, { onConflict: 'entity_id' });
 
             if (error) {
-                console.error('❌ [Supabase] AYA Update Error:', error);
+                console.error('❌ [DB] AYA Update Error:', error);
                 return;
             }
             _clearAyaCaches();
-            console.log(`💾 [Supabase] AYA Entity updated: ${entityId}`);
+            console.log(`💾 [DB] AYA Entity updated: ${entityId}`);
         } catch (error) {
-            console.error('❌ [Supabase] AYA Update Error:', error);
+            console.error('❌ [DB] AYA Update Error:', error);
         }
     },
 
@@ -426,14 +483,14 @@ export const database = {
                 .eq('entity_id', entityId);
 
             if (error) {
-                console.error('❌ [Supabase] AYA updateEntityData Error:', error);
+                console.error('❌ [DB] AYA updateEntityData Error:', error);
                 return false;
             }
             _clearAyaCaches();
-            console.log(`💾 [Supabase] AYA Entity data updated (safe): ${entityId}`);
+            console.log(`💾 [DB] AYA Entity data updated (safe): ${entityId}`);
             return true;
         } catch (error) {
-            console.error('❌ [Supabase] AYA updateEntityData Error:', error);
+            console.error('❌ [DB] AYA updateEntityData Error:', error);
             return false;
         }
     },
@@ -448,6 +505,8 @@ export const database = {
     // Survives across warm Lambda/Edge invocations; cold starts re-fetch (acceptable).
     getAyaEntities: async (limit: number = 10000): Promise<any[]> => {
         // Migration totale Supabase -> VPS Postgres : aya_registry now lives locally.
+        // LECTURE INTERNE (admin, enrichissement, re-scoring) : pas de filtre adulte.
+        // Pour une surface publique, utiliser getAyaPublicEntities.
         if (isLocalPgConfigured()) {
             return localPgGetAyaEntities(limit);
         }
@@ -483,7 +542,7 @@ export const database = {
                     .range(offset, offset + pageSize - 1);
 
                 if (error) {
-                    console.error('❌ [Supabase] Get AYA Entities Error:', error);
+                    console.error('❌ [DB] Get AYA Entities Error:', error);
                     hadError = true;
                     break;
                 }
@@ -502,9 +561,26 @@ export const database = {
             }
             return allData;
         } catch (error) {
-            console.error('❌ [Supabase] Get AYA Entities Error:', error);
+            console.error('❌ [DB] Get AYA Entities Error:', error);
             return [];
         }
+    },
+
+    /**
+     * Idem getAyaEntities mais sur la SURFACE PUBLIQUE (adulte exclu).
+     * À utiliser dès que la liste est montrée à un humain ou à un agent —
+     * typiquement les « concurrents » de /api/diagnostic/compare.
+     */
+    getAyaPublicEntities: async (limit: number = 10000): Promise<any[]> => {
+        if (isLocalPgConfigured()) {
+            return localPgGetPublicAyaEntities(limit);
+        }
+        // Sans Postgres local on retombe sur Supabase (gelé, sans colonne
+        // is_adult) : on y réapplique le même filtre approximatif que les
+        // autres lectures Supabase de ce fichier. L'autorité reste la fonction
+        // SQL aya_is_adult côté VPS — ne pas la réimplémenter ici.
+        const rows = await db.getAyaEntities(limit);
+        return rows.filter((e: any) => !supabaseLooksAdult(e.display_name));
     },
 
     /**
@@ -512,6 +588,7 @@ export const database = {
      * Filters: payment_completed != true, website not null, ordered by entity_id ASC.
      */
     getEntitiesForRescore: async (limit: number = 10, offset: number = 0): Promise<any[]> => {
+        if (isLocalPgConfigured()) return localPgGetEntitiesForRescore(limit, offset);
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -523,15 +600,16 @@ export const database = {
                 .not('website', 'is', null)
                 .order('entity_id', { ascending: true })
                 .range(offset, offset + limit - 1);
-            if (error) { console.error('❌ [Supabase] getEntitiesForRescore Error:', error); return []; }
+            if (error) { console.error('❌ [DB] getEntitiesForRescore Error:', error); return []; }
             return data || [];
-        } catch (error) { console.error('❌ [Supabase] getEntitiesForRescore Error:', error); return []; }
+        } catch (error) { console.error('❌ [DB] getEntitiesForRescore Error:', error); return []; }
     },
 
     /**
      * Count bot-indexed entities eligible for V2 re-scoring.
      */
     countEntitiesForRescore: async (): Promise<{ total: number; rescored: number }> => {
+        if (isLocalPgConfigured()) return localPgCountEntitiesForRescore();
         if (!isSupabaseConfigured()) return { total: 0, rescored: 0 };
         const client = getSupabase();
         if (!client) return { total: 0, rescored: 0 };
@@ -541,7 +619,7 @@ export const database = {
                 .select('entity_id', { count: 'exact', head: true })
                 .or('payment_completed.is.null,payment_completed.eq.false')
                 .not('website', 'is', null);
-            if (error) { console.error('❌ [Supabase] countEntitiesForRescore Error:', error); return { total: 0, rescored: 0 }; }
+            if (error) { console.error('❌ [DB] countEntitiesForRescore Error:', error); return { total: 0, rescored: 0 }; }
             // Count rescored by checking for rescore_v2 marker — Supabase JSONB filter
             const { count: rescored, error: e2 } = await client
                 .from('aya_registry')
@@ -551,7 +629,7 @@ export const database = {
                 .not('asr_payload->rescore_v2->scored_at', 'is', null);
             if (e2) { return { total: total || 0, rescored: 0 }; }
             return { total: total || 0, rescored: rescored || 0 };
-        } catch (error) { console.error('❌ [Supabase] countEntitiesForRescore Error:', error); return { total: 0, rescored: 0 }; }
+        } catch (error) { console.error('❌ [DB] countEntitiesForRescore Error:', error); return { total: 0, rescored: 0 }; }
     },
 
     /**
@@ -562,6 +640,10 @@ export const database = {
      * This is the OWNER's email, not the company contact email.
      */
     getRegistrationEmail: async (url: string): Promise<string | null> => {
+        if (isLocalPgConfigured()) {
+            const fragment = url.replace(/\/+$/, '').toLowerCase().replace(/^https?:\/\/(www\.)?/, '');
+            return await localPgGetRegistrationEmail(fragment);
+        }
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;
@@ -582,12 +664,15 @@ export const database = {
     },
 
     getAyaEntityById: async (id: string): Promise<any | null> => {
+        // Lecture INTERNE (dashboard, mise a jour, OTP, admin) : registre en direct, sans
+        // filtre adulte. La surface publique passe par getAyaEntityByIdAggregated.
+        if (isLocalPgConfigured()) return _localPgGetEntityById(id);
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;
 
         try {
-            console.log(`🔍 [Supabase] Fetching AYA Entity ID: ${id}`);
+            console.log(`🔍 [DB] Fetching AYA Entity ID: ${id}`);
             const { data, error } = await client
                 .from('aya_registry')
                 .select('*')
@@ -596,16 +681,16 @@ export const database = {
 
             if (error) {
                 if (error.code === 'PGRST116') {
-                    console.warn(`⚠️ [Supabase] Entity not found: ${id}`);
+                    console.warn(`⚠️ [DB] Entity not found: ${id}`);
                     return null;
                 }
-                console.error('❌ [Supabase] Get Entity By ID Error:', error);
+                console.error('❌ [DB] Get Entity By ID Error:', error);
                 return null;
             }
 
             return data;
         } catch (error) {
-            console.error('❌ [Supabase] Get Entity By ID Error:', error);
+            console.error('❌ [DB] Get Entity By ID Error:', error);
             return null;
         }
     },
@@ -614,13 +699,24 @@ export const database = {
      * Retrieve an AYA Entity by its URL (Smart Search via normalized URL)
      */
     getAyaEntityByUrl: async (url: string): Promise<any | null> => {
+        // Migration totale Supabase -> VPS Postgres : aya_registry vit en local.
+        // (sans ce shortcircuit, le lookup tape Supabase frozen et rate toutes les
+        //  entités VPS -> dédup cassée pour registerOrUpdateEntity + indexEntityFromDiagnostic)
+        if (isLocalPgConfigured()) {
+            try {
+                return await localPgGetEntityByDomain(url);
+            } catch (e) {
+                console.error('❌ [VPS-PG] getAyaEntityByUrl error:', e);
+                return null;
+            }
+        }
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;
 
         try {
             const normalizedTarget = database.normalizeUrl(url);
-            console.log(`🔍 [Supabase] Searching for AYA Entity with URL: ${normalizedTarget}`);
+            console.log(`🔍 [DB] Searching for AYA Entity with URL: ${normalizedTarget}`);
 
             // Single query using website_normalized GENERATED column
             const { data, error } = await client
@@ -635,14 +731,14 @@ export const database = {
                     // No rows returned
                     return null;
                 }
-                console.error('❌ [Supabase] Query AYA By URL Error:', error);
+                console.error('❌ [DB] Query AYA By URL Error:', error);
                 return null;
             }
 
-            console.log(`✅ [Supabase] AYA Entity found by normalized URL.`);
+            console.log(`✅ [DB] AYA Entity found by normalized URL.`);
             return data;
         } catch (error) {
-            console.error('❌ [Supabase] Query AYA By URL Error:', error);
+            console.error('❌ [DB] Query AYA By URL Error:', error);
             return null;
         }
     },
@@ -651,6 +747,7 @@ export const database = {
      * Retrieve an AYA Entity by contact_email (for renew webhook fallback)
      */
     getAyaEntityByContactEmail: async (email: string): Promise<any | null> => {
+        if (isLocalPgConfigured()) return localPgGetEntityByContactEmail(email);
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;
@@ -688,11 +785,11 @@ export const database = {
                 .update({ owner_email: newOwnerEmail.trim().toLowerCase() })
                 .eq('entity_id', entityId);
             if (error) {
-                console.error('❌ [Supabase] updateOwnerEmail Error:', error);
+                console.error('❌ [DB] updateOwnerEmail Error:', error);
                 return false;
             }
             _clearAyaCaches();
-            console.log(`✅ [Supabase] owner_email updated for ${entityId}`);
+            console.log(`✅ [DB] owner_email updated for ${entityId}`);
             return true;
         } catch {
             return false;
@@ -703,9 +800,14 @@ export const database = {
      * OTP MANAGEMENT (One Time Password)
      */
     saveOTP: async (email: string, code: string): Promise<boolean> => {
-        if (!isSupabaseConfigured()) { console.error('❌ [Supabase] OTP save: Supabase not configured'); return false; }
+        if (isLocalPgConfigured()) {
+            const ok = await localPgSaveOTP(email, code);
+            if (ok) console.log(`🔐 [VPS-PG] OTP saved for ${email}`);
+            return ok;
+        }
+        if (!isSupabaseConfigured()) { console.error('❌ [DB] OTP save: Supabase not configured'); return false; }
         const client = getSupabase();
-        if (!client) { console.error('❌ [Supabase] OTP save: no client'); return false; }
+        if (!client) { console.error('❌ [DB] OTP save: no client'); return false; }
 
         try {
             // Delete any existing OTP for this email first (one active per email)
@@ -723,18 +825,47 @@ export const database = {
                 });
 
             if (error) {
-                console.error('❌ [Supabase] OTP Save Error:', error);
+                console.error('❌ [DB] OTP Save Error:', error);
                 return false;
             }
-            console.log(`🔐 [Supabase] OTP saved for ${email}`);
+            console.log(`🔐 [DB] OTP saved for ${email}`);
             return true;
         } catch (e) {
-            console.error('❌ [Supabase] Error saving OTP:', e);
+            console.error('❌ [DB] Error saving OTP:', e);
+            return false;
+        }
+    },
+
+    /**
+     * Le code existe-t-il encore, sans le consommer.
+     * Sert au contrôle de relecture après écriture dans la route d'envoi : verifyOTP
+     * brûle le code, il ne peut donc pas servir à vérifier qu'il a bien été écrit.
+     */
+    verifyOtpExists: async (email: string, code: string): Promise<boolean> => {
+        if (isLocalPgConfigured()) return await localPgOtpExists(email, code);
+        if (!isSupabaseConfigured()) return false;
+        const client = getSupabase();
+        if (!client) return false;
+        try {
+            const { data } = await client
+                .from('otp_codes')
+                .select('code')
+                .eq('email', email)
+                .eq('code', code)
+                .limit(1)
+                .maybeSingle();
+            return !!data;
+        } catch {
             return false;
         }
     },
 
     verifyOTP: async (email: string, code: string): Promise<boolean> => {
+        if (isLocalPgConfigured()) {
+            const ok = await localPgVerifyOTP(email, code);
+            console.log(`${ok ? '✅' : '❌'} [VPS-PG] OTP ${ok ? 'validated' : 'rejected'} for ${email}`);
+            return ok;
+        }
         if (!isSupabaseConfigured()) return false;
         const client = getSupabase();
         if (!client) return false;
@@ -751,7 +882,7 @@ export const database = {
                 .single();
 
             if (error || !data) {
-                console.log(`❌ [Supabase] No OTP found for ${email}`);
+                console.log(`❌ [DB] No OTP found for ${email}`);
                 return false;
             }
 
@@ -759,20 +890,20 @@ export const database = {
             const expires = new Date(data.expires_at);
 
             if (now > expires) {
-                console.log(`❌ [Supabase] OTP expired for ${email}`);
+                console.log(`❌ [DB] OTP expired for ${email}`);
                 // Cleanup expired OTP
                 await client.from('otp_codes').delete().eq('id', data.id);
                 return false;
             }
 
             if (data.code === code) {
-                console.log(`✅ [Supabase] OTP Validated for ${email}`);
+                console.log(`✅ [DB] OTP Validated for ${email}`);
                 // Burn the code (One Time Use) — delete it
                 await client.from('otp_codes').delete().eq('id', data.id);
                 return true;
             }
 
-            console.log(`❌ [Supabase] Invalid OTP for ${email}`);
+            console.log(`❌ [DB] Invalid OTP for ${email}`);
             return false;
         } catch (e) {
             console.error('Error verifying OTP:', e);
@@ -784,6 +915,12 @@ export const database = {
      * Save scan state for a URL
      */
     saveScanState: async (urlOrId: string, data: any): Promise<void> => {
+        if (isLocalPgConfigured()) {
+            const url = data?.url || urlOrId;
+            const ok = await localPgSaveScanState(url, data);
+            if (ok) console.log(`💾 [VPS-PG] Scan state saved for URL: ${url}`);
+            return;
+        }
         if (!isSupabaseConfigured()) {
             console.log(`⚠️ DB Disabled: Skipping scan state save for ${urlOrId}`);
             return;
@@ -809,12 +946,12 @@ export const database = {
                 });
 
             if (error) {
-                console.error('❌ [Supabase] Scan State Save Error:', error);
+                console.error('❌ [DB] Scan State Save Error:', error);
                 return;
             }
-            console.log(`💾 [Supabase] Scan state saved for URL: ${url}`);
+            console.log(`💾 [DB] Scan state saved for URL: ${url}`);
         } catch (error) {
-            console.error('❌ [Supabase] Scan State Save Error:', error);
+            console.error('❌ [DB] Scan State Save Error:', error);
         }
     },
 
@@ -822,6 +959,9 @@ export const database = {
      * Get scan state by URL (normalized matching)
      */
     getScanState: async (url: string): Promise<any | null> => {
+        if (isLocalPgConfigured()) {
+            return await localPgGetScanState(database.normalizeUrl(url));
+        }
         if (!isSupabaseConfigured()) return null;
         const client = getSupabase();
         if (!client) return null;
@@ -839,13 +979,13 @@ export const database = {
 
             if (error) {
                 if (error.code === 'PGRST116') return null;
-                console.error('❌ [Supabase] Get Scan State Error:', error);
+                console.error('❌ [DB] Get Scan State Error:', error);
                 return null;
             }
 
             return data?.state || null;
         } catch (error) {
-            console.error('❌ [Supabase] Get Scan State Error:', error);
+            console.error('❌ [DB] Get Scan State Error:', error);
             return null;
         }
     },
@@ -861,6 +1001,10 @@ export const database = {
         message: string;
         data?: any;
     }): Promise<void> => {
+        if (isLocalPgConfigured()) {
+            await localPgLogPersist(entry);
+            return;
+        }
         if (!isSupabaseConfigured()) return;
         const client = getSupabase();
         if (!client) return;
@@ -878,10 +1022,10 @@ export const database = {
                 });
 
             if (error) {
-                console.error('❌ [Supabase] Log Persist Error:', error);
+                console.error('❌ [DB] Log Persist Error:', error);
             }
         } catch (error) {
-            console.error('❌ [Supabase] Log Persist Error:', error);
+            console.error('❌ [DB] Log Persist Error:', error);
         }
     },
 
@@ -895,6 +1039,21 @@ export const database = {
         search?: string;
         sort?: 'default' | 'alpha' | 'score' | 'country' | 'certified';
     }): Promise<{ data: any[]; total: number; certifiedCount: number; indexedCount: number }> => {
+        if (isLocalPgConfigured()) {
+            const r = await localPgGetEntities({
+                limit: options.pageSize,
+                offset: (options.page - 1) * options.pageSize,
+                search: options.search,
+                sort: options.sort,
+            });
+            const stats = await localPgGetStats();
+            return {
+                data: r.data,
+                total: r.total,
+                certifiedCount: stats.certified_count,
+                indexedCount: stats.indexed_count,
+            };
+        }
         if (!isSupabaseConfigured()) return { data: [], total: 0, certifiedCount: 0, indexedCount: 0 };
         const client = getSupabase();
         if (!client) return { data: [], total: 0, certifiedCount: 0, indexedCount: 0 };
@@ -913,7 +1072,7 @@ export const database = {
                 .eq('payment_completed', true);
 
             if (countErr || certErr) {
-                console.error('❌ [Supabase] Count Error:', countErr || certErr);
+                console.error('❌ [DB] Count Error:', countErr || certErr);
             }
 
             const total = totalCount || 0;
@@ -994,7 +1153,7 @@ export const database = {
             const { data, error } = await query;
 
             if (error) {
-                console.error('❌ [Supabase] Paginated Query Error:', error);
+                console.error('❌ [DB] Paginated Query Error:', error);
                 return { data: [], total: filteredTotal, certifiedCount, indexedCount };
             }
 
@@ -1005,7 +1164,7 @@ export const database = {
                 indexedCount,
             };
         } catch (error) {
-            console.error('❌ [Supabase] Paginated Query Error:', error);
+            console.error('❌ [DB] Paginated Query Error:', error);
             return { data: [], total: 0, certifiedCount: 0, indexedCount: 0 };
         }
     },
@@ -1020,6 +1179,14 @@ export const database = {
         limit?: number;
         offset?: number;
     }): Promise<{ data: any[]; total: number }> => {
+        if (isLocalPgConfigured()) {
+            return localPgGetEntitiesByFilter({
+                sector: options.sector,
+                country: options.country,
+                limit: options.limit ?? 100,
+                offset: options.offset ?? 0,
+            });
+        }
         if (!isSupabaseConfigured()) return { data: [], total: 0 };
 
         const { sector, country, limit = 100, offset = 0 } = options;
@@ -1055,7 +1222,7 @@ export const database = {
             // (Supabase returns soft errors, not throws), caching { data: [N rows], total: 0 }
             // would make landing pages 404 for the full TTL. Bail without caching.
             if (countErr || total == null) {
-                if (countErr) console.error('❌ [Supabase] getAyaEntitiesByFilter count error:', countErr);
+                if (countErr) console.error('❌ [DB] getAyaEntitiesByFilter count error:', countErr);
                 return { data: [], total: 0 };
             }
 
@@ -1076,7 +1243,7 @@ export const database = {
 
             const { data, error } = await query;
             if (error) {
-                console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
+                console.error('❌ [DB] getAyaEntitiesByFilter Error:', error);
                 return { data: [], total: 0 };
             }
 
@@ -1087,7 +1254,7 @@ export const database = {
             }
             return result;
         } catch (error) {
-            console.error('❌ [Supabase] getAyaEntitiesByFilter Error:', error);
+            console.error('❌ [DB] getAyaEntitiesByFilter Error:', error);
             return { data: [], total: 0 };
         }
     },
@@ -1096,6 +1263,7 @@ export const database = {
      * List distinct sector_macro values with their entity count. Used for sitemap + index pages.
      */
     getAyaSectors: async (): Promise<{ sector: string; count: number }[]> => {
+        if (isLocalPgConfigured()) return localPgGetSectors();
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -1125,6 +1293,7 @@ export const database = {
      * List distinct country_legal values with their entity count. Used for sitemap + index pages.
      */
     getAyaCountries: async (): Promise<{ country: string; count: number }[]> => {
+        if (isLocalPgConfigured()) return localPgGetCountries();
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -1157,6 +1326,7 @@ export const database = {
      * Returns only pairs where at least 1 entity has both fields set and asr_score >= 20.
      */
     getAyaSectorCountryCombinations: async (): Promise<{ sector: string; country: string; count: number }[]> => {
+        if (isLocalPgConfigured()) return localPgGetSectorCountryCombinations();
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -1175,7 +1345,7 @@ export const database = {
                 .gte('asr_score', 20);
 
             if (error) {
-                console.error('❌ [Supabase] getAyaSectorCountryCombinations Error:', error);
+                console.error('❌ [DB] getAyaSectorCountryCombinations Error:', error);
                 return [];
             }
 
@@ -1208,6 +1378,7 @@ export const database = {
      * Get entities expiring within N days (payment_completed=true, valid_until approaching)
      */
     getExpiringEntities: async (daysUntilExpiry: number): Promise<any[]> => {
+        if (isLocalPgConfigured()) return localPgGetExpiringEntities(daysUntilExpiry);
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -1226,13 +1397,13 @@ export const database = {
                 .order('valid_until', { ascending: true });
 
             if (error) {
-                console.error('❌ [Supabase] getExpiringEntities Error:', error);
+                console.error('❌ [DB] getExpiringEntities Error:', error);
                 return [];
             }
 
             return data || [];
         } catch (error) {
-            console.error('❌ [Supabase] getExpiringEntities Error:', error);
+            console.error('❌ [DB] getExpiringEntities Error:', error);
             return [];
         }
     },
@@ -1242,6 +1413,7 @@ export const database = {
      * Only certified entities (payment_completed = true)
      */
     getEntitiesNeedingReview: async (): Promise<any[]> => {
+        if (isLocalPgConfigured()) return localPgGetEntitiesNeedingReview();
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -1258,13 +1430,13 @@ export const database = {
                 .order('next_review_due', { ascending: true });
 
             if (error) {
-                console.error('❌ [Supabase] getEntitiesNeedingReview Error:', error);
+                console.error('❌ [DB] getEntitiesNeedingReview Error:', error);
                 return [];
             }
 
             return data || [];
         } catch (error) {
-            console.error('❌ [Supabase] getEntitiesNeedingReview Error:', error);
+            console.error('❌ [DB] getEntitiesNeedingReview Error:', error);
             return [];
         }
     },
@@ -1312,15 +1484,15 @@ export const database = {
                 .eq('entity_id', entityId);
 
             if (error) {
-                console.error(`❌ [Supabase] updateEntityLifecycle Error for ${entityId}:`, error);
+                console.error(`❌ [DB] updateEntityLifecycle Error for ${entityId}:`, error);
                 return false;
             }
 
             _clearAyaCaches();
-            console.log(`💾 [Supabase] Lifecycle updated for entity: ${entityId}`);
+            console.log(`💾 [DB] Lifecycle updated for entity: ${entityId}`);
             return true;
         } catch (error) {
-            console.error(`❌ [Supabase] updateEntityLifecycle Error for ${entityId}:`, error);
+            console.error(`❌ [DB] updateEntityLifecycle Error for ${entityId}:`, error);
             return false;
         }
     },
@@ -1346,13 +1518,13 @@ export const database = {
 
             if (error) {
                 if (error.code === 'PGRST116') return null; // No rows
-                console.error('❌ [Supabase] getEntityBySubscriptionId Error:', error);
+                console.error('❌ [DB] getEntityBySubscriptionId Error:', error);
                 return null;
             }
 
             return data;
         } catch (error) {
-            console.error('❌ [Supabase] getEntityBySubscriptionId Error:', error);
+            console.error('❌ [DB] getEntityBySubscriptionId Error:', error);
             return null;
         }
     },
@@ -1383,7 +1555,7 @@ export const database = {
                 .lt('valid_until', now);
 
             if (fetchErr) {
-                console.error('❌ [Supabase] markEntitiesExpired fetch Error:', fetchErr);
+                console.error('❌ [DB] markEntitiesExpired fetch Error:', fetchErr);
                 return [];
             }
 
@@ -1402,15 +1574,15 @@ export const database = {
                 .in('entity_id', entityIds);
 
             if (updateErr) {
-                console.error('❌ [Supabase] markEntitiesExpired update Error:', updateErr);
+                console.error('❌ [DB] markEntitiesExpired update Error:', updateErr);
                 return [];
             }
 
             _clearAyaCaches();
-            console.log(`⏰ [Supabase] Marked ${entityIds.length} entities as expired`);
+            console.log(`⏰ [DB] Marked ${entityIds.length} entities as expired`);
             return entityIds;
         } catch (error) {
-            console.error('❌ [Supabase] markEntitiesExpired Error:', error);
+            console.error('❌ [DB] markEntitiesExpired Error:', error);
             return [];
         }
     },
@@ -1418,18 +1590,26 @@ export const database = {
     // ── API Analytics ───────────────────────────────────────
 
     insertAyaAnalytics: async (rows: { recorded_at: string; endpoint: string; caller_type: string; call_count: number; sample_ua: string | null; domain: string | null }[]): Promise<void> => {
-        if (!isSupabaseConfigured() || rows.length === 0) return;
+        if (rows.length === 0) return;
+        if (isLocalPgConfigured()) {
+            await localPgInsertAnalytics(rows);
+            return;
+        }
+        if (!isSupabaseConfigured()) return;
         const client = getSupabase();
         if (!client) return;
         try {
             const { error } = await client.from('aya_api_analytics').insert(rows);
-            if (error) console.error('❌ [Supabase] insertAyaAnalytics Error:', error.message);
+            if (error) console.error('❌ [DB] insertAyaAnalytics Error:', error.message);
         } catch (error) {
-            console.error('❌ [Supabase] insertAyaAnalytics Error:', error);
+            console.error('❌ [DB] insertAyaAnalytics Error:', error);
         }
     },
 
     getAyaAnalytics: async (days: number = 7): Promise<any[]> => {
+        if (isLocalPgConfigured()) {
+            return await localPgGetAnalytics(days);
+        }
         if (!isSupabaseConfigured()) return [];
         const client = getSupabase();
         if (!client) return [];
@@ -1440,10 +1620,10 @@ export const database = {
                 .select('*')
                 .gte('recorded_at', since)
                 .order('recorded_at', { ascending: false });
-            if (error) { console.error('❌ [Supabase] getAyaAnalytics Error:', error); return []; }
+            if (error) { console.error('❌ [DB] getAyaAnalytics Error:', error); return []; }
             return data || [];
         } catch (error) {
-            console.error('❌ [Supabase] getAyaAnalytics Error:', error);
+            console.error('❌ [DB] getAyaAnalytics Error:', error);
             return [];
         }
     },
@@ -1864,6 +2044,47 @@ export interface AyaStatsShape {
     last_updated: string;
 }
 
+// ── Sitemap ───────────────────────────────────────────────────────────────────
+
+export type SitemapEntity = { entity_id: string; updated_at: Date | null };
+
+/**
+ * Number of entity URLs the sitemap must cover. Drives how many chunk files
+ * generateSitemaps() declares.
+ *
+ * LÈVE en cas d'échec, volontairement. Renvoyer 0 produirait un robots.txt
+ * n'annonçant qu'un seul chunk, figé jusqu'au déploiement suivant. Mieux vaut
+ * casser le build bruyamment : c'est précisément un `console.warn` que personne
+ * ne lisait qui a laissé le sitemap dépasser 50 000 URLs pendant des mois.
+ */
+export async function getAyaSitemapCount(): Promise<number> {
+    if (isLocalPgConfigured()) return await localPgCountSitemapEntities();
+    const { total } = await getAyaEntitiesAggregated({ page: 1, pageSize: 1 });
+    return total;
+}
+
+/**
+ * One page of entity ids for a sitemap chunk. Deliberately lean (2 columns).
+ *
+ * LÈVE en cas d'échec, volontairement. Ces routes sont en ISR : si la
+ * régénération lève, Next.js conserve le dernier fichier valide et réessaie.
+ * Renvoyer [] ferait au contraire considérer la régénération comme réussie, et
+ * mettrait un sitemap VIDE en cache 24 h, remplaçant du contenu valide par du
+ * vide sur une simple coupure Postgres passagère.
+ */
+export async function getAyaSitemapPage(page: number, pageSize: number): Promise<SitemapEntity[]> {
+    if (isLocalPgConfigured()) {
+        return await localPgGetSitemapPage(pageSize, (page - 1) * pageSize);
+    }
+    const { data } = await getAyaEntitiesAggregated({ page, pageSize });
+    return data
+        .filter((e: any) => e.entity_id)
+        .map((e: any) => ({
+            entity_id: e.entity_id,
+            updated_at: e.updated_at ? new Date(e.updated_at) : null,
+        }));
+}
+
 // ── getAyaSearchAggregated ────────────────────────────────────────────────────
 
 /**
@@ -2184,8 +2405,10 @@ export async function getAyaLiveAggregated(
  */
 export async function getAyaEntityByIdAggregated(id: string): Promise<any | null> {
     // Migration totale Supabase -> VPS Postgres : read locally.
+    // Surface PUBLIQUE (page certificat /aya/e/<id> + image OpenGraph) : filtre
+    // adulte appliqué. Les lectures internes passent par db.getAyaEntityById.
     if (isLocalPgConfigured()) {
-        return _localPgGetEntityById(id);
+        return localPgGetPublicEntityById(id);
     }
     // 1. Supabase first (authoritative, paying customers)
     try {
@@ -2251,8 +2474,11 @@ export async function getAyaEntityByUrlAggregated(url: string): Promise<any | nu
         .split('#')[0];
 
     // Migration totale Supabase -> VPS Postgres : read locally.
+    // Surface PUBLIQUE (/api/aya/entity/<domain>, /api/aya/llm/<domain>, badge) :
+    // filtre adulte appliqué. La déduplication de scan et l'OTP passent par
+    // db.getAyaEntityByUrl, qui doit lui continuer de voir toutes les entités.
     if (isLocalPgConfigured()) {
-        return localPgGetEntityByDomain(bare);
+        return localPgGetPublicEntityByDomain(bare);
     }
 
     // 1. Supabase first — try without www, then with www
