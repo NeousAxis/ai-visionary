@@ -47,6 +47,16 @@ const STOP_WORDS = new Set([
     'company', 'my', 'we', 'need', 'des', 'chez', 'près', 'pres', 'vers', 'ou', 'or',
 ]);
 
+// Mots trop vagues pour prouver quoi que ce soit ("service" trouve "Conseil &
+// Services Pro") : jamais utilisés comme mots de recherche ni comme preuve.
+const GENERIC = new Set([
+    'service', 'services', 'solution', 'solutions', 'entreprise', 'entreprises', 'company', 'companies',
+    'business', 'local', 'locale', 'locaux', 'professionnel', 'professionnels', 'professional', 'qualité',
+    'quality', 'offre', 'offres', 'produit', 'produits', 'product', 'products', 'client', 'clients',
+    'customer', 'customers', 'online', 'ligne', 'site', 'web', 'meilleur', 'best', 'pro', 'expert', 'experts',
+]);
+const notGeneric = (t: string) => !t.split(/\s+/).every((w) => GENERIC.has(w));
+
 const SYSTEM = `Tu transformes une demande de recherche d'entreprise en critères JSON.
 Réponds UNIQUEMENT avec un objet JSON de cette forme :
 {"requirements":[{"label":"...","terms":["...","..."]}],"city":null,"country":null,"sector":null,"terms":["..."]}
@@ -105,7 +115,7 @@ export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promis
                 label: clean(r?.label, 40),
                 terms: Array.from(new Set((Array.isArray(r?.terms) ? r.terms : [])
                     .map((t: unknown) => stripCity(clean(t, 40).toLowerCase()))
-                    .filter((t: string) => t.length >= 3))).slice(0, 6) as string[],
+                    .filter((t: string) => t.length >= 3 && notGeneric(t)))).slice(0, 6) as string[],
             }))
             .filter((r) => r.label && r.terms.length > 0);
         // Garde-fou : un critère doit venir de la demande. Ceux que le modèle
@@ -114,7 +124,10 @@ export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promis
         const fromQuery = (r: AskRequirement) =>
             [r.label, ...r.terms].some((s) => deaccent(s.toLowerCase()).split(/[\s'’-]+/)
                 .some((w) => w.length >= 4 && nq.includes(w.slice(0, Math.max(4, w.length - 2)))));
-        const kept = requirements.filter(fromQuery);
+        // Un critère qui reprend le lieu ("Proximité Morges") fait doublon avec la ville.
+        const notPlace = (r: AskRequirement) => !deaccent(r.label.toLowerCase()).split(/[\s'’-]+/)
+            .some((w) => cityWords.has(w) || [...cityWords].some((c) => deaccent(c) === w));
+        const kept = requirements.filter((r) => fromQuery(r) && notPlace(r));
         if (kept.length === 0) {
             for (const w of fallbackIntent(query).terms.filter((x) => !cityWords.has(x)).slice(0, 3)) {
                 kept.push({ label: w.charAt(0).toUpperCase() + w.slice(1), terms: [w] });
@@ -133,7 +146,7 @@ export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promis
             ...(Array.isArray(raw.terms) ? raw.terms : []).map((t: unknown) => clean(t, 40).toLowerCase()),
             ...requirements.flatMap((r) => r.terms),
         ].flatMap((t) => t.split(/[\s,]+/))
-            .filter((w) => w.length >= 4 && !STOP_WORDS.has(w) && !cityWords.has(w)))).slice(0, 12);
+            .filter((w) => w.length >= 4 && !STOP_WORDS.has(w) && !cityWords.has(w) && !GENERIC.has(w)))).slice(0, 12);
         if (terms.length === 0 && !city) return fallbackIntent(query);
         return { terms, requirements, city, country, sector, source: 'llm' };
     } catch (err) {

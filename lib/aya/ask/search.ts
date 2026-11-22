@@ -10,9 +10,17 @@
 
 import { localPgAskSearch, type AskSearchRow } from '@/lib/db-local-pg';
 import { parseAskQuery, type AskIntent } from './parse';
-import { geocodeCity, distanceKm, type GeoPoint } from './geo';
+import { geocodeCity, distanceKm, isGeocoded, type GeoPoint } from './geo';
 
-export type AskWhy = { label: string; matched: boolean; evidence: string | null };
+/** strong : le mot demandé lui-même figure dans la fiche ; sinon seulement un synonyme. */
+export type AskWhy = { label: string; matched: boolean; strong: boolean; evidence: string | null };
+
+/** Racine du mot principal d'un libellé : "Pizzeria" donne "pizzer", "Végétarien" donne "vegetari". */
+function stemOf(label: string): string {
+    const words = norm(label).split(/[\s'’-]+/).filter((w) => w.length >= 4).sort((a, b) => b.length - a.length);
+    const w = words[0] || norm(label);
+    return w.length > 6 ? w.slice(0, w.length - 2) : w;
+}
 
 export type AskResult = {
     entity_id: string;
@@ -31,9 +39,11 @@ export type AskResult = {
     description: string | null;
     why: AskWhy[];
     matched_count: number;
+    /** Poids des critères prouvés : le premier (le métier demandé) compte double. */
+    match_weight: number;
     price: string | null;
     audience: string | null;
-    /** Coordonnées montrées seulement pour les fiches certifiées. */
+    /** Téléphone publié par l'entreprise ; email public seulement pour les fiches certifiées. */
     contact: { phone: string | null; email: string | null } | null;
     /** Contact via AYA possible : fiche certifiée avec une adresse vérifiée. */
     can_contact: boolean;
@@ -77,11 +87,37 @@ function domainOf(website: string | null): string {
     return (website || '').replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
 }
 
+/**
+ * Les fiches ont trois formats selon leur origine :
+ * - AYO (diagnostic) et certifiées : asr_payload.data.identite.city.value, etc.
+ * - Web Data Commons (FUSION-WDC, MIN3) : asr_payload.city / description / telephone.
+ * - Robot AYA-BOT (AYA-PREINDEX) : asr_payload.data.entity.city / contacts, aio_blocks.
+ */
+function cityOf(p: any): string | null {
+    const d = p.data || {};
+    return asList(v(d, 'identite', 'city', 'value'))[0]
+        || asList(p.city)[0]
+        || asList(v(d, 'entity', 'city'))[0]
+        || asList(v(p, 'entity', 'city'))[0]
+        || asList(v(d, 'aio_blocks', 'identite', 'fields', 'city'))[0]
+        || null;
+}
+function phoneOf(p: any): string | null {
+    const d = p.data || {};
+    return asList(v(d, 'identite', 'contact_phone', 'value'))[0]
+        || asList(p.telephone)[0]
+        || asList(v(d, 'entity', 'contacts', 'phone'))[0]
+        || asList(v(d, 'aio_blocks', 'identite', 'fields', 'phone'))[0]
+        || null;
+}
+
 /** Toutes les phrases réelles d'une fiche où un critère peut être prouvé. */
 function evidencePool(row: AskSearchRow): string[] {
     const p: any = row.asr_payload || {};
     const d = p.data || {};
     return [
+        ...asList(p.description),
+        ...asList(v(d, 'source', 'meta_description')),
         ...asList(v(d, 'offre', 'services', 'value')),
         ...asList(v(d, 'offre', 'products', 'value')),
         ...asList(v(d, 'offre', 'use_cases', 'value')),
@@ -122,27 +158,32 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
     const p: any = row.asr_payload || {};
     const d = p.data || {};
     const pool = evidencePool(row);
-    const city = asList(v(d, 'identite', 'city', 'value'))[0] || null;
+    const city = cityOf(p);
     const zone = asList(v(d, 'processus_methodes', 'geographies_served', 'value'))[0] || null;
     const description =
         asList(v(p, 'enrichment', 'gemini_description_fr'))[0] ||
         asList(v(d, 'identite', 'description', 'value'))[0] ||
+        asList(p.description)[0] ||
         asList(v(d, 'aio_blocks', 'offre', 'fields', 'meta_description'))[0] ||
+        asList(v(d, 'source', 'meta_description'))[0] ||
         asList(v(d, 'offre', 'services', 'value'))[0] || null;
 
     const why: AskWhy[] = intent.requirements.map((r) => {
-        const evidence = findEvidence(pool, r.terms);
-        return { label: r.label, matched: !!evidence, evidence };
+        const strongEv = findEvidence(pool, [stemOf(r.label)]);
+        const evidence = strongEv || findEvidence(pool, r.terms);
+        return { label: r.label, matched: !!evidence, strong: !!strongEv, evidence };
     });
     if (intent.city) {
         const c = norm(intent.city);
         const where = [city, zone].filter(Boolean) as string[];
         const ev = where.find((s) => norm(s).includes(c)) || findEvidence(pool, [intent.city]);
-        why.push({ label: intent.city, matched: !!ev, evidence: ev ? cut(ev) : null });
+        why.push({ label: intent.city, matched: !!ev, strong: !!ev, evidence: ev ? cut(ev) : null });
     }
 
     const certified = row.payment_completed === true;
-    const phone = certified ? (asList(v(d, 'identite', 'contact_phone', 'value'))[0] || null) : null;
+    // Téléphone professionnel publié par l'entreprise (site ou données schema.org) :
+    // montré pour toutes les fiches. L'email public, lui, seulement pour les certifiées.
+    const phone = phoneOf(p);
     // Adresse PUBLIQUE de la fiche (lue sur le site) uniquement. contact_email du
     // registre est l'adresse de la personne qui a réclamé la fiche : elle ne sert
     // qu'au relais « Contacter via AYA » et n'est jamais montrée.
@@ -165,9 +206,12 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
         description: description ? cut(description, 220) : null,
         why,
         matched_count: why.filter((w) => w.matched).length,
+        // Preuve forte = 2, synonyme = 1 ; le premier critère (le métier) compte double.
+        match_weight: why.reduce((s, w, i) =>
+            s + (w.matched ? (w.strong ? 2 : 1) * (i === 0 && intent.requirements.length > 1 ? 2 : 1) : 0), 0),
         price: asList(v(d, 'offre', 'pricing_indication', 'value'))[0] ? cut(asList(v(d, 'offre', 'pricing_indication', 'value'))[0], 80) : null,
         audience: asList(v(d, 'offre', 'target_audience', 'value'))[0] ? cut(asList(v(d, 'offre', 'target_audience', 'value'))[0], 80) : null,
-        contact: certified ? { phone, email } : null,
+        contact: phone || email ? { phone, email } : null,
         can_contact: certified && /@/.test(row.contact_email || ''),
         geo: null,
         distance_km: null,
@@ -215,15 +259,23 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
         return true;
     });
     shaped.sort((a, b) =>
-        (b.matched_count - a.matched_count) ||
+        (b.match_weight - a.match_weight) ||
         (Number(b.certified) - Number(a.certified)) ||
         ((b.score ?? 0) - (a.score ?? 0)));
 
     const results = shaped.slice(0, Math.min(Math.max(opts.limit ?? 10, 1), 20));
     const center = intent.city ? await geocodeCity(intent.city, intent.country) : null;
 
+    // Suisse : géocodeur fédéral, sans limite. Ailleurs : 3 nouvelles villes au plus
+    // par recherche (Nominatim, une par seconde) ; les suivantes viennent du cache.
+    let remoteBudget = 3;
     await Promise.all(results.map(async (r) => {
         if (!r.city) return;
+        const ch = (r.country || '').toUpperCase() === 'CH';
+        if (!ch && !isGeocoded(r.city, r.country)) {
+            if (remoteBudget <= 0) return;
+            remoteBudget -= 1;
+        }
         r.geo = await geocodeCity(r.city, r.country);
         if (r.geo && center) r.distance_km = Math.round(distanceKm(center, r.geo));
     }));

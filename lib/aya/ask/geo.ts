@@ -26,7 +26,26 @@ async function swisstopo(city: string): Promise<GeoPoint | null> {
     return { lat: a.lat, lon: a.lon, label };
 }
 
+// Nominatim demande au plus une requête par seconde : les appels passent en file.
+let nominatimChain: Promise<unknown> = Promise.resolve();
+function throttled<T>(fn: () => Promise<T>): Promise<T> {
+    const run = nominatimChain.then(() => new Promise((r) => setTimeout(r, 1100))).then(fn);
+    nominatimChain = run.catch(() => undefined);
+    return run;
+}
+
+/** Vrai si la ville est déjà située (aucun appel réseau nécessaire). */
+export function isGeocoded(city: string | null | undefined, country: string | null | undefined): boolean {
+    const c = (city || '').trim();
+    const hit = cache.get(`${c.toLowerCase()}|${(country || '').toUpperCase()}`);
+    return !!hit && hit.exp > Date.now();
+}
+
 async function nominatim(city: string, country: string | null): Promise<GeoPoint | null> {
+    return throttled(() => nominatimRaw(city, country));
+}
+
+async function nominatimRaw(city: string, country: string | null): Promise<GeoPoint | null> {
     const cc = country && /^[A-Z]{2}$/.test(country) ? `&countrycodes=${country.toLowerCase()}` : '';
     const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(city)}${cc}`;
     const j = await fetchJson(url);
