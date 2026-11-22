@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { db, getAyaEntitiesAggregated } from '@/lib/db';
 import AyaRegistryClient from '@/app/components/AyaRegistryClient';
+import AyaAsk from '@/app/components/AyaAsk';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -97,7 +98,10 @@ export default async function AyaPage({
                 </div>
             </header>
 
-            {/* CLIENT INTERACTIVE SECTION (search, sort, grid, pagination) */}
+            {/* RECHERCHE EN LANGAGE COURANT (proposition A, 22.11.2026) */}
+            <AyaAsk totalCount={totalAll} />
+
+            {/* CLIENT INTERACTIVE SECTION (index : tri, grille, pagination) */}
             <Suspense fallback={
                 <div style={{ textAlign: 'center', padding: '80px 20px' }}>{t('loading')}</div>
             }>
@@ -110,6 +114,7 @@ export default async function AyaPage({
                     pageSize={PAGE_SIZE}
                     currentSearch={search}
                     currentSort={sort}
+                    hideHero
                 />
             </Suspense>
 

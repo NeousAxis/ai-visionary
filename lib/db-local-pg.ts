@@ -2381,3 +2381,87 @@ export async function localPgDeleteEntitiesByWebsite(variants: string[]): Promis
         return 0;
     }
 }
+
+// ── Recherche en langage courant (page /aya, route /api/aya/ask) ─────────────
+
+export type AskSearchParams = {
+    /** Mots ou expressions à chercher. */
+    terms: string[];
+    /** Code pays ISO à 2 lettres. Filtre doux : les fiches sans pays restent candidates. */
+    country?: string | null;
+    /** Ville ou région citée dans la demande. Bonus fort quand la fiche la mentionne. */
+    city?: string | null;
+    /** Macro-secteur du registre (sector_macro). Bonus quand il correspond. */
+    sector?: string | null;
+    limit: number;
+};
+
+export type AskSearchRow = Entity & { match_score: number };
+
+/**
+ * Cherche dans tout le registre public les fiches qui répondent à au moins un
+ * terme de la demande, dans le nom, le domaine, le secteur ou le contenu de la
+ * fiche (asr_payload). Le classement additionne les correspondances, puis
+ * favorise la ville demandée, le secteur, les fiches certifiées et les fiches
+ * détaillées. Lecture seule.
+ */
+export async function localPgAskSearch(p: AskSearchParams): Promise<AskSearchRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+
+    const terms = Array.from(new Set(
+        p.terms.map((t) => t.trim().toLowerCase()).filter((t) => t.length >= 3)
+    )).slice(0, 10);
+    const city = p.city?.trim().toLowerCase() || null;
+    if (terms.length === 0 && !city) return [];
+
+    const params: unknown[] = [];
+    const add = (v: unknown) => { params.push(v); return `$${params.length}`; };
+
+    const scoreParts: string[] = [];
+    const matchParts: string[] = [];
+    for (const t of terms) {
+        const ph = add(`%${t}%`);
+        scoreParts.push(`(CASE WHEN r.h LIKE ${ph} THEN 3 WHEN r.pl LIKE ${ph} THEN 2 ELSE 0 END)`);
+        matchParts.push(`r.h LIKE ${ph} OR r.pl LIKE ${ph}`);
+    }
+    if (city) {
+        const ph = add(`%${city}%`);
+        scoreParts.push(`(CASE WHEN r.h LIKE ${ph} OR r.pl LIKE ${ph} THEN 5 ELSE 0 END)`);
+        if (matchParts.length === 0) matchParts.push(`r.h LIKE ${ph} OR r.pl LIKE ${ph}`);
+    }
+    if (p.sector) {
+        const ph = add(p.sector);
+        scoreParts.push(`(CASE WHEN r.sector_macro = ${ph} THEN 2 ELSE 0 END)`);
+    }
+    scoreParts.push(`(CASE WHEN r.payment_completed THEN 3 ELSE 0 END)`);
+    scoreParts.push(`(CASE WHEN r.asr_payload->'data'->'offre' IS NOT NULL THEN 1 ELSE 0 END)`);
+
+    let countryClause = 'TRUE';
+    if (p.country && /^[A-Za-z]{2}$/.test(p.country)) {
+        const ph = add(p.country.toUpperCase());
+        countryClause = `(r.country_legal = ${ph} OR coalesce(r.country_legal, '') IN ('', 'XX'))`;
+    }
+    const limitPh = add(Math.min(Math.max(p.limit, 1), 100));
+
+    try {
+        const res: QueryResult<AskSearchRow> = await pool.query(
+            `SELECT ${ENTITY_COLS}, (${scoreParts.join(' + ')}) AS match_score
+             FROM (
+                SELECT a.*,
+                       lower(coalesce(a.display_name,'') || ' ' || coalesce(a.legal_name,'') || ' ' ||
+                             coalesce(a.website,'') || ' ' || coalesce(a.sector_macro,'')) AS h,
+                       lower(coalesce(a.asr_payload::text, '')) AS pl
+                FROM ${publicRegistry('a')}
+             ) r
+             WHERE ${countryClause} AND (${matchParts.join(' OR ')})
+             ORDER BY match_score DESC, r.payment_completed DESC NULLS LAST, r.asr_score DESC NULLS LAST
+             LIMIT ${limitPh}`,
+            params
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgAskSearch error:', err);
+        return [];
+    }
+}
