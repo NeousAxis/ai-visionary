@@ -39,9 +39,10 @@ export default async function AyaPage({
 }) {
     const t = await getTranslations('aya');
     const params = await searchParams;
-    // Nouvelle recherche (proposition A) visible seulement avec ?apercu=1 tant que
-    // Cyril ne l'a pas validée en ligne. Pour l'ouvrir à tous : NEW_SEARCH = true.
-    const NEW_SEARCH = false;
+    // Nouvelle recherche (proposition A), validée et ouverte à tous par Cyril le
+    // 22.11.2026. Pour revenir à l'ancienne page : NEW_SEARCH = false (?apercu=1
+    // la montre alors encore).
+    const NEW_SEARCH = true;
     const showAsk = NEW_SEARCH || params.apercu === '1';
     const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
     const search = (params.q || '').trim();
