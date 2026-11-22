@@ -1595,6 +1595,7 @@
     "cErrInvalid": "Vérifiez votre email et votre message (au moins 20 caractères).",
     "cErrCode": "Code incorrect ou expiré.",
     "cErrSend": "L'envoi n'a pas abouti. Réessayez plus tard.",
-    "cErrRate": "Trop de demandes. Réessayez dans quelques minutes."
+    "cErrRate": "Trop de demandes. Réessayez dans quelques minutes.",
+    "nearMatch": "proche"
   }
 }

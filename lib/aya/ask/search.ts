@@ -157,14 +157,15 @@ function evidencePool(row: AskSearchRow): string[] {
 }
 
 /**
- * Une expression est prouvée par une phrase de la fiche quand ses mots utiles
- * y figurent : tous pour 1 ou 2 mots, au moins les deux tiers au-delà.
+ * Une expression est prouvée par une phrase de la fiche quand TOUS ses mots
+ * utiles y figurent ("pain fait maison" ne doit pas être prouvé par « faites
+ * ... votre maison »). Au-delà de 3 mots, un seul peut manquer.
  */
 function phraseIn(text: string, phrase: string): boolean {
     const words = phrase.split(/\s+/).filter((w) => w.length >= 3);
     if (words.length === 0) return false;
     const hits = words.filter((w) => text.includes(w)).length;
-    return words.length <= 2 ? hits === words.length : hits >= Math.ceil((words.length * 2) / 3);
+    return words.length <= 3 ? hits === words.length : hits >= words.length - 1;
 }
 
 function findEvidence(pool: string[], terms: string[]): string | null {

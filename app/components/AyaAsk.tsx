@@ -11,7 +11,7 @@ import AyaMap, { type MapPoint } from './AyaMap';
 import LanguageToggle from './LanguageToggle';
 import AyaContact from './AyaContact';
 
-type Why = { label: string; matched: boolean; evidence: string | null };
+type Why = { label: string; matched: boolean; strong?: boolean; evidence: string | null };
 type Result = {
     entity_id: string; name: string; domain: string; website: string | null; url: string;
     country: string | null; sector: string | null; score: number | null; certified: boolean;
@@ -48,7 +48,10 @@ function formatPhone(p: string): string {
 const card: React.CSSProperties = { border: '1px solid var(--border-light)', borderRadius: 24, background: '#fff' };
 const eyebrowStyle: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: 0.6, textTransform: 'uppercase' };
 
-function Check({ on }: { on: boolean }) {
+function Check({ on, near }: { on: boolean; near?: boolean }) {
+    if (on && near) {
+        return <span aria-hidden="true" style={{ flex: 'none', width: 20, textAlign: 'center', marginTop: 1, color: 'var(--primary-color)', fontWeight: 700, fontSize: 17 }}>≈</span>;
+    }
     return on ? (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flex: 'none', marginTop: 2 }}><path d="M20 6 9 17l-5-5" /></svg>
     ) : (
@@ -187,9 +190,10 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                                             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                                                 {r.why.map((w) => (
                                                     <li key={w.label} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                                                        <Check on={w.matched} />
+                                                        <Check on={w.matched} near={w.matched && w.strong === false} />
                                                         <span>
                                                             <strong style={{ color: w.matched ? 'var(--text-main)' : 'var(--text-muted)' }}>{w.label}</strong>
+                                                            {w.matched && w.strong === false && <span style={{ color: 'var(--text-muted)' }}>{` (${t('nearMatch')})`}</span>}
                                                             <span style={{ color: 'var(--text-muted)' }}>{' : '}{w.matched ? `« ${w.evidence} »` : t('notInFiche')}</span>
                                                         </span>
                                                     </li>
