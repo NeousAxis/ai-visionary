@@ -16,6 +16,7 @@ import { localPgScanSearchDocs } from '@/lib/db-local-pg';
 
 type Index = {
     ids: string[];
+    heads: string[];
     docs: string[];
     country: string[];
     sector: string[];
@@ -33,13 +34,14 @@ export const fold = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu,
 
 async function build(): Promise<void> {
     const t0 = Date.now();
-    const ids: string[] = [], docs: string[] = [], country: string[] = [], sector: string[] = [];
+    const ids: string[] = [], heads: string[] = [], docs: string[] = [], country: string[] = [], sector: string[] = [];
     const cert: number[] = [], score: number[] = [];
     let after: string | null = null;
     for (;;) {
         const rows = await localPgScanSearchDocs(after, BATCH);
         for (const r of rows) {
             ids.push(r.entity_id);
+            heads.push(fold(r.head || ''));
             docs.push(fold(r.doc || ''));
             country.push((r.country_legal || '').toUpperCase());
             sector.push(r.sector_macro || '');
@@ -50,7 +52,7 @@ async function build(): Promise<void> {
         after = rows[rows.length - 1].entity_id;
         await new Promise((res) => setTimeout(res, 150)); // ménage la base entre deux tranches
     }
-    current = { ids, docs, country, sector, certified: Uint8Array.from(cert), score: Float32Array.from(score), builtAt: Date.now() };
+    current = { ids, heads, docs, country, sector, certified: Uint8Array.from(cert), score: Float32Array.from(score), builtAt: Date.now() };
     console.warn(`[aya/memindex] ${ids.length} fiches indexées en ${Math.round((Date.now() - t0) / 1000)} s`);
 }
 
@@ -74,10 +76,13 @@ export type MemHit = { id: string; score: number };
  * points, la ville demandée beaucoup, puis le secteur, la certification.
  * Pays demandé : ce pays, ou une fiche sans pays qui cite le lieu.
  */
-export function memSearch(p: { terms: string[]; city: string | null; country: string | null; sector: string | null; limit: number }): MemHit[] | null {
+export function memSearch(p: { terms: string[]; city: string | null; country: string | null; sector: string | null; limit: number; raw?: string }): MemHit[] | null {
     const ix = current;
     if (!ix) return null;
     const terms = Array.from(new Set(p.terms.map(fold).filter((t) => t.length >= 3))).slice(0, 12);
+    // Ce qui a été tapé tel quel : s'il figure dans le nom ou le site d'une fiche
+    // ("infomaniak"), cette fiche passe devant toutes les correspondances de contenu.
+    const raw = p.raw ? fold(p.raw.trim()) : '';
     const city = p.city ? fold(p.city) : null;
     if (terms.length === 0 && !city) return [];
     const cc = p.country && /^[A-Za-z]{2}$/.test(p.country) ? p.country.toUpperCase() : null;
@@ -88,9 +93,11 @@ export function memSearch(p: { terms: string[]; city: string | null; country: st
         let s = 0;
         let any = false;
         for (const t of terms) if (d.includes(t)) { s += 2; any = true; }
+        const nameHit = raw.length >= 3 && ix.heads[i].includes(raw);
+        if (nameHit) { s += 20; any = true; }
         const cityHit = !!city && d.includes(city);
         if (!any && !cityHit) continue;
-        if (cc && ix.country[i] !== cc && !((ix.country[i] === '' || ix.country[i] === 'XX') && cityHit)) continue;
+        if (!nameHit && cc && ix.country[i] !== cc && !((ix.country[i] === '' || ix.country[i] === 'XX') && cityHit)) continue;
         // Le lieu demandé pèse plus que plusieurs synonymes réunis.
         if (cityHit) s += 10;
         if (p.sector && ix.sector[i] === p.sector) s += 2;

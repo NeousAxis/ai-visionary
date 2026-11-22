@@ -254,7 +254,7 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
         limit: 100,
     };
     // Index en mémoire d'abord (rapide) ; recherche SQL tant qu'il se construit.
-    const hits = memSearch(params);
+    const hits = memSearch({ ...params, raw: raw.length <= 60 ? raw : undefined });
     let rows: AskSearchRow[];
     if (hits) {
         const full = await localPgGetPublicEntitiesByIds(hits.map((h) => h.id));

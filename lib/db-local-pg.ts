@@ -2390,6 +2390,8 @@ export type SearchDocRow = {
     sector_macro: string | null;
     payment_completed: boolean | null;
     asr_score: number | null;
+    /** Nom, raison sociale et site : ce qu'on tape pour chercher une entreprise précise. */
+    head: string;
     doc: string;
 };
 
@@ -2409,6 +2411,7 @@ export async function localPgScanSearchDocs(afterId: string | null, limit: numbe
         await client.query("SET LOCAL statement_timeout = '20s'");
         const res: QueryResult<SearchDocRow> = await client.query(
             `SELECT a.entity_id, a.country_legal, a.sector_macro, a.payment_completed, a.asr_score,
+                    concat_ws(' ', a.display_name, a.legal_name, a.website) AS head,
                     concat_ws(' ',
                         a.display_name, a.legal_name, a.website, a.sector_macro,
                         a.asr_payload->>'city',
