@@ -138,7 +138,7 @@ export async function startContact(i: ContactInput): Promise<StartResult> {
     const sent = await sendEmail({
         from: FROM,
         to: test || v.email,
-        subject: `${test ? `[TEST pour ${v.email}] ` : ''}${i.via === 'agent' ? 'Message de votre agent : ' : 'Votre code AYA : '}${code}`,
+        subject: `${test ? `[TEST pour ${v.email}] ` : ''}${i.via === 'agent' ? 'Code AYA pour votre agent : ' : 'Votre code AYA : '}${code}`,
         html,
     });
     if (!sent.success) return { ok: false, error: 'send' };
