@@ -79,7 +79,9 @@ function entityCount(id: string) {
     if (e) e.n += 1;
 }
 
-export type ContactInput = { entityId: string; email: string; subject: string; message: string };
+// via 'agent' : demande faite par un agent IA (serveur MCP). L'email du code
+// montre alors le message exact à approuver, et le relais le signale.
+export type ContactInput = { entityId: string; email: string; subject: string; message: string; via?: 'agent' };
 export type StartResult =
     | { ok: true; token: string; dev_code?: string }
     | { ok: false; error: 'invalid' | 'not_contactable' | 'rate' | 'send' };
@@ -111,7 +113,7 @@ export async function startContact(i: ContactInput): Promise<StartResult> {
     const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
     const payload = Buffer.from(JSON.stringify({
         e: i.entityId, m: v.email.toLowerCase(), s: v.subject, h: sha(v.message),
-        c: sha(`${code}:${secret()}`), x: Date.now() + TTL_MS,
+        c: sha(`${code}:${secret()}`), x: Date.now() + TTL_MS, ...(i.via === 'agent' ? { v: 'a' } : {}),
     })).toString('base64url');
     const token = `${payload}.${hmac(payload)}`;
 
@@ -120,14 +122,24 @@ export async function startContact(i: ContactInput): Promise<StartResult> {
         return { ok: true, token, dev_code: code };
     }
     const test = testRecipient();
+    const html = i.via === 'agent'
+        // Le texte libre de l'agent n'est volontairement PAS repris ici : sinon
+        // n'importe qui pourrait faire envoyer par AYA un texte de son choix à
+        // n'importe quelle adresse. L'agent montre le message dans sa conversation.
+        ? `<p>Bonjour,</p><p>Un agent IA demande à envoyer en votre nom une <strong>${esc(SUBJECT_LABEL[v.subject].toLowerCase())}</strong> à <strong>${esc(rcpt.name)}</strong> via le registre AYA, avec le message qu'il vous a montré.</p>
+<p>Si vous êtes d'accord, donnez ce code à votre agent :</p>
+<p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p>
+<p>Il est valable 15 minutes et ne permet d'envoyer que ce message-là, sans aucune modification. Si vous n'avez rien demandé, ignorez cet email : rien ne sera envoyé.</p>
+<p style="color:#64748B;font-size:13px">An AI agent asks to send a message to ${esc(rcpt.name)} on your behalf through the AYA registry. If you agree, give it this code: ${code}. It is valid for 15 minutes and only allows the exact message it showed you. If you did not ask for this, ignore this email and nothing will be sent.</p>`
+        : `<p>Bonjour,</p><p>Voici votre code pour envoyer votre message à <strong>${esc(rcpt.name)}</strong> via le registre AYA :</p>
+<p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p>
+<p>Il est valable 15 minutes. Si vous n'avez rien demandé, ignorez cet email.</p>
+<p style="color:#64748B;font-size:13px">Your AYA verification code is ${code}. It is valid for 15 minutes.</p>`;
     const sent = await sendEmail({
         from: FROM,
         to: test || v.email,
-        subject: `${test ? `[TEST pour ${v.email}] ` : ''}Votre code AYA : ${code}`,
-        html: `<p>Bonjour,</p><p>Voici votre code pour envoyer votre message à <strong>${esc(rcpt.name)}</strong> via le registre AYA :</p>
-<p style="font-size:28px;font-weight:700;letter-spacing:4px">${code}</p>
-<p>Il est valable 15 minutes. Si vous n'avez rien demandé, ignorez cet email.</p>
-<p style="color:#64748B;font-size:13px">Your AYA verification code is ${code}. It is valid for 15 minutes.</p>`,
+        subject: `${test ? `[TEST pour ${v.email}] ` : ''}${i.via === 'agent' ? 'Code AYA pour votre agent : ' : 'Votre code AYA : '}${code}`,
+        html,
     });
     if (!sent.success) return { ok: false, error: 'send' };
     return { ok: true, token };
@@ -160,7 +172,7 @@ export async function confirmContact(i: ConfirmInput): Promise<ConfirmResult> {
 
     const label = SUBJECT_LABEL[v.subject];
     if (dryRun()) {
-        console.log(`[aya/contact] DRY RUN relais vers ${rcpt.to} : ${label} de ${v.email}`);
+        console.log(`[aya/contact] DRY RUN relais vers ${rcpt.to} : ${label} de ${v.email}${p.v === 'a' ? ' (agent)' : ''}`);
         return { ok: true, dry_run: true };
     }
     const test = testRecipient();
@@ -171,10 +183,11 @@ export async function confirmContact(i: ConfirmInput): Promise<ConfirmResult> {
         subject: `${test ? `[TEST pour ${rcpt.to}] ` : ''}[AYA] ${label} : ${v.message.slice(0, 60).replace(/\s+/g, ' ')}`,
         html: `<p>Bonjour,</p><p>Vous recevez une <strong>${esc(label.toLowerCase())}</strong> via votre fiche certifiée sur le registre AYA.</p>
 <blockquote style="border-left:3px solid #4A919E;margin:16px 0;padding:8px 16px;white-space:pre-wrap">${esc(v.message)}</blockquote>
-<p>Expéditeur : <a href="mailto:${esc(v.email)}">${esc(v.email)}</a> (adresse vérifiée par AYA). Répondez directement à cet email.</p>
+<p>Expéditeur : <a href="mailto:${esc(v.email)}">${esc(v.email)}</a> (adresse vérifiée par AYA). Répondez directement à cet email.</p>${p.v === 'a' ? `
+<p>Ce message a été préparé par un agent IA pour le compte de l'expéditeur, qui l'a approuvé avec un code reçu sur son adresse.</p>` : ''}
 <p style="color:#64748B;font-size:13px">Message transmis par le registre AYA (ai-visionary.xyz), qui ne publie jamais votre adresse. Request relayed by the AYA registry; the sender's address was verified.</p>`,
     });
     if (!sent.success) return { ok: false, error: 'send' };
-    ayaLog('info', 'CONTACT_RELAYED', `${label} pour ${rcpt.name}`);
+    ayaLog('info', 'CONTACT_RELAYED', `${label} pour ${rcpt.name}${p.v === 'a' ? ' (agent)' : ''}`);
     return { ok: true };
 }

@@ -99,6 +99,8 @@ export default async function ForAgentsPage() {
         { name: 'get_registry_stats', what: t('tool3What'), when: t('tool3When') },
         { name: 'get_cashback_offer', what: t('tool4What'), when: t('tool4When') },
         { name: 'claim_cashback', what: t('tool5What'), when: t('tool5When') },
+        { name: 'contact_company', what: t('tool6What'), when: t('tool6When') },
+        { name: 'confirm_contact', what: t('tool7What'), when: t('tool7When') },
     ];
 
     const flow = [t('cashbackStep1'), t('cashbackStep2'), t('cashbackStep3'), t('cashbackStep4')];

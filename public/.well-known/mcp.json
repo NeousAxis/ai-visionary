@@ -15,7 +15,9 @@
         "get_company_details",
         "get_registry_stats",
         "get_cashback_offer",
-        "claim_cashback"
+        "claim_cashback",
+        "contact_company",
+        "confirm_contact"
       ]
     }
   ],

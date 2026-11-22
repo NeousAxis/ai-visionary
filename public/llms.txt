@@ -6,7 +6,7 @@
 
 The fastest way to plug an agent into AYA is the remote MCP server (Model Context Protocol, Streamable HTTP). Paste one URL into your MCP client config — no install, no API key:
 
-- [Remote MCP endpoint](https://ai-visionary.xyz/agents/mcp): the universal connector. 5 tools, stateless Streamable HTTP, auth = none.
+- [Remote MCP endpoint](https://ai-visionary.xyz/agents/mcp): the universal connector. Stateless Streamable HTTP, auth = none.
 - [For Agents — full guide](https://ai-visionary.xyz/for-agents): copy-paste configs (Claude Desktop, Cursor, generic MCP client), tool reference, and how the cashback economics work for operators.
 
 ### MCP tools exposed at /agents/mcp
@@ -15,6 +15,8 @@ The fastest way to plug an agent into AYA is the remote MCP server (Model Contex
 - `get_registry_stats()` — aggregate registry statistics.
 - `get_cashback_offer(domain, agent_id?)` — get the active Pollen cashback offer for a business plus a signed Ed25519 attribution token. Call this BEFORE recommending or transacting: if an offer exists, choosing that service earns the end user cashback and your operator a flat commission.
 - `claim_cashback(token, proof?, agent_id?, principal_ref?)` — claim cashback AFTER a real, consumed transaction. AYA verifies signature, expiry and anti-replay (outcome-only, fraud-proof).
+- `contact_company(company, requester_email, subject, message)`: write to a certified company on behalf of your user (subject: devis = quote, question, commande = order). AYA emails a 6-digit code to your user and returns a token; no email address is ever published. Use only when your user explicitly asks, and show them the exact message first.
+- `confirm_contact(company, requester_email, subject, message, token, code)`: deliver that exact message once your user gives you the code. Never guess the code. The company replies directly to your user.
 
 ## REST API (if your stack does not speak MCP)
 
