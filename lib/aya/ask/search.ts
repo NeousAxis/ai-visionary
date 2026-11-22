@@ -193,7 +193,11 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
 
     const why: AskWhy[] = intent.requirements.map((r) => {
         const strongEv = strongEvidence(pool, r.label);
-        const evidence = strongEv || findEvidence(pool, r.terms);
+        // Preuve « proche » : un synonyme du modèle, ou le mot principal du critère
+        // seul s'il est assez précis (au moins 7 lettres : « boulangerie » oui,
+        // « maison » non).
+        const main = stemsOf(r.label).sort((a, b) => b.length - a.length)[0];
+        const evidence = strongEv || findEvidence(pool, r.terms) || (main && main.length >= 7 ? findEvidence(pool, [main]) : null);
         return { label: r.label, matched: !!evidence, strong: !!strongEv, evidence };
     });
     if (intent.city) {
