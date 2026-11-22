@@ -216,7 +216,9 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
     // Adresse PUBLIQUE de la fiche (lue sur le site) uniquement. contact_email du
     // registre est l'adresse de la personne qui a réclamé la fiche : elle ne sert
     // qu'au relais « Contacter via AYA » et n'est jamais montrée.
-    const email = certified ? (asList(v(d, 'identite', 'contact_email', 'value'))[0] || null) : null;
+    const emailRaw = certified ? (asList(v(d, 'identite', 'contact_email', 'value'))[0] || null) : null;
+    // Une valeur qui n'est pas un email (« contact_form ») n'est pas transmise.
+    const email = emailRaw && /^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/i.test(emailRaw) ? emailRaw : null;
     const services = asList(v(d, 'offre', 'services', 'value'));
 
     return {

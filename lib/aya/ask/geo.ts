@@ -5,6 +5,8 @@
 // Seuls des noms de villes sont envoyés, jamais une donnée personnelle.
 // Résultats gardés en mémoire 7 jours pour ne pas solliciter ces services.
 
+import { ayaLog } from '@/lib/aya/log';
+
 export type GeoPoint = { lat: number; lon: number; label: string };
 
 const UA = 'AI-Visionary-AYA/1.0 (+https://ai-visionary.xyz)';
@@ -72,7 +74,7 @@ export async function geocodeCity(city: string | null | undefined, country: stri
         if (v && first(v.label) !== first(c)) v = null;
         if (!v && cc !== 'CH') v = await nominatim(c, cc || null);
     } catch (err) {
-        console.warn('[aya/ask] geocode failed:', c, (err as Error)?.message);
+        ayaLog('warn', 'GEOCODE_FAILED', `${c} : ${(err as Error)?.message}`);
         return null; // échec réseau : pas mis en cache, on réessaiera
     }
     cache.set(key, { v, exp: Date.now() + TTL_MS });

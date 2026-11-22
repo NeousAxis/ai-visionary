@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { startContact, confirmContact } from '@/lib/aya/contact';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { allow, realIp } from '@/lib/aya/guard';
+import { ayaLog } from '@/lib/aya/log';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
         }
         return NextResponse.json({ ok: false, error: 'invalid' }, { status: 400 });
     } catch (err) {
-        console.error('[aya/contact] error:', err);
+        ayaLog('error', 'CONTACT_ERROR', (err as Error)?.message || String(err));
         return NextResponse.json({ ok: false, error: 'send' }, { status: 500 });
     }
 }

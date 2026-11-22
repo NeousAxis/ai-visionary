@@ -9,6 +9,7 @@
 // S'il est lent ou indisponible, un découpage par mots prend le relais.
 
 import { llmJson } from '@/lib/llm-provider';
+import { ayaLog } from '@/lib/aya/log';
 
 export type AskRequirement = {
     /** Libellé court montré au visiteur, dans sa langue ("Végétarien"). */
@@ -159,7 +160,7 @@ export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promis
         if (terms.length === 0 && !city) return fallbackIntent(query);
         return { terms, requirements, city, country, sector, source: 'llm' };
     } catch (err) {
-        console.warn('[aya/ask] parse fallback:', (err as Error)?.message);
+        ayaLog('warn', 'PARSE_FALLBACK', (err as Error)?.message || String(err));
         return fallbackIntent(query);
     }
 }

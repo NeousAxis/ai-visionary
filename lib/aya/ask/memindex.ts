@@ -13,6 +13,7 @@
 // search.ts retombe sur la recherche SQL.
 
 import { localPgScanSearchDocs } from '@/lib/db-local-pg';
+import { ayaLog } from '@/lib/aya/log';
 
 type Index = {
     ids: string[];
@@ -53,7 +54,7 @@ async function build(): Promise<void> {
         await new Promise((res) => setTimeout(res, 150)); // ménage la base entre deux tranches
     }
     current = { ids, heads, docs, country, sector, certified: Uint8Array.from(cert), score: Float32Array.from(score), builtAt: Date.now() };
-    console.warn(`[aya/memindex] ${ids.length} fiches indexées en ${Math.round((Date.now() - t0) / 1000)} s`);
+    ayaLog('info', 'INDEX_BUILT', `${ids.length} fiches indexées en ${Math.round((Date.now() - t0) / 1000)} s`);
 }
 
 /** Lance (ou relance si périmé) la construction en arrière-plan ; ne bloque jamais. */
@@ -61,7 +62,7 @@ export function ensureIndex(): void {
     const stale = !current || Date.now() - current.builtAt > REFRESH_MS;
     if (!stale || building) return;
     building = build()
-        .catch((err) => console.error('[aya/memindex] build failed:', (err as Error)?.message))
+        .catch((err) => ayaLog('error', 'INDEX_FAILED', (err as Error)?.message || String(err)))
         .finally(() => { building = null; });
 }
 

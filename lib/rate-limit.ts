@@ -29,13 +29,18 @@ function cleanup() {
     }
 }
 
-/** Get client IP from Vercel headers */
+/**
+ * IP du client. Derrière le nginx du VPS, X-Real-IP vaut $remote_addr : fiable.
+ * X-Forwarded-For ($proxy_add_x_forwarded_for) garde ce que le client envoie,
+ * donc sa PREMIÈRE valeur se falsifie et permettait de contourner toutes les
+ * limites (corrigé le 22.11.2026). À défaut de X-Real-IP, on prend la DERNIÈRE
+ * valeur, ajoutée par notre proxy.
+ */
 function getClientIp(req: NextRequest): string {
-    return (
-        req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-        req.headers.get('x-real-ip') ||
-        'unknown'
-    );
+    const real = req.headers.get('x-real-ip')?.trim();
+    if (real) return real;
+    const parts = (req.headers.get('x-forwarded-for') || '').split(',').map((s) => s.trim()).filter(Boolean);
+    return parts[parts.length - 1] || 'unknown';
 }
 
 /** Rate limit configuration */

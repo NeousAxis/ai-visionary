@@ -3,6 +3,7 @@ import { askRegistry } from '@/lib/aya/ask/search';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { trackAyaCall } from '@/lib/aya/api-tracker';
 import { allow, realIp } from '@/lib/aya/guard';
+import { ayaLog } from '@/lib/aya/log';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
             headers: { 'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=60' },
         });
     } catch (err) {
-        console.error('[aya/ask] error:', err);
+        ayaLog('error', 'ASK_ERROR', (err as Error)?.message || String(err));
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

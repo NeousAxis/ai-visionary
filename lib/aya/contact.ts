@@ -19,6 +19,7 @@ import crypto from 'crypto';
 import { sendEmail } from '@/lib/mailer';
 import { getAyaEntityByIdAggregated } from '@/lib/db';
 import { allow } from '@/lib/aya/guard';
+import { ayaLog } from '@/lib/aya/log';
 
 export const CONTACT_SUBJECTS = ['devis', 'question', 'commande'] as const;
 export type ContactSubject = (typeof CONTACT_SUBJECTS)[number];
@@ -174,6 +175,6 @@ export async function confirmContact(i: ConfirmInput): Promise<ConfirmResult> {
 <p style="color:#64748B;font-size:13px">Message transmis par le registre AYA (ai-visionary.xyz), qui ne publie jamais votre adresse. Request relayed by the AYA registry; the sender's address was verified.</p>`,
     });
     if (!sent.success) return { ok: false, error: 'send' };
-    console.log(`[aya/contact] relais envoyé : ${label} pour ${rcpt.name}`);
+    ayaLog('info', 'CONTACT_RELAYED', `${label} pour ${rcpt.name}`);
     return { ok: true };
 }
