@@ -2384,6 +2384,77 @@ export async function localPgDeleteEntitiesByWebsite(variants: string[]): Promis
 
 // ── Recherche en langage courant (page /aya, route /api/aya/ask) ─────────────
 
+export type SearchDocRow = {
+    entity_id: string;
+    country_legal: string | null;
+    sector_macro: string | null;
+    payment_completed: boolean | null;
+    asr_score: number | null;
+    doc: string;
+};
+
+/**
+ * Une tranche du registre public sous forme de texte compact cherchable (nom,
+ * domaine, secteur, ville et descriptions des trois formats de fiches, offre des
+ * fiches AYO). Pagination par entity_id. Sert à construire l'index en mémoire de
+ * lib/aya/ask/memindex.ts. Lecture seule, bornée à 20 s.
+ */
+export async function localPgScanSearchDocs(afterId: string | null, limit: number): Promise<SearchDocRow[]> {
+    const pool = getPool();
+    if (!pool) return [];
+    let client: import('pg').PoolClient | null = null;
+    try {
+        client = await pool.connect();
+        await client.query('BEGIN');
+        await client.query("SET LOCAL statement_timeout = '20s'");
+        const res: QueryResult<SearchDocRow> = await client.query(
+            `SELECT a.entity_id, a.country_legal, a.sector_macro, a.payment_completed, a.asr_score,
+                    concat_ws(' ',
+                        a.display_name, a.legal_name, a.website, a.sector_macro,
+                        a.asr_payload->>'city',
+                        left(a.asr_payload->>'description', 240),
+                        a.asr_payload->'data'->'identite'->'city'->>'value',
+                        a.asr_payload->'data'->'entity'->>'city',
+                        left(a.asr_payload->'data'->'source'->>'meta_description', 240),
+                        left(a.asr_payload->'data'->'aio_blocks'->'offre'->'fields'->>'meta_description', 240),
+                        left(a.asr_payload->'enrichment'->>'gemini_description_fr', 300),
+                        left(a.asr_payload->'enrichment'->>'gemini_description', 300),
+                        left((a.asr_payload->'data'->'offre')::text, 2000),
+                        left((a.asr_payload->'data'->'processus_methodes'->'geographies_served')::text, 300)
+                    ) AS doc
+             FROM ${publicRegistry('a')}
+             WHERE ($1::uuid IS NULL OR a.entity_id > $1::uuid)
+             ORDER BY a.entity_id
+             LIMIT $2`,
+            [afterId, limit]
+        );
+        await client.query('COMMIT');
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgScanSearchDocs error:', err);
+        if (client) await client.query('ROLLBACK').catch(() => {});
+        throw err;
+    } finally {
+        client?.release();
+    }
+}
+
+/** Fiches complètes du registre public pour une liste d'identifiants. */
+export async function localPgGetPublicEntitiesByIds(ids: string[]): Promise<Entity[]> {
+    const pool = getPool();
+    if (!pool || ids.length === 0) return [];
+    try {
+        const res: QueryResult<Entity> = await pool.query(
+            `SELECT ${ENTITY_COLS} FROM ${publicRegistry()} WHERE entity_id = ANY($1::uuid[])`,
+            [ids.slice(0, 200)]
+        );
+        return res.rows;
+    } catch (err) {
+        console.error('[db-local-pg] localPgGetPublicEntitiesByIds error:', err);
+        return [];
+    }
+}
+
 export type AskSearchParams = {
     /** Mots ou expressions à chercher. */
     terms: string[];

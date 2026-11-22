@@ -66,6 +66,10 @@ export async function geocodeCity(city: string | null | undefined, country: stri
     let v: GeoPoint | null = null;
     try {
         v = cc === 'CH' || cc === '' ? await swisstopo(c) : null;
+        // Le lieu trouvé doit porter le nom demandé ("Stockholm" ne doit pas
+        // devenir un hameau suisse, "Suisse romande" pas "Romont").
+        const first = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z]/g, '').slice(0, 5);
+        if (v && first(v.label) !== first(c)) v = null;
         if (!v && cc !== 'CH') v = await nominatim(c, cc || null);
     } catch (err) {
         console.warn('[aya/ask] geocode failed:', c, (err as Error)?.message);

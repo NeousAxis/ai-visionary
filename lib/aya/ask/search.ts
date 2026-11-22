@@ -8,19 +8,40 @@
 //    Rien n'est rédigé par le modèle sur l'entreprise.
 // 4. Les villes connues sont situées pour la carte.
 
-import { localPgAskSearch, type AskSearchRow } from '@/lib/db-local-pg';
+import { localPgAskSearch, localPgGetPublicEntitiesByIds, type AskSearchRow } from '@/lib/db-local-pg';
 import { parseAskQuery, type AskIntent } from './parse';
 import { geocodeCity, distanceKm, isGeocoded, type GeoPoint } from './geo';
+import { ensureIndex, memSearch } from './memindex';
 import { withSlot } from '@/lib/aya/guard';
 
-/** strong : le mot demandé lui-même figure dans la fiche ; sinon seulement un synonyme. */
+/** strong : les mots demandés eux-mêmes figurent dans la fiche ; sinon seulement un synonyme. */
 export type AskWhy = { label: string; matched: boolean; strong: boolean; evidence: string | null };
 
-/** Racine du mot principal d'un libellé : "Pizzeria" donne "pizzer", "Végétarien" donne "vegetari". */
-function stemOf(label: string): string {
-    const words = norm(label).split(/[\s'’-]+/).filter((w) => w.length >= 4).sort((a, b) => b.length - a.length);
-    const w = words[0] || norm(label);
-    return w.length > 6 ? w.slice(0, w.length - 2) : w;
+const LABEL_STOP = new Set(['avec', 'pour', 'dans', 'sans', 'tres', 'with', 'from', 'near', 'pres', 'options', 'option']);
+
+/** Racines des mots utiles d'un libellé : "Repas faits maison" donne repas, fait, maison. */
+function stemsOf(label: string): string[] {
+    return norm(label).split(/[\s'’-]+/)
+        .filter((w) => w.length >= 4 && !LABEL_STOP.has(w))
+        .map((w) => (w.length > 6 ? w.slice(0, w.length - 2) : w));
+}
+
+/** Preuve forte : une phrase de la fiche contient TOUS les mots du libellé. */
+function strongEvidence(pool: string[], label: string): string | null {
+    const stems = stemsOf(label);
+    if (stems.length === 0) return null;
+    for (const s of pool) {
+        const n = norm(s);
+        if (stems.every((st) => n.includes(st))) return cut(s);
+    }
+    return null;
+}
+
+/** "1188 Saint-George" devient "Saint-George", "Lausanne 25" devient "Lausanne". */
+function cleanCity(s: string | null): string | null {
+    if (!s) return null;
+    const c = s.replace(/\b(CH|F|D|A|I)-?\d{4,5}\b/g, ' ').replace(/\d+/g, ' ').replace(/[,;()]+/g, ' ').replace(/\s+/g, ' ').trim();
+    return c.length >= 2 && c.length <= 60 ? c : null;
 }
 
 export type AskResult = {
@@ -159,7 +180,7 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
     const p: any = row.asr_payload || {};
     const d = p.data || {};
     const pool = evidencePool(row);
-    const city = cityOf(p);
+    const city = cleanCity(cityOf(p));
     const zone = asList(v(d, 'processus_methodes', 'geographies_served', 'value'))[0] || null;
     const description =
         asList(v(p, 'enrichment', 'gemini_description_fr'))[0] ||
@@ -170,7 +191,7 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
         asList(v(d, 'offre', 'services', 'value'))[0] || null;
 
     const why: AskWhy[] = intent.requirements.map((r) => {
-        const strongEv = findEvidence(pool, [stemOf(r.label)]);
+        const strongEv = strongEvidence(pool, r.label);
         const evidence = strongEv || findEvidence(pool, r.terms);
         return { label: r.label, matched: !!evidence, strong: !!strongEv, evidence };
     });
@@ -220,9 +241,10 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
 }
 
 export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr' | 'en' } = {}): Promise<AskResponse> {
+    ensureIndex();
     const intent = await parseAskQuery(q, opts.lang ?? 'fr');
     const raw = q.trim().toLowerCase();
-    const rows = (await withSlot(() => localPgAskSearch({
+    const params = {
         // La phrase brute est aussi cherchée telle quelle : c'est ainsi qu'un nom
         // d'entreprise tapé en entier ("Happy Green Kids") est retrouvé.
         terms: raw.length <= 60 ? [raw, ...intent.terms] : intent.terms,
@@ -230,7 +252,20 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
         city: intent.city,
         sector: intent.sector,
         limit: 100,
-    }))) ?? [];
+    };
+    // Index en mémoire d'abord (rapide) ; recherche SQL tant qu'il se construit.
+    const hits = memSearch(params);
+    let rows: AskSearchRow[];
+    if (hits) {
+        const full = await localPgGetPublicEntitiesByIds(hits.map((h) => h.id));
+        const byId = new Map(full.map((e) => [e.entity_id, e]));
+        rows = hits.flatMap((h) => {
+            const e = byId.get(h.id);
+            return e ? [{ ...(e as any), match_score: h.score } as AskSearchRow] : [];
+        });
+    } else {
+        rows = (await withSlot(() => localPgAskSearch(params))) ?? [];
+    }
 
     // Recherche par nom : si la phrase est le nom (ou le domaine) d'une fiche,
     // cette fiche seule répond, sans critères déduits par le modèle.
@@ -259,18 +294,27 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
         if (intent.country && r.country !== intent.country && !cityOk) return false;
         return true;
     });
-    shaped.sort((a, b) =>
+
+    // Si des fiches prouvent le MÉTIER demandé avec ses propres mots (premier
+    // critère), celles qui ne le prouvent que par un synonyme sont écartées.
+    const coreStrong = intent.requirements.length > 0 && shaped.some((r) => r.why[0]?.strong);
+    const relevant = coreStrong ? shaped.filter((r) => r.why[0]?.strong) : shaped;
+    relevant.sort((a, b) =>
         (b.match_weight - a.match_weight) ||
         (Number(b.certified) - Number(a.certified)) ||
         ((b.score ?? 0) - (a.score ?? 0)));
 
-    const results = shaped.slice(0, Math.min(Math.max(opts.limit ?? 10, 1), 20));
-    const center = intent.city ? await geocodeCity(intent.city, intent.country) : null;
+    // Lieu demandé : une région ("Suisse romande", "Vaud") n'a pas de centre fiable.
+    const region = !!intent.city && /suisse|schweiz|switzerland|romand|canton|r[ée]gion|valais|vaud|tessin|ticino/i.test(intent.city)
+        && !/^lausanne|^gen[eè]v|^sion|^fribourg|^neuch/i.test(intent.city);
+    const center = intent.city && !region ? await geocodeCity(intent.city, intent.country) : null;
 
-    // Suisse : géocodeur fédéral, sans limite. Ailleurs : 3 nouvelles villes au plus
-    // par recherche (Nominatim, une par seconde) ; les suivantes viennent du cache.
+    // Géocodage des 20 premières, puis à égalité de pertinence, la plus proche
+    // d'abord. Suisse : géocodeur fédéral ; ailleurs : 3 nouvelles villes au plus
+    // par recherche (Nominatim, une par seconde), les suivantes viennent du cache.
+    const pool20 = relevant.slice(0, 20);
     let remoteBudget = 3;
-    await Promise.all(results.map(async (r) => {
+    await Promise.all(pool20.map(async (r) => {
         if (!r.city) return;
         const ch = (r.country || '').toUpperCase() === 'CH';
         if (!ch && !isGeocoded(r.city, r.country)) {
@@ -280,6 +324,13 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
         r.geo = await geocodeCity(r.city, r.country);
         if (r.geo && center) r.distance_km = Math.round(distanceKm(center, r.geo));
     }));
+    if (center) {
+        pool20.sort((a, b) =>
+            (b.match_weight - a.match_weight) ||
+            ((a.distance_km ?? 9999) - (b.distance_km ?? 9999)) ||
+            (Number(b.certified) - Number(a.certified)));
+    }
+    const results = pool20.slice(0, Math.min(Math.max(opts.limit ?? 10, 1), 20));
 
     const nCriteria = intent.requirements.length + (intent.city ? 1 : 0);
     return {
@@ -291,7 +342,7 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
         },
         center,
         total: rows.length,
-        all_criteria: nCriteria > 0 ? shaped.filter((r) => r.matched_count === nCriteria).length : 0,
+        all_criteria: nCriteria > 0 ? relevant.filter((r) => r.matched_count === nCriteria).length : 0,
         results,
     };
 }
