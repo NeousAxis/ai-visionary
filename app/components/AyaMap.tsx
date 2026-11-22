@@ -42,11 +42,11 @@ export default function AyaMap({ points, target, height = 280, osmLabel, zoomInL
     // une future carte claire swisstopo.
     const swiss = USE_SWISSTOPO && all.length > 0 && all.every(inSwitzerland);
 
-    // Zoom et centre initiaux : tous les repères visibles, zoom 9 à 14.
+    // Zoom et centre initiaux : tous les repères visibles, zoom 3 à 14.
     const fit = useMemo(() => {
         if (all.length === 0) return { z: 8, cx: 0, cy: 0 };
         let z = 14;
-        for (; z > 9; z--) {
+        for (; z > 3; z--) {
             const ps = all.map((p) => project(p.lat, p.lon, z));
             const w = Math.max(...ps.map((p) => p.x)) - Math.min(...ps.map((p) => p.x));
             const h = Math.max(...ps.map((p) => p.y)) - Math.min(...ps.map((p) => p.y));

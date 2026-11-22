@@ -69,6 +69,12 @@ export function indexReady(): boolean {
     return !!current;
 }
 
+/** Attend la fin de la construction en cours, au plus `ms` millisecondes. */
+export async function waitForIndex(ms: number): Promise<void> {
+    if (current || !building) return;
+    await Promise.race([building, new Promise((r) => setTimeout(r, ms))]);
+}
+
 export type MemHit = { id: string; score: number };
 
 /**

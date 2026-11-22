@@ -11,7 +11,7 @@
 import { localPgAskSearch, localPgGetPublicEntitiesByIds, type AskSearchRow } from '@/lib/db-local-pg';
 import { parseAskQuery, type AskIntent } from './parse';
 import { geocodeCity, distanceKm, isGeocoded, type GeoPoint } from './geo';
-import { ensureIndex, memSearch } from './memindex';
+import { ensureIndex, memSearch, waitForIndex } from './memindex';
 import { withSlot } from '@/lib/aya/guard';
 
 /** strong : les mots demandés eux-mêmes figurent dans la fiche ; sinon seulement un synonyme. */
@@ -247,7 +247,10 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
 
 export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr' | 'en' } = {}): Promise<AskResponse> {
     ensureIndex();
-    const intent = await parseAskQuery(q, opts.lang ?? 'fr');
+    // Juste après un redémarrage, l'index se construit (environ 10 s) pendant que
+    // le modèle lit la phrase : on l'attend plutôt que de retomber sur la
+    // recherche SQL, trop lente sur tout le registre.
+    const [intent] = await Promise.all([parseAskQuery(q, opts.lang ?? 'fr'), waitForIndex(15_000)]);
     const raw = q.trim().toLowerCase();
     const params = {
         // La phrase brute est aussi cherchée telle quelle : c'est ainsi qu'un nom
