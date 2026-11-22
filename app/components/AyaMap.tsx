@@ -11,6 +11,7 @@ export type MapPoint = { lat: number; lon: number; n: number; label: string; str
 export type MapTarget = { lat: number; lon: number; label: string } | null;
 
 const TILE = 256;
+const USE_SWISSTOPO = false;
 const CH = { minLat: 45.8, maxLat: 47.85, minLon: 5.9, maxLon: 10.55 };
 
 function project(lat: number, lon: number, z: number) {
@@ -25,7 +26,7 @@ function inSwitzerland(p: { lat: number; lon: number }) {
     return p.lat >= CH.minLat && p.lat <= CH.maxLat && p.lon >= CH.minLon && p.lon <= CH.maxLon;
 }
 
-export default function AyaMap({ points, target, height = 260, osmLabel, zoomInLabel, zoomOutLabel }: {
+export default function AyaMap({ points, target, height = 280, osmLabel, zoomInLabel, zoomOutLabel }: {
     points: MapPoint[];
     target: MapTarget;
     height?: number;
@@ -36,7 +37,10 @@ export default function AyaMap({ points, target, height = 260, osmLabel, zoomInL
     const boxRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(360);
     const all = useMemo(() => [...points, ...(target ? [target] : [])], [points, target]);
-    const swiss = all.length > 0 && all.every(inSwitzerland);
+    // La carte nationale suisse est très chargée aux échelles d'une petite carte
+    // (zoom 11 à 13) : OpenStreetMap reste plus lisible. Interrupteur gardé pour
+    // une future carte claire swisstopo.
+    const swiss = USE_SWISSTOPO && all.length > 0 && all.every(inSwitzerland);
 
     // Zoom et centre initiaux : tous les repères visibles, zoom 9 à 14.
     const fit = useMemo(() => {

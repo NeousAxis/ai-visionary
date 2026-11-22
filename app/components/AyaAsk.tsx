@@ -29,6 +29,13 @@ type Ask = {
 
 const MCP_URL = 'https://ai-visionary.xyz/agents/mcp';
 
+/** +41218020776 devient +41 21 802 07 76 ; les autres numéros restent tels quels. */
+function formatPhone(p: string): string {
+    const d = p.replace(/[\s.]/g, '');
+    const m = d.match(/^\+41(\d{2})(\d{3})(\d{2})(\d{2})$/);
+    return m ? `+41 ${m[1]} ${m[2]} ${m[3]} ${m[4]}` : p;
+}
+
 const card: React.CSSProperties = { border: '1px solid var(--border-light)', borderRadius: 24, background: '#fff' };
 const eyebrowStyle: React.CSSProperties = { fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: 0.6, textTransform: 'uppercase' };
 
@@ -199,7 +206,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                                             <h4 style={{ ...eyebrowStyle, margin: 0, color: 'var(--text-main)' }}>{t('contactTitle')}</h4>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', fontWeight: 600 }}>
                                                 {r.city && <span style={{ color: 'var(--text-main)' }}>{r.city}{r.country ? `, ${r.country}` : ''}</span>}
-                                                {r.contact.phone && <a href={`tel:${r.contact.phone.replace(/\s/g, '')}`} style={{ textDecoration: 'none' }}>{r.contact.phone}</a>}
+                                                {r.contact.phone && <a href={`tel:${r.contact.phone.replace(/\s/g, '')}`} style={{ textDecoration: 'none' }}>{formatPhone(r.contact.phone)}</a>}
                                                 {r.contact.email && <a href={`mailto:${r.contact.email}`} style={{ textDecoration: 'none', wordBreak: 'break-all' }}>{r.contact.email}</a>}
                                                 {r.domain && <a href={r.website || `https://${r.domain}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>{r.domain}</a>}
                                             </div>

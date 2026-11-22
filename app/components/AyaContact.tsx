@@ -11,7 +11,7 @@ const SUBJECTS = ['devis', 'question', 'commande'] as const;
 export default function AyaContact({ entityId, companyName, query }: { entityId: string; companyName: string; query: string }) {
     const t = useTranslations('ayaAsk');
     const [subject, setSubject] = useState<(typeof SUBJECTS)[number]>('devis');
-    const [message, setMessage] = useState(query ? t('cMsgDefault', { query }) : '');
+    const [message, setMessage] = useState(query ? t('cMsgDefault', { query: query.charAt(0).toLowerCase() + query.slice(1) }) : '');
     const [email, setEmail] = useState('');
     const [token, setToken] = useState<string | null>(null);
     const [code, setCode] = useState('');

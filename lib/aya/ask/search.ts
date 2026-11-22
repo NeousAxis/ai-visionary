@@ -43,7 +43,7 @@ export type AskResult = {
 
 export type AskResponse = {
     q: string;
-    understood: { chips: string[]; city: string | null; country: string | null; sector: string | null; source: AskIntent['source'] };
+    understood: { chips: string[]; city: string | null; country: string | null; sector: string | null; source: AskIntent['source']; terms: string[]; requirements: AskIntent['requirements'] };
     center: GeoPoint | null;
     total: number;
     all_criteria: number;
@@ -67,6 +67,10 @@ function asList(x: any): string[] {
 function cut(s: string, max = 150): string {
     const t = s.replace(/\s+/g, ' ').trim();
     return t.length > max ? t.slice(0, max - 1).trimEnd() + '…' : t;
+}
+
+function decode(s: string): string {
+    return s.replace(/&amp;/g, '&').replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 }
 
 function domainOf(website: string | null): string {
@@ -94,11 +98,22 @@ function evidencePool(row: AskSearchRow): string[] {
     ];
 }
 
+/**
+ * Une expression est prouvée par une phrase de la fiche quand ses mots utiles
+ * y figurent : tous pour 1 ou 2 mots, au moins les deux tiers au-delà.
+ */
+function phraseIn(text: string, phrase: string): boolean {
+    const words = phrase.split(/\s+/).filter((w) => w.length >= 3);
+    if (words.length === 0) return false;
+    const hits = words.filter((w) => text.includes(w)).length;
+    return words.length <= 2 ? hits === words.length : hits >= Math.ceil((words.length * 2) / 3);
+}
+
 function findEvidence(pool: string[], terms: string[]): string | null {
     const ts = terms.map(norm).filter((t) => t.length >= 3);
     for (const s of pool) {
         const n = norm(s);
-        if (ts.some((t) => n.includes(t))) return cut(s);
+        if (ts.some((t) => phraseIn(n, t))) return cut(s);
     }
     return null;
 }
@@ -133,7 +148,7 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
 
     return {
         entity_id: row.entity_id,
-        name: row.display_name || row.legal_name || domainOf(row.website),
+        name: decode(row.display_name || row.legal_name || domainOf(row.website)),
         domain: domainOf(row.website),
         website: row.website,
         url: `/aya/e/${row.entity_id}`,
@@ -166,7 +181,17 @@ export async function askRegistry(q: string, opts: { limit?: number } = {}): Pro
         limit: 40,
     });
 
-    const shaped = rows.map((r) => shape(r, intent));
+    // On ne montre que des fiches qui prouvent au moins un critère, et, quand un
+    // pays est demandé, celles de ce pays (ou sans pays mais citant le lieu).
+    const shaped = rows.map((r) => shape(r, intent)).filter((r) => {
+        if (r.matched_count === 0) return false;
+        const cityOk = !!intent.city && r.why[r.why.length - 1]?.matched === true;
+        const needOk = r.why.some((w) => w.matched && w.label !== intent.city);
+        // Le lieu seul ne suffit pas quand la demande précise aussi un besoin.
+        if (!needOk && (intent.requirements.length > 0 || !cityOk)) return false;
+        if (intent.country && r.country !== intent.country && !cityOk) return false;
+        return true;
+    });
     shaped.sort((a, b) =>
         (b.matched_count - a.matched_count) ||
         (Number(b.certified) - Number(a.certified)) ||
@@ -187,6 +212,7 @@ export async function askRegistry(q: string, opts: { limit?: number } = {}): Pro
         understood: {
             chips: [...intent.requirements.map((r) => r.label), ...(intent.city ? [intent.city] : [])],
             city: intent.city, country: intent.country, sector: intent.sector, source: intent.source,
+            terms: intent.terms, requirements: intent.requirements,
         },
         center,
         total: rows.length,

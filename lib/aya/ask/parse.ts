@@ -51,12 +51,15 @@ const SYSTEM = `Tu transformes une demande de recherche d'entreprise en critère
 Réponds UNIQUEMENT avec un objet JSON de cette forme :
 {"requirements":[{"label":"...","terms":["...","..."]}],"city":null,"country":null,"sector":null,"terms":["..."]}
 Règles :
-- requirements : un élément par besoin exprimé (au plus 5). "label" = 1 à 4 mots dans la langue de la demande, avec majuscule initiale. "terms" = 2 à 6 mots ou expressions courtes, en minuscules, qu'une fiche d'entreprise contiendrait si elle remplit ce besoin (synonymes français ET anglais, formes avec et sans accents).
-- La ville ou la région ne va PAS dans requirements : mets-la dans "city" telle qu'écrite.
+- requirements : un élément par idée distincte de la demande (au plus 5). Exemple : "repas faits maison livrés au bureau, végétarien" = 3 besoins ("Fait maison", "Livraison au bureau", "Végétarien"). "label" = 1 à 3 mots repris de la demande elle-même (ex. "Association", "Énergie", "Végétarien"), avec majuscule initiale. "terms" = 3 à 6 mots ou expressions de 1 ou 2 mots, en minuscules, qu'une fiche d'entreprise contiendrait si elle remplit ce besoin (synonymes français ET anglais, formes avec et sans accents). Jamais la ville dans terms.
+- N'ajoute AUCUN besoin absent de la demande. Le type d'entreprise demandé (restaurant, avocat, menuisier...) est lui-même un besoin.
+- La ville ou la région (ex. "Lausanne", "Vaud", "Suisse romande") ne va PAS dans requirements : mets-la dans "city" telle qu'écrite.
 - country : code ISO à 2 lettres si la demande ou la ville l'indique clairement (Lausanne, Genève, Zurich = "CH"), sinon null.
 - sector : exactement une valeur de cette liste si la demande en relève clairement, sinon null : ${REGISTRY_SECTORS.join(' | ')}.
-- terms : 4 à 10 mots-clés courts (minuscules) pour trouver des candidates, métier d'abord (ex. "traiteur", "restaurant", "catering", "repas").
+- terms : 4 à 10 mots SEULS (un mot chacun, minuscules, sans la ville) pour trouver des candidates, le métier d'abord (ex. "traiteur", "restaurant", "catering", "repas").
 - N'invente aucun nom d'entreprise.`;
+
+const deaccent = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '');
 
 function clean(s: unknown, max = 60): string {
     return typeof s === 'string' ? s.replace(/\s+/g, ' ').trim().slice(0, max) : '';
@@ -92,22 +95,42 @@ export async function parseAskQuery(q: string): Promise<AskIntent> {
             timeoutMs: 9_000,
         });
         const raw = JSON.parse(res.text) as Record<string, unknown>;
+        const city = clean(raw.city, 60) || null;
+        // La ville est un critère à part : on la retire des mots des autres critères.
+        const cityWords = new Set((city || '').toLowerCase().split(/[\s,'-]+/).filter(Boolean));
+        const stripCity = (t: string) => t.split(/\s+/).filter((w) => !cityWords.has(w)).join(' ').trim();
         const requirements: AskRequirement[] = (Array.isArray(raw.requirements) ? raw.requirements : [])
             .slice(0, 5)
             .map((r: any) => ({
                 label: clean(r?.label, 40),
-                terms: (Array.isArray(r?.terms) ? r.terms : []).map((t: unknown) => clean(t, 40).toLowerCase()).filter((t: string) => t.length >= 3).slice(0, 6),
+                terms: Array.from(new Set((Array.isArray(r?.terms) ? r.terms : [])
+                    .map((t: unknown) => stripCity(clean(t, 40).toLowerCase()))
+                    .filter((t: string) => t.length >= 3))).slice(0, 6) as string[],
             }))
             .filter((r) => r.label && r.terms.length > 0);
-        const city = clean(raw.city, 60) || null;
+        // Garde-fou : un critère doit venir de la demande. Ceux que le modèle
+        // ajoute de lui-même (aucun de leurs mots dans la phrase) sont retirés.
+        const nq = deaccent(query.toLowerCase());
+        const fromQuery = (r: AskRequirement) =>
+            [r.label, ...r.terms].some((s) => deaccent(s.toLowerCase()).split(/[\s'’-]+/)
+                .some((w) => w.length >= 4 && nq.includes(w.slice(0, Math.max(4, w.length - 2)))));
+        const kept = requirements.filter(fromQuery);
+        if (kept.length === 0) {
+            for (const w of fallbackIntent(query).terms.filter((x) => !cityWords.has(x)).slice(0, 3)) {
+                kept.push({ label: w.charAt(0).toUpperCase() + w.slice(1), terms: [w] });
+            }
+        }
+        requirements.splice(0, requirements.length, ...kept);
         const countryRaw = clean(raw.country, 2).toUpperCase();
         const country = /^[A-Z]{2}$/.test(countryRaw) ? countryRaw : null;
         const sectorRaw = clean(raw.sector, 60);
         const sector = REGISTRY_SECTORS.includes(sectorRaw) ? sectorRaw : null;
+        // Recherche des candidates : des mots seuls, sans mots vides ni ville.
         const terms = Array.from(new Set([
             ...(Array.isArray(raw.terms) ? raw.terms : []).map((t: unknown) => clean(t, 40).toLowerCase()),
             ...requirements.flatMap((r) => r.terms),
-        ])).filter((t) => t.length >= 3).slice(0, 10);
+        ].flatMap((t) => t.split(/[\s,]+/))
+            .filter((w) => w.length >= 4 && !STOP_WORDS.has(w) && !cityWords.has(w)))).slice(0, 12);
         if (terms.length === 0 && !city) return fallbackIntent(query);
         return { terms, requirements, city, country, sector, source: 'llm' };
     } catch (err) {
