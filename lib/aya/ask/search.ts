@@ -11,6 +11,7 @@
 import { localPgAskSearch, type AskSearchRow } from '@/lib/db-local-pg';
 import { parseAskQuery, type AskIntent } from './parse';
 import { geocodeCity, distanceKm, isGeocoded, type GeoPoint } from './geo';
+import { withSlot } from '@/lib/aya/guard';
 
 /** strong : le mot demandé lui-même figure dans la fiche ; sinon seulement un synonyme. */
 export type AskWhy = { label: string; matched: boolean; strong: boolean; evidence: string | null };
@@ -221,7 +222,7 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
 export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr' | 'en' } = {}): Promise<AskResponse> {
     const intent = await parseAskQuery(q, opts.lang ?? 'fr');
     const raw = q.trim().toLowerCase();
-    const rows = await localPgAskSearch({
+    const rows = (await withSlot(() => localPgAskSearch({
         // La phrase brute est aussi cherchée telle quelle : c'est ainsi qu'un nom
         // d'entreprise tapé en entier ("Happy Green Kids") est retrouvé.
         terms: raw.length <= 60 ? [raw, ...intent.terms] : intent.terms,
@@ -229,7 +230,7 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
         city: intent.city,
         sector: intent.sector,
         limit: 100,
-    });
+    }))) ?? [];
 
     // Recherche par nom : si la phrase est le nom (ou le domaine) d'une fiche,
     // cette fiche seule répond, sans critères déduits par le modèle.

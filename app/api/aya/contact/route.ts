@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { startContact, confirmContact } from '@/lib/aya/contact';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
+import { allow, realIp } from '@/lib/aya/guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,11 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
     const limited = checkRateLimit(req, 'aya-contact', RATE_LIMITS.otp);
     if (limited) return limited;
+    // IP réelle : 10 appels par 10 minutes, 30 par jour.
+    const ip = realIp(req);
+    if (!allow(`contact:m:${ip}`, 10, 600_000) || !allow(`contact:d:${ip}`, 30, 86_400_000)) {
+        return NextResponse.json({ ok: false, error: 'rate' }, { status: 429 });
+    }
 
     let body: any;
     try { body = await req.json(); } catch { return NextResponse.json({ ok: false, error: 'invalid' }, { status: 400 }); }

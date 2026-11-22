@@ -29,6 +29,15 @@ type Ask = {
 
 const MCP_URL = 'https://ai-visionary.xyz/agents/mcp';
 
+/** Liens construits à partir de données d'entreprises : seuls http(s), tel et mailto sûrs. */
+function safeWeb(url: string | null, domain: string): string | null {
+    const u = (url || '').trim();
+    if (/^https?:\/\/[^\s"'<>]+$/i.test(u)) return u;
+    return /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain) ? `https://${domain}` : null;
+}
+const safeTel = (p: string) => p.replace(/[^\d+]/g, '');
+const safeMail = (m: string) => (/^[^\s@<>"']+@[^\s@<>"']+\.[a-z]{2,}$/i.test(m) ? m : null);
+
 /** +41218020776 devient +41 21 802 07 76 ; les autres numéros restent tels quels. */
 function formatPhone(p: string): string {
     const d = p.replace(/[\s.]/g, '');
@@ -207,9 +216,9 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                                             <h4 style={{ ...eyebrowStyle, margin: 0, color: 'var(--text-main)' }}>{t('contactTitle')}</h4>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', fontWeight: 600 }}>
                                                 {r.city && <span style={{ color: 'var(--text-main)' }}>{r.city}{r.country ? `, ${r.country}` : ''}</span>}
-                                                {r.contact.phone && <a href={`tel:${r.contact.phone.replace(/\s/g, '')}`} style={{ textDecoration: 'none' }}>{formatPhone(r.contact.phone)}</a>}
-                                                {r.contact.email && <a href={`mailto:${r.contact.email}`} style={{ textDecoration: 'none', wordBreak: 'break-all' }}>{r.contact.email}</a>}
-                                                {r.domain && <a href={r.website || `https://${r.domain}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>{r.domain}</a>}
+                                                {r.contact.phone && <a href={`tel:${safeTel(r.contact.phone)}`} style={{ textDecoration: 'none' }}>{formatPhone(r.contact.phone)}</a>}
+                                                {r.contact.email && safeMail(r.contact.email) && <a href={`mailto:${safeMail(r.contact.email)}`} style={{ textDecoration: 'none', wordBreak: 'break-all' }}>{r.contact.email}</a>}
+                                                {safeWeb(r.website, r.domain) && <a href={safeWeb(r.website, r.domain)!} target="_blank" rel="noopener noreferrer nofollow" style={{ textDecoration: 'none' }}>{r.domain}</a>}
                                             </div>
                                         </div>
                                     )}
@@ -219,7 +228,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                                             <button type="button" onClick={() => setOpenContact(openContact === r.entity_id ? null : r.entity_id)} aria-expanded={openContact === r.entity_id}
                                                 style={{ border: 0, background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '13px 22px', borderRadius: 999, cursor: 'pointer' }}>{t('contactVia')}</button>
                                         ) : (
-                                            r.domain && <a href={r.website || `https://${r.domain}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '13px 22px', borderRadius: 999 }}>{t('visitSite')}</a>
+                                            safeWeb(r.website, r.domain) && <a href={safeWeb(r.website, r.domain)!} target="_blank" rel="noopener noreferrer nofollow" style={{ textDecoration: 'none', background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '13px 22px', borderRadius: 999 }}>{t('visitSite')}</a>
                                         )}
                                         <Link href={r.url} style={{ textDecoration: 'none', border: '1px solid var(--primary-color)', color: 'var(--primary-hover)', fontWeight: 700, padding: '12px 22px', borderRadius: 999 }}>{t('seeFiche')}</Link>
                                         {!r.can_contact && <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('contactNotActive')}</span>}

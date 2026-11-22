@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { askRegistry } from '@/lib/aya/ask/search';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 import { trackAyaCall } from '@/lib/aya/api-tracker';
+import { allow, realIp } from '@/lib/aya/guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,12 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
     const rateLimited = checkRateLimit(req, 'aya-ask', RATE_LIMITS.chat);
     if (rateLimited) return rateLimited;
+    // Limite sur l'IP réelle (chaque recherche coûte un appel au modèle et un
+    // parcours du registre) : 15 par minute et 300 par jour.
+    const ip = realIp(req);
+    if (!allow(`ask:m:${ip}`, 15, 60_000) || !allow(`ask:d:${ip}`, 300, 86_400_000)) {
+        return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
     trackAyaCall(req, 'search');
 
     const q = (req.nextUrl.searchParams.get('q') || '').trim().slice(0, 300);

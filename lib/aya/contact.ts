@@ -18,6 +18,7 @@
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/mailer';
 import { getAyaEntityByIdAggregated } from '@/lib/db';
+import { allow } from '@/lib/aya/guard';
 
 export const CONTACT_SUBJECTS = ['devis', 'question', 'commande'] as const;
 export type ContactSubject = (typeof CONTACT_SUBJECTS)[number];
@@ -47,15 +48,11 @@ function dryRun(): boolean {
     return !process.env.SMTP_USER && process.env.NODE_ENV !== 'production';
 }
 
-// Limite par email : 5 demandes de code par heure (mémoire du processus).
-const perEmail = new Map<string, { n: number; reset: number }>();
+// Limite par email visiteur : 3 codes par heure et 10 par jour. Empêche aussi
+// d'utiliser AYA pour inonder de codes l'adresse de quelqu'un d'autre.
 function emailAllowed(email: string): boolean {
-    const now = Date.now();
     const k = email.toLowerCase();
-    const e = perEmail.get(k);
-    if (!e || now > e.reset) { perEmail.set(k, { n: 1, reset: now + 3600_000 }); return true; }
-    e.n += 1;
-    return e.n <= 5;
+    return allow(`contact:e:h:${k}`, 3, 3_600_000) && allow(`contact:e:d:${k}`, 10, 86_400_000);
 }
 
 // Un jeton ne sert qu'une fois, et 5 codes faux le rendent inutilisable.

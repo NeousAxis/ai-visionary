@@ -2417,17 +2417,19 @@ export async function localPgAskSearch(p: AskSearchParams): Promise<AskSearchRow
 
     const params: unknown[] = [];
     const add = (v: unknown) => { params.push(v); return `$${params.length}`; };
+    // % et _ tapés par le visiteur restent des caractères, pas des jokers LIKE.
+    const lit = (s: string) => s.replace(/[\\%_]/g, (m) => `\\${m}`);
 
     const scoreParts: string[] = [];
     const matchParts: string[] = [];
     for (const t of terms) {
-        const ph = add(`%${t}%`);
+        const ph = add(`%${lit(t)}%`);
         scoreParts.push(`(CASE WHEN r.h LIKE ${ph} THEN 3 WHEN r.pl LIKE ${ph} THEN 2 ELSE 0 END)`);
         matchParts.push(`r.h LIKE ${ph} OR r.pl LIKE ${ph}`);
     }
     let cityLike = 'FALSE';
     if (city) {
-        const ph = add(`%${city}%`);
+        const ph = add(`%${lit(city)}%`);
         cityLike = `(r.h LIKE ${ph} OR r.pl LIKE ${ph})`;
         scoreParts.push(`(CASE WHEN ${cityLike} THEN 5 ELSE 0 END)`);
         if (matchParts.length === 0) matchParts.push(cityLike);
