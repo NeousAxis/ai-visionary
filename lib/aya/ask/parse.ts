@@ -105,7 +105,14 @@ export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promis
             timeoutMs: 9_000,
         });
         const raw = JSON.parse(res.text) as Record<string, unknown>;
-        const city = clean(raw.city, 60) || null;
+        // La ville telle qu'écrite dans la phrase : le modèle la traduit parfois
+        // ("Geneva" pour "Genève"), ce qui empêche de la retrouver dans les fiches.
+        let city = clean(raw.city, 60) || null;
+        if (city) {
+            const head = deaccent(city.toLowerCase()).slice(0, 4);
+            const word = query.split(/[\s,;.!?]+/).find((w) => w.length >= 3 && deaccent(w.toLowerCase()).replace(/^[ld]'/, '').startsWith(head));
+            if (word) city = word.replace(/^[lLdD]'/, '');
+        }
         // La ville est un critère à part : on la retire des mots des autres critères.
         const cityWords = new Set((city || '').toLowerCase().split(/[\s,'-]+/).filter(Boolean));
         const stripCity = (t: string) => t.split(/\s+/).filter((w) => !cityWords.has(w)).join(' ').trim();
@@ -121,9 +128,11 @@ export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promis
         // Garde-fou : un critère doit venir de la demande. Ceux que le modèle
         // ajoute de lui-même (aucun de leurs mots dans la phrase) sont retirés.
         const nq = deaccent(query.toLowerCase());
+        // Seul le LIBELLÉ compte : un synonyme présent dans la phrase ne suffit pas
+        // à justifier un critère inventé ("Traiteur" pour "repas faits maison").
         const fromQuery = (r: AskRequirement) =>
-            [r.label, ...r.terms].some((s) => deaccent(s.toLowerCase()).split(/[\s'’-]+/)
-                .some((w) => w.length >= 4 && nq.includes(w.slice(0, Math.max(4, w.length - 2)))));
+            deaccent(r.label.toLowerCase()).split(/[\s'’-]+/)
+                .some((w) => w.length >= 4 && nq.includes(w.slice(0, Math.max(4, w.length - 2))));
         // Un critère qui reprend le lieu ("Proximité Morges") fait doublon avec la ville.
         const notPlace = (r: AskRequirement) => !deaccent(r.label.toLowerCase()).split(/[\s'’-]+/)
             .some((w) => cityWords.has(w) || [...cityWords].some((c) => deaccent(c) === w));

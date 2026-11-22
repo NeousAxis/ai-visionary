@@ -152,7 +152,7 @@ function evidencePool(row: AskSearchRow): string[] {
         ...asList(v(p, 'enrichment', 'gemini_description_fr')),
         ...asList(v(p, 'enrichment', 'gemini_description')),
         ...asList(v(d, 'aio_blocks', 'offre', 'fields', 'meta_description')),
-        ...asList(row.display_name), ...asList(row.sector_macro),
+        ...asList(row.display_name), ...asList(row.sector_macro), ...asList(domainOf(row.website)),
     ];
 }
 
@@ -270,8 +270,11 @@ export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr'
     // Recherche par nom : si la phrase est le nom (ou le domaine) d'une fiche,
     // cette fiche seule répond, sans critères déduits par le modèle.
     const nq = norm(q.trim());
+    // Nom, raison sociale, domaine ("infomaniak.com") ou marque du domaine ("infomaniak").
+    const brand = (w: string | null) => domainOf(w).split('.').slice(0, -1).join('.');
     const byName = rows.filter((r) =>
-        norm(decode(r.display_name || '')) === nq || norm(r.legal_name || '') === nq || domainOf(r.website) === nq);
+        norm(decode(r.display_name || '')) === nq || norm(r.legal_name || '') === nq ||
+        domainOf(r.website) === nq || (nq.length >= 4 && brand(r.website) === nq));
     if (byName.length > 0) {
         const nameIntent: AskIntent = { ...intent, requirements: [], city: null };
         const results = byName.slice(0, 5).map((r) => shape(r, nameIntent));

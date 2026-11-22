@@ -91,7 +91,8 @@ export function memSearch(p: { terms: string[]; city: string | null; country: st
         const cityHit = !!city && d.includes(city);
         if (!any && !cityHit) continue;
         if (cc && ix.country[i] !== cc && !((ix.country[i] === '' || ix.country[i] === 'XX') && cityHit)) continue;
-        if (cityHit) s += 5;
+        // Le lieu demandé pèse plus que plusieurs synonymes réunis.
+        if (cityHit) s += 10;
         if (p.sector && ix.sector[i] === p.sector) s += 2;
         if (ix.certified[i]) s += 3;
         hits.push({ id: ix.ids[i], score: s + ix.score[i] / 1000 });
