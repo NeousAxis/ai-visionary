@@ -32,6 +32,13 @@ export async function POST(req: NextRequest) {
     const analysisId = (body?.analysisId || '').toString().trim();
     const url = (body?.url || '').toString().trim();
     const locale: 'fr' | 'en' = body?.locale === 'en' ? 'en' : 'fr';
+    // Name confirmed by the owner at the legal-name prompt. Published on a public page:
+    // no control characters, no markup, single spaces, 120 characters max.
+    const confirmedName = (typeof body?.legalName === 'string' ? body.legalName : '')
+      .replace(/[\u0000-\u001f\u007f<>]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 120);
 
     // DRY-RUN (test uniquement) : génère les fichiers sans OTP/écriture/email.
     // Strictement désactivé en production.
@@ -103,6 +110,7 @@ export async function POST(req: NextRequest) {
       analysisData,
       email: email || 'dry-run@test.local',
       locale,
+      confirmedName: confirmedName || undefined,
       dryRun: dry,
     });
     logger.info('FREE_DELIVERED', `dry=${dry} ayaId=${result.ayaId} emailSent=${result.emailSent}`);

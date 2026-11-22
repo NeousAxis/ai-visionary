@@ -24,7 +24,69 @@ export interface FreeDeliveryInput {
   };
   email: string;
   locale: 'fr' | 'en';
+  /** Name the owner confirmed at the legal-name prompt. Wins over the scanned page title. */
+  confirmedName?: string;
   dryRun?: boolean; // test : génère les fichiers SANS écrire le registre ni emailer
+}
+
+/**
+ * Business type (schema.org-like, from the scan) → the registry's sector labels, the same
+ * labels the bot writes (aya/parser.py) and the registry card translates. The raw type
+ * ("TechnologyCompany") is never a sector: it used to be printed as-is on the public card.
+ */
+const SECTOR_BY_BUSINESS_TYPE: Record<string, string> = {
+  technologycompany: 'Technologie & SaaS',
+  softwareapplication: 'Technologie & SaaS',
+  webapplication: 'Technologie & SaaS',
+  foodestablishment: 'Restauration & Alimentation',
+  restaurant: 'Restauration & Alimentation',
+  cafeorcoffeeshop: 'Restauration & Alimentation',
+  bakery: 'Restauration & Alimentation',
+  store: 'E-commerce & Retail',
+  onlinestore: 'E-commerce & Retail',
+  shoppingcenter: 'E-commerce & Retail',
+  financialservice: 'Finance & Banque',
+  bankorcreditunion: 'Finance & Banque',
+  insuranceagency: 'Finance & Banque',
+  medicalbusiness: 'Santé & Pharma',
+  medicalorganization: 'Santé & Pharma',
+  medicalclinic: 'Santé & Pharma',
+  hospital: 'Santé & Pharma',
+  pharmacy: 'Santé & Pharma',
+  educationalorganization: 'Éducation & Formation',
+  school: 'Éducation & Formation',
+  collegeoruniversity: 'Éducation & Formation',
+  consultingfirm: 'Conseil & Services Pro',
+  professionalservice: 'Conseil & Services Pro',
+  accountingservice: 'Conseil & Services Pro',
+  legalservice: 'Conseil & Services Pro',
+  marketingagency: 'Média & Communication',
+  designagency: 'Média & Communication',
+  newsmediaorganization: 'Média & Communication',
+  hotel: 'Tourisme & Transport',
+  travelagency: 'Tourisme & Transport',
+  realestateagent: 'Immobilier',
+  governmentorganization: 'Administration & Public',
+  nonprofitorganization: 'ONG & Associations',
+};
+
+/**
+ * business_type as one string. A JSON-LD @type can be an array (["LocalBusiness",
+ * "TaxiService"]): `.toLowerCase()` on it threw and the free delivery failed with a 500.
+ * Keeps the most specific entry (not the generic Organization / LocalBusiness).
+ */
+export function businessTypeString(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) {
+    const types = value.filter((t): t is string => typeof t === 'string' && t.trim().length > 0);
+    return types.find(t => !/^(Organization|LocalBusiness|Thing)$/i.test(t.trim())) || types[0] || '';
+  }
+  return '';
+}
+
+export function sectorFromBusinessType(businessType: string): string {
+  const key = (businessType || '').trim().toLowerCase().replace(/^https?:\/\/schema\.org\//, '');
+  return SECTOR_BY_BUSINESS_TYPE[key] || 'General';
 }
 
 export interface FreeDeliveryResult {
@@ -43,13 +105,22 @@ export async function deliverProPackFree(
   const { analysisData, email, locale } = input;
   const ext = (analysisData.extract || {}) as Record<string, any>;
 
-  // 1. Entity metadata (mirror of the webhook resolution)
+  // 1. Entity metadata. The owner-confirmed name replaces the scanned one EVERYWHERE
+  //    (registry row + identite.name + identite.legal_name → the 5 files), otherwise the
+  //    page title with its tagline ends up as the entity's public name.
+  const confirmedName = (input.confirmedName || '').trim();
+  if (confirmedName) {
+    ext.identite = ext.identite || {};
+    ext.identite.name = { value: confirmedName, q: 1, evidence: ['user_confirmed'] };
+    ext.identite.legal_name = { value: confirmedName, q: 1, evidence: ['user_confirmed'] };
+  }
   const entityName =
+    confirmedName ||
     ext.identite?.name?.value ||
     ext.identite?.legal_name?.value ||
     (locale === 'fr' ? 'Entreprise' : 'Entity');
 
-  const entityBusinessType = ext.identite?.business_type?.value || '';
+  const entityBusinessType = businessTypeString(ext.identite?.business_type?.value);
   const entityCountry = ext.identite?.country?.value || '';
   const lowerEBT = entityBusinessType.toLowerCase();
   const lowerEName = entityName.toLowerCase();
@@ -61,10 +132,7 @@ export async function deliverProPackFree(
     lowerEName.includes('asso ') || lowerEUrl.includes('.org');
   const entityType = isAssociation ? ('association' as const) : ('company' as const);
   const countryLegal = normalizeCountryCode(entityCountry) ?? 'XX';
-  const sectorMacro =
-    sanitizeBusinessType(entityBusinessType) ||
-    ext.offre?.services?.value?.[0] ||
-    'General';
+  const sectorMacro = sectorFromBusinessType(sanitizeBusinessType(entityBusinessType));
 
   // 2. Register / update + PUBLISH on AYA. 'purchase' sets owner_email = contact_email
   //    (the OTP-verified email becomes the sole admin) and makes the entity visible.
@@ -77,11 +145,12 @@ export async function deliverProPackFree(
         display_name: entityName,
         entity_type: entityType,
         country_legal: countryLegal,
-        sector_macro: sectorMacro,
+        // Unknown type: let the registry keep an existing sector rather than write 'General' over it.
+        sector_macro: sectorMacro !== 'General' ? sectorMacro : undefined,
         website: analysisData.url,
         asr_score: Math.round(analysisData.score || 0),
         contact_email: email, // → becomes owner_email (sole admin)
-        asr_payload: { data: analysisData.extract } as any,
+        asr_payload: { data: ext } as any,
       },
       'purchase',
     );

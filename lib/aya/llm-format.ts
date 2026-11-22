@@ -190,6 +190,43 @@ interface EntityFields {
 
 const GENERIC_NAMES = ['Unknown', 'Entity', 'Unknown Entity', 'Entreprise Inconnue', 'Homepage', 'Welcome'];
 
+/**
+ * schema.org-style types written by the scan ("FoodEstablishment") as words a reader can
+ * read. Without this the certificate said "Happy Green Lunch est un foodestablishment".
+ */
+const BUSINESS_TYPE_WORDS: Record<string, { fr: string; en: string }> = {
+    FoodEstablishment: { fr: 'établissement de restauration', en: 'food establishment' },
+    Restaurant: { fr: 'restaurant', en: 'restaurant' },
+    TechnologyCompany: { fr: 'entreprise technologique', en: 'technology company' },
+    ConsultingFirm: { fr: 'cabinet de conseil', en: 'consulting firm' },
+    ProfessionalService: { fr: 'prestataire de services', en: 'professional services provider' },
+    DesignAgency: { fr: 'agence de design', en: 'design agency' },
+    MarketingAgency: { fr: 'agence marketing', en: 'marketing agency' },
+    EducationalOrganization: { fr: 'organisme de formation', en: 'educational organization' },
+    LegalService: { fr: 'cabinet juridique', en: 'legal services firm' },
+    MedicalBusiness: { fr: 'établissement de santé', en: 'medical business' },
+    FinancialService: { fr: 'société de services financiers', en: 'financial services company' },
+    Store: { fr: 'commerce', en: 'store' },
+    OnlineStore: { fr: 'boutique en ligne', en: 'online store' },
+    NonprofitOrganization: { fr: 'organisation à but non lucratif', en: 'nonprofit organization' },
+    LocalBusiness: { fr: 'entreprise locale', en: 'local business' },
+    Organization: { fr: 'organisation', en: 'organization' },
+    Corporation: { fr: 'entreprise', en: 'corporation' },
+};
+
+function capitalize(s: string): string {
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
+function humanizeBusinessType(raw: string, locale: 'fr' | 'en'): string {
+    const bt = (raw || '').trim();
+    const known = BUSINESS_TYPE_WORDS[bt];
+    if (known) return known[locale];
+    // Any other CamelCase schema type: split into words ("TravelAgency" → "travel agency").
+    if (/^[A-Z][a-z]+(?:[A-Z][a-z]+)+$/.test(bt)) return bt.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+    return bt; // free text written by a person or the bot: unchanged
+}
+
 /** Extract all commonly-needed fields from an entity, locale-aware. */
 function extractEntityFields(entity: any, locale: 'fr' | 'en'): EntityFields {
     const asr = extractAsrData(entity);
@@ -208,7 +245,7 @@ function extractEntityFields(entity: any, locale: 'fr' | 'en'): EntityFields {
 
     const rawServices: string[] = Array.isArray(asr.offre?.services?.value) ? asr.offre.services.value : [];
     const services = filterGarbageServices(rawServices);
-    const businessType: string = asr.identite?.business_type?.value || '';
+    const businessType: string = humanizeBusinessType(asr.identite?.business_type?.value || '', locale);
 
     const enrichment = entity.asr_payload?.enrichment || asr.enrichment || {};
     const geminiDescFr: string = enrichment.gemini_description_fr || '';
@@ -248,10 +285,10 @@ export function buildLlmSummary(entity: any, locale: 'fr' | 'en' = 'en'): LlmSum
     } else if (f.services.length > 0) {
         const svcText = f.services.slice(0, 3).join(', ');
         whatItDoes = f.businessType
-            ? `${f.businessType} providing ${svcText.toLowerCase()}.`
+            ? `${capitalize(f.businessType)} providing ${svcText.toLowerCase()}.`
             : `Provides ${svcText.toLowerCase()}.`;
     } else if (f.businessType) {
-        whatItDoes = `${f.businessType} based in ${f.location}.`;
+        whatItDoes = `${capitalize(f.businessType)} based in ${f.location}.`;
     } else {
         whatItDoes = `${f.category} company.`;
     }
@@ -368,7 +405,7 @@ export function buildPlainTextDescription(entity: any, locale: 'fr' | 'en' = 'en
 /** Add French indefinite article before business type ("une agence", "un cabinet") */
 function addArticle(bt: string): string {
     const lower = bt.toLowerCase();
-    const feminine = ['agence', 'entreprise', 'société', 'association', 'organisation', 'fondation', 'plateforme', 'banque', 'compagnie', 'marque'];
+    const feminine = ['agence', 'entreprise', 'société', 'association', 'organisation', 'fondation', 'plateforme', 'banque', 'compagnie', 'marque', 'boutique'];
     const article = feminine.some(f => lower.startsWith(f)) ? 'une' : 'un';
     return `${article} ${lower}`;
 }

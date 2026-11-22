@@ -2,6 +2,7 @@
 import { db } from '../db';
 import { AyaEntity } from './schema';
 import { normalizeCountryCode } from './country-iso';
+import { MIN_VISIBLE_TEXT } from '../micro-agents/constants';
 import crypto from 'crypto';
 
 /**
@@ -134,6 +135,72 @@ function resolveCountryISO(rawCountry: string, url: string): string {
     return 'XX';
 }
 
+function bareHost(url: string): string {
+    try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname.replace(/^www\./, ''); }
+    catch { return url; }
+}
+
+function sectorLabel(raw?: string): string {
+    const s = (raw || '').trim();
+    if (!s) return 'General';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** Colonnes d'une ligne existante dont l'indexation a besoin (renvoyées par db.getAyaEntityByUrl). */
+export type ExistingEntityRow = {
+    entity_id?: string;
+    aya_entity_id?: string;
+    data_origin?: string | null;
+    payment_completed?: boolean | null;
+    asr_score?: number | string | null;
+    legal_name?: string | null;
+    display_name?: string | null;
+    contact_email?: string | null;
+    country_legal?: string | null;
+    sector_macro?: string | null;
+    last_update?: string | Date | null;
+};
+
+type DiagnosticIndexInput = {
+    url: string;
+    score: number;
+    /**
+     * Caracteres de texte reellement lus sur le site (fetchResult.textContent.length).
+     * En dessous de MIN_VISIBLE_TEXT, AYO n'a rien lu : aucune ecriture.
+     */
+    contentChars: number;
+    name?: string;
+    country?: string;
+    sector?: string;
+    contactEmail?: string;
+};
+
+/**
+ * Rafraichit une ligne que cette fonction a elle-meme creee (AYO-SCAN, non payee) avec le
+ * dernier scan lisible. Mise a jour etroite : le score, et les champs encore vides ou restes
+ * a leur valeur de repli. Jamais une ligne du bot ni une entite certifiee.
+ */
+async function refreshOwnScanRow(entityId: string, existing: ExistingEntityRow, input: DiagnosticIndexInput): Promise<void> {
+    const host = bareHost(input.url);
+    const isFallback = (v: unknown) => !v || !String(v).trim() || String(v).trim().toLowerCase() === host;
+    const fields: Record<string, unknown> = { asr_score: input.score };
+    const cleanName = (input.name || '').trim();
+    if (cleanName && isFallback(existing.display_name)) fields.display_name = cleanName;
+    if (cleanName && isFallback(existing.legal_name)) fields.legal_name = cleanName;
+    if (input.contactEmail && !existing.contact_email) fields.contact_email = input.contactEmail;
+    const iso = resolveCountryISO(input.country || '', input.url);
+    if (iso !== 'XX' && (!existing.country_legal || existing.country_legal === 'XX')) fields.country_legal = iso;
+    const sector = sectorLabel(input.sector);
+    if (sector !== 'General' && (!existing.sector_macro || existing.sector_macro === 'General')) fields.sector_macro = sector;
+
+    const ok = await db.updateEntityData(entityId, fields);
+    if (ok) {
+        console.log(`🔄 AYA INDEX: ligne AYO-SCAN ${entityId} rafraichie par le diagnostic (${host}, score ${existing.asr_score} -> ${input.score})`);
+    } else {
+        console.error(`❌ AYA INDEX: rafraichissement refuse par la base pour ${entityId} (${host})`);
+    }
+}
+
 /**
  * Indexe automatiquement une entité dans AYA dès qu'un diagnostic est lancé.
  *
@@ -141,50 +208,56 @@ function resolveCountryISO(rawCountry: string, url: string): string {
  * Doctrine : pas d'ASR généré = pas certifié. L'entité apparaît dans le registre
  * (volume / API / pages crawlables) mais reste distincte des entités certifiées AYO.
  *
- * Dédup par URL : si l'entité existe déjà (bot indexé OU certifiée), on NE TOUCHE À RIEN
- * (on ne dégrade jamais une entité existante) et on renvoie son id.
+ * Site non lu (contentChars sous MIN_VISIBLE_TEXT) : rien n'est écrit. AYO n'invente rien,
+ * et un score calculé sans lecture serait figé par la dédup (incident du 14.10.2026).
  *
- * @returns l'entity_id (existant ou nouveau), ou null en cas d'échec.
+ * Dédup par URL : une entité du bot ou certifiée n'est JAMAIS touchée (on ne dégrade jamais
+ * une entité existante). Une ligne AYO-SCAN non payée, créée par cette fonction, suit le
+ * dernier scan lisible, sinon un score faux écrit une fois restait figé pour toujours.
+ *
+ * @returns l'entity_id (existant ou nouveau), ou null en cas d'échec ou de refus.
  */
-export async function indexEntityFromDiagnostic(input: {
-    url: string;
-    score: number;
-    name?: string;
-    country?: string;
-    sector?: string;
-    contactEmail?: string;
-}): Promise<string | null> {
+export async function indexEntityFromDiagnostic(input: DiagnosticIndexInput): Promise<string | null> {
     const targetUrl = input.url;
     if (!targetUrl) return null;
 
-    // 1. Dédup par URL — ne jamais dupliquer ni écraser une entité existante
+    // 0. Garde de lisibilité. La porte principale est dans fetchHtml ; celle-ci protège le
+    // registre contre tout appelant qui calculerait un score sans avoir lu le site.
+    if (!(input.contentChars >= MIN_VISIBLE_TEXT)) {
+        console.warn(`⛔ AYA INDEX: ${targetUrl} non lu (${input.contentChars || 0} caractères de texte), rien n'est inscrit.`);
+        return null;
+    }
+
+    // 1. Dédup par URL — ne jamais dupliquer une entité existante
+    let existing: ExistingEntityRow | null = null;
     try {
-        const existing = await db.getAyaEntityByUrl(targetUrl);
-        const existingId = existing?.entity_id || existing?.aya_entity_id;
-        if (existing && existingId) {
-            console.log(`♻️ AYA INDEX: Already in registry (${existingId}) — diagnostic ne modifie rien.`);
-            return existingId;
-        }
+        existing = await db.getAyaEntityByUrl(targetUrl);
     } catch (checkErr) {
         console.error('⚠️ AYA INDEX: duplicate check failed', checkErr);
         // En cas d'erreur de lecture, on s'abstient d'écrire pour éviter les doublons.
         return null;
     }
+    const existingId = existing?.entity_id || existing?.aya_entity_id;
+    if (existing && existingId) {
+        if (existing.data_origin === 'AYO-SCAN' && existing.payment_completed !== true) {
+            try {
+                await refreshOwnScanRow(existingId, existing, input);
+            } catch (err) {
+                console.error(`❌ AYA INDEX: rafraichissement ${existingId} en échec`, err);
+            }
+        } else {
+            console.log(`♻️ AYA INDEX: Already in registry (${existingId}, ${existing.data_origin || '?'}) — diagnostic ne modifie rien.`);
+        }
+        return existingId;
+    }
 
     // 2. Construire l'entrée indexée
     const now = new Date();
     const entityId = crypto.randomUUID();
-    const host = (() => {
-        try { return new URL(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`).hostname.replace(/^www\./, ''); }
-        catch { return targetUrl; }
-    })();
+    const host = bareHost(targetUrl);
     const cleanName = (input.name || '').trim();
     const displayName = cleanName || host;
-    const sector = (() => {
-        const s = (input.sector || '').trim();
-        if (!s) return 'General';
-        return s.charAt(0).toUpperCase() + s.slice(1);
-    })();
+    const sector = sectorLabel(input.sector);
 
     const record: AyaEntity = {
         aya_entity_id: entityId,

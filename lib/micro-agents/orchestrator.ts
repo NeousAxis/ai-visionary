@@ -1,6 +1,6 @@
 // lib/micro-agents/orchestrator.ts — Run all 8 agents, merge into AyoExtract
 
-import { fetchHtml, getTextContent } from './html-fetcher';
+import { fetchHtml, getTextContent, assessPageContent } from './html-fetcher';
 import { AYOBOT_UA } from './constants';
 import { detectContact } from './detect-contact';
 import { detectJsonLd } from './detect-jsonld';
@@ -31,11 +31,13 @@ function cleanEntityName(raw: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#0?39;|&#x27;/g, "'")
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&nbsp;| | /g, ' ');
 
-  // 2. Strip tagline after separators: " | ", " - ", " — ", " : "
+  // 2. Strip tagline after separators: " | ", " · ", " • ", " — ", " – ", " - ", " : "
   // Only if the part before the separator is long enough to be a real name (>= 3 chars)
-  const separators = [' | ', ' — ', ' – ', ' - ', ' : '];
+  // "Happy Green Lunch · Repas faits maison à Lonay" → "Happy Green Lunch"
+  const separators = [' | ', ' · ', ' • ', ' — ', ' – ', ' - ', ' : '];
   for (const sep of separators) {
     const idx = name.indexOf(sep);
     if (idx >= 3) {
@@ -45,6 +47,57 @@ function cleanEntityName(raw: string): string {
   }
 
   return name.trim();
+}
+
+// --- Business type inference (deterministic) ---
+
+/**
+ * Whole-word matcher. JS `\b` is ASCII only (`santé\b` never matches), so the boundaries
+ * are "no letter or digit on either side", Unicode aware. A stem (trailing `\p{L}*`)
+ * keeps its own open end.
+ */
+function wordRe(alternation: string): RegExp {
+  return new RegExp(`(?<![\\p{L}\\p{N}])(?:${alternation})(?![\\p{L}\\p{N}])`, 'iu');
+}
+
+// `ngo` / `ong` as whole words only: as substrings they fired on "long", "along", "mango"
+// (and the page text is scanned too), which flipped companies to NonprofitOrganization and
+// then to entity_type 'association'. "développement durable" removed: a sustainability
+// claim is not an NGO marker (it classified green businesses as associations).
+const NGO_RE = /humanitari|humanitarian|(?<![\p{L}\p{N}])(?:ngos?|ong)(?![\p{L}\p{N}])|croix-?rouge|red cross|unicef|unhcr|fondation|foundation|charity|charit[eé]|nonprofit|non-?profit|aide humanitaire|r[eé]fugi[eé]|refugee|droits? de l'homme|human rights|action sociale/iu;
+
+// Food: whole words. Not bare "restauration" (also "restauration de montres").
+const FOOD_RE = wordRe("restaurants?|restauration (?:collective|rapide|scolaire|d['’]entreprise)|traiteurs?|catering|repas|meals?|lunch(?:es)?|d[ée]jeuners?|brunch|boulangeries?|bakery|bakeries|p[âa]tisseries?|pastry|caf[ée]s?|coffee shops?|bistrots?|bistros?|brasseries?|pizzerias?|food|plats? (?:cuisin[ée]s?|du jour|pr[ée]par[ée]s?|[àa] emporter)|faits? maison|homemade|[àa] emporter|take-?away|cuisin[ée]s?|gastronomi\\p{L}*|[ée]piceries?|grocery|alimentaires?|vins?|wines?|chocolat\\p{L}*");
+
+// `app` as a whole word only: as a substring it read "Apple Pay" (a payment method listed
+// by any shop or restaurant) as a software company. Rest of the rule unchanged.
+const TECH_RE = /website|web|(?<![\p{L}\p{N}])apps?(?![\p{L}\p{N}])|software|développement|development|saas|platform/iu;
+
+/**
+ * Infer a schema.org-like business type from the detected services when the site has no
+ * JSON-LD type. Order: NGO, then food when at least half the services are about food
+ * (a meal-delivery business also lists "commande en ligne", "conseils", "app"...), then
+ * the historical first-match chain.
+ */
+export function inferBusinessType(services: string[], pageText: string): string {
+  const svcs = (services || []).filter((s): s is string => typeof s === 'string' && s.trim().length > 0);
+  if (svcs.length === 0) return '';
+  const svcText = svcs.join(' ').toLowerCase();
+  const allText = `${svcText} ${(pageText || '').substring(0, 2000).toLowerCase()}`;
+
+  if (NGO_RE.test(allText)) return 'NonprofitOrganization';
+  const foodCount = svcs.filter(s => FOOD_RE.test(s)).length;
+  if (foodCount > 0 && foodCount * 2 >= svcs.length) return 'FoodEstablishment';
+  if (/consulting|conseil|advisory|accompagnement|stratégie/i.test(svcText)) return 'ConsultingFirm';
+  if (TECH_RE.test(svcText)) return 'TechnologyCompany';
+  if (/design|graphi|créati|branding|ux|ui/i.test(svcText)) return 'DesignAgency';
+  if (/marketing|communication|pub|seo|social media/i.test(svcText)) return 'MarketingAgency';
+  if (/formation|training|coaching|education|cours/i.test(svcText)) return 'EducationalOrganization';
+  if (/legal|juridique|avocat|droit|compliance/i.test(svcText)) return 'LegalService';
+  if (/health|santé|medical|pharma|clinic/i.test(svcText)) return 'MedicalBusiness';
+  if (/finance|bank|assurance|investissement/i.test(svcText)) return 'FinancialService';
+  if (/e-?commerce|shop|boutique|magasin|store|retail|vente en ligne|marketplace/i.test(svcText)) return 'Store';
+  return 'ProfessionalService';
 }
 
 // --- Deterministic legal link detection (regex, like social) ---
@@ -314,17 +367,26 @@ export async function runAllAgents(
   let fetchResult: FetchResult;
   if (providedHtmlContent && providedHtmlContent.trim().length > 100) {
     const textContent = getTextContent(providedHtmlContent);
+    // 'user_provided' : AYO n'a pas lu ce site, le visiteur a fourni la page. Le score est
+    // montre au visiteur, mais la route ne l'inscrit jamais au registre sous ce domaine.
     fetchResult = {
       url,
       rawHtml: providedHtmlContent,
       renderedHtml: providedHtmlContent,
       textContent,
-      sourceType: 'ssr',
+      sourceType: 'user_provided',
       headers: {},
       statusCode: 200,
       isReachable: true,
     };
     console.log(`[orchestrator] Using provided HTML: ${providedHtmlContent.length} chars, ${textContent.length} text chars`);
+    // Meme porte que pour une page lue par AYO : un parking ou un mur anti-bot colle par
+    // le visiteur ne se note pas davantage.
+    const verdict = assessPageContent(providedHtmlContent);
+    if (verdict) {
+      console.warn(`[orchestrator] Provided HTML non lisible (${verdict.reason}: ${verdict.detail}), aucun score`);
+      fetchResult = { ...fetchResult, textContent: '', isReachable: false, unreadableReason: verdict.reason, unreadableDetail: verdict.detail };
+    }
   } else {
     fetchResult = await fetchHtml(url);
   }
@@ -416,6 +478,95 @@ export async function runAllAgents(
   return { fetchResult, results, events };
 }
 
+/** Agents que la passe de secours sait rejouer : ceux dont la panne vient d'un appel LLM. */
+const REPLAYABLE_AGENTS = new Set<string>([
+  'detect-contact', 'detect-location', 'detect-services',
+  'detect-legal', 'detect-security', 'detect-pedagogy',
+]);
+
+/**
+ * Passe de secours : rejoue UNIQUEMENT les agents tombes en panne.
+ *
+ * Pourquoi elle existe. Depuis le 19 aout 2026 un agent muet ne peut plus passer pour
+ * "ce site n'a rien" : le scan refuse de publier un score sous-estime. La regle est juste,
+ * mais elle etait sans issue de secours — la moindre vague de latence chez Infomaniak
+ * (mesure du 26 aout : les memes appels passent de 3 s a 16 s, avec des 502 immediats
+ * sporadiques) renvoyait le visiteur a un ecran vide. Les sondes du 21, 24 et 25 aout sont
+ * toutes tombees sur ce meme mur, toujours sur detect-services puis process/indicateurs.
+ *
+ * Ces vagues sont breves. Une pause courte puis un second essai franc les traverse, la ou
+ * un retry colle a la premiere tentative retombe dans le meme trou. Les agents qui avaient
+ * repondu ne sont pas rejoues : leur resultat est deja acquis et le budget est compte.
+ *
+ * Retourne la liste des agents toujours en panne apres le rattrapage.
+ */
+export async function retryFailedAgents(
+  url: string,
+  fetchResult: FetchResult,
+  results: AllAgentResults,
+  failed: string[],
+  onEvent?: (event: AgentEvent) => void,
+  opts: { timeoutMs?: number } = {},
+): Promise<string[]> {
+  const { renderedHtml, textContent, headers } = fetchResult;
+  const enrichedContent = buildEnrichedContent(renderedHtml, textContent);
+  // Un seul essai : au rattrapage le budget restant ne permet pas une serie.
+  const runOpts = { retries: 0, timeoutMs: opts.timeoutMs };
+  const stillFailed: string[] = [];
+  const jobs: Promise<void>[] = [];
+
+  const attempt = <T,>(name: AgentName, fn: () => Promise<T>, assign: (v: T) => void) => {
+    if (!failed.includes(name)) return;
+    onEvent?.({ agent: name, status: 'running', data: null, durationMs: 0 });
+    jobs.push((async () => {
+      const started = Date.now();
+      try {
+        const value = await fn();
+        assign(value);
+        const ms = Date.now() - started;
+        console.log(`[rescue] ${name}: recupere en ${ms}ms`);
+        onEvent?.({ agent: name, status: 'done', data: value as any, durationMs: ms });
+      } catch (err) {
+        const ms = Date.now() - started;
+        const detail = err instanceof Error ? err.message : String(err);
+        stillFailed.push(name);
+        console.error(`[rescue] ${name}: toujours en panne apres rattrapage — ${detail}`);
+        onEvent?.({ agent: name, status: 'error', data: null, durationMs: ms, error: detail });
+      }
+    })());
+  };
+
+  attempt('detect-services', () => detectServices(textContent, runOpts), (v) => { results.services = v; });
+  attempt('detect-legal', async () => {
+    const r = await detectLegal(enrichedContent, runOpts);
+    // Meme enrichissement qu'au premier passage : sans lui, un site rattrape perdrait les
+    // mentions legales trouvees par regex et sortirait avec un bloc conformite plus pauvre.
+    const deterministic = detectLegalLinksDeterministic([fetchResult.rawHtml, renderedHtml]);
+    r.policies = unionStrings(r.policies, deterministic.policies);
+    r.frameworks = unionStrings(r.frameworks, deterministic.frameworks);
+    if (r.policies.length === 0 && r.frameworks.length === 0) {
+      const probed = await detectLegalPages(url);
+      r.policies = unionStrings(r.policies, probed.policies);
+      r.frameworks = unionStrings(r.frameworks, probed.frameworks);
+    }
+    if ((r.policies.length + r.frameworks.length) > 0 && r.q === 0) r.q = 0.5;
+    return r;
+  }, (v) => { results.legal = v; });
+  attempt('detect-contact', () => detectContact(enrichedContent, results.jsonld, runOpts), (v) => { results.contact = v; });
+  attempt('detect-location', () => detectLocation(enrichedContent, results.jsonld, fetchResult.url, runOpts), (v) => { results.location = v; });
+  attempt('detect-security', () => detectSecurity(textContent, headers, runOpts), (v) => { results.security = v; });
+  attempt('detect-pedagogy', () => detectPedagogy(renderedHtml, textContent, url, runOpts), (v) => { results.pedagogy = v; });
+
+  await Promise.all(jobs);
+
+  // Une panne hors LLM (jsonld, social, site injoignable) n'est pas rejouable : elle reste
+  // comptee comme telle, sinon le scan publierait un score ampute sans le dire.
+  for (const name of failed) {
+    if (!REPLAYABLE_AGENTS.has(name)) stillFailed.push(name);
+  }
+  return stillFailed;
+}
+
 /**
  * Merge all agent results into AyoExtract format.
  * Compatible with computeAioScore() and all generators.
@@ -437,6 +588,12 @@ export async function mergeAgentResultsToExtract(
      * chance et ferait depasser SCAN_DEADLINE_MS (150 s).
      */
     llmRetries?: number;
+    /**
+     * Plafond de temps accorde a l'extraction process/indicateurs. La passe de secours le
+     * releve : au rattrapage il reste du budget, et le refuser reviendrait a rejouer sous
+     * la meme contrainte que la tentative qui vient d'echouer.
+     */
+    llmTimeoutMs?: number;
   } = {},
 ): Promise<AyoExtract> {
   const { contact, services, legal, location, security, jsonld, social } = results;
@@ -451,20 +608,7 @@ export async function mergeAgentResultsToExtract(
   // Order matters: NGO/nonprofit BEFORE commercial types (avoid "advisory" → ConsultingFirm for ICRC)
   let businessType = jsonld.type || '';
   if (!businessType && services.services.length > 0) {
-    const svcText = services.services.join(' ').toLowerCase();
-    const allText = `${svcText} ${fetchResult.textContent.substring(0, 2000).toLowerCase()}`;
-    // NGO/nonprofit detection FIRST — priority over commercial types
-    if (/humanitari|humanitarian|ngo|ong|croix-?rouge|red cross|unicef|unhcr|fondation|foundation|charity|charit[eé]|nonprofit|non-?profit|aide humanitaire|r[eé]fugi[eé]|refugee|droits? de l'homme|human rights|développement durable|sustainable development|action sociale/i.test(allText)) businessType = 'NonprofitOrganization';
-    else if (/consulting|conseil|advisory|accompagnement|stratégie/i.test(svcText)) businessType = 'ConsultingFirm';
-    else if (/website|web|app|software|développement|development|saas|platform/i.test(svcText)) businessType = 'TechnologyCompany';
-    else if (/design|graphi|créati|branding|ux|ui/i.test(svcText)) businessType = 'DesignAgency';
-    else if (/marketing|communication|pub|seo|social media/i.test(svcText)) businessType = 'MarketingAgency';
-    else if (/formation|training|coaching|education|cours/i.test(svcText)) businessType = 'EducationalOrganization';
-    else if (/legal|juridique|avocat|droit|compliance/i.test(svcText)) businessType = 'LegalService';
-    else if (/health|santé|medical|pharma|clinic/i.test(svcText)) businessType = 'MedicalBusiness';
-    else if (/finance|bank|assurance|investissement/i.test(svcText)) businessType = 'FinancialService';
-    else if (/e-?commerce|shop|boutique|magasin|store|retail|vente en ligne|marketplace/i.test(svcText)) businessType = 'Store';
-    else businessType = 'ProfessionalService';
+    businessType = inferBusinessType(services.services, fetchResult.textContent);
   }
 
   // City/country: merge JSON-LD + location agent
@@ -536,14 +680,14 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
     const [raw, kwRaw] = await Promise.all([
       // Porte les blocs 3 (processus) et 5 (indicateurs), soit 35 points : elle merite un
       // second essai, et son echec rend le diagnostic incomplet.
-      llmExtract(processPrompt, enrichedContent, 10000, { retries: opts.llmRetries ?? 1, maxTokens: 1000 }).catch((e) => {
+      llmExtract(processPrompt, enrichedContent, 10000, { retries: opts.llmRetries ?? 1, maxTokens: 1000, timeoutMs: opts.llmTimeoutMs }).catch((e) => {
         console.error('[agent] process/indicators: ECHEC —', e instanceof Error ? e.message : e);
         onDegraded?.('process/indicators');
         return '{}';
       }),
       // Sert uniquement l'appariement concurrentiel, aucun point de score : son absence
       // ne rend pas le diagnostic incomplet.
-      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0, maxTokens: 400 }).catch(() => '[]'),
+      llmExtract(keywordsPrompt, enrichedContent, 8000, { retries: 0, maxTokens: 400, timeoutMs: opts.llmTimeoutMs }).catch(() => '[]'),
     ]);
 
     const data = parseJson<ProcessData>(raw);
@@ -608,8 +752,9 @@ Return ONLY a JSON array: ["keyword1", "keyword2", ...]`;
         name: field(name, name ? 1 : 0, name ? ['scan_micro_agent'] : []),
         legal_name: field(name || '', name ? 1 : 0, name ? ['scan_micro_agent'] : []),
         business_type: field(businessType, businessType ? 1 : 0, businessType ? ['scan_micro_agent'] : []),
-        city: field(city, location.q, city ? ['scan_micro_agent'] : []),
-        country: field(country, location.q, country ? ['scan_micro_agent'] : []),
+        // Une valeur absente vaut 0 : la confiance de l'agent ne donne aucun point a un champ vide.
+        city: field(city, city ? location.q : 0, city ? ['scan_micro_agent'] : []),
+        country: field(country, country ? location.q : 0, country ? ['scan_micro_agent'] : []),
         contact_email: field(
           email || (contact.hasContactForm ? 'contact_form' : ''),
           email ? 1 : contact.hasContactForm ? 0.5 : 0,

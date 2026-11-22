@@ -273,8 +273,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ competitors: [], averageScore: 0, totalInSector: 0 });
     }
 
-    // Fetch ALL entities
-    const allEntities = await db.getAyaEntities(10000);
+    // Fetch ALL entities — surface publique (des « concurrents » sont affichés
+    // à l'utilisateur), donc lecture filtrée : pas d'entité adulte ici.
+    const allEntities = await db.getAyaPublicEntities(10000);
     if (!allEntities?.length) {
       return NextResponse.json({ competitors: [], averageScore: 0, totalInSector: 0 });
     }

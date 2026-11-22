@@ -1,6 +1,41 @@
 
 import { MetadataRoute } from 'next';
-import { db, getAyaEntitiesAggregated, getAyaSectorsAggregated, getAyaCountriesAggregated, getAyaSectorCountryCombinationsAggregated } from '@/lib/db';
+import { getAyaSectorsAggregated, getAyaCountriesAggregated, getAyaSectorCountryCombinationsAggregated } from '@/lib/db';
+
+/**
+ * Root sitemap: static pages + taxonomy landing pages ONLY.
+ *
+ * The ~367 000 entity certificate pages live in their own chunked sitemaps at
+ * /aya/sitemap/[id].xml (see app/aya/sitemap.ts) and are advertised to crawlers
+ * through robots.txt. Keeping them out of this file is what stops it from
+ * crossing Google's hard 50 000-URL ceiling — above that limit Google discards
+ * the whole file, which previously took every taxonomy page down with it.
+ */
+/** Taxonomy grows with the registry — refresh daily rather than at deploy time. */
+export const revalidate = 86_400;
+
+/**
+ * Déclare la version française d'une URL via les balises d'alternance.
+ *
+ * On ne duplique PAS les entrées : une seule `<url>` portant `xhtml:link
+ * hreflang` suffit à Google pour découvrir et indexer `/fr/...`. Dupliquer
+ * aurait doublé le volume du sitemap pour rien.
+ */
+function withFrench(entry: MetadataRoute.Sitemap[number]): MetadataRoute.Sitemap[number] {
+    const path = entry.url.replace('https://ai-visionary.xyz', '');
+    // Pas de barre finale : l'accueil devient `/fr`, pas `/fr/`. Next redirige
+    // `/fr/` en 308, et déclarer dans un sitemap une URL qui redirige envoie
+    // Google faire un saut pour rien.
+    return {
+        ...entry,
+        alternates: {
+            languages: {
+                en: entry.url,
+                fr: `https://ai-visionary.xyz/fr${path}`,
+            },
+        },
+    };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://ai-visionary.xyz';
@@ -40,6 +75,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.5,
         },
         {
+            url: `${baseUrl}/for-agents`,
+            lastModified: now,
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/pollen-agents`,
+            lastModified: now,
+            changeFrequency: 'weekly',
+            priority: 0.7,
+        },
+        {
             url: `${baseUrl}/confidentialite`,
             lastModified: now,
             changeFrequency: 'yearly',
@@ -53,27 +100,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ];
 
-    // 2. Dynamic entity certificate pages (Supabase + VPS Postgres aggregated)
-    let entityPages: MetadataRoute.Sitemap = [];
-    try {
-        // getAyaEntitiesAggregated supports pagination; fetch a large first page to capture
-        // all ~30k entities (Supabase ~4 438 + VPS ~25 860).  pageSize=50 000 is safe for
-        // sitemap generation (server-side only, never sent to the browser).
-        const result = await getAyaEntitiesAggregated({ page: 1, pageSize: 50_000 });
-        entityPages = result.data
-            .filter((entity: any) => entity.entity_id)
-            .map((entity: any) => ({
-                url: `${baseUrl}/aya/e/${entity.entity_id}`,
-                lastModified: new Date(entity.updated_at || entity.created_at || now),
-                changeFrequency: 'monthly' as const,
-                priority: 0.6,
-            }));
-    } catch (_err) {
-        // DB unavailable at build time — static sitemap only
-        console.warn('[sitemap] Could not fetch entities (aggregated):', _err);
-    }
-
-    // 3. Sector landing pages (/aya/sector/[macro]) — aggregated
+    // 2. Sector landing pages (/aya/sector/[macro]) — aggregated
     let sectorPages: MetadataRoute.Sitemap = [];
     try {
         const sectors = await getAyaSectorsAggregated();
@@ -116,13 +143,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.warn('[sitemap] Could not fetch sector×country combinations (aggregated):', _err);
     }
 
-    // Safety check: Google Sitemaps support max 50 000 URLs and 50 MB per file.
-    // With ~4 438 Supabase entities, ~14 sectors, ~73 countries and < 1 000 cross combos
-    // we are well within limits. Log a warning if we approach the threshold.
-    const total = staticPages.length + entityPages.length + sectorPages.length + countryPages.length + crossPages.length;
+    // Taxonomy grows with the registry (sector × country combinations), so the
+    // ceiling still has to be watched even without the entity pages.
+    const total = staticPages.length + sectorPages.length + countryPages.length + crossPages.length;
     if (total > 45_000) {
-        console.warn(`[sitemap] URL count ${total} is approaching the 50 000 limit — consider splitting into multiple sitemaps.`);
+        console.warn(`[sitemap] Taxonomy URL count ${total} is approaching the 50 000 limit — split this file too.`);
     }
 
-    return [...staticPages, ...sectorPages, ...countryPages, ...crossPages, ...entityPages];
+    // Chaque page statique et de taxonomie déclare sa version française.
+    return [...staticPages, ...sectorPages, ...countryPages, ...crossPages].map(withFrench);
 }

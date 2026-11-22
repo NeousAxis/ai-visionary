@@ -135,15 +135,15 @@
     "ayo:seal": {
         "level": "ESSENTIAL",
         "issuer": "AYO Trusted Authority",
-        "issuedAt": "2026-01-03T03:00:11Z",
+        "issuedAt": "2026-08-09T16:58:44Z",
         "payloadHash": {
             "algorithm": "sha256",
-            "value": "78a9c...simulated_hash"
+            "value": "53c8655be9112808dc43d0f521ce28a0b9e51e42c34343a2855b9a8f9c9b7b0f"
         },
         "signature": {
             "algorithm": "ed25519",
-            "value": "sig_ed...",
-            "keyId": "AYO_KEY_01"
+            "value": "//ApEgRMXw8X+HOX/bMc/xre35e5Jbtrzd6SCI5k34cOzhwjRCg0HRCKEGkcLTA/aSwbO+W+fZNtA7W3sMEyDA==",
+            "keyId": "AYO-KEY-2026-03"
         }
     }
 }

@@ -1,6 +1,7 @@
 // lib/micro-agents/detect-pedagogy.ts — Detect FAQ, glossary & documentation via focused LLM
 // Consumes renderedHtml from html-fetcher — NO additional Jina calls.
 
+import type { AgentRunOpts } from './llm-agent';
 import type { PedagogyResult, Quality } from './types';
 import { llmExtract, parseJson, LlmCallError } from './llm-agent';
 import { AYOBOT_UA } from './constants';
@@ -119,7 +120,12 @@ function extractLinksAndHeadings(html: string): string {
  * Detect FAQ, glossary, documentation from renderedHtml.
  * No Jina calls — html-fetcher already provides complete renderedHtml.
  */
-export async function detectPedagogy(renderedHtml: string, textContent = '', url = ''): Promise<PedagogyResult> {
+/**
+ * `opts` permet a la passe de secours du scan de rejouer l'agent avec un seul essai et un
+ * plafond de temps reduit : au rattrapage il reste peu de budget, mieux vaut un essai
+ * franc qu'une serie qui deborde.
+ */
+export async function detectPedagogy(renderedHtml: string, textContent = '', url = '', opts: AgentRunOpts = {}): Promise<PedagogyResult> {
   try {
     const extracted = extractLinksAndHeadings(renderedHtml);
 
@@ -135,7 +141,7 @@ export async function detectPedagogy(renderedHtml: string, textContent = '', url
     // LLM pass over links/headings — catches nav-based FAQ + documentation (blog/guides/resources).
     let llmFaq = false, llmGlossary = false, llmDocs = false;
     if (extracted && extracted.length >= 20) {
-      const raw = await llmExtract(PROMPT, extracted, 8000, { maxTokens: 300 });
+      const raw = await llmExtract(PROMPT, extracted, 8000, { maxTokens: 300, ...opts });
       const data = parseJson<{ has_faq?: boolean; has_glossary?: boolean; has_documentation?: boolean }>(raw);
       llmFaq = data?.has_faq || false;
       llmGlossary = data?.has_glossary || false;

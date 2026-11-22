@@ -149,10 +149,19 @@ async function callInfomaniak(input: LlmInput, forceJson: boolean): Promise<LlmR
                 : err;
 
             const httpTransient = err instanceof InfomaniakHttpError && (err.status >= 500 || err.status === 429);
-            const retryable = timedOut || httpTransient || !(err instanceof InfomaniakHttpError);
+            // Un timeout n'est PAS rejoue sur place. Il a deja coute le plafond entier et il
+            // signale une vague de latence en cours chez le provider : la relance immediate
+            // retombe dans le meme trou et brule une seconde tranche du budget du scan
+            // (25 s x 2 sur detect-services, sondes des 21, 24 et 25 aout 2026). La seconde
+            // chance est donnee plus tard, par la passe de secours du scan.
+            // Les 5xx, 429 et coupures reseau, eux, echouent en une fraction de seconde
+            // (502 mesure a 0,16 s le 26 aout) : ceux-la valent un retry sur place.
+            const retryable = httpTransient || !(timedOut || err instanceof InfomaniakHttpError);
             if (!retryable || attempt === attempts) throw lastErr;
-            const why = timedOut ? 'timeout' : (err instanceof InfomaniakHttpError ? `http ${err.status}` : 'network');
+            const why = err instanceof InfomaniakHttpError ? `http ${err.status}` : 'network';
             console.warn(`[llm-provider] attempt ${attempt}/${attempts} failed (${why}), retrying`);
+            // Laisser le backend fautif sortir du pool avant de retenter.
+            await new Promise((r) => setTimeout(r, 500));
         }
     }
     throw lastErr;

@@ -43,15 +43,16 @@ function formatNumber(n: number) {
 
 export default function StatsBar() {
     const t = useTranslations('stats');
-    const [target, setTarget] = useState({ total: 30000, countries: 73 });
+    const [target, setTarget] = useState({ total: 26200, countries: 94 });
 
     useEffect(() => {
-        fetch('/api/aya/stats')
+        // Compteur RÉEL du registre VPS (via le proxy serveur) — jamais le fallback Supabase local.
+        fetch('/api/pollen-stats')
             .then(r => r.json())
             .then(data => {
                 setTarget({
-                    total: data.total_entities || 30000,
-                    countries: data.countries?.length || 73,
+                    total: data.total_entities || 26200,
+                    countries: data.countries_count || 94,
                 });
             })
             .catch(() => {/* keep defaults */});

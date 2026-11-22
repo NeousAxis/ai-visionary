@@ -11,6 +11,7 @@ import { formDataToAyoExtract } from '@/lib/form-to-extract';
 import { sanitizeExtract } from '@/lib/ayo-generators';
 import { generateProPack, type ArchitecteInput } from '@/lib/agents/architecte';
 import { normalizeCountryCode } from '@/lib/aya/country-iso';
+import { sectorFromBusinessType, businessTypeString } from '@/lib/pro-delivery';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -174,7 +175,6 @@ export async function POST(req: NextRequest) {
 
         // --- Extract top-level fields for Supabase columns ---
         const identite = extract.fields?.identite;
-        const offre = extract.fields?.offre;
 
         const displayName =
             identite?.name?.value ||
@@ -186,9 +186,10 @@ export async function POST(req: NextRequest) {
             entity.legal_name;
         const country = identite?.country?.value || entity.country_legal;
         const contactEmail = identite?.contact_email?.value || entity.contact_email;
-        const businessType = (identite?.business_type?.value as string) || '';
-        const firstService = (offre?.services?.value as string[])?.[0] || '';
-        const sector = businessType || firstService || entity.sector_macro;
+        // Registry sector label, never the raw schema type ("FoodEstablishment") nor a
+        // service sentence: an unknown type keeps the sector the entity already has.
+        const mappedSector = sectorFromBusinessType(businessTypeString(identite?.business_type?.value));
+        const sector = mappedSector !== 'General' ? mappedSector : (entity.sector_macro || 'General');
 
         // --- Update Supabase ---
         const updateFields: Record<string, unknown> = {

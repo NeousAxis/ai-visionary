@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { localizedAlternates } from '@/lib/i18n-alternates';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { getAyaEntitiesByFilterAggregated } from '@/lib/db';
 import { SECTOR_LABELS, COUNTRY_LABELS, COUNTRY_LABELS_FR } from '@/lib/aya/llm-format';
@@ -45,6 +46,7 @@ export async function generateMetadata({
     return {
         title,
         description,
+        alternates: await localizedAlternates(`/aya/sector/${encodeURIComponent(sector)}/country/${country}`),
         openGraph: {
             title,
             description,

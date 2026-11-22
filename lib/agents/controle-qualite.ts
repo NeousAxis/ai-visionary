@@ -118,7 +118,9 @@ function validateAsr(asr: Record<string, unknown>): QCError[] {
 function validateFaq(faq: Record<string, unknown>): QCError[] {
     const errors: QCError[] = [];
 
-    const items: any[] = (faq as any)?.faq_items || (faq as any)?.items || [];
+    // generateFaqJson writes a schema.org FAQPage: questions live in `mainEntity`. Reading only
+    // the old keys flagged every delivery since July as "Aucun item FAQ" (files were full).
+    const items: any[] = (faq as any)?.mainEntity || (faq as any)?.faq_items || (faq as any)?.items || [];
     if (!Array.isArray(items) || items.length === 0) {
         errors.push({
             file: 'faq.json',
@@ -159,7 +161,9 @@ function validateFaq(faq: Record<string, unknown>): QCError[] {
 function validateGlossary(glossary: Record<string, unknown>): QCError[] {
     const errors: QCError[] = [];
 
-    const terms: any[] = (glossary as any)?.terms || [];
+    // generateGlossaryJson writes a schema.org DefinedTermSet: terms live in `hasDefinedTerm`
+    // ({ name, description }), not in `terms` ({ term, definition }).
+    const terms: any[] = (glossary as any)?.hasDefinedTerm || (glossary as any)?.terms || [];
     if (!Array.isArray(terms) || terms.length === 0) {
         errors.push({
             file: 'glossary.json',
@@ -176,13 +180,14 @@ function validateGlossary(glossary: Record<string, unknown>): QCError[] {
         'politique de conformité',
     ];
     for (let i = 0; i < terms.length; i++) {
-        const def = String(terms[i]?.definition || '').toLowerCase();
+        const def = String(terms[i]?.description || terms[i]?.definition || '').toLowerCase();
+        const termName = terms[i]?.name || terms[i]?.term;
         for (const generic of GENERIC_DEFS) {
             if (def.startsWith(generic) && def.length < 60) {
                 errors.push({
                     file: 'glossary.json',
                     field: `terms[${i}].definition`,
-                    message: `Définition trop générique pour "${terms[i]?.term}": "${def.substring(0, 60)}"`,
+                    message: `Définition trop générique pour "${termName}": "${def.substring(0, 60)}"`,
                     severity: 'blocking',
                 });
             }
