@@ -86,17 +86,19 @@ export default async function AyaPage({
 
             {/* HEADER */}
             <header style={{ background: 'white', borderBottom: '1px solid var(--border-light)', position: 'sticky', top: 0, zIndex: 100, padding: '15px 0' }}>
-                <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '15px', textDecoration: 'none' }}>
-                        <img src="/logo-v2.png" alt="AI Visionary" style={{ height: '40px', width: 'auto' }} />
-                        <div style={{ height: '24px', width: '1px', background: 'var(--border-light)' }}></div>
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
+                {/* En-tête qui passe sur deux lignes sur petit écran au lieu de se
+                    chevaucher (globals.css met tous les .btn en pleine largeur sur mobile). */}
+                <div className="container" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '10px 16px' }}>
+                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', minWidth: 0 }}>
+                        <img src="/logo-v2.png" alt="AI Visionary" style={{ height: '40px', width: 'auto', flex: 'none' }} />
+                        <div style={{ height: '24px', width: '1px', background: 'var(--border-light)', flex: 'none' }}></div>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-main)', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
                             {t('registryTitle')} <span style={{ color: 'var(--primary-color)', fontWeight: '400' }}>{t('registryName')}</span>
                         </span>
                     </Link>
 
-                    <div style={{ display: 'flex', gap: '15px' }}>
-                        <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}>
+                    <div style={{ display: 'flex', gap: '15px', flex: 'none' }}>
+                        <Link href="/diagnostic?pack=aya-sub" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', width: 'auto', marginBottom: 0, whiteSpace: 'nowrap' }}>
                             {t('registerEntity')}
                         </Link>
                     </div>

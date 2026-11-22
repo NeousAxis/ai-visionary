@@ -210,7 +210,9 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
     const certified = row.payment_completed === true;
     // Téléphone professionnel publié par l'entreprise (site ou données schema.org) :
     // montré pour toutes les fiches. L'email public, lui, seulement pour les certifiées.
-    const phone = phoneOf(p);
+    // Un « téléphone » sans au moins 6 chiffres (« PAS DE TELEPHONE ») n'est pas affiché.
+    const phoneRaw = phoneOf(p);
+    const phone = phoneRaw && (phoneRaw.match(/\d/g) || []).length >= 6 ? phoneRaw : null;
     // Adresse PUBLIQUE de la fiche (lue sur le site) uniquement. contact_email du
     // registre est l'adresse de la personne qui a réclamé la fiche : elle ne sert
     // qu'au relais « Contacter via AYA » et n'est jamais montrée.

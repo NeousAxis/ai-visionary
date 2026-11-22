@@ -26,13 +26,15 @@ function inSwitzerland(p: { lat: number; lon: number }) {
     return p.lat >= CH.minLat && p.lat <= CH.maxLat && p.lon >= CH.minLon && p.lon <= CH.maxLon;
 }
 
-export default function AyaMap({ points, target, height = 280, osmLabel, zoomInLabel, zoomOutLabel }: {
+export default function AyaMap({ points, target, height = 280, osmLabel, zoomInLabel, zoomOutLabel, label }: {
     points: MapPoint[];
     target: MapTarget;
     height?: number;
     osmLabel: string;
     zoomInLabel: string;
     zoomOutLabel: string;
+    /** Description de la carte pour les lecteurs d'écran. */
+    label?: string;
 }) {
     const boxRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(360);
@@ -113,6 +115,8 @@ export default function AyaMap({ points, target, height = 280, osmLabel, zoomInL
     return (
         <div
             ref={boxRef}
+            role="img"
+            aria-label={label}
             onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
             onWheel={(e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); zoomBy(e.deltaY < 0 ? 1 : -1); } }}
             style={{ position: 'relative', height, overflow: 'hidden', background: '#E2EFE9', cursor: 'grab', touchAction: 'none', userSelect: 'none' }}

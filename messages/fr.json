@@ -1596,6 +1596,7 @@
     "cErrCode": "Code incorrect ou expiré.",
     "cErrSend": "L'envoi n'a pas abouti. Réessayez plus tard.",
     "cErrRate": "Trop de demandes. Réessayez dans quelques minutes.",
-    "nearMatch": "proche"
+    "nearMatch": "proche",
+    "cMsgDefaultName": "Bonjour, je vous contacte via le registre AYA. "
   }
 }

@@ -1596,6 +1596,7 @@
     "cErrCode": "Wrong or expired code.",
     "cErrSend": "Sending failed. Please try again later.",
     "cErrRate": "Too many requests. Please try again in a few minutes.",
-    "nearMatch": "related"
+    "nearMatch": "related",
+    "cMsgDefaultName": "Hello, I am contacting you through the AYA registry. "
   }
 }

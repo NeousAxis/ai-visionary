@@ -22,7 +22,7 @@ type Result = {
 };
 type Ask = {
     q: string;
-    understood: { chips: string[]; city: string | null };
+    understood: { chips: string[]; city: string | null; requirements?: unknown[] };
     center: { lat: number; lon: number; label: string } | null;
     total: number; all_criteria: number; results: Result[];
 };
@@ -151,7 +151,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                         <div style={{ flex: '999 1 560px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
                             {error && <p style={{ margin: 0, color: 'var(--accent-color)' }}>{t('error')}</p>}
                             {data && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                <div aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                                     <h2 style={{ margin: 0, fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: 26, color: 'var(--text-main)' }}>
                                         {results.length === 0 ? t('resultsNone') : data.all_criteria > 0 ? t('resultsAll', { n: data.all_criteria }) : t('resultsSome')}
                                     </h2>
@@ -160,7 +160,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                             )}
 
                             {results.map((r, i) => (
-                                <article key={r.entity_id} style={{ ...card, padding: 28, display: 'flex', flexDirection: 'column', gap: 18, boxShadow: i === 0 ? 'var(--shadow-md)' : 'none' }}>
+                                <article key={r.entity_id} style={{ ...card, padding: 'clamp(18px, 5vw, 28px)', display: 'flex', flexDirection: 'column', gap: 18, boxShadow: i === 0 ? 'var(--shadow-md)' : 'none' }}>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 16, alignItems: 'flex-start' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
@@ -230,15 +230,15 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
                                         {r.can_contact ? (
                                             <button type="button" onClick={() => setOpenContact(openContact === r.entity_id ? null : r.entity_id)} aria-expanded={openContact === r.entity_id}
-                                                style={{ border: 0, background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '13px 22px', borderRadius: 999, cursor: 'pointer' }}>{t('contactVia')}</button>
+                                                style={{ border: 0, background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '13px 22px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap' }}>{t('contactVia')}</button>
                                         ) : (
-                                            safeWeb(r.website, r.domain) && <a href={safeWeb(r.website, r.domain)!} target="_blank" rel="noopener noreferrer nofollow" style={{ textDecoration: 'none', background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '13px 22px', borderRadius: 999 }}>{t('visitSite')}</a>
+                                            safeWeb(r.website, r.domain) && <a href={safeWeb(r.website, r.domain)!} target="_blank" rel="noopener noreferrer nofollow" style={{ textDecoration: 'none', background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '13px 22px', borderRadius: 999, whiteSpace: 'nowrap' }}>{t('visitSite')}</a>
                                         )}
-                                        <Link href={r.url} style={{ textDecoration: 'none', border: '1px solid var(--primary-color)', color: 'var(--primary-hover)', fontWeight: 700, padding: '12px 22px', borderRadius: 999 }}>{t('seeFiche')}</Link>
+                                        <Link href={r.url} style={{ textDecoration: 'none', border: '1px solid var(--primary-color)', color: 'var(--primary-hover)', fontWeight: 700, padding: '12px 22px', borderRadius: 999, whiteSpace: 'nowrap' }}>{t('seeFiche')}</Link>
                                         {!r.can_contact && <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('contactNotActive')}</span>}
                                     </div>
 
-                                    {openContact === r.entity_id && <AyaContact entityId={r.entity_id} companyName={r.name} query={data?.q || ''} />}
+                                    {openContact === r.entity_id && <AyaContact entityId={r.entity_id} companyName={r.name} query={(data?.understood.requirements?.length || data?.understood.city) ? data.q : ''} />}
                                 </article>
                             ))}
                         </div>
@@ -250,7 +250,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                                         <h3 style={{ margin: 0, fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: 18, color: 'var(--text-main)' }}>{t('mapTitle')}</h3>
                                     </div>
                                     {points.length > 0 ? (
-                                        <AyaMap points={points} target={data.center} osmLabel={t('osm')} zoomInLabel={t('zoomIn')} zoomOutLabel={t('zoomOut')} />
+                                        <AyaMap points={points} target={data.center} osmLabel={t('osm')} zoomInLabel={t('zoomIn')} zoomOutLabel={t('zoomOut')} label={`${t('mapTitle')} : ${points.map((pt) => `${pt.n}. ${pt.label}`).join(', ')}`} />
                                     ) : (
                                         <p style={{ margin: 0, padding: '0 20px 16px', fontSize: 14, color: 'var(--text-muted)' }}>{t('mapNone')}</p>
                                     )}

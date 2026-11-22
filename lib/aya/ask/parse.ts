@@ -102,7 +102,7 @@ export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promis
             prompt: query,
             temperature: 0,
             maxTokens: 600,
-            timeoutMs: 9_000,
+            timeoutMs: 6_000,
         });
         const raw = JSON.parse(res.text) as Record<string, unknown>;
         // La ville telle qu'écrite dans la phrase : le modèle la traduit parfois

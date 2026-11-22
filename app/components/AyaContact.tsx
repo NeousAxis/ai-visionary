@@ -11,7 +11,8 @@ const SUBJECTS = ['devis', 'question', 'commande'] as const;
 export default function AyaContact({ entityId, companyName, query }: { entityId: string; companyName: string; query: string }) {
     const t = useTranslations('ayaAsk');
     const [subject, setSubject] = useState<(typeof SUBJECTS)[number]>('devis');
-    const [message, setMessage] = useState(query ? t('cMsgDefault', { query: query.charAt(0).toLowerCase() + query.slice(1) }) : '');
+    // Recherche par besoin : message tiré de la phrase. Recherche par nom : message neutre.
+    const [message, setMessage] = useState(query ? t('cMsgDefault', { query: query.charAt(0).toLowerCase() + query.slice(1) }) : t('cMsgDefaultName'));
     const [email, setEmail] = useState('');
     const [token, setToken] = useState<string | null>(null);
     const [code, setCode] = useState('');
@@ -43,7 +44,8 @@ export default function AyaContact({ entityId, companyName, query }: { entityId:
     };
 
     const field: React.CSSProperties = { boxSizing: 'border-box', width: '100%', border: '1px solid var(--border-light)', borderRadius: 12, padding: '12px 14px', fontSize: 15, color: 'var(--text-main)', background: '#fff', fontFamily: 'inherit' };
-    const primary: React.CSSProperties = { border: 0, borderRadius: 12, background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '0 20px', height: 48, cursor: busy ? 'wait' : 'pointer' };
+    // Hauteur minimale et non fixe : sur téléphone, un libellé sur deux lignes reste lisible.
+    const primary: React.CSSProperties = { border: 0, borderRadius: 12, background: 'var(--primary-hover)', color: '#fff', fontWeight: 700, padding: '10px 20px', minHeight: 48, lineHeight: 1.25, cursor: busy ? 'wait' : 'pointer' };
     const label: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' };
 
     return (
