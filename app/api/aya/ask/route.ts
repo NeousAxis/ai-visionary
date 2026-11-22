@@ -25,7 +25,8 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(req.nextUrl.searchParams.get('limit') || '10', 10) || 10;
 
     try {
-        const data = await askRegistry(q, { limit });
+        const lang = req.nextUrl.searchParams.get('lang') === 'en' ? 'en' : 'fr';
+        const data = await askRegistry(q, { limit, lang });
         return NextResponse.json(data, {
             headers: { 'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=60' },
         });

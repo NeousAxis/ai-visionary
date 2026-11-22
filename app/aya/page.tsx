@@ -35,10 +35,14 @@ const VALID_SORTS: SortMode[] = ['default', 'alpha', 'score', 'country', 'certif
 export default async function AyaPage({
     searchParams,
 }: {
-    searchParams: Promise<{ page?: string; q?: string; sort?: string }>;
+    searchParams: Promise<{ page?: string; q?: string; sort?: string; apercu?: string; ask?: string }>;
 }) {
     const t = await getTranslations('aya');
     const params = await searchParams;
+    // Nouvelle recherche (proposition A) visible seulement avec ?apercu=1 tant que
+    // Cyril ne l'a pas validée en ligne. Pour l'ouvrir à tous : NEW_SEARCH = true.
+    const NEW_SEARCH = false;
+    const showAsk = NEW_SEARCH || params.apercu === '1';
     const page = Math.max(1, parseInt(params.page || '1', 10) || 1);
     const search = (params.q || '').trim();
     const sort: SortMode = VALID_SORTS.includes(params.sort as SortMode) ? (params.sort as SortMode) : 'default';
@@ -99,7 +103,7 @@ export default async function AyaPage({
             </header>
 
             {/* RECHERCHE EN LANGAGE COURANT (proposition A, 22.11.2026) */}
-            <AyaAsk totalCount={totalAll} />
+            {showAsk && <AyaAsk totalCount={totalAll} />}
 
             {/* CLIENT INTERACTIVE SECTION (index : tri, grille, pagination) */}
             <Suspense fallback={
@@ -114,7 +118,7 @@ export default async function AyaPage({
                     pageSize={PAGE_SIZE}
                     currentSearch={search}
                     currentSort={sort}
-                    hideHero
+                    hideHero={showAsk}
                 />
             </Suspense>
 

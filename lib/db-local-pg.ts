@@ -2425,10 +2425,12 @@ export async function localPgAskSearch(p: AskSearchParams): Promise<AskSearchRow
         scoreParts.push(`(CASE WHEN r.h LIKE ${ph} THEN 3 WHEN r.pl LIKE ${ph} THEN 2 ELSE 0 END)`);
         matchParts.push(`r.h LIKE ${ph} OR r.pl LIKE ${ph}`);
     }
+    let cityLike = 'FALSE';
     if (city) {
         const ph = add(`%${city}%`);
-        scoreParts.push(`(CASE WHEN r.h LIKE ${ph} OR r.pl LIKE ${ph} THEN 5 ELSE 0 END)`);
-        if (matchParts.length === 0) matchParts.push(`r.h LIKE ${ph} OR r.pl LIKE ${ph}`);
+        cityLike = `(r.h LIKE ${ph} OR r.pl LIKE ${ph})`;
+        scoreParts.push(`(CASE WHEN ${cityLike} THEN 5 ELSE 0 END)`);
+        if (matchParts.length === 0) matchParts.push(cityLike);
     }
     if (p.sector) {
         const ph = add(p.sector);
@@ -2440,12 +2442,18 @@ export async function localPgAskSearch(p: AskSearchParams): Promise<AskSearchRow
     let countryClause = 'TRUE';
     if (p.country && /^[A-Za-z]{2}$/.test(p.country)) {
         const ph = add(p.country.toUpperCase());
-        countryClause = `(r.country_legal = ${ph} OR coalesce(r.country_legal, '') IN ('', 'XX'))`;
+        // Pays demandé : ce pays, ou une fiche sans pays qui cite le lieu demandé.
+        countryClause = `(r.country_legal = ${ph} OR (coalesce(r.country_legal, '') IN ('', 'XX') AND ${cityLike}))`;
     }
-    const limitPh = add(Math.min(Math.max(p.limit, 1), 100));
+    const limitPh = add(Math.min(Math.max(p.limit, 1), 120));
 
+    // Requête bornée à 6 s pour ne jamais bloquer le pool partagé avec le site.
+    let client: import('pg').PoolClient | null = null;
     try {
-        const res: QueryResult<AskSearchRow> = await pool.query(
+        client = await pool.connect();
+        await client.query('BEGIN');
+        await client.query("SET LOCAL statement_timeout = '6s'");
+        const res: QueryResult<AskSearchRow> = await client.query(
             `SELECT ${ENTITY_COLS}, (${scoreParts.join(' + ')}) AS match_score
              FROM (
                 SELECT a.*,
@@ -2459,9 +2467,13 @@ export async function localPgAskSearch(p: AskSearchParams): Promise<AskSearchRow
              LIMIT ${limitPh}`,
             params
         );
+        await client.query('COMMIT');
         return res.rows;
     } catch (err) {
         console.error('[db-local-pg] localPgAskSearch error:', err);
+        if (client) await client.query('ROLLBACK').catch(() => {});
         return [];
+    } finally {
+        client?.release();
     }
 }

@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import AyaMap, { type MapPoint } from './AyaMap';
 import LanguageToggle from './LanguageToggle';
 import AyaContact from './AyaContact';
@@ -49,6 +49,7 @@ function Check({ on }: { on: boolean }) {
 
 export default function AyaAsk({ totalCount }: { totalCount: number }) {
     const t = useTranslations('ayaAsk');
+    const locale = useLocale();
     const [q, setQ] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -61,7 +62,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
         if (text.length < 2) return;
         setLoading(true); setError(false); setOpenContact(null);
         try {
-            const res = await fetch(`/api/aya/ask?q=${encodeURIComponent(text)}`);
+            const res = await fetch(`/api/aya/ask?q=${encodeURIComponent(text)}&lang=${locale === 'en' ? 'en' : 'fr'}`);
             if (!res.ok) throw new Error(String(res.status));
             setData(await res.json());
             const u = new URL(window.location.href);
@@ -72,7 +73,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [locale]);
 
     useEffect(() => {
         const a = new URLSearchParams(window.location.search).get('ask');

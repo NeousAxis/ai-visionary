@@ -27,7 +27,7 @@ const SUBJECT_LABEL: Record<ContactSubject, string> = {
 };
 
 const TTL_MS = 15 * 60 * 1000;
-const FROM = process.env.AYA_CONTACT_FROM || 'AYA Registry <hello@ai-visionary.xyz>';
+const FROM = process.env.AYA_CONTACT_FROM || 'AI Visionary <hello@ai-visionary.xyz>';
 const EMAIL_RE = /^[^\s@<>"']{1,64}@[^\s@<>"']{1,190}\.[a-z]{2,24}$/i;
 
 function secret(): string {
@@ -58,6 +58,29 @@ function emailAllowed(email: string): boolean {
     return e.n <= 5;
 }
 
+// Un jeton ne sert qu'une fois, et 5 codes faux le rendent inutilisable.
+const tokenState = new Map<string, { tries: number; used: boolean; exp: number }>();
+function tokenEntry(sig: string, exp: number) {
+    const now = Date.now();
+    for (const [k, v] of tokenState) if (v.exp < now) tokenState.delete(k);
+    let e = tokenState.get(sig);
+    if (!e) { e = { tries: 0, used: false, exp }; tokenState.set(sig, e); }
+    return e;
+}
+
+// Au plus 20 messages relayés par entreprise et par jour.
+const perEntity = new Map<string, { n: number; reset: number }>();
+function entityAllowed(id: string): boolean {
+    const now = Date.now();
+    const e = perEntity.get(id);
+    if (!e || now > e.reset) { perEntity.set(id, { n: 0, reset: now + 86_400_000 }); return true; }
+    return e.n < 20;
+}
+function entityCount(id: string) {
+    const e = perEntity.get(id);
+    if (e) e.n += 1;
+}
+
 export type ContactInput = { entityId: string; email: string; subject: string; message: string };
 export type StartResult =
     | { ok: true; token: string; dev_code?: string }
@@ -85,7 +108,7 @@ export async function startContact(i: ContactInput): Promise<StartResult> {
     if (!v) return { ok: false, error: 'invalid' };
     const rcpt = await recipientOf(i.entityId);
     if (!rcpt) return { ok: false, error: 'not_contactable' };
-    if (!emailAllowed(v.email)) return { ok: false, error: 'rate' };
+    if (!emailAllowed(v.email) || !entityAllowed(i.entityId)) return { ok: false, error: 'rate' };
 
     const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
     const payload = Buffer.from(JSON.stringify({
@@ -127,10 +150,15 @@ export async function confirmContact(i: ConfirmInput): Promise<ConfirmResult> {
     if (p.x < Date.now() || p.e !== i.entityId || p.m !== v.email.toLowerCase() || p.s !== v.subject || p.h !== sha(v.message)) {
         return { ok: false, error: 'code' };
     }
-    if (p.c !== sha(`${i.code}:${secret()}`)) return { ok: false, error: 'code' };
+    const state = tokenEntry(sig, p.x);
+    if (state.used || state.tries >= 5) return { ok: false, error: 'code' };
+    if (p.c !== sha(`${i.code}:${secret()}`)) { state.tries += 1; return { ok: false, error: 'code' }; }
+    state.used = true;
 
     const rcpt = await recipientOf(i.entityId);
     if (!rcpt) return { ok: false, error: 'not_contactable' };
+    if (!entityAllowed(i.entityId)) return { ok: false, error: 'send' };
+    entityCount(i.entityId);
 
     const label = SUBJECT_LABEL[v.subject];
     if (dryRun()) {

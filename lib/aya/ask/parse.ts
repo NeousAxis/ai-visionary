@@ -83,12 +83,12 @@ function fallbackIntent(q: string): AskIntent {
     };
 }
 
-export async function parseAskQuery(q: string): Promise<AskIntent> {
+export async function parseAskQuery(q: string, lang: 'fr' | 'en' = 'fr'): Promise<AskIntent> {
     const query = q.trim().slice(0, 300);
     if (!query) return fallbackIntent('');
     try {
         const res = await llmJson({
-            system: SYSTEM,
+            system: `${SYSTEM}\n- Écris chaque "label" en ${lang === 'en' ? 'ANGLAIS' : 'FRANÇAIS'}.`,
             prompt: query,
             temperature: 0,
             maxTokens: 600,
@@ -122,7 +122,10 @@ export async function parseAskQuery(q: string): Promise<AskIntent> {
         }
         requirements.splice(0, requirements.length, ...kept);
         const countryRaw = clean(raw.country, 2).toUpperCase();
-        const country = /^[A-Z]{2}$/.test(countryRaw) ? countryRaw : null;
+        // Le pays ne filtre que si la phrase cite un lieu : le modèle ne doit pas
+        // déduire un pays de ce qu'il sait d'une entreprise ("Infomaniak" seul).
+        const placeInQuery = !!city || /\b(suisse|switzerland|schweiz|svizzera|france|allemagne|germany|deutschland|italie|italy|espagne|spain|belgique|belgium|autriche|austria|luxembourg|royaume-uni|uk|usa|états-unis|etats-unis|canada|portugal|pays-bas|netherlands)\b/i.test(query);
+        const country = placeInQuery && /^[A-Z]{2}$/.test(countryRaw) ? countryRaw : null;
         const sectorRaw = clean(raw.sector, 60);
         const sector = REGISTRY_SECTORS.includes(sectorRaw) ? sectorRaw : null;
         // Recherche des candidates : des mots seuls, sans mots vides ni ville.

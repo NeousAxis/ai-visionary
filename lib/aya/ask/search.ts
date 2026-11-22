@@ -143,7 +143,10 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
 
     const certified = row.payment_completed === true;
     const phone = certified ? (asList(v(d, 'identite', 'contact_phone', 'value'))[0] || null) : null;
-    const email = certified ? (row.contact_email || asList(v(d, 'identite', 'contact_email', 'value'))[0] || null) : null;
+    // Adresse PUBLIQUE de la fiche (lue sur le site) uniquement. contact_email du
+    // registre est l'adresse de la personne qui a réclamé la fiche : elle ne sert
+    // qu'au relais « Contacter via AYA » et n'est jamais montrée.
+    const email = certified ? (asList(v(d, 'identite', 'contact_email', 'value'))[0] || null) : null;
     const services = asList(v(d, 'offre', 'services', 'value'));
 
     return {
@@ -165,21 +168,40 @@ function shape(row: AskSearchRow, intent: AskIntent): AskResult {
         price: asList(v(d, 'offre', 'pricing_indication', 'value'))[0] ? cut(asList(v(d, 'offre', 'pricing_indication', 'value'))[0], 80) : null,
         audience: asList(v(d, 'offre', 'target_audience', 'value'))[0] ? cut(asList(v(d, 'offre', 'target_audience', 'value'))[0], 80) : null,
         contact: certified ? { phone, email } : null,
-        can_contact: certified && !!email,
+        can_contact: certified && /@/.test(row.contact_email || ''),
         geo: null,
         distance_km: null,
     };
 }
 
-export async function askRegistry(q: string, opts: { limit?: number } = {}): Promise<AskResponse> {
-    const intent = await parseAskQuery(q);
+export async function askRegistry(q: string, opts: { limit?: number; lang?: 'fr' | 'en' } = {}): Promise<AskResponse> {
+    const intent = await parseAskQuery(q, opts.lang ?? 'fr');
+    const raw = q.trim().toLowerCase();
     const rows = await localPgAskSearch({
-        terms: intent.terms,
+        // La phrase brute est aussi cherchée telle quelle : c'est ainsi qu'un nom
+        // d'entreprise tapé en entier ("Happy Green Kids") est retrouvé.
+        terms: raw.length <= 60 ? [raw, ...intent.terms] : intent.terms,
         country: intent.country,
         city: intent.city,
         sector: intent.sector,
-        limit: 40,
+        limit: 100,
     });
+
+    // Recherche par nom : si la phrase est le nom (ou le domaine) d'une fiche,
+    // cette fiche seule répond, sans critères déduits par le modèle.
+    const nq = norm(q.trim());
+    const byName = rows.filter((r) =>
+        norm(decode(r.display_name || '')) === nq || norm(r.legal_name || '') === nq || domainOf(r.website) === nq);
+    if (byName.length > 0) {
+        const nameIntent: AskIntent = { ...intent, requirements: [], city: null };
+        const results = byName.slice(0, 5).map((r) => shape(r, nameIntent));
+        await Promise.all(results.map(async (r) => { if (r.city) r.geo = await geocodeCity(r.city, r.country); }));
+        return {
+            q,
+            understood: { chips: [q.trim()], city: null, country: null, sector: null, source: intent.source, terms: [raw], requirements: [] },
+            center: null, total: byName.length, all_criteria: byName.length, results,
+        };
+    }
 
     // On ne montre que des fiches qui prouvent au moins un critère, et, quand un
     // pays est demandé, celles de ce pays (ou sans pays mais citant le lieu).
