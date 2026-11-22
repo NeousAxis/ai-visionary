@@ -1,5 +1,9 @@
 import { createMcpHandler } from 'mcp-handler';
 import { z } from 'zod';
+import { startContact, confirmContact } from '@/lib/aya/contact';
+import { getAyaEntityByIdAggregated, getAyaEntityByUrlAggregated } from '@/lib/db';
+import { allow } from '@/lib/aya/guard';
+import { ayaLog } from '@/lib/aya/log';
 
 /**
  * Serveur MCP DISTANT d'AYA — le connecteur universel pour les agents.
@@ -35,6 +39,40 @@ async function apiPost(path: string, body: unknown): Promise<string> {
   }
 }
 const text = (t: string) => ({ content: [{ type: 'text' as const, text: t }] });
+const json = (o: unknown) => text(JSON.stringify(o, null, 2));
+
+// --- Contact via AYA (outils contact_company / confirm_contact) -------------
+// Même mécanisme que le formulaire de /aya (lib/aya/contact.ts), appelé
+// directement dans le processus : passer par l'API HTTP ferait partager à tous
+// les agents la limite d'une seule adresse IP (celle du serveur).
+
+async function resolveCompany(company: string): Promise<{ id: string; name: string } | null> {
+  const c = (company || '').trim();
+  if (!c || c.length > 253) return null;
+  const e: any = /^[0-9a-f-]{36}$/i.test(c) ? await getAyaEntityByIdAggregated(c) : await getAyaEntityByUrlAggregated(c);
+  if (!e?.entity_id) return null;
+  return { id: String(e.entity_id), name: e.display_name || e.legal_name || c };
+}
+
+// IP réelle posée par nginx (X-Real-IP), comme pour les routes publiques.
+function callerIp(extra: any): string {
+  const v = extra?.requestInfo?.headers?.['x-real-ip'];
+  return String((Array.isArray(v) ? v[0] : v) || 'unknown');
+}
+
+const CONTACT_ERRORS: Record<string, string> = {
+  invalid:
+    'Invalid input. requester_email must be a valid email address, message must be 20 to 3000 characters, ' +
+    'subject must be devis, question or commande.',
+  not_contactable:
+    'This company has not activated contact via AYA (only certified companies with a verified address can be reached). ' +
+    'Give your user the public contact details from get_company_details instead.',
+  rate: 'Too many contact requests for this address or from this client. Try again later.',
+  send: 'The email could not be sent. Try again later.',
+  code:
+    'Wrong or expired code, or company, requester_email, subject or message differ from the contact_company call. ' +
+    'Ask your user to check the code. After 5 wrong codes or 15 minutes, start again with contact_company.',
+};
 
 const handler = createMcpHandler(
   (server) => {
@@ -79,6 +117,96 @@ const handler = createMcpHandler(
       'get_registry_stats',
       { description: 'Aggregate stats of the AYA registry.', inputSchema: {} },
       async () => text(await apiGet('/aya/stats')),
+    );
+    server.registerTool(
+      'contact_company',
+      {
+        description:
+          'Send a message to a company of the AYA registry on behalf of your user. Neither email address is published: ' +
+          'AYA relays the message to the address the company verified, and the company replies directly to your user. ' +
+          'Use it ONLY when your user explicitly asks to contact this company, and show them the exact message first. ' +
+          'Step 1 (this tool): AYA emails a 6-digit code to requester_email and returns a token. ' +
+          'Step 2: ask your user for that code, then call confirm_contact with the same company, requester_email, subject ' +
+          'and message, plus the token and the code. The code must come from your user: never guess or invent it. ' +
+          'Only certified companies with a verified address can be contacted.',
+        inputSchema: {
+          company: z.string().describe('bare domain of the company (e.g. regenereplus.ch) or its AYA entity_id'),
+          requester_email: z
+            .string()
+            .describe("your user's own email address: the code is sent there and the company replies there"),
+          subject: z
+            .enum(['devis', 'question', 'commande'])
+            .describe('devis = quote request, question = question, commande = order'),
+          message: z
+            .string()
+            .describe("20 to 3000 characters, in the company's language, signed with your user's name"),
+        },
+      },
+      async ({ company, requester_email, subject, message }, extra) => {
+        const ip = callerIp(extra);
+        if (!allow(`mcp-contact:m:${ip}`, 10, 600_000) || !allow(`mcp-contact:d:${ip}`, 30, 86_400_000) || !allow('mcp-contact:all', 200, 3_600_000)) {
+          return json({ status: 'error', error: 'rate', detail: CONTACT_ERRORS.rate });
+        }
+        try {
+          const co = await resolveCompany(company);
+          if (!co) return json({ status: 'error', error: 'not_found', detail: 'Company not found in AYA. Use search_companies to find its domain.' });
+          const r = await startContact({ entityId: co.id, email: requester_email, subject, message, via: 'agent' });
+          if (!r.ok) return json({ status: 'error', error: r.error, detail: CONTACT_ERRORS[r.error] });
+          return json({
+            status: 'code_sent',
+            company: co.name,
+            code_sent_to: requester_email.trim(),
+            token: r.token,
+            expires_in_minutes: 15,
+            next_step:
+              `Ask your user for the 6-digit code AYA just emailed to ${requester_email.trim()}. Then call confirm_contact ` +
+              'with the same company, requester_email, subject and message, plus this token and the code.',
+            ...(r.dev_code ? { dev_code: r.dev_code } : {}),
+          });
+        } catch (err) {
+          ayaLog('error', 'MCP_CONTACT_ERROR', (err as Error)?.message || String(err));
+          return json({ status: 'error', error: 'send', detail: CONTACT_ERRORS.send });
+        }
+      },
+    );
+    server.registerTool(
+      'confirm_contact',
+      {
+        description:
+          'Step 2 of contact_company: deliver the message once your user has given you the 6-digit code AYA emailed them. ' +
+          'Pass exactly the same company, requester_email, subject and message as in contact_company, plus its token and ' +
+          'the code. Never guess the code. On success the company receives the message and replies to requester_email.',
+        inputSchema: {
+          company: z.string(),
+          requester_email: z.string(),
+          subject: z.enum(['devis', 'question', 'commande']),
+          message: z.string(),
+          token: z.string().describe('token returned by contact_company'),
+          code: z.string().describe('6-digit code your user received by email'),
+        },
+      },
+      async ({ company, requester_email, subject, message, token, code }, extra) => {
+        if (!allow(`mcp-confirm:${callerIp(extra)}`, 30, 600_000)) {
+          return json({ status: 'error', error: 'rate', detail: CONTACT_ERRORS.rate });
+        }
+        try {
+          const co = await resolveCompany(company);
+          if (!co) return json({ status: 'error', error: 'not_found', detail: 'Company not found in AYA.' });
+          const r = await confirmContact({
+            entityId: co.id, email: requester_email, subject, message, token, code: String(code).trim(),
+          });
+          if (!r.ok) return json({ status: 'error', error: r.error, detail: CONTACT_ERRORS[r.error] });
+          return json({
+            status: 'sent',
+            company: co.name,
+            detail: `Message delivered to ${co.name}. The company will reply directly to ${requester_email.trim()}.`,
+            ...(r.dry_run ? { dry_run: true } : {}),
+          });
+        } catch (err) {
+          ayaLog('error', 'MCP_CONTACT_ERROR', (err as Error)?.message || String(err));
+          return json({ status: 'error', error: 'send', detail: CONTACT_ERRORS.send });
+        }
+      },
     );
     server.registerTool(
       'get_cashback_offer',
