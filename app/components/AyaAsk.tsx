@@ -159,7 +159,7 @@ export default function AyaAsk({ totalCount }: { totalCount: number }) {
                                             </div>
                                             <h3 style={{ margin: 0, fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: 26, lineHeight: 1.2, color: 'var(--text-main)' }}>{r.name}</h3>
                                             <p style={{ margin: 0, fontSize: 15, color: 'var(--text-muted)' }}>
-                                                {[r.sector, r.city, r.distance_km != null && data?.center ? t('kmFrom', { km: r.distance_km, place: data.center.label }) : null].filter(Boolean).join(' · ')}
+                                                {[r.sector, r.city, r.distance_km != null && r.distance_km > 0 && data?.center ? t('kmFrom', { km: r.distance_km, place: data.center.label }) : null].filter(Boolean).join(' · ')}
                                             </p>
                                         </div>
                                         {r.score != null && (
