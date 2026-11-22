@@ -38,6 +38,18 @@ function isExcluded(pathname: string): boolean {
 export function proxy(req: NextRequest) {
     const { pathname, search } = req.nextUrl;
 
+    // API interne /api/aya-local : réservée au serveur lui-même. Elle renvoie
+    // des fiches complètes (dont l'email du titulaire) et était joignable depuis
+    // Internet. Toute requête venue de l'extérieur passe par nginx, qui pose
+    // X-Real-IP ; un appel local du serveur n'en a pas. (22.11.2026)
+    if (pathname.startsWith('/api/aya-local')) {
+        const ip = (req.headers.get('x-real-ip') || '').trim();
+        if (ip && ip !== '127.0.0.1' && ip !== '::1') {
+            return new NextResponse(null, { status: 404 });
+        }
+        return NextResponse.next();
+    }
+
     if (!pathname.startsWith(LOCALE_PREFIX + '/') && pathname !== LOCALE_PREFIX) {
         return NextResponse.next();
     }
@@ -64,5 +76,6 @@ export function proxy(req: NextRequest) {
 export const config = {
     // Ne fait tourner le proxy que sur ce qui commence par /fr, pour ne
     // rien coûter aux 367 000 pages anglaises.
-    matcher: ['/fr', '/fr/:path*'],
+    // + l'API interne /api/aya-local, fermée à l'extérieur (voir plus haut).
+    matcher: ['/fr', '/fr/:path*', '/api/aya-local/:path*'],
 };
